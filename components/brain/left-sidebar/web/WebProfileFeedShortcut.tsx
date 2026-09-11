@@ -1,6 +1,7 @@
 "use client";
 
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { SidebarIconTile } from "../waves/SidebarIconTile";
 import Link from "next/link";
 import React from "react";
 
@@ -31,25 +32,10 @@ function MasonryGridIcon() {
 
 function ProfileFeedAvatar({ isActive }: { readonly isActive: boolean }) {
   return (
-    <div
-      className={`tw-relative tw-size-8 tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-200 desktop-hover:group-hover:tw-brightness-110 ${
-        isActive
-          ? "tw-border-primary-300/75 tw-opacity-100"
-          : "tw-border-iron-700/80 tw-opacity-90 desktop-hover:group-hover:tw-border-iron-500/80 desktop-hover:group-hover:tw-opacity-100"
-      }`}
-    >
-      <div
-        className={`tw-h-full tw-w-full tw-rounded-full ${
-          isActive ? "tw-bg-primary-500/90" : "tw-bg-iron-900"
-        }`}
-      />
-      <div
-        className={`tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center ${
-          isActive ? "tw-text-primary-50" : "tw-text-iron-400"
-        }`}
-      >
+    <div className="tw-relative tw-size-8 tw-flex-shrink-0">
+      <SidebarIconTile variant={isActive ? "selected" : "neutral"}>
         <MasonryGridIcon />
-      </div>
+      </SidebarIconTile>
     </div>
   );
 }
@@ -90,7 +76,7 @@ export function WebProfileFeedShortcut({
         className={`tw-group tw-flex tw-items-center tw-justify-center tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
-            : "desktop-hover:hover:tw-bg-iron-800/70"
+            : "desktop-hover:hover:tw-bg-iron-900/70"
         }`}
       >
         <Link
@@ -114,7 +100,7 @@ export function WebProfileFeedShortcut({
       className={`tw-group tw-mt-2 tw-flex tw-items-center tw-gap-x-4 tw-px-5 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
-          : "desktop-hover:hover:tw-bg-iron-800/80"
+          : "desktop-hover:hover:tw-bg-iron-900/80"
       }`}
     >
       <Link

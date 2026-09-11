@@ -6,6 +6,7 @@ import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { SingleWaveDropWrapper } from "./SingleWaveDropWrapper";
 import { SingleWaveDropInfoPanel } from "./SingleWaveDropInfoPanel";
 import { useSingleWaveDropData } from "./useSingleWaveDropData";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 interface DefaultSingleWaveDropProps {
   readonly drop: ExtendedDrop;
@@ -16,7 +17,7 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
   drop: initialDrop,
   onClose,
 }) => {
-  const { drop, wave, extendedDrop } = useSingleWaveDropData(
+  const { drop, wave, extendedDrop, voteSummary } = useSingleWaveDropData(
     initialDrop,
     onClose
   );
@@ -43,12 +44,15 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
     >
-      <SingleWaveDropInfoPanel
-        drop={extendedDrop}
-        isVotingClosed={isVotingClosed}
-        isVotingControlsLocked={isVotingControlsLocked}
-        winningThreshold={winningThreshold}
-      />
+      <ContentModerationDropGate drop={extendedDrop}>
+        <SingleWaveDropInfoPanel
+          drop={extendedDrop}
+          voteSummary={voteSummary}
+          isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
+          winningThreshold={winningThreshold}
+        />
+      </ContentModerationDropGate>
     </SingleWaveDropWrapper>
   );
 };

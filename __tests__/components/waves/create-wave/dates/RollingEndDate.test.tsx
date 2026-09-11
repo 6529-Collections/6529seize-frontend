@@ -24,7 +24,7 @@ jest.mock(
   () => (props: any) => mockCommonCalendar(props)
 );
 
-jest.mock("@/components/common/DateAccordion", () => (props: any) => (
+jest.mock("@/components/common/CollapsibleCard", () => (props: any) => (
   <div data-testid="accordion" data-expanded={String(props.isExpanded)}>
     <button onClick={props.onToggle}>toggle</button>
     {props.isExpanded && props.children}

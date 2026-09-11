@@ -20,7 +20,7 @@ Route scope:
 ### Right Sidebar (Thread View)
 
 - [Wave Right Sidebar Tabs](feature-right-sidebar-tabs.md):
-  sidebar tab order, including `Rules` for all wave types.
+  sidebar tab order and the consolidated `Configuration` surface.
 - [Wave Right Sidebar Leaderboard](feature-right-sidebar-leaderboard.md)
 - [Wave Right Sidebar Jump Actions](feature-right-sidebar-jump-actions.md):
   canonical owner for serial-jump and drop-overlay open actions from
@@ -32,8 +32,8 @@ Route scope:
 ### Left Sidebar and Lists
 
 - [Wave List Navigation](feature-wave-list-navigation.md):
-  row open/clear behavior, unread `divider` routing, and stale `wave` query
-  cleanup.
+  row open/clear behavior, combined `Worth Checking Out` avatar-and-score links,
+  unread `divider` routing, and stale `wave` query cleanup.
 - [Brain Wave Row Metadata and Last Drop Indicator](feature-brain-list-last-drop-indicator.md):
   canonical owner for row-name labels, web tooltip rules, `Last drop` timestamp
   source, live refresh, and sorting behavior across wave and DM lists.

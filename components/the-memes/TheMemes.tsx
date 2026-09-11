@@ -508,7 +508,7 @@ export default function TheMemesComponent({
     }
 
     return (
-      <div className="tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5">
         {nfts.map((nft) => printNft(nft))}
       </div>
     );
@@ -543,7 +543,7 @@ export default function TheMemesComponent({
           <h2 className="tw-mb-4 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
             {formatInteger(locale, meme.meme)} - {meme.meme_name}
           </h2>
-          <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5">
+          <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5">
             {memeNfts.map((nft) => printNft(nft))}
           </div>
         </section>
@@ -567,12 +567,15 @@ export default function TheMemesComponent({
                   <div className="tw-min-w-0 min-[1200px]:tw-hidden">
                     <CollectionsDropdown activePage="memes" variant="title" />
                   </div>
-                  <h1 className="tw-mb-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
+                  <h1 className="tw-m-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
                     {t(locale, "theMemes.title")}
                   </h1>
                   <LFGButton contract={MEMES_CONTRACT} />
                 </div>
-                <div className="tw-grid tw-w-full tw-shrink-0 tw-grid-cols-1 tw-gap-2 sm:tw-w-auto sm:tw-grid-cols-[9rem_13rem]">
+                <div
+                  className="tw-grid tw-w-full tw-shrink-0 tw-grid-cols-1 tw-gap-2 sm:tw-w-auto sm:tw-grid-cols-[9rem_13rem]"
+                  data-dropdown-menu-align="end"
+                >
                   <FilterGridDropdown
                     filterLabel={yearFilterLabel}
                     items={yearOptions.map((year) => ({

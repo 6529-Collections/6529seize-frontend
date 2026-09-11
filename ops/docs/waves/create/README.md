@@ -35,22 +35,32 @@ Use this area to create:
 
 - Entry points: [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - Step pages:
-  1. [Wave Creation Overview Step](feature-overview-step.md)
+  1. [Wave Creation Setup Step](feature-overview-step.md)
   2. [Wave Creation Group Access and Permissions](feature-groups-step.md)
-  3. [Wave Creation Dates and Timeline](feature-dates-step.md) (`Rank` and
+  3. [Wave Creation Schedule](feature-dates-step.md) (`Rank` and
      `Approve`)
   4. [Wave Creation Drop Settings](feature-drops-step.md) (`Rank` and
      `Approve`)
-  5. [Wave Creation Rules Step](feature-rules-step.md)
-  6. [Wave Creation Voting Configuration](feature-voting-step.md) (`Rank` and
+  5. [Wave Creation Voting Configuration](feature-voting-step.md) (`Rank` and
      `Approve`)
-  7. [Wave Creation Outcomes Step](feature-outcomes-step.md) (`Rank` and
+  6. [Wave Creation Outcomes Step](feature-outcomes-step.md) (`Rank` and
      `Approve`)
+  7. [Wave Creation Guidelines Step](feature-rules-step.md)
   8. [Wave Creation Description Step](feature-description-step.md)
+  9. [Final Overview](feature-final-overview-step.md)
 - Step path by wave type:
-  - `Chat`: `Overview -> Groups -> Rules -> Description`
-  - `Rank`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
-  - `Approve`: `Overview -> Groups -> Dates -> Drops -> Rules -> Voting -> Outcomes -> Description`
+  - `Chat`: `Setup -> Access -> Guidelines -> Description -> Overview`
+  - Scheduled `Rank`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
+  - `Perpetual Ranking`: `Setup -> Access -> Schedule -> Drops -> Voting -> Guidelines -> Description -> Overview`
+  - `Approve`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
+
+The default path keeps the decisions most creators need visible. Less common
+customization is available from expandable sections named for their contents,
+such as `Vote limits and behavior`. An expandable section shows `Customized`
+when saved or restored values differ from the defaults and opens as
+`Needs attention` when a hidden field fails validation.
+
+`Submission requirements` stays open, with all its controls visible.
 
 ### Direct-Message Journey
 
@@ -59,9 +69,10 @@ Use this area to create:
 
 ### Access and Availability
 
-- Create forms render only when a connected profile is available.
-- If profile context is missing, create entry points are hidden and create
-  forms do not render.
+- Create forms render only when the connected identity has a profile handle.
+- Without a profile handle, Create Wave entry points open a compact profile
+  setup dialog with `Go to Identity` and `Not now`; the multi-step form does not
+  render.
 
 ## Flows
 
@@ -81,4 +92,3 @@ Use this area to create:
 
 - [Waves Index](../README.md)
 - [Navigation Index](../../navigation/README.md)
-- [Groups Index](../../groups/README.md)

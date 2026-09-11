@@ -5,7 +5,7 @@ Parent: [Wave Link Previews Index](README.md)
 ## Overview
 
 Wave markdown renders supported social links with provider-specific previews:
-TikTok cards, Farcaster/Warpcast cards, and Tenor GIF embeds.
+TikTok cards, Farcaster/Warpcast cards, Tenor GIF embeds, and GIPHY GIF embeds.
 
 If a social URL does not match supported host/path patterns, rendering falls
 back to the generic external preview flow, then to a plain link if needed.
@@ -37,9 +37,10 @@ back to the generic external preview flow, then to a plain link if needed.
 - `farcaster.xyz/{username}` and `farcaster.xyz/{username}/{castHash}`
 - `farcaster.xyz/u/{username}` and `farcaster.xyz/u/{username}/{castHash}`
 
-### Tenor GIF
+### GIF Providers
 
 - `media.tenor.com/.../*.gif`
+- `media*.giphy.com/.../*.gif`
 
 ## Entry Points
 
@@ -52,9 +53,9 @@ back to the generic external preview flow, then to a plain link if needed.
 
 1. Open a wave/message thread or home-style drop card with a supported social
    URL.
-2. The renderer maps the URL to TikTok, Farcaster, or Tenor handling.
+2. The renderer maps the URL to TikTok, Farcaster, Tenor, or GIPHY handling.
 3. TikTok/Farcaster links show loading cards, then resolve to provider layouts.
-4. Tenor GIF links render inline GIF previews.
+4. Tenor and GIPHY GIF links render inline GIF previews.
 5. Users can continue reading inline or open provider destinations from card
    actions.
 
@@ -70,8 +71,9 @@ back to the generic external preview flow, then to a plain link if needed.
   embeds, and reaction counts.
 - Unavailable Farcaster targets show `Unavailable on Farcaster` with an
   `Open on Warpcast` action.
-- Tenor `media.tenor.com/*.gif` links render inline GIF previews.
-- Tenor GIF sizing is surface-dependent:
+- Tenor `media.tenor.com/*.gif` and GIPHY `media*.giphy.com/*.gif` links render
+  inline GIF previews.
+- GIF sizing is surface-dependent:
   - Wave/message markdown rendering uses a fixed-height GIF frame for stable
     row height.
   - Home-style markdown variants (including boosted cards and wave leaderboard

@@ -24,6 +24,8 @@ interface WaveDropHeaderProps {
   readonly showWaveInfo: boolean;
   readonly badge?: React.ReactNode | undefined;
   readonly showActionsButton?: boolean | undefined;
+  readonly showActionsButtonOnMobile?: boolean | undefined;
+  readonly desktopActions?: React.ReactNode | undefined;
   readonly onOpenActions?:
     | ((e: React.MouseEvent<HTMLButtonElement>) => void)
     | undefined;
@@ -38,11 +40,14 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   showWaveInfo,
   badge,
   showActionsButton = false,
+  showActionsButtonOnMobile = false,
+  desktopActions,
   onOpenActions,
   timestampLayout = "inline",
 }) => {
   const router = useRouter();
   const compact = useCompactMode();
+  const identityRowHeightClass = compact ? "tw-min-h-8" : "tw-min-h-10";
   const authorIdentity = drop.author.handle ?? drop.author.primary_address;
   const isStackedTimestamp = timestampLayout === "stacked";
 
@@ -59,7 +64,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   return (
     <>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
+        <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
           <div
             className={
               isStackedTimestamp
@@ -67,15 +72,17 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
                 : "tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1"
             }
           >
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
+            <div
+              className={`tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 ${isStackedTimestamp ? identityRowHeightClass : ""}`}
+            >
               <p
-                className={`tw-m-0 tw-font-semibold tw-leading-none ${compact ? "tw-text-sm" : "tw-text-md"}`}
+                className={`tw-m-0 tw-min-w-0 tw-max-w-full tw-font-semibold tw-leading-5 [overflow-wrap:anywhere] ${compact ? "tw-text-sm" : "tw-text-md"}`}
               >
                 <UserProfileTooltipWrapper user={authorIdentity}>
                   <Link
                     onClick={(e) => handleNavigation(e, `/${authorIdentity}`)}
                     href={`/${authorIdentity}`}
-                    className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
+                    className="tw-rounded-sm tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
                   >
                     <ProfileNameWithAiMarker
                       classification={drop.author.classification}
@@ -91,6 +98,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
               />
               <DropAuthorBadges
                 profile={drop.author}
+                wave={drop.wave}
                 tooltipIdPrefix={`header-author-badges-${drop.id}`}
               />
               {!isStackedTimestamp && (
@@ -104,18 +112,23 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
           </div>
           {Boolean(badge) && <div className="tw-ml-2">{badge}</div>}
         </div>
-        {showActionsButton && onOpenActions !== undefined && (
-          <button
-            type="button"
-            aria-label="Open drop actions"
-            onClick={onOpenActions}
-            className="tw-hidden tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-1.5 tw-text-iron-300 active:tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100 md:tw-flex"
-          >
-            <EllipsisVerticalIcon className="tw-h-5 tw-w-5" />
-          </button>
-        )}
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center">
+          {desktopActions}
+          {showActionsButton && onOpenActions !== undefined && (
+            <button
+              type="button"
+              aria-label="Open drop actions"
+              onClick={onOpenActions}
+              className={`${
+                showActionsButtonOnMobile ? "tw-flex" : "tw-hidden md:tw-flex"
+              } tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 active:tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100`}
+            >
+              <EllipsisVerticalIcon className="tw-h-5 tw-w-5" />
+            </button>
+          )}
+        </div>
       </div>
-      <div>
+      <div className={showWaveInfo ? "tw-mt-1" : undefined}>
         {showWaveInfo &&
           (() => {
             const waveMeta = (
@@ -143,7 +156,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
               <Link
                 onClick={(e) => handleNavigation(e, waveHref)}
                 href={waveHref}
-                className="tw-leading-0 -tw-mt-1 tw-mb-0 tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
+                className="tw-block tw-rounded-sm tw-text-xs tw-leading-4 tw-text-iron-400 tw-no-underline tw-transition tw-duration-300 tw-ease-out [overflow-wrap:anywhere] hover:tw-text-iron-300 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
               >
                 {drop.wave.name}
               </Link>

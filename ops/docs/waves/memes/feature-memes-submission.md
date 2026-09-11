@@ -20,11 +20,14 @@ submit states are documented separately.
       `Submit Meme (Closes Soon!)`
     - narrower desktop widths can show compact labels (for example
       `Submit Work`)
+  - Native app wave header: icon-only submit action
+    - when submission is blocked, the action becomes a lock; select it to see
+      the exact restriction
   - Mobile leaderboard header: `Drop`
   - Mobile chat thread: floating `+` button (top-right)
 
-If submit controls are unavailable (not started, closed, not eligible, or limit
-reached), use
+If submission is unavailable (not started, closed, not eligible, or limit
+reached), select the header restriction control to see the reason, then use
 [Wave Leaderboard Drop Entry and Eligibility](../leaderboard/feature-drop-entry-and-eligibility.md).
 
 ## Entry Points
@@ -35,9 +38,13 @@ reached), use
     relabel this to `Submit Meme` or `Submit Meme (Closes Soon!)`)
   - mobile leaderboard header action (`Drop`)
   - mobile chat floating submit button (`+`, top-right)
-- If submission controls are hidden or disabled, use
+- If submission controls are hidden or show a restriction icon/label, select
+  the restriction control for the full reason and use
   [Wave Leaderboard Drop Entry and Eligibility](../leaderboard/feature-drop-entry-and-eligibility.md)
   for the gating states.
+- On The Memes Main Stage, the desktop `How to Submit` state and the native app
+  lock both open `Unlock submissions`, with live MemesNominee REP progress and
+  a `Get nominated` action.
 
 ## User Journey
 
@@ -64,21 +71,34 @@ reached), use
 - Filled text and select fields show success styling, including a green ring and
   checkmark, until a validation error replaces that state.
 - On larger viewports, `Artwork` keeps the media source panel and the metadata
-  form side by side; on smaller viewports, the same content stacks vertically.
+  form side by side while the form scrolls independently. On smaller
+  viewports, the same content stacks and scrolls as one page.
+- On touch devices, focusing a text field scrolls it into the visible part of
+  the modal after the software keyboard opens. In the native app, the modal
+  also reduces its height so the keyboard does not cover the action bar.
 - The upload drop zone shows grouped format badges for image, video, and
-  interactive model uploads before a file is selected.
+  interactive model uploads and `Max 250 MB` on the same row before a file is
+  selected. The row wraps on smaller screens.
+  File sizes use decimal MB in the artwork preview and submission progress.
+  While a selected file is processing, the message notes that large files may
+  take longer.
 - After a file is selected, the preview surface keeps a `Change` control for
   clearing the current upload and picking another file.
 - The interactive artwork panel always shows `Media Type` as `Interactive HTML
   (text/html)` while the provider selector switches between `IPFS` and
   `Arweave`.
-- `Artwork` `Continue` stays disabled until required traits and media checks
-  pass.
+- `Artwork` `Continue` remains available before required fields are complete.
+  Selecting it validates the media and all required metadata together.
+- While an interactive artwork hash is being verified, `Continue` stays
+  disabled until that check finishes.
 - Numeric trait fields reject `0`.
 - Upload checks:
   - accepted formats include `PNG`, `JPG/JPEG`, `GIF`, `MP4/MOV`, and
-    `GLB/GLTF`
-  - files above `200MB` are rejected
+    binary `GLB` models; JSON `.gltf` files are not accepted, and `.glb`
+    uploads must contain a valid GLB v2 binary header
+  - files above `250 MB` (`250,000,000 bytes`) are rejected
+  - the service verifies the completed stored file size again when the Main
+    Stage submission is created, so API submissions follow the same limit
 - Switching between `Upload File` and `Interactive HTML` keeps each source
   draft for the current modal session.
 
@@ -102,14 +122,23 @@ reached), use
 
 ## Failure and Recovery
 
-- Unsupported type or oversized upload shows inline validation errors in
-  `Artwork`.
+- An oversized file, unsupported type, or invalid GLB shows an inline validation
+  error immediately in `Artwork`, without a `Try Again` button. Use `Select Art`
+  or drag and drop another file into the upload area to replace it.
+- If the uploaded file cannot be verified or has not finished processing, the
+  submission is rejected; wait for the upload to finish and try again.
+- Selecting `Continue` with missing or invalid values gives every affected
+  field red error styling and an inline recovery message.
+- If artwork is missing, the upload area or interactive hash input turns red.
+- Changing between `Upload File` and `Interactive HTML` clears the previous
+  generic missing-media error until `Continue` is selected again; specific
+  file or hash validation errors remain visible.
 - Invalid or unreachable interactive content shows inline errors; fix input and
   retry.
 - If a pasted gateway URL is rejected, replace it with the root CID/transaction
   ID or retry with an approved gateway URL for the same asset.
-- If `Continue` is attempted with invalid artwork metadata, the first invalid
-  field is focused so the user can correct it in place.
+- After an invalid `Continue` attempt, focus and scrolling move to the first
+  missing item in form order: media first, then title, description, and traits.
 - `Close` icon, backdrop click, `Cancel`, or `Escape` closes the modal from any
   step.
 - Closing the modal discards the draft. Reopening starts a new draft.

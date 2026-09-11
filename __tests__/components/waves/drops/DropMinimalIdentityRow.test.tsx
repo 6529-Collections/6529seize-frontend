@@ -3,6 +3,8 @@ import { render, screen } from "@testing-library/react";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import DropMinimalIdentityRow from "@/components/waves/drops/DropMinimalIdentityRow";
 
+const mockDropAuthorBadges = jest.fn();
+
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({ href, children, ...props }: any) => (
@@ -32,6 +34,13 @@ jest.mock("@/components/waves/drops/time/WaveDropTime", () => ({
   default: () => <div data-testid="wave-drop-time" />,
 }));
 
+jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
+  DropAuthorBadges: (props: any) => {
+    mockDropAuthorBadges(props);
+    return <div data-testid="drop-author-badges" />;
+  },
+}));
+
 describe("DropMinimalIdentityRow", () => {
   const createDrop = (
     handle: string | null,
@@ -47,6 +56,7 @@ describe("DropMinimalIdentityRow", () => {
         primary_address: primaryAddress,
         classification,
       },
+      wave: { id: "wave-1", name: "Wave One" },
     }) as any;
 
   it("renders a robot emoji before the author name for AI profiles", () => {
@@ -83,6 +93,11 @@ describe("DropMinimalIdentityRow", () => {
     expect(screen.getByTestId("tooltip-wrapper")).toHaveAttribute(
       "data-user",
       "alice"
+    );
+    expect(mockDropAuthorBadges).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        wave: expect.objectContaining({ id: "wave-1" }),
+      })
     );
   });
 

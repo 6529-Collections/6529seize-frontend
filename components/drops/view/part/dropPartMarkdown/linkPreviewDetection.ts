@@ -3,7 +3,8 @@ import { publicEnv } from "@/config/env";
 
 const DEFAULT_CLOUDFRONT_DOMAIN = "https://d3lqz0a4bldqgf.cloudfront.net";
 const TENOR_DOMAIN = "tenor.com";
-const ALLOWED_TENOR_PATH_EXTENSIONS = [
+const GIPHY_MEDIA_HOST_REGEX = /^media\d*\.giphy\.com$/;
+const ALLOWED_MEDIA_PATH_EXTENSIONS = [
   ".mp4",
   ".gif",
   ".jpg",
@@ -69,7 +70,14 @@ const isAllowedCloudfrontHref = (href: string): boolean => {
 const isDomainOrSubdomain = (hostname: string, domain: string): boolean =>
   hostname === domain || hostname.endsWith(`.${domain}`);
 
-const isAllowedTenorHref = (href: string): boolean => {
+const hasAllowedMediaExtension = (url: URL): boolean => {
+  const pathname = url.pathname.toLowerCase();
+  return ALLOWED_MEDIA_PATH_EXTENSIONS.some((extension) =>
+    pathname.endsWith(extension)
+  );
+};
+
+const isAllowedGifProviderHref = (href: string): boolean => {
   const url = parseUrl(href);
   if (!url) {
     return false;
@@ -80,14 +88,12 @@ const isAllowedTenorHref = (href: string): boolean => {
     return false;
   }
 
-  if (!isDomainOrSubdomain(url.hostname.toLowerCase(), TENOR_DOMAIN)) {
-    return false;
-  }
+  const hostname = url.hostname.toLowerCase();
+  const isAllowedHost =
+    isDomainOrSubdomain(hostname, TENOR_DOMAIN) ||
+    GIPHY_MEDIA_HOST_REGEX.test(hostname);
 
-  const pathname = url.pathname.toLowerCase();
-  return ALLOWED_TENOR_PATH_EXTENSIONS.some((extension) =>
-    pathname.endsWith(extension)
-  );
+  return isAllowedHost && hasAllowedMediaExtension(url);
 };
 
 const isDisallowedLinkHref = (href: string): boolean => {
@@ -102,7 +108,8 @@ const isDisallowedLinkHref = (href: string): boolean => {
   }
 
   return (
-    !isAllowedCloudfrontHref(stableHref) && !isAllowedTenorHref(stableHref)
+    !isAllowedCloudfrontHref(stableHref) &&
+    !isAllowedGifProviderHref(stableHref)
   );
 };
 

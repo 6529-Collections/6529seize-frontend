@@ -28,6 +28,9 @@ export default function MentionsTypeaheadMenuItem({
     >
       <button
         onMouseEnter={onMouseEnter}
+        onMouseDown={(event) => {
+          event.preventDefault();
+        }}
         onClick={onClick}
         type="button"
         className={`${

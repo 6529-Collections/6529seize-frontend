@@ -45,7 +45,7 @@ export default function Footer() {
 
   return (
     <footer
-      className="tailwind-scope tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800"
+      className="tailwind-scope tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-900"
       id="footer"
     >
       <span className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2">
@@ -60,7 +60,6 @@ export default function Footer() {
           "/twitter.png",
           "@6529Collections"
         )}
-        {printSeparator()}
         {printSeparator()}
         {printLinkWithImage(
           "https://github.com/6529-Collections",
@@ -81,6 +80,8 @@ export default function Footer() {
         {printLink(`/about/${AboutSection.COOKIE_POLICY}`, "Cookie Policy")}
         {printSeparator()}
         {printLink(`/about/${AboutSection.LICENSE}`, "License")}
+        {printSeparator()}
+        {printLink("/about/6529-apps", "6529 Apps")}
         {printSeparator()}
         {printLink(`/tools/api`, "API")}
         {printSeparator()}

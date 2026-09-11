@@ -7,7 +7,15 @@ import { useKeyPressEvent } from 'react-use';
 let keyCb: any;
 (useKeyPressEvent as jest.Mock).mockImplementation((_key, cb) => { keyCb = cb; });
 
-const option = { key: 'a', label: 'A' } as any;
+const option = {
+  key: 'a',
+  label: 'A',
+  name: 'A',
+  picture: null,
+  collectionName: null,
+  tokenId: '1',
+  setRefElement: jest.fn(),
+} as any;
 const setHighlightedIndex = jest.fn();
 const selectOptionAndCleanUp = jest.fn();
 

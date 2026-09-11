@@ -3,6 +3,12 @@ import { AboutSection } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 describe("Footer", () => {
+  it("uses the subdued page-shell border", () => {
+    render(<Footer />);
+
+    expect(screen.getByRole("contentinfo")).toHaveClass("tw-border-iron-900");
+  });
+
   it("renders social links with images", () => {
     render(<Footer />);
     const punk = screen.getByRole("link", { name: /@punk6529/i });
@@ -19,6 +25,7 @@ describe("Footer", () => {
     );
     const images = screen.getAllByRole("img");
     expect(images).toHaveLength(3);
+    expect(punk.parentElement?.textContent).not.toContain("||");
   });
 
   it("renders policy and contact links", () => {
@@ -53,5 +60,22 @@ describe("Footer", () => {
       "href",
       "https://status.6529.io/"
     );
+  });
+
+  it("renders the 6529 Apps link between License and API in the same tab", () => {
+    render(<Footer />);
+
+    const licenseLink = screen.getByRole("link", { name: "License" });
+    const appsLink = screen.getByRole("link", { name: "6529 Apps" });
+    const apiLink = screen.getByRole("link", { name: "API" });
+
+    expect(appsLink).toHaveAttribute("href", "/about/6529-apps");
+    expect(appsLink).toHaveAttribute("target", "_self");
+    expect(appsLink.previousElementSibling).toHaveTextContent("|");
+    expect(appsLink.previousElementSibling?.previousElementSibling).toBe(
+      licenseLink
+    );
+    expect(appsLink.nextElementSibling).toHaveTextContent("|");
+    expect(appsLink.nextElementSibling?.nextElementSibling).toBe(apiLink);
   });
 });

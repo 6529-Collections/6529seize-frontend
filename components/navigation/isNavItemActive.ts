@@ -14,6 +14,7 @@ type ActiveContext = {
 };
 
 const COLLECTION_ROUTE_PREFIXES = [
+  "/collect",
   "/the-memes",
   "/6529-gradient",
   "/nextgen",

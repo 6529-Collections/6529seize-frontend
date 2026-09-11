@@ -1,8 +1,22 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import GroupCardConfigs from "@/components/groups/page/list/card/GroupCardConfigs";
+import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
 import { ApiGroupFilterDirection } from "@/generated/models/ApiGroupFilterDirection";
+import { ApiGroupNftOwnershipMatchMode } from "@/generated/models/ApiGroupNftOwnershipMatchMode";
+import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
+import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
+import { ApiXTdhGrantTargetTokenMode } from "@/generated/models/ApiXTdhGrantTargetTokenMode";
 import { GroupDescriptionType } from "@/entities/IGroup";
+import { useGroupCriteriaIdentityLabels } from "@/hooks/useGroupCriteriaIdentityLabels";
+
+jest.mock("@/hooks/useGroupCriteriaIdentityLabels", () => ({
+  useGroupCriteriaIdentityLabels: jest.fn(),
+}));
+
+const useGroupCriteriaIdentityLabelsMock = jest.mocked(
+  useGroupCriteriaIdentityLabels
+);
 
 jest.mock(
   "@/components/groups/page/list/card/GroupCardConfig",
@@ -12,7 +26,20 @@ jest.mock(
     )
 );
 
+const emptyGroupDescription = {
+  tdh: { min: null, max: null },
+  rep: { min: null, max: null, category: null, user_identity: null },
+  cic: { min: null, max: null, user_identity: null, direction: null },
+  level: { min: null, max: null },
+  owns_nfts: [],
+  identity_group_identities_count: 0,
+};
+
 describe("GroupCardConfigs", () => {
+  beforeEach(() => {
+    useGroupCriteriaIdentityLabelsMock.mockReturnValue({});
+  });
+
   it("shows default manual list hint when group undefined", () => {
     const { getByTestId } = render(
       <GroupCardConfigs group={undefined as any} />
@@ -35,6 +62,7 @@ describe("GroupCardConfigs", () => {
         },
         cic: { min: null, max: 5, user_identity: null, direction: null },
         level: { min: 3, max: 4 },
+        owns_nfts: [],
         identity_group_identities_count: 7,
       },
     };
@@ -54,5 +82,109 @@ describe("GroupCardConfigs", () => {
     expect(
       getByTestId(`config-${GroupDescriptionType.WALLETS}`)
     ).toHaveTextContent("7");
+  });
+
+  it("shows a resolved handle instead of a wallet in identity criteria", () => {
+    const wallet = "0xfd22004806a6846ea67ad883356be810f0428793";
+    useGroupCriteriaIdentityLabelsMock.mockReturnValue({
+      [wallet]: "pinkapewife",
+    });
+    const group: any = {
+      group: {
+        ...emptyGroupDescription,
+        rep: {
+          min: 1,
+          max: null,
+          category: null,
+          user_identity: wallet,
+          direction: ApiGroupFilterDirection.Received,
+        },
+      },
+    };
+
+    const { getByTestId } = render(<GroupCardConfigs group={group} />);
+
+    expect(getByTestId(`config-${GroupDescriptionType.REP}`)).toHaveTextContent(
+      "from identity: pinkapewife"
+    );
+    expect(
+      getByTestId(`config-${GroupDescriptionType.REP}`)
+    ).not.toHaveTextContent(wallet);
+  });
+
+  it("labels internal NFT requirements", () => {
+    const group: any = {
+      group: {
+        ...emptyGroupDescription,
+        owns_nfts: [
+          {
+            name: ApiGroupOwnsNftNameEnum.Memes,
+            tokens: ["100", "201"],
+            match_mode: ApiGroupNftOwnershipMatchMode.AnyToken,
+          },
+          {
+            name: ApiGroupOwnsNftNameEnum.Gradients,
+            tokens: ["5"],
+            match_mode: ApiGroupNftOwnershipMatchMode.AllTokens,
+          },
+          {
+            name: ApiGroupOwnsNftNameEnum.Nextgen,
+            tokens: [],
+          },
+        ],
+      },
+    };
+
+    const { getByTestId } = render(<GroupCardConfigs group={group} />);
+
+    expect(
+      getByTestId(`config-${GroupDescriptionType.OWNS_NFTS}`)
+    ).toHaveTextContent(
+      "Memes: any selected (2), Gradients: all selected (1), NextGen: any collection token"
+    );
+  });
+
+  it("does not guess grant token mode when grant details are unresolved", () => {
+    const group: any = {
+      group: {
+        ...emptyGroupDescription,
+        is_beneficiary_of_grant_id: "grant-1",
+        is_beneficiary_of_grant_match_mode:
+          ApiGroupBeneficiaryGrantMatchMode.AnyToken,
+        is_beneficiary_of_grant: null,
+      },
+    };
+
+    const { getByTestId } = render(<GroupCardConfigs group={group} />);
+
+    expect(
+      getByTestId(`config-${GroupDescriptionType.XTDH_GRANT}`)
+    ).toHaveTextContent("grant-1");
+    expect(
+      getByTestId(`config-${GroupDescriptionType.XTDH_GRANT}`)
+    ).not.toHaveTextContent("Any specified token");
+  });
+
+  it("labels full-collection grant requirements", () => {
+    const group: any = {
+      group: {
+        ...emptyGroupDescription,
+        is_beneficiary_of_grant_id: "grant-1",
+        is_beneficiary_of_grant_match_mode:
+          ApiGroupBeneficiaryGrantMatchMode.AnyToken,
+        is_beneficiary_of_grant: {
+          status: ApiXTdhGrantStatus.Granted,
+          target_token_mode: ApiXTdhGrantTargetTokenMode.All,
+          valid_from: null,
+          valid_to: null,
+        },
+      },
+    };
+
+    const { getByTestId } = render(<GroupCardConfigs group={group} />);
+
+    expect(
+      getByTestId(`config-${GroupDescriptionType.XTDH_GRANT}`)
+    ).toHaveTextContent("ACTIVE (grant-1) · Any collection token");
   });
 });

@@ -77,6 +77,7 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: () => ({
     settings: {},
   }),
+  useSeizeSettingsOptional: () => null,
 }));
 
 // Mock WaveDropActions to focus on edit functionality

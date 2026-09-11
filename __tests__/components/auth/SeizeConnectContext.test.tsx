@@ -1566,13 +1566,17 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
     const { useAppKitState } = require("@reown/appkit/react");
     const appKitState = { open: false };
     (useAppKitState as jest.Mock).mockImplementation(() => appKitState);
+    let isAppKitCreated = false;
+    let appKitStatus: "initializing" | "ready" = "initializing";
 
     const renderConnectTree = () => (
       <AppKitBootstrapContext.Provider
         value={{
-          status: "initializing",
-          isReady: false,
-          isWaiting: true,
+          status: appKitStatus,
+          hasTerminalError: false,
+          isCreated: isAppKitCreated,
+          isReady: appKitStatus === "ready",
+          isWaiting: appKitStatus === "initializing",
           waitForReady,
         }}
       >
@@ -1595,6 +1599,9 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
     await act(async () => {
       resolveReady();
       await Promise.resolve();
+      isAppKitCreated = true;
+      appKitStatus = "ready";
+      view.rerender(renderConnectTree());
     });
 
     await waitFor(() => {
@@ -1613,6 +1620,163 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
     await waitFor(() => {
       expect(screen.getByTestId("connect-open")).toHaveTextContent("false");
     });
+  });
+
+  it("keeps AppKit-only hooks deferred without remounting children", async () => {
+    const {
+      useAppKit,
+      useAppKitState,
+      useWalletInfo,
+    } = require("@reown/appkit/react");
+    (useAppKit as jest.Mock).mockImplementation(() => {
+      throw new Error("AppKit has not been created");
+    });
+    (useAppKitState as jest.Mock).mockImplementation(() => {
+      throw new Error("AppKit has not been created");
+    });
+    (useWalletInfo as jest.Mock).mockImplementation(() => {
+      throw new Error("AppKit has not been created");
+    });
+    let isAppKitCreated = false;
+
+    const renderTree = () => (
+      <AppKitBootstrapContext.Provider
+        value={{
+          status: "initializing",
+          hasTerminalError: false,
+          isCreated: isAppKitCreated,
+          isReady: false,
+          isWaiting: true,
+          waitForReady: jest.fn(() => new Promise<void>(() => undefined)),
+        }}
+      >
+        <SeizeConnectProvider>
+          <div data-testid="stable-fast-path-child">Fast path</div>
+        </SeizeConnectProvider>
+      </AppKitBootstrapContext.Provider>
+    );
+
+    const view = render(renderTree());
+    const childBeforeAppKit = screen.getByTestId("stable-fast-path-child");
+    expect(useAppKit).not.toHaveBeenCalled();
+    expect(useAppKitState).not.toHaveBeenCalled();
+    expect(useWalletInfo).not.toHaveBeenCalled();
+
+    (useAppKit as jest.Mock).mockReturnValue({ open: mockOpen });
+    (useAppKitState as jest.Mock).mockReturnValue({ open: false });
+    (useWalletInfo as jest.Mock).mockReturnValue({ walletInfo: undefined });
+    isAppKitCreated = true;
+    view.rerender(renderTree());
+
+    await waitFor(() => {
+      expect(useAppKit).toHaveBeenCalledTimes(1);
+      expect(useAppKitState).toHaveBeenCalledTimes(1);
+      expect(useWalletInfo).toHaveBeenCalledTimes(1);
+    });
+    expect(screen.getByTestId("stable-fast-path-child")).toBe(
+      childBeforeAppKit
+    );
+  });
+
+  it("does not loop when useWalletInfo returns a fresh object", async () => {
+    const { useWalletInfo } = require("@reown/appkit/react");
+    (useWalletInfo as jest.Mock).mockImplementation(() => ({ walletInfo: {} }));
+
+    renderWithProvider(<div data-testid="fresh-wallet-info-child">Test</div>);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("fresh-wallet-info-child")).toBeInTheDocument();
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect((useWalletInfo as jest.Mock).mock.calls.length).toBeLessThan(10);
+    expect(console.error).not.toHaveBeenCalledWith(
+      expect.stringContaining("Maximum update depth exceeded")
+    );
+  });
+
+  it("rejects connect when the deferred AppKit bridge hook fails", async () => {
+    mockGetWalletAddress.mockReturnValue(null);
+    const { useAppKit } = require("@reown/appkit/react");
+    (useAppKit as jest.Mock).mockImplementation(() => {
+      throw new Error("bridge failed");
+    });
+    let connectPromise: Promise<void> | undefined;
+
+    const ConnectFailureProbe = () => {
+      const { seizeConnectFresh } = useSeizeConnectContext();
+      return (
+        <button
+          data-testid="bridge-failure-connect"
+          onClick={() => {
+            connectPromise = seizeConnectFresh();
+            void connectPromise.catch(() => undefined);
+          }}
+        >
+          Connect
+        </button>
+      );
+    };
+
+    renderWithProvider(<ConnectFailureProbe />);
+    fireEvent.click(screen.getByTestId("bridge-failure-connect"));
+
+    await waitFor(() => {
+      expect(connectPromise).toBeDefined();
+    });
+    await expect(connectPromise!).rejects.toThrow(
+      "Failed to open wallet connection modal"
+    );
+    expect(mockOpen).not.toHaveBeenCalled();
+  });
+
+  it("rejects and clears a pending AppKit bridge waiter on unmount", async () => {
+    mockGetWalletAddress.mockReturnValue(null);
+    let connectPromise: Promise<void> | undefined;
+
+    const ConnectUnmountProbe = () => {
+      const { seizeConnectFresh } = useSeizeConnectContext();
+      return (
+        <button
+          data-testid="bridge-unmount-connect"
+          onClick={() => {
+            connectPromise = seizeConnectFresh();
+            void connectPromise.catch(() => undefined);
+          }}
+        >
+          Connect
+        </button>
+      );
+    };
+
+    const view = render(
+      <AppKitBootstrapContext.Provider
+        value={{
+          status: "ready",
+          hasTerminalError: false,
+          isCreated: false,
+          isReady: true,
+          isWaiting: false,
+          waitForReady: jest.fn(() => Promise.resolve()),
+        }}
+      >
+        <SeizeConnectProvider>
+          <ConnectUnmountProbe />
+        </SeizeConnectProvider>
+      </AppKitBootstrapContext.Provider>
+    );
+
+    fireEvent.click(screen.getByTestId("bridge-unmount-connect"));
+    await act(async () => {
+      await Promise.resolve();
+      view.unmount();
+    });
+
+    await expect(connectPromise!).rejects.toThrow(
+      "Failed to open wallet connection modal"
+    );
   });
 
   it("clears the connect intent fallback if AppKit never reports open", async () => {

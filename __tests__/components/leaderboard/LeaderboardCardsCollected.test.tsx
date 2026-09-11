@@ -131,6 +131,17 @@ describe("LeaderboardCardsCollectedComponent", () => {
     const rows = screen.getAllByRole("row");
     // First row corresponds to table header, others to data
     expect(rows).toHaveLength(5);
+    expect(rows[0]!.querySelectorAll("th")[2]).toHaveClass(
+      "tw-border-iron-800",
+      "tw-text-iron-400",
+      "md:tw-text-sm"
+    );
+    expect(rows[1]).toHaveClass(
+      "tw-group",
+      "even:tw-bg-iron-900/70",
+      "hover:tw-bg-iron-900",
+      "focus-within:tw-bg-iron-900"
+    );
 
     // check rank numbering
     expect(rows[1]).toHaveTextContent("1");

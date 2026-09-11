@@ -1,4 +1,6 @@
 import { Capacitor } from "@capacitor/core";
+import * as Sentry from "@sentry/nextjs";
+import { TokenRefreshCancelledError } from "@/errors/authentication";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getWalletAddress, setAuthJwt } from "@/services/auth/auth.utils";
 import {
@@ -47,6 +49,110 @@ jest.mock("@/services/auth/native-refresh-token-storage", () => ({
   setNativeRefreshToken: jest.fn(),
 }));
 
+jest.mock("@sentry/nextjs", () => ({
+  __esModule: true,
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+  },
+}));
+
+type SessionRefreshTelemetryAttrs = {
+  readonly source?: unknown;
+  readonly refresh_source?: unknown;
+  readonly client_type?: unknown;
+  readonly refresh_client_type?: unknown;
+  readonly refresh_result?: unknown;
+  readonly auth_refresh_outcome?: unknown;
+  readonly outcome?: unknown;
+  readonly refresh_status_bucket?: unknown;
+  readonly refresh_status_code?: unknown;
+  readonly status_code?: unknown;
+  readonly refresh_duration_bucket_ms?: unknown;
+  readonly duration_bucket_ms?: unknown;
+};
+
+const getSessionRefreshTelemetry = (
+  loggerMock: jest.Mock
+): SessionRefreshTelemetryAttrs[] =>
+  loggerMock.mock.calls
+    .filter(([message]) => message === "auth_session_refresh")
+    .map(([, attrs]) => attrs as SessionRefreshTelemetryAttrs);
+
+const getSessionRefreshInfoTelemetry = (): SessionRefreshTelemetryAttrs[] =>
+  getSessionRefreshTelemetry(Sentry.logger.info as jest.Mock);
+
+const getSessionRefreshWarnTelemetry = (): SessionRefreshTelemetryAttrs[] =>
+  getSessionRefreshTelemetry(Sentry.logger.warn as jest.Mock);
+
+const getTelemetryOutcomes = (
+  attrs: SessionRefreshTelemetryAttrs[]
+): unknown[] => attrs.map((attr) => attr.auth_refresh_outcome);
+
+const allowedRefreshTelemetryAttrNames = new Set([
+  "source",
+  "refresh_source",
+  "client_type",
+  "refresh_client_type",
+  "refresh_result",
+  "auth_refresh_outcome",
+  "outcome",
+  "refresh_status_bucket",
+  "refresh_status_code",
+  "status_code",
+  "refresh_duration_bucket_ms",
+  "duration_bucket_ms",
+]);
+
+const expectNoSensitiveRefreshTelemetry = (
+  attrs: SessionRefreshTelemetryAttrs[]
+): void => {
+  for (const attr of attrs) {
+    const unexpectedAttrNames = Object.keys(attr).filter(
+      (key) => !allowedRefreshTelemetryAttrNames.has(key)
+    );
+    expect(unexpectedAttrNames).toEqual([]);
+    expect(attr).toHaveProperty("refresh_source", attr.source);
+    expect(attr).toHaveProperty("refresh_client_type", attr.client_type);
+    expect(attr).toHaveProperty("refresh_result", attr.auth_refresh_outcome);
+    expect(attr).toHaveProperty("auth_refresh_outcome", attr.outcome);
+    expect(attr).toHaveProperty("refresh_status_bucket");
+    if (attr.status_code !== undefined) {
+      expect(attr).toHaveProperty("refresh_status_code", attr.status_code);
+    }
+    if (attr.duration_bucket_ms !== undefined) {
+      expect(attr).toHaveProperty(
+        "refresh_duration_bucket_ms",
+        attr.duration_bucket_ms
+      );
+    }
+    expect(attr).not.toHaveProperty("address");
+    expect(attr).not.toHaveProperty("client_address");
+    expect(attr).not.toHaveProperty("access_token");
+    expect(attr).not.toHaveProperty("auth_jwt");
+    expect(attr).not.toHaveProperty("jwt");
+    expect(attr).not.toHaveProperty("cookie");
+    expect(attr).not.toHaveProperty("cookies");
+    expect(attr).not.toHaveProperty("refresh_token");
+    expect(attr).not.toHaveProperty("native_refresh_token");
+    expect(attr).not.toHaveProperty("profile_id");
+    expect(attr).not.toHaveProperty("request_body");
+    expect(attr).not.toHaveProperty("body");
+    expect(attr).not.toHaveProperty("error");
+    expect(attr).not.toHaveProperty("raw_error");
+    expect(attr).not.toHaveProperty("raw_error_message");
+    expect(attr).not.toHaveProperty("error_message");
+    expect(attr).not.toHaveProperty("message");
+  }
+};
+
+const setNavigatorLocks = (lockManager: LockManager | undefined): void => {
+  Object.defineProperty(globalThis.navigator, "locks", {
+    configurable: true,
+    value: lockManager,
+  });
+};
+
 describe("session-v2.utils", () => {
   beforeEach(() => {
     __resetSessionRefreshStateForTests();
@@ -58,6 +164,7 @@ describe("session-v2.utils", () => {
     (isNativeSecureStorageAvailable as jest.Mock).mockReturnValue(true);
     (getWalletAddress as jest.Mock).mockReturnValue(null);
     (setAuthJwt as jest.Mock).mockReturnValue(true);
+    setNavigatorLocks(undefined);
   });
 
   it("requests web session nonce with only session-v2 query params", async () => {
@@ -164,6 +271,43 @@ describe("session-v2.utils", () => {
       undefined,
       { authSessionVersion: "v2" }
     );
+  });
+
+  it("does not activate a native session after auth changes during secure storage persistence", async () => {
+    let finishSecureStorageWrite!: () => void;
+    const secureStorageWrite = new Promise<void>((resolve) => {
+      finishSecureStorageWrite = resolve;
+    });
+    let isCurrentAuthState = true;
+    (setNativeRefreshToken as jest.Mock).mockReturnValueOnce(
+      secureStorageWrite
+    );
+
+    const persistence = persistSessionResponse(
+      {
+        client_type: "native",
+        address: "0xabc",
+        role: null,
+        access_token: "stale-access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+        native_refresh_token: "stale-native-refresh-token",
+        refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+      },
+      { shouldPersist: () => isCurrentAuthState }
+    );
+
+    expect(setNativeRefreshToken).toHaveBeenCalledWith({
+      address: "0xabc",
+      refreshToken: "stale-native-refresh-token",
+    });
+    isCurrentAuthState = false;
+    finishSecureStorageWrite();
+
+    await expect(persistence).rejects.toBeInstanceOf(
+      TokenRefreshCancelledError
+    );
+    expect(setAuthJwt).not.toHaveBeenCalled();
+    expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
   });
 
   it("marks persisted web auth as session v2", async () => {
@@ -296,11 +440,157 @@ describe("session-v2.utils", () => {
         client_type: "web",
         client_address: "0xabc",
       },
-      signal: undefined,
+      signal: expect.any(AbortSignal),
       credentials: "include",
       errorMode: "structured",
       includeWalletAuth: false,
     });
+    expect(getSessionRefreshInfoTelemetry()).toEqual([
+      expect.objectContaining({
+        source: "refreshSessionV2",
+        client_type: "web",
+        auth_refresh_outcome: "started",
+        outcome: "started",
+        refresh_status_bucket: "not_applicable",
+      }),
+      expect.objectContaining({
+        source: "refreshSessionV2",
+        client_type: "web",
+        auth_refresh_outcome: "success",
+        outcome: "success",
+        refresh_status_bucket: "not_applicable",
+        duration_bucket_ms: expect.any(String),
+      }),
+    ]);
+    expect(getSessionRefreshWarnTelemetry()).toEqual([]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
+  });
+
+  it("serializes web refreshes through an address-scoped cross-tab lock", async () => {
+    const sessionResponse = {
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    const requestLock = jest.fn(
+      async <T>(
+        _name: string,
+        _options: LockOptions,
+        callback: (lock: Lock | null) => Promise<T>
+      ): Promise<T> => await callback(null)
+    );
+    setNavigatorLocks({ request: requestLock } as unknown as LockManager);
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(sessionResponse);
+
+    await expect(refreshSessionV2({ address: "0xAbC" })).resolves.toBe(
+      sessionResponse
+    );
+
+    expect(requestLock).toHaveBeenCalledWith(
+      "6529:auth-session-refresh:web:0xabc",
+      { mode: "exclusive", signal: expect.any(AbortSignal) },
+      expect.any(Function)
+    );
+    expect(commonApiPost).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "auth/session-refresh",
+        body: {
+          client_type: "web",
+          client_address: "0xAbC",
+        },
+      })
+    );
+  });
+
+  it("falls back when lock acquisition fails before the refresh starts", async () => {
+    const sessionResponse = {
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    const requestLock = jest.fn().mockRejectedValue(new Error("locks broken"));
+    setNavigatorLocks({ request: requestLock } as unknown as LockManager);
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(sessionResponse);
+
+    await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBe(
+      sessionResponse
+    );
+
+    expect(requestLock).toHaveBeenCalledTimes(1);
+    expect(commonApiPost).toHaveBeenCalledTimes(1);
+    expect(getTelemetryOutcomes(getSessionRefreshInfoTelemetry())).toEqual([
+      "started",
+      "success",
+    ]);
+  });
+
+  it("does not retry when the refresh task fails after acquiring the lock", async () => {
+    const refreshError = new TypeError("Failed to fetch");
+    const requestLock = jest.fn(
+      async <T>(
+        _name: string,
+        _options: LockOptions,
+        callback: (lock: Lock | null) => Promise<T>
+      ): Promise<T> => await callback(null)
+    );
+    setNavigatorLocks({ request: requestLock } as unknown as LockManager);
+    (commonApiPost as jest.Mock).mockRejectedValueOnce(refreshError);
+
+    await expect(refreshSessionV2({ address: "0xabc" })).rejects.toBe(
+      refreshError
+    );
+
+    expect(requestLock).toHaveBeenCalledTimes(1);
+    expect(commonApiPost).toHaveBeenCalledTimes(1);
+  });
+
+  it("records an abort while waiting for the cross-tab lock", async () => {
+    const abortController = new AbortController();
+    const sessionResponse = {
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    const requestLock = jest.fn(
+      async <T>(
+        _name: string,
+        options: LockOptions,
+        _callback: (lock: Lock | null) => Promise<T>
+      ): Promise<T> =>
+        await new Promise<T>((_resolve, reject) => {
+          options.signal?.addEventListener(
+            "abort",
+            () => reject(new DOMException("aborted", "AbortError")),
+            { once: true }
+          );
+        })
+    );
+    setNavigatorLocks({ request: requestLock } as unknown as LockManager);
+
+    const abortedRefresh = refreshSessionV2({
+      address: "0xabc",
+      abortSignal: abortController.signal,
+    });
+    abortController.abort();
+
+    await expect(abortedRefresh).rejects.toMatchObject({ name: "AbortError" });
+    expect(commonApiPost).not.toHaveBeenCalled();
+    expect(getTelemetryOutcomes(getSessionRefreshInfoTelemetry())).toEqual([
+      "aborted",
+    ]);
+
+    setNavigatorLocks(undefined);
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(sessionResponse);
+    await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBe(
+      sessionResponse
+    );
+    expect(commonApiPost).toHaveBeenCalledTimes(1);
   });
 
   it("treats unauthorized web refresh as an invalid session", async () => {
@@ -318,11 +608,29 @@ describe("session-v2.utils", () => {
         client_type: "web",
         client_address: "0xabc",
       },
-      signal: undefined,
+      signal: expect.any(AbortSignal),
       credentials: "include",
       errorMode: "structured",
       includeWalletAuth: false,
     });
+    expect(getSessionRefreshInfoTelemetry()).toEqual([
+      expect.objectContaining({
+        client_type: "web",
+        auth_refresh_outcome: "started",
+        outcome: "started",
+        refresh_status_bucket: "not_applicable",
+      }),
+      expect.objectContaining({
+        client_type: "web",
+        auth_refresh_outcome: "unauthorized",
+        outcome: "unauthorized",
+        refresh_status_bucket: "http_401",
+        status_code: 401,
+        duration_bucket_ms: expect.any(String),
+      }),
+    ]);
+    expect(getSessionRefreshWarnTelemetry()).toEqual([]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
   it("shares concurrent refreshes for the same web session context", async () => {
@@ -350,6 +658,12 @@ describe("session-v2.utils", () => {
 
     await expect(firstRefresh).resolves.toBe(sessionResponse);
     await expect(secondRefresh).resolves.toBe(sessionResponse);
+    expect(getTelemetryOutcomes(getSessionRefreshInfoTelemetry())).toEqual([
+      "started",
+      "deduped_in_flight",
+      "success",
+    ]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
   it("keeps a shared refresh alive when one consumer aborts", async () => {
@@ -393,19 +707,259 @@ describe("session-v2.utils", () => {
     resolveRefresh?.(sessionResponse);
     await expect(waitingRefresh).resolves.toBe(sessionResponse);
     expect(commonApiPost).toHaveBeenCalledTimes(1);
+    expect(getTelemetryOutcomes(getSessionRefreshInfoTelemetry())).toEqual([
+      "started",
+      "deduped_in_flight",
+      "aborted",
+      "success",
+    ]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
-  it("cooldowns failed web refreshes for the same session context", async () => {
+  it("expires a stalled background refresh so later actions can start a fresh request", async () => {
+    jest.useFakeTimers();
+    const sessionResponse = {
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    const manualController = new AbortController();
+    let backgroundError: unknown;
+    let internalSignal: AbortSignal | undefined;
+    (commonApiPost as jest.Mock)
+      .mockImplementationOnce(
+        ({ signal }: { readonly signal?: AbortSignal }) => {
+          internalSignal = signal;
+          return new Promise(() => {});
+        }
+      )
+      .mockResolvedValueOnce(sessionResponse);
+
+    try {
+      const backgroundRefresh = refreshSessionV2({ address: "0xabc" }).catch(
+        (error: unknown) => {
+          backgroundError = error;
+        }
+      );
+      const manualRefresh = refreshSessionV2({
+        address: "0xABC",
+        abortSignal: manualController.signal,
+      });
+      manualController.abort();
+      await expect(manualRefresh).rejects.toMatchObject({ name: "AbortError" });
+      expect(commonApiPost).toHaveBeenCalledTimes(1);
+
+      await jest.advanceTimersByTimeAsync(30_000);
+
+      expect(backgroundError).toMatchObject({ name: "TimeoutError" });
+      expect(internalSignal?.aborted).toBe(true);
+      await backgroundRefresh;
+      const retry = refreshSessionV2({ address: "0xabc" });
+      expect(commonApiPost).toHaveBeenCalledTimes(1);
+      await jest.advanceTimersByTimeAsync(250);
+      await expect(retry).resolves.toBe(sessionResponse);
+      expect(commonApiPost).toHaveBeenCalledTimes(2);
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      __resetSessionRefreshStateForTests();
+      jest.useRealTimers();
+    }
+  });
+
+  it.each(["success", "unauthorized", "rate-limit"] as const)(
+    "ignores a timed-out refresh's late %s settlement while a replacement request is active",
+    async (lateOutcome) => {
+      jest.useFakeTimers();
+      const sessionResponse = {
+        client_type: "web",
+        address: "0xabc",
+        role: null,
+        access_token: "access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      };
+      let resolveStalled!: (value: typeof sessionResponse) => void;
+      let rejectStalled!: (error: Error) => void;
+      let resolveReplacement!: (value: typeof sessionResponse) => void;
+      const stalled = new Promise<typeof sessionResponse>((resolve, reject) => {
+        resolveStalled = resolve;
+        rejectStalled = reject;
+      });
+      const replacement = new Promise<typeof sessionResponse>((resolve) => {
+        resolveReplacement = resolve;
+      });
+      (commonApiPost as jest.Mock)
+        .mockReturnValueOnce(stalled)
+        .mockReturnValueOnce(replacement)
+        .mockResolvedValueOnce(sessionResponse);
+
+      try {
+        let timeoutError: unknown;
+        const expired = refreshSessionV2({ address: "0xabc" }).catch(
+          (error: unknown) => {
+            timeoutError = error;
+          }
+        );
+        await jest.advanceTimersByTimeAsync(30_000);
+        expect(timeoutError).toMatchObject({ name: "TimeoutError" });
+        await expired;
+
+        const fresh = refreshSessionV2({ address: "0xabc" });
+        await jest.advanceTimersByTimeAsync(250);
+        expect(commonApiPost).toHaveBeenCalledTimes(2);
+        if (lateOutcome === "success") {
+          resolveStalled({
+            ...sessionResponse,
+            access_token: "stale-access-token",
+          });
+        } else {
+          rejectStalled(
+            Object.assign(new Error(lateOutcome), {
+              status: lateOutcome === "unauthorized" ? 401 : 429,
+            })
+          );
+        }
+        await jest.advanceTimersByTimeAsync(0);
+
+        const joined = refreshSessionV2({ address: "0xABC" });
+        expect(commonApiPost).toHaveBeenCalledTimes(2);
+        resolveReplacement(sessionResponse);
+        await expect(fresh).resolves.toBe(sessionResponse);
+        await expect(joined).resolves.toBe(sessionResponse);
+        await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBe(
+          sessionResponse
+        );
+        expect(commonApiPost).toHaveBeenCalledTimes(3);
+      } finally {
+        __resetSessionRefreshStateForTests();
+        jest.useRealTimers();
+      }
+    }
+  );
+
+  it.each(["waiting", "acquired"] as const)(
+    "expires a stalled refresh with its cross-tab lock %s",
+    async (lockState) => {
+      jest.useFakeTimers();
+      let lockSignal: AbortSignal | undefined;
+      let lockReleased = false;
+      let timeoutError: unknown;
+      const requestLock = jest.fn(
+        async <T>(
+          _name: string,
+          options: LockOptions,
+          callback: (lock: Lock | null) => Promise<T>
+        ): Promise<T> => {
+          lockSignal = options.signal;
+          if (lockState === "waiting") {
+            return await new Promise<T>(() => {});
+          }
+          try {
+            return await callback(null);
+          } finally {
+            lockReleased = true;
+          }
+        }
+      );
+      setNavigatorLocks({ request: requestLock } as unknown as LockManager);
+      (commonApiPost as jest.Mock).mockReturnValueOnce(new Promise(() => {}));
+
+      try {
+        const refresh = refreshSessionV2({ address: "0xabc" }).catch(
+          (error: unknown) => {
+            timeoutError = error;
+          }
+        );
+        await jest.advanceTimersByTimeAsync(30_000);
+
+        expect(timeoutError).toMatchObject({ name: "TimeoutError" });
+        await refresh;
+        expect(lockSignal?.aborted).toBe(true);
+        expect(lockReleased).toBe(lockState === "acquired");
+        expect(commonApiPost).toHaveBeenCalledTimes(
+          lockState === "acquired" ? 1 : 0
+        );
+      } finally {
+        __resetSessionRefreshStateForTests();
+        jest.useRealTimers();
+      }
+    }
+  );
+
+  it("does not send a native refresh if token storage resolves after the deadline", async () => {
+    jest.useFakeTimers();
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    let resolveStoredToken!: (token: string) => void;
+    let timeoutError: unknown;
+    (getNativeRefreshToken as jest.Mock).mockReturnValueOnce(
+      new Promise<string>((resolve) => {
+        resolveStoredToken = resolve;
+      })
+    );
+
+    try {
+      const refresh = refreshSessionV2({ address: "0xabc" }).catch(
+        (error: unknown) => {
+          timeoutError = error;
+        }
+      );
+      await jest.advanceTimersByTimeAsync(30_000);
+
+      expect(timeoutError).toMatchObject({ name: "TimeoutError" });
+      await refresh;
+      resolveStoredToken("native-refresh-token");
+      await jest.advanceTimersByTimeAsync(0);
+      expect(commonApiPost).not.toHaveBeenCalled();
+    } finally {
+      __resetSessionRefreshStateForTests();
+      jest.useRealTimers();
+    }
+  });
+
+  it("blocks invalid web session refreshes until persisted auth clears the block", async () => {
+    jest.useFakeTimers();
     const unauthorizedError = Object.assign(new Error("Unauthorized"), {
       status: 401,
       response: { status: 401 },
     });
-    (commonApiPost as jest.Mock).mockRejectedValueOnce(unauthorizedError);
+    const sessionResponse = {
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    (commonApiPost as jest.Mock)
+      .mockRejectedValueOnce(unauthorizedError)
+      .mockResolvedValueOnce(sessionResponse);
 
-    await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBeNull();
-    await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBeNull();
+    try {
+      await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBeNull();
+      await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBeNull();
 
-    expect(commonApiPost).toHaveBeenCalledTimes(1);
+      await jest.advanceTimersByTimeAsync(5 * 60 * 1000);
+      await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBeNull();
+      expect(commonApiPost).toHaveBeenCalledTimes(1);
+
+      await expect(persistSessionResponse(sessionResponse)).resolves.toBe(true);
+      await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBe(
+        sessionResponse
+      );
+      expect(commonApiPost).toHaveBeenCalledTimes(2);
+
+      expect(getTelemetryOutcomes(getSessionRefreshInfoTelemetry())).toEqual([
+        "started",
+        "unauthorized",
+        "cooldown_used_empty",
+        "cooldown_used_empty",
+        "started",
+        "success",
+      ]);
+      expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("clears a failed refresh cooldown after successful auth persistence", async () => {
@@ -431,6 +985,7 @@ describe("session-v2.utils", () => {
     );
 
     expect(commonApiPost).toHaveBeenCalledTimes(2);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
   it("delays transport failure retries without replaying a stale error", async () => {
@@ -458,9 +1013,167 @@ describe("session-v2.utils", () => {
       await jest.advanceTimersByTimeAsync(250);
       await expect(retriedRefresh).resolves.toBe(sessionResponse);
       expect(commonApiPost).toHaveBeenCalledTimes(2);
+      expect(getTelemetryOutcomes(getSessionRefreshInfoTelemetry())).toEqual([
+        "started",
+        "cooldown_used_retry",
+        "started",
+        "success",
+      ]);
+      expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
+      expect(getSessionRefreshWarnTelemetry()).toEqual([
+        expect.objectContaining({
+          client_type: "web",
+          auth_refresh_outcome: "network_error",
+          outcome: "network_error",
+          refresh_status_bucket: "network_error",
+          duration_bucket_ms: expect.any(String),
+        }),
+      ]);
+      expectNoSensitiveRefreshTelemetry(getSessionRefreshWarnTelemetry());
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it("short-circuits refresh retries for sixty seconds while rate limited", async () => {
+    jest.useFakeTimers();
+    const rateLimitError = Object.assign(new Error("Rate limit exceeded"), {
+      status: 429,
+      response: {
+        status: 429,
+        headers: new Headers({
+          "Retry-After": "1",
+        }),
+      },
+    });
+    const sessionResponse = {
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    (commonApiPost as jest.Mock)
+      .mockRejectedValueOnce(rateLimitError)
+      .mockResolvedValueOnce(sessionResponse);
+
+    try {
+      await expect(refreshSessionV2({ address: "0xabc" })).rejects.toBe(
+        rateLimitError
+      );
+      await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBeNull();
+
+      await jest.advanceTimersByTimeAsync(59_000);
+      await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBeNull();
+      expect(commonApiPost).toHaveBeenCalledTimes(1);
+
+      await jest.advanceTimersByTimeAsync(1_000);
+      await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBe(
+        sessionResponse
+      );
+
+      expect(commonApiPost).toHaveBeenCalledTimes(2);
+      expect(getTelemetryOutcomes(getSessionRefreshInfoTelemetry())).toEqual([
+        "started",
+        "cooldown_used_rate_limit",
+        "cooldown_used_rate_limit",
+        "started",
+        "success",
+      ]);
+      expect(getSessionRefreshWarnTelemetry()).toEqual([
+        expect.objectContaining({
+          client_type: "web",
+          auth_refresh_outcome: "backend_error",
+          outcome: "backend_error",
+          status_code: 429,
+          duration_bucket_ms: expect.any(String),
+        }),
+      ]);
+      expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
+      expectNoSensitiveRefreshTelemetry(getSessionRefreshWarnTelemetry());
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("counts aborted refreshes without logging them as failures", async () => {
+    const abortController = new AbortController();
+    abortController.abort();
+
+    await expect(
+      refreshSessionV2({
+        address: "0xabc",
+        abortSignal: abortController.signal,
+      })
+    ).rejects.toMatchObject({
+      name: "AbortError",
+    });
+
+    expect(commonApiPost).not.toHaveBeenCalled();
+    expect(getSessionRefreshInfoTelemetry()).toEqual([
+      expect.objectContaining({
+        client_type: "web",
+        auth_refresh_outcome: "aborted",
+        outcome: "aborted",
+        refresh_status_bucket: "aborted",
+      }),
+    ]);
+    expect(getSessionRefreshWarnTelemetry()).toEqual([]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
+  });
+
+  it("logs non-401 backend refresh errors with status only", async () => {
+    const backendError = Object.assign(
+      new Error("server leaked secret-token"),
+      {
+        status: 500,
+        response: { status: 500 },
+      }
+    );
+    (commonApiPost as jest.Mock).mockRejectedValueOnce(backendError);
+
+    await expect(refreshSessionV2({ address: "0xabc" })).rejects.toBe(
+      backendError
+    );
+
+    expect(getSessionRefreshWarnTelemetry()).toEqual([
+      expect.objectContaining({
+        client_type: "web",
+        auth_refresh_outcome: "backend_error",
+        outcome: "backend_error",
+        refresh_status_bucket: "http_5xx",
+        status_code: 500,
+        duration_bucket_ms: expect.any(String),
+      }),
+    ]);
+    expect(JSON.stringify(getSessionRefreshWarnTelemetry())).not.toContain(
+      "secret-token"
+    );
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshWarnTelemetry());
+  });
+
+  it("buckets non-401 4xx refresh errors separately from 401s", async () => {
+    const forbiddenError = Object.assign(new Error("Forbidden"), {
+      status: 403,
+      response: { status: 403 },
+    });
+    (commonApiPost as jest.Mock).mockRejectedValueOnce(forbiddenError);
+
+    await expect(refreshSessionV2({ address: "0xabc" })).rejects.toBe(
+      forbiddenError
+    );
+
+    expect(getSessionRefreshWarnTelemetry()).toEqual([
+      expect.objectContaining({
+        client_type: "web",
+        auth_refresh_outcome: "backend_error",
+        outcome: "backend_error",
+        refresh_status_bucket: "http_4xx",
+        status_code: 403,
+        duration_bucket_ms: expect.any(String),
+      }),
+    ]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshWarnTelemetry());
   });
 
   it("starts a new refresh immediately after the previous caller aborts", async () => {
@@ -502,6 +1215,13 @@ describe("session-v2.utils", () => {
     );
 
     expect(commonApiPost).toHaveBeenCalledTimes(2);
+    expect(getTelemetryOutcomes(getSessionRefreshInfoTelemetry())).toEqual([
+      "started",
+      "aborted",
+      "started",
+      "success",
+    ]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
   it("verifies an active web session and persists the refreshed auth", async () => {
@@ -524,7 +1244,7 @@ describe("session-v2.utils", () => {
         client_type: "web",
         client_address: "0xabc",
       },
-      signal: undefined,
+      signal: expect.any(AbortSignal),
       credentials: "include",
       errorMode: "structured",
       includeWalletAuth: false,
@@ -579,6 +1299,63 @@ describe("session-v2.utils", () => {
     ).resolves.toBe(false);
   });
 
+  it("logs native session refresh success telemetry", async () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (getNativeRefreshToken as jest.Mock).mockResolvedValue(
+      "native-refresh-token"
+    );
+    const sessionResponse = {
+      client_type: "native",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "rotated-native-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    };
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(sessionResponse);
+
+    await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBe(
+      sessionResponse
+    );
+
+    expect(getSessionRefreshInfoTelemetry()).toEqual([
+      expect.objectContaining({
+        client_type: "native",
+        auth_refresh_outcome: "started",
+        outcome: "started",
+        refresh_status_bucket: "not_applicable",
+      }),
+      expect.objectContaining({
+        client_type: "native",
+        auth_refresh_outcome: "success",
+        outcome: "success",
+        refresh_status_bucket: "not_applicable",
+        duration_bucket_ms: expect.any(String),
+      }),
+    ]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
+  });
+
+  it("counts missing native refresh tokens as unauthorized without a backend request", async () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (getNativeRefreshToken as jest.Mock).mockResolvedValue(null);
+
+    await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBeNull();
+
+    expect(commonApiPost).not.toHaveBeenCalled();
+    expect(getSessionRefreshInfoTelemetry()).toEqual([
+      expect.objectContaining({
+        client_type: "native",
+        auth_refresh_outcome: "unauthorized",
+        outcome: "unauthorized",
+        refresh_status_bucket: "unauthorized",
+      }),
+    ]);
+    expect(getSessionRefreshWarnTelemetry()).toEqual([]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
+  });
+
   it("treats unauthorized native refresh as an invalid session", async () => {
     const unauthorizedError = Object.assign(new Error("Unauthorized"), {
       status: 401,
@@ -599,11 +1376,28 @@ describe("session-v2.utils", () => {
         client_address: "0xabc",
         native_refresh_token: "native-refresh-token",
       },
-      signal: undefined,
+      signal: expect.any(AbortSignal),
       credentials: "include",
       errorMode: "structured",
       includeWalletAuth: false,
     });
+    expect(getSessionRefreshInfoTelemetry()).toEqual([
+      expect.objectContaining({
+        client_type: "native",
+        auth_refresh_outcome: "started",
+        outcome: "started",
+        refresh_status_bucket: "not_applicable",
+      }),
+      expect.objectContaining({
+        client_type: "native",
+        auth_refresh_outcome: "unauthorized",
+        outcome: "unauthorized",
+        refresh_status_bucket: "http_401",
+        status_code: 401,
+        duration_bucket_ms: expect.any(String),
+      }),
+    ]);
+    expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
   it("revokes an existing native session", async () => {

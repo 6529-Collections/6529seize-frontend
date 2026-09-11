@@ -65,6 +65,7 @@ interface LeaderboardContentProps {
   readonly maxPrice: number | undefined;
   readonly priceCurrency: string | undefined;
   readonly onCreateDrop: (() => void) | undefined;
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const isWaveLeaderboardSortPreference = (
@@ -87,20 +88,29 @@ const staticLeaderboardControlsClassName = "tw-flex-none tw-bg-black tw-py-4";
 interface LeaderboardControlsFrameProps {
   readonly isSticky: boolean;
   readonly children: React.ReactNode;
+  readonly className?: string | undefined;
 }
 
 const LeaderboardControlsFrame: React.FC<LeaderboardControlsFrameProps> = ({
   isSticky,
   children,
+  className,
 }) => (
   <div
-    className={
+    className={`${
       isSticky
         ? stickyLeaderboardControlsClassName
         : staticLeaderboardControlsClassName
-    }
+    } ${className ?? ""}`}
   >
-    {children}
+    {isSticky && (
+      // Cover the full scroll viewport while the controls share a flex row.
+      <span
+        aria-hidden="true"
+        className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-0 tw-w-[100cqw] tw-bg-black"
+      />
+    )}
+    <div className="tw-relative tw-z-10">{children}</div>
   </div>
 );
 
@@ -179,6 +189,7 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
   maxPrice,
   priceCurrency,
   onCreateDrop,
+  scrollContainerRef,
 }) => {
   if (viewMode === "list") {
     return (
@@ -192,6 +203,7 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
         maxPrice={maxPrice}
         priceCurrency={priceCurrency}
         onCreateDrop={onCreateDrop}
+        scrollContainerRef={scrollContainerRef}
       />
     );
   }
@@ -208,6 +220,7 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
         priceCurrency={priceCurrency}
         mode={viewMode === "grid" ? "compact" : "content_only"}
         onDropClick={onDropClick}
+        scrollContainerRef={scrollContainerRef}
       />
     );
   }
@@ -222,6 +235,7 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
       maxPrice={maxPrice}
       priceCurrency={priceCurrency}
       onDropClick={onDropClick}
+      scrollContainerRef={scrollContainerRef}
     />
   );
 };
@@ -256,7 +270,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   }, []);
 
   const containerClassName = useMemo(() => {
-    return `tw-w-full tw-min-w-0 tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-flex-grow tw-px-2 sm:tw-px-4`;
+    return "tw-w-full tw-min-w-0 tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-flex-grow tw-px-2 sm:tw-px-4 tw-@container/leaderboard";
   }, []);
 
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
@@ -488,94 +502,124 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   return (
     <div
       ref={leaderboardContainerRef}
+      tabIndex={-1}
       className={containerClassName}
       style={leaderboardViewStyle}
     >
-      {isApproveWave ? (
-        <WaveApprovalStatusBar
-          approvedCount={approvedCount}
-          closeStatus={approvalCloseStatus}
-          isApprovalCountError={isApprovalCountError}
-          isApprovalStatusError={isApprovalStatusError}
-          retryApprovalCount={retryApprovalCount}
-          retryApprovalStatus={retryApprovalStatus}
-          wave={wave}
-        />
-      ) : (
-        <WaveLeaderboardTime wave={wave} />
-      )}
+      <div
+        className={`tw-flex tw-min-w-0 tw-flex-grow ${
+          isMemesWave
+            ? "tw-flex-row-reverse tw-flex-wrap tw-content-start tw-items-start tw-gap-x-6 tw-@container/leaderboard-toolbar"
+            : "tw-flex-col"
+        }`}
+      >
+        {isApproveWave ? (
+          <WaveApprovalStatusBar
+            approvedCount={approvedCount}
+            closeStatus={approvalCloseStatus}
+            isApprovalCountError={isApprovalCountError}
+            isApprovalStatusError={isApprovalStatusError}
+            retryApprovalCount={retryApprovalCount}
+            retryApprovalStatus={retryApprovalStatus}
+            wave={wave}
+          />
+        ) : (
+          <WaveLeaderboardTime
+            wave={wave}
+            className={
+              isMemesWave
+                ? "tw-relative tw-z-40 tw-w-full tw-min-w-0 tw-flex-none tw-basis-full @[46rem]/leaderboard-toolbar:tw-w-auto @[46rem]/leaderboard-toolbar:tw-flex-[1_1_17rem]"
+                : undefined
+            }
+          />
+        )}
 
-      {/* Sticky tabs/filters section */}
-      {shouldDelayApprovalControlsSticky ? (
-        <ApproveListStickyLeaderboardControls
-          key={`${wave.id}:list`}
-          rootRef={leaderboardContainerRef}
+        {/* Sticky tabs/filters section */}
+        {shouldDelayApprovalControlsSticky ? (
+          <ApproveListStickyLeaderboardControls
+            key={`${wave.id}:list`}
+            rootRef={leaderboardContainerRef}
+          >
+            {leaderboardControls}
+          </ApproveListStickyLeaderboardControls>
+        ) : (
+          <LeaderboardControlsFrame
+            isSticky
+            className={
+              isMemesWave
+                ? "tw-w-full tw-min-w-0 tw-max-w-full !tw-flex-none !tw-basis-full !tw-pb-2 !tw-pt-2 sm:!tw-pt-4 @[46rem]/leaderboard-toolbar:!tw-w-auto @[46rem]/leaderboard-toolbar:!tw-flex-[0_0_27rem]"
+                : undefined
+            }
+          >
+            {leaderboardControls}
+          </LeaderboardControlsFrame>
+        )}
+
+        {/* Content section */}
+        <div
+          className={`tw-min-w-0 tw-pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] ${
+            isMemesWave
+              ? "tw-w-full tw-flex-none tw-basis-full tw-pt-4"
+              : ""
+          }`}
         >
-          {leaderboardControls}
-        </ApproveListStickyLeaderboardControls>
-      ) : (
-        <LeaderboardControlsFrame isSticky>
-          {leaderboardControls}
-        </LeaderboardControlsFrame>
-      )}
+          <AnimatePresence>
+            {showToggleableDropInput && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+              >
+                <WaveDropCreate
+                  wave={wave}
+                  onCancel={closeCreateDrop}
+                  onSuccess={closeCreateDrop}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-      {/* Content section */}
-      <div className="tw-min-w-0 tw-pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
-        <AnimatePresence>
-          {showToggleableDropInput && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-            >
-              <WaveDropCreate
-                wave={wave}
-                onCancel={closeCreateDrop}
-                onSuccess={closeCreateDrop}
-              />
-            </motion.div>
+          {activeCreateDropExperience ===
+            WaveSubmissionExperience.MEMES_LEGACY && (
+            <MemesArtSubmissionModal
+              isOpen
+              wave={wave}
+              onClose={closeCreateDrop}
+            />
           )}
-        </AnimatePresence>
+          {activeCreateDropExperience ===
+            WaveSubmissionExperience.CURATION_LEGACY && (
+            <WaveLeaderboardCurationDropModal
+              isOpen
+              wave={wave}
+              onClose={closeCreateDrop}
+            />
+          )}
+          {activeCreateDropExperience ===
+            WaveSubmissionExperience.QUORUM_PROPOSAL && (
+            <WaveDropCreate
+              wave={wave}
+              onCancel={closeCreateDrop}
+              onSuccess={closeCreateDrop}
+            />
+          )}
 
-        {activeCreateDropExperience ===
-          WaveSubmissionExperience.MEMES_LEGACY && (
-          <MemesArtSubmissionModal
-            isOpen
+          <LeaderboardContent
             wave={wave}
-            onClose={closeCreateDrop}
+            viewMode={effectiveViewMode}
+            sort={effectiveSort}
+            isMemesWave={isMemesWave}
+            isVotingClosed={isApprovalVotingClosed}
+            isVotingControlsLocked={isApprovalVotingControlsLocked}
+            onDropClick={onDropClick}
+            minPrice={minPrice}
+            maxPrice={maxPrice}
+            priceCurrency={priceCurrency}
+            onCreateDrop={createDropAction}
+            scrollContainerRef={leaderboardContainerRef}
           />
-        )}
-        {activeCreateDropExperience ===
-          WaveSubmissionExperience.CURATION_LEGACY && (
-          <WaveLeaderboardCurationDropModal
-            isOpen
-            wave={wave}
-            onClose={closeCreateDrop}
-          />
-        )}
-        {activeCreateDropExperience ===
-          WaveSubmissionExperience.QUORUM_PROPOSAL && (
-          <WaveDropCreate
-            wave={wave}
-            onCancel={closeCreateDrop}
-            onSuccess={closeCreateDrop}
-          />
-        )}
-
-        <LeaderboardContent
-          wave={wave}
-          viewMode={effectiveViewMode}
-          sort={effectiveSort}
-          isMemesWave={isMemesWave}
-          isVotingClosed={isApprovalVotingClosed}
-          isVotingControlsLocked={isApprovalVotingControlsLocked}
-          onDropClick={onDropClick}
-          minPrice={minPrice}
-          maxPrice={maxPrice}
-          priceCurrency={priceCurrency}
-          onCreateDrop={createDropAction}
-        />
+        </div>
       </div>
     </div>
   );

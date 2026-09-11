@@ -12,9 +12,7 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 
 import ProxyCreateActionConfigEndTimeSwitch from "@/components/user/proxy/proxy/create-action/config/ProxyCreateActionConfigEndTimeSwitch";
 import { Time } from "@/helpers/time";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
+import Button from "@/components/utils/button/Button";
 import type { ApiUpdateProxyActionRequest } from "@/generated/models/ApiUpdateProxyActionRequest";
 
 export default function ProfileProxyEndTimeEdit({
@@ -112,29 +110,27 @@ export default function ProfileProxyEndTimeEdit({
             )}
           </div>
           <div className="tw-mt-5 tw-flex tw-items-center tw-justify-end tw-gap-x-3 sm:tw-mt-8 md:tw-mt-0 md:tw-justify-start">
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={setViewMode}
-              type="button"
               disabled={submitting}
-              className="tw-flex tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none sm:tw-w-auto"
+              fullWidth
+              className="sm:tw-w-auto"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="action"
+              size="sm"
               onClick={onSubmit}
               disabled={!isChangedAndValid || submitting}
-              type="button"
-              className={`${
-                isChangedAndValid
-                  ? "hover:tw-border-primary-600 hover:tw-bg-primary-600"
-                  : "tw-opacity-50"
-              } tw-relative tw-flex tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out`}
+              loading={submitting}
+              fullWidth
+              className="sm:tw-w-auto"
             >
-              <div className="tw-flex tw-items-center tw-space-x-2">
-                {submitting && <CircleLoader size={CircleLoaderSize.SMALL} />}
-                <span>Update</span>
-              </div>
-            </button>
+              Update
+            </Button>
           </div>
         </div>
       </div>

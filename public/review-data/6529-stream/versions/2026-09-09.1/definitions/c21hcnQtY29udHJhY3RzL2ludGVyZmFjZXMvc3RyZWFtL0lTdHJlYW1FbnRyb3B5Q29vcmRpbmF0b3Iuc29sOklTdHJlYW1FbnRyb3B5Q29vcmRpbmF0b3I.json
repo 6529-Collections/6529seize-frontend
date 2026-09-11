@@ -1,0 +1,507 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator#function:0x53bc2b32",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "requestKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "rawRandomness",
+              "type": "bytes32"
+            }
+          ],
+          "name": "fulfillEntropy",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "outcome",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x53bc2b32",
+          "signature": "fulfillEntropy(bytes32,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator#function:0x714ae638",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "mintCommitment",
+              "type": "bytes32"
+            }
+          ],
+          "name": "onTokenMinted",
+          "outputs": [],
+          "selector": "0x714ae638",
+          "signature": "onTokenMinted(uint256,uint256,address,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator#function:0x5c77f5e5",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "scopeKind",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "scopeRef",
+              "type": "bytes32"
+            }
+          ],
+          "name": "registerEntropyScope",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "scopeId",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x5c77f5e5",
+          "signature": "registerEntropyScope(uint256,uint8,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator#function:0x68feeeab",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "requestEntropy",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "requestKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "providerRequestId",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x68feeeab",
+          "signature": "requestEntropy(uint256)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator#function:0x81e4413b",
+          "declaringDefinitionId": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "scopeId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "scopeInputsHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "requestScopeEntropy",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "requestKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "providerRequestId",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x81e4413b",
+          "signature": "requestScopeEntropy(bytes32,bytes32)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "onTokenMinted(uint256,uint256,address,bytes32)",
+          "displaySignature": "onTokenMinted(uint256,uint256,address,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator#function:0x714ae638",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "mintCommitment",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1FbnRyb3B5Q29vcmRpbmF0b3Iuc29sOklTdHJlYW1FbnRyb3B5Q29vcmRpbmF0b3IjZnVuY3Rpb246MHg3MTRhZTYzOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "onTokenMinted",
+          "natspec": "@notice Registers a newly allocated token before Core invokes the ERC-721 receiver hook.",
+          "outputs": [],
+          "range": {
+            "byteLength": 152,
+            "byteStart": 333,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol#L9-L14",
+            "lineEnd": 14,
+            "lineStart": 9,
+            "snippetSha256": "sha256:e5701a7fbf152f354a3424f6d4b7503f5b5f094e879c09fe03d674b3b9f80b5c",
+            "sourceSha256": "sha256:050a47af9265e600c9506d6de242c2e0c75bfca4eaf8401aa16d1b21146544ae"
+          },
+          "selector": "0x714ae638",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "requestEntropy(uint256)",
+          "displaySignature": "requestEntropy(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator#function:0x68feeeab",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1FbnRyb3B5Q29vcmRpbmF0b3Iuc29sOklTdHJlYW1FbnRyb3B5Q29vcmRpbmF0b3IjZnVuY3Rpb246MHg2OGZlZWVhYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestEntropy",
+          "natspec": "@notice Requests token entropy under the collection's active provider policy.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "requestKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "providerRequestId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 138,
+            "byteStart": 577,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol#L17-L20",
+            "lineEnd": 20,
+            "lineStart": 17,
+            "snippetSha256": "sha256:356eb769ba07f2f6e1f4892d5dc3212f2b656e08b71adb99b7ae7e5d4b016943",
+            "sourceSha256": "sha256:050a47af9265e600c9506d6de242c2e0c75bfca4eaf8401aa16d1b21146544ae"
+          },
+          "selector": "0x68feeeab",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "registerEntropyScope(uint256,uint8,bytes32)",
+          "displaySignature": "registerEntropyScope(uint256,uint8,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator#function:0x5c77f5e5",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "scopeKind",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "scopeRef",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1FbnRyb3B5Q29vcmRpbmF0b3Iuc29sOklTdHJlYW1FbnRyb3B5Q29vcmRpbmF0b3IjZnVuY3Rpb246MHg1Yzc3ZjVlNQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "registerEntropyScope",
+          "natspec": "@notice Registers a collection- or sale-scoped entropy subject.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "scopeId",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 138,
+            "byteStart": 793,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol#L23-L25",
+            "lineEnd": 25,
+            "lineStart": 23,
+            "snippetSha256": "sha256:bd4fc52c3047dceb3bf8c2c66d7162dba3f0a4ed024ef55b90a16732f909c5cd",
+            "sourceSha256": "sha256:050a47af9265e600c9506d6de242c2e0c75bfca4eaf8401aa16d1b21146544ae"
+          },
+          "selector": "0x5c77f5e5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "requestScopeEntropy(bytes32,bytes32)",
+          "displaySignature": "requestScopeEntropy(bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator#function:0x81e4413b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scopeId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scopeInputsHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1FbnRyb3B5Q29vcmRpbmF0b3Iuc29sOklTdHJlYW1FbnRyb3B5Q29vcmRpbmF0b3IjZnVuY3Rpb246MHg4MWU0NDEzYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestScopeEntropy",
+          "natspec": "@notice Requests entropy for a registered scope.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "requestKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "providerRequestId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 168,
+            "byteStart": 994,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol#L28-L31",
+            "lineEnd": 31,
+            "lineStart": 28,
+            "snippetSha256": "sha256:c6c92256f395b21afce4d32730a1bd0d743d86493faf39399525d668a365ae8c",
+            "sourceSha256": "sha256:050a47af9265e600c9506d6de242c2e0c75bfca4eaf8401aa16d1b21146544ae"
+          },
+          "selector": "0x81e4413b",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "fulfillEntropy(bytes32,bytes32)",
+          "displaySignature": "fulfillEntropy(bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator#function:0x53bc2b32",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "rawRandomness",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1FbnRyb3B5Q29vcmRpbmF0b3Iuc29sOklTdHJlYW1FbnRyb3B5Q29vcmRpbmF0b3IjZnVuY3Rpb246MHg1M2JjMmIzMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fulfillEntropy",
+          "natspec": "@notice Records a provider callback and returns the pinned fulfillment outcome code.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "outcome",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 116,
+            "byteStart": 1261,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol#L34-L36",
+            "lineEnd": 36,
+            "lineStart": 34,
+            "snippetSha256": "sha256:c929d4ebe48a9515ba4c721f5ed08a45016034aca053a0780eeee00549c46714",
+            "sourceSha256": "sha256:050a47af9265e600c9506d6de242c2e0c75bfca4eaf8401aa16d1b21146544ae"
+          },
+          "selector": "0x53bc2b32",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165",
+        "name": "IERC165"
+      }
+    ],
+    "interface": {
+      "abiSha256": "sha256:d1e808ce5bf6395630b011586d1a32d557a6e14413c68ce4cc9cd821ed5720a4",
+      "interfaceId": "0x96645ed8",
+      "interfaceIdSource": "selector_xor",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL2ludGVyZmFjZXMvc3RyZWFtL0lTdHJlYW1FbnRyb3B5Q29vcmRpbmF0b3Iuc29sOklTdHJlYW1FbnRyb3B5Q29vcmRpbmF0b3I",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol:IStreamEntropyCoordinator",
+      "smart-contracts/vendor/openzeppelin/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IStreamEntropyCoordinator",
+    "natspec": "@notice Permanent write surface for the Core-bound entropy coordinator.",
+    "range": {
+      "byteLength": 1196,
+      "byteStart": 183,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol#L7-L37",
+      "lineEnd": 37,
+      "lineStart": 7,
+      "snippetSha256": "sha256:ca32b6b80d1ea706e0f23b4e0239c17c06a599ee39fa44fad22d661edc3b9d85",
+      "sourceSha256": "sha256:050a47af9265e600c9506d6de242c2e0c75bfca4eaf8401aa16d1b21146544ae"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

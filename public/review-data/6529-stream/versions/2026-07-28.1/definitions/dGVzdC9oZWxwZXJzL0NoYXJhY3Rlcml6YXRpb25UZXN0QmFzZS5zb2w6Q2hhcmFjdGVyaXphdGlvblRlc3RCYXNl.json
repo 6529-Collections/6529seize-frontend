@@ -1,0 +1,107 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": true,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "vm",
+          "natspec": "",
+          "range": {
+            "byteLength": 85,
+            "byteStart": 1715,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/CharacterizationTestBase.sol#L42",
+            "lineEnd": 42,
+            "lineStart": 42,
+            "snippetSha256": "sha256:ace3f2458f0804b10e60c7c93aa56a777a24c6ce0cd885b2d6a2cd536ebb8db9",
+            "sourceSha256": "sha256:7fc7785d6c9d417bcd2f23aabf6235786fcc28c038b6b33f7758d1cd850c4be7"
+          },
+          "selector": null,
+          "type": "Vm",
+          "typeString": "contract Vm",
+          "valueRange": {
+            "byteLength": 59,
+            "byteStart": 1741,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/CharacterizationTestBase.sol#L42",
+            "lineEnd": 42,
+            "lineStart": 42,
+            "snippetSha256": "sha256:6b8a3629417ca0df6836607793799388e1cb4f591002cfaee2eb532ea74f808d",
+            "sourceSha256": "sha256:7fc7785d6c9d417bcd2f23aabf6235786fcc28c038b6b33f7758d1cd850c4be7"
+          },
+          "valueSource": "Vm(address(uint160(uint256(keccak256(\"hevm cheat code\")))))",
+          "visibility": "internal"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL0NoYXJhY3Rlcml6YXRpb25UZXN0QmFzZS5zb2w6Q2hhcmFjdGVyaXphdGlvblRlc3RCYXNl",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "CharacterizationTestBase",
+    "natspec": "",
+    "range": {
+      "byteLength": 137,
+      "byteStart": 1666,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/CharacterizationTestBase.sol#L41-L43",
+      "lineEnd": 43,
+      "lineStart": 41,
+      "snippetSha256": "sha256:1d0b7b302c9af87305d56fbca36d0008259b07427c0f0fbd5a35989d5e554d01",
+      "sourceSha256": "sha256:7fc7785d6c9d417bcd2f23aabf6235786fcc28c038b6b33f7758d1cd850c4be7"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/CharacterizationTestBase.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+      "severity": "advisory"
+    }
+  ]
+}

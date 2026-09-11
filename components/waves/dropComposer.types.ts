@@ -6,3 +6,4 @@ export enum DropMode {
 
 export type CurationComposerVariant = "default" | "leaderboard";
 export type IdentityPickerPlacement = "modal" | "inline";
+export type DropComposerDensity = "default" | "compact";

@@ -153,7 +153,7 @@ function artifactPointer(overrides: Record<string, unknown> = {}) {
 describe("testing strategy risk floor", () => {
   it("keeps docs and tests in the fast lane", () => {
     const result = classifyChangedFiles([
-      "ops/workstreams/frontend-a11y-i18n/testing-improvement-plan.md",
+      "ops/workstreams/README.md",
       "__tests__/components/example.test.tsx",
     ]);
 
@@ -292,20 +292,19 @@ describe("testing strategy risk floor", () => {
 
 describe("testing strategy CI plan", () => {
   it("keeps docs-only PRs in the no-install fast lane", () => {
-    const plan = createCiPlan([
-      "ops/workstreams/frontend-a11y-i18n/testing-improvement-plan.md",
-    ]);
+    const plan = createCiPlan(["ops/workstreams/README.md"]);
 
     expect(plan.schema_version).toBe(CI_PLAN_SCHEMA_VERSION);
     expect(plan.risk.computed_floor).toBe(0);
     expect(plan.checks.risk_floor.required).toBe(true);
     expect(plan.checks.secret_scan.required).toBe(true);
     expect(plan.checks.install.required).toBe(false);
-    expect(plan.checks.playwright_smoke.required).toBe(false);
-    expect(plan.checks.playwright_critical_shell.required).toBe(false);
+    expect(plan.checks["playwright_smoke"]!.required).toBe(false);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(false);
     expect(plan.security).toMatchObject({
       secrets_allowed: false,
-      token_permissions: "contents:read",
+      token_permissions:
+        "contents:read; packages:read only in same-repository frozen-install jobs",
     });
   });
 
@@ -315,14 +314,20 @@ describe("testing strategy CI plan", () => {
     });
 
     expect(plan.untrusted_pr).toBe(true);
+    expect(plan.security.fork_pr_policy).toContain(
+      "do not execute for fork PRs"
+    );
     expect(plan.risk.computed_floor).toBe(2);
     expect(plan.checks.install.required).toBe(true);
     expect(plan.checks.lint_changed.required).toBe(true);
     expect(plan.checks.typecheck_changed.required).toBe(true);
-    expect(plan.checks.test_typecheck.required).toBe(true);
+    expect(plan.checks["test_typecheck"]!.required).toBe(true);
+    expect(plan.checks["test_typecheck"]?.reason).toContain(
+      "Jest diagnostic ratchet"
+    );
     expect(plan.checks.jest_changed.required).toBe(true);
-    expect(plan.checks.playwright_smoke.required).toBe(true);
-    expect(plan.checks.playwright_critical_shell.required).toBe(false);
+    expect(plan.checks["playwright_smoke"]!.required).toBe(true);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(false);
     expect(plan.checks.build.required).toBe(false);
   });
 
@@ -336,7 +341,42 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.workflow_security_review.required).toBe(true);
     expect(plan.checks.dependency_governance.required).toBe(true);
     expect(plan.checks.build.required).toBe(true);
-    expect(plan.checks.playwright_critical_shell.required).toBe(true);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(true);
+  });
+
+  it("filters non-file related Jest discovery output before resolving paths", () => {
+    const workflow = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+
+    const guardIndex = workflow.indexOf('if [ -z "$related_test" ]; then');
+    const fileGuardIndex = workflow.indexOf(
+      'if [ ! -f "$related_test" ]; then'
+    );
+    const resolveIndex = workflow.indexOf(
+      'related_path="$(realpath "$related_test")"'
+    );
+
+    expect(guardIndex).toBeGreaterThanOrEqual(0);
+    expect(fileGuardIndex).toBeGreaterThan(guardIndex);
+    expect(resolveIndex).toBeGreaterThan(guardIndex);
+    expect(resolveIndex).toBeGreaterThan(fileGuardIndex);
+    const fileGuardBlock = workflow.slice(fileGuardIndex, resolveIndex);
+    expect(fileGuardBlock).toContain("Skipping non-file Jest discovery output");
+    expect(fileGuardBlock).toContain("continue");
+  });
+
+  it.each([
+    "config/public-reviews/6529-stream.reference.json",
+    "public/review-data/6529-stream/index.json",
+    "scripts/public-reviews/solidity-reference.cjs",
+  ])("treats public review reference input %s as build-sensitive", (file) => {
+    const plan = createCiPlan([file]);
+
+    expect(plan.checks["build"]!.required).toBe(true);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(true);
+    expect(plan.checks["build"]!.reason).toContain("build-sensitive");
   });
 
   it("requires build coverage for deleted runtime source", () => {
@@ -344,7 +384,7 @@ describe("testing strategy CI plan", () => {
 
     expect(plan.risk.computed_floor).toBe(2);
     expect(plan.checks.build.required).toBe(true);
-    expect(plan.checks.playwright_critical_shell.required).toBe(true);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(true);
     expect(plan.checks.build.reason).toContain("deleted runtime source");
   });
 
@@ -375,6 +415,447 @@ describe("testing strategy CI plan", () => {
     const plan = createCiPlan([".github/6529bot.yml"]);
 
     expect(plan.checks.reviewbot_contract.required).toBe(true);
+  });
+
+  it("verifies agent files sync when the help corpus changes", () => {
+    const plan = createCiPlan(["ops/help/help-index.json"]);
+
+    expect(plan.checks.agent_files_sync.required).toBe(true);
+    expect(plan.checks.install.required).toBe(true);
+  });
+
+  it("verifies agent files sync when only committed artifacts change", () => {
+    const plan = createCiPlan(["public/llms.txt"]);
+
+    expect(plan.risk.computed_floor).toBe(1);
+    expect(plan.checks.agent_files_sync.required).toBe(true);
+    expect(plan.checks.install.required).toBe(true);
+  });
+
+  it.each([
+    "ops/help/llms.txt.template",
+    "public/glossary.json",
+    "public/help-index.json",
+    "public/robots.txt",
+    "scripts/sync-agent-files.cjs",
+    "scripts/sync-help-index.cjs",
+    "next-sitemap.config.ts",
+    "__tests__/scripts/sync-agent-files.test.ts",
+  ])("verifies agent files sync when %s changes", (file) => {
+    const plan = createCiPlan([file]);
+
+    expect(plan.checks.agent_files_sync.required).toBe(true);
+    expect(plan.checks.install.required).toBe(true);
+  });
+
+  it("keeps corpus docs in the fast lane without agent files sync", () => {
+    const plan = createCiPlan(["ops/help/README.md"]);
+
+    expect(plan.checks.agent_files_sync.required).toBe(false);
+    expect(plan.checks.install.required).toBe(false);
+  });
+
+  it("runs Museum browser coverage only for Museum-impacting PRs and deployed changes", () => {
+    const workflow = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+    const stagingWorkflow = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/staging-e2e.yml"),
+      "utf8"
+    );
+    const productionWorkflow = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/production-e2e.yml"),
+      "utf8"
+    );
+    const museumReleaseSelector = fs.readFileSync(
+      path.join(process.cwd(), "scripts/museum-release-selection.cjs"),
+      "utf8"
+    );
+    const museumSpec = fs.readFileSync(
+      path.join(
+        process.cwd(),
+        "tests/museum/institutional-practice-readonly.spec.ts"
+      ),
+      "utf8"
+    );
+    const aboutSpec = fs.readFileSync(
+      path.join(process.cwd(), "tests/museum/about-readonly.spec.ts"),
+      "utf8"
+    );
+    const networkIaSpec = fs.readFileSync(
+      path.join(process.cwd(), "tests/museum/network-ia-readonly.spec.ts"),
+      "utf8"
+    );
+
+    expect(workflow).not.toContain("playwright install --with-deps chromium");
+    expect(stagingWorkflow).not.toContain(
+      "playwright install --with-deps chromium"
+    );
+    expect(productionWorkflow).not.toContain(
+      "playwright install --with-deps chromium"
+    );
+    expect(workflow).toContain("test:e2e:smoke");
+    expect(workflow).toContain("test:e2e:critical-shell");
+    for (const museumBrowserSpec of [
+      "tests/museum/data-architecture-readonly.spec.ts",
+      "tests/museum/institutional-practice-readonly.spec.ts",
+      "tests/museum/network-ia-readonly.spec.ts",
+      "tests/museum/about-readonly.spec.ts",
+      "tests/museum/inside-system-readonly.spec.ts",
+      "tests/museum/rights-readonly.spec.ts",
+    ]) {
+      expect(workflow).toContain(museumBrowserSpec);
+    }
+    expect(workflow).toContain("PLAYWRIGHT_WEB_SERVER_COMMAND");
+    expect(stagingWorkflow).toContain("--trigger post-deploy");
+    expect(stagingWorkflow).toContain("SELECTED_PACK");
+    expect(stagingWorkflow).toContain("--exclude-pack");
+    expect(stagingWorkflow).not.toContain("const isMuseumPack = (pack) =>");
+    expect(stagingWorkflow).not.toContain("release-bus-museum-hold");
+    expect(productionWorkflow).toContain("--exclude-pack");
+    expect(productionWorkflow).not.toContain("release-bus-museum-hold");
+    expect(stagingWorkflow).not.toContain("scripts/museum-e2e-change-set.cjs");
+    expect(museumReleaseSelector).toContain("failClosedClassification");
+    expect(museumReleaseSelector).toContain("effectiveActivation");
+    expect(museumReleaseSelector).toContain("source commit must be an exact");
+    expect(workflow).toContain(
+      "playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}"
+    );
+    expect(workflow).toContain(
+      "Resolve exact Museum publication for Playwright"
+    );
+    expect(workflow).toContain("GH_TOKEN: ${{ github.token }}");
+    expect(workflow).toContain(
+      "MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.catalog_commit }}"
+    );
+    expect(workflow).toContain(
+      "MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.source_commit }}"
+    );
+    expect(workflow).toContain(
+      'MUSEUM_PUBLICATION_TEST_CATALOG_COMMIT: "858d3ebc049b59219d6fa639dbd325b6adc7345a"'
+    );
+    expect(workflow).toContain(
+      'MUSEUM_PUBLICATION_TEST_SOURCE_COMMIT: "92966f2836ebf2af06edfe0fe2cff25041307c92"'
+    );
+    expect(workflow).toContain('case "$selected_pack"');
+    expect(workflow).toContain(
+      "museum_gate_spec=tests/museum/network-ia-readonly.spec.ts"
+    );
+    expect(workflow).toContain("selected_specs=()");
+    expect(workflow).toContain('[ ! -f "$selected_spec" ]');
+    expect(workflow).toContain("./bin/6529 exec playwright test");
+    expect(workflow).not.toContain('./bin/6529 run "$selected_pack"');
+    expect(workflow).toContain("--workers=1");
+    expect(stagingWorkflow).toContain("DEPLOYMENT_E2E_SOURCE_SHA");
+    expect(stagingWorkflow).toContain("--retry-failed-packs 1");
+    expect(museumSpec).not.toContain(
+      'test.describe.configure({ mode: "serial" })'
+    );
+    expect(museumSpec).not.toContain("let sourceCommit");
+    expect(museumSpec).toContain("for (const profile of PROFILE_ROUTES)");
+    expect(aboutSpec).toContain("MUSEUM_PUBLICATION_EXPECTED_COMMIT");
+    expect(aboutSpec).toContain("museum_publication_expected_commit_not_exact");
+    expect(networkIaSpec).not.toContain("page.screenshot");
+    expect(networkIaSpec).not.toContain("fullPage:");
+    expect(networkIaSpec).toContain("newCDPSession(page)");
+    expect(networkIaSpec).toContain('cdpSession.send("Page.captureScreenshot"');
+    expect(networkIaSpec).toContain("captureBeyondViewport: false");
+    expect(networkIaSpec).toContain("fromSurface: true");
+    expect(networkIaSpec).toContain(
+      "await cdpSession.detach().catch(() => undefined)"
+    );
+    expect(networkIaSpec).toContain(
+      "const EVIDENCE_SCREENSHOT_TIMEOUT_MS = 15_000;"
+    );
+    expect(networkIaSpec).toContain(
+      "Museum viewport evidence capture timed out after"
+    );
+    expect(
+      fs.existsSync(
+        path.join(
+          process.cwd(),
+          "__tests__/lib/museum/publication/institutionalPractice.test.ts"
+        )
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(
+          process.cwd(),
+          "__tests__/lib/museum/publication/pageSources.test.ts"
+        )
+      )
+    ).toBe(true);
+
+    const parsed = YAML.parse(workflow) as {
+      jobs: Record<
+        string,
+        {
+          if?: string;
+          name?: string;
+          needs?: string | string[];
+          strategy?: { matrix?: string };
+          "runs-on"?: string;
+          "timeout-minutes"?: number;
+          container?: { image?: string; options?: string };
+          defaults?: { run?: { shell?: string } };
+          steps?: Array<{
+            name?: string;
+            if?: string;
+            id?: string;
+            run?: string;
+            "timeout-minutes"?: number;
+            "continue-on-error"?: boolean;
+          }>;
+        }
+      >;
+    };
+    expect(parsed.jobs["app-checks"]).toMatchObject({
+      if: "needs.plan.outputs.install_required == 'true' && github.event.pull_request.head.repo.full_name == github.repository",
+      "runs-on": "${{ matrix.runner }}",
+      strategy: {
+        matrix: "${{ fromJSON(needs.plan.outputs.app_check_matrix) }}",
+      },
+    });
+    expect(parsed.jobs["app-checks"]?.steps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "Build production profile",
+          if: "matrix.lane == 'build'",
+        }),
+        expect.objectContaining({
+          name: "Run Network Museum Playwright packs",
+          if: "startsWith(matrix.lane, 'playwright-museum-')",
+        }),
+      ])
+    );
+    expect(parsed.jobs["app-checks"]?.steps).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "Run small Playwright smoke pack" }),
+        expect.objectContaining({
+          name: "Run critical route-shell Playwright pack",
+        }),
+      ])
+    );
+    expect(parsed.jobs["core-playwright-checks"]).toMatchObject({
+      if: "needs.plan.outputs.core_playwright_required == 'true' && github.event.pull_request.head.repo.full_name == github.repository",
+      "runs-on": "${{ matrix.runner }}",
+      "timeout-minutes": 20,
+      container: {
+        image:
+          "mcr.microsoft.com/playwright:v1.61.1-noble@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48",
+        options: "--ipc=host",
+      },
+      defaults: { run: { shell: "bash" } },
+      strategy: {
+        matrix: "${{ fromJSON(needs.plan.outputs.core_playwright_matrix) }}",
+      },
+    });
+    expect(parsed.jobs["core-playwright-checks"]?.steps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "Run small Playwright smoke pack",
+          if: "matrix.lane == 'playwright-smoke'",
+        }),
+        expect.objectContaining({
+          name: "Run critical route-shell Playwright pack",
+          if: "matrix.lane == 'playwright-critical-shell'",
+        }),
+      ])
+    );
+    expect(parsed.jobs["core-playwright-checks"]?.steps).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "Restore Playwright browser" }),
+        expect.objectContaining({ name: "Install Playwright dependencies" }),
+        expect.objectContaining({ name: "Install Playwright browser" }),
+      ])
+    );
+    const museumBrowserStep = parsed.jobs["app-checks"]?.steps?.find(
+      (step) => step.name === "Run Network Museum Playwright packs"
+    );
+    const museumBrowserRun = museumBrowserStep?.run ?? "";
+    expect(
+      museumBrowserRun.match(/tests\/museum\/[a-z-]+\.spec\.ts/gu) ?? []
+    ).toEqual([
+      "tests/museum/network-ia-readonly.spec.ts",
+      "tests/museum/data-architecture-readonly.spec.ts",
+      "tests/museum/institutional-practice-readonly.spec.ts",
+      "tests/museum/about-readonly.spec.ts",
+      "tests/museum/inside-system-readonly.spec.ts",
+      "tests/museum/rights-readonly.spec.ts",
+    ]);
+    expect(workflow).toContain('lane: "playwright-museum-desktop"');
+    expect(workflow).toContain('label: "Network Museum desktop"');
+    expect(workflow).toContain('museum_project: "web-desktop-chromium"');
+    expect(workflow).toContain('lane: "playwright-museum-mobile"');
+    expect(workflow).toContain('label: "Network Museum mobile"');
+    expect(workflow).toContain('museum_project: "web-mobile-chromium"');
+    expect(museumBrowserRun).toContain('--project="$MUSEUM_PROJECT"');
+    expect(museumBrowserRun).not.toContain("--project=web-desktop-chromium");
+    expect(museumBrowserRun).not.toContain("--project=web-mobile-chromium");
+    expect(museumBrowserRun).not.toContain("--project=web-desktop-firefox");
+    expect(museumBrowserRun).not.toContain("--project=web-desktop-webkit");
+    expect(museumBrowserRun).toContain(
+      'contract: "museum-playwright-isolated-project-v3"'
+    );
+    expect(museumBrowserRun).toContain(
+      "Museum execution overlap or unexpected test"
+    );
+    expect(museumBrowserRun).toContain(
+      "Museum execution coverage is incomplete"
+    );
+    expect(museumBrowserRun).toContain(
+      "Museum execution spec coverage is incomplete"
+    );
+    expect(museumBrowserRun).toContain(
+      "Museum execution inventory must cover only ${project}"
+    );
+    expect(museumBrowserRun).toContain(
+      "Museum fail-fast gate must cover Network IA on ${project}"
+    );
+    expect(museumBrowserRun).toContain(
+      'PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-gate"'
+    );
+    expect(museumBrowserRun).toContain(
+      "timeout --signal=TERM --kill-after=30s 10m"
+    );
+    expect(museumBrowserRun).toContain("--retries=0");
+    expect(museumBrowserRun).toContain("--max-failures=1");
+    expect(museumBrowserRun).toContain(
+      "Museum $MUSEUM_PROJECT Network IA gate exceeded its 10-minute timeout."
+    );
+    expect(museumBrowserRun).toContain(
+      'PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-remaining"'
+    );
+    expect(museumBrowserRun).toContain(
+      'PLAYWRIGHT_HTML_REPORT_DIR="playwright-report/museum-remaining"'
+    );
+    expect(museumBrowserRun).toContain(
+      'NEXT_DEV_DIST_DIR=".next-playwright-${MUSEUM_PROJECT}"'
+    );
+    expect(museumBrowserRun).toContain("./bin/6529 run dev");
+    expect(museumBrowserRun).not.toContain("PORT_SEARCH_LIMIT=0");
+    expect(museumBrowserRun).toContain("PLAYWRIGHT_SKIP_WEB_SERVER=1");
+    expect(museumBrowserRun).toContain("trap cleanup_museum_server EXIT");
+    expect(museumBrowserRun).toContain(
+      'echo "Museum server did not become ready for $MUSEUM_PROJECT."'
+    );
+    expect(museumBrowserRun).toContain(
+      "timeout --signal=TERM --kill-after=30s 20m"
+    );
+    expect(museumBrowserRun).toContain(
+      '| sed -u "s/^/[museum $MUSEUM_PROJECT remaining] /"'
+    );
+    expect(museumBrowserRun).toContain('| tee "$museum_remaining_log"');
+    expect(museumBrowserRun).toContain(
+      "Museum $MUSEUM_PROJECT remaining coverage exceeded its 20-minute timeout."
+    );
+    expect(museumBrowserRun).toContain(
+      "Museum $MUSEUM_PROJECT remaining coverage failed with exit ${museum_remaining_exit}."
+    );
+    expect(museumBrowserRun).toContain('tail -n 120 "$museum_remaining_log"');
+    expect(museumBrowserRun).toContain("--workers=1");
+    expect(museumBrowserRun).not.toContain("--workers=2");
+    expect(museumBrowserRun).not.toContain("wait -n");
+    expect(museumBrowserRun).not.toContain("setsid");
+    expect(museumBrowserRun).not.toContain("./bin/6529 run base-build");
+    expect(museumBrowserRun).not.toContain("start:standalone");
+    expect(parsed.jobs["installed-checks"]).toMatchObject({
+      name: "Installed app checks",
+      needs: ["plan", "app-checks", "core-playwright-checks"],
+      if: "always() && needs.plan.result == 'success' && needs.plan.outputs.install_required == 'true'",
+    });
+    expect(workflow).toContain(
+      'write("app_check_matrix", JSON.stringify({ include: appCheckLanes }))'
+    );
+    expect(workflow).toContain(
+      'write("core_playwright_matrix", JSON.stringify({ include: corePlaywrightLanes }))'
+    );
+    expect(workflow).toContain(
+      'write("core_playwright_required", String(corePlaywrightLanes.length > 0))'
+    );
+    expect(workflow).toContain("BUILD_CI_RUNNER");
+    expect(workflow).toContain("Restore Playwright browser");
+    expect(workflow).toContain("node22-pr-production-nextjs");
+
+    for (const source of [workflow, stagingWorkflow, productionWorkflow]) {
+      const workflowJobs = YAML.parse(source) as {
+        jobs: Record<
+          string,
+          {
+            steps?: Array<{
+              name?: string;
+              run?: string;
+              "timeout-minutes"?: number;
+              "continue-on-error"?: boolean;
+            }>;
+          }
+        >;
+      };
+      const steps = Object.values(workflowJobs.jobs).flatMap(
+        (job) => job.steps ?? []
+      );
+      expect(steps).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: "Install Playwright dependencies",
+            run: "./bin/6529 exec playwright install-deps chromium",
+            "timeout-minutes": 3,
+            "continue-on-error": true,
+          }),
+          expect.objectContaining({
+            name: "Retry Playwright dependencies",
+            run: "./bin/6529 exec playwright install-deps chromium",
+            "timeout-minutes": 3,
+            "continue-on-error": true,
+          }),
+          expect.objectContaining({
+            name: "Install Playwright browser",
+            run: "./bin/6529 exec playwright install chromium",
+            "timeout-minutes": 10,
+          }),
+        ])
+      );
+    }
+  });
+
+  it("keeps full-history CI checkouts blobless", () => {
+    const appPrCi = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+    const coverageFloor = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/coverage-floor.yml"),
+      "utf8"
+    );
+    const parsedCoverageFloor = YAML.parse(coverageFloor) as {
+      jobs: {
+        "coverage-floor": {
+          steps: Array<{
+            uses?: string;
+            with?: Record<string, unknown>;
+          }>;
+        };
+      };
+    };
+    const coverageCheckoutSteps = parsedCoverageFloor.jobs[
+      "coverage-floor"
+    ].steps.filter((step) => step.uses?.startsWith("actions/checkout@"));
+    const pushSecretScan = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/push-secret-scan.yml"),
+      "utf8"
+    );
+
+    expect(appPrCi.match(/filter: blob:none/gu)).toHaveLength(2);
+    expect(appPrCi.match(/fetch-depth: 0/gu)).toHaveLength(2);
+    expect(coverageCheckoutSteps).toHaveLength(1);
+    expect(coverageCheckoutSteps[0]?.with).toMatchObject({
+      "fetch-depth": 0,
+      filter: "blob:none",
+    });
+    expect(pushSecretScan).toContain("filter: blob:none");
+    expect(pushSecretScan).toContain("fetch-depth: 0");
   });
 });
 
@@ -436,6 +917,31 @@ describe("testing strategy CI security checks", () => {
     ]);
   });
 
+  it("does not treat YAML secret declarations as assigned values", () => {
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(tempDir, ".github", "workflows", "reusable.yml"),
+      [
+        "on:",
+        "  workflow_call:",
+        "    secrets:",
+        "      ALCHEMY_API_KEY:",
+        "        required: false",
+        "      SENTRY_AUTH_TOKEN:",
+        "        required: true",
+      ].join("\n")
+    );
+
+    const result = scanFilesForSecrets(
+      [".github/workflows/reusable.yml"],
+      tempDir
+    );
+
+    expect(result).toMatchObject({ ok: true, findings: [] });
+  });
+
   it("scans common credential files that do not look like source", () => {
     fs.writeFileSync(
       path.join(tempDir, ".npmrc"),
@@ -453,6 +959,36 @@ describe("testing strategy CI security checks", () => {
       expect.arrayContaining(["npm-auth-token", "private-key-block"])
     );
   });
+
+  it("allows the runtime NODE_AUTH_TOKEN npm placeholder", () => {
+    fs.writeFileSync(
+      path.join(tempDir, ".npmrc"),
+      "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}\n"
+    );
+
+    const result = scanFilesForSecrets([".npmrc"], tempDir);
+
+    expect(result).toMatchObject({ ok: true, findings: [] });
+  });
+
+  it.each(["${NODE_AUTH_TOKEN}extra", '"${NODE_AUTH_TOKEN}"'])(
+    "rejects the near-miss npm auth placeholder %s",
+    (tokenValue) => {
+      fs.writeFileSync(
+        path.join(tempDir, ".npmrc"),
+        `//npm.pkg.github.com/:_authToken=${tokenValue}\n`
+      );
+
+      const result = scanFilesForSecrets([".npmrc"], tempDir);
+
+      expect(result.ok).toBe(false);
+      expect(result.findings).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ pattern: "npm-auth-token" }),
+        ])
+      );
+    }
+  );
 
   it("reports raw JWT-shaped tokens in JSON payload files", () => {
     const fakeJwt = [
@@ -506,6 +1042,145 @@ describe("testing strategy CI security checks", () => {
       checked_files: [".github/workflows/safe.yml"],
       findings: [],
     });
+  });
+
+  it("flags ordinary pull_request_target workflows", () => {
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(tempDir, ".github", "workflows", "target.yml"),
+      [
+        "name: Unsafe target",
+        "on:",
+        "  pull_request_target:",
+        "permissions:",
+        "  contents: read",
+        "jobs:",
+        "  inspect:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        "      - run: echo ok",
+      ].join("\n")
+    );
+
+    const result = validateWorkflowSecurityFiles(
+      [".github/workflows/target.yml"],
+      tempDir
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.findings.map((finding) => finding.pattern)).toContain(
+      "pull_request_target"
+    );
+  });
+
+  it.each([
+    "on: { pull_request_target: {} }",
+    "on:\n  'pull_request_target':",
+    'on: "pull_request_target"',
+  ])("flags alternate pull_request_target syntax: %s", (trigger) => {
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(tempDir, ".github", "workflows", "alternate-target.yml"),
+      [
+        "name: Alternate target",
+        trigger,
+        "permissions:",
+        "  contents: write",
+        "jobs:",
+        "  inspect:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        '      - run: echo "${{ secrets.STAGING_AUTH }}"',
+      ].join("\n")
+    );
+
+    const result = validateWorkflowSecurityFiles(
+      [".github/workflows/alternate-target.yml"],
+      tempDir
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.findings.map((finding) => finding.pattern)).toEqual(
+      expect.arrayContaining([
+        "pull_request_target",
+        "pull_request-secrets",
+        "pull_request-write-permission",
+      ])
+    );
+  });
+
+  it("accepts only the exact base-owned public-review trust workflow", () => {
+    const workflowPath = path.join(
+      ".github",
+      "workflows",
+      "public-review-snapshot-trust.yml"
+    );
+    const source = fs
+      .readFileSync(path.join(process.cwd(), workflowPath), "utf8")
+      .replaceAll("\r\n", "\n");
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(path.join(tempDir, workflowPath), source);
+
+    const result = validateWorkflowSecurityFiles(
+      [workflowPath.replaceAll("\\", "/")],
+      tempDir
+    );
+
+    expect(result.ok).toBe(true);
+    expect(result.findings).toEqual([]);
+  });
+
+  it("rejects any privilege or candidate-execution drift in the trusted workflow", () => {
+    const workflowPath = path.join(
+      ".github",
+      "workflows",
+      "public-review-snapshot-trust.yml"
+    );
+    const source = fs
+      .readFileSync(path.join(process.cwd(), workflowPath), "utf8")
+      .replaceAll("\r\n", "\n");
+    const mutations = [
+      source.replace(
+        "permissions:\n  contents: read",
+        "permissions:\n  contents: write"
+      ),
+      source.replace(
+        '          git checkout --detach "$SNAPSHOT_BASE_SHA"',
+        '          git checkout --detach "$SNAPSHOT_HEAD_SHA"'
+      ),
+      source.replace(
+        "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+        "actions/setup-node@v4"
+      ),
+      source.replace(
+        "      - name: Verify candidate snapshot from Git objects",
+        [
+          '      - run: echo "${{ secrets.STAGING_AUTH }}"',
+          "      - name: Verify candidate snapshot from Git objects",
+        ].join("\n")
+      ),
+    ];
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+
+    for (const mutation of mutations) {
+      fs.writeFileSync(path.join(tempDir, workflowPath), mutation);
+      const result = validateWorkflowSecurityFiles(
+        [workflowPath.replaceAll("\\", "/")],
+        tempDir
+      );
+      expect(result.ok).toBe(false);
+      expect(result.findings.map((finding) => finding.pattern)).toContain(
+        "pull_request_target"
+      );
+    }
   });
 
   it("flags pull_request workflows that expose secrets or write permissions", () => {

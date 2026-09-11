@@ -69,7 +69,7 @@ describe("buildDropImageGalleryItems", () => {
     expect(items).toEqual([]);
   });
 
-  it("includes bare direct image markdown links", () => {
+  it("excludes direct image markdown links", () => {
     const imageSrc = "https://cdn.example.com/image.jpg";
     const partContent = `prefix [${imageSrc}](${imageSrc})`;
     const items = buildDropImageGalleryItems({
@@ -77,17 +77,7 @@ describe("buildDropImageGalleryItems", () => {
       partMedias: [],
     });
 
-    expect(items).toEqual([
-      expect.objectContaining({
-        id: getDropImageGalleryItemId(
-          "body",
-          partContent.indexOf(`[${imageSrc}]`),
-          imageSrc
-        ),
-        src: imageSrc,
-        source: "body",
-      }),
-    ]);
+    expect(items).toEqual([]);
   });
 
   it("excludes image URLs used as markdown link labels", () => {
@@ -206,7 +196,7 @@ describe("buildDropImageGalleryItems", () => {
     ]);
   });
 
-  it("includes bare direct image reference links", () => {
+  it("excludes direct image reference links", () => {
     const imageSrc = "https://cdn.example.com/reference-link.jpg";
     const partContent = [`[${imageSrc}][img]`, "", `[img]: ${imageSrc}`].join(
       "\n"
@@ -216,9 +206,7 @@ describe("buildDropImageGalleryItems", () => {
       partMedias: [],
     });
 
-    expect(items.map((item) => item.id)).toEqual([
-      getDropImageGalleryItemId("body", 0, imageSrc),
-    ]);
+    expect(items).toEqual([]);
   });
 
   it("excludes named reference links to direct images", () => {
@@ -296,10 +284,7 @@ describe("buildDropImageGalleryItems", () => {
       partMedias: [{ mimeType: "image/png", mediaSrc: "upload.png" }],
     });
 
-    expect(items.map((item) => item.src)).toEqual([
-      "/body.png",
-      "upload.png",
-    ]);
+    expect(items.map((item) => item.src)).toEqual(["/body.png", "upload.png"]);
   });
 
   it("uses unique body image ids for duplicate URLs", () => {

@@ -47,6 +47,7 @@ const NEXTGEN_COLLECTION_SUBPAGES = [
 const EXACT_EXCLUDED_PATHS = new Set([
   "/accept-connection-sharing",
   "/access",
+  "/artwork-documentation",
   "/cdn-cgi/l/email-protection",
   "/error",
   "/messages",
@@ -55,11 +56,67 @@ const EXACT_EXCLUDED_PATHS = new Set([
   "/notifications",
   "/open-mobile",
   "/restricted",
+  "/stream",
   "/sentry-example-page",
   "/tools/app-wallets",
   "/tools/app-wallets/import-wallet",
   "/waves/create",
 ]);
+
+const PREFIX_EXCLUDED_PATHS = ["/reviews/", "/artwork-documentation/"] as const;
+const LEGACY_MUSEUM_PREFIXES = [
+  "/museum/network/accessions",
+  "/museum/network/collection/",
+  "/museum/network/collections",
+  "/museum/network/gifts",
+  "/museum/network/methodology",
+  "/museum/network/objects",
+  "/museum/network/programs",
+  "/museum/network/stories",
+  "/museum/network/governance",
+  "/museum/network/rights",
+] as const;
+
+const MUSEUM_FIXED_DATA_ARCHITECTURE_PATHS = [
+  "spectrum",
+  "cidoc-crm",
+  "lido",
+  "premis",
+  "prov-o",
+  "getty-aat-ulan",
+  "iiif",
+  "c2pa",
+  "bagit",
+  "ocfl",
+  "caip-19",
+] as const;
+
+export const MUSEUM_STATIC_CANONICAL_PATHS = [
+  "/museum/network",
+  "/museum/network/collection",
+  "/museum/network/artists",
+  "/museum/network/acquisitions",
+  "/museum/network/research",
+  "/museum/network/about",
+  "/museum/network/works",
+  "/museum/network/projects",
+  "/museum/network/organizations",
+  "/museum/network/acquisition-programs",
+  "/museum/network/research/institutional-practice",
+  "/museum/network/research/institutional-practice/adjacent-practice",
+  "/museum/network/research/institutional-practice/sources",
+  "/museum/network/research/scholarship-and-writing",
+  "/museum/network/research/sources-and-chronology",
+  "/museum/network/research/data-architecture",
+  ...MUSEUM_FIXED_DATA_ARCHITECTURE_PATHS.map(
+    (slug) => `/museum/network/research/data-architecture/${slug}`
+  ),
+  "/museum/network/research/data-architecture/casey-reas-implementation",
+  "/museum/network/research/rights",
+  "/museum/network/research/rights/artists",
+  "/museum/network/research/rights/collectors",
+  "/museum/network/about/governance",
+] as const;
 
 type SitemapPathOptions = {
   readonly changefreq: NonNullable<ISitemapField["changefreq"]>;
@@ -316,6 +373,12 @@ function getAboutPaths(): ISitemapField[] {
   );
 }
 
+function getMuseumCanonicalPaths(): ISitemapField[] {
+  return MUSEUM_STATIC_CANONICAL_PATHS.map((path) =>
+    createSitemapPath(path, { changefreq: "monthly", priority: 0.6 })
+  );
+}
+
 function dedupeSitemapFields(paths: readonly ISitemapField[]): ISitemapField[] {
   const pathsByLocation = new Map<string, ISitemapField>();
   for (const path of paths) {
@@ -412,6 +475,7 @@ export async function buildAdditionalSitemapPaths(
 
   return dedupeSitemapFields([
     ...getAboutPaths(),
+    ...getMuseumCanonicalPaths(),
     ...(memesPaths ?? []),
     ...(gradientPaths ?? []),
     ...(memeLabPaths ?? []),
@@ -423,7 +487,11 @@ export async function buildAdditionalSitemapPaths(
 
 export function shouldExcludeSitemapPath(path: string): boolean {
   const [pathname = path] = path.split(/[?#]/);
-  return EXACT_EXCLUDED_PATHS.has(pathname);
+  return (
+    EXACT_EXCLUDED_PATHS.has(pathname) ||
+    PREFIX_EXCLUDED_PATHS.some((prefix) => pathname.startsWith(prefix)) ||
+    LEGACY_MUSEUM_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+  );
 }
 
 function getRouteOverride(path: string): RouteOverride {
@@ -476,7 +544,11 @@ const config: IConfig = {
   sitemapSize: 50_000,
   changefreq: "weekly",
   priority: 0.65,
-  exclude: Array.from(EXACT_EXCLUDED_PATHS),
+  exclude: [
+    ...EXACT_EXCLUDED_PATHS,
+    "/reviews/*",
+    ...LEGACY_MUSEUM_PREFIXES.map((prefix) => `${prefix}*`),
+  ],
   additionalPaths: async () => buildAdditionalSitemapPaths(),
   transform: async (_config, path): Promise<ISitemapField | undefined> => {
     if (shouldExcludeSitemapPath(path)) {

@@ -29,10 +29,11 @@ export default function TheMemesMint({
   const { setTitle } = useTitle();
 
   useEffect(() => {
+    const nftName = nft.name.trim();
     setTitle(
       standalone
-        ? `Mint #${nft.id} | ${nft.name} | The Memes by 6529`
-        : `Mint #${nft.id} | ${nft.name} | The Memes`
+        ? `Mint #${nft.id} | ${nftName} | The Memes by 6529`
+        : `Mint #${nft.id} | ${nftName} | The Memes`
     );
   }, [nft.id, nft.name, setTitle, standalone]);
 
@@ -41,7 +42,7 @@ export default function TheMemesMint({
     () => ({
       tokenId: nft.id,
       metadata:
-        nft.metadata && typeof nft.metadata === "object"
+        typeof nft.metadata === "object" && nft.metadata !== null
           ? (nft.metadata as ArweaveMetadata)
           : {},
     }),

@@ -3,23 +3,79 @@
 import { useTitle } from "@/contexts/TitleContext";
 import type { Royalty } from "@/entities/IRoyalty";
 import { capitalizeEveryWord, displayDecimal } from "@/helpers/Helpers";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import { GasRoyaltiesCollectionFocus } from "@/types/enums";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { InformationCircleIcon as InformationCircleSolidIcon } from "@heroicons/react/24/solid";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import {
+  GAS_ROYALTIES_PAGE_CONTAINER_CLASS_NAME,
+  GAS_ROYALTIES_TABLE_CELL_CLASS_NAME,
+  GAS_ROYALTIES_TABLE_CLASS_NAME,
+  GAS_ROYALTIES_TABLE_HEADER_CELL_CLASS_NAME,
+  GAS_ROYALTIES_TABLE_ROW_CLASS_NAME,
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,
   useSharedState,
 } from "./GasRoyalties";
-import styles from "./GasRoyalties.module.css";
 
 const MEMES_SOLD_MANUALLY = [1, 2, 3, 4];
 
+const HEADER_TOOLTIP_STYLES = {
+  ...TOOLTIP_STYLES,
+  lineHeight: 1.5,
+  maxWidth: "min(24rem, calc(100vw - 2rem))",
+  textAlign: "left" as const,
+  whiteSpace: "normal" as const,
+};
+
+function TableHeaderInfoTooltip({
+  children,
+  description,
+  label,
+  tooltipId,
+}: Readonly<{
+  children: ReactNode;
+  description: string;
+  label: string;
+  tooltipId: string;
+}>) {
+  const descriptionId = `${tooltipId}-description`;
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-label={label}
+        aria-describedby={descriptionId}
+        data-tooltip-id={tooltipId}
+        className="tw-inline-flex tw-size-6 tw-shrink-0 tw-cursor-help tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-1 tw-text-iron-400 tw-transition-colors hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-1 focus-visible:tw-ring-offset-[#0D0D0F]"
+      >
+        <InformationCircleSolidIcon aria-hidden="true" className="tw-size-4" />
+      </button>
+      <span className="tw-sr-only" id={descriptionId}>
+        {description}
+      </span>
+      <Tooltip
+        id={tooltipId}
+        place="top"
+        offset={8}
+        opacity={1}
+        style={HEADER_TOOLTIP_STYLES}
+      >
+        <span aria-hidden="true">{children}</span>
+      </Tooltip>
+    </>
+  );
+}
+
 export default function RoyaltiesComponent() {
+  const locale = useBrowserLocale();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -45,6 +101,7 @@ export default function RoyaltiesComponent() {
   const [sumVolume, setSumVolume] = useState(0);
   const [sumProceeds, setSumProceeds] = useState(0);
   const [sumArtistTake, setSumArtistTake] = useState(0);
+  const [fetchError, setFetchError] = useState(false);
 
   const {
     dateSelection,
@@ -70,9 +127,11 @@ export default function RoyaltiesComponent() {
     return getUrl("royalties");
   }
 
-  function fetchRoyalties() {
+  async function fetchRoyalties() {
     setFetching(true);
-    fetchUrl<Royalty[]>(getUrlWithParams()).then((res: Royalty[]) => {
+    setFetchError(false);
+    try {
+      const res = await fetchUrl<Royalty[]>(getUrlWithParams());
       res.forEach((r) => {
         r.volume = Math.round(r.volume * 100000) / 100000;
         r.proceeds = Math.round(r.proceeds * 100000) / 100000;
@@ -85,8 +144,16 @@ export default function RoyaltiesComponent() {
       setSumArtistTake(
         res.reduce((prev, current) => prev + current.artist_take, 0)
       );
+    } catch (error) {
+      console.error("Failed to fetch royalties data", error);
+      setRoyalties([]);
+      setSumVolume(0);
+      setSumProceeds(0);
+      setSumArtistTake(0);
+      setFetchError(true);
+    } finally {
       setFetching(false);
-    });
+    }
   }
 
   useEffect(() => {
@@ -115,28 +182,43 @@ export default function RoyaltiesComponent() {
     return <></>;
   }
 
-  function getTippyArtistsContent() {
-    let content;
+  function getArtistSplitSummary() {
     if (isPrimary) {
-      content = `Primary mint revenues`;
-    } else {
-      content = `Secondary royalties`;
+      return t(
+        locale,
+        collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
+          ? "memeData.tooltip.artistSplit.primaryMemeLab"
+          : "memeData.tooltip.artistSplit.primaryMemes"
+      );
     }
-    if (collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB) {
-      content += ` in Meme Lab are split between the artist and the collection solely at the artist's discretion.`;
-    } else {
-      content += ` in The Memes are split 50:50 between the artist and the collection.`;
-    }
+
+    return t(
+      locale,
+      collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
+        ? "memeData.tooltip.artistSplit.secondaryMemeLab"
+        : "memeData.tooltip.artistSplit.secondaryMemes"
+    );
+  }
+
+  function getArtistSplitTooltipContent() {
+    const summary = getArtistSplitSummary();
+    const customArrangements = t(
+      locale,
+      "memeData.tooltip.artistSplit.customArrangements"
+    );
+
     return (
       <span className="tw-flex tw-flex-col tw-gap-1">
-        <span>{content}</span>
-        <span>
-          6529 and 6529er have custom arrangements not reflected here for
-          simplicity.
-        </span>
+        <span>{summary}</span>
+        <span>{customArrangements}</span>
       </span>
     );
   }
+
+  const artistSplitDescription = `${getArtistSplitSummary()} ${t(
+    locale,
+    "memeData.tooltip.artistSplit.customArrangements"
+  )}`;
 
   return (
     <>
@@ -152,79 +234,103 @@ export default function RoyaltiesComponent() {
         getUrl={getUrlWithParams}
         {...getSharedProps()}
       />
-      <section className="tailwind-scope tw-container tw-mx-auto tw-px-0 tw-pt-4">
-        <div className={`tw-pt-4 ${styles["scrollContainer"]}`}>
+      <section
+        className={`${GAS_ROYALTIES_PAGE_CONTAINER_CLASS_NAME} tw-mt-2 tw-flow-root lg:tw-mt-3`}
+      >
+        <div className="tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-600">
           {royalties.length > 0 && (
-            <table
-              className={`${styles["royaltiesTable"]} tw-mb-4 tw-w-full tw-border-collapse tw-text-inherit`}
-            >
+            <table className={GAS_ROYALTIES_TABLE_CLASS_NAME}>
               <thead>
                 <tr>
-                  <th className="tw-p-2 tw-text-left">
-                    {collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
-                      ? "Meme Lab Card"
-                      : "Meme Card"}{" "}
-                    (x{royalties.length})
+                  <th
+                    className={`${GAS_ROYALTIES_TABLE_HEADER_CELL_CLASS_NAME} tw-text-left`}
+                    scope="col"
+                  >
+                    {t(
+                      locale,
+                      collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
+                        ? "memeData.columns.memeLabCardCount"
+                        : "memeData.columns.memeCardCount",
+                      { count: royalties.length }
+                    )}
                   </th>
-                  <th className="tw-p-2 tw-text-left">Artist</th>
-                  <th className="tw-p-2 tw-text-center">Volume</th>
-                  <th className="tw-p-2 tw-text-center">
-                    <div className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-                      {isPrimary ? "Primary Proceeds" : "Royalties"}
+                  <th
+                    className={`${GAS_ROYALTIES_TABLE_HEADER_CELL_CLASS_NAME} tw-text-left`}
+                    scope="col"
+                  >
+                    {t(locale, "memeData.columns.artist")}
+                  </th>
+                  <th
+                    className={`${GAS_ROYALTIES_TABLE_HEADER_CELL_CLASS_NAME} tw-text-right`}
+                    scope="col"
+                  >
+                    {t(locale, "memeData.columns.volume")}
+                  </th>
+                  <th
+                    className={`${GAS_ROYALTIES_TABLE_HEADER_CELL_CLASS_NAME} tw-text-right`}
+                    scope="col"
+                  >
+                    <div className="tw-flex tw-items-center tw-justify-end tw-gap-0">
+                      {t(
+                        locale,
+                        isPrimary
+                          ? "memeData.columns.primaryProceeds"
+                          : "memeData.columns.royalties"
+                      )}
                       {isPrimary && (
-                        <>
-                          <FontAwesomeIcon
-                            className={styles["infoIcon"]}
-                            icon={faInfoCircle}
-                            data-tooltip-id="primary-proceeds-tooltip"
-                          ></FontAwesomeIcon>
-                          <Tooltip
-                            id="primary-proceeds-tooltip"
-                            style={{
-                              backgroundColor: "#1F2937",
-                              color: "white",
-                              padding: "4px 8px",
-                            }}
-                          >
-                            Total Minter payments less the Manifold fee
-                          </Tooltip>
-                        </>
+                        <TableHeaderInfoTooltip
+                          tooltipId="primary-proceeds-tooltip"
+                          label={t(
+                            locale,
+                            "memeData.tooltip.primaryProceeds.label"
+                          )}
+                          description={t(
+                            locale,
+                            "memeData.tooltip.primaryProceeds.description"
+                          )}
+                        >
+                          {t(
+                            locale,
+                            "memeData.tooltip.primaryProceeds.description"
+                          )}
+                        </TableHeaderInfoTooltip>
                       )}
                     </div>
                   </th>
                   {!isPrimary && (
-                    <th className="tw-p-2 tw-text-center">
-                      Effective Royalty %
+                    <th
+                      className={`${GAS_ROYALTIES_TABLE_HEADER_CELL_CLASS_NAME} tw-text-right`}
+                      scope="col"
+                    >
+                      {t(locale, "memeData.columns.effectiveRoyalty")}
                     </th>
                   )}
-                  <th className="tw-p-2 tw-text-center">
-                    <div className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-                      Artist Split{" "}
-                      <>
-                        <FontAwesomeIcon
-                          className={styles["infoIcon"]}
-                          icon={faInfoCircle}
-                          data-tooltip-id="artist-split-tooltip"
-                        ></FontAwesomeIcon>
-                        <Tooltip
-                          id="artist-split-tooltip"
-                          style={{
-                            backgroundColor: "#1F2937",
-                            color: "white",
-                            padding: "4px 8px",
-                          }}
-                        >
-                          {getTippyArtistsContent()}
-                        </Tooltip>
-                      </>
+                  <th
+                    className={`${GAS_ROYALTIES_TABLE_HEADER_CELL_CLASS_NAME} tw-text-right`}
+                    scope="col"
+                  >
+                    <div className="tw-flex tw-items-center tw-justify-end tw-gap-0">
+                      {t(locale, "memeData.columns.artistSplit")}
+                      <TableHeaderInfoTooltip
+                        tooltipId="artist-split-tooltip"
+                        label={t(locale, "memeData.tooltip.artistSplit.label")}
+                        description={artistSplitDescription}
+                      >
+                        {getArtistSplitTooltipContent()}
+                      </TableHeaderInfoTooltip>
                     </div>
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {royalties.map((r) => (
-                  <tr key={`token-${r.token_id}`}>
-                    <td className="tw-p-2 tw-align-middle">
+                  <tr
+                    className={GAS_ROYALTIES_TABLE_ROW_CLASS_NAME}
+                    key={`token-${r.token_id}`}
+                  >
+                    <td
+                      className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-left`}
+                    >
                       <GasRoyaltiesTokenImage
                         path={
                           collectionFocus ===
@@ -240,27 +346,39 @@ export default function RoyaltiesComponent() {
                             GasRoyaltiesCollectionFocus.MEMES &&
                           isPrimary &&
                           MEMES_SOLD_MANUALLY.includes(r.token_id)
-                            ? "Figures not easily calculable as card was sold manually"
+                            ? t(locale, "memeData.token.manualSaleNote")
                             : undefined
                         }
                       />
                     </td>
-                    <td className="tw-p-2 tw-align-middle">{r.artist}</td>
-                    <td className="tw-p-2 tw-text-center tw-align-middle">
+                    <td
+                      className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-left tw-text-iron-50`}
+                    >
+                      {r.artist}
+                    </td>
+                    <td
+                      className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-tabular-nums`}
+                    >
                       {displayDecimal(r.volume)}
                     </td>
-                    <td className="tw-p-2 tw-text-center tw-align-middle">
+                    <td
+                      className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-tabular-nums`}
+                    >
                       {displayDecimal(r.proceeds)}
                     </td>
                     {!isPrimary && (
-                      <td className="tw-p-2 tw-text-center tw-align-middle">
-                        {r.proceeds > 0
+                      <td
+                        className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-tabular-nums`}
+                      >
+                        {r.volume > 0
                           ? `${((r.proceeds / r.volume) * 100).toFixed(2)}%`
                           : `-`}
                       </td>
                     )}
-                    <td className="tw-p-2 tw-align-middle">
-                      <div className="tw-flex tw-justify-center">
+                    <td
+                      className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-tabular-nums`}
+                    >
+                      <div className="tw-flex tw-justify-end">
                         <span className="tw-flex tw-items-center tw-gap-1">
                           {displayDecimal(r.artist_take)}
                           {collectionFocus ===
@@ -276,30 +394,42 @@ export default function RoyaltiesComponent() {
                     </td>
                   </tr>
                 ))}
-                <tr key={`royalties-total`}>
+                <tr
+                  className={GAS_ROYALTIES_TABLE_ROW_CLASS_NAME}
+                  key="royalties-total"
+                >
                   <td
                     colSpan={2}
-                    className="tw-p-2 tw-text-right tw-align-middle"
+                    className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-font-semibold tw-text-iron-300`}
                   >
-                    <b>TOTAL</b>
+                    <b>{t(locale, "memeData.total")}</b>
                   </td>
-                  <td className="tw-p-2 tw-text-center tw-align-middle">
+                  <td
+                    className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-font-semibold tw-tabular-nums`}
+                  >
                     {displayDecimal(sumVolume)}
                   </td>
-                  <td className="tw-p-2 tw-text-center tw-align-middle">
+                  <td
+                    className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-font-semibold tw-tabular-nums`}
+                  >
                     {displayDecimal(sumProceeds)}
                   </td>
                   {!isPrimary && (
-                    <td className="tw-p-2 tw-text-center tw-align-middle">
-                      {sumProceeds > 0
+                    <td
+                      className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-font-semibold tw-tabular-nums`}
+                    >
+                      {sumVolume > 0
                         ? `${((sumProceeds / sumVolume) * 100).toFixed(2)}%`
                         : `-`}
                     </td>
                   )}
-                  <td className="tw-p-2 tw-text-center tw-align-middle">
+                  <td
+                    className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-font-semibold tw-tabular-nums`}
+                  >
                     {displayDecimal(sumArtistTake)}
                     {collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB &&
                       sumArtistTake > 0 &&
+                      sumProceeds > 0 &&
                       ` (${displayDecimal(
                         (sumArtistTake * 100) / sumProceeds
                       )}%)`}
@@ -310,13 +440,24 @@ export default function RoyaltiesComponent() {
           )}
         </div>
         {!fetching && royalties.length === 0 && (
-          <div>
-            <h5>No royalties found for selected dates</h5>
+          <div className="tw-mt-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-px-4 tw-py-8 tw-text-center">
+            {fetchError ? (
+              <p
+                className="tw-text-red-500 tw-mb-0 tw-text-sm tw-leading-6"
+                role="alert"
+              >
+                {t(locale, "memeData.royalties.loadError")}
+              </p>
+            ) : (
+              <output className="tw-block tw-text-sm tw-leading-6 tw-text-iron-400">
+                {t(locale, "memeData.royalties.empty")}
+              </output>
+            )}
           </div>
         )}
         {!fetching && royalties.length > 0 && (
-          <div className="tw-pb-3 tw-pt-3 tw-text-iron-400">
-            All values are in ETH
+          <div className="tw-pb-3 tw-pt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
+            {t(locale, "memeData.ethFootnote")}
           </div>
         )}
       </section>

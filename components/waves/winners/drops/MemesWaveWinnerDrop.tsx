@@ -1,8 +1,15 @@
 "use client";
 
+import ClientOnly from "@/components/client-only/ClientOnly";
+import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
+import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import MainStageMemeCardLink, {
+  isValidMemeCardId,
+} from "@/components/memes/drops/MainStageMemeCardLink";
 import MemeDropTraits from "@/components/memes/drops/MemeDropTraits";
+import { getMintTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -14,9 +21,9 @@ import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileM
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
-import { getRankHoverBorderClass } from "@/components/waves/drops/dropRankStyles";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -27,7 +34,10 @@ import {
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
+import { formatDate } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -37,14 +47,12 @@ import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthor
 import { WaveWinnerIdentity } from "../identity/WaveWinnerIdentity";
 
 interface MemesWaveWinnersDropProps {
-  readonly winner: ApiWaveDecisionWinner;
+  readonly winner: Omit<ApiWaveDecisionWinner, "drop"> & {
+    readonly drop: ApiDropV2View;
+  };
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
-
-const getRankHoverClass = (place: number | null): string => {
-  return getRankHoverBorderClass(place);
-};
 
 const isClickFromCardDom = (
   event: React.MouseEvent<HTMLDivElement>
@@ -68,6 +76,39 @@ const getMetadataValue = (
       ?.data_value
   );
 
+function MemesWinnerMintDate({ memeCardId }: { readonly memeCardId: number }) {
+  const locale = useBrowserLocale();
+  const mintDate = React.useMemo(() => {
+    try {
+      const instantUtc = getMintTimelineDetails(memeCardId).instantUtc;
+      return Number.isFinite(instantUtc.getTime()) ? instantUtc : null;
+    } catch {
+      return null;
+    }
+  }, [memeCardId]);
+
+  if (!mintDate) {
+    return null;
+  }
+
+  const mintDateLabel = formatDate(locale, mintDate, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
+  return (
+    <p className="tw-mb-0 tw-mt-2 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-text-sm tw-leading-5">
+      <span className="tw-whitespace-nowrap tw-font-medium tw-text-iron-300">
+        {t(locale, "theMemes.detail.live.artwork.mintDateLabel")}
+      </span>
+      <time className="tw-text-iron-400" dateTime={mintDate.toISOString()}>
+        {mintDateLabel}
+      </time>
+    </p>
+  );
+}
+
 export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   winner,
   wave,
@@ -75,6 +116,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
 }) => {
   // Get device info from useDeviceInfo hook
   const { hasTouchScreen } = useDeviceInfo();
+  const [isReportOpen, setIsReportOpen] = React.useState(false);
   const suppressNextClickRef = React.useRef(false);
 
   const handleInteractionStart = React.useCallback(() => {
@@ -134,6 +176,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
     "This is an artwork submission for The Memes collection.";
 
   const artworkMedia = winner.drop.parts.at(0)?.media.at(0);
+  const memeCardId = winner.drop.submission_context?.meme_card_id;
 
   const rating = winner.drop.rating || 0;
   const topVoters = winner.drop.top_raters.slice(0, 3);
@@ -145,7 +188,8 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
     winner.drop.context_profile_context.rating !== 0;
   const userVote = winner.drop.context_profile_context?.rating ?? 0;
   const isUserVoteNegative = userVote < 0;
-  const totalVoteClass = rating < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
+  const totalVoteClass =
+    rating < 0 ? "tw-text-rose-400" : "tw-text-iron-100";
   const userVoteClass = isUserVoteNegative
     ? "tw-text-rose-400"
     : "tw-text-iron-50";
@@ -171,11 +215,11 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
       className="touch-select-none tw-w-full tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out"
     >
       <div
-        className={`tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-transition-all tw-duration-200 tw-ease-out ${getRankHoverClass(winner.place)}`}
+        className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-border-white/10"
       >
         <div className="tw-flex tw-flex-col" {...touchHandlers}>
-          <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4 tw-pb-3">
-            <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+          <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-[13px] tw-py-[8px]">
+            <div className="tw-flex tw-items-center tw-justify-between tw-gap-[13px]">
               <div className="tw-flex tw-gap-x-2">
                 <WaveWinnersDropHeaderAuthorPfp winner={winner} size="sm" />
                 <div className="tw-flex tw-items-center">
@@ -190,7 +234,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                           scroll={false}
                           className="tw-no-underline desktop-hover:hover:tw-underline"
                         >
-                          <span className="tw-text-sm tw-font-bold tw-text-white">
+                          <span className="tw-text-sm tw-font-semibold tw-text-white">
                             {winner.drop.author.handle}
                           </span>
                         </Link>
@@ -202,7 +246,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                         scroll={false}
                         className="tw-no-underline desktop-hover:hover:tw-underline"
                       >
-                        <span className="tw-text-sm tw-font-bold tw-text-white">
+                        <span className="tw-text-sm tw-font-semibold tw-text-white">
                           {winner.drop.author.handle ?? winner.drop.author.id}
                         </span>
                       </Link>
@@ -213,10 +257,11 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     />
                     <DropAuthorBadges
                       profile={winner.drop.author}
+                      wave={winner.drop.wave}
                       tooltipIdPrefix={`memes-winner-author-badges-${winner.drop.id}`}
                     />
 
-                    <span className="tw-text-sm tw-text-iron-500">•</span>
+                    <span className="tw-text-xs tw-text-iron-600">•</span>
 
                     <WaveDropTime timestamp={winner.drop.created_at} />
                   </div>
@@ -234,56 +279,70 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
           </div>
 
           {/* Title and Description */}
-          <div className="tw-px-4 tw-pb-4 tw-pt-4">
-            <div className="tw-space-y-1">
-              <div className="tw-flex tw-items-center tw-gap-x-2">
-                <MediaTypeBadge
-                  mimeType={artworkMedia?.mime_type}
-                  dropId={winner.drop.id}
-                  size="sm"
-                />
-                <h3 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-100">
+          <div className="tw-grid tw-grid-cols-[20px_minmax(0,1fr)] tw-gap-x-[8px] tw-gap-y-[5px] tw-px-[13px] tw-pb-[13px] tw-pt-[13px]">
+            <MediaTypeBadge
+              mimeType={artworkMedia?.mime_type}
+              dropId={winner.drop.id}
+              size="xs"
+              className="tw-self-start"
+            />
+            <div className="tw-min-w-0">
+              <div className="tw-flex tw-min-h-5 tw-flex-wrap tw-items-center tw-gap-x-[8px] tw-gap-y-[3px]">
+                <h3 className="tw-mb-0 tw-mt-0 tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-100">
                   {title}
                 </h3>
+                <MainStageMemeCardLink
+                  memeCardId={memeCardId}
+                  variant="minimal"
+                />
               </div>
-              <p className="tw-mb-0 tw-line-clamp-2 tw-text-sm tw-text-iron-400">
-                {description}
-              </p>
+              {isValidMemeCardId(memeCardId) ? (
+                <ClientOnly>
+                  <MemesWinnerMintDate memeCardId={memeCardId} />
+                </ClientOnly>
+              ) : null}
             </div>
+            <p className="tw-col-start-2 tw-mb-0 tw-line-clamp-2 tw-text-sm tw-leading-5 tw-text-iron-400">
+              {description}
+            </p>
           </div>
 
           <WaveWinnerIdentity
             drop={winner.drop}
             variant="full"
             cardVariant="chat"
-            className="tw-px-4 tw-pb-4"
+            className="tw-px-[13px] tw-pb-[13px]"
           />
 
           {artworkMedia && (
-            <div className="tw-flex tw-h-96 tw-justify-center tw-bg-iron-950">
+            <div className="tw-flex tw-h-96 tw-justify-center tw-bg-iron-900/30">
               <DropListItemContentMedia
                 media_mime_type={artworkMedia.mime_type}
                 media_url={artworkMedia.url}
                 isCompetitionDrop={true}
+                fillVideoContainer={true}
+                videoAlign="center"
               />
             </div>
           )}
 
           {/* Footer Section: Traits + Vote Summary */}
-          <div className="tw-mt-4 tw-space-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4">
+          <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-px-[13px] tw-py-3 lg:tw-space-y-[13px]">
             <MemeDropTraits drop={winner.drop} />
 
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-pt-1">
-              <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm tw-leading-5">
-                <span className={`tw-font-medium ${totalVoteClass}`}>
+            <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-[13px] tw-gap-y-[8px]">
+              <div className="tw-flex tw-items-baseline tw-gap-x-1 tw-leading-5">
+                <span
+                  className={`tw-text-body tw-font-semibold tw-tracking-identity tw-tabular-nums ${totalVoteClass}`}
+                >
                   {formatNumberWithCommas(rating)}
                 </span>
-                <span className="tw-font-normal tw-text-iron-400">
+                <span className="tw-whitespace-nowrap tw-text-label tw-font-medium tw-uppercase tw-tracking-ordinal tw-text-iron-500">
                   {creditType} {WAVE_VOTE_STATS_LABELS.TOTAL}
                 </span>
               </div>
 
-              <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-leading-5">
+              <div className="tw-order-3 tw-ml-auto tw-flex tw-items-center tw-gap-2 tw-text-sm tw-leading-5">
                 {topVoters.length > 0 && (
                   <div className="tw-flex tw-items-center -tw-space-x-2">
                     {topVoters.map((voter) => (
@@ -327,12 +386,16 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     ))}
                   </div>
                 )}
-                <ParticipationDropVoteDetailsTrigger drop={winner.drop} />
+                <ParticipationDropVoteDetailsTrigger
+                  drop={winner.drop}
+                  density="gallery"
+                  visualVariant="memes"
+                />
               </div>
 
               {/* User's vote */}
               {hasUserVoted && (
-                <div className="tw-flex tw-items-center tw-gap-1.5 tw-text-sm tw-leading-5">
+                <div className="tw-order-2 tw-flex tw-items-center tw-gap-1.5 tw-text-sm tw-leading-5">
                   <div className="tw-flex tw-items-baseline tw-gap-x-1">
                     <span className="tw-font-normal tw-text-iron-400">
                       {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:
@@ -370,10 +433,23 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     drop={extendedDrop}
                     onCopy={() => setIsActive(false)}
                   />
+                  <ContentModerationDropActions
+                    drop={extendedDrop}
+                    mobile
+                    onReport={() => {
+                      handleMobileMenuClose();
+                      setIsReportOpen(true);
+                    }}
+                  />
                 </div>
               </CommonDropdownItemsMobileWrapper>,
               document.body
             )}
+          <ReportDropModal
+            drop={extendedDrop}
+            isOpen={isReportOpen}
+            onClose={() => setIsReportOpen(false)}
+          />
         </div>
       </div>
     </div>

@@ -1,13 +1,39 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CreateWaveGroup from "@/components/waves/create-wave/groups/CreateWaveGroup";
+import type CreateWaveGroupInlinePanel from "@/components/waves/create-wave/groups/CreateWaveGroupInlinePanel";
 import type { WaveGroupsConfig } from "@/types/waves.types";
 import { CreateWaveGroupConfigType } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { commonApiFetch } from "@/services/api/common-api";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
-let inlinePanelProps: any;
+type InlinePanelProps = React.ComponentProps<typeof CreateWaveGroupInlinePanel>;
+
+let inlinePanelProps: InlinePanelProps | null;
+
+jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn(),
+}));
+
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({
+    connectedProfile: {
+      id: "creator-profile",
+      handle: "creator",
+      normalised_handle: "creator",
+      primary_wallet: "0xcreator",
+      display: "Creator",
+      tdh: 42,
+      level: 3,
+      cic: 5,
+      pfp: "creator.png",
+    },
+  }),
+}));
 
 jest.mock("@/components/waves/create-wave/utils/CreateWaveToggle", () => {
   return function CreateWaveToggle({
@@ -38,7 +64,7 @@ jest.mock("@/components/waves/create-wave/utils/CreateWaveToggle", () => {
 jest.mock(
   "@/components/waves/create-wave/groups/CreateWaveGroupInlinePanel",
   () =>
-    function MockCreateWaveGroupInlinePanel(props: any) {
+    function MockCreateWaveGroupInlinePanel(props: InlinePanelProps) {
       inlinePanelProps = props;
       return (
         <div data-testid="inline-panel">
@@ -50,20 +76,52 @@ jest.mock(
 
 describe("CreateWaveGroup", () => {
   const mockOnGroupSelect = jest.fn();
+  const mockOnCriteriaReplacementChange = jest.fn();
+  const mockOnGroupResolutionChange = jest.fn();
+  const mockOnMakeWavePublic = jest.fn();
+  const mockOnMatchWaveAccess = jest.fn();
   const mockSetChatEnabled = jest.fn();
   const mockSetDropsAdminCanDelete = jest.fn();
   const mockOnInlineGroupCreate = jest.fn();
+  const mockedCommonApiFetch = commonApiFetch as jest.MockedFunction<
+    typeof commonApiFetch
+  >;
 
   const exampleGroup: ApiGroupFull = {
     id: "group-1",
     name: "Alpha Group",
-    description: "Example",
+    group: {
+      tdh: { min: null, max: null, inclusion_strategy: "BOTH" },
+      rep: {
+        min: null,
+        max: null,
+        direction: "RECEIVED",
+        user_identity: null,
+        category: null,
+      },
+      cic: {
+        min: null,
+        max: null,
+        direction: "RECEIVED",
+        user_identity: null,
+      },
+      level: { min: null, max: null },
+      owns_nfts: [],
+      identity_group_id: null,
+      identity_group_identities_count: 0,
+      excluded_identity_group_id: null,
+      excluded_identity_group_identities_count: 0,
+      is_beneficiary_of_grant_id: null,
+      is_beneficiary_of_grant_match_mode: "ANY_TOKEN",
+      is_beneficiary_of_grant: null,
+    },
+    is_private: false,
     created_by: {
       id: "creator-1",
       handle: "alpha",
       wallet: "0xalpha",
     },
-  } as ApiGroupFull;
+  } as unknown as ApiGroupFull;
 
   const defaultGroups: WaveGroupsConfig = {
     admin: null,
@@ -81,23 +139,45 @@ describe("CreateWaveGroup", () => {
     adminCanDeleteDrops: false,
     setChatEnabled: mockSetChatEnabled,
     onGroupSelect: mockOnGroupSelect,
+    onCriteriaReplacementChange: mockOnCriteriaReplacementChange,
+    onGroupResolutionChange: mockOnGroupResolutionChange,
     onInlineGroupCreate: mockOnInlineGroupCreate,
+    onMakeWavePublic: mockOnMakeWavePublic,
+    onMatchWaveAccess: mockOnMatchWaveAccess,
     groupsCache: {},
     groups: defaultGroups,
     setDropsAdminCanDelete: mockSetDropsAdminCanDelete,
+    errorMessage: null,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedCommonApiFetch.mockReset();
     inlinePanelProps = null;
   });
 
-  const renderComponent = (props = {}) =>
-    render(<CreateWaveGroup {...defaultProps} {...props} />);
+  const renderComponent = (props = {}) => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <CreateWaveGroup {...defaultProps} {...props} />
+      </QueryClientProvider>
+    );
+  };
 
   it("shows the scope title", () => {
     renderComponent();
     expect(screen.getByText("Who can drop")).toBeInTheDocument();
+  });
+
+  it.each([
+    [CreateWaveGroupConfigType.CAN_VIEW, "Who can access this wave"],
+    [CreateWaveGroupConfigType.ADMIN, "Admins"],
+  ])("shows the updated %s scope title", (groupType, label) => {
+    renderComponent({ groupType });
+    expect(screen.getByText(label)).toBeInTheDocument();
   });
 
   it("passes the resolved selected group to the inline panel", () => {
@@ -112,16 +192,182 @@ describe("CreateWaveGroup", () => {
     });
 
     expect(screen.getByTestId("inline-panel")).toHaveTextContent("Alpha Group");
-    expect(inlinePanelProps.selectedGroup).toEqual(exampleGroup);
+    expect(inlinePanelProps?.selectedGroup).toEqual(exampleGroup);
+    expect(mockedCommonApiFetch).not.toHaveBeenCalled();
   });
+
+  it("fetches a selected group's details when a resumed draft has only its id", async () => {
+    mockedCommonApiFetch.mockResolvedValue(exampleGroup);
+
+    renderComponent({
+      groups: {
+        ...defaultGroups,
+        canDrop: exampleGroup.id,
+      },
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("inline-panel")).toHaveTextContent(
+        "Alpha Group"
+      )
+    );
+    expect(mockedCommonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "groups/group-1",
+      })
+    );
+    expect(mockOnGroupResolutionChange.mock.calls).toEqual([[true], [false]]);
+    expect(inlinePanelProps?.selectedGroup).toEqual(exampleGroup);
+  });
+
+  it("restores included and excluded identity wallets for editing", async () => {
+    const groupWithIdentityLists = {
+      ...exampleGroup,
+      group: {
+        ...exampleGroup.group,
+        identity_group_id: "included-list",
+        identity_group_identities_count: 1,
+        excluded_identity_group_id: "excluded-list",
+        excluded_identity_group_identities_count: 1,
+      },
+    };
+    mockedCommonApiFetch.mockImplementation(async ({ endpoint }) => {
+      if (endpoint.endsWith("/identity_groups/included-list")) {
+        return ["0xincluded"];
+      }
+      if (endpoint.endsWith("/identity_groups/excluded-list")) {
+        return ["0xexcluded"];
+      }
+      throw new Error(`Unexpected endpoint: ${endpoint}`);
+    });
+
+    renderComponent({
+      groups: {
+        ...defaultGroups,
+        canDrop: groupWithIdentityLists.id,
+      },
+      groupsCache: {
+        [groupWithIdentityLists.id]: groupWithIdentityLists,
+      },
+    });
+
+    await waitFor(() => {
+      expect(inlinePanelProps?.selectedGroupIncludedWallets).toEqual([
+        "0xincluded",
+      ]);
+      expect(inlinePanelProps?.selectedGroupExcludedWallets).toEqual([
+        "0xexcluded",
+      ]);
+    });
+    expect(mockedCommonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "groups/group-1/identity_groups/included-list",
+      })
+    );
+    expect(mockedCommonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "groups/group-1/identity_groups/excluded-list",
+      })
+    );
+  });
+
+  it.each(["saved group", "public"])(
+    "keeps Next enabled after switching to %s cancels the previous group's refresh",
+    async (selection) => {
+      let refreshSignal: AbortSignal | undefined;
+      mockedCommonApiFetch
+        .mockResolvedValueOnce(exampleGroup)
+        .mockImplementation(
+          ({ signal }) =>
+            new Promise((_resolve, reject) => {
+              refreshSignal = signal;
+              signal?.addEventListener("abort", () => {
+                reject(new DOMException("Request aborted", "AbortError"));
+              });
+            })
+        );
+      const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      });
+      const savedGroup = { ...exampleGroup, id: "saved-group" };
+
+      function ControlledGroup() {
+        const [selectedGroup, setSelectedGroup] =
+          React.useState<ApiGroupFull | null>(null);
+        const [groupId, setGroupId] = React.useState<string | null>(
+          exampleGroup.id
+        );
+        const [isUnresolved, setIsUnresolved] = React.useState(false);
+
+        return (
+          <>
+            <CreateWaveGroup
+              {...defaultProps}
+              groupType={CreateWaveGroupConfigType.CAN_VIEW}
+              groups={{ ...defaultGroups, canView: groupId }}
+              groupsCache={
+                selectedGroup ? { [selectedGroup.id]: selectedGroup } : {}
+              }
+              onGroupResolutionChange={setIsUnresolved}
+              onGroupSelect={(group) => {
+                setSelectedGroup(group);
+                setGroupId(group?.id ?? null);
+              }}
+            />
+            <button disabled={isUnresolved}>Next</button>
+          </>
+        );
+      }
+
+      render(
+        <QueryClientProvider client={queryClient}>
+          <ControlledGroup />
+        </QueryClientProvider>
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId("inline-panel")).toHaveTextContent(
+          exampleGroup.name
+        );
+        expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
+      });
+
+      // Publishing an edited group invalidates the inherited group's query.
+      await act(async () => {
+        void queryClient.invalidateQueries({ queryKey: [QueryKey.GROUPS] });
+      });
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "Next" })).toBeDisabled()
+      );
+      await act(async () => {
+        await inlinePanelProps?.onChange(
+          selection === "saved group" ? savedGroup : null
+        );
+      });
+
+      expect(refreshSignal?.aborted).toBe(true);
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "Next" })).toBeEnabled()
+      );
+    }
+  );
 
   it("passes the suggested group name and simplified callbacks to the inline panel", () => {
     renderComponent();
 
-    expect(inlinePanelProps.suggestedName).toBe("Test Wave Who can drop");
-    expect(inlinePanelProps.onChange).toBe(mockOnGroupSelect);
-    expect(inlinePanelProps.onCreateGroup).toBe(mockOnInlineGroupCreate);
-    expect(inlinePanelProps.groupBuilder).toBeUndefined();
+    expect(inlinePanelProps?.suggestedName).toBe("Test Wave Who can drop");
+    expect(inlinePanelProps?.defaultLabel).toBe("Everyone");
+    inlinePanelProps?.onChange(exampleGroup);
+    expect(mockOnGroupResolutionChange).toHaveBeenCalledWith(false);
+    expect(mockOnGroupSelect).toHaveBeenCalledWith(exampleGroup);
+    expect(inlinePanelProps?.onCriteriaReplacementChange).toBe(
+      mockOnCriteriaReplacementChange
+    );
+    expect(inlinePanelProps?.onCreateGroup).toBe(mockOnInlineGroupCreate);
+    expect(inlinePanelProps?.membersRoleLabel).toBe("Who can drop");
+    expect(inlinePanelProps?.defaultIncludedIdentity).toMatchObject({
+      profile_id: "creator-profile",
+      wallet: "0xcreator",
+    });
   });
 
   it("shows the chat toggle for non-chat waves when editing chat scope", async () => {
@@ -133,6 +379,7 @@ describe("CreateWaveGroup", () => {
     const chatToggle = screen.getByLabelText("Enable chat");
     await user.click(chatToggle);
     expect(mockSetChatEnabled).toHaveBeenCalledWith(false);
+    expect(mockOnCriteriaReplacementChange).toHaveBeenCalledWith(false);
   });
 
   it("hides the chat toggle for chat waves", () => {
@@ -152,6 +399,15 @@ describe("CreateWaveGroup", () => {
 
     await user.click(screen.getByLabelText("Allow admins to delete posts"));
     expect(mockSetDropsAdminCanDelete).toHaveBeenCalledWith(true);
+    expect(inlinePanelProps?.defaultMembersPreviewTarget).toMatchObject({
+      kind: "draft",
+      name: "Only me",
+      summary: "Only me",
+      group: {
+        identity_addresses: ["0xcreator"],
+      },
+    });
+    expect(inlinePanelProps?.defaultLabel).toBe("Only me");
   });
 
   it("passes disabled to the inline panel when chat is disabled", () => {
@@ -160,6 +416,90 @@ describe("CreateWaveGroup", () => {
       chatEnabled: false,
     });
 
-    expect(inlinePanelProps.disabled).toBe(true);
+    expect(inlinePanelProps?.disabled).toBe(true);
+  });
+
+  it("offers Make wave public only for restricted wave access", () => {
+    renderComponent({
+      groupType: CreateWaveGroupConfigType.CAN_VIEW,
+      groups: { ...defaultGroups, canView: exampleGroup.id },
+      groupsCache: { [exampleGroup.id]: exampleGroup },
+    });
+
+    expect(inlinePanelProps?.showMakeWavePublic).toBe(true);
+    inlinePanelProps?.onMakeWavePublic?.();
+    expect(mockOnCriteriaReplacementChange).toHaveBeenCalledWith(false);
+    expect(mockOnGroupResolutionChange).toHaveBeenCalledWith(false);
+    expect(mockOnMakeWavePublic).toHaveBeenCalledTimes(1);
+
+    renderComponent({
+      groupType: CreateWaveGroupConfigType.CAN_CHAT,
+      groups: { ...defaultGroups, canChat: exampleGroup.id },
+      groupsCache: { [exampleGroup.id]: exampleGroup },
+    });
+    expect(inlinePanelProps?.showMakeWavePublic).toBe(false);
+  });
+
+  it("forwards the one-click match action and clears transient editor state", () => {
+    renderComponent({ showMatchWaveAccess: true });
+
+    expect(inlinePanelProps?.showMatchWaveAccess).toBe(true);
+    inlinePanelProps?.onMatchWaveAccess?.();
+    expect(mockOnCriteriaReplacementChange).toHaveBeenCalledWith(false);
+    expect(mockOnGroupResolutionChange).toHaveBeenCalledWith(false);
+    expect(mockOnMatchWaveAccess).toHaveBeenCalledTimes(1);
+  });
+
+  it("blocks continuation and offers retry when a draft group cannot be restored", async () => {
+    mockedCommonApiFetch.mockRejectedValue(new Error("not found"));
+
+    renderComponent({
+      groups: {
+        ...defaultGroups,
+        canDrop: exampleGroup.id,
+      },
+    });
+
+    expect(
+      await screen.findByText(/selected group could not be loaded/i)
+    ).toBeVisible();
+    expect(mockOnGroupResolutionChange).toHaveBeenCalledWith(true);
+    expect(screen.getByRole("group", { name: "Who can drop" })).toHaveAttribute(
+      "data-wave-group-invalid",
+      "true"
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Retry group" }));
+    await waitFor(() => expect(mockedCommonApiFetch).toHaveBeenCalledTimes(2));
+  });
+
+  it("clears failed draft restoration state after the selected group is removed", async () => {
+    mockedCommonApiFetch.mockRejectedValue(new Error("not found"));
+    renderComponent({
+      groups: { ...defaultGroups, canDrop: exampleGroup.id },
+    });
+
+    expect(
+      await screen.findByText(/selected group could not be loaded/i)
+    ).toBeVisible();
+    expect(mockOnGroupResolutionChange).toHaveBeenLastCalledWith(true);
+
+    inlinePanelProps?.onChange(null);
+
+    expect(mockOnGroupResolutionChange).toHaveBeenLastCalledWith(false);
+    expect(mockOnGroupSelect).toHaveBeenCalledWith(null);
+  });
+
+  it("exposes a containment error accessibly", () => {
+    renderComponent({
+      errorMessage: "Everyone in this group must also be able to view.",
+    });
+
+    const group = screen.getByRole("group", { name: "Who can drop" });
+    expect(group).toHaveAttribute("data-wave-group-invalid", "true");
+    expect(group).toHaveAttribute("tabindex", "-1");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Everyone in this group must also be able to view."
+    );
   });
 });

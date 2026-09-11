@@ -10,7 +10,7 @@ import {
   CreateWaveOutcomeType,
 } from "@/types/waves.types";
 import CreateWaveOutcomesWinners from "../winners/CreateWaveOutcomesWinners";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 
 export default function CreateWaveOutcomesCICRank({
   onOutcome,
@@ -106,21 +106,12 @@ export default function CreateWaveOutcomesCICRank({
           />
         )}
         <div className="tw-flex tw-justify-end tw-gap-x-3">
-          <button
-            onClick={onCancel}
-            type="button"
-            className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-700 hover:tw-bg-iron-700"
-          >
+          <Button variant="secondary" size="md" onClick={onCancel}>
             Cancel
-          </button>
-          <PrimaryButton
-            onClicked={onSubmit}
-            disabled={false}
-            loading={false}
-            padding="tw-px-4 tw-py-3"
-          >
+          </Button>
+          <Button variant="primary" size="md" onClick={onSubmit}>
             Save
-          </PrimaryButton>
+          </Button>
         </div>
       </div>
     </div>

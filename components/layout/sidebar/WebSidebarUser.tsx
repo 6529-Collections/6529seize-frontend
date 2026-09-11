@@ -7,7 +7,7 @@ import {
 import { memo, useEffect, useRef, useState } from "react";
 import { useClickAway } from "react-use";
 import { getConnectionProfileIndicator } from "@/components/auth/connection-state-indicator";
-import { HeaderQRModal } from "@/components/header/share/HeaderShare";
+import { HeaderConnectModal } from "@/components/header/share/HeaderShare";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
 import HeaderUserMenuDropdown from "@/components/header/user/HeaderUserMenuDropdown";
@@ -22,6 +22,9 @@ import { useIsMobileDeviceStatus } from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useIdentity } from "@/hooks/useIdentity";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import { PROFILE_DOUBLE_ACTIVATE_DELAY_MS } from "@/components/header/profile-activation.constants";
 
 interface WebSidebarUserProps {
   readonly isCollapsed: boolean;
@@ -32,13 +35,12 @@ function WebSidebarUser({
   isCollapsed,
   profile: parentProfile,
 }: WebSidebarUserProps) {
-  const PROFILE_DOUBLE_ACTIVATE_DELAY_MS = 280;
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showShareModal, setShowShareModal] = useState(false);
+  const [showConnectModal, setShowConnectModal] = useState(false);
   const capacitor = useCapacitor();
   const { isMobileDevice, isDeviceDetectionResolved } =
     useIsMobileDeviceStatus();
-  const canUseDesktopShare =
+  const canUseDesktopConnect =
     !capacitor.isCapacitor && isDeviceDetectionResolved && !isMobileDevice;
   const {
     address,
@@ -54,16 +56,6 @@ function WebSidebarUser({
   const profileClickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
-
-  useEffect(
-    () => () => {
-      if (profileClickTimeoutRef.current) {
-        clearTimeout(profileClickTimeoutRef.current);
-      }
-    },
-    []
-  );
-
   // Click away that properly handles button clicks
   useClickAway(dropdownRef, (event) => {
     if (
@@ -93,6 +85,15 @@ function WebSidebarUser({
   useEffect(() => {
     setAvatarSrc(resolvedPfp ?? DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP);
   }, [resolvedPfp]);
+
+  useEffect(
+    () => () => {
+      if (profileClickTimeoutRef.current) {
+        clearTimeout(profileClickTimeoutRef.current);
+      }
+    },
+    []
+  );
 
   if (!address) {
     return (
@@ -159,9 +160,14 @@ function WebSidebarUser({
       (connectedAccountUnreadNotifications?.[account.address.toLowerCase()] ??
         0) > 0
   );
+  const hasMultipleConnectedAccounts = connectedAccounts.length > 1;
+
+  const toggleUserMenu = () => {
+    setShowUserMenu((current) => !current);
+  };
 
   const switchToNextConnectedAccount = (): boolean => {
-    if (connectedAccounts.length < 2) {
+    if (!hasMultipleConnectedAccounts) {
       return false;
     }
 
@@ -171,44 +177,51 @@ function WebSidebarUser({
     const currentIndex = Math.max(activeIndex, 0);
     const nextAccount =
       connectedAccounts[(currentIndex + 1) % connectedAccounts.length];
+
     if (!nextAccount) {
       return false;
     }
 
     try {
       seizeSwitchConnectedAccount(nextAccount.address);
+      setShowUserMenu(false);
       return true;
     } catch (error) {
-      console.error("Failed to switch connected account", error);
+      console.error(
+        "Failed to switch connected account from desktop sidebar",
+        error
+      );
       return false;
     }
   };
 
-  const toggleUserMenu = () => {
-    setShowUserMenu((current) => !current);
-  };
+  const handleProfileActivate = () => {
+    if (!hasMultipleConnectedAccounts) {
+      if (profileClickTimeoutRef.current) {
+        clearTimeout(profileClickTimeoutRef.current);
+        profileClickTimeoutRef.current = null;
+      }
+      toggleUserMenu();
+      return;
+    }
 
-  const onOpenShare = () => {
-    setShowUserMenu(false);
-    setShowShareModal(true);
-  };
-
-  const onProfileActivate = () => {
     if (profileClickTimeoutRef.current) {
       clearTimeout(profileClickTimeoutRef.current);
       profileClickTimeoutRef.current = null;
 
-      const didSwitchAccount = switchToNextConnectedAccount();
-      if (!didSwitchAccount) {
-        toggleUserMenu();
-      }
+      switchToNextConnectedAccount();
       return;
     }
 
+    toggleUserMenu();
     profileClickTimeoutRef.current = setTimeout(() => {
       profileClickTimeoutRef.current = null;
-      toggleUserMenu();
     }, PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
+  };
+
+  const onOpenConnect = () => {
+    setShowUserMenu(false);
+    setShowConnectModal(true);
   };
 
   // Authenticated user
@@ -216,11 +229,16 @@ function WebSidebarUser({
     <div className={containerClasses}>
       <button
         ref={buttonRef}
-        onClick={onProfileActivate}
+        onClick={handleProfileActivate}
         className={`tw-group/user tw-mt-1 tw-w-full tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 ${
           isCollapsed ? "" : "desktop-hover:hover:tw-bg-iron-900"
         }`}
-        aria-label="Open user menu"
+        aria-label={t(
+          DEFAULT_LOCALE,
+          hasMultipleConnectedAccounts
+            ? "webSidebar.accountMenu.openWithSwitchAriaLabel"
+            : "webSidebar.accountMenu.openAriaLabel"
+        )}
         aria-expanded={showUserMenu}
         aria-controls="user-menu"
       >
@@ -231,7 +249,11 @@ function WebSidebarUser({
         >
           <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0">
             <div
-              className={`tw-relative tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl ${connectionIndicator.avatarClassName}`}
+              className={`tw-relative tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-transition-[box-shadow,filter] tw-duration-200 tw-ease-out ${connectionIndicator.avatarClassName} ${
+                isCollapsed
+                  ? "desktop-hover:group-hover/user:tw-shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_0_14px_rgba(255,255,255,0.06)] desktop-hover:group-hover/user:tw-brightness-[1.05]"
+                  : ""
+              }`}
               title={connectionIndicator.title}
             >
               <img
@@ -289,13 +311,13 @@ function WebSidebarUser({
             profile={profile}
             isOpen={showUserMenu}
             onClose={() => setShowUserMenu(false)}
-            onOpenShare={canUseDesktopShare ? onOpenShare : undefined}
+            onOpenConnect={canUseDesktopConnect ? onOpenConnect : undefined}
           />
         </div>
       )}
-      <HeaderQRModal
-        show={canUseDesktopShare && showShareModal}
-        onClose={() => setShowShareModal(false)}
+      <HeaderConnectModal
+        show={canUseDesktopConnect && showConnectModal}
+        onClose={() => setShowConnectModal(false)}
       />
     </div>
   );

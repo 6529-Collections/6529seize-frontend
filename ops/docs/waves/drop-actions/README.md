@@ -37,6 +37,7 @@ threads.
 ### Reading, media, and link actions
 
 - [Wave Drop Content Display](feature-content-display.md)
+- [Compact Proposal Cards](feature-proposal-cards.md)
 - [Wave Drop Reply Preview Rows](feature-reply-preview-rows.md)
 - [Wave Drop Image Viewer and Scaling](feature-image-viewer-and-scaling.md)
 - [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)
@@ -49,6 +50,7 @@ threads.
 - [Wave Drop Set as Pinned Drop](feature-set-pinned-drop.md)
 - [Wave Drop Mark as Unread](feature-mark-as-unread.md)
 - [Wave Drop Artist Preview Modal](feature-artist-preview-modal.md)
+- [Wave Competition Participant and Winner Badges](feature-wave-competition-badges.md)
 - [Wave Creator Badge](feature-wave-creator-badge.md)
 
 ### Connected behavior (owned in other areas)

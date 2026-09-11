@@ -240,29 +240,16 @@ export const getVisibleHighlyRatedPreviewItems = ({
 };
 
 function HighlyRatedWavePreviewScoreBadge({
-  ariaLabel,
   isTouchPreview,
-  onClick,
-  onMouseEnter,
   scoreLabel,
 }: {
-  readonly ariaLabel: string;
   readonly isTouchPreview: boolean;
-  readonly onClick: () => void;
-  readonly onMouseEnter?: (() => void) | undefined;
-  readonly scoreLabel: string | null;
+  readonly scoreLabel: string;
 }) {
-  if (scoreLabel === null) {
-    return null;
-  }
-
   return (
-    <button
-      type="button"
-      aria-label={ariaLabel}
-      onClick={onClick}
-      onMouseEnter={onMouseEnter}
-      className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5 -tw-right-2" : "-tw-bottom-1 -tw-right-1.5"} tw-z-20 tw-inline-flex tw-h-6 tw-w-7 tw-cursor-help tw-appearance-none tw-items-center tw-justify-center tw-overflow-visible tw-border-0 tw-bg-transparent tw-p-0 tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400`}
+    <span
+      aria-hidden="true"
+      className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5 -tw-right-2" : "-tw-bottom-1 -tw-right-1.5"} tw-z-20 tw-inline-flex tw-h-6 tw-w-7 tw-cursor-pointer tw-items-center tw-justify-center tw-overflow-visible tw-drop-shadow-[0_3px_6px_rgba(0,0,0,0.35)]`}
     >
       <svg
         aria-hidden="true"
@@ -271,14 +258,8 @@ function HighlyRatedWavePreviewScoreBadge({
       >
         <path
           d="M16 2.15 28 6.15v6.7c0 5.45-4.35 9.5-12 11.2-7.65-1.7-12-5.75-12-11.2v-6.7L16 2.15Z"
-          className="tw-fill-iron-800 tw-stroke-iron-950"
-          strokeWidth="2.4"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M16 4.7 25.35 7.75v5.1c0 4.15-3.2 7.15-9.35 8.75-6.15-1.6-9.35-4.6-9.35-8.75v-5.1L16 4.7Z"
-          className="tw-fill-none tw-stroke-white/20"
-          strokeWidth="1"
+          className="tw-fill-iron-900 tw-stroke-white/25"
+          strokeWidth="1.2"
           strokeLinejoin="round"
         />
         <text
@@ -293,7 +274,7 @@ function HighlyRatedWavePreviewScoreBadge({
           {scoreLabel}
         </text>
       </svg>
-    </button>
+    </span>
   );
 }
 
@@ -325,22 +306,11 @@ function HighlyRatedWavePreviewLink({
             score: scoreLabel,
           }
         );
-  const scoreDetailsLabel =
-    scoreLabel === null
-      ? null
-      : t(SIDEBAR_LOCALE, "waves.score.summary.openDetailsAriaLabel", {
-          waveName: wave.name,
-          score: scoreLabel,
-        });
   const handleLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
     item.onClick(event);
     if (event.defaultPrevented || isModifiedAnchorClick(event)) {
       event.stopPropagation();
     }
-  };
-  const handleScoreBadgeClick = () => {
-    // Keep the click bubbling into WaveScoreSummaryHoverCard so touch, mouse, and keyboard use the shared card state.
-    item.onMouseEnter?.();
   };
 
   return (
@@ -367,47 +337,42 @@ function HighlyRatedWavePreviewLink({
       waveRep={wave.waveRep}
       waveScore={wave.waveScore}
     >
-      <span
-        className={`tw-relative tw-flex ${isTouchPreview ? "tw-size-11" : "tw-size-8"} tw-flex-shrink-0 tw-items-center tw-justify-center`}
+      <Link
+        href={item.href}
+        prefetch={false}
+        aria-label={linkLabel}
+        onClick={handleLinkClick}
+        {...(item.onMouseEnter ? { onMouseEnter: item.onMouseEnter } : {})}
+        className={`tw-group/preview tw-relative tw-flex ${isTouchPreview ? "tw-size-11" : "tw-size-8"} tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-overflow-visible tw-rounded-full tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
       >
-        <Link
-          href={item.href}
-          prefetch={false}
-          aria-label={linkLabel}
-          onClick={handleLinkClick}
-          {...(item.onMouseEnter ? { onMouseEnter: item.onMouseEnter } : {})}
-          className={`tw-group/preview tw-flex ${isTouchPreview ? "tw-size-11" : "tw-size-8"} tw-items-center tw-justify-center tw-rounded-full tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
-        >
-          <WaveAvatar
-            dropBadgePlacement="bottom-left"
-            isActive={item.isActive}
-            isDropWave={isDropWave}
-            showNewDropsBadge={false}
-            showUnreadDropsBadge={false}
-            size={isTouchPreview ? "lg" : "default"}
-            wave={wave}
-          />
-        </Link>
-        {scoreDetailsLabel !== null && (
+        <WaveAvatar
+          dropBadgePlacement="bottom-left"
+          isActive={item.isActive}
+          isDropWave={isDropWave}
+          showNewDropsBadge={false}
+          showUnreadDropsBadge={false}
+          size={isTouchPreview ? "lg" : "default"}
+          wave={wave}
+        />
+        {scoreLabel !== null && (
           <HighlyRatedWavePreviewScoreBadge
-            ariaLabel={scoreDetailsLabel}
             isTouchPreview={isTouchPreview}
-            onClick={handleScoreBadgeClick}
-            onMouseEnter={item.onMouseEnter}
             scoreLabel={scoreLabel}
           />
         )}
-      </span>
+      </Link>
     </WaveScoreSummaryHoverCard>
   );
 }
 
 export function HighlyRatedWavesToggle({
   isTouchPreview = false,
+  compactTouchPadding = false,
   paddingClassName,
   previewItems,
 }: {
   readonly isTouchPreview?: boolean | undefined;
+  readonly compactTouchPadding?: boolean | undefined;
   readonly paddingClassName: string;
   readonly previewItems: readonly HighlyRatedWavePreviewItem[];
 }) {
@@ -466,7 +431,7 @@ export function HighlyRatedWavesToggle({
 
   return (
     <div
-      className={`${paddingClassName} ${isTouchPreview ? "tw-pb-3 tw-pt-1" : "tw-pb-1"}`}
+      className={`${paddingClassName} tw-pt-1 ${isTouchPreview && !compactTouchPadding ? "tw-pb-3" : "tw-pb-1"}`}
     >
       <div
         ref={previewStripRef}

@@ -58,10 +58,10 @@ describe("WaveLeaderboardDropRaters", () => {
         name: "View voters and vote log for 2 voters",
       })
     ).toHaveClass(
-      "tw-rounded-lg",
+      "tw-rounded-md",
       "tw-border",
-      "tw-border-iron-700",
-      "tw-bg-iron-900/40"
+      "tw-border-white/[0.06]",
+      "tw-bg-white/[0.05]"
     );
     expect(screen.getByText("Your votes:")).toBeInTheDocument();
   });
@@ -82,17 +82,17 @@ describe("WaveLeaderboardDropRaters", () => {
     expect(progress).toHaveAttribute("data-projected", "13");
     expect(progress).toHaveAttribute(
       "data-tooltip-label",
-      "Votes given now"
+      "Votes now"
     );
     expect(
       screen.getByRole("button", {
         name: "View voters and vote log for 2 voters",
       })
     ).toHaveClass(
-      "tw-rounded-lg",
+      "tw-rounded-md",
       "tw-border",
-      "tw-border-iron-700",
-      "tw-bg-iron-900/40"
+      "tw-border-white/[0.06]",
+      "tw-bg-white/[0.05]"
     );
   });
 
@@ -149,7 +149,7 @@ describe("WaveLeaderboardDropRaters", () => {
     expect(progress).toHaveAttribute("data-projected-label", "80.3M");
     expect(progress).toHaveAttribute(
       "data-tooltip-label",
-      "Votes given now"
+      "Votes now"
     );
   });
 

@@ -6,7 +6,10 @@ import UserPageProfileWaveMasonry, {
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { PlusIcon } from "@heroicons/react/24/outline";
+import Button from "@/components/utils/button/Button";
 import { resolveProfileCurationViewState } from "./userPageProfileWave.helpers";
 import {
   CurationEmptyPanel,
@@ -19,6 +22,7 @@ export default function UserPageProfileWaveContent({
   canManageOwnOfficialWave,
   containerWidth,
   onCreateCuration,
+  onAddPost,
   profileIdentity,
   areCurationsError,
   areCurationsFetching,
@@ -31,6 +35,7 @@ export default function UserPageProfileWaveContent({
   readonly canManageOwnOfficialWave: boolean;
   readonly containerWidth: number;
   readonly onCreateCuration: () => void;
+  readonly onAddPost: () => void;
   readonly profileIdentity: ProfileIdentitySummary;
   readonly areCurationsError: boolean;
   readonly areCurationsFetching: boolean;
@@ -40,6 +45,7 @@ export default function UserPageProfileWaveContent({
   readonly profileCuration: ApiWaveCuration | null;
   readonly wave: ApiWave;
 }) {
+  const locale = useBrowserLocale();
   const {
     dataUpdatedAt,
     drops,
@@ -109,6 +115,14 @@ export default function UserPageProfileWaveContent({
         <CurationEmptyPanel
           title={state.emptyState.title}
           message={state.emptyState.message}
+          primaryAction={
+            canManageOwnOfficialWave ? (
+              <ProfileCurationActionButton
+                label={t(locale, "profileCuration.header.addFirstPost")}
+                onClick={onAddPost}
+              />
+            ) : undefined
+          }
         />
       );
     case "drops_error":
@@ -131,7 +145,6 @@ export default function UserPageProfileWaveContent({
         <div className="tw-overflow-hidden tw-rounded-2xl">
           <UserPageProfileWaveMasonry
             curationId={state.curation.id}
-            curationName={state.curation.name}
             containerWidth={containerWidth}
             drops={state.drops}
             fetchNextPage={state.fetchNextPage}
@@ -153,13 +166,9 @@ function ProfileCurationActionButton({
   readonly onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white disabled:tw-cursor-not-allowed disabled:tw-border-white/15 disabled:tw-bg-white/10 disabled:tw-text-iron-400 desktop-hover:hover:tw-border-iron-200 desktop-hover:hover:tw-bg-iron-100"
-    >
+    <Button variant="primary" size="md" onClick={onClick}>
       <PlusIcon className="-tw-ml-0.5 tw-h-5 tw-w-5 tw-flex-shrink-0" />
       <span>{label}</span>
-    </button>
+    </Button>
   );
 }

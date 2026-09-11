@@ -10,6 +10,12 @@ import OpenGraphPreview, {
 import { fetchLinkPreview } from "@/services/api/link-preview-api";
 import EnsPreviewCard from "./ens/EnsPreviewCard";
 import { isEnsPreview, type EnsPreview } from "./ens/types";
+import EtherscanCard from "./etherscan/EtherscanCard";
+import {
+  isEtherscanPreview,
+  type EtherscanPreview,
+} from "@/lib/link-preview/etherscan/types";
+import { parseEtherscanUrl } from "@/lib/link-preview/etherscan/parse";
 import {
   useLinkPreviewVariant,
   type LinkPreviewVariant,
@@ -30,6 +36,11 @@ type PreviewState =
       readonly href: string;
       readonly data: OpenGraphPreviewData;
     }
+  | {
+      readonly type: "etherscan";
+      readonly href: string;
+      readonly data: EtherscanPreview;
+    }
   | { readonly type: "ens"; readonly href: string; readonly data: EnsPreview };
 
 const CHAT_STABLE_FRAME_CLASSES =
@@ -38,17 +49,23 @@ const CHAT_FIRST_PARTY_FRAME_CLASSES =
   "tw-h-[15rem] tw-min-h-[15rem] tw-max-h-[15rem] tw-w-full tw-overflow-hidden lg:tw-h-[11rem] lg:tw-min-h-[11rem] lg:tw-max-h-[11rem]";
 const CHAT_COLLECTION_FRAME_CLASSES =
   "tw-h-[18rem] tw-min-h-[18rem] tw-max-h-[18rem] tw-w-full tw-overflow-hidden sm:tw-h-[15rem] sm:tw-min-h-[15rem] sm:tw-max-h-[15rem] md:tw-h-[15rem] md:tw-min-h-[15rem] md:tw-max-h-[15rem]";
+const CHAT_THE_MEMES_FRAME_CLASSES =
+  "tw-h-[18rem] tw-min-h-[18rem] tw-max-h-[18rem] tw-w-full tw-overflow-hidden sm:tw-h-[15rem] sm:tw-min-h-[15rem] sm:tw-max-h-[15rem] md:tw-h-[12rem] md:tw-min-h-[12rem] md:tw-max-h-[12rem]";
 const CHAT_VIDEO_FRAME_CLASSES =
   "tw-h-[18rem] tw-min-h-[18rem] tw-max-h-[18rem] tw-w-full tw-overflow-hidden sm:tw-h-[14rem] sm:tw-min-h-[14rem] sm:tw-max-h-[14rem] md:tw-h-[15rem] md:tw-min-h-[15rem] md:tw-max-h-[15rem]";
 const CHAT_FARCASTER_FRAME_CLASSES =
   "tw-h-[24rem] tw-min-h-[24rem] tw-max-h-[24rem] tw-w-full tw-overflow-hidden sm:tw-h-[13rem] sm:tw-min-h-[13rem] sm:tw-max-h-[13rem] md:tw-h-[14rem] md:tw-min-h-[14rem] md:tw-max-h-[14rem]";
+const CHAT_ETHERSCAN_FRAME_CLASSES =
+  "tw-h-[14rem] tw-min-h-[14rem] tw-max-h-[14rem] tw-w-full tw-overflow-hidden sm:tw-h-[12rem] sm:tw-min-h-[12rem] sm:tw-max-h-[12rem]";
 
 type ChatStableFrameKind =
   | "generic"
   | "first-party"
+  | "the-memes"
   | "collection"
   | "video"
-  | "farcaster";
+  | "farcaster"
+  | "etherscan";
 
 const normalizePreviewHostname = (hostname: string): string =>
   hostname.toLowerCase().replace(/^www\./, "");
@@ -159,6 +176,11 @@ const is6529CollectionPathname = (pathname: string): boolean => {
   return false;
 };
 
+const isTheMemesPathname = (pathname: string): boolean => {
+  const [root, id] = pathname.split("/").filter(Boolean);
+  return root === "the-memes" && isNumericPathSegment(id);
+};
+
 const getChatStableFrameKind = (href: string): ChatStableFrameKind => {
   const parsed = parsePreviewHref(href);
   if (!parsed) {
@@ -167,6 +189,10 @@ const getChatStableFrameKind = (href: string): ChatStableFrameKind => {
 
   const hostname = normalizePreviewHostname(parsed.hostname);
   const pathname = parsed.pathname.toLowerCase();
+
+  if (parseEtherscanUrl(parsed)) {
+    return "etherscan";
+  }
 
   if (
     hostname === "youtu.be" ||
@@ -188,6 +214,10 @@ const getChatStableFrameKind = (href: string): ChatStableFrameKind => {
   }
 
   if (is6529Hostname(hostname)) {
+    if (isTheMemesPathname(pathname)) {
+      return "the-memes";
+    }
+
     if (is6529CollectionPathname(pathname)) {
       return "collection";
     }
@@ -202,12 +232,16 @@ const getChatStableFrameClasses = (kind: ChatStableFrameKind): string => {
   switch (kind) {
     case "first-party":
       return CHAT_FIRST_PARTY_FRAME_CLASSES;
+    case "the-memes":
+      return CHAT_THE_MEMES_FRAME_CLASSES;
     case "collection":
       return CHAT_COLLECTION_FRAME_CLASSES;
     case "video":
       return CHAT_VIDEO_FRAME_CLASSES;
     case "farcaster":
       return CHAT_FARCASTER_FRAME_CLASSES;
+    case "etherscan":
+      return CHAT_ETHERSCAN_FRAME_CLASSES;
     case "generic":
       return CHAT_STABLE_FRAME_CLASSES;
   }
@@ -247,6 +281,11 @@ export default function LinkPreviewCard({
     fetchLinkPreview(href)
       .then((response) => {
         if (!active) {
+          return;
+        }
+
+        if (isEtherscanPreview(response)) {
+          setState({ type: "etherscan", data: response, href });
           return;
         }
 
@@ -325,6 +364,16 @@ export default function LinkPreviewCard({
             <EnsPreviewCard preview={state.data} />
           </div>
         </div>
+      </LinkPreviewCardLayout>
+    );
+  } else if (isCurrent && state.type === "etherscan") {
+    content = (
+      <LinkPreviewCardLayout
+        href={href}
+        hideActions={hideActions}
+        variant={resolvedVariant}
+      >
+        <EtherscanCard preview={state.data} />
       </LinkPreviewCardLayout>
     );
   } else {

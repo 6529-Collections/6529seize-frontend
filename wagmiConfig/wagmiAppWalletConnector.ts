@@ -17,6 +17,18 @@ interface CreateAppWalletConnectorOptions {
   appWallet: AppWallet;
 }
 
+type AppWalletAccountWithCapabilities = {
+  address: Address;
+  capabilities: Record<string, unknown>;
+};
+
+type AppWalletConnectResult<withCapabilities extends boolean> = {
+  accounts: withCapabilities extends true
+    ? readonly AppWalletAccountWithCapabilities[]
+    : readonly Address[];
+  chainId: number;
+};
+
 export function createAppWalletConnector(
   chains: Chain[],
   options: CreateAppWalletConnectorOptions,
@@ -184,15 +196,7 @@ export function createAppWalletConnector(
       chainId?: number | undefined;
       isReconnecting?: boolean | undefined;
       withCapabilities?: boolean | withCapabilities | undefined;
-    }): Promise<{
-      accounts: withCapabilities extends true
-        ? readonly {
-            address: `0x${string}`;
-            capabilities: Record<string, unknown>;
-          }[]
-        : readonly `0x${string}`[];
-      chainId: number;
-    }> {
+    }): Promise<AppWalletConnectResult<withCapabilities>> {
       const maybeChainId = opts?.chainId;
       const chainId = maybeChainId ?? chains[0]?.id;
 
@@ -223,7 +227,8 @@ export function createAppWalletConnector(
         );
       }
 
-      const client = await getOrCreateClient(chainId!);
+      const connectedChainId = chainId!;
+      const client = await getOrCreateClient(connectedChainId);
       if (!client.account?.address) {
         throw new Error("No valid local account found after decryption.");
       }
@@ -238,35 +243,33 @@ export function createAppWalletConnector(
       }
 
       // Keep internal state up to date
-      currentChainId = chainId!;
+      currentChainId = connectedChainId;
 
       // Emit connect event (addresses only)
       emitter.emit("connect", {
         accounts: [client.account.address],
-        chainId: chainId!,
+        chainId: connectedChainId,
       });
 
-      if (opts?.withCapabilities) {
-        const accountsWithCaps = (
-          [client.account.address] as readonly `0x${string}`[]
-        ).map((address) => ({
-          address,
-          capabilities: {} as Record<string, unknown>,
-        })) as unknown as readonly {
-          address: `0x${string}`;
-          capabilities: Record<string, unknown>;
-        }[];
+      const result = opts?.withCapabilities
+        ? {
+            accounts: [
+              {
+                address: client.account.address,
+                capabilities: {},
+              },
+            ] satisfies readonly AppWalletAccountWithCapabilities[],
+            chainId: connectedChainId,
+          }
+        : {
+            accounts: [client.account.address] satisfies readonly Address[],
+            chainId: connectedChainId,
+          };
 
-        return {
-          accounts: accountsWithCaps as any,
-          chainId,
-        } as any;
-      }
-
-      return {
-        accounts: [client.account.address] as readonly `0x${string}`[],
-        chainId,
-      } as any;
+      // TypeScript cannot narrow wagmi's generic `withCapabilities` parameter
+      // from the runtime option; this assertion is limited to the two account
+      // shapes constructed above from the validated wallet client.
+      return result as unknown as AppWalletConnectResult<withCapabilities>;
     },
 
     async disconnect() {

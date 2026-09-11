@@ -1,0 +1,629 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#event:Approval(address,address,uint256)",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "approved",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "Approval",
+          "signature": "Approval(address,address,uint256)",
+          "topic0": "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#event:ApprovalForAll(address,address,bool)",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "approved",
+              "type": "bool"
+            }
+          ],
+          "name": "ApprovalForAll",
+          "signature": "ApprovalForAll(address,address,bool)",
+          "topic0": "0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#event:Transfer(address,address,uint256)",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "Transfer",
+          "signature": "Transfer(address,address,uint256)",
+          "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0x095ea7b3",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "approve",
+          "outputs": [],
+          "selector": "0x095ea7b3",
+          "signature": "approve(address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0x70a08231",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "balance",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x70a08231",
+          "signature": "balanceOf(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0x081812fc",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "getApproved",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "selector": "0x081812fc",
+          "signature": "getApproved(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0xe985e9c5",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "name": "isApprovedForAll",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xe985e9c5",
+          "signature": "isApprovedForAll(address,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721Metadata.sol:IERC721Metadata#function:0x06fdde03",
+          "declaringDefinitionId": "smart-contracts/IERC721Metadata.sol:IERC721Metadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "name",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x06fdde03",
+          "signature": "name()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0x6352211e",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "ownerOf",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "selector": "0x6352211e",
+          "signature": "ownerOf(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0x42842e0e",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "safeTransferFrom",
+          "outputs": [],
+          "selector": "0x42842e0e",
+          "signature": "safeTransferFrom(address,address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0xb88d4fde",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "name": "safeTransferFrom",
+          "outputs": [],
+          "selector": "0xb88d4fde",
+          "signature": "safeTransferFrom(address,address,uint256,bytes)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0xa22cb465",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "approved",
+              "type": "bool"
+            }
+          ],
+          "name": "setApprovalForAll",
+          "outputs": [],
+          "selector": "0xa22cb465",
+          "signature": "setApprovalForAll(address,bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IERC165.sol:IERC165#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/IERC165.sol:IERC165",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721Metadata.sol:IERC721Metadata#function:0x95d89b41",
+          "declaringDefinitionId": "smart-contracts/IERC721Metadata.sol:IERC721Metadata",
+          "inherited": false,
+          "inputs": [],
+          "name": "symbol",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x95d89b41",
+          "signature": "symbol()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721Metadata.sol:IERC721Metadata#function:0xc87b56dd",
+          "declaringDefinitionId": "smart-contracts/IERC721Metadata.sol:IERC721Metadata",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenURI",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0xc87b56dd",
+          "signature": "tokenURI(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0x23b872dd",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "transferFrom",
+          "outputs": [],
+          "selector": "0x23b872dd",
+          "signature": "transferFrom(address,address,uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "name()",
+          "displaySignature": "name()",
+          "functionKind": "function",
+          "id": "smart-contracts/IERC721Metadata.sol:IERC721Metadata#function:0x06fdde03",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjFNZXRhZGF0YS5zb2w6SUVSQzcyMU1ldGFkYXRhI2Z1bmN0aW9uOjB4MDZmZGRlMDM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "name",
+          "natspec": "@dev Returns the token collection name.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 54,
+            "byteStart": 403,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721Metadata.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:789829e81a68c3fdd98563123315ca3223ee7bf254bdaffc4325b2c80e8b4f62",
+            "sourceSha256": "sha256:aa6d6ca7da62a705ea5636f4d2fb8ee912e8048da7117f32849f9310965656c0"
+          },
+          "selector": "0x06fdde03",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "symbol()",
+          "displaySignature": "symbol()",
+          "functionKind": "function",
+          "id": "smart-contracts/IERC721Metadata.sol:IERC721Metadata#function:0x95d89b41",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjFNZXRhZGF0YS5zb2w6SUVSQzcyMU1ldGFkYXRhI2Z1bmN0aW9uOjB4OTVkODliNDE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "symbol",
+          "natspec": "@dev Returns the token collection symbol.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 56,
+            "byteStart": 528,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721Metadata.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:813d6d1a7553b116096d02dc406c14d219f052387cb62d3247c8e60661e74a00",
+            "sourceSha256": "sha256:aa6d6ca7da62a705ea5636f4d2fb8ee912e8048da7117f32849f9310965656c0"
+          },
+          "selector": "0x95d89b41",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "tokenURI(uint256)",
+          "displaySignature": "tokenURI(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IERC721Metadata.sol:IERC721Metadata#function:0xc87b56dd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjFNZXRhZGF0YS5zb2w6SUVSQzcyMU1ldGFkYXRhI2Z1bmN0aW9uOjB4Yzg3YjU2ZGQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "tokenURI",
+          "natspec": "@dev Returns the Uniform Resource Identifier (URI) for `tokenId` token.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 73,
+            "byteStart": 685,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721Metadata.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:cf61dbe8caa3f55f17ad0a824f1f9c5b7b32fe81a375cf204e55d248c3ab9b90",
+            "sourceSha256": "sha256:aa6d6ca7da62a705ea5636f4d2fb8ee912e8048da7117f32849f9310965656c0"
+          },
+          "selector": "0xc87b56dd",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IERC721Metadata.sol:IERC721Metadata",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IERC721.sol:IERC721",
+        "name": "IERC721"
+      }
+    ],
+    "interface": {
+      "abiSha256": "sha256:5ed9f3277e136284e3f9e8701131fd0fe76312b0dfa33cdb2664f571498b3f3e",
+      "interfaceId": "0x5b5e139f",
+      "interfaceIdSource": "configured",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjFNZXRhZGF0YS5zb2w6SUVSQzcyMU1ldGFkYXRh",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IERC721Metadata.sol:IERC721Metadata",
+      "smart-contracts/IERC721.sol:IERC721",
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IERC721Metadata",
+    "natspec": "",
+    "range": {
+      "byteLength": 463,
+      "byteStart": 297,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721Metadata.sol#L13-L28",
+      "lineEnd": 28,
+      "lineStart": 13,
+      "snippetSha256": "sha256:0f375b69efdd30cf60424b96cb2e03492092d659cce221dd29bd2a32ac317a7e",
+      "sourceSha256": "sha256:aa6d6ca7da62a705ea5636f4d2fb8ee912e8048da7117f32849f9310965656c0"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IERC721Metadata.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/IERC721Metadata.sol:IERC721Metadata",
+      "severity": "advisory"
+    }
+  ]
+}

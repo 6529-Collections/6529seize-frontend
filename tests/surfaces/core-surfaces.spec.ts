@@ -16,9 +16,9 @@ const NAVIGATION_TIMEOUT_MS = 15000;
 const WAVE_SCORE_RESULT = /Wave Score.*About.*Network & Reputation/i;
 const WAVE_SCORE_HEADING = "Wave score transparency";
 const REQUIRED_DELEGATION_ACTIONS = [
-  "Register Delegation",
-  "Register Consolidation",
-  "Register Delegation Manager",
+  "Delegation",
+  "Consolidation",
+  "Delegation Manager",
 ];
 
 async function gotoReady(page: Page, path: string) {
@@ -29,6 +29,9 @@ async function gotoReady(page: Page, path: string) {
 
 async function forceExpandedDesktopSidebar(page: Page) {
   await page.addInitScript(() => {
+    if (globalThis.self !== globalThis.top) {
+      return;
+    }
     globalThis.sessionStorage.setItem("sidebarCollapsed", "false");
   });
 }
@@ -38,7 +41,7 @@ async function openWaveScoreFromSearch(page: Page, searchButton: Locator) {
   const searchInput = page.locator("#header-search-input");
   await expect(searchInput).toBeVisible();
   await searchInput.fill("wave score");
-  const result = page.getByRole("link", { name: WAVE_SCORE_RESULT }).first();
+  const result = page.getByRole("option", { name: WAVE_SCORE_RESULT }).first();
   await expect(result).toBeVisible();
   await result.click();
   await expectWaveScorePage(page);
@@ -56,10 +59,11 @@ async function expectWaveScorePage(page: Page) {
 
 async function expectTdhExplainer(page: Page) {
   await expect(
-    page.getByRole("heading", { level: 1, name: "TDH" })
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "How TDH is computed" })
+    page.getByRole("heading", {
+      level: 1,
+      name: "How TDH is calculated",
+      exact: true,
+    })
   ).toBeVisible();
 }
 
@@ -171,7 +175,7 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
       page.getByRole("link", { name: "Back to wave" })
     ).toHaveAttribute("href", "/waves/test-wave");
     await page.locator("#wave-score-calculator-input").fill("x");
-    await page.getByRole("button", { name: "Score" }).click();
+    await page.getByRole("button", { name: "Score", exact: true }).click();
 
     await expect(page.locator("#wave-score-calculator-error")).toContainText(
       "Enter a wave name, wave id, or wave URL."
@@ -182,14 +186,20 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await gotoReady(page, "/network/tdh");
 
     await expectTdhExplainer(page);
-    await expect(page.getByRole("heading", { name: /TDH 1\.4/ })).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        level: 2,
+        name: "Current boosts & the full schedule",
+        exact: true,
+      })
+    ).toBeVisible();
     await expectLinkHref(page, "Definitions", "/network/definitions");
     await expectLinkHref(
       page,
-      "View Network TDH Stats",
+      "Network TDH Stats",
       "/network/health/network-tdh"
     );
-    await expectLinkHref(page, "View Levels", "/network/levels");
+    await expectLinkHref(page, "Levels", "/network/levels");
   });
 
   test("Delegation Center renders disconnected-safe choices", async ({
@@ -221,12 +231,12 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
 
     await expect(
       page.getByRole("navigation", { name: "Breadcrumb" })
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(
       page.getByRole("heading", { name: "How to Register a Delegation?" })
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Back to Delegation FAQ" })
+      page.getByRole("link", { name: "All FAQ topics" })
     ).toHaveAttribute("href", "/delegation/delegation-faq");
     await expect(
       page.getByRole("navigation", {

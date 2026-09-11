@@ -39,8 +39,8 @@ why a section can disappear.
 3. `Most active waves` loads hot waves:
    - While loading: six skeleton cards render.
    - When data is ready: up to six cards render with wave metadata.
-   - Cards reuse the wave description drop for the compact preview row when
-     that content has text or media.
+   - Cards use the artwork-led wave-card design shared with `/discover`, with
+     the description, labelled scores, and activity metadata below the image.
    - If the request fails or returns no waves: section is hidden.
 4. Users select a wave card to open that wave, or use `View all` to open
    `/waves`.
@@ -55,13 +55,14 @@ why a section can disappear.
   - Footer shows `Anonymous` when the author has no handle.
 - Most active waves card with recent activity:
   - Shows relative last-drop time and drops count.
-  - Shows a compact description-drop preview text/media snippet when the wave
-    description has usable content.
+  - Shows a two-line description-drop preview when the wave description has
+    usable content.
+  - Shows labelled Score, Hot, and REP metrics below the description.
 - Most active waves card with no activity:
   - Shows `No drops yet`.
 - Most active waves card with activity but no description content:
   - Keeps the activity metadata row.
-  - Hides the compact preview row.
+  - Keeps the card layout aligned with the other wave cards.
 
 ## Edge Cases
 
@@ -84,9 +85,8 @@ why a section can disappear.
 
 - `Boosted Drops` has no `View all` action on the homepage.
 - `Most active waves` is capped to six cards on home.
-- The dedicated `/discover` route reuses the active-wave card surface with up
-  to 20 results, no subtitle, no footer link, and backend exclude-followed
-  filtering.
+- The dedicated `/discover` route uses the same card design with up to 20
+  results, no subtitle, no footer link, and backend exclude-followed filtering.
 - Boosted ranking uses a recent boost window and updates while the page stays open.
 
 ## Related Pages

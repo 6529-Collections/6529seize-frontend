@@ -18,7 +18,12 @@ import type {
   WaveReadSendRetryContext,
   WaveReadShouldSend,
 } from "@/hooks/useMarkWaveNotificationsRead.types";
-import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
+import type { ApiMarkWaveReadRequest } from "@/generated/models/ApiMarkWaveReadRequest";
+import type { ApiMarkWaveReadResponse } from "@/generated/models/ApiMarkWaveReadResponse";
+import {
+  commonApiPost,
+  commonApiPostWithoutBodyAndResponse,
+} from "@/services/api/common-api";
 import type { RefObject } from "react";
 
 const inFlightWaveReadRequests = new Map<string, WaveReadRequestState>();
@@ -138,12 +143,20 @@ type WaveReadSendRequestResult =
 const createWaveReadSendIntent = ({
   shouldSend,
   retryContext,
+  readThroughSerialNo,
+  onReadResponse,
 }: {
   readonly shouldSend: WaveReadShouldSend;
   readonly retryContext: WaveReadSendRetryContext | undefined;
+  readonly readThroughSerialNo?: number | undefined;
+  readonly onReadResponse?:
+    | ((response: ApiMarkWaveReadResponse) => void)
+    | undefined;
 }): WaveReadSendIntent => ({
   shouldSend,
   retryContext,
+  readThroughSerialNo,
+  onReadResponse,
 });
 
 const requeueExpiredWaveReadIntents = (
@@ -168,6 +181,8 @@ const requeueExpiredWaveReadIntents = (
       return enqueuePendingWaveReadRequest({
         ...retryContext,
         shouldSend: sendIntent.shouldSend,
+        readThroughSerialNo: sendIntent.readThroughSerialNo,
+        onReadResponse: sendIntent.onReadResponse,
         queueIfBlocked: true,
       });
     });
@@ -215,10 +230,42 @@ const sendWaveReadRequest = async (
     return "auth-expired";
   }
 
-  await commonApiPostWithoutBodyAndResponse({
-    endpoint: `notifications/wave/${waveId}/read`,
-    headers: authHeaders,
-  });
+  const sendableIntents = sendIntents.filter(shouldSendWaveRead);
+  const readThroughSerialNo = sendableIntents.reduce<number | undefined>(
+    (latest, intent) => {
+      const candidate = intent.readThroughSerialNo;
+      if (candidate === undefined) {
+        return latest;
+      }
+      return latest === undefined ? candidate : Math.max(latest, candidate);
+    },
+    undefined
+  );
+  const needsDmResponse = sendableIntents.some(
+    (intent) => intent.onReadResponse !== undefined
+  );
+  if (readThroughSerialNo === undefined && !needsDmResponse) {
+    await commonApiPostWithoutBodyAndResponse({
+      endpoint: `notifications/wave/${waveId}/read`,
+      headers: authHeaders,
+    });
+  } else {
+    const response = await commonApiPost<
+      ApiMarkWaveReadRequest,
+      ApiMarkWaveReadResponse
+    >({
+      endpoint: `notifications/wave/${waveId}/read`,
+      headers: authHeaders,
+      body:
+        readThroughSerialNo === undefined
+          ? { request_dm_unread_state: true }
+          : {
+              read_through_serial_no: readThroughSerialNo,
+              request_dm_unread_state: true,
+            },
+    });
+    sendableIntents.forEach((intent) => intent.onReadResponse?.(response));
+  }
   invalidateNotificationsRef.current();
   return "sent";
 };
@@ -383,6 +430,8 @@ export function enqueuePendingWaveReadRequest({
   addressEpoch,
   latestAddressEpochRef,
   shouldSend,
+  readThroughSerialNo,
+  onReadResponse,
   queueIfBlocked,
 }: {
   readonly addressKey: string;
@@ -394,6 +443,10 @@ export function enqueuePendingWaveReadRequest({
   readonly addressEpoch: WaveReadAddressEpoch;
   readonly latestAddressEpochRef: RefObject<WaveReadAddressEpoch>;
   readonly shouldSend: WaveReadShouldSend;
+  readonly readThroughSerialNo?: number | undefined;
+  readonly onReadResponse?:
+    | ((response: ApiMarkWaveReadResponse) => void)
+    | undefined;
   readonly queueIfBlocked: boolean;
 }): Promise<MarkWaveNotificationsReadResult> {
   const staleAddressEpochResult = getStaleAddressEpochWaveReadResult({
@@ -422,6 +475,8 @@ export function enqueuePendingWaveReadRequest({
   const sendIntent = createWaveReadSendIntent({
     shouldSend,
     retryContext,
+    readThroughSerialNo,
+    onReadResponse,
   });
 
   const existingState = pendingWaveReadRequests.get(requestKey);
@@ -518,6 +573,8 @@ const flushQueuedWaveReadRequests = ({
         createWaveReadSendIntent({
           shouldSend: sendIntent.shouldSend,
           retryContext: getRetryContext(queuedRequest, requestKey),
+          readThroughSerialNo: sendIntent.readThroughSerialNo,
+          onReadResponse: sendIntent.onReadResponse,
         })
       )
     );

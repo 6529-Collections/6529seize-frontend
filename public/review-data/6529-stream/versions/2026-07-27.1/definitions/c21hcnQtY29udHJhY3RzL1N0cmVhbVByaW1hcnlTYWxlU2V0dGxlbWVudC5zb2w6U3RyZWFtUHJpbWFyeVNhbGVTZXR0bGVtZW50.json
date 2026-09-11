@@ -1,0 +1,3519 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0xa142d392",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            }
+          ],
+          "name": "AssetNotActive",
+          "selector": "0xa142d392",
+          "signature": "AssetNotActive(address,uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0x9a787919",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "AssetPolicyReadFailed",
+          "selector": "0x9a787919",
+          "signature": "AssetPolicyReadFailed(address,address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0x409f04fb",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "ERC20BalanceReadFailed",
+          "selector": "0x409f04fb",
+          "signature": "ERC20BalanceReadFailed(address,address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0x94e6808a",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "ERC20TransferFailed",
+          "selector": "0x94e6808a",
+          "signature": "ERC20TransferFailed(address,address,address,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0x9a7bc4bc",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "expectedFromBalance",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "internalType": "uint256",
+              "name": "actualFromBalance",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "internalType": "uint256",
+              "name": "expectedToBalance",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "internalType": "uint256",
+              "name": "actualToBalance",
+              "type": "uint256"
+            }
+          ],
+          "name": "ERC20TransferInvariantBroken",
+          "selector": "0x9a7bc4bc",
+          "signature": "ERC20TransferInvariantBroken(address,address,address,uint256,uint256,uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0x1da106e1",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "expectedAmount",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "actualAmount",
+              "type": "uint256"
+            }
+          ],
+          "name": "IncorrectNativeValue",
+          "selector": "0x1da106e1",
+          "signature": "IncorrectNativeValue(uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0xdd42018a",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "policyMode",
+              "type": "uint8"
+            }
+          ],
+          "name": "InvalidPolicyMode",
+          "selector": "0xdd42018a",
+          "signature": "InvalidPolicyMode(uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0x29e17005",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "settlementId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidPrimarySale",
+          "selector": "0x29e17005",
+          "signature": "InvalidPrimarySale(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0xcb671fef",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidSettlementCaller",
+          "selector": "0xcb671fef",
+          "signature": "InvalidSettlementCaller(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0xa5b05eec",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "NativeTransferFailed",
+          "selector": "0xa5b05eec",
+          "signature": "NativeTransferFailed(address,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0x7a302634",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "PrimaryAssignmentMissing",
+          "selector": "0x7a302634",
+          "signature": "PrimaryAssignmentMissing(bytes32,uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0xc4179bcf",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "expectedPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actualPolicyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "PrimaryPolicyHashMismatch",
+          "selector": "0xc4179bcf",
+          "signature": "PrimaryPolicyHashMismatch(bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard#error:0x3ee5aeb5",
+          "declaringDefinitionId": "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard",
+          "inherited": true,
+          "inputs": [],
+          "name": "ReentrancyGuardReentrantCall",
+          "selector": "0x3ee5aeb5",
+          "signature": "ReentrancyGuardReentrantCall()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0xf6cbcb00",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "settlementKey",
+              "type": "bytes32"
+            }
+          ],
+          "name": "SettlementAlreadyConsumed",
+          "selector": "0xf6cbcb00",
+          "signature": "SettlementAlreadyConsumed(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0x84f10348",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            }
+          ],
+          "name": "UnauthorizedSettlementCaller",
+          "selector": "0x84f10348",
+          "signature": "UnauthorizedSettlementCaller(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0xee84f40b",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "UnsupportedAsset",
+          "selector": "0xee84f40b",
+          "signature": "UnsupportedAsset(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#error:0x0d8bd514",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "name": "UnverifiedSplitWallet",
+          "selector": "0x0d8bd514",
+          "signature": "UnverifiedSplitWallet(bytes32,address)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/Ownable.sol:Ownable#event:OwnershipTransferred(address,address)",
+          "declaringDefinitionId": "smart-contracts/Ownable.sol:Ownable",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "signature": "OwnershipTransferred(address,address)",
+          "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#event:PrimaryRevenueSettled(bytes32,bytes32,bytes32,address,address,address,uint256,bytes32,bool,uint8)",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "settlementKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "saleContextHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "policyDrift",
+              "type": "bool"
+            },
+            {
+              "index": 9,
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "assignmentType",
+              "type": "uint8"
+            }
+          ],
+          "name": "PrimaryRevenueSettled",
+          "signature": "PrimaryRevenueSettled(bytes32,bytes32,bytes32,address,address,address,uint256,bytes32,bool,uint8)",
+          "topic0": "0x309f15b406b3970738e99cdb17fb1c12af7d5c0499c6e78b77f90eb9e7798e35"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#event:PrimaryRevenueSettlementContext(bytes32,bytes32,bytes32,address,bytes32,uint8,uint256,uint256,uint256,address,address,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "settlementKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "settlementCaller",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "settlementId",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "policyMode",
+              "type": "uint8"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "saleId",
+              "type": "uint256"
+            },
+            {
+              "index": 9,
+              "indexed": false,
+              "internalType": "address",
+              "name": "poster",
+              "type": "address"
+            },
+            {
+              "index": 10,
+              "indexed": false,
+              "internalType": "address",
+              "name": "beneficiary",
+              "type": "address"
+            },
+            {
+              "index": 11,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "PrimaryRevenueSettlementContext",
+          "signature": "PrimaryRevenueSettlementContext(bytes32,bytes32,bytes32,address,bytes32,uint8,uint256,uint256,uint256,address,address,bytes32)",
+          "topic0": "0x477196917ca70624bc42331a01abfd1de3b1cdf8f483ca97f9053ce8af515ae5"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#event:PrimaryRevenueSettlementPolicy(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "settlementKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "expectedPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "resolvedPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "resolvedAssignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "PrimaryRevenueSettlementPolicy",
+          "signature": "PrimaryRevenueSettlementPolicy(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)",
+          "topic0": "0xab2e0463cd887986aa4dd429b669898a8a8b2621944544fa2dd9b3ade170c64e"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement#event:SettlementCallerUpdated(address,bool,address)",
+          "declaringDefinitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "SettlementCallerUpdated",
+          "signature": "SettlementCallerUpdated(address,bool,address)",
+          "topic0": "0x1e77a85657976ce31303b0b7c1ff2e0bda4f1d15aac95425f2757a3ff973823c"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x3bd99f40",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [],
+          "name": "POLICY_MODE_ALLOW_CURRENT",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x3bd99f40",
+          "signature": "POLICY_MODE_ALLOW_CURRENT()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x727e963c",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [],
+          "name": "POLICY_MODE_STRICT_MATCH",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x727e963c",
+          "signature": "POLICY_MODE_STRICT_MATCH()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xb332feb7",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [],
+          "name": "PRIMARY_POLICY_DOMAIN",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xb332feb7",
+          "signature": "PRIMARY_POLICY_DOMAIN()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xdecadc35",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [],
+          "name": "assetPolicyRegistry",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamAssetPolicyRegistry",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xdecadc35",
+          "signature": "assetPolicyRegistry()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xa2422a11",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamPrimarySaleSettlement",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xa2422a11",
+          "signature": "isStreamPrimarySaleSettlement()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xabf7c729",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "officialSettled",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xabf7c729",
+          "signature": "officialSettled(bytes32,bytes32,address,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/Ownable.sol:Ownable#function:0x8da5cb5b",
+          "declaringDefinitionId": "smart-contracts/Ownable.sol:Ownable",
+          "inherited": true,
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x8da5cb5b",
+          "signature": "owner()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/Ownable.sol:Ownable#function:0x715018a6",
+          "declaringDefinitionId": "smart-contracts/Ownable.sol:Ownable",
+          "inherited": true,
+          "inputs": [],
+          "name": "renounceOwnership",
+          "outputs": [],
+          "selector": "0x715018a6",
+          "signature": "renounceOwnership()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xd230c33d",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "internalType": "bytes32",
+              "name": "assignmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "resolvedPrimaryPolicyHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xd230c33d",
+          "signature": "resolvedPrimaryPolicyHash(bytes32,uint256,uint256,bytes32,bytes32,address,bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x86624fc7",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [],
+          "name": "revenueResolver",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamRevenueResolver",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x86624fc7",
+          "signature": "revenueResolver()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xdef83cae",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "name": "setSettlementCaller",
+          "outputs": [],
+          "selector": "0xdef83cae",
+          "signature": "setSettlementCaller(address,bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x9e6dc442",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamPrimarySaleSettlement.PrimarySale",
+              "name": "sale",
+              "type": "(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32)"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "settleERC20PrimarySale",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "key",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "selector": "0x9e6dc442",
+          "signature": "settleERC20PrimarySale((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x978cf912",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamPrimarySaleSettlement.PrimarySale",
+              "name": "sale",
+              "type": "(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32)"
+            }
+          ],
+          "name": "settleNativePrimarySale",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "key",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "selector": "0x978cf912",
+          "signature": "settleNativePrimarySale((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x2ae34e97",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "settlementCaller",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x2ae34e97",
+          "signature": "settlementCaller(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x37cfadd5",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "name": "settlementConsumed",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x37cfadd5",
+          "signature": "settlementConsumed(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x415db8ef",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamPrimarySaleSettlement.PrimarySale",
+              "name": "sale",
+              "type": "(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32)"
+            }
+          ],
+          "name": "settlementKey",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x415db8ef",
+          "signature": "settlementKey((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x5720babb",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [],
+          "name": "splitFactory",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamSplitFactory",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x5720babb",
+          "signature": "splitFactory()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x7fe3b24d",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "totalOfficialSettled",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x7fe3b24d",
+          "signature": "totalOfficialSettled(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/Ownable.sol:Ownable#function:0xf2fde38b",
+          "declaringDefinitionId": "smart-contracts/Ownable.sol:Ownable",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "transferOwnership",
+          "outputs": [],
+          "selector": "0xf2fde38b",
+          "signature": "transferOwnership(address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "production_release_contract",
+    "classificationReason": "Listed in release-artifacts/contracts.json production_contracts.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "PRIMARY_POLICY_DOMAIN()",
+          "displaySignature": "PRIMARY_POLICY_DOMAIN()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xb332feb7",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4YjMzMmZlYjc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "PRIMARY_POLICY_DOMAIN",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 94,
+            "byteStart": 1247,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:b1ae71b10498766e8e372ae927e2c2814197ab63912ab8f34e732f1e5d95c388",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0xb332feb7",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "POLICY_MODE_STRICT_MATCH()",
+          "displaySignature": "POLICY_MODE_STRICT_MATCH()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x727e963c",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4NzI3ZTk2M2M",
+          "kind": "function",
+          "modifiers": [],
+          "name": "POLICY_MODE_STRICT_MATCH",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 59,
+            "byteStart": 1347,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:30f7039c312ad956712af73dcebeae272c4529b57a946f2ec902f9101870f90c",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x727e963c",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "POLICY_MODE_ALLOW_CURRENT()",
+          "displaySignature": "POLICY_MODE_ALLOW_CURRENT()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x3bd99f40",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4M2JkOTlmNDA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "POLICY_MODE_ALLOW_CURRENT",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 60,
+            "byteStart": 1412,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:a9271aeab9995a6a5cc9bbb9a004832fcb9e01b2b260e512fd5713aee208bf22",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x3bd99f40",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "revenueResolver()",
+          "displaySignature": "revenueResolver()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x86624fc7",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4ODY2MjRmYzc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "revenueResolver",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamRevenueResolver",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 1479,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:ed3987c6a849f9167dd99fd6b7dde95ea7673fa95c107cefe596d897ca5fca5d",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x86624fc7",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "splitFactory()",
+          "displaySignature": "splitFactory()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x5720babb",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4NTcyMGJhYmI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "splitFactory",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamSplitFactory",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 49,
+            "byteStart": 1549,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:00c64c4b1df0a5f02aa48c6da8fee61454836369e3b9cce5c1005fabc955365c",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x5720babb",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "assetPolicyRegistry()",
+          "displaySignature": "assetPolicyRegistry()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xdecadc35",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4ZGVjYWRjMzU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "assetPolicyRegistry",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamAssetPolicyRegistry",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 63,
+            "byteStart": 1604,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L33",
+            "lineEnd": 33,
+            "lineStart": 33,
+            "snippetSha256": "sha256:a8eaae173a4b57cae3c8c212c09b7e736271f7f5e19ca9c632125ec1c116a962",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0xdecadc35",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "settlementCaller(address)",
+          "displaySignature": "settlementCaller(address)",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x2ae34e97",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4MmFlMzRlOTc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "settlementCaller",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 57,
+            "byteStart": 1674,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:43a333b905e1f6b7347770b612694968ca4fb0bedde1f74b795ce0ab3e7c0117",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x2ae34e97",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "settlementConsumed(bytes32)",
+          "displaySignature": "settlementConsumed(bytes32)",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x37cfadd5",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4MzdjZmFkZDU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "settlementConsumed",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 59,
+            "byteStart": 1737,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:4934a3dd2b239acfa16800b3375beb7922318f67590dae45cc68e0949a735994",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x37cfadd5",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "totalOfficialSettled(address)",
+          "displaySignature": "totalOfficialSettled(address)",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x7fe3b24d",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4N2ZlM2IyNGQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalOfficialSettled",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 1860,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L38",
+            "lineEnd": 38,
+            "lineStart": 38,
+            "snippetSha256": "sha256:12cd57ff40330a1aa8ba548b7e0eb1293b08c0d2e0d4c21f7ecc2e4bbf1fc67f",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x7fe3b24d",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(IStreamRevenueResolver)",
+          "functionKind": "constructor",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:constructor(IStreamRevenueResolver)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueResolver_",
+              "type": "IStreamRevenueResolver"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOmNvbnN0cnVjdG9yKElTdHJlYW1SZXZlbnVlUmVzb2x2ZXIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1436,
+            "byteStart": 2143,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L49-L80",
+            "lineEnd": 80,
+            "lineStart": 49,
+            "snippetSha256": "sha256:006c27c87e6b7bf73fb6296af5edf9d06211f1404cfa554a389f435aaa56e4c5",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "isStreamPrimarySaleSettlement()",
+          "displaySignature": "isStreamPrimarySaleSettlement()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xa2422a11",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4YTI0MjJhMTE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamPrimarySaleSettlement",
+          "natspec": "@notice Returns true for deployment validation.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 107,
+            "byteStart": 3641,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L83-L85",
+            "lineEnd": 85,
+            "lineStart": 83,
+            "snippetSha256": "sha256:e2d0b2d1761444dc259c36727d04c9fd2e676017bbb56d3620a9e1933ec6c43c",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0xa2422a11",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setSettlementCaller(address,bool)",
+          "displaySignature": "setSettlementCaller(address,bool)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xdef83cae",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "caller",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4ZGVmODNjYWU",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setSettlementCaller",
+          "natspec": "@notice Enables or disables a settlement caller.",
+          "outputs": [],
+          "range": {
+            "byteLength": 303,
+            "byteStart": 3811,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L88-L94",
+            "lineEnd": 94,
+            "lineStart": 88,
+            "snippetSha256": "sha256:27f6bff264accd64bfb2a81fa59c6756b8786d196cc0e6120a1ec1a9e5458b76",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0xdef83cae",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "settleNativePrimarySale((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+          "displaySignature": "settleNativePrimarySale(PrimarySale)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x978cf912",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "sale",
+              "storageLocation": "calldata",
+              "type": "PrimarySale"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4OTc4Y2Y5MTI",
+          "kind": "function",
+          "modifiers": [
+            "nonReentrant"
+          ],
+          "name": "settleNativePrimarySale",
+          "natspec": "@notice Settles a native ETH primary sale into the resolved split wallet.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "key",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 885,
+            "byteStart": 4202,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L97-L122",
+            "lineEnd": 122,
+            "lineStart": 97,
+            "snippetSha256": "sha256:a6286dc32670808fcbd9c8ecf6d873c4e6f6e2e82715bd813dab643578a02eb9",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x978cf912",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "settleERC20PrimarySale((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),address)",
+          "displaySignature": "settleERC20PrimarySale(PrimarySale,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x9e6dc442",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "sale",
+              "storageLocation": "calldata",
+              "type": "PrimarySale"
+            },
+            {
+              "index": 1,
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4OWU2ZGM0NDI",
+          "kind": "function",
+          "modifiers": [
+            "nonReentrant"
+          ],
+          "name": "settleERC20PrimarySale",
+          "natspec": "@notice Settles an approved standard ERC-20 primary sale into the resolved split wallet.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "key",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 771,
+            "byteStart": 5190,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L125-L145",
+            "lineEnd": 145,
+            "lineStart": 125,
+            "snippetSha256": "sha256:6c4a3b5b2e6567c20fbecbdeb2698891c175daed04bf5b41e7f05e49da017828",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x9e6dc442",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "settlementKey((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+          "displaySignature": "settlementKey(PrimarySale)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x415db8ef",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "sale",
+              "storageLocation": "calldata",
+              "type": "PrimarySale"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4NDE1ZGI4ZWY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "settlementKey",
+          "natspec": "@notice Computes the consumed settlement key for a sale context.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 135,
+            "byteStart": 6040,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L148-L150",
+            "lineEnd": 150,
+            "lineStart": 148,
+            "snippetSha256": "sha256:78ce8de5bd603a7a345e3ac65e7dc86398bdf5b5661daff7fb772f75a786b87e",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x415db8ef",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "resolvedPrimaryPolicyHash(bytes32,uint256,uint256,bytes32,bytes32,address,bytes32)",
+          "displaySignature": "resolvedPrimaryPolicyHash(bytes32,uint256,uint256,bytes32,bytes32,address,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xd230c33d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "name": "assignmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4ZDIzMGMzM2Q",
+          "kind": "function",
+          "modifiers": [],
+          "name": "resolvedPrimaryPolicyHash",
+          "natspec": "@notice Computes the resolved primary policy hash for explicit settlement inputs.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 434,
+            "byteStart": 6271,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L153-L165",
+            "lineEnd": 165,
+            "lineStart": 153,
+            "snippetSha256": "sha256:4da1cce677f93f597621b04403c2ae3feb03d1158be0515a07d7c5d430300e8c",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0xd230c33d",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "officialSettled(bytes32,bytes32,address,address)",
+          "displaySignature": "officialSettled(bytes32,bytes32,address,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xabf7c729",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOjB4YWJmN2M3Mjk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "officialSettled",
+          "natspec": "@notice Returns official primary revenue settled for a wallet/profile/revenue class/asset.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 275,
+            "byteStart": 6810,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L168-L175",
+            "lineEnd": 175,
+            "lineStart": 168,
+            "snippetSha256": "sha256:27535d85c2f3008c6384a0d0eca5223be702f8f491a497c8b05c2dca91dbbd03",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0xabf7c729",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requireSettlementCaller()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_requireSettlementCaller()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9yZXF1aXJlU2V0dGxlbWVudENhbGxlcigp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requireSettlementCaller",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 172,
+            "byteStart": 7091,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L177-L181",
+            "lineEnd": 181,
+            "lineStart": 177,
+            "snippetSha256": "sha256:4b5aa2dfb1764887ad202497138797faec8aaad5403ad56199d5b11cd68b5caa",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_validateSale(PrimarySale)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_validateSale(PrimarySale)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "sale",
+              "storageLocation": "calldata",
+              "type": "PrimarySale"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl92YWxpZGF0ZVNhbGUoUHJpbWFyeVNhbGUp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_validateSale",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 573,
+            "byteStart": 7269,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L183-L197",
+            "lineEnd": 197,
+            "lineStart": 183,
+            "snippetSha256": "sha256:8b12aec82472b751a99da785949f4424dc3c041492bcbf2410d45f120a0d9247",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requireSettlementUnconsumed(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_requireSettlementUnconsumed(bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "key",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9yZXF1aXJlU2V0dGxlbWVudFVuY29uc3VtZWQoYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requireSettlementUnconsumed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 171,
+            "byteStart": 7848,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L199-L203",
+            "lineEnd": 203,
+            "lineStart": 199,
+            "snippetSha256": "sha256:57fe76d4bfdc633e728be3d4e6ee18673adb413f901f0cbbdf46bc2a339f3feb",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_consumeSettlementKey(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_consumeSettlementKey(bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "key",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9jb25zdW1lU2V0dGxlbWVudEtleShieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_consumeSettlementKey",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 99,
+            "byteStart": 8025,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L205-L207",
+            "lineEnd": 207,
+            "lineStart": 205,
+            "snippetSha256": "sha256:3dab33eefcd1777c3a7779183490aad0b0d2733163c65867ceab79b4051d7729",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_resolveSale(PrimarySale)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_resolveSale(PrimarySale)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "sale",
+              "storageLocation": "calldata",
+              "type": "PrimarySale"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9yZXNvbHZlU2FsZShQcmltYXJ5U2FsZSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_resolveSale",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "resolution",
+              "storageLocation": "memory",
+              "type": "SaleResolution"
+            }
+          ],
+          "range": {
+            "byteLength": 2353,
+            "byteStart": 8130,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L209-L259",
+            "lineEnd": 259,
+            "lineStart": 209,
+            "snippetSha256": "sha256:cb0324d1e05b457ea6d759586a56c222b62b85232b52f7ebab0947fff1e769a0",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_recordOfficialSettlement(bytes32,PrimarySale,address,SaleResolution)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_recordOfficialSettlement(bytes32,PrimarySale,address,SaleResolution)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "key",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "sale",
+              "storageLocation": "calldata",
+              "type": "PrimarySale"
+            },
+            {
+              "index": 2,
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "resolution",
+              "storageLocation": "memory",
+              "type": "SaleResolution"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9yZWNvcmRPZmZpY2lhbFNldHRsZW1lbnQoYnl0ZXMzMixQcmltYXJ5U2FsZSxhZGRyZXNzLFNhbGVSZXNvbHV0aW9uKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_recordOfficialSettlement",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 840,
+            "byteStart": 10489,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L261-L278",
+            "lineEnd": 278,
+            "lineStart": 261,
+            "snippetSha256": "sha256:a50234b2608916be90a4df03aba0de4ae26b964c8cf9a53f1ee3d8459537e4bf",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_emitPrimaryRevenueSettled(bytes32,PrimarySale,address,SaleResolution,bytes32,bool)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_emitPrimaryRevenueSettled(bytes32,PrimarySale,address,SaleResolution,bytes32,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "key",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "sale",
+              "storageLocation": "calldata",
+              "type": "PrimarySale"
+            },
+            {
+              "index": 2,
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "resolution",
+              "storageLocation": "memory",
+              "type": "SaleResolution"
+            },
+            {
+              "index": 4,
+              "name": "contextHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "policyDrift",
+              "type": "bool"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9lbWl0UHJpbWFyeVJldmVudWVTZXR0bGVkKGJ5dGVzMzIsUHJpbWFyeVNhbGUsYWRkcmVzcyxTYWxlUmVzb2x1dGlvbixieXRlczMyLGJvb2wp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_emitPrimaryRevenueSettled",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 549,
+            "byteStart": 11335,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L280-L300",
+            "lineEnd": 300,
+            "lineStart": 280,
+            "snippetSha256": "sha256:4b7104328cb7afa6dde290157fcf947eb9573a49fc5bd1a2ad2a2906362c1d83",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_emitPrimaryRevenueSettlementContext(bytes32,PrimarySale,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_emitPrimaryRevenueSettlementContext(bytes32,PrimarySale,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "key",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "sale",
+              "storageLocation": "calldata",
+              "type": "PrimarySale"
+            },
+            {
+              "index": 2,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9lbWl0UHJpbWFyeVJldmVudWVTZXR0bGVtZW50Q29udGV4dChieXRlczMyLFByaW1hcnlTYWxlLGJ5dGVzMzIsYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_emitPrimaryRevenueSettlementContext",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 550,
+            "byteStart": 11890,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L302-L322",
+            "lineEnd": 322,
+            "lineStart": 302,
+            "snippetSha256": "sha256:975f08faff50e42de2b45f0fd28bc013c1689a9fc8d70aa9ebfc61923f77ea53",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_emitPrimaryRevenueSettlementPolicy(bytes32,PrimarySale,SaleResolution)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_emitPrimaryRevenueSettlementPolicy(bytes32,PrimarySale,SaleResolution)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "key",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "sale",
+              "storageLocation": "calldata",
+              "type": "PrimarySale"
+            },
+            {
+              "index": 2,
+              "name": "resolution",
+              "storageLocation": "memory",
+              "type": "SaleResolution"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9lbWl0UHJpbWFyeVJldmVudWVTZXR0bGVtZW50UG9saWN5KGJ5dGVzMzIsUHJpbWFyeVNhbGUsU2FsZVJlc29sdXRpb24p",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_emitPrimaryRevenueSettlementPolicy",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 455,
+            "byteStart": 12446,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L324-L338",
+            "lineEnd": 338,
+            "lineStart": 324,
+            "snippetSha256": "sha256:27bbfda165c9e4b783b26da3a5d5015738f2d2023b1203d5c89b1bf6ab296271",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requireActiveAsset(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_requireActiveAsset(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9yZXF1aXJlQWN0aXZlQXNzZXQoYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requireActiveAsset",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 713,
+            "byteStart": 12907,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L340-L355",
+            "lineEnd": 355,
+            "lineStart": 340,
+            "snippetSha256": "sha256:a6b6f2838eff3e06f62610740565054cd02cb5fd3bc37a162b4ac37198661108",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_settlementKey(PrimarySale)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_settlementKey(PrimarySale)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "sale",
+              "storageLocation": "calldata",
+              "type": "PrimarySale"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9zZXR0bGVtZW50S2V5KFByaW1hcnlTYWxlKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_settlementKey",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 558,
+            "byteStart": 13626,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L357-L374",
+            "lineEnd": 374,
+            "lineStart": 357,
+            "snippetSha256": "sha256:0f137069e21edafb9b9055918c51aa8653bc5fa598353933359c3602ea98e8ca",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_officialSettledKey(bytes32,bytes32,address,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_officialSettledKey(bytes32,bytes32,address,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9vZmZpY2lhbFNldHRsZWRLZXkoYnl0ZXMzMixieXRlczMyLGFkZHJlc3MsYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_officialSettledKey",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 303,
+            "byteStart": 14190,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L376-L385",
+            "lineEnd": 385,
+            "lineStart": 376,
+            "snippetSha256": "sha256:fdca5e8b7cb434a812e45cbf9daf084dce3223cfaf25184a663cf2815661cf53",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_saleContextHash(PrimarySale,address,SaleResolution)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_saleContextHash(PrimarySale,address,SaleResolution)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "sale",
+              "storageLocation": "calldata",
+              "type": "PrimarySale"
+            },
+            {
+              "index": 1,
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "resolution",
+              "storageLocation": "memory",
+              "type": "SaleResolution"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9zYWxlQ29udGV4dEhhc2goUHJpbWFyeVNhbGUsYWRkcmVzcyxTYWxlUmVzb2x1dGlvbik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_saleContextHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 1168,
+            "byteStart": 14499,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L387-L421",
+            "lineEnd": 421,
+            "lineStart": 387,
+            "snippetSha256": "sha256:05b489feecc2e4d916a5ef3b50abfeaec233a2ecf0176ae5ac21639a4a844b88",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_resolvedPrimaryPolicyHash(bytes32,uint256,uint256,bytes32,bytes32,address,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_resolvedPrimaryPolicyHash(bytes32,uint256,uint256,bytes32,bytes32,address,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "name": "assignmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9yZXNvbHZlZFByaW1hcnlQb2xpY3lIYXNoKGJ5dGVzMzIsdWludDI1Nix1aW50MjU2LGJ5dGVzMzIsYnl0ZXMzMixhZGRyZXNzLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_resolvedPrimaryPolicyHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 667,
+            "byteStart": 15673,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L423-L446",
+            "lineEnd": 446,
+            "lineStart": 423,
+            "snippetSha256": "sha256:6644c94ea3cb1a1c1053b9a0c7e88595367f31b48d5235bc6cdb3680d188e63f",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_readAssetStatusWord(address,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_readAssetStatusWord(address,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9yZWFkQXNzZXRTdGF0dXNXb3JkKGFkZHJlc3MsYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_readAssetStatusWord",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "statusWord",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 824,
+            "byteStart": 16346,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L448-L469",
+            "lineEnd": 469,
+            "lineStart": 448,
+            "snippetSha256": "sha256:498384db4bdb4275857d8b3a54f02b703b82316eb6a3365be6948d13348735fe",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_erc20BalanceOf(address,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_erc20BalanceOf(address,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9lcmMyMEJhbGFuY2VPZihhZGRyZXNzLGFkZHJlc3Mp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_erc20BalanceOf",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 736,
+            "byteStart": 17176,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L471-L488",
+            "lineEnd": 488,
+            "lineStart": 471,
+            "snippetSha256": "sha256:131686da55fe85bbabfc521aab32677712475762fad60a2b8664e8850ea5557b",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_transferFromERC20(address,address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_transferFromERC20(address,address,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl90cmFuc2ZlckZyb21FUkMyMChhZGRyZXNzLGFkZHJlc3MsYWRkcmVzcyx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_transferFromERC20",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 348,
+            "byteStart": 17918,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L490-L495",
+            "lineEnd": 495,
+            "lineStart": 490,
+            "snippetSha256": "sha256:e30d9e865b288aa9b6214bf3270a0409900a60a8b50da16cbd44772e2c069d79",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_transferERC20(address,address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_transferERC20(address,address,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl90cmFuc2ZlckVSQzIwKGFkZHJlc3MsYWRkcmVzcyxhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_transferERC20",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 334,
+            "byteStart": 18272,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L497-L502",
+            "lineEnd": 502,
+            "lineStart": 497,
+            "snippetSha256": "sha256:b59ff714b07043b27b0b6910bf559d179b98951227bc49a8208f3c7a67226b24",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertERC20TransferDelta(address,address,address,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_assertERC20TransferDelta(address,address,address,uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "fromBefore",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "toBefore",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9hc3NlcnRFUkMyMFRyYW5zZmVyRGVsdGEoYWRkcmVzcyxhZGRyZXNzLGFkZHJlc3MsdWludDI1Nix1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertERC20TransferDelta",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 858,
+            "byteStart": 18612,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L504-L526",
+            "lineEnd": 526,
+            "lineStart": 504,
+            "snippetSha256": "sha256:05282eb1cbaee1a70039233e678d4fb891b1c05ae67ed72bdf0f47a66287fdac",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_callTransferFrom(address,address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_callTransferFrom(address,address,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9jYWxsVHJhbnNmZXJGcm9tKGFkZHJlc3MsYWRkcmVzcyxhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_callTransferFrom",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 881,
+            "byteStart": 19476,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L528-L548",
+            "lineEnd": 548,
+            "lineStart": 528,
+            "snippetSha256": "sha256:a0f03249740f0d16fd54389f6ae4b879124d93ed80246de92fd9c14ac46ce881",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_callTransfer(address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:_callTransfer(address,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50I2Z1bmN0aW9uOl9jYWxsVHJhbnNmZXIoYWRkcmVzcyxhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_callTransfer",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 827,
+            "byteStart": 20363,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L550-L569",
+            "lineEnd": 569,
+            "lineStart": 550,
+            "snippetSha256": "sha256:6a8bf19f97920bdcf3ca5747ff211a7ac1d23357ac1eb828aedf86b2e5f3c746",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_SETTLEMENT_KEY_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 107,
+            "byteStart": 731,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L18-L19",
+            "lineEnd": 19,
+            "lineStart": 18,
+            "snippetSha256": "sha256:e06e65c819a65558cdb7c95d903a77fde0df4f4aab6576e971b19ca45e13fce3",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 49,
+            "byteStart": 789,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:ec444f6530e5a6d273fcd50feaefa04e9fbb9b79242932ed1537503c7d0e50d6",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "valueSource": "keccak256(\"6529STREAM_PRIMARY_SETTLEMENT_KEY_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_OFFICIAL_SETTLED_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 111,
+            "byteStart": 844,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L20-L21",
+            "lineEnd": 21,
+            "lineStart": 20,
+            "snippetSha256": "sha256:cc68c9b68abecb041bd1d9036c7e651f1119a765047c413d4e56d92b2813e9f2",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 51,
+            "byteStart": 904,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:64883e7178c3b04745686d7b834db5a0e5c4a44cc4b605db4b3ac46a5fce5842",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "valueSource": "keccak256(\"6529STREAM_OFFICIAL_PRIMARY_SETTLED_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_SALE_CONTEXT_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 95,
+            "byteStart": 961,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:4714d4883427d427732eb4b121378c6710c4c109c5d65af3bedd4d7dd8c1cce7",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 47,
+            "byteStart": 1009,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:06ebfc5b388dab879d8a085cc6c264aa5aa767217308f34082ef69bafd17b521",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "valueSource": "keccak256(\"6529STREAM_PRIMARY_SALE_CONTEXT_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_ASSET_STATUS_ACTIVE",
+          "natspec": "",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 1062,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:fca11c1bb579c7c6b531d2b398f2fb0f76b8a2d8e9e200f83df5c60dc0f66856",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1108,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_ASSET_POLICY_GAS_LIMIT",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 1115,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:2ad7450018913c4d19a314a5889dcc6df5a8e9a8814fdcc3a65527f182b5f2e0",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 6,
+            "byteStart": 1166,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:b751cf85b709f0cc8c8771e4a5195f1284c3e9622a92fe5bafc1fd6a7942e098",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "valueSource": "30_000",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_ASSET_POLICY_PARENT_GAS_MIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 62,
+            "byteStart": 1178,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:0c783d07086890706d30b084b2333bf2adebf25fee1102de5794944de86f5245",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 6,
+            "byteStart": 1234,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:595b9e8119b201c14208f400e11e797765ce2591f00a1549b5c5740175125333",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "valueSource": "31_000",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xb332feb7",
+          "immutable": false,
+          "name": "PRIMARY_POLICY_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 94,
+            "byteStart": 1247,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:b1ae71b10498766e8e372ae927e2c2814197ab63912ab8f34e732f1e5d95c388",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0xb332feb7",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 37,
+            "byteStart": 1304,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:f4b0770ef9f871b6959248eab9450dace374a540061b6edabdd93478c8db122d",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "valueSource": "keccak256(\"STREAM_PRIMARY_POLICY_V1\")",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x727e963c",
+          "immutable": false,
+          "name": "POLICY_MODE_STRICT_MATCH",
+          "natspec": "",
+          "range": {
+            "byteLength": 59,
+            "byteStart": 1347,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:30f7039c312ad956712af73dcebeae272c4529b57a946f2ec902f9101870f90c",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x727e963c",
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1405,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "valueSource": "0",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x3bd99f40",
+          "immutable": false,
+          "name": "POLICY_MODE_ALLOW_CURRENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 1412,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:a9271aeab9995a6a5cc9bbb9a004832fcb9e01b2b260e512fd5713aee208bf22",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x3bd99f40",
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1471,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "valueSource": "1",
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x86624fc7",
+          "immutable": true,
+          "name": "revenueResolver",
+          "natspec": "",
+          "range": {
+            "byteLength": 64,
+            "byteStart": 1479,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:ed3987c6a849f9167dd99fd6b7dde95ea7673fa95c107cefe596d897ca5fca5d",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x86624fc7",
+          "type": "IStreamRevenueResolver",
+          "typeString": "contract IStreamRevenueResolver",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x5720babb",
+          "immutable": true,
+          "name": "splitFactory",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 1549,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:00c64c4b1df0a5f02aa48c6da8fee61454836369e3b9cce5c1005fabc955365c",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x5720babb",
+          "type": "IStreamSplitFactory",
+          "typeString": "contract IStreamSplitFactory",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xdecadc35",
+          "immutable": true,
+          "name": "assetPolicyRegistry",
+          "natspec": "",
+          "range": {
+            "byteLength": 63,
+            "byteStart": 1604,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L33",
+            "lineEnd": 33,
+            "lineStart": 33,
+            "snippetSha256": "sha256:a8eaae173a4b57cae3c8c212c09b7e736271f7f5e19ca9c632125ec1c116a962",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0xdecadc35",
+          "type": "IStreamAssetPolicyRegistry",
+          "typeString": "contract IStreamAssetPolicyRegistry",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x2ae34e97",
+          "immutable": false,
+          "name": "settlementCaller",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 1674,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:43a333b905e1f6b7347770b612694968ca4fb0bedde1f74b795ce0ab3e7c0117",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x2ae34e97",
+          "type": "mapping(address => bool)",
+          "typeString": "mapping(address => bool)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x37cfadd5",
+          "immutable": false,
+          "name": "settlementConsumed",
+          "natspec": "",
+          "range": {
+            "byteLength": 59,
+            "byteStart": 1737,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:4934a3dd2b239acfa16800b3375beb7922318f67590dae45cc68e0949a735994",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x37cfadd5",
+          "type": "mapping(bytes32 => bool)",
+          "typeString": "mapping(bytes32 => bool)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_officialSettled",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 1802,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L37",
+            "lineEnd": 37,
+            "lineStart": 37,
+            "snippetSha256": "sha256:c19dd9cb3239adab7d110b241ec11acca7d4abf225cb92d59b353595abd20896",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": null,
+          "type": "mapping(bytes32 => uint256)",
+          "typeString": "mapping(bytes32 => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x7fe3b24d",
+          "immutable": false,
+          "name": "totalOfficialSettled",
+          "natspec": "",
+          "range": {
+            "byteLength": 64,
+            "byteStart": 1860,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L38",
+            "lineEnd": 38,
+            "lineStart": 38,
+            "snippetSha256": "sha256:12cd57ff40330a1aa8ba548b7e0eb1293b08c0d2e0d4c21f7ecc2e4bbf1fc67f",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x7fe3b24d",
+          "type": "mapping(address => uint256)",
+          "typeString": "mapping(address => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 1963,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L41",
+                "lineEnd": 41,
+                "lineStart": 41,
+                "snippetSha256": "sha256:9f154ecbe289dfcbcd7915cdb1b76db2162efe110fe1998098198b6d406c4e34",
+                "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "wallet",
+              "natspec": "",
+              "range": {
+                "byteLength": 14,
+                "byteStart": 1990,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L42",
+                "lineEnd": 42,
+                "lineStart": 42,
+                "snippetSha256": "sha256:3b7274fae428c46b6e121f22842d54b3aa41e98693566acb5ff40945bda2c006",
+                "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 2,
+              "name": "assignmentType",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 2014,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L43",
+                "lineEnd": 43,
+                "lineStart": 43,
+                "snippetSha256": "sha256:f5476c853143235f90e2d934d9030ddc4a1f724379cfb8dddc0ce67958d91a3f",
+                "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+              },
+              "type": "uint8",
+              "typeString": "uint8"
+            },
+            {
+              "index": 3,
+              "name": "templateId",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 2044,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L44",
+                "lineEnd": 44,
+                "lineStart": 44,
+                "snippetSha256": "sha256:4bb94f67985b3b2e43836e4a38e7d25ed4e6255253e58d6c6dab59bd1819b683",
+                "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "assignmentHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 2072,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L45",
+                "lineEnd": 45,
+                "lineStart": 45,
+                "snippetSha256": "sha256:1da723630c9ccd3822843065e70f4812bb7c634ade6cf1f57ba60be20adaffa9",
+                "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "resolvedPolicyHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 26,
+                "byteStart": 2104,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L46",
+                "lineEnd": 46,
+                "lineStart": 46,
+                "snippetSha256": "sha256:fe7f436867ae334460b2c2f6835357f25daef606b5a010f49228f3160ea31859",
+                "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "SaleResolution",
+          "natspec": "",
+          "range": {
+            "byteLength": 206,
+            "byteStart": 1931,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L40-L47",
+            "lineEnd": 47,
+            "lineStart": 40,
+            "snippetSha256": "sha256:bbfa4d6158674c8b2eaa63c2deb6b03e2f03b2c3a02fd3182b58713f038bc431",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement",
+        "name": "IStreamPrimarySaleSettlement"
+      },
+      {
+        "definitionId": "smart-contracts/Ownable.sol:Ownable",
+        "name": "Ownable"
+      },
+      {
+        "definitionId": "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard",
+        "name": "ReentrancyGuard"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+      "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard",
+      "smart-contracts/Ownable.sol:Ownable",
+      "smart-contracts/Context.sol:Context",
+      "smart-contracts/IStreamPrimarySaleSettlement.sol:IStreamPrimarySaleSettlement"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": true,
+      "releaseCatalog": "production_contract"
+    },
+    "name": "StreamPrimarySaleSettlement",
+    "natspec": "@notice Outside-Core adapter for recording official primary-sale settlement evidence.",
+    "range": {
+      "byteLength": 20562,
+      "byteStart": 630,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L17-L570",
+      "lineEnd": 570,
+      "lineStart": 17,
+      "snippetSha256": "sha256:4b860e6b3d04413ca261d329a1c8790c18aed405756d4bcefdf3b2e4caeb6d97",
+      "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+    },
+    "release": {
+      "abiSha256": "sha256:48fc686d6b7e094b3d93322cf5713c2252068bf3db6d387e1ff7ec92f2afaff8",
+      "bytecodeSha256": "sha256:ab63cac7ba99e96a065aad3d015a0e871b870e6a4bd00cd6f6e4433c007e7e79",
+      "deployedBytecodeSha256": "sha256:02d7a64c722fdc18193377b4014f6d7a48b2a4a0eab2fae24e70f75652e38b23",
+      "deployedBytecodeSizeBytes": 7855,
+      "summary": {
+        "custom_error_count": 17,
+        "event_count": 5,
+        "function_count": 19,
+        "payable_function_count": 1,
+        "read_function_count": 14,
+        "write_function_count": 5
+      },
+      "tracked": true
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamPrimarySaleSettlement.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 10
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 10
+    },
+    "totalCount": 10
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x2ae34e97",
+      "definitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x37cfadd5",
+      "definitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x3bd99f40",
+      "definitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x5720babb",
+      "definitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x727e963c",
+      "definitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x7fe3b24d",
+      "definitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0x86624fc7",
+      "definitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xb332feb7",
+      "definitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:0xdecadc35",
+      "definitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement#function:constructor(IStreamRevenueResolver)",
+      "definitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:StreamPrimarySaleSettlement",
+      "severity": "advisory"
+    }
+  ]
+}

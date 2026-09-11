@@ -2,8 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useWaveWebSocket } from "./useWaveWebSocket";
-import type { WsDropUpdateMessage, WsTypingMessage } from "@/helpers/Types";
-import { WsMessageType } from "@/helpers/Types";
+import type {
+  WsDropUpdateMessage,
+  WsDropUpdateRefMessage,
+  WsTypingMessage,
+} from "@/helpers/Types";
+import { isWsDropUpdateRefData, WsMessageType } from "@/helpers/Types";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */
@@ -99,6 +103,13 @@ const isWsDropUpdateMessage = (
   return isRecord(author) && typeof author["handle"] === "string";
 };
 
+const isWsDropUpdateRefMessage = (
+  value: unknown
+): value is WsDropUpdateRefMessage =>
+  isRecord(value) &&
+  value["type"] === WsMessageType.DROP_UPDATE_REF &&
+  isWsDropUpdateRefData(value["data"]);
+
 /* ------------------------------------------------------------------ */
 /*  Hook                                                              */
 /* ------------------------------------------------------------------ */
@@ -149,6 +160,16 @@ export function useWaveIsTyping(
         if (authorHandle) {
           typersRef.current.delete(authorHandle);
         }
+      }
+      if (
+        isWsDropUpdateRefMessage(msg) &&
+        msg.data.update_type === WsMessageType.DROP_UPDATE &&
+        msg.data.wave_id === waveId
+      ) {
+        // Compact refs deliberately omit author data. Clear the subscribed
+        // Wave's typing state so a completed large post cannot leave a stale
+        // indicator behind.
+        typersRef.current.clear();
       }
       if (!isWsTypingMessage(msg)) return;
       const data = msg.data;

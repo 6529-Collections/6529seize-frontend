@@ -1,15 +1,26 @@
 import { render, screen } from "@testing-library/react";
 import NotificationWaveCreated from "@/components/brain/notifications/wave-created/NotificationWaveCreated";
+import type { ComponentProps } from "react";
+
+type MockNextLinkProps = ComponentProps<"a"> & {
+  readonly prefetch?: boolean | undefined;
+};
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: (p: any) => <a {...p}>{p.children}</a>,
+  default: ({ prefetch, ...props }: MockNextLinkProps) => (
+    <a data-prefetch={String(prefetch)} {...props} />
+  ),
 }));
 jest.mock(
   "@/components/brain/notifications/wave-created/NotificationWaveFollowBtn",
   () => ({
     __esModule: true,
-    default: () => <div data-testid="wave-follow" />,
+    default: (props: { followLabel?: string; followingLabel?: string }) => (
+      <div data-testid="wave-follow">
+        {props.followLabel}/{props.followingLabel}
+      </div>
+    ),
   })
 );
 jest.mock("@/hooks/useDeviceInfo", () => ({
@@ -18,7 +29,11 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 }));
 jest.mock("@/components/brain/notifications/NotificationsFollowBtn", () => ({
   __esModule: true,
-  default: () => <div data-testid="follow-btn" />,
+  default: (props: { followLabel?: string; followingLabel?: string }) => (
+    <div data-testid="follow-btn">
+      {props.followLabel}/{props.followingLabel}
+    </div>
+  ),
 }));
 jest.mock("@/helpers/image.helpers", () => ({
   getScaledImageUri: () => "/scaled.jpg",
@@ -47,14 +62,62 @@ it("renders wave data and links", () => {
     "href",
     "/alice"
   );
+  expect(screen.getByRole("link", { name: "alice" })).toHaveAttribute(
+    "data-prefetch",
+    "false"
+  );
   expect(screen.getByRole("link", { name: "Wave 1" })).toHaveAttribute(
     "href",
     "/waves/1"
   );
-  expect(screen.getByTestId("wave-follow")).toBeInTheDocument();
-  expect(screen.getByTestId("follow-btn")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Wave 1" })).toHaveAttribute(
+    "data-prefetch",
+    "false"
+  );
+  expect(
+    screen.getByText("created a wave you can access:")
+  ).toBeInTheDocument();
+  expect(screen.getByTestId("wave-follow")).toHaveTextContent(
+    "Join wave/Joined"
+  );
+  expect(screen.getByTestId("follow-btn")).toHaveTextContent(
+    "Follow creator/Following creator"
+  );
   const img = screen.getByRole("img");
   expect(img.getAttribute("src")).toContain("scaled.jpg");
+});
+
+it("renders direct message wave notifications with DM copy and action", () => {
+  render(
+    <NotificationWaveCreated
+      notification={{
+        ...notification,
+        related_wave: {
+          ...notification.related_wave,
+          is_dm_wave: true,
+        },
+      }}
+    />
+  );
+
+  expect(screen.getByText("started a DM with you:")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Wave 1" })).toHaveAttribute(
+    "href",
+    "/messages/1"
+  );
+  expect(screen.getByRole("link", { name: "Open DM" })).toHaveAttribute(
+    "href",
+    "/messages/1"
+  );
+  expect(screen.getByRole("link", { name: "Wave 1" })).toHaveAttribute(
+    "data-prefetch",
+    "false"
+  );
+  expect(screen.getByRole("link", { name: "Open DM" })).toHaveAttribute(
+    "data-prefetch",
+    "false"
+  );
+  expect(screen.queryByTestId("wave-follow")).toBeNull();
 });
 
 it("renders fallback wave text without a link when wave id is missing", () => {

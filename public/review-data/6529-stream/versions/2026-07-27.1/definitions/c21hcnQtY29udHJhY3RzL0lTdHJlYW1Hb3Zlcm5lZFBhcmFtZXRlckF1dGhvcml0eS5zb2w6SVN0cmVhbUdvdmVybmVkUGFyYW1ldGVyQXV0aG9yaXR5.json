@@ -1,0 +1,227 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamGovernedParameterAuthority.sol:IStreamGovernedParameterAuthority#function:0x546ea281",
+          "declaringDefinitionId": "smart-contracts/IStreamGovernedParameterAuthority.sol:IStreamGovernedParameterAuthority",
+          "inherited": false,
+          "inputs": [],
+          "name": "currentAction",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "executing",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x546ea281",
+          "signature": "currentAction()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGovernedParameterAuthority.sol:IStreamGovernedParameterAuthority#function:0x8d96760d",
+          "declaringDefinitionId": "smart-contracts/IStreamGovernedParameterAuthority.sol:IStreamGovernedParameterAuthority",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamGovernedParameterAuthority",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x8d96760d",
+          "signature": "isStreamGovernedParameterAuthority()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "isStreamGovernedParameterAuthority()",
+          "displaySignature": "isStreamGovernedParameterAuthority()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamGovernedParameterAuthority.sol:IStreamGovernedParameterAuthority#function:0x8d96760d",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Hb3Zlcm5lZFBhcmFtZXRlckF1dGhvcml0eS5zb2w6SVN0cmVhbUdvdmVybmVkUGFyYW1ldGVyQXV0aG9yaXR5I2Z1bmN0aW9uOjB4OGQ5Njc2MGQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamGovernedParameterAuthority",
+          "natspec": "@notice Returns true for deployment-time wiring validation.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 75,
+            "byteStart": 734,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernedParameterAuthority.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:2b4eb6b8800cb6061392e90b2f75b7bf407ac49de83f95ed8468975736c8e19d",
+            "sourceSha256": "sha256:d8e32f79e4dbb7a072c00efd112bdc7d9edce45e91026654d89c5c2ec3608731"
+          },
+          "selector": "0x8d96760d",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "currentAction()",
+          "displaySignature": "currentAction()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamGovernedParameterAuthority.sol:IStreamGovernedParameterAuthority#function:0x546ea281",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Hb3Zlcm5lZFBhcmFtZXRlckF1dGhvcml0eS5zb2w6SVN0cmVhbUdvdmVybmVkUGFyYW1ldGVyQXV0aG9yaXR5I2Z1bmN0aW9uOjB4NTQ2ZWEyODE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "currentAction",
+          "natspec": "@notice Governance-V2 per-call execution context. Outside an executing\n         target call all six returns are zero.\n @dev Selector: `0x546ea281`. Parameter hosts derive the event action id\n      and verify transition commitments exclusively from this context.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "executing",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 270,
+            "byteStart": 1106,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernedParameterAuthority.sol#L20-L30",
+            "lineEnd": 30,
+            "lineStart": 20,
+            "snippetSha256": "sha256:973ba550e75edc1db48537588c86f98663f68600c8e36c345820047aaa540440",
+            "sourceSha256": "sha256:d8e32f79e4dbb7a072c00efd112bdc7d9edce45e91026654d89c5c2ec3608731"
+          },
+          "selector": "0x546ea281",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamGovernedParameterAuthority.sol:IStreamGovernedParameterAuthority",
+    "inheritance": [],
+    "interface": {
+      "abiSha256": "sha256:2781c74c319f8cf9256fc141171c74c00f8280fb1be9b23152387144f99b73ab",
+      "interfaceId": "0xd9f8d48c",
+      "interfaceIdSource": "selector_xor",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Hb3Zlcm5lZFBhcmFtZXRlckF1dGhvcml0eS5zb2w6SVN0cmVhbUdvdmVybmVkUGFyYW1ldGVyQXV0aG9yaXR5",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamGovernedParameterAuthority.sol:IStreamGovernedParameterAuthority"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IStreamGovernedParameterAuthority",
+    "natspec": "@notice Narrow target-side seam between Governed Gas/Time Parameter hosts\n         and the canonical Governance-V2 executor of ADR 0004\n         [GOV-ACTION-ID], as rebaselined by ADR 0017.\n @dev Hosts accept no caller-supplied action id. Every governed mutation is\n      callable only by the immutable authority and independently verifies\n      the six-return in-flight action context before writing. The executor\n      owns action-id derivation; hosts own the exact action class and per-call\n      scope/old/new state commitments.",
+    "range": {
+      "byteLength": 762,
+      "byteStart": 616,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernedParameterAuthority.sol#L12-L31",
+      "lineEnd": 31,
+      "lineStart": 12,
+      "snippetSha256": "sha256:138176b83261ad014c9bc3e68ee1cccc6e14885557f8da3c1e0868a978711644",
+      "sourceSha256": "sha256:d8e32f79e4dbb7a072c00efd112bdc7d9edce45e91026654d89c5c2ec3608731"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamGovernedParameterAuthority.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

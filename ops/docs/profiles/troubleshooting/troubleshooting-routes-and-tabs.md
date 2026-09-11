@@ -73,6 +73,15 @@ Scope:
   - Meaning: canonical-handle normalization.
   - Action: save the canonical URL.
 
+- Symptom: a published custom profile page such as `/{user}/studio` cannot be found.
+  - Meaning: the profile handle is case-insensitive, but page names after the
+    handle remain case-sensitive. The page must exist in the active published
+    site; an unpublished draft is not a public route. Existing `/index.html`
+    archive paths also remain supported.
+  - Action: use the published page or navigation link and preserve its page-name
+    capitalization. Changing only the handle capitalization does not select a
+    different page.
+
 - Symptom: `/{user}/stats` shows `USER OR PAGE`.
   - Meaning: the standalone `Stats` route was removed.
   - Action: open `/{user}/collected` and use `Details` for profile stats behavior.
@@ -188,6 +197,7 @@ Scope:
 
 ## Related Pages
 
+- [Profile Website Studio](../feature-profile-cms-builder.md)
 - [Profiles Index](../README.md)
 - [Profiles Troubleshooting Index](README.md)
 - [Profile Routes and Tab Visibility](../navigation/feature-tabs.md)

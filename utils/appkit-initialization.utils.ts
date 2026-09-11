@@ -14,10 +14,19 @@ import type { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import type { AppKitNetwork } from "@reown/appkit-common";
 import type { Chain } from "viem";
 
+const COINBASE_WALLET_ID =
+  "fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa";
+
 // Configuration interface for AppKit initialization
-export interface AppKitInitializationConfig {
+export interface AppKitAdapterConfig {
   wallets: AppWallet[];
   adapterManager: AppKitAdapterManager;
+  isCapacitor: boolean;
+  chains: Chain[];
+}
+
+export interface AppKitInitializationConfig {
+  adapter: WagmiAdapter;
   isCapacitor: boolean;
   chains: Chain[];
 }
@@ -87,36 +96,42 @@ function createAdapter(
 }
 
 /**
- * Initializes AppKit with wallets using a fail-fast approach with retry logic
- * Extracted from WagmiSetup component for better maintainability and testability
+ * Creates the stable Wagmi adapter before the heavier AppKit bootstrap starts.
+ */
+export function createAppKitAdapter(config: AppKitAdapterConfig): WagmiAdapter {
+  const { wallets, adapterManager, isCapacitor } = config;
+
+  return createAdapter(wallets, adapterManager, isCapacitor, config.chains);
+}
+
+/**
+ * Initializes AppKit around an already-mounted Wagmi adapter.
  */
 export function initializeAppKit(
   config: AppKitInitializationConfig
 ): AppKitInitializationResult {
-  const { wallets, adapterManager, isCapacitor } = config;
-
-  const newAdapter = createAdapter(
-    wallets,
-    adapterManager,
-    isCapacitor,
-    config.chains
-  );
   const appKitConfig = buildAppKitConfig(
-    newAdapter,
+    config.adapter,
     config.chains,
-    isCapacitor
+    config.isCapacitor
   );
   const appKit = createAppKit(appKitConfig);
   const ready = appKit.ready();
   // Prevent unhandled rejections if a caller chooses not to await `ready`.
-  ready.catch((error) => {
-    logErrorSecurely("[AppKitInitialization] AppKit ready() failed", error);
-  });
+  void logAppKitReadyFailure(ready);
 
   return {
-    adapter: newAdapter,
+    adapter: config.adapter,
     ready,
   };
+}
+
+async function logAppKitReadyFailure(ready: Promise<void>): Promise<void> {
+  try {
+    await ready;
+  } catch (error) {
+    logErrorSecurely("[AppKitInitialization] AppKit ready() failed", error);
+  }
 }
 
 /**
@@ -149,9 +164,11 @@ function buildAppKitConfig(
     },
     themeVariables: {
       "--w3m-font-family": "'Montserrat', sans-serif",
+      "--w3m-z-index": 10000,
     },
     enableWalletGuide: false,
     enableCoinbase: !isCapacitor,
+    ...(isCapacitor ? { excludeWalletIds: [COINBASE_WALLET_ID] } : undefined),
     featuredWalletIds: ["metamask", "walletConnect"],
     allWallets: "SHOW" as const,
     features: {

@@ -1,5 +1,42 @@
 # AGENTS.md
 
+## Deployment
+
+- Follow `ops/skills/deploy-6529/SKILL.md` for authorized staging and production
+  work, using ordinary Git merges and the existing GitHub Actions workflows.
+- For new staging or direct production release intents that include frontend,
+  follow the skill's [Coordinator release recording](ops/skills/deploy-6529/SKILL.md#coordinator-release-recording)
+  step before release merges or deployments. Preserve this current integration
+  when changing deployment instructions; keep its details in the skill.
+- For staging, merge the development branch into the latest `1a-staging` and
+  push. Frontend changes automatically start `Web Deploy - STAGING`; backend
+  changes require dispatching `Deploy a service` for the required services.
+- For production, merge the development branch into `main`, then dispatch
+  `Web Deploy - PROD` for frontend or `Deploy a service` with `environment=prod`
+  for backend. A staging request alone does not authorize production.
+- Run backend service deployments sequentially in dependency order. Wait for
+  each run to succeed, then continue the next service in the same task without
+  asking for repeated authorization already covered by the requested phase.
+- Deploy backend dependencies before merging or deploying dependent frontend
+  changes in each environment. Read the backend service catalog and the change
+  to determine the units and order; avoid deploying unrelated services.
+- Fetch shared refs before merging. Preserve other developers' changes, resolve
+  conflicts normally, and never force-push or overwrite a moved shared ref.
+  Do not cancel another developer's deployment; coordinate through GitHub run
+  visibility and wait when the work would conflict.
+- Complete deployments after build, artifact integrity, runtime version, and
+  health checks pass. Automatic E2E runs separately and does not hold up a
+  merge, deployment, or promotion to the next authorized environment.
+- Unrelated PR E2E failures or pending runs do not block releases. Keep relevant
+  build, unit/contract, and security checks intact; report E2E status separately.
+  Fix known regressions attributable to the change on the development branch.
+- CI wave notifications carry deploy run IDs through E2E and reruns. The
+  backend alone resolves the drop reply target; notification failures remain
+  best effort. Keep receiver and sender contracts compatible during rollout.
+- Never author or post release notes manually. Preserve the autonomous bot's
+  PR/service grouping metadata and final publication signal; use the release-note opt-out
+  only when the user explicitly requests suppressing release notes.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # Next.js: ALWAYS read docs before coding
@@ -86,8 +123,15 @@ find the correct source of truth.
 All project commands must go through the repo-local `6529` wrapper.
 
 - Fresh shell setup: `./bin/6529 bootstrap` when needed.
-- Install dependencies: `6529 install`.
+- Install dependencies: `6529 ci`.
 - Add dependencies: `6529 add <package>` or `6529 add -D <package>`.
+- Remove dependencies: `6529 remove <package>`.
+- Update dependencies: `6529 update [package]`.
+- Audit dependencies: `6529 audit` or `6529 audit:fix`.
+- If a dependency needs an install/build script, add it to `allowBuilds` in
+  `pnpm-workspace.yaml` and `ALLOWED_BUILD_DEPENDENCIES` in
+  `scripts/public-package-policy.cjs` in the same reviewed pull request. Do not
+  approve build scripts automatically.
 - Run app: `6529 run dev`. The default local app port is `3001`.
 - Run scripts: `6529 run <script>`.
 - Do not use plain `pnpm install`, `pnpm dev`, `npm run ...`,
@@ -118,6 +162,14 @@ All project commands must go through the repo-local `6529` wrapper.
   `ops/standards/frontend-design-ui-ux.md` for repo-specific visual
   consistency, Tailwind-first styling migration, responsive layout, interaction
   states, media behavior, and browser evidence.
+- Every Network Museum PR that changes a public route, visible component,
+  layout, copy, or media must also pass the pre-PR full-page adversarial review
+  gate in `ops/standards/museum-visual-release-acceptance.md`. A PR must not be
+  opened until exact production-build screenshots of every changed Museum route
+  have been reviewed independently for museum/curatorial quality, visual/UX
+  quality, and copy/editorial quality, and all blocking findings have been fixed
+  and recaptured. Automated geometry, DOM, and accessibility checks do not
+  substitute for this gate.
 - Use `ops/skills/design-ui-ux/SKILL.md` for frontend design and UX review.
 - Use `ops/skills/wcag-22-aa/SKILL.md` for accessibility audits and fixes.
 - Use `ops/skills/i18n-localization/SKILL.md` for progressive localization
@@ -162,6 +214,32 @@ is available, use it; otherwise read the relevant files in
   and the repo patterns in `ops/standards/frontend-design-ui-ux.md`; scoped
   plain-CSS modules are the fallback where Tailwind cannot express a selector
   cleanly.
+
+## Capacitor iOS NFT purchasing visibility
+
+- Preserve the current regional rule: restrict first-party minting and paid
+  Meme subscription surfaces on Capacitor iOS when the IP-derived country is
+  not `US`. An unknown country is restricted. This is the current product rule;
+  do not silently replace it with all-iOS blocking or App Store storefront logic.
+- Use `useNftPurchasingVisibility` for new or changed surfaces and
+  `NftPurchasingGate` to keep restricted components from mounting. Preserve the
+  existing `shouldHideSubscriptions` country normalization.
+- Completely omit restricted sections, copy, cards, actions, navigation/search
+  entries, and subscription-coverage notification controls. Do not leave empty
+  cards, disabled purchase buttons, or an unavailable banner.
+- Direct and deep-linked restricted pages redirect to an appropriate allowed
+  destination: profile subscriptions to Identity, NextGen mint to its collection,
+  and About Minting/Subscriptions to `/about`. Do not mount purchasing content
+  or start its requests/contract hooks before redirecting; keep it hidden during
+  server rendering and hydration too.
+- Check inbound first-party links as well as the destination. Apply the same
+  checks to new mint/subscription promotions and notification entry points.
+- Preserve US iOS, Android, and web behavior. Ordinary user-authored posts and
+  links, NFT browsing/history, calendar invitations, and open-data reports are
+  not subject to blanket word or link suppression. Hide purchase promotions
+  embedded in otherwise allowed pages without removing those pages.
+- Cover restricted iOS, unknown country, US iOS, Android, web, and direct-link
+  behavior in focused tests. See the mobile-testing skill's purchasing checklist.
 
 ## Architecture Boundaries
 
@@ -218,13 +296,32 @@ is available, use it; otherwise read the relevant files in
     state changes.
   - `ops/skills/sonar-guardrails/SKILL.md` for TS/JS quality-sensitive edits.
   - `ops/skills/write-skills/SKILL.md` for repo-local skill work.
-- For merge, staging, production, or release-lane work, read
-  `ops/docs/developer/deployment-bus-process.md` and
+- For merge, staging, or production work, read
+  `ops/docs/developer/deployment.md` and
   `ops/skills/deploy-6529/SKILL.md` before acting.
 - Operational plans, roadmaps, runbooks, workstream state, and agent process
   docs belong under `ops/`, not top-level `docs/`.
 - Operational scripts belong under `ops/scripts/`; app build/runtime scripts
   stay under top-level `scripts/` when existing tooling expects them there.
+
+## Test Layer Selection
+
+- Reserve Playwright for behavior that can fail only, or materially
+  differently, in a real browser: rendering, hydration, navigation,
+  responsive layout, accessibility, and browser/runtime integration.
+- Do not add content-equivalent static-route enumeration to ordinary PR
+  Playwright. Exercise one representative route for each distinct rendering
+  template and required viewport; add another route only when it introduces a
+  distinct browser risk.
+- Keep exhaustive route inventories, static content, metadata, source mapping,
+  link, and fail-closed invariants in fast Jest or other static contract tests.
+  The existing Museum institutional-practice sweep is a scoped exception:
+  retain its complete desktop/mobile route coverage, but schedule its isolated
+  PR and staging lanes only when the exact change set touches the Network
+  Museum route, component, publication, locale, environment-adapter, or E2E
+  paths declared by the CI classifier.
+- Before adding or expanding an E2E pack, identify the browser-specific failure
+  it catches and check that a lower test layer does not already cover it.
 
 ## Validation Matrix
 
@@ -237,7 +334,10 @@ Prefer focused checks first. Escalate based on blast radius.
 - Broader changed-file validation: `6529 run check:changed`.
 - React, Next.js, JSX, TSX, hooks, routing, or UI state: also run
   `6529 run react-doctor:diff` when available.
-- Unit/integration behavior: targeted `6529 run test -- <pattern>`.
+- Unit/integration behavior: targeted `6529 run test <pattern>` (append flags
+  like `--testPathPatterns=<regex>` or `--cacheDirectory=<dir>` directly; do
+  not insert a `--` separator — jest reads everything after `--` as a
+  test-path pattern, so flags placed there are misread).
 - Playwright/user flows: `6529 run test:e2e` or a targeted Playwright run. The
   Playwright config starts `./bin/6529 run dev` on port `3001`.
 - Build-time, generated models, Next config, env/runtime config, proxy, routing,

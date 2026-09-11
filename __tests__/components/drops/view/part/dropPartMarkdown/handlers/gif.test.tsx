@@ -22,12 +22,18 @@ describe("createGifHandler", () => {
     jest.clearAllMocks();
   });
 
-  it("matches only Tenor GIF URLs", () => {
+  it("matches supported GIF provider URLs", () => {
     const handler = createGifHandler();
 
     expect(handler.match("https://media.tenor.com/abc/tenor.gif")).toBe(true);
     expect(handler.match("https://media.tenor.com/abc/tenor.jpg")).toBe(false);
     expect(handler.match("https://media.giphy.com/media/abc/giphy.gif")).toBe(
+      true
+    );
+    expect(handler.match("https://media1.giphy.com/media/abc/giphy.gif")).toBe(
+      true
+    );
+    expect(handler.match("https://media.giphy.com/media/abc/giphy.jpg")).toBe(
       false
     );
     expect(handler.match("https://example.com/image.gif")).toBe(false);

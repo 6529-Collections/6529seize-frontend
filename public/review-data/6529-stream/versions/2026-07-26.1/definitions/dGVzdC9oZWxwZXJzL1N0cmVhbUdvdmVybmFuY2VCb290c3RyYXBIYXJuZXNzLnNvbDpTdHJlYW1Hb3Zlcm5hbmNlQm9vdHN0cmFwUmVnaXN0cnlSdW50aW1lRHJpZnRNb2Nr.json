@@ -1,0 +1,620 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0x15276aad",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "internalType": "string",
+              "name": "moduleManifestURI",
+              "type": "string"
+            }
+          ],
+          "name": "addModule",
+          "outputs": [],
+          "selector": "0x15276aad",
+          "signature": "addModule(address,bytes32,bytes4,bytes32,bytes32,string)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0x4ad444b1",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "duplicateModuleInEnumeration",
+          "outputs": [],
+          "selector": "0x4ad444b1",
+          "signature": "duplicateModuleInEnumeration(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0xc675807d",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "hideModuleFromEnumeration",
+          "outputs": [],
+          "selector": "0xc675807d",
+          "signature": "hideModuleFromEnumeration(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0x5ffaf3d7",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "isModuleEligible",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x5ffaf3d7",
+          "signature": "isModuleEligible(address,bytes32,bytes4)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0xd216d296",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "moduleAt",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xd216d296",
+          "signature": "moduleAt(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0x334f7ac5",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [],
+          "name": "moduleCount",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x334f7ac5",
+          "signature": "moduleCount()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0x2a6a8074",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "moduleRecord",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamGovernanceEvidence.ModuleRecord",
+              "name": "record",
+              "type": "(uint8,bytes32,bytes32,bytes4,uint32,bytes32,bytes32,bytes32,string,uint64,uint64,uint64)"
+            }
+          ],
+          "selector": "0x2a6a8074",
+          "signature": "moduleRecord(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0x056c746f",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [],
+          "name": "moduleRegistryManifest",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "string",
+              "name": "manifestURI",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "internalType": "uint64",
+              "name": "manifestRevision",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x056c746f",
+          "signature": "moduleRegistryManifest()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0x7e669031",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [],
+          "name": "registrationChainHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "count",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x7e669031",
+          "signature": "registrationChainHash()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryRuntimeDriftMock#function:0x075eb1ed",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryRuntimeDriftMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "runtimeVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x075eb1ed",
+          "signature": "runtimeVersion()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0xe38e4273",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "allInterfaces_",
+              "type": "bool"
+            }
+          ],
+          "name": "setAllInterfaces",
+          "outputs": [],
+          "selector": "0xe38e4273",
+          "signature": "setAllInterfaces(bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0x7bdb052c",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "forceIneligible_",
+              "type": "bool"
+            }
+          ],
+          "name": "setForceIneligible",
+          "outputs": [],
+          "selector": "0x7bdb052c",
+          "signature": "setForceIneligible(bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0xcaad4b17",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "gasToBurn",
+              "type": "uint256"
+            }
+          ],
+          "name": "setInterfaceGasToBurn",
+          "outputs": [],
+          "selector": "0xcaad4b17",
+          "signature": "setInterfaceGasToBurn(uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0x5e443a53",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "gasToBurn",
+              "type": "uint256"
+            }
+          ],
+          "name": "setModuleCountGasToBurn",
+          "outputs": [],
+          "selector": "0x5e443a53",
+          "signature": "setModuleCountGasToBurn(uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0x1dfaba7c",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            }
+          ],
+          "name": "setModuleStatus",
+          "outputs": [],
+          "selector": "0x1dfaba7c",
+          "signature": "setModuleStatus(address,uint8)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0x193097f0",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "oversized_",
+              "type": "bool"
+            }
+          ],
+          "name": "setOversizedModuleRecordReturn",
+          "outputs": [],
+          "selector": "0x193097f0",
+          "signature": "setOversizedModuleRecordReturn(bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0xf48e0e44",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "offset",
+              "type": "uint256"
+            }
+          ],
+          "name": "setReportedModuleCountOffset",
+          "outputs": [],
+          "selector": "0xf48e0e44",
+          "signature": "setReportedModuleCountOffset(uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0x30db7634",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "probe",
+              "type": "address"
+            }
+          ],
+          "name": "setWarmthVariant",
+          "outputs": [],
+          "selector": "0x30db7634",
+          "signature": "setWarmthVariant(address,address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock#function:0x01ffc9a7",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(bytes32,string,uint64)",
+          "functionKind": "constructor",
+          "id": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryRuntimeDriftMock#function:constructor(bytes32,string,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manifestHash_",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "manifestURI_",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "manifestRevision_",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VCb290c3RyYXBIYXJuZXNzLnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwUmVnaXN0cnlSdW50aW1lRHJpZnRNb2NrI2Z1bmN0aW9uOmNvbnN0cnVjdG9yKGJ5dGVzMzIsc3RyaW5nLHVpbnQ2NCk",
+          "kind": "function",
+          "modifiers": [
+            "StreamGovernanceBootstrapRegistryMock"
+          ],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 190,
+            "byteStart": 7379,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceBootstrapHarness.sol#L208-L210",
+            "lineEnd": 210,
+            "lineStart": 208,
+            "snippetSha256": "sha256:c18779a9ee7900e1549d9171e1784352b59a052826040c437e5085e7ad0f440b",
+            "sourceSha256": "sha256:865dacdc23f2027c5e863b1fc6244ab265a4778d228dd42e6429b0eec90f5fce"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "runtimeVersion()",
+          "displaySignature": "runtimeVersion()",
+          "functionKind": "function",
+          "id": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryRuntimeDriftMock#function:0x075eb1ed",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VCb290c3RyYXBIYXJuZXNzLnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwUmVnaXN0cnlSdW50aW1lRHJpZnRNb2NrI2Z1bmN0aW9uOjB4MDc1ZWIxZWQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "runtimeVersion",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 83,
+            "byteStart": 7575,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceBootstrapHarness.sol#L212-L214",
+            "lineEnd": 214,
+            "lineStart": 212,
+            "snippetSha256": "sha256:45b934a6e3fa9061c41ebb31aab002e606d3d58f1977552b67106bcb514828ea",
+            "sourceSha256": "sha256:865dacdc23f2027c5e863b1fc6244ab265a4778d228dd42e6429b0eec90f5fce"
+          },
+          "selector": "0x075eb1ed",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryRuntimeDriftMock",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock",
+        "name": "StreamGovernanceBootstrapRegistryMock"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VCb290c3RyYXBIYXJuZXNzLnNvbDpTdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwUmVnaXN0cnlSdW50aW1lRHJpZnRNb2Nr",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryRuntimeDriftMock",
+      "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryMock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGovernanceBootstrapRegistryRuntimeDriftMock",
+    "natspec": "",
+    "range": {
+      "byteLength": 391,
+      "byteStart": 7269,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceBootstrapHarness.sol#L205-L215",
+      "lineEnd": 215,
+      "lineStart": 205,
+      "snippetSha256": "sha256:2d623de9f0eaa277d760b38d6923dd6a049047a975da257c81fe8b5919d4598c",
+      "sourceSha256": "sha256:865dacdc23f2027c5e863b1fc6244ab265a4778d228dd42e6429b0eec90f5fce"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/StreamGovernanceBootstrapHarness.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryRuntimeDriftMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryRuntimeDriftMock#function:0x075eb1ed",
+      "definitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryRuntimeDriftMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryRuntimeDriftMock#function:constructor(bytes32,string,uint64)",
+      "definitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapRegistryRuntimeDriftMock",
+      "severity": "advisory"
+    }
+  ]
+}

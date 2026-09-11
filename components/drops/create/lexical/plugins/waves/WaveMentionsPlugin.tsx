@@ -144,7 +144,10 @@ const NewWaveMentionsPlugin = forwardRef<
     ) => {
       editor.update(() => {
         const safeWaveName = selectedOption.name.replaceAll("]", "");
-        const mentionNode = $createWaveMentionNode(`#${safeWaveName}`);
+        const mentionNode = $createWaveMentionNode(
+          `#${safeWaveName}`,
+          selectedOption.id
+        );
         if (nodeToReplace) {
           nodeToReplace.replace(mentionNode);
         }

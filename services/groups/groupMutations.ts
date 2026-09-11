@@ -1,9 +1,11 @@
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
+import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { normalizeGroupNftOwnerships } from "@/helpers/groups/group-nft-ownership";
 import { commonApiPost } from "@/services/api/common-api";
 
-const GROUP_INCLUDE_LIMIT = 10000;
-const GROUP_EXCLUDE_LIMIT = 1000;
+export const GROUP_INCLUDE_LIMIT = 10000;
+export const GROUP_EXCLUDE_LIMIT = 1000;
 
 export type ValidationIssue =
   | "INCLUDE_LIMIT"
@@ -36,6 +38,9 @@ const sanitiseGroupPayload = (
   const identityAddresses = payload.group.identity_addresses;
   const excludedIdentityAddresses = payload.group.excluded_identity_addresses;
   const rawBeneficiaryGrantId = payload.group.is_beneficiary_of_grant_id;
+  const beneficiaryGrantMatchMode =
+    payload.group.is_beneficiary_of_grant_match_mode ??
+    ApiGroupBeneficiaryGrantMatchMode.AnyToken;
   const trimmedBeneficiaryGrantId =
     typeof rawBeneficiaryGrantId === "string"
       ? rawBeneficiaryGrantId.trim()
@@ -45,13 +50,14 @@ const sanitiseGroupPayload = (
     trimmedBeneficiaryGrantId.length > 0;
   const groupWithoutGrantId = { ...payload.group };
   delete groupWithoutGrantId.is_beneficiary_of_grant_id;
+  delete groupWithoutGrantId.is_beneficiary_of_grant_match_mode;
 
   return {
     ...payload,
     name,
     group: {
       ...groupWithoutGrantId,
-      owns_nfts: [...payload.group.owns_nfts],
+      owns_nfts: normalizeGroupNftOwnerships(payload.group.owns_nfts),
       identity_addresses:
         identityAddresses && identityAddresses.length > 0
           ? [...identityAddresses]
@@ -63,6 +69,7 @@ const sanitiseGroupPayload = (
       ...(hasBeneficiaryGrantId
         ? {
             is_beneficiary_of_grant_id: trimmedBeneficiaryGrantId,
+            is_beneficiary_of_grant_match_mode: beneficiaryGrantMatchMode,
           }
         : {}),
     },

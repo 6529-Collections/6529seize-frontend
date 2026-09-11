@@ -1,0 +1,338 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness#function:0x12496a1b",
+          "declaringDefinitionId": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "name": "encode",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x12496a1b",
+          "signature": "encode(bytes)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness#function:0xaa9a0912",
+          "declaringDefinitionId": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "x",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "y",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "denominator",
+              "type": "uint256"
+            }
+          ],
+          "name": "mulDiv",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xaa9a0912",
+          "signature": "mulDiv(uint256,uint256,uint256)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness#function:0x12bd6ac0",
+          "declaringDefinitionId": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "x",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "y",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "denominator",
+              "type": "uint256"
+            }
+          ],
+          "name": "mulDivUp",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x12bd6ac0",
+          "signature": "mulDivUp(uint256,uint256,uint256)",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "encode(bytes)",
+          "displaySignature": "encode(bytes)",
+          "functionKind": "function",
+          "id": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness#function:0x12496a1b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1WZW5kb3JlZExpYnJhcmllcy50LnNvbDpWZW5kb3JlZExpYnJhcnlIYXJuZXNzI2Z1bmN0aW9uOjB4MTI0OTZhMWI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "encode",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 116,
+            "byteStart": 210,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamVendoredLibraries.t.sol#L9-L11",
+            "lineEnd": 11,
+            "lineStart": 9,
+            "snippetSha256": "sha256:31010ee0d4297701c12e1f1dd72e3b85d86185ba0673ab5f03ceaecef1164f02",
+            "sourceSha256": "sha256:c4bc523ff1b2bea08514070b0330108688b894c03acacbbac9d018bc56e321a6"
+          },
+          "selector": "0x12496a1b",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "mulDiv(uint256,uint256,uint256)",
+          "displaySignature": "mulDiv(uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness#function:0xaa9a0912",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "x",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "y",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "denominator",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1WZW5kb3JlZExpYnJhcmllcy50LnNvbDpWZW5kb3JlZExpYnJhcnlIYXJuZXNzI2Z1bmN0aW9uOjB4YWE5YTA5MTI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "mulDiv",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 145,
+            "byteStart": 332,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamVendoredLibraries.t.sol#L13-L15",
+            "lineEnd": 15,
+            "lineStart": 13,
+            "snippetSha256": "sha256:7024ad5daab4aebce238ef3edb19b5e5c765d47382b6777a87c78bbf2883fce0",
+            "sourceSha256": "sha256:c4bc523ff1b2bea08514070b0330108688b894c03acacbbac9d018bc56e321a6"
+          },
+          "selector": "0xaa9a0912",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "mulDivUp(uint256,uint256,uint256)",
+          "displaySignature": "mulDivUp(uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness#function:0x12bd6ac0",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "x",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "y",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "denominator",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1WZW5kb3JlZExpYnJhcmllcy50LnNvbDpWZW5kb3JlZExpYnJhcnlIYXJuZXNzI2Z1bmN0aW9uOjB4MTJiZDZhYzA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "mulDivUp",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 165,
+            "byteStart": 483,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamVendoredLibraries.t.sol#L17-L19",
+            "lineEnd": 19,
+            "lineStart": 17,
+            "snippetSha256": "sha256:9b2b5ebb64f3b40d597e28ed999240a9a28e0dd3b3c22d72fa2373726e52cd68",
+            "sourceSha256": "sha256:c4bc523ff1b2bea08514070b0330108688b894c03acacbbac9d018bc56e321a6"
+          },
+          "selector": "0x12bd6ac0",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1WZW5kb3JlZExpYnJhcmllcy50LnNvbDpWZW5kb3JlZExpYnJhcnlIYXJuZXNz",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "VendoredLibraryHarness",
+    "natspec": "",
+    "range": {
+      "byteLength": 478,
+      "byteStart": 172,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamVendoredLibraries.t.sol#L8-L20",
+      "lineEnd": 20,
+      "lineStart": 8,
+      "snippetSha256": "sha256:fd5bc633802cb709bf335ff03f2b417476dd6ce730bb03559f8d784ad86fceb8",
+      "sourceSha256": "sha256:c4bc523ff1b2bea08514070b0330108688b894c03acacbbac9d018bc56e321a6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamVendoredLibraries.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness#function:0x12496a1b",
+      "definitionId": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness#function:0x12bd6ac0",
+      "definitionId": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness#function:0xaa9a0912",
+      "definitionId": "test/StreamVendoredLibraries.t.sol:VendoredLibraryHarness",
+      "severity": "advisory"
+    }
+  ]
+}

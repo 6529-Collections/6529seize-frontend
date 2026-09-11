@@ -1,0 +1,176 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamArtworkFinalityComponents.sol:IStreamArtworkScopedFrozenRouteRegistry#function:0xe8621e5f",
+          "declaringDefinitionId": "smart-contracts/IStreamArtworkFinalityComponents.sol:IStreamArtworkScopedFrozenRouteRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "routeType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamFinalityScope",
+              "name": "scope",
+              "type": "(uint8,uint256,uint256,bytes32)"
+            }
+          ],
+          "name": "frozenRouteForScope",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "pinned",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "routeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "finalityRecordHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xe8621e5f",
+          "signature": "frozenRouteForScope(bytes32,(uint8,uint256,uint256,bytes32))",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "frozenRouteForScope(bytes32,(uint8,uint256,uint256,bytes32))",
+          "displaySignature": "frozenRouteForScope(bytes32,StreamFinalityScope)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamArtworkFinalityComponents.sol:IStreamArtworkScopedFrozenRouteRegistry#function:0xe8621e5f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "routeType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scope",
+              "storageLocation": "calldata",
+              "type": "StreamFinalityScope"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BcnR3b3JrRmluYWxpdHlDb21wb25lbnRzLnNvbDpJU3RyZWFtQXJ0d29ya1Njb3BlZEZyb3plblJvdXRlUmVnaXN0cnkjZnVuY3Rpb246MHhlODYyMWU1Zg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "frozenRouteForScope",
+          "natspec": "@notice Returns the module pinned for `routeType` by the scope's executed finality.\n @dev `routeHash` is `keccak256(abi.encode(expectation))` over the stored\n      `StreamFinalityComponentExpectation` — a registry-local convention until the\n      event catalog pins a route preimage.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "pinned",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "routeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "finalityRecordHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 207,
+            "byteStart": 2590,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamArtworkFinalityComponents.sol#L64-L67",
+            "lineEnd": 67,
+            "lineStart": 64,
+            "snippetSha256": "sha256:600baebea159b8a2fc9754db3f3ea2ebdcf8cc5142d1754e504a7ca9716196cb",
+            "sourceSha256": "sha256:9b54941cc9ec170631e27ca89df8f0d3db4b40df13409b15504d70405ef08496"
+          },
+          "selector": "0xe8621e5f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamArtworkFinalityComponents.sol:IStreamArtworkScopedFrozenRouteRegistry",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BcnR3b3JrRmluYWxpdHlDb21wb25lbnRzLnNvbDpJU3RyZWFtQXJ0d29ya1Njb3BlZEZyb3plblJvdXRlUmVnaXN0cnk",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamArtworkFinalityComponents.sol:IStreamArtworkScopedFrozenRouteRegistry"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IStreamArtworkScopedFrozenRouteRegistry",
+    "natspec": "@notice Frozen-route compatibility read keyed by full scope identity\n         (Scoped Finality For Open Series, scope rule 5).",
+    "range": {
+      "byteLength": 580,
+      "byteStart": 2219,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamArtworkFinalityComponents.sol#L59-L68",
+      "lineEnd": 68,
+      "lineStart": 59,
+      "snippetSha256": "sha256:3d309feb9b3dec03d8432fd3278cab869d3c3e8b9fa435d588b29e5e6ebcc753",
+      "sourceSha256": "sha256:9b54941cc9ec170631e27ca89df8f0d3db4b40df13409b15504d70405ef08496"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamArtworkFinalityComponents.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

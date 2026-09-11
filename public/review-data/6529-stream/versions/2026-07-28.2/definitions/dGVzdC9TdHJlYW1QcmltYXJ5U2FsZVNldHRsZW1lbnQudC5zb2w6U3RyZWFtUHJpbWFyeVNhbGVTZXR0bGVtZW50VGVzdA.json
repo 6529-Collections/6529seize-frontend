@@ -1,0 +1,3363 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x8069b4d5",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAllowCurrentSettlementRecordsRepointDriftToCurrentWallet",
+          "outputs": [],
+          "selector": "0x8069b4d5",
+          "signature": "testAllowCurrentSettlementRecordsRepointDriftToCurrentWallet()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xf170c6d8",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testClearPrimaryAssignmentFallsThroughAndRejectsMissing",
+          "outputs": [],
+          "selector": "0xf170c6d8",
+          "signature": "testClearPrimaryAssignmentFallsThroughAndRejectsMissing()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xca2d7da4",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConsumedSaleRejectsBeforeTemplateMaterializationAcrossAssets",
+          "outputs": [],
+          "selector": "0xca2d7da4",
+          "signature": "testConsumedSaleRejectsBeforeTemplateMaterializationAcrossAssets()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x8a68168c",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testERC20CallbackCannotReenterOfficialSettlement",
+          "outputs": [],
+          "selector": "0x8a68168c",
+          "signature": "testERC20CallbackCannotReenterOfficialSettlement()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x14484bc1",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testERC20SecondLegFailuresRollbackPullAndOfficialState",
+          "outputs": [],
+          "selector": "0x14484bc1",
+          "signature": "testERC20SecondLegFailuresRollbackPullAndOfficialState()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x40f17426",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testERC20SettlementConsumesKeyAcrossERC20Assets",
+          "outputs": [],
+          "selector": "0x40f17426",
+          "signature": "testERC20SettlementConsumesKeyAcrossERC20Assets()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xa38468c1",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testERC20SettlementRejectsUnsupportedAndNonStandardTokens",
+          "outputs": [],
+          "selector": "0xa38468c1",
+          "signature": "testERC20SettlementRejectsUnsupportedAndNonStandardTokens()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x1e53a198",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testERC20SettlementRequiresActiveStandardTokenAndRecordsExactOfficialRevenue",
+          "outputs": [],
+          "selector": "0x1e53a198",
+          "signature": "testERC20SettlementRequiresActiveStandardTokenAndRecordsExactOfficialRevenue()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x2aef64aa",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testERC20TemplateSettlementMaterializesProfileOnSettlement",
+          "outputs": [],
+          "selector": "0x2aef64aa",
+          "signature": "testERC20TemplateSettlementMaterializesProfileOnSettlement()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xaaadbc86",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFrozenAssignmentRejectsProfileAndTemplateOverwrite",
+          "outputs": [],
+          "selector": "0xaaadbc86",
+          "signature": "testFrozenAssignmentRejectsProfileAndTemplateOverwrite()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x55b449ea",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testNativeSettlementRecordsOfficialRevenueAndRejectsReplay",
+          "outputs": [],
+          "selector": "0x55b449ea",
+          "signature": "testNativeSettlementRecordsOfficialRevenueAndRejectsReplay()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x591c4520",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testNativeSettlementRejectsIncorrectValueBeforeConsumptionOrFunds",
+          "outputs": [],
+          "selector": "0x591c4520",
+          "signature": "testNativeSettlementRejectsIncorrectValueBeforeConsumptionOrFunds()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x12f5b6f7",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testResolverPrecedenceFreezeAndVerifiedProfileRequirement",
+          "outputs": [],
+          "selector": "0x12f5b6f7",
+          "signature": "testResolverPrecedenceFreezeAndVerifiedProfileRequirement()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x08d48504",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSettlementRejectsUnauthorizedCallersAndRevokedCallers",
+          "outputs": [],
+          "selector": "0x08d48504",
+          "signature": "testSettlementRejectsUnauthorizedCallersAndRevokedCallers()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x58ce3e5d",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSplitWalletExistsRejectsMissingWrongCodeAndMismatchedWallet",
+          "outputs": [],
+          "selector": "0x58ce3e5d",
+          "signature": "testSplitWalletExistsRejectsMissingWrongCodeAndMismatchedWallet()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xc1689e3f",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testStrictPolicyDriftRevertsAndAllowCurrentRecordsDrift",
+          "outputs": [],
+          "selector": "0xc1689e3f",
+          "signature": "testStrictPolicyDriftRevertsAndAllowCurrentRecordsDrift()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x7b2a5a99",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testTemplateMaterializationUsesSalePosterAggregatesAndIgnoresSaleContext",
+          "outputs": [],
+          "selector": "0x7b2a5a99",
+          "signature": "testTemplateMaterializationUsesSalePosterAggregatesAndIgnoresSaleContext()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x5c47fa50",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testTemplateSettlementRejectsZeroPosterBeforeFundsMoveOrKeyConsumption",
+          "outputs": [],
+          "selector": "0x5c47fa50",
+          "signature": "testTemplateSettlementRejectsZeroPosterBeforeFundsMoveOrKeyConsumption()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xc890e673",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testTemplateSettlementUsesDifferentPosterWallets",
+          "outputs": [],
+          "selector": "0xc890e673",
+          "signature": "testTemplateSettlementUsesDifferentPosterWallets()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xeb0f47a8",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testTokenScopedAssignmentSettlesToTokenWallet",
+          "outputs": [],
+          "selector": "0xeb0f47a8",
+          "signature": "testTokenScopedAssignmentSettlesToTokenWallet()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweDBhOTI1NGU0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 341,
+            "byteStart": 4817,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L79-L85",
+            "lineEnd": 85,
+            "lineStart": 79,
+            "snippetSha256": "sha256:98c50cc783413178d3fe755694f75a3b7adfcd093e905246b1f6367e900746ad",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testResolverPrecedenceFreezeAndVerifiedProfileRequirement()",
+          "displaySignature": "testResolverPrecedenceFreezeAndVerifiedProfileRequirement()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x12f5b6f7",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweDEyZjViNmY3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testResolverPrecedenceFreezeAndVerifiedProfileRequirement",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 4329,
+            "byteStart": 5164,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L87-L171",
+            "lineEnd": 171,
+            "lineStart": 87,
+            "snippetSha256": "sha256:cc62d19462ec7bdd95cc4ea167f888099c0bf850341e3761082a9969d3961172",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x12f5b6f7",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFrozenAssignmentRejectsProfileAndTemplateOverwrite()",
+          "displaySignature": "testFrozenAssignmentRejectsProfileAndTemplateOverwrite()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xaaadbc86",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweGFhYWRiYzg2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFrozenAssignmentRejectsProfileAndTemplateOverwrite",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1909,
+            "byteStart": 9499,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L173-L216",
+            "lineEnd": 216,
+            "lineStart": 173,
+            "snippetSha256": "sha256:6c12cd021fc8275e39454f1e0e5f63abf7246e584d2e31bab4feb19e9c297155",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0xaaadbc86",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testClearPrimaryAssignmentFallsThroughAndRejectsMissing()",
+          "displaySignature": "testClearPrimaryAssignmentFallsThroughAndRejectsMissing()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xf170c6d8",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweGYxNzBjNmQ4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testClearPrimaryAssignmentFallsThroughAndRejectsMissing",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1769,
+            "byteStart": 11414,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L218-L251",
+            "lineEnd": 251,
+            "lineStart": 218,
+            "snippetSha256": "sha256:aaf71223120c507afe7e15c4bcc0f5bc2db0694f2d986d29424279bf9bcaab11",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0xf170c6d8",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSplitWalletExistsRejectsMissingWrongCodeAndMismatchedWallet()",
+          "displaySignature": "testSplitWalletExistsRejectsMissingWrongCodeAndMismatchedWallet()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x58ce3e5d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweDU4Y2UzZTVk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSplitWalletExistsRejectsMissingWrongCodeAndMismatchedWallet",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 658,
+            "byteStart": 13189,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L253-L264",
+            "lineEnd": 264,
+            "lineStart": 253,
+            "snippetSha256": "sha256:0444206064b99503ee1488df9e1d3a9a052be90999da8b488c5588f5a1f49f18",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x58ce3e5d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_expectZeroScopeProfileRevert(uint8,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_expectZeroScopeProfileRevert(uint8,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfZXhwZWN0WmVyb1Njb3BlUHJvZmlsZVJldmVydCh1aW50OCxieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_expectZeroScopeProfileRevert",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 324,
+            "byteStart": 13853,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L266-L271",
+            "lineEnd": 271,
+            "lineStart": 266,
+            "snippetSha256": "sha256:203737a466349c62d8da26476dd4b3ed3b36a0eaf9a5c480c34f61bd44c747ec",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": "testTemplateMaterializationUsesSalePosterAggregatesAndIgnoresSaleContext()",
+          "displaySignature": "testTemplateMaterializationUsesSalePosterAggregatesAndIgnoresSaleContext()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x7b2a5a99",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweDdiMmE1YTk5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testTemplateMaterializationUsesSalePosterAggregatesAndIgnoresSaleContext",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 4312,
+            "byteStart": 14183,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L273-L359",
+            "lineEnd": 359,
+            "lineStart": 273,
+            "snippetSha256": "sha256:b25c75addae6e57189c87f81129dee96b5a7e3382312c491c66180bc17f4ed7c",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x7b2a5a99",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testTemplateSettlementUsesDifferentPosterWallets()",
+          "displaySignature": "testTemplateSettlementUsesDifferentPosterWallets()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xc890e673",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweGM4OTBlNjcz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testTemplateSettlementUsesDifferentPosterWallets",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2692,
+            "byteStart": 18501,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L361-L409",
+            "lineEnd": 409,
+            "lineStart": 361,
+            "snippetSha256": "sha256:68f1fc27eed7a556987a4ea48bbfc337958a81439f274df0c59df4e9f1db69f8",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0xc890e673",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testERC20TemplateSettlementMaterializesProfileOnSettlement()",
+          "displaySignature": "testERC20TemplateSettlementMaterializesProfileOnSettlement()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x2aef64aa",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweDJhZWY2NGFh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testERC20TemplateSettlementMaterializesProfileOnSettlement",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1989,
+            "byteStart": 21199,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L411-L449",
+            "lineEnd": 449,
+            "lineStart": 411,
+            "snippetSha256": "sha256:e215c6c8b492ed2becbc472bdba204cb6b877635fda979db1d5d93b12134de89",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x2aef64aa",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testTemplateSettlementRejectsZeroPosterBeforeFundsMoveOrKeyConsumption()",
+          "displaySignature": "testTemplateSettlementRejectsZeroPosterBeforeFundsMoveOrKeyConsumption()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x5c47fa50",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweDVjNDdmYTUw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testTemplateSettlementRejectsZeroPosterBeforeFundsMoveOrKeyConsumption",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1913,
+            "byteStart": 23194,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L451-L490",
+            "lineEnd": 490,
+            "lineStart": 451,
+            "snippetSha256": "sha256:5edfe0cb7f81e2e0716e51d5c68a657f94a9a0d9b0d831710e8e4bf36f5f05d6",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x5c47fa50",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSettlementRejectsUnauthorizedCallersAndRevokedCallers()",
+          "displaySignature": "testSettlementRejectsUnauthorizedCallersAndRevokedCallers()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x08d48504",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweDA4ZDQ4NTA0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSettlementRejectsUnauthorizedCallersAndRevokedCallers",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2246,
+            "byteStart": 25113,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L492-L542",
+            "lineEnd": 542,
+            "lineStart": 492,
+            "snippetSha256": "sha256:34630389a7e540632bde1f13ad0151ac5fa719fefeb1bf4c6521a95e6d2af1b5",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x08d48504",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testTokenScopedAssignmentSettlesToTokenWallet()",
+          "displaySignature": "testTokenScopedAssignmentSettlesToTokenWallet()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xeb0f47a8",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweGViMGY0N2E4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testTokenScopedAssignmentSettlesToTokenWallet",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1505,
+            "byteStart": 27365,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L544-L570",
+            "lineEnd": 570,
+            "lineStart": 544,
+            "snippetSha256": "sha256:b0ddf3c81382ff1fd4a25245b509423350ff7ba0c2fb6a207ced0c577670d77d",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0xeb0f47a8",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testNativeSettlementRecordsOfficialRevenueAndRejectsReplay()",
+          "displaySignature": "testNativeSettlementRecordsOfficialRevenueAndRejectsReplay()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x55b449ea",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweDU1YjQ0OWVh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testNativeSettlementRecordsOfficialRevenueAndRejectsReplay",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3519,
+            "byteStart": 28876,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L572-L646",
+            "lineEnd": 646,
+            "lineStart": 572,
+            "snippetSha256": "sha256:d7ae6dc3896528a35c0526846caab3d7f9acff6c3eda730575d3f275f4a55957",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x55b449ea",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testNativeSettlementRejectsIncorrectValueBeforeConsumptionOrFunds()",
+          "displaySignature": "testNativeSettlementRejectsIncorrectValueBeforeConsumptionOrFunds()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x591c4520",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweDU5MWM0NTIw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testNativeSettlementRejectsIncorrectValueBeforeConsumptionOrFunds",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1977,
+            "byteStart": 32401,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L648-L687",
+            "lineEnd": 687,
+            "lineStart": 648,
+            "snippetSha256": "sha256:6f792b4a46aa08b88b7b4d868b7bbfb31954e9a2a0d319109b8afbdcedebe71c",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x591c4520",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAllowCurrentSettlementRecordsRepointDriftToCurrentWallet()",
+          "displaySignature": "testAllowCurrentSettlementRecordsRepointDriftToCurrentWallet()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x8069b4d5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweDgwNjliNGQ1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAllowCurrentSettlementRecordsRepointDriftToCurrentWallet",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2154,
+            "byteStart": 34384,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L689-L732",
+            "lineEnd": 732,
+            "lineStart": 689,
+            "snippetSha256": "sha256:4816180c73ea3f96578359d166e86d6e01d41e3bf4510f4e25b6a60ddfc7dc0b",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x8069b4d5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testStrictPolicyDriftRevertsAndAllowCurrentRecordsDrift()",
+          "displaySignature": "testStrictPolicyDriftRevertsAndAllowCurrentRecordsDrift()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xc1689e3f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweGMxNjg5ZTNm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testStrictPolicyDriftRevertsAndAllowCurrentRecordsDrift",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2006,
+            "byteStart": 36544,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L734-L776",
+            "lineEnd": 776,
+            "lineStart": 734,
+            "snippetSha256": "sha256:68eea548f6d991c42432840f282642333f9e8bd988893ac8afe0e694dcea29f8",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0xc1689e3f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testERC20SettlementRequiresActiveStandardTokenAndRecordsExactOfficialRevenue()",
+          "displaySignature": "testERC20SettlementRequiresActiveStandardTokenAndRecordsExactOfficialRevenue()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x1e53a198",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweDFlNTNhMTk4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testERC20SettlementRequiresActiveStandardTokenAndRecordsExactOfficialRevenue",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1869,
+            "byteStart": 38556,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L778-L810",
+            "lineEnd": 810,
+            "lineStart": 778,
+            "snippetSha256": "sha256:cc35ea2b3da26e81b59a6396b31d40f51bd48e88e2f2f000c878f88da7e5e04f",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x1e53a198",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testERC20SettlementConsumesKeyAcrossERC20Assets()",
+          "displaySignature": "testERC20SettlementConsumesKeyAcrossERC20Assets()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x40f17426",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweDQwZjE3NDI2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testERC20SettlementConsumesKeyAcrossERC20Assets",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1718,
+            "byteStart": 40431,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L812-L843",
+            "lineEnd": 843,
+            "lineStart": 812,
+            "snippetSha256": "sha256:fb901219a709d91fd0c2f65f8cf329f29f6ab9c61ca8ec18e4fcb08e9e92d950",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x40f17426",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConsumedSaleRejectsBeforeTemplateMaterializationAcrossAssets()",
+          "displaySignature": "testConsumedSaleRejectsBeforeTemplateMaterializationAcrossAssets()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xca2d7da4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweGNhMmQ3ZGE0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConsumedSaleRejectsBeforeTemplateMaterializationAcrossAssets",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3856,
+            "byteStart": 42155,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L845-L918",
+            "lineEnd": 918,
+            "lineStart": 845,
+            "snippetSha256": "sha256:1d03379c795fe24029a0b910ce51b752c7a868bc4b52928dcebc39f9900b002a",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0xca2d7da4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testERC20SettlementRejectsUnsupportedAndNonStandardTokens()",
+          "displaySignature": "testERC20SettlementRejectsUnsupportedAndNonStandardTokens()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xa38468c1",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweGEzODQ2OGMx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testERC20SettlementRejectsUnsupportedAndNonStandardTokens",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 5000,
+            "byteStart": 46017,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L920-L1046",
+            "lineEnd": 1046,
+            "lineStart": 920,
+            "snippetSha256": "sha256:6bc4121a79833266da57883d7a54972b728877a3f10f7f4b15752caa23160414",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0xa38468c1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testERC20SecondLegFailuresRollbackPullAndOfficialState()",
+          "displaySignature": "testERC20SecondLegFailuresRollbackPullAndOfficialState()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x14484bc1",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweDE0NDg0YmMx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testERC20SecondLegFailuresRollbackPullAndOfficialState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2693,
+            "byteStart": 51023,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1048-L1110",
+            "lineEnd": 1110,
+            "lineStart": 1048,
+            "snippetSha256": "sha256:1fe9eb1dc1e1278aa0cc4c7f10361bb96d816f8392dd4acea3fa690610dd12e3",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x14484bc1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testERC20CallbackCannotReenterOfficialSettlement()",
+          "displaySignature": "testERC20CallbackCannotReenterOfficialSettlement()",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x8a68168c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjoweDhhNjgxNjhj",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testERC20CallbackCannotReenterOfficialSettlement",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1513,
+            "byteStart": 53722,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1112-L1139",
+            "lineEnd": 1139,
+            "lineStart": 1112,
+            "snippetSha256": "sha256:e5d2185ab5d93b83bbbefdae793188290a23a15b6c4e9e837a4635d4af459aeb",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x8a68168c",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assignedSingleAccountProfile(bytes32,address)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_assignedSingleAccountProfile(bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfYXNzaWduZWRTaW5nbGVBY2NvdW50UHJvZmlsZShieXRlczMyLGFkZHJlc3Mp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assignedSingleAccountProfile",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "assignmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 418,
+            "byteStart": 55241,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1141-L1149",
+            "lineEnd": 1149,
+            "lineStart": 1141,
+            "snippetSha256": "sha256:92bcbea5ac77597dc57f93959b47503d3341e2781c67596f32be2d1a61ab7c90",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_createProfile(address,uint32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_createProfile(address,uint32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "index": 2,
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfY3JlYXRlUHJvZmlsZShhZGRyZXNzLHVpbnQzMixieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_createProfile",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "entriesHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 568,
+            "byteStart": 55665,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1151-L1160",
+            "lineEnd": 1160,
+            "lineStart": 1151,
+            "snippetSha256": "sha256:5e78c028adc3456e824557985487c680213aa07eb0a157cde251dbdf73726003",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_profileIdFor(address)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_profileIdFor(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfcHJvZmlsZUlkRm9yKGFkZHJlc3Mp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_profileIdFor",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 325,
+            "byteStart": 56239,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1162-L1166",
+            "lineEnd": 1166,
+            "lineStart": 1162,
+            "snippetSha256": "sha256:177c752aa718928a25a9065f8757087b736226ad0d7db2dc71b94eaefdfa9182",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_expectedPolicyHash(bytes32,uint256,uint256,bytes32,bytes32,address,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_expectedPolicyHash(bytes32,uint256,uint256,bytes32,bytes32,address,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "name": "assignmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfZXhwZWN0ZWRQb2xpY3lIYXNoKGJ5dGVzMzIsdWludDI1Nix1aW50MjU2LGJ5dGVzMzIsYnl0ZXMzMixhZGRyZXNzLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_expectedPolicyHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 428,
+            "byteStart": 56570,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1168-L1180",
+            "lineEnd": 1180,
+            "lineStart": 1168,
+            "snippetSha256": "sha256:100ab8eadbc8796e7905021501e7d7f44e76ef9afd1af9ab4d3f82ac8f2d48a2",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_predictedSalePosterTemplateProfile(bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_predictedSalePosterTemplateProfile(bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfcHJlZGljdGVkU2FsZVBvc3RlclRlbXBsYXRlUHJvZmlsZShieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_predictedSalePosterTemplateProfile",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 937,
+            "byteStart": 57004,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1182-L1203",
+            "lineEnd": 1203,
+            "lineStart": 1182,
+            "snippetSha256": "sha256:e2a3b12aaed346a2d01846b0789174e7e19b3866b3ff048963ff98ca5724dcac",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_sale(bytes32,bytes32,uint256,uint256,uint256,uint256,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_sale(bytes32,bytes32,uint256,uint256,uint256,uint256,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "settlementId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "saleId",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "expectedPolicyHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfc2FsZShieXRlczMyLGJ5dGVzMzIsdWludDI1Nix1aW50MjU2LHVpbnQyNTYsdWludDI1NixieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_sale",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "IStreamPrimarySaleSettlement.PrimarySale"
+            }
+          ],
+          "range": {
+            "byteLength": 785,
+            "byteStart": 57947,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1205-L1227",
+            "lineEnd": 1227,
+            "lineStart": 1205,
+            "snippetSha256": "sha256:8752e89138ef41ed30c6dcdd77fa689baaf9fdac750858ceda960ef198279d9a",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_activateAsset(address)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_activateAsset(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "token",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfYWN0aXZhdGVBc3NldChhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_activateAsset",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 193,
+            "byteStart": 58738,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1229-L1233",
+            "lineEnd": 1233,
+            "lineStart": 1229,
+            "snippetSha256": "sha256:9da9198d4fbffe0015894492dc1567e0d2b10de979312a9aa34583b56af7f7f2",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_fundApprovedAsset(PrimarySettlementERC20Mock,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_fundApprovedAsset(PrimarySettlementERC20Mock,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "token",
+              "type": "PrimarySettlementERC20Mock"
+            },
+            {
+              "index": 1,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfZnVuZEFwcHJvdmVkQXNzZXQoUHJpbWFyeVNldHRsZW1lbnRFUkMyME1vY2ssdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_fundApprovedAsset",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 245,
+            "byteStart": 58937,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1235-L1240",
+            "lineEnd": 1240,
+            "lineStart": 1235,
+            "snippetSha256": "sha256:6875a52cf84e7e84e6309ca7c2c2b395058f04c258b8c34b0d7e22b3875bfe62",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertERC20Rollback(PrimarySettlementERC20Mock,bytes32,bytes32,bytes32,address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_assertERC20Rollback(PrimarySettlementERC20Mock,bytes32,bytes32,bytes32,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "token",
+              "type": "PrimarySettlementERC20Mock"
+            },
+            {
+              "index": 1,
+              "name": "key",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfYXNzZXJ0RVJDMjBSb2xsYmFjayhQcmltYXJ5U2V0dGxlbWVudEVSQzIwTW9jayxieXRlczMyLGJ5dGVzMzIsYnl0ZXMzMixhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertERC20Rollback",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 775,
+            "byteStart": 59188,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1242-L1257",
+            "lineEnd": 1257,
+            "lineStart": 1242,
+            "snippetSha256": "sha256:b422f0836721ebc0f816e33ac22875bed911d6701f8b55e969c18c19feeb9e5b",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertSettlementEventDrift(bool,uint8,bytes32,uint8,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_assertSettlementEventDrift(bool,uint8,bytes32,uint8,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "expectedDrift",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "expectedAssignmentType",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "expectedSettlementId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "expectedPolicyMode",
+              "type": "uint8"
+            },
+            {
+              "index": 4,
+              "name": "expectedSaleId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfYXNzZXJ0U2V0dGxlbWVudEV2ZW50RHJpZnQoYm9vbCx1aW50OCxieXRlczMyLHVpbnQ4LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertSettlementEventDrift",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1632,
+            "byteStart": 59969,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1259-L1298",
+            "lineEnd": 1298,
+            "lineStart": 1259,
+            "snippetSha256": "sha256:58ab2b1a93695798c0a7bd38a0061a71cec4188df9cc6461a842aae97ff9d4b9",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertSettledLog(bytes,bool,uint8)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_assertSettledLog(bytes,bool,uint8)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 1,
+              "name": "expectedDrift",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "expectedAssignmentType",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfYXNzZXJ0U2V0dGxlZExvZyhieXRlcyxib29sLHVpbnQ4KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertSettledLog",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 935,
+            "byteStart": 61607,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1300-L1321",
+            "lineEnd": 1321,
+            "lineStart": 1300,
+            "snippetSha256": "sha256:30eee43153ea747a431ee1bf75a90f6041222d65e6ff07d062df6517e82410e2",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertContextLog(bytes,bytes32,uint8,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_assertContextLog(bytes,bytes32,uint8,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 1,
+              "name": "expectedSettlementId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "expectedPolicyMode",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "name": "expectedSaleId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfYXNzZXJ0Q29udGV4dExvZyhieXRlcyxieXRlczMyLHVpbnQ4LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertContextLog",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1194,
+            "byteStart": 62548,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1323-L1351",
+            "lineEnd": 1351,
+            "lineStart": 1323,
+            "snippetSha256": "sha256:42e1a5c96817057d1f06b9f9eff31437ca478528df733024e2c87ee2dc05af56",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertPolicyLog(bytes)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_assertPolicyLog(bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfYXNzZXJ0UG9saWN5TG9nKGJ5dGVzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertPolicyLog",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 597,
+            "byteStart": 63748,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1353-L1364",
+            "lineEnd": 1364,
+            "lineStart": 1353,
+            "snippetSha256": "sha256:abae75d2ed7df66d0ae694b6ba7a22740364c1edd0e6de99ba473911a2188557",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertTemplateERC20SettlementLogs(bytes32,bytes32,address,address,IStreamPrimarySaleSettlement.PrimarySale,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_assertTemplateERC20SettlementLogs(bytes32,bytes32,address,address,IStreamPrimarySaleSettlement.PrimarySale,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "expectedKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "expectedProfileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "expectedWallet",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "expectedAsset",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "name": "sale",
+              "storageLocation": "memory",
+              "type": "IStreamPrimarySaleSettlement.PrimarySale"
+            },
+            {
+              "index": 5,
+              "name": "expectedAssignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "expectedTemplateId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfYXNzZXJ0VGVtcGxhdGVFUkMyMFNldHRsZW1lbnRMb2dzKGJ5dGVzMzIsYnl0ZXMzMixhZGRyZXNzLGFkZHJlc3MsSVN0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5QcmltYXJ5U2FsZSxieXRlczMyLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertTemplateERC20SettlementLogs",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2638,
+            "byteStart": 64351,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1366-L1429",
+            "lineEnd": 1429,
+            "lineStart": 1366,
+            "snippetSha256": "sha256:1845bf2e774d9c5d90e649a95a40981145f2f1ba5069f39974da33e3ef4ebea8",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertIndexedSettlementTopics(Vm.Log,bytes32,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_assertIndexedSettlementTopics(Vm.Log,bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "log",
+              "storageLocation": "memory",
+              "type": "Vm.Log"
+            },
+            {
+              "index": 1,
+              "name": "expectedKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "expectedRevenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "expectedProfileId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfYXNzZXJ0SW5kZXhlZFNldHRsZW1lbnRUb3BpY3MoVm0uTG9nLGJ5dGVzMzIsYnl0ZXMzMixieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertIndexedSettlementTopics",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 466,
+            "byteStart": 66995,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1431-L1441",
+            "lineEnd": 1441,
+            "lineStart": 1431,
+            "snippetSha256": "sha256:db58fe6406143559e31e904a7ca8919200d659340c021b923a1ff60647269d3f",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertTemplateERC20SettledLog(bytes,address,address,IStreamPrimarySaleSettlement.PrimarySale,bytes32,bool)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_assertTemplateERC20SettledLog(bytes,address,address,IStreamPrimarySaleSettlement.PrimarySale,bytes32,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 1,
+              "name": "expectedWallet",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "expectedAsset",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "sale",
+              "storageLocation": "memory",
+              "type": "IStreamPrimarySaleSettlement.PrimarySale"
+            },
+            {
+              "index": 4,
+              "name": "expectedResolvedPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "expectedDrift",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfYXNzZXJ0VGVtcGxhdGVFUkMyMFNldHRsZWRMb2coYnl0ZXMsYWRkcmVzcyxhZGRyZXNzLElTdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQuUHJpbWFyeVNhbGUsYnl0ZXMzMixib29sKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertTemplateERC20SettledLog",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1235,
+            "byteStart": 67467,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1443-L1469",
+            "lineEnd": 1469,
+            "lineStart": 1443,
+            "snippetSha256": "sha256:5e82bf2c31c58205d282696004fbd713e7e0b52bb885b4ed09ff82086ef60a06",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertTemplateERC20ContextLog(bytes,IStreamPrimarySaleSettlement.PrimarySale,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_assertTemplateERC20ContextLog(bytes,IStreamPrimarySaleSettlement.PrimarySale,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 1,
+              "name": "sale",
+              "storageLocation": "memory",
+              "type": "IStreamPrimarySaleSettlement.PrimarySale"
+            },
+            {
+              "index": 2,
+              "name": "expectedTemplateId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfYXNzZXJ0VGVtcGxhdGVFUkMyMENvbnRleHRMb2coYnl0ZXMsSVN0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5QcmltYXJ5U2FsZSxieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertTemplateERC20ContextLog",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1310,
+            "byteStart": 68708,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1471-L1498",
+            "lineEnd": 1498,
+            "lineStart": 1471,
+            "snippetSha256": "sha256:06d90ad3c0311f6c278419f7a0d749c39388cc3d302c6ba5ed588997e704c262",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertTemplateERC20PolicyLog(bytes,bytes32,bytes32,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:_assertTemplateERC20PolicyLog(bytes,bytes32,bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 1,
+              "name": "expectedPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "expectedResolvedPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "expectedAssignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "expectedTemplateId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdCNmdW5jdGlvbjpfYXNzZXJ0VGVtcGxhdGVFUkMyMFBvbGljeUxvZyhieXRlcyxieXRlczMyLGJ5dGVzMzIsYnl0ZXMzMixieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertTemplateERC20PolicyLog",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 867,
+            "byteStart": 70024,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1500-L1517",
+            "lineEnd": 1517,
+            "lineStart": 1500,
+            "snippetSha256": "sha256:5315a220d0032085dd1e93e1b9e1a066c21d43ba33cb252052d5eeb829363334",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ARTIST",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 862,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:cdc8a42608fed62386ade3dbf3f9b1a2e7a9841ae811f2b30514214b39db6f54",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 896,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:9aa88dd8f3b969def84c016bf5a71d9b0ca8d1fdcf8f6fd910c4c2c4bb6e3a77",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "address(0xA001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PROTOCOL",
+          "natspec": "",
+          "range": {
+            "byteLength": 51,
+            "byteStart": 917,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:7f23b4b0a3ab2753834fd9df28a239c50ba183be17a3ad517bb486955765cf76",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 953,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:e291c49ab9d296f3f521365ed36c465d6e4558fcbc36e3bd0c233b1d1ae43d00",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "address(0xB002)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ESTATE",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 974,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:3cd9e811c51a79dc25aed4bfd02b3ef1a1a0dcb99440db819a4cf88cab62d7dc",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1008,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:3ab92f17ca6c881a1fbe4765993d872bab94246f048543ed79602e4e9078a2d6",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "address(0xC003)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYER",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 1029,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:5aeb5075b7bc3e45c104cab24a26833b064ba4b57edcff7b3b005210a416bf05",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1062,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:853b4c9bae9baee031f379af59cdafce2515e2a9c82e653106861a366774f8e7",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "address(0xD004)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SALE_POSTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 1083,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:c0275d8aa4b11a800590774db375c6bbc2c5d26b4d4abb53205a78202c72dcf6",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1122,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:1709c2c4307de06de7e3e1264dac047eac688186b8d4c660a3c88706dc7f693a",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "address(0xE005)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "OTHER_SALE_POSTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 1143,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:631e3d8bdd0a6d7c93ed52eff333f7959b0d46d7e22652a3b0926c088ec73c8f",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1188,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:421ba9e01e4b2eef8d8232bcae43404c784df2994ec57267e0ade8b41cb1e3de",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "address(0xE099)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "BENEFICIARY",
+          "natspec": "",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 1209,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:65a6de8f8b3199d250c4d0d2e6abaea187a05c151159ec1d928800826656be05",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1248,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:1482316f8378c297234cf72331582c23b9a392c4cdf7c27d4e014cf26fee4d25",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "address(0xF006)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_CALLER",
+          "natspec": "",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 1269,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:2fc313b3286b9e4d39b607d8ecb7ed4f767a6b5349c6de6b716f9b63648a66c1",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1314,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:6d39544e6387ca9fc5d3967e7f58e3ecada4cfc65f9d6f8134baba6bcc51ff5b",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "address(0x5151)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ALT_SETTLEMENT_CALLER",
+          "natspec": "",
+          "range": {
+            "byteLength": 64,
+            "byteStart": 1335,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:87201f7e7aba29c52809010286eb8450ee55184147f1027f75e2f625336ff15a",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1384,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:d92649da495129ed71b48b366569c76de3771e7a9b363d900843c92398365e7e",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "address(0x5252)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "LABEL_ARTIST",
+          "natspec": "",
+          "range": {
+            "byteLength": 59,
+            "byteStart": 1405,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:ca770c9d8ff773a5bdb9d9367272504fb51c9f1fb044a6f6a58819c26e06f189",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 19,
+            "byteStart": 1445,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:91f7c2ca15d3bdfcb5caf076de8d3db11a0e64712bf35302f5b8bce8baedbf06",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"artist\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "LABEL_PROTOCOL",
+          "natspec": "",
+          "range": {
+            "byteLength": 63,
+            "byteStart": 1470,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:7f5b07202422fb128e25a0076ef0ddb7d4fac0d657883c7e2035a3180fcb86f6",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 21,
+            "byteStart": 1512,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:48ed56dca0be6577c37f1ccf0d78e6a8c8a800370a06dd6f09bd6cddac12dca6",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"protocol\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "LABEL_ESTATE",
+          "natspec": "",
+          "range": {
+            "byteLength": 59,
+            "byteStart": 1539,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L33",
+            "lineEnd": 33,
+            "lineStart": 33,
+            "snippetSha256": "sha256:b67aaad77ce2bb7659ebe4a23790a03ae5040386a7fe0997fb89e35cdd162c34",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 19,
+            "byteStart": 1579,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L33",
+            "lineEnd": 33,
+            "lineStart": 33,
+            "snippetSha256": "sha256:158cc5411870880cb829f2771f97b162dee4844de74766d4f4a4cb3fc3cbcc05",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"estate\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "REVENUE_PRIMARY",
+          "natspec": "",
+          "range": {
+            "byteLength": 63,
+            "byteStart": 1604,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:3120ddd6465481382180f4b6d9bdc356333ab862b81fa83cb39d030d3e9b1e70",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 20,
+            "byteStart": 1647,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:6dc25d55cd823370b67eebd07e386c75f90396b11db284188c48c731b6a61ff3",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"primary\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "REVENUE_SPECIAL",
+          "natspec": "",
+          "range": {
+            "byteLength": 71,
+            "byteStart": 1673,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:e2663908d5318023c150e7a4258654f2735dbea24f7ee351b75581dd3ea38e97",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 28,
+            "byteStart": 1716,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:13a558b22456f8fca5e049caa15fdfea9a623bfc6fcd222a08806194b58a7717",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"primary-special\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PROFILE_METADATA",
+          "natspec": "",
+          "range": {
+            "byteLength": 77,
+            "byteStart": 1750,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:1f83a6f157c88c6ddec3220b1b5d0b60c37d032a22ac4e669b52f1e5d8146290",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 33,
+            "byteStart": 1794,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:6b9bc6de56d26a2a993c0e60711452dcfd71dc92421d2adf331dd40e9c9e5506",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"ipfs://primary-split\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TEMPLATE_METADATA",
+          "natspec": "",
+          "range": {
+            "byteLength": 81,
+            "byteStart": 1833,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L37",
+            "lineEnd": 37,
+            "lineStart": 37,
+            "snippetSha256": "sha256:ac7cb88d8f807e4c383945fdb9767eef6680aa1364e7bc259a8e8047aff6db07",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 36,
+            "byteStart": 1878,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L37",
+            "lineEnd": 37,
+            "lineStart": 37,
+            "snippetSha256": "sha256:718486bce097e2ebb8dd66cd72df100931671bca7cd9a6806f8201d6e8bed332",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"ipfs://primary-template\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MATERIALIZED_PROFILE_METADATA_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 136,
+            "byteStart": 1920,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L38-L39",
+            "lineEnd": 39,
+            "lineStart": 38,
+            "snippetSha256": "sha256:24b1af2b57546c52084a47f53e376b117df95ae266da25fa34b5ecfaf56fc57f",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 64,
+            "byteStart": 1992,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L39",
+            "lineEnd": 39,
+            "lineStart": 39,
+            "snippetSha256": "sha256:7504bd4e9b89c0d547b8a5a0c9d872a3adb6845aba0f7e6e4a5219fd2ee35797",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"6529STREAM_MATERIALIZED_PRIMARY_PROFILE_METADATA_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "POLICY_EVIDENCE",
+          "natspec": "",
+          "range": {
+            "byteLength": 71,
+            "byteStart": 2062,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L40",
+            "lineEnd": 40,
+            "lineStart": 40,
+            "snippetSha256": "sha256:b9684ad97ea0fb0d53265854cda3b0740974d4f87f462326603105103ed88f67",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 28,
+            "byteStart": 2105,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L40",
+            "lineEnd": 40,
+            "lineStart": 40,
+            "snippetSha256": "sha256:eb9ad6b6d4d658867e48f1db78e133c7e65bac04069605cd3dc7516cb9bd36e6",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"policy-evidence\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ERC20_POLICY_EVIDENCE",
+          "natspec": "",
+          "range": {
+            "byteLength": 83,
+            "byteStart": 2139,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L41",
+            "lineEnd": 41,
+            "lineStart": 41,
+            "snippetSha256": "sha256:3e0c0a5ec845c8dec11f71b4223f482a67d018994046cf51e0376314694c2128",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 34,
+            "byteStart": 2188,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L41",
+            "lineEnd": 41,
+            "lineStart": 41,
+            "snippetSha256": "sha256:f63b08273893841ea8be7e00f9918820283e2e113109df38a8f38e493c465d4c",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"standard-erc20-policy\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MISSING_PROFILE",
+          "natspec": "",
+          "range": {
+            "byteLength": 71,
+            "byteStart": 2228,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L42",
+            "lineEnd": 42,
+            "lineStart": 42,
+            "snippetSha256": "sha256:360c887fb899954f6d4ebe2b7afc2474c59585daf0007075a1812ac48607d434",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 28,
+            "byteStart": 2271,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L42",
+            "lineEnd": 42,
+            "lineStart": 42,
+            "snippetSha256": "sha256:5863d00da38428680b5eb9958e3e13cd803733418c66eb9c544e65add8e598ef",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"missing-profile\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_POSTER_1",
+          "natspec": "",
+          "range": {
+            "byteLength": 73,
+            "byteStart": 2305,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L43",
+            "lineEnd": 43,
+            "lineStart": 43,
+            "snippetSha256": "sha256:30b62db2844baa59350faa780f00858bb27ca5d02faff643370d3dd7e9610368",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 26,
+            "byteStart": 2352,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L43",
+            "lineEnd": 43,
+            "lineStart": 43,
+            "snippetSha256": "sha256:392fb4fe3425342496d4bbaeeced6113e4b5aeb8c66a9d28371e735c4e53bd2e",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"poster-sale-1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_POSTER_2",
+          "natspec": "",
+          "range": {
+            "byteLength": 73,
+            "byteStart": 2384,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L44",
+            "lineEnd": 44,
+            "lineStart": 44,
+            "snippetSha256": "sha256:8e29934acca1937be7cc67983266e6dcd6c0b8d32164a47cd0f645ca66f8852e",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 26,
+            "byteStart": 2431,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L44",
+            "lineEnd": 44,
+            "lineStart": 44,
+            "snippetSha256": "sha256:6aee4a55b46747602096116531e7c04192c7bd088073618b8ff0ee3cd4009b17",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"poster-sale-2\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_POSTER_3",
+          "natspec": "",
+          "range": {
+            "byteLength": 73,
+            "byteStart": 2463,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L45",
+            "lineEnd": 45,
+            "lineStart": 45,
+            "snippetSha256": "sha256:25e3c80391838eeb15ff864dc2327b40a45a7e4622413eaca83399eb788a9a8c",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 26,
+            "byteStart": 2510,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L45",
+            "lineEnd": 45,
+            "lineStart": 45,
+            "snippetSha256": "sha256:af85de5dfb7680629ce0b8bb0e6504998678c1c2725871fc532d89765f143804",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"poster-sale-3\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_UNAUTHORIZED_NATIVE",
+          "natspec": "",
+          "range": {
+            "byteLength": 90,
+            "byteStart": 2542,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L46",
+            "lineEnd": 46,
+            "lineStart": 46,
+            "snippetSha256": "sha256:3b46c291623b3f27714b3f4c0f0c15b2daf2b4530f00f087062d8673b2ac259a",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 32,
+            "byteStart": 2600,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L46",
+            "lineEnd": 46,
+            "lineStart": 46,
+            "snippetSha256": "sha256:91588a191ef5f66a6160031b49f283a29f6c6ca1087401757bd3c9de47ce78a6",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"unauthorized-native\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_UNAUTHORIZED_ERC20",
+          "natspec": "",
+          "range": {
+            "byteLength": 88,
+            "byteStart": 2638,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L47",
+            "lineEnd": 47,
+            "lineStart": 47,
+            "snippetSha256": "sha256:caece882e32cea422ff252be8b2e55dc60c5dfa69f8499f410fab597a64bf3b3",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 31,
+            "byteStart": 2695,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L47",
+            "lineEnd": 47,
+            "lineStart": 47,
+            "snippetSha256": "sha256:56e0f1631220dfcf717d22a3a11537b455a769a3bbff172b24a1999dcee9d407",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"unauthorized-erc20\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_TOKEN_SCOPE",
+          "natspec": "",
+          "range": {
+            "byteLength": 79,
+            "byteStart": 2732,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L48",
+            "lineEnd": 48,
+            "lineStart": 48,
+            "snippetSha256": "sha256:3df16465b307512c450d4916a0ec43ab4ef4117dc906ba9f7a8656107d3d8d6c",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 29,
+            "byteStart": 2782,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L48",
+            "lineEnd": 48,
+            "lineStart": 48,
+            "snippetSha256": "sha256:431d516af64363975bf867b867ebd10f08fb11995a8f91111bbeff0935c8f2ec",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"token-scope-sale\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_NATIVE",
+          "natspec": "",
+          "range": {
+            "byteLength": 69,
+            "byteStart": 2817,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L49",
+            "lineEnd": 49,
+            "lineStart": 49,
+            "snippetSha256": "sha256:a5320ad86d558063cf0f66945d01e566ab6ee812830db77bc5d0062a0071b1c4",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 24,
+            "byteStart": 2862,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L49",
+            "lineEnd": 49,
+            "lineStart": 49,
+            "snippetSha256": "sha256:5d3cc2bb06710935f84fc3836fff34568535319125529419d678a4f758058e88",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"native-sale\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_REPOINT_DRIFT",
+          "natspec": "",
+          "range": {
+            "byteLength": 78,
+            "byteStart": 2892,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L50",
+            "lineEnd": 50,
+            "lineStart": 50,
+            "snippetSha256": "sha256:e129c625313d31315a29d32b553d706fde9a9a9ed2841306e61d073a311bf7a4",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 26,
+            "byteStart": 2944,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L50",
+            "lineEnd": 50,
+            "lineStart": 50,
+            "snippetSha256": "sha256:d10f2fd5e38aa3e454bdf381c7cd6d6618a4f0092347289305c2019e265c440d",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"repoint-drift\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_STRICT_DRIFT",
+          "natspec": "",
+          "range": {
+            "byteLength": 76,
+            "byteStart": 2976,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L51",
+            "lineEnd": 51,
+            "lineStart": 51,
+            "snippetSha256": "sha256:f48ce3ca839a780458ae99d6f1d85760abacfa466e426e748b26bc84dedfd407",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 25,
+            "byteStart": 3027,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L51",
+            "lineEnd": 51,
+            "lineStart": 51,
+            "snippetSha256": "sha256:787501552f6e898480920f34569629a1e289595d39766139af0dd3a4dc68825a",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"strict-drift\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_CURRENT_DRIFT",
+          "natspec": "",
+          "range": {
+            "byteLength": 78,
+            "byteStart": 3058,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L52",
+            "lineEnd": 52,
+            "lineStart": 52,
+            "snippetSha256": "sha256:679fb5f6a13c910ad06426fab5ab47626ca016d2e53a45bde9a0bae3ff73a266",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 26,
+            "byteStart": 3110,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L52",
+            "lineEnd": 52,
+            "lineStart": 52,
+            "snippetSha256": "sha256:8b15cab0074f5fe5c23db542b6ab1a5b2c2fea458ccf15237a3e592175b4bf27",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"current-drift\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_ERC20",
+          "natspec": "",
+          "range": {
+            "byteLength": 67,
+            "byteStart": 3142,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L53",
+            "lineEnd": 53,
+            "lineStart": 53,
+            "snippetSha256": "sha256:3c320ff4c5f7c9f2e91dcd357c23595e3780e486d7a3859c6f9b58857114b875",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 23,
+            "byteStart": 3186,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L53",
+            "lineEnd": 53,
+            "lineStart": 53,
+            "snippetSha256": "sha256:033684ef8440e1351af6ca56f37dcfbefc9df39f3ad0208ba928aa13dd2a778f",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"erc20-sale\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_ERC20_TEMPLATE",
+          "natspec": "",
+          "range": {
+            "byteLength": 85,
+            "byteStart": 3215,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L54",
+            "lineEnd": 54,
+            "lineStart": 54,
+            "snippetSha256": "sha256:cf838638e9a66d571b3456054cd4add331f591f8adf2df350afecf1c82e8daea",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 32,
+            "byteStart": 3268,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L54",
+            "lineEnd": 54,
+            "lineStart": 54,
+            "snippetSha256": "sha256:059a06817c27d2e63e663fd3c9701265a1394516c09ea57d9f0ee0636759b37d",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"erc20-template-sale\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_ERC20_REPLAY",
+          "natspec": "",
+          "range": {
+            "byteLength": 76,
+            "byteStart": 3306,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L55",
+            "lineEnd": 55,
+            "lineStart": 55,
+            "snippetSha256": "sha256:917fa1084d2c790f3bcc638f0e7576097968d1df573175809aa53babec4b92f3",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 25,
+            "byteStart": 3357,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L55",
+            "lineEnd": 55,
+            "lineStart": 55,
+            "snippetSha256": "sha256:320469d3418ddf4a3d2785d2744d89a8dd760bb0c18b8d04992228d6a8e228f8",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"erc20-replay\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_TEMPLATE_REPLAY_PRECHECK",
+          "natspec": "",
+          "range": {
+            "byteLength": 108,
+            "byteStart": 3388,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L56-L57",
+            "lineEnd": 57,
+            "lineStart": 56,
+            "snippetSha256": "sha256:44a720367c3a7bd81ee3810b239c1207bdbee146156ba1bf102f688020219a22",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 37,
+            "byteStart": 3459,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L57",
+            "lineEnd": 57,
+            "lineStart": 57,
+            "snippetSha256": "sha256:f5b6fc0b54fbbc983b32539baa1107b65d3ac72249ddea81a2a13413c43874a9",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"template-replay-precheck\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_ERC20_SECOND_LEG",
+          "natspec": "",
+          "range": {
+            "byteLength": 84,
+            "byteStart": 3502,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L58",
+            "lineEnd": 58,
+            "lineStart": 58,
+            "snippetSha256": "sha256:bca5296c60abb8e39484af6ff87f511fbeff5875b01136cd6672fff9f704611d",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 29,
+            "byteStart": 3557,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L58",
+            "lineEnd": 58,
+            "lineStart": 58,
+            "snippetSha256": "sha256:ae823b5c04b56156b5cf7d423be89882bf0128199ee0f3f5679d3505ae9ac27e",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"erc20-second-leg\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_ZERO_POSTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 83,
+            "byteStart": 3592,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L59",
+            "lineEnd": 59,
+            "lineStart": 59,
+            "snippetSha256": "sha256:7f4fa392efa2a6275f675407be6a476feae9bdbfece6862a4b4444f0979b93f5",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 33,
+            "byteStart": 3642,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L59",
+            "lineEnd": 59,
+            "lineStart": 59,
+            "snippetSha256": "sha256:d6ed576567b1e32065e2112d7b9eb1262a8ed3ecf4c61bf2c93fa344aa59fb8d",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"zero-poster-template\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_ERC20_BAD",
+          "natspec": "",
+          "range": {
+            "byteLength": 70,
+            "byteStart": 3681,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L60",
+            "lineEnd": 60,
+            "lineStart": 60,
+            "snippetSha256": "sha256:9d6a6828ae6d46a61e24e7365c7a83a9a2eb12848ba6f4b2e6b72c4bd8050d98",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 22,
+            "byteStart": 3729,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L60",
+            "lineEnd": 60,
+            "lineStart": 60,
+            "snippetSha256": "sha256:48b4bad5a1ffdc27fb3f0efe528fb838ce28acdd1fdac5a5c65f99b1bb05fd43",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"erc20-bad\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_NATIVE_VALUE_BAD",
+          "natspec": "",
+          "range": {
+            "byteLength": 84,
+            "byteStart": 3757,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L61",
+            "lineEnd": 61,
+            "lineStart": 61,
+            "snippetSha256": "sha256:caee0ea8b0bf43d7e4adb06f48d666ff3f8ffa5f83d3cc46aa6ce4ce9f3974b4",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 29,
+            "byteStart": 3812,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L61",
+            "lineEnd": 61,
+            "lineStart": 61,
+            "snippetSha256": "sha256:df9c26d2d7a8089b7d5bcc0058b20a599abe8c63a5e12618d5265589978d4840",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"native-value-bad\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_OUTER_CALLBACK",
+          "natspec": "",
+          "range": {
+            "byteLength": 80,
+            "byteStart": 3847,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L62",
+            "lineEnd": 62,
+            "lineStart": 62,
+            "snippetSha256": "sha256:358001328b969f5d3ff5a543f192e4bbb72f1b51fe1281b19dc5111760573cad",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 27,
+            "byteStart": 3900,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L62",
+            "lineEnd": 62,
+            "lineStart": 62,
+            "snippetSha256": "sha256:f934216b7a35ac4b774d32e0a1ff25244a40d823d63b717972a62044f2f705aa",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"outer-callback\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SETTLEMENT_INNER_CALLBACK",
+          "natspec": "",
+          "range": {
+            "byteLength": 80,
+            "byteStart": 3933,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L63",
+            "lineEnd": 63,
+            "lineStart": 63,
+            "snippetSha256": "sha256:a2a6024911648b6a8022418c284f5dbb2409ba79092ba15f721e9e4a3aea2766",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 27,
+            "byteStart": 3986,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L63",
+            "lineEnd": 63,
+            "lineStart": 63,
+            "snippetSha256": "sha256:17426fb5542fe9051e50ff81560a2f6486dd37782ce75a17b26419e3ede68ac4",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\"inner-callback\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PRIMARY_REVENUE_SETTLED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 181,
+            "byteStart": 4019,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L64-L66",
+            "lineEnd": 66,
+            "lineStart": 64,
+            "snippetSha256": "sha256:a52367cc6f4cad4824ec3845647042c925f8e6d28109ecf72a2135846d29cec7",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 124,
+            "byteStart": 4076,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L64-L66",
+            "lineEnd": 66,
+            "lineStart": 64,
+            "snippetSha256": "sha256:a8551d4f065b3f97be75e91ac5aff4060794c7b4de73e0ba2e4a3e687d28a0ab",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\n        \"PrimaryRevenueSettled(bytes32,bytes32,bytes32,address,address,address,uint256,bytes32,bool,uint8)\"\n    )",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PRIMARY_REVENUE_SETTLEMENT_CONTEXT_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 221,
+            "byteStart": 4206,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L67-L69",
+            "lineEnd": 69,
+            "lineStart": 67,
+            "snippetSha256": "sha256:5b6398be62df5618aa58efe4b4ab0b63c638cc187205224cf450703de546720f",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 153,
+            "byteStart": 4274,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L67-L69",
+            "lineEnd": 69,
+            "lineStart": 67,
+            "snippetSha256": "sha256:c68b81db8b239e836e1df347f29346453eac79b6ae43281ff43d5e1dfc5c3caf",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\n        \"PrimaryRevenueSettlementContext(bytes32,bytes32,bytes32,address,bytes32,uint8,uint256,uint256,uint256,address,address,bytes32)\"\n    )",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PRIMARY_REVENUE_SETTLEMENT_POLICY_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 181,
+            "byteStart": 4433,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L70-L72",
+            "lineEnd": 72,
+            "lineStart": 70,
+            "snippetSha256": "sha256:6483489421838cbcdc7cd7e7e843e84e9d3191c82cbb8022f03dc36ea1465435",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 114,
+            "byteStart": 4500,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L70-L72",
+            "lineEnd": 72,
+            "lineStart": 70,
+            "snippetSha256": "sha256:a6cb676bb946404c7df053dadab3ed72b5337cf0664a7c8d1632afe8332c816a",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "valueSource": "keccak256(\n        \"PrimaryRevenueSettlementPolicy(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)\"\n    )",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "assetPolicyRegistry",
+          "natspec": "",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 4621,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L74",
+            "lineEnd": 74,
+            "lineStart": 74,
+            "snippetSha256": "sha256:4c48f4fa77afd60e97b66c4f5be4a2b522dedb55dfd91070d4d498c90db456bc",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "StreamAssetPolicyRegistry",
+          "typeString": "contract StreamAssetPolicyRegistry",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "factory",
+          "natspec": "",
+          "range": {
+            "byteLength": 34,
+            "byteStart": 4680,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L75",
+            "lineEnd": 75,
+            "lineStart": 75,
+            "snippetSha256": "sha256:eea0364b44022c983c933a210c31da3e5e3dc29203d00cdaf69fe76db7997e0c",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "StreamSplitFactory",
+          "typeString": "contract StreamSplitFactory",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "resolver",
+          "natspec": "",
+          "range": {
+            "byteLength": 38,
+            "byteStart": 4720,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L76",
+            "lineEnd": 76,
+            "lineStart": 76,
+            "snippetSha256": "sha256:73447ba2c23459ca70b58cdf8894d6d40c5c587cccadeebd7008ae1b395ef000",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "StreamRevenueResolver",
+          "typeString": "contract StreamRevenueResolver",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "settlement",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 4764,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L77",
+            "lineEnd": 77,
+            "lineStart": 77,
+            "snippetSha256": "sha256:de119812a250cca6a9c69c00fcc8037148e6623895c71f227a71a3581a888f65",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "StreamPrimarySaleSettlement",
+          "typeString": "contract StreamPrimarySaleSettlement",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6U3RyZWFtUHJpbWFyeVNhbGVTZXR0bGVtZW50VGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamPrimarySaleSettlementTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 70240,
+      "byteStart": 653,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L16-L1518",
+      "lineEnd": 1518,
+      "lineStart": 16,
+      "snippetSha256": "sha256:05db65b19f7a6fdb426348db19e0059fdf8cbf08b464fc6e0db9a251d1d332c8",
+      "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamPrimarySaleSettlement.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 22
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 21
+    },
+    "totalCount": 22
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x08d48504",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x0a9254e4",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x12f5b6f7",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x14484bc1",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x1e53a198",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x2aef64aa",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x40f17426",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x55b449ea",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x58ce3e5d",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x591c4520",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x5c47fa50",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x7b2a5a99",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x8069b4d5",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0x8a68168c",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xa38468c1",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xaaadbc86",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xc1689e3f",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xc890e673",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xca2d7da4",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xeb0f47a8",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest#function:0xf170c6d8",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:StreamPrimarySaleSettlementTest",
+      "severity": "advisory"
+    }
+  ]
+}

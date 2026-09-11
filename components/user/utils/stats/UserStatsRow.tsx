@@ -13,10 +13,7 @@ export enum UserStatsRowSize {
   MEDIUM = "MEDIUM",
 }
 
-const SIZE_CLASSES: Record<
-  UserStatsRowSize,
-  { text: string; rate: string }
-> = {
+const SIZE_CLASSES: Record<UserStatsRowSize, { text: string; rate: string }> = {
   [UserStatsRowSize.SMALL]: {
     text: "tw-text-sm",
     rate: "tw-text-xs",
@@ -95,13 +92,13 @@ export default function UserStatsRow({
 
   return (
     <div className={`@container ${className}`}>
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-1 sm:tw-gap-y-0.5 tw-gap-x-4 lg:tw-gap-x-6">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1 sm:tw-gap-y-0.5 lg:tw-gap-x-6">
         <Link
           href={`/${routeHandle}/collected`}
           aria-label={tdhLinkLabel}
-          className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+          className="tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-underline"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-200`}>
             {tdhValue}
           </span>{" "}
           <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
@@ -122,9 +119,9 @@ export default function UserStatsRow({
         <Link
           href={`/${routeHandle}/xtdh`}
           aria-label={xtdhLinkLabel}
-          className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+          className="tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-underline"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-200`}>
             {xtdhValue}
           </span>{" "}
           <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
@@ -149,9 +146,9 @@ export default function UserStatsRow({
             { handle, value: nicValue },
             locale
           )}
-          className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+          className="tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-underline"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-200`}>
             {nicValue}
           </span>{" "}
           <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
@@ -166,9 +163,9 @@ export default function UserStatsRow({
             { handle, value: repValue },
             locale
           )}
-          className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+          className="tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-underline"
         >
-          <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
+          <span className={`${classes.text} tw-font-semibold tw-text-iron-200`}>
             {repValue}
           </span>{" "}
           <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
@@ -185,9 +182,11 @@ export default function UserStatsRow({
               followersActionLabel,
               locale
             )}
-            className="tw-bg-transparent tw-border-none tw-p-0 tw-cursor-pointer tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+            className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-underline"
           >
-            <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
+            <span
+              className={`${classes.text} tw-font-semibold tw-text-iron-200`}
+            >
               {followersValue}
             </span>{" "}
             <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
@@ -202,9 +201,11 @@ export default function UserStatsRow({
               followersActionLabel,
               locale
             )}
-            className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+            className="tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-underline"
           >
-            <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
+            <span
+              className={`${classes.text} tw-font-semibold tw-text-iron-200`}
+            >
               {followersValue}
             </span>{" "}
             <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>

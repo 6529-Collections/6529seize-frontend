@@ -1,0 +1,229 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock#function:0xefb1a4dc",
+          "declaringDefinitionId": "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "ASSET_STATUS_ACTIVE",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0xefb1a4dc",
+          "signature": "ASSET_STATUS_ACTIVE()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock#function:0x99ce40d6",
+          "declaringDefinitionId": "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamAssetPolicyRegistry",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x99ce40d6",
+          "signature": "isStreamAssetPolicyRegistry()",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "isStreamAssetPolicyRegistry()",
+          "displaySignature": "isStreamAssetPolicyRegistry()",
+          "functionKind": "function",
+          "id": "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock#function:0x99ce40d6",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpPdXRPZlJhbmdlQXNzZXRQb2xpY3lSZWdpc3RyeU1vY2sjZnVuY3Rpb246MHg5OWNlNDBkNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamAssetPolicyRegistry",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 96,
+            "byteStart": 77748,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1715-L1717",
+            "lineEnd": 1717,
+            "lineStart": 1715,
+            "snippetSha256": "sha256:7d180b035178e2a55973967246f02d087170c312eba091288f48efbcab1d10b0",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": "0x99ce40d6",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "ASSET_STATUS_ACTIVE()",
+          "displaySignature": "ASSET_STATUS_ACTIVE()",
+          "functionKind": "function",
+          "id": "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock#function:0xefb1a4dc",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpPdXRPZlJhbmdlQXNzZXRQb2xpY3lSZWdpc3RyeU1vY2sjZnVuY3Rpb246MHhlZmIxYTRkYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "ASSET_STATUS_ACTIVE",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 86,
+            "byteStart": 77850,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1719-L1721",
+            "lineEnd": 1721,
+            "lineStart": 1719,
+            "snippetSha256": "sha256:e211d70778f786a328d11a847716d87cb57293c8d07332e962baedefd84fd794",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": "0xefb1a4dc",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "fallback()",
+          "functionKind": "fallback",
+          "id": "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock#function:fallback()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpPdXRPZlJhbmdlQXNzZXRQb2xpY3lSZWdpc3RyeU1vY2sjZnVuY3Rpb246ZmFsbGJhY2soKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fallback",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 282,
+            "byteStart": 77942,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1723-L1731",
+            "lineEnd": 1731,
+            "lineStart": 1723,
+            "snippetSha256": "sha256:f59206d239bec6e1848b3bbcf6408f09e37b8f43fba1ee9d3761d240562157fd",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpPdXRPZlJhbmdlQXNzZXRQb2xpY3lSZWdpc3RyeU1vY2s",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "OutOfRangeAssetPolicyRegistryMock",
+    "natspec": "",
+    "range": {
+      "byteLength": 527,
+      "byteStart": 77699,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1714-L1732",
+      "lineEnd": 1732,
+      "lineStart": 1714,
+      "snippetSha256": "sha256:d9309bba77db2fdb39d679bd8e9cf9f93d6ea94f12b890e0a2ca2668f7d3a8e8",
+      "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamSplitWallet.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock#function:0x99ce40d6",
+      "definitionId": "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock#function:0xefb1a4dc",
+      "definitionId": "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock#function:fallback()",
+      "definitionId": "test/StreamSplitWallet.t.sol:OutOfRangeAssetPolicyRegistryMock",
+      "severity": "advisory"
+    }
+  ]
+}

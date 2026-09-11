@@ -31,8 +31,17 @@ const tailwindConfig: Config = {
         "3xl": "2048px",
       },
       fontSize: {
+        label: ["11px", { letterSpacing: "0.14em" }],
+        meta: "13px",
+        body: ["15px", { lineHeight: "1.72" }],
         xxs: ["0.8125rem", "20px"],
         md: ["0.9375rem", "24px"],
+      },
+      letterSpacing: {
+        title: "-0.02em",
+        identity: "-0.01em",
+        rank: "-0.03em",
+        ordinal: "0.04em",
       },
       colors: {
         "primary-300": "#84ADFF",
@@ -105,6 +114,26 @@ const tailwindConfig: Config = {
           },
           "100%": {
             opacity: "1",
+          },
+        },
+        "sidebar-flyout-in": {
+          "0%": {
+            opacity: "0",
+            transform: "translate3d(-4px, 0, 0)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translate3d(0, 0, 0)",
+          },
+        },
+        "sidebar-account-menu-in": {
+          "0%": {
+            opacity: "0",
+            transform: "translate3d(0, 4px, 0)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translate3d(0, 0, 0)",
           },
         },
         slideUp: {
@@ -198,6 +227,14 @@ const tailwindConfig: Config = {
             transform: "translate3d(-50%, 0, 0)",
           },
         },
+        "hero-float": {
+          "0%, 100%": {
+            transform: "translate3d(0, 0, 0) rotate(var(--hero-rotate))",
+          },
+          "50%": {
+            transform: "translate3d(0, -12px, 0) rotate(var(--hero-rotate))",
+          },
+        },
       },
       animation: {
         "loading-bar": "loading-bar 1.5s infinite",
@@ -206,6 +243,10 @@ const tailwindConfig: Config = {
         "gradient-x": "gradient-x 3s ease infinite",
         "spin-slow": "spin 15s linear infinite",
         fadeIn: "fadeIn 0.3s ease-out forwards",
+        "sidebar-flyout-in":
+          "sidebar-flyout-in 160ms cubic-bezier(0.22, 1, 0.36, 1) both",
+        "sidebar-account-menu-in":
+          "sidebar-account-menu-in 160ms cubic-bezier(0.22, 1, 0.36, 1) both",
         slideUp: "slideUp 0.3s ease-out forwards",
         slideDown: "slideDown 0.3s ease-out forwards",
         shake: "shake 0.3s ease-in-out",
@@ -218,6 +259,7 @@ const tailwindConfig: Config = {
         "poll-result-stats-in": "poll-result-stats-in 0.5s ease-out forwards",
         "boosted-preview-marquee":
           "boosted-preview-marquee 14s linear infinite",
+        "hero-float": "hero-float 6s ease-in-out infinite",
       },
       backgroundSize: {
         "gradient-pos": "200% 200%",
@@ -239,9 +281,28 @@ const tailwindConfig: Config = {
         "@media (any-hover: hover)",
         "body[data-fine-pointer] &",
       ]);
+      // `touch-only` is the exact complement of the query above: tailwind runs
+      // with `hoverOnlyWhenSupported`, so every `hover:`/`group-hover:` utility
+      // ships inside `(hover: hover) and (pointer: fine)`. Any browser that
+      // denies it cannot fire a CSS hover reveal at all, and must therefore
+      // keep the always-visible form — phones, tablets, hybrids in tablet
+      // posture, and Windows laptops that mis-report while a trackpad drives
+      // the cursor.
+      //
+      // Deliberately NOT `body:not([data-fine-pointer])`. #3115 suppressed
+      // this on the premise that `data-fine-pointer` turns desktop-hover
+      // styles back on, but that only holds for capability-only
+      // `desktop-hover:tw-*` utilities — the tag cannot reach anything stacked
+      // with `hover:`, because that sits inside the media query the browser is
+      // denying. Suppressing the touch form there left those controls with no
+      // reachable state at all (reported on a Surface Pro 8).
+      //
+      // Fails open by construction: a browser too old to understand these
+      // features evaluates them false, so the negation matches and the
+      // affordance stays visible.
       addVariant(
         "touch-only",
-        "@media (any-hover: none) and (any-pointer: coarse) { body:not([data-fine-pointer]) & }"
+        "@media not all and (hover: hover) and (pointer: fine)"
       );
     }),
   ],

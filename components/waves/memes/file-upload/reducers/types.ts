@@ -59,6 +59,7 @@ export type FileUploaderAction =
   | { type: "RESET_STATE" }
   | { type: "START_PROCESSING"; payload: File }
   | { type: "PROCESSING_SUCCESS"; payload: { objectUrl: string; file: File } }
+  | { type: "VALIDATION_ERROR"; payload: string }
   | { type: "PROCESSING_ERROR"; payload: string }
   | { type: "PROCESSING_RETRY" }
   | { type: "PROCESSING_TIMEOUT" }
@@ -75,6 +76,8 @@ export interface MemesArtSubmissionFileProps {
   readonly artworkUrl: string;
   /** Error raised while reading the selected upload */
   readonly uploadError: string | null;
+  /** Missing media error shown after the user tries to continue */
+  readonly missingMediaError?: string | null | undefined;
   /** MIME type for server-provided artwork */
   readonly artworkMimeType?: string | null | undefined;
   /** Callback to update artwork upload state */

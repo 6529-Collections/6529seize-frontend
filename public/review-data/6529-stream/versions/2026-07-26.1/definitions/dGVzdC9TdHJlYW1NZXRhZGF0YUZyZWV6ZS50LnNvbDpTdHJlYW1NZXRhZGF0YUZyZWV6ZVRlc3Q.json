@@ -1,0 +1,655 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#event:CollectionFrozen(uint256,bytes32,string,address)",
+          "declaringDefinitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "string",
+              "name": "schemaVersion",
+              "type": "string"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "CollectionFrozen",
+          "signature": "CollectionFrozen(uint256,bytes32,string,address)",
+          "topic0": "0x7965a79edbbe8f2445202cb9d12fb0d9c7049a41ea1def1c77e96577610dfc4b"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0x57f15dba",
+          "declaringDefinitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFreezeIgnoresBurnedPendingTokenMetadata",
+          "outputs": [],
+          "selector": "0x57f15dba",
+          "signature": "testFreezeIgnoresBurnedPendingTokenMetadata()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0xa28fd102",
+          "declaringDefinitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFreezeRejectsBeforeMintAndFinalSupplyWindowsEnd",
+          "outputs": [],
+          "selector": "0xa28fd102",
+          "signature": "testFreezeRejectsBeforeMintAndFinalSupplyWindowsEnd()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0x40c9205b",
+          "declaringDefinitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFreezeRejectsPendingLiveTokenMetadata",
+          "outputs": [],
+          "selector": "0x40c9205b",
+          "signature": "testFreezeRejectsPendingLiveTokenMetadata()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0xf4ff8ca3",
+          "declaringDefinitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFreezeStoresManifestEventAndFinalizesSupply",
+          "outputs": [],
+          "selector": "0xf4ff8ca3",
+          "signature": "testFreezeStoresManifestEventAndFinalizesSupply()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0xe439940d",
+          "declaringDefinitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFrozenCollectionBlocksDependencyRegistrySwap",
+          "outputs": [],
+          "selector": "0xe439940d",
+          "signature": "testFrozenCollectionBlocksDependencyRegistrySwap()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0x42973999",
+          "declaringDefinitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFrozenCollectionRejectsMetadataSignificantWrites",
+          "outputs": [],
+          "selector": "0x42973999",
+          "signature": "testFrozenCollectionRejectsMetadataSignificantWrites()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0x6abb6be5",
+          "declaringDefinitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSetTokenHashRejectsTokenMappedToAnotherCollection",
+          "outputs": [],
+          "selector": "0x6abb6be5",
+          "signature": "testSetTokenHashRejectsTokenMappedToAnotherCollection()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 208957,
+          "canonicalSignature": "CollectionFrozen(uint256,bytes32,string,address)",
+          "displaySignature": "CollectionFrozen(uint256,bytes32,string,address)",
+          "id": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#event:CollectionFrozen(uint256,bytes32,string,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "string"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUZyZWV6ZS50LnNvbDpTdHJlYW1NZXRhZGF0YUZyZWV6ZVRlc3QjZXZlbnQ6Q29sbGVjdGlvbkZyb3plbih1aW50MjU2LGJ5dGVzMzIsc3RyaW5nLGFkZHJlc3Mp",
+          "kind": "event",
+          "name": "CollectionFrozen",
+          "natspec": "",
+          "range": {
+            "byteLength": 167,
+            "byteStart": 531,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L17-L22",
+            "lineEnd": 22,
+            "lineStart": 17,
+            "snippetSha256": "sha256:732e0880d41ba308acd6e9d012e22eaf24e729238c9d82e2b619e92d4b37d6f5",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "topic0": "0x7965a79edbbe8f2445202cb9d12fb0d9c7049a41ea1def1c77e96577610dfc4b"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "testFreezeStoresManifestEventAndFinalizesSupply()",
+          "displaySignature": "testFreezeStoresManifestEventAndFinalizesSupply()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0xf4ff8ca3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUZyZWV6ZS50LnNvbDpTdHJlYW1NZXRhZGF0YUZyZWV6ZVRlc3QjZnVuY3Rpb246MHhmNGZmOGNhMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFreezeStoresManifestEventAndFinalizesSupply",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2572,
+            "byteStart": 855,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L28-L78",
+            "lineEnd": 78,
+            "lineStart": 28,
+            "snippetSha256": "sha256:37b70e11de4d92020de2a171cbfc5868822f111294c17202b5b1415d71643692",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "selector": "0xf4ff8ca3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFreezeRejectsBeforeMintAndFinalSupplyWindowsEnd()",
+          "displaySignature": "testFreezeRejectsBeforeMintAndFinalSupplyWindowsEnd()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0xa28fd102",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUZyZWV6ZS50LnNvbDpTdHJlYW1NZXRhZGF0YUZyZWV6ZVRlc3QjZnVuY3Rpb246MHhhMjhmZDEwMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFreezeRejectsBeforeMintAndFinalSupplyWindowsEnd",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 942,
+            "byteStart": 3433,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L80-L105",
+            "lineEnd": 105,
+            "lineStart": 80,
+            "snippetSha256": "sha256:60153139d76e24d1adedf47fd5245d579c6c437d4a903d595e57d49ae6f4b2dc",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "selector": "0xa28fd102",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFreezeRejectsPendingLiveTokenMetadata()",
+          "displaySignature": "testFreezeRejectsPendingLiveTokenMetadata()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0x40c9205b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUZyZWV6ZS50LnNvbDpTdHJlYW1NZXRhZGF0YUZyZWV6ZVRlc3QjZnVuY3Rpb246MHg0MGM5MjA1Yg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFreezeRejectsPendingLiveTokenMetadata",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 606,
+            "byteStart": 4381,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L107-L120",
+            "lineEnd": 120,
+            "lineStart": 107,
+            "snippetSha256": "sha256:377e3556bdfd624caf479f73f081921ee5897ff12d21ee4632744f93c41ecc90",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "selector": "0x40c9205b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFreezeIgnoresBurnedPendingTokenMetadata()",
+          "displaySignature": "testFreezeIgnoresBurnedPendingTokenMetadata()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0x57f15dba",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUZyZWV6ZS50LnNvbDpTdHJlYW1NZXRhZGF0YUZyZWV6ZVRlc3QjZnVuY3Rpb246MHg1N2YxNWRiYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFreezeIgnoresBurnedPendingTokenMetadata",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 716,
+            "byteStart": 4993,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L122-L137",
+            "lineEnd": 137,
+            "lineStart": 122,
+            "snippetSha256": "sha256:e1de15acf5bc9b59a7181f2156b870c7c9a03e436438b0206440e45136d5d440",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "selector": "0x57f15dba",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFrozenCollectionRejectsMetadataSignificantWrites()",
+          "displaySignature": "testFrozenCollectionRejectsMetadataSignificantWrites()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0x42973999",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUZyZWV6ZS50LnNvbDpTdHJlYW1NZXRhZGF0YUZyZWV6ZVRlc3QjZnVuY3Rpb246MHg0Mjk3Mzk5OQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFrozenCollectionRejectsMetadataSignificantWrites",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3152,
+            "byteStart": 5715,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L139-L204",
+            "lineEnd": 204,
+            "lineStart": 139,
+            "snippetSha256": "sha256:8e9c4d936594e7ced7f41e9973d646a50d64a87b19cac77fc148c56e49a08ec6",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "selector": "0x42973999",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSetTokenHashRejectsTokenMappedToAnotherCollection()",
+          "displaySignature": "testSetTokenHashRejectsTokenMappedToAnotherCollection()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0x6abb6be5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUZyZWV6ZS50LnNvbDpTdHJlYW1NZXRhZGF0YUZyZWV6ZVRlc3QjZnVuY3Rpb246MHg2YWJiNmJlNQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSetTokenHashRejectsTokenMappedToAnotherCollection",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1244,
+            "byteStart": 8873,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L206-L232",
+            "lineEnd": 232,
+            "lineStart": 206,
+            "snippetSha256": "sha256:9b0f9e2203b2bc15cc04e57ecac62872daebae60a2b5d9e030d2d9e6d37d4d0c",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "selector": "0x6abb6be5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFrozenCollectionBlocksDependencyRegistrySwap()",
+          "displaySignature": "testFrozenCollectionBlocksDependencyRegistrySwap()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0xe439940d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUZyZWV6ZS50LnNvbDpTdHJlYW1NZXRhZGF0YUZyZWV6ZVRlc3QjZnVuY3Rpb246MHhlNDM5OTQwZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFrozenCollectionBlocksDependencyRegistrySwap",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 582,
+            "byteStart": 10123,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L234-L245",
+            "lineEnd": 245,
+            "lineStart": 234,
+            "snippetSha256": "sha256:32c062d14d5ac38799d0409960a669eea6ce02ad51b050eacf88e6b71df4eaf9",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "selector": "0xe439940d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintToken(DeployedStream,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:_mintToken(DeployedStream,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "salt",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUZyZWV6ZS50LnNvbDpTdHJlYW1NZXRhZGF0YUZyZWV6ZVRlc3QjZnVuY3Rpb246X21pbnRUb2tlbihEZXBsb3llZFN0cmVhbSx1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintToken",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 220,
+            "byteStart": 10711,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L247-L250",
+            "lineEnd": 250,
+            "lineStart": 247,
+            "snippetSha256": "sha256:06e172aaf5abfc47b8a90c8c309b9e6961fc0e5508c4d8b3398fa91e39519366",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_warpPastFinalSupplyWindow()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:_warpPastFinalSupplyWindow()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUZyZWV6ZS50LnNvbDpTdHJlYW1NZXRhZGF0YUZyZWV6ZVRlc3QjZnVuY3Rpb246X3dhcnBQYXN0RmluYWxTdXBwbHlXaW5kb3coKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_warpPastFinalSupplyWindow",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 101,
+            "byteStart": 10937,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L252-L254",
+            "lineEnd": 254,
+            "lineStart": 252,
+            "snippetSha256": "sha256:82a6688bff813f04a0b4678165717eac2ee27e3657eac19a004bc225f1440737",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 704,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 745,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 752,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 788,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 795,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:9ad3cd03bccb87616377ded5a696e0eb9dcbd4debf5aabca58a379ad81e19501",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 16,
+            "byteStart": 832,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:ff90295fee849d58a9a67d401763bcdf9a2e87e84bdeb02ce3ca102c5621224f",
+            "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+          },
+          "valueSource": "address(0xA11CE)",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUZyZWV6ZS50LnNvbDpTdHJlYW1NZXRhZGF0YUZyZWV6ZVRlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamMetadataFreezeTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 10726,
+      "byteStart": 314,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataFreeze.t.sol#L11-L255",
+      "lineEnd": 255,
+      "lineStart": 11,
+      "snippetSha256": "sha256:3aade0e60c4baf09520f62675766c921b41a24b1c9ea5c6e1042b351bf295b7c",
+      "sourceSha256": "sha256:c4eab189b10a14777ea46db83953d463bcf5d6cacc75a09d68db4fa86c5fd4c6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMetadataFreeze.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 8
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 7
+    },
+    "totalCount": 8
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0x40c9205b",
+      "definitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0x42973999",
+      "definitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0x57f15dba",
+      "definitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0x6abb6be5",
+      "definitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0xa28fd102",
+      "definitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0xe439940d",
+      "definitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest#function:0xf4ff8ca3",
+      "definitionId": "test/StreamMetadataFreeze.t.sol:StreamMetadataFreezeTest",
+      "severity": "advisory"
+    }
+  ]
+}

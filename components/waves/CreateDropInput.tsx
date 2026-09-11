@@ -1,6 +1,7 @@
 "use client";
 
 import type { InitialConfigType } from "@lexical/react/LexicalComposer";
+import { $convertFromMarkdownString } from "@lexical/markdown";
 import type { FocusEvent } from "react";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import {
@@ -8,10 +9,12 @@ import {
   useImperativeHandle,
   useCallback,
   useEffect,
+  useId,
   useRef,
 } from "react";
-import type { EditorState } from "lexical";
-import { COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
+import type { EditorState, LexicalEditor } from "lexical";
+import { $getRoot, COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
+import { clearWaveDraft } from "@/helpers/waves/wave-draft.helpers";
 
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -44,7 +47,10 @@ import ExampleTheme from "../drops/create/lexical/ExampleTheme";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import type { ClearEditorPluginHandles } from "../drops/create/lexical/plugins/ClearEditorPlugin";
 import ClearEditorPlugin from "../drops/create/lexical/plugins/ClearEditorPlugin";
-import type { NewMentionsPluginHandles } from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
+import type {
+  MentionAliasExpansionResult,
+  NewMentionsPluginHandles,
+} from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
 import NewMentionsPlugin from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
 import type { NewHastagsPluginHandles } from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
 import NewHashtagsPlugin from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
@@ -58,14 +64,25 @@ import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
 import useCapacitor from "@/hooks/useCapacitor";
 import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
-import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
+import {
+  CREATE_DROP_MARKDOWN_SHORTCUT_TRANSFORMERS,
+  CREATE_DROP_MARKDOWN_TRANSFORMERS,
+} from "@/components/drops/create/lexical/transformers/createDropMarkdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 import EditLastDropArrowUpPlugin from "./EditLastDropArrowUpPlugin";
 import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
+import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/rootContent";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { useDropComposerDensity } from "./CreateDropWaveWrapper";
+import { MAX_DROP_PART_UTF16_UNITS } from "@/helpers/waves/drop-content-limits";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
+  setMarkdown: (markdown: string) => void;
+  expandMentionAliases: () => Promise<MentionAliasExpansionResult>;
   focus: () => void;
+  blur: () => void;
 }
 
 // Create a custom command
@@ -91,16 +108,118 @@ function DisableEditPlugin({ disabled }: { disabled: boolean }) {
   return null;
 }
 
+interface EditorCommandsPluginHandles {
+  setMarkdown: (markdown: string) => void;
+  focus: () => void;
+  blur: () => void;
+}
+
+const EditorCommandsPlugin = forwardRef<EditorCommandsPluginHandles>(
+  (_props, ref) => {
+    const [editor] = useLexicalComposerContext();
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        focus: () => editor.focus(),
+        blur: () => editor.blur(),
+        setMarkdown: (markdown: string) => {
+          editor.update(() => {
+            $convertFromMarkdownString(
+              markdown,
+              CREATE_DROP_MARKDOWN_TRANSFORMERS
+            );
+          });
+        },
+      }),
+      [editor]
+    );
+
+    return null;
+  }
+);
+EditorCommandsPlugin.displayName = "EditorCommandsPlugin";
+
+/**
+ * Pushes the editor's mount-time state up to the parent once. A draft
+ * restored through initialConfig.editorState never fires OnChangePlugin (it
+ * is the initial state, not an update), so without this the parent still
+ * believes the composer is empty — submit stays disabled until the user
+ * types. Rendered only when a restored draft seeded the editor.
+ */
+function NotifyInitialEditorStatePlugin({
+  onEditorState,
+}: {
+  readonly onEditorState: (editorState: EditorState) => void;
+}) {
+  const [editor] = useLexicalComposerContext();
+  const notifiedRef = useRef(false);
+
+  useEffect(() => {
+    if (notifiedRef.current) {
+      return;
+    }
+    notifiedRef.current = true;
+    onEditorState(editor.getEditorState());
+  }, [editor, onEditorState]);
+
+  return null;
+}
+
+function InitialMarkdownPlugin({
+  initialMarkdown,
+  initialMarkdownKey,
+}: {
+  readonly initialMarkdown: string | null;
+  readonly initialMarkdownKey: string | null;
+}) {
+  const [editor] = useLexicalComposerContext();
+  const appliedKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!initialMarkdown || !initialMarkdownKey) {
+      return;
+    }
+
+    if (appliedKeyRef.current === initialMarkdownKey) {
+      return;
+    }
+
+    appliedKeyRef.current = initialMarkdownKey;
+    editor.update(() => {
+      const root = $getRoot();
+      root.clear();
+      $convertFromMarkdownString(
+        initialMarkdown,
+        CREATE_DROP_MARKDOWN_TRANSFORMERS
+      );
+      $selectEndOfRootBlock(root);
+    });
+    editor.focus();
+  }, [editor, initialMarkdown, initialMarkdownKey]);
+
+  return null;
+}
+
 const CreateDropInput = forwardRef<
   CreateDropInputHandles,
   {
     readonly waveId: string;
     readonly editorState: EditorState | null;
+    /**
+     * Serialized editor state (JSON) to seed a fresh editor with — a restored
+     * draft. Lexical reads initialConfig.editorState once at creation, so this
+     * only takes effect on mount; live edits flow through `editorState`.
+     */
+    readonly initialEditorStateJson?: string | null | undefined;
     readonly type: ActiveDropAction | null;
     readonly canSubmit: boolean;
     readonly isStormMode: boolean;
+    readonly stormPartNumber?: number | undefined;
     readonly submitting: boolean;
     readonly isDropMode: boolean;
+    readonly isPollActive?: boolean | undefined;
+    readonly containerClassName?: string | undefined;
     readonly canMentionAll?: boolean | undefined;
     readonly onDrop?: (() => void) | undefined;
     readonly onEditorState: (editorState: EditorState) => void;
@@ -113,18 +232,25 @@ const CreateDropInput = forwardRef<
     readonly onAttachmentFiles?: ((files: File[]) => void) | undefined;
     readonly hasValidationError?: boolean | undefined;
     readonly validationHelperText?: string | null | undefined;
+    readonly validationHelperClassName?: string | undefined;
     readonly canEditLastDropWithArrow?: boolean | undefined;
     readonly onRequestEditLastDrop?: (() => boolean) | undefined;
+    readonly initialMarkdown?: string | null | undefined;
+    readonly initialMarkdownKey?: string | null | undefined;
   }
 >(
   (
     {
       waveId,
       editorState,
+      initialEditorStateJson,
       type,
       canSubmit,
       isStormMode,
+      stormPartNumber = 1,
       isDropMode,
+      isPollActive = false,
+      containerClassName,
       canMentionAll = false,
       submitting,
       onEditorState,
@@ -135,13 +261,22 @@ const CreateDropInput = forwardRef<
       onAttachmentFiles,
       hasValidationError = false,
       validationHelperText = null,
+      validationHelperClassName,
       canEditLastDropWithArrow = false,
       onRequestEditLastDrop,
+      initialMarkdown = null,
+      initialMarkdownKey = null,
       onDrop,
     },
     ref
   ) => {
     const { isCapacitor } = useCapacitor();
+    const locale = useBrowserLocale();
+    const validationHelperTextId = useId();
+    const showValidationError =
+      hasValidationError && validationHelperText !== null;
+    const composerDensity = useDropComposerDensity();
+    const isCompact = composerDensity === "compact";
     const editorConfig: InitialConfigType = {
       namespace: "User Drop",
       nodes: [
@@ -164,7 +299,27 @@ const CreateDropInput = forwardRef<
         ImageNode,
         EmojiNode,
       ],
-      editorState,
+      // A restored draft (JSON string) wins at creation; otherwise the live
+      // editorState object. The draft is parsed inside a try/catch because a
+      // malformed or schema-incompatible draft (e.g. saved by an older app
+      // version whose node types have since changed) would otherwise throw
+      // through onError — which re-throws — and crash the composer mount. On
+      // failure the broken draft is removed from storage so it is not retried
+      // on every mount, and we silently fall back to an empty editor.
+      editorState:
+        typeof initialEditorStateJson === "string"
+          ? (editor: LexicalEditor) => {
+              try {
+                editor.setEditorState(
+                  editor.parseEditorState(initialEditorStateJson)
+                );
+              } catch {
+                // Unrestorable draft — clear it and start empty rather than
+                // crash or retry the same broken payload forever.
+                clearWaveDraft(waveId);
+              }
+            }
+          : editorState,
       editable: !submitting,
       onError(error: Error): void {
         throw error;
@@ -186,15 +341,37 @@ const CreateDropInput = forwardRef<
     const onHashtagAdded = (hashtag: ReferencedNft) => onReferencedNft(hashtag);
 
     const getPlaceHolderText = () => {
-      if (isStormMode) return "Add to the storm";
+      if (isStormMode) {
+        return t(locale, "waves.stormComposer.writePart", {
+          number: stormPartNumber,
+        });
+      }
+      if (isPollActive) {
+        return t(locale, "waves.poll.composer.questionPlaceholder");
+      }
       if (type === null) {
-        return isDropMode ? "Create a drop" : "Write a chat message";
+        return t(
+          locale,
+          isDropMode
+            ? "waves.composer.placeholder.createDrop"
+            : "waves.composer.placeholder.writeChatMessage"
+        );
       }
       switch (type) {
         case ActiveDropAction.REPLY:
-          return isDropMode ? "Drop a reply" : "Post a reply";
+          return t(
+            locale,
+            isDropMode
+              ? "waves.composer.placeholder.dropReply"
+              : "waves.composer.placeholder.postReply"
+          );
         case ActiveDropAction.QUOTE:
-          return isDropMode ? "Quote a drop" : "Post a quote";
+          return t(
+            locale,
+            isDropMode
+              ? "waves.composer.placeholder.quoteDrop"
+              : "waves.composer.placeholder.postQuote"
+          );
         default:
           assertUnreachable(type);
           return "";
@@ -209,23 +386,31 @@ const CreateDropInput = forwardRef<
     }
 
     const clearEditorRef = useRef<ClearEditorPluginHandles | null>(null);
-    const editorRef = useRef<HTMLDivElement>(null);
-    const clearEditorState = () => {
-      clearEditorRef.current?.clearEditorState();
-    };
-
-    useImperativeHandle(ref, () => ({
-      clearEditorState,
-      focus: () => {
-        (
-          editorRef.current?.querySelector(
-            '[contenteditable="true"]'
-          ) as HTMLElement
-        ).focus();
-      },
-    }));
-
+    const editorCommandsRef = useRef<EditorCommandsPluginHandles | null>(null);
     const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
+    const clearEditorState = useCallback(() => {
+      clearEditorRef.current?.clearEditorState();
+    }, []);
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        clearEditorState,
+        setMarkdown: (markdown: string) =>
+          editorCommandsRef.current?.setMarkdown(markdown),
+        expandMentionAliases: async () => {
+          const mentionsPlugin = mentionsPluginRef.current;
+          if (!mentionsPlugin) {
+            throw new Error("Quick Tags are not ready yet.");
+          }
+          return mentionsPlugin.expandMentionAliases();
+        },
+        focus: () => editorCommandsRef.current?.focus(),
+        blur: () => editorCommandsRef.current?.blur(),
+      }),
+      [clearEditorState]
+    );
+
     const hashtagPluginRef = useRef<NewHastagsPluginHandles | null>(null);
     const waveMentionsPluginRef = useRef<NewWaveMentionsPluginHandles | null>(
       null
@@ -261,106 +446,119 @@ const CreateDropInput = forwardRef<
     const placeholderText = getPlaceHolderText();
 
     return (
-      <div className="tailwind-scope" ref={editorRef}>
-        <LexicalComposer initialConfig={editorConfig}>
-          <div className="tw-flex tw-items-end tw-gap-x-3">
-            <div className="tw-relative tw-w-full">
-              <RichTextPlugin
-                contentEditable={
-                  <div className="tw-relative">
-                    <ContentEditable
-                      spellCheck={true}
-                      autoCorrect="on"
-                      ariaLabel={placeholderText}
-                      style={{ touchAction: "manipulation" }}
-                      onClick={(e) => {
-                        // Ensure the contenteditable is properly focused and ready for paste
-                        const target = e.currentTarget;
-                        if (!submitting) {
-                          // Use a microtask to ensure focus happens after any other handlers
-                          Promise.resolve().then(() => {
-                            target.focus();
-                            // If there's no selection, place cursor at end
-                            const selection = window.getSelection();
-                            if (selection?.rangeCount === 0) {
-                              const range = document.createRange();
-                              range.selectNodeContents(target);
-                              range.collapse(false);
-                              selection.addRange(range);
-                            }
-                          });
+      <>
+        <div className={`tailwind-scope ${containerClassName ?? ""}`}>
+          <LexicalComposer initialConfig={editorConfig}>
+            <div className="tw-flex tw-items-end tw-gap-x-3">
+              <div className="tw-relative tw-w-full">
+                <RichTextPlugin
+                  contentEditable={
+                    <div className="tw-relative">
+                      <ContentEditable
+                        spellCheck={true}
+                        autoCorrect="on"
+                        ariaLabel={placeholderText}
+                        ariaDescribedBy={
+                          showValidationError
+                            ? validationHelperTextId
+                            : undefined
                         }
-                      }}
-                      onBlur={onEditorBlur}
-                      className={`editor-input-one-liner tw-form-input tw-block tw-max-h-[40vh] tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-3 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-text-sm ${
-                        submitting ? "tw-cursor-default tw-opacity-50" : ""
-                      } ${isCapacitor ? "tw-pr-[35px]" : "tw-pr-[40px]"}`}
-                    />
-                    <CreateDropEmojiPicker />
-                  </div>
-                }
-                placeholder={
-                  <span
-                    className={`editor-placeholder tw-block tw-max-w-[calc(100%-3.5rem)] tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap ${
-                      submitting ? "tw-opacity-50" : ""
-                    }`}
-                  >
-                    {placeholderText}
-                  </span>
-                }
-                ErrorBoundary={LexicalErrorBoundary}
-              />
-              <HistoryPlugin />
-              <OnChangePlugin onChange={onEditorStateChange} />
-              <RootBlockGuardPlugin />
-              <NewMentionsPlugin
-                waveId={waveId}
-                onSelect={onMentionedUserAdded}
-                canMentionAll={canMentionAll}
-                ref={mentionsPluginRef}
-              />
-              <NewWaveMentionsPlugin
-                onSelect={onMentionedWaveAdded}
-                ref={waveMentionsPluginRef}
-              />
-              <NewHashtagsPlugin
-                onSelect={onHashtagAdded}
-                ref={hashtagPluginRef}
-              />
-              <MaxLengthPlugin maxLength={25000} />
-              <DragDropPastePlugin onAttachmentFiles={onAttachmentFiles} />
-              <ListPlugin />
-              <PlainTextPastePlugin />
-              <MarkdownShortcutPlugin
-                transformers={SAFE_MARKDOWN_TRANSFORMERS}
-              />
-              <TabIndentationPlugin />
-              <LinkPlugin validateUrl={validateUrl} />
-              <ClearEditorPlugin ref={clearEditorRef} />
-              <DisableEditPlugin disabled={submitting} />
-              <EnterKeyPlugin
-                handleSubmit={handleSubmit}
-                canSubmitWithEnter={canSubmitWithEnter}
-                disabled={submitting}
-              />
-              <EditLastDropArrowUpPlugin
-                canEditLastDropWithArrow={canEditLastDropWithArrow}
-                onRequestEditLastDrop={onRequestEditLastDrop}
-                canUseArrowUpShortcut={canUseShortcutKeys}
-              />
-              <EmojiPlugin />
+                        ariaRequired={isPollActive}
+                        aria-invalid={hasValidationError || undefined}
+                        style={{ touchAction: "manipulation" }}
+                        onBlur={onEditorBlur}
+                        className={`editor-input-one-liner tw-form-input tw-block tw-max-h-[40vh] tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-pl-3 tw-font-normal tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 ${
+                          isCompact
+                            ? "tw-py-3 tw-text-sm tw-leading-5"
+                            : "tw-pb-2 tw-pt-3 tw-text-base tw-leading-6 sm:tw-text-sm"
+                        } ${
+                          submitting ? "tw-cursor-default tw-opacity-50" : ""
+                        } ${isCapacitor ? "tw-pr-[35px]" : "tw-pr-[40px]"}`}
+                      />
+                      <CreateDropEmojiPicker
+                        verticalAlignment={isCompact ? "center" : "top"}
+                      />
+                    </div>
+                  }
+                  placeholder={
+                    <span
+                      className={`editor-placeholder tw-block tw-max-w-[calc(100%-3.5rem)] tw-translate-y-0 tw-truncate sm:tw-translate-y-0.5 ${
+                        isCompact
+                          ? "tw-text-sm tw-leading-5"
+                          : "tw-text-base tw-leading-6 sm:tw-text-sm"
+                      } ${submitting ? "tw-opacity-50" : ""}`}
+                    >
+                      {placeholderText}
+                    </span>
+                  }
+                  ErrorBoundary={LexicalErrorBoundary}
+                />
+                <HistoryPlugin />
+                <OnChangePlugin onChange={onEditorStateChange} />
+                {typeof initialEditorStateJson === "string" && (
+                  <NotifyInitialEditorStatePlugin
+                    onEditorState={onEditorStateChange}
+                  />
+                )}
+                <RootBlockGuardPlugin />
+                <NewMentionsPlugin
+                  waveId={waveId}
+                  onSelect={onMentionedUserAdded}
+                  canMentionAll={canMentionAll}
+                  ref={mentionsPluginRef}
+                />
+                <NewWaveMentionsPlugin
+                  onSelect={onMentionedWaveAdded}
+                  ref={waveMentionsPluginRef}
+                />
+                <NewHashtagsPlugin
+                  onSelect={onHashtagAdded}
+                  ref={hashtagPluginRef}
+                />
+                <MaxLengthPlugin maxLength={MAX_DROP_PART_UTF16_UNITS} />
+                <DragDropPastePlugin onAttachmentFiles={onAttachmentFiles} />
+                <ListPlugin />
+                <PlainTextPastePlugin />
+                <MarkdownShortcutPlugin
+                  transformers={CREATE_DROP_MARKDOWN_SHORTCUT_TRANSFORMERS}
+                />
+                <TabIndentationPlugin />
+                <LinkPlugin validateUrl={validateUrl} />
+                <ClearEditorPlugin ref={clearEditorRef} />
+                <EditorCommandsPlugin ref={editorCommandsRef} />
+                <DisableEditPlugin disabled={submitting} />
+                <InitialMarkdownPlugin
+                  initialMarkdown={initialMarkdown}
+                  initialMarkdownKey={initialMarkdownKey}
+                />
+                <EnterKeyPlugin
+                  handleSubmit={handleSubmit}
+                  canSubmitWithEnter={canSubmitWithEnter}
+                  disabled={submitting}
+                />
+                <EditLastDropArrowUpPlugin
+                  canEditLastDropWithArrow={canEditLastDropWithArrow}
+                  onRequestEditLastDrop={onRequestEditLastDrop}
+                  canUseArrowUpShortcut={canUseShortcutKeys}
+                />
+                <EmojiPlugin />
+              </div>
             </div>
-          </div>
-        </LexicalComposer>
-        {hasValidationError && validationHelperText && (
+          </LexicalComposer>
+        </div>
+        {showValidationError && (
           <div
+            id={validationHelperTextId}
             role="alert"
-            className="tw-mt-2 tw-text-xs tw-font-medium tw-text-error"
+            className={
+              validationHelperClassName ??
+              "tw-mt-2 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-amber-200/90"
+            }
           >
             {validationHelperText}
           </div>
         )}
-      </div>
+      </>
     );
   }
 );

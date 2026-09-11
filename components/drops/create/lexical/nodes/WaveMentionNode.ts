@@ -22,6 +22,7 @@ import {
 type SerializedWaveMentionNode = Spread<
   {
     waveName: string;
+    waveId?: string | null;
   },
   SerializedTextNode
 >;
@@ -32,25 +33,37 @@ function convertWaveMentionElement(
   const textContent = domNode.textContent;
 
   return {
-    node: $createWaveMentionNode(textContent),
+    node: $createWaveMentionNode(
+      textContent,
+      domNode.dataset["mentionedWaveId"] ?? null
+    ),
   };
 }
 
 export class WaveMentionNode extends TextNode {
   __waveName: string;
+  __waveId: string | null;
 
   static override getType(): string {
     return "wave-mention";
   }
 
   static override clone(node: WaveMentionNode): WaveMentionNode {
-    return new WaveMentionNode(node.__waveName, node.__text, node.__key);
+    return new WaveMentionNode(
+      node.__waveName,
+      node.__waveId,
+      node.__text,
+      node.__key
+    );
   }
 
   static override importJSON(
     serializedNode: SerializedWaveMentionNode
   ): WaveMentionNode {
-    const node = $createWaveMentionNode(serializedNode.waveName);
+    const node = $createWaveMentionNode(
+      serializedNode.waveName,
+      serializedNode.waveId ?? null
+    );
     node.setTextContent(serializedNode.text);
     node.setFormat(serializedNode.format);
     node.setDetail(serializedNode.detail);
@@ -59,15 +72,22 @@ export class WaveMentionNode extends TextNode {
     return node;
   }
 
-  constructor(waveName: string, text?: string, key?: NodeKey) {
+  constructor(
+    waveName: string,
+    waveId: string | null = null,
+    text?: string,
+    key?: NodeKey
+  ) {
     super(text ?? waveName, key);
     this.__waveName = waveName;
+    this.__waveId = waveId;
   }
 
   override exportJSON(): SerializedWaveMentionNode {
     return {
       ...super.exportJSON(),
       waveName: this.__waveName,
+      waveId: this.__waveId,
       type: "wave-mention",
       version: 1,
     };
@@ -82,6 +102,9 @@ export class WaveMentionNode extends TextNode {
   override exportDOM(): DOMExportOutput {
     const element = document.createElement("span");
     element.dataset["lexicalWaveMention"] = "true";
+    if (this.__waveId) {
+      element.dataset["mentionedWaveId"] = this.__waveId;
+    }
     element.textContent = this.__text;
     return { element };
   }
@@ -111,10 +134,17 @@ export class WaveMentionNode extends TextNode {
   override canInsertTextAfter(): boolean {
     return false;
   }
+
+  getMentionedWaveId(): string | null {
+    return this.__waveId;
+  }
 }
 
-export function $createWaveMentionNode(waveName: string): WaveMentionNode {
-  const waveMentionNode = new WaveMentionNode(waveName);
+export function $createWaveMentionNode(
+  waveName: string,
+  waveId: string | null = null
+): WaveMentionNode {
+  const waveMentionNode = new WaveMentionNode(waveName, waveId);
   waveMentionNode.setMode("segmented").toggleDirectionless();
   return $applyNodeReplacement(waveMentionNode);
 }

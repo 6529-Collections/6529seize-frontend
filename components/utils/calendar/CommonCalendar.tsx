@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { generateCalendar } from "@/helpers/calendar/calendar.helpers";
-import CommonCalendarDay from "./CommonCalendarDay";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import CommonCalendarDay, {
+  type CommonCalendarVariant,
+} from "./CommonCalendarDay";
 
 const MONTHS = [
   "January",
@@ -26,6 +29,7 @@ type CommonCalendarProps = {
   readonly maxTimestamp: number | null;
   readonly selectedTimestamp: number | null;
   readonly setSelectedTimestamp: (timestamp: number) => void;
+  readonly variant?: CommonCalendarVariant;
 };
 
 const getInitialVisibleDate = ({
@@ -51,7 +55,9 @@ function CommonCalendarView({
   maxTimestamp,
   selectedTimestamp,
   setSelectedTimestamp,
+  variant = "default",
 }: CommonCalendarProps) {
+  const locale = useBrowserLocale();
   const [visibleDate, setVisibleDate] = useState(() =>
     getInitialVisibleDate({
       initialMonth,
@@ -59,6 +65,32 @@ function CommonCalendarView({
       selectedTimestamp,
     })
   );
+
+  // Follow selection changes in place instead of remounting via a key:
+  // remounting destroys the tapped day button mid-gesture, which breaks
+  // scroll anchoring on mobile Safari and yanks the page. Only snap the
+  // view when the selection lands in a different month — time-of-day
+  // changes and month browsing must not move it.
+  const selectedMonthKey =
+    selectedTimestamp !== null
+      ? `${new Date(selectedTimestamp).getFullYear()}-${new Date(
+          selectedTimestamp
+        ).getMonth()}`
+      : `initial-${initialYear}-${initialMonth}`;
+  // Snap the view to the selected month when (and only when) the selection
+  // lands in a different month — computed during render via the "adjust state
+  // on prop change" pattern, so month browsing and time-of-day edits (which
+  // leave the month key unchanged) never move the view.
+  const [lastSelectedMonthKey, setLastSelectedMonthKey] =
+    useState(selectedMonthKey);
+  if (lastSelectedMonthKey !== selectedMonthKey) {
+    setLastSelectedMonthKey(selectedMonthKey);
+    const target =
+      selectedTimestamp !== null
+        ? new Date(selectedTimestamp)
+        : new Date(initialYear, initialMonth, 1);
+    setVisibleDate(new Date(target.getFullYear(), target.getMonth(), 1));
+  }
   const month = visibleDate.getMonth();
   const year = visibleDate.getFullYear();
   const days = generateCalendar({ month, year });
@@ -145,6 +177,8 @@ function CommonCalendarView({
               maxTimestamp={maxTimestamp}
               selectedTimestamp={selectedTimestamp}
               setSelectedTimestamp={setSelectedTimestamp}
+              locale={locale}
+              variant={variant}
             />
           ))}
         </div>
@@ -153,29 +187,6 @@ function CommonCalendarView({
   );
 }
 
-const getResetKey = ({
-  initialMonth,
-  initialYear,
-  selectedTimestamp,
-}: Pick<
-  CommonCalendarProps,
-  "initialMonth" | "initialYear" | "selectedTimestamp"
->) => {
-  if (selectedTimestamp === null) {
-    return `initial-${initialYear}-${initialMonth}`;
-  }
-
-  const selectedDate = new Date(selectedTimestamp);
-  return [
-    "selected",
-    selectedDate.getFullYear(),
-    selectedDate.getMonth(),
-    selectedDate.getDate(),
-  ].join("-");
-};
-
 export default function CommonCalendar(props: CommonCalendarProps) {
-  const resetKey = getResetKey(props);
-
-  return <CommonCalendarView key={resetKey} {...props} />;
+  return <CommonCalendarView {...props} />;
 }

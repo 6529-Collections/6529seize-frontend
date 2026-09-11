@@ -7,6 +7,9 @@ import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissio
 let headerProps: any = null;
 let connectProps: any = null;
 let mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
+let mockModeratorAccess = {
+  data: { moderator: false, has_open_reports: false },
+};
 
 type AppSidebarMenuItemsProps = Parameters<typeof AppSidebarMenuItems>[0];
 type SidebarMenu = AppSidebarMenuItemsProps["menu"];
@@ -34,6 +37,9 @@ jest.mock("@/components/header/AppUserConnect", () => (props: any) => {
 jest.mock("@/components/app-wallets/AppWalletsContext");
 jest.mock("@/hooks/useDropForgePermissions", () => ({
   useDropForgePermissions: () => mockDropForgePermissions,
+}));
+jest.mock("@/hooks/content-moderation/useContentModeratorAccess", () => ({
+  useContentModeratorAccess: () => mockModeratorAccess,
 }));
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
@@ -108,6 +114,9 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
     beforeEach(() => {
       headerProps = menuProps = connectProps = null;
       mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
+      mockModeratorAccess = {
+        data: { moderator: false, has_open_reports: false },
+      };
       setCookieCountry("US");
     });
 
@@ -119,21 +128,28 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       render(<AppSidebar open={true} onClose={onClose} />);
       expect(getMenu().map((item) => item.label)).toEqual([
         "NFTs",
+        "Museum",
         "Waves",
         "DMs",
+        "Join 6529",
         "About",
       ]);
       expect(getMenu()).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ label: "DMs", path: "/messages" }),
+          expect.objectContaining({
+            label: "Museum",
+            path: "/museum/network",
+          }),
+          expect.objectContaining({
+            label: "Join 6529",
+            path: "/join-6529",
+          }),
         ])
       );
-      expect(getMenu()).toEqual(
-        expect.not.arrayContaining([
-          expect.objectContaining({ label: "Join 6529" }),
-        ])
-      );
+      expect(getMenuItem("Museum").children).toBeUndefined();
       expect(getMenuChildren("NFTs")).toEqual([
+        { label: "Collect", path: "/collect" },
         { label: "The Memes", path: "/the-memes" },
         { label: "6529 Gradient", path: "/6529-gradient" },
         { label: "NextGen", path: "/nextgen" },
@@ -149,7 +165,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       const aboutChildren = getMenuChildren("About");
       expect(aboutChildren).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ label: "About 6529", section: true }),
+          expect.objectContaining({ label: "Overview", section: true }),
           expect.objectContaining({
             label: "Collections & Minting",
             section: true,
@@ -170,8 +186,8 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         ])
       );
       expect(aboutChildren.slice(0, 3)).toEqual([
-        { label: "About", path: "/about" },
-        expect.objectContaining({ label: "About 6529", section: true }),
+        { label: "Overview", path: "/about" },
+        expect.objectContaining({ label: "Overview", section: true }),
         expect.objectContaining({
           label: "Collections & Minting",
           section: true,
@@ -238,8 +254,10 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 
       expect(getMenu().map((item) => item.label)).toEqual([
         "NFTs",
+        "Museum",
         "Waves",
         "DMs",
+        "Join 6529",
         "About",
         "Drop Forge",
       ]);
@@ -254,6 +272,46 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
           expect.objectContaining({ label: "Drop Forge" }),
         ])
       );
+    });
+
+    it("adds WatchTower with the open-report indicator for moderators", () => {
+      mockModeratorAccess = {
+        data: { moderator: true, has_open_reports: true },
+      };
+      (useAppWallets as jest.Mock).mockReturnValue({
+        appWalletsSupported: false,
+      });
+
+      render(<AppSidebar open={true} onClose={() => {}} />);
+
+      expect(getMenuItem("WatchTower")).toEqual(
+        expect.objectContaining({
+          path: "/content-moderation",
+          hasIndicator: true,
+          indicatorLabel: "Open reports need review",
+        })
+      );
+    });
+
+    it("places WatchTower after Drop Forge when both are available", () => {
+      mockDropForgePermissions = {
+        ...DEFAULT_DROP_FORGE_PERMISSIONS,
+        canAccessLanding: true,
+      };
+      mockModeratorAccess = {
+        data: { moderator: true, has_open_reports: false },
+      };
+      (useAppWallets as jest.Mock).mockReturnValue({
+        appWalletsSupported: false,
+      });
+
+      render(<AppSidebar open={true} onClose={() => {}} />);
+
+      expect(
+        getMenu()
+          .slice(-2)
+          .map((item) => item.label)
+      ).toEqual(["Drop Forge", "WatchTower"]);
     });
 
     it("omits App Wallets when unsupported", () => {

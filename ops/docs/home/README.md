@@ -2,8 +2,8 @@
 
 ## Overview
 
-Home docs cover route `/`: hero messaging, latest-drop and next-drop behavior,
-coming-up cards, and discovery sections below the fold.
+Home docs cover route `/`: newcomer orientation, hero messaging, latest-drop
+and next-drop behavior, coming-up cards, and discovery sections below the fold.
 
 Use this area when homepage sections are missing, links route to the wrong
 destination, or mint/wave handoffs from `/` do not match expectations.

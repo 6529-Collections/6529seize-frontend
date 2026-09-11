@@ -1,0 +1,694 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#event:Withdraw(address,bool,uint256)",
+          "declaringDefinitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "_add",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "status",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "funds",
+              "type": "uint256"
+            }
+          ],
+          "name": "Withdraw",
+          "signature": "Withdraw(address,bool,uint256)",
+          "topic0": "0x4a48cb98c5be023b78a0b3ec94107a01a0397b2e389d4b5f252aef518e633ec3"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xce4e643c",
+          "declaringDefinitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testForcedEthIsRandomizerReserveNotEmergencySurplus",
+          "outputs": [],
+          "selector": "0xce4e643c",
+          "signature": "testForcedEthIsRandomizerReserveNotEmergencySurplus()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xbb2f260b",
+          "declaringDefinitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRandomizerEmergencyWithdrawCannotDrainAdapterReserve",
+          "outputs": [],
+          "selector": "0xbb2f260b",
+          "signature": "testRandomizerEmergencyWithdrawCannotDrainAdapterReserve()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0x7c69d952",
+          "declaringDefinitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRandomizerRequestSpendsReserveAndKeepsRemainderNonWithdrawable",
+          "outputs": [],
+          "selector": "0x7c69d952",
+          "signature": "testRandomizerRequestSpendsReserveAndKeepsRemainderNonWithdrawable()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xcd4f28df",
+          "declaringDefinitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRandomizerUnauthorizedEmergencyWithdrawRevertsWithoutTransfer",
+          "outputs": [],
+          "selector": "0xcd4f28df",
+          "signature": "testRandomizerUnauthorizedEmergencyWithdrawRevertsWithoutTransfer()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xfa9dd407",
+          "declaringDefinitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testStreamMinterEmergencyWithdrawsForcedSurplusOnly",
+          "outputs": [],
+          "selector": "0xfa9dd407",
+          "signature": "testStreamMinterEmergencyWithdrawsForcedSurplusOnly()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xf6ff7b58",
+          "declaringDefinitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testStreamMinterRejectsNormalEthTransfers",
+          "outputs": [],
+          "selector": "0xf6ff7b58",
+          "signature": "testStreamMinterRejectsNormalEthTransfers()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xebaf9424",
+          "declaringDefinitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testStreamMinterUnauthorizedEmergencyWithdrawRevertsWithoutTransfer",
+          "outputs": [],
+          "selector": "0xebaf9424",
+          "signature": "testStreamMinterUnauthorizedEmergencyWithdrawRevertsWithoutTransfer()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 144071,
+          "canonicalSignature": "Withdraw(address,bool,uint256)",
+          "displaySignature": "Withdraw(address,bool,uint256)",
+          "id": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#event:Withdraw(address,bool,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "_add",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "status",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "funds",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpTdHJlYW1FbWVyZ2VuY3lXaXRoZHJhd1Rlc3QjZXZlbnQ6V2l0aGRyYXcoYWRkcmVzcyxib29sLHVpbnQyNTYp",
+          "kind": "event",
+          "name": "Withdraw",
+          "natspec": "",
+          "range": {
+            "byteLength": 73,
+            "byteStart": 494,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:4450f9689b3a6b7b9acb13445450f27c5d2c68244e08fae156c3952d6ff10688",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "topic0": "0x4a48cb98c5be023b78a0b3ec94107a01a0397b2e389d4b5f252aef518e633ec3"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "testStreamMinterRejectsNormalEthTransfers()",
+          "displaySignature": "testStreamMinterRejectsNormalEthTransfers()",
+          "functionKind": "function",
+          "id": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xf6ff7b58",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpTdHJlYW1FbWVyZ2VuY3lXaXRoZHJhd1Rlc3QjZnVuY3Rpb246MHhmNmZmN2I1OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testStreamMinterRejectsNormalEthTransfers",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 501,
+            "byteStart": 859,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L24-L34",
+            "lineEnd": 34,
+            "lineStart": 24,
+            "snippetSha256": "sha256:cf81a5422268eec3a3027ed0b1650363fec789516f6139e0b02f075598293b18",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0xf6ff7b58",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testStreamMinterEmergencyWithdrawsForcedSurplusOnly()",
+          "displaySignature": "testStreamMinterEmergencyWithdrawsForcedSurplusOnly()",
+          "functionKind": "function",
+          "id": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xfa9dd407",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpTdHJlYW1FbWVyZ2VuY3lXaXRoZHJhd1Rlc3QjZnVuY3Rpb246MHhmYTlkZDQwNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testStreamMinterEmergencyWithdrawsForcedSurplusOnly",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1053,
+            "byteStart": 1366,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L36-L57",
+            "lineEnd": 57,
+            "lineStart": 36,
+            "snippetSha256": "sha256:2ad1c04a77f3a58076ceb8e4ef9f0a7da0860b64f2dd3da2af88ec7bd9bee0a4",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0xfa9dd407",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testStreamMinterUnauthorizedEmergencyWithdrawRevertsWithoutTransfer()",
+          "displaySignature": "testStreamMinterUnauthorizedEmergencyWithdrawRevertsWithoutTransfer()",
+          "functionKind": "function",
+          "id": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xebaf9424",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpTdHJlYW1FbWVyZ2VuY3lXaXRoZHJhd1Rlc3QjZnVuY3Rpb246MHhlYmFmOTQyNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testStreamMinterUnauthorizedEmergencyWithdrawRevertsWithoutTransfer",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 952,
+            "byteStart": 2425,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L59-L75",
+            "lineEnd": 75,
+            "lineStart": 59,
+            "snippetSha256": "sha256:1bee6ed6790298b9de5e06a3d8d7c8f38dc1a77689d327faefbfdba432764218",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0xebaf9424",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRandomizerEmergencyWithdrawCannotDrainAdapterReserve()",
+          "displaySignature": "testRandomizerEmergencyWithdrawCannotDrainAdapterReserve()",
+          "functionKind": "function",
+          "id": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xbb2f260b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpTdHJlYW1FbWVyZ2VuY3lXaXRoZHJhd1Rlc3QjZnVuY3Rpb246MHhiYjJmMjYwYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRandomizerEmergencyWithdrawCannotDrainAdapterReserve",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1256,
+            "byteStart": 3383,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L77-L99",
+            "lineEnd": 99,
+            "lineStart": 77,
+            "snippetSha256": "sha256:0ecc58afc14d219920879f1b0ec0808fb02a63ab66d7c728203565036d9fa567",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0xbb2f260b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRandomizerUnauthorizedEmergencyWithdrawRevertsWithoutTransfer()",
+          "displaySignature": "testRandomizerUnauthorizedEmergencyWithdrawRevertsWithoutTransfer()",
+          "functionKind": "function",
+          "id": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xcd4f28df",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpTdHJlYW1FbWVyZ2VuY3lXaXRoZHJhd1Rlc3QjZnVuY3Rpb246MHhjZDRmMjhkZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRandomizerUnauthorizedEmergencyWithdrawRevertsWithoutTransfer",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1080,
+            "byteStart": 4645,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L101-L118",
+            "lineEnd": 118,
+            "lineStart": 101,
+            "snippetSha256": "sha256:8134512a795f097143116c871800dc37f7522c7b6690943dff2da8bcb3657c9f",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0xcd4f28df",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testForcedEthIsRandomizerReserveNotEmergencySurplus()",
+          "displaySignature": "testForcedEthIsRandomizerReserveNotEmergencySurplus()",
+          "functionKind": "function",
+          "id": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xce4e643c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpTdHJlYW1FbWVyZ2VuY3lXaXRoZHJhd1Rlc3QjZnVuY3Rpb246MHhjZTRlNjQzYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testForcedEthIsRandomizerReserveNotEmergencySurplus",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 982,
+            "byteStart": 5731,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L120-L138",
+            "lineEnd": 138,
+            "lineStart": 120,
+            "snippetSha256": "sha256:05b8285ba3eec4521fe95b27edebe6d26a66ca5ea1e1d1476df45f99fdc87e13",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0xce4e643c",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRandomizerRequestSpendsReserveAndKeepsRemainderNonWithdrawable()",
+          "displaySignature": "testRandomizerRequestSpendsReserveAndKeepsRemainderNonWithdrawable()",
+          "functionKind": "function",
+          "id": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0x7c69d952",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpTdHJlYW1FbWVyZ2VuY3lXaXRoZHJhd1Rlc3QjZnVuY3Rpb246MHg3YzY5ZDk1Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRandomizerRequestSpendsReserveAndKeepsRemainderNonWithdrawable",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1589,
+            "byteStart": 6719,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L140-L166",
+            "lineEnd": 166,
+            "lineStart": 140,
+            "snippetSha256": "sha256:862836fadbed69ec9930018b965a540f32d45202b6a4888375cc521ed959c14d",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0x7c69d952",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deployMinter()",
+          "functionKind": "function",
+          "id": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:_deployMinter()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpTdHJlYW1FbWVyZ2VuY3lXaXRoZHJhd1Rlc3QjZnVuY3Rpb246X2RlcGxveU1pbnRlcigp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deployMinter",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "MinterSetup"
+            }
+          ],
+          "range": {
+            "byteLength": 387,
+            "byteStart": 8314,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L168-L175",
+            "lineEnd": 175,
+            "lineStart": 168,
+            "snippetSha256": "sha256:0b5d7c41b66611c99571491516209d94404f598e401b1fee5becd8f168f3edba",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deployRandomizer()",
+          "functionKind": "function",
+          "id": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:_deployRandomizer()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpTdHJlYW1FbWVyZ2VuY3lXaXRoZHJhd1Rlc3QjZnVuY3Rpb246X2RlcGxveVJhbmRvbWl6ZXIoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deployRandomizer",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "RandomizerSetup"
+            }
+          ],
+          "range": {
+            "byteLength": 905,
+            "byteStart": 8707,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L177-L199",
+            "lineEnd": 199,
+            "lineStart": 177,
+            "snippetSha256": "sha256:9079dbd833be9674cc64ceabf6ad55930d88f33fb9e6e477a7004e4329d6b2bb",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CORE",
+          "natspec": "",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 573,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:14f578fc5607fa77aea90ee2d7db0b11705d0c6bdb18cad1f95cbe6f7bb6c764",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 605,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:e6b11f93299a00994838192445b17dceecfbc8c6f818effff087cc1d3229671a",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "valueSource": "address(0xC0DE)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_DROPS",
+          "natspec": "",
+          "range": {
+            "byteLength": 55,
+            "byteStart": 626,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:153af35097b642c2b3d1777fa11af19a71138f5dad55ce5b608a085e62649701",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 666,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:7fa6e55b082e696cf468ac3ca2c88f6a3f799990e6f21d74fed1c2a9caed2cb6",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "valueSource": "address(0xD012)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "UNAUTHORIZED",
+          "natspec": "",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 687,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:3f79eed727fcca59b0cd8f66c3c45b70cf3f6f8a5d18d93a88bbe6a0e15e6f61",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 14,
+            "byteStart": 727,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:5fe29a76e2629947948415ecda7d1487fdc88957163265742345ce64f7515e5f",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "valueSource": "address(0xBAD)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "EMERGENCY_RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 62,
+            "byteStart": 747,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:4bf332d32db86270e22e0a5ebc8c644030b0b51adaed2f088ab1212173a3b76c",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 794,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:1e369b6d813bb37697341d2bab533dc72a24e58dde2e3df6afd17c5a909d99ee",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "valueSource": "address(0xE001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 815,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 851,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpTdHJlYW1FbWVyZ2VuY3lXaXRoZHJhd1Rlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamEmergencyWithdrawTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 9291,
+      "byteStart": 323,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L11-L200",
+      "lineEnd": 200,
+      "lineStart": 11,
+      "snippetSha256": "sha256:c62b292e79d5ca7d28df962f898b26f20f88ed211890eb76a3fc79cc42d271d2",
+      "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamEmergencyWithdraw.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 8
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 7
+    },
+    "totalCount": 8
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0x7c69d952",
+      "definitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xbb2f260b",
+      "definitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xcd4f28df",
+      "definitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xce4e643c",
+      "definitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xebaf9424",
+      "definitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xf6ff7b58",
+      "definitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest#function:0xfa9dd407",
+      "definitionId": "test/StreamEmergencyWithdraw.t.sol:StreamEmergencyWithdrawTest",
+      "severity": "advisory"
+    }
+  ]
+}

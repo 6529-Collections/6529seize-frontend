@@ -1,5 +1,6 @@
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
-import { getRankHoverBorderClass } from "@/components/waves/drops/dropRankStyles";
+import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
+import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
@@ -32,10 +33,6 @@ interface DefaultWaveWinnersDropProps {
   readonly outcomesVisible?: boolean | undefined;
 }
 
-const getRankHoverClass = (place: number | null): string => {
-  return getRankHoverBorderClass(place);
-};
-
 const isClickFromCardDom = (
   event: React.MouseEvent<HTMLDivElement>
 ): boolean => {
@@ -51,6 +48,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
 }) => {
   // Get device info from useDeviceInfo hook
   const { hasTouchScreen } = useDeviceInfo();
+  const [isReportOpen, setIsReportOpen] = React.useState(false);
   const suppressNextClickRef = React.useRef(false);
 
   const handleInteractionStart = React.useCallback(() => {
@@ -126,15 +124,15 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
     <div
       onClickCapture={handleClickCapture}
       onClick={handleClick}
-      className={`tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${
-        isApprovalWave
-          ? "desktop-hover:hover:tw-border-iron-700"
-          : getRankHoverClass(winner.place)
-      }`}
+      className="tw-group tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-border-iron-700"
     >
       <div className="tw-rounded-xl tw-p-4" {...touchHandlers}>
         <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-justify-between tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
-          <div className="tw-flex tw-flex-1 tw-gap-x-3">
+          <div
+            className={`tw-flex tw-flex-1 tw-gap-x-3 ${
+              isApprovalWave ? "tw-items-start tw-pb-3" : ""
+            }`}
+          >
             <WaveWinnersDropHeaderAuthorPfp winner={winner} />
             <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
               <WaveWinnersDropHeader
@@ -166,10 +164,26 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
               variant="full"
               cardVariant="chat"
             />
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-pt-2">
+            <div
+              className={`tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-pt-3 ${
+                isApprovalWave ? "tw-relative" : ""
+              }`}
+            >
+              {isApprovalWave && (
+                <span
+                  aria-hidden="true"
+                  className="tw-pointer-events-none tw-absolute tw-left-[-4.25rem] tw-right-[-1rem] tw-top-0 tw-h-px tw-bg-iron-800/60"
+                />
+              )}
               <div className="tw-flex tw-items-center tw-gap-x-4 tw-whitespace-nowrap">
-                <WaveWinnersDropHeaderTotalVotes winner={winner} />
-                <WaveWinnersDropHeaderVoters winner={winner} />
+                <WaveWinnersDropHeaderTotalVotes
+                  winner={winner}
+                  tight={isApprovalWave}
+                />
+                <WaveWinnersDropHeaderVoters
+                  winner={winner}
+                  tight={isApprovalWave}
+                />
               </div>
               <div>
                 <WaveWinnersDropOutcome
@@ -226,10 +240,23 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
                 drop={extendedDrop}
                 onCopy={() => setIsActive(false)}
               />
+              <ContentModerationDropActions
+                drop={extendedDrop}
+                mobile
+                onReport={() => {
+                  handleMobileMenuClose();
+                  setIsReportOpen(true);
+                }}
+              />
             </div>
           </CommonDropdownItemsMobileWrapper>,
           document.body
         )}
+      <ReportDropModal
+        drop={extendedDrop}
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+      />
     </div>
   );
 };

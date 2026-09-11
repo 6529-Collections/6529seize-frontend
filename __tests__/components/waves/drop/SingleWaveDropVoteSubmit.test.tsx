@@ -314,9 +314,16 @@ describe("SingleWaveDropVoteSubmit", () => {
     });
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
       queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId: mockDrop.wave.id }],
+      refetchType: "none",
+    });
+    expect(invalidateQueriesSpy).not.toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROPS, { waveId: mockDrop.wave.id }],
     });
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
-      queryKey: [QueryKey.DROPS, { waveId: mockDrop.wave.id }],
+      queryKey: [QueryKey.DROP_VOTERS, { dropId: mockDrop.id }],
+    });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROP_VOTE_LOGS, { dropId: mockDrop.id }],
     });
   });
 
@@ -400,6 +407,28 @@ describe("SingleWaveDropVoteSubmit", () => {
     await waitFor(() => {
       expect(onVoteApplied).toHaveBeenCalledWith(mockDrop);
     });
+  });
+
+  it("closes background submissions when onVoteApplied never settles", async () => {
+    const onVoteRequestStarted = jest.fn();
+    const onVoteApplied = jest.fn(() => new Promise<void>(() => undefined));
+
+    renderComponent({
+      onVoteApplied,
+      onVoteRequestStarted,
+      submissionMode: SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH,
+    });
+
+    fireEvent.click(screen.getByRole("button"));
+    await advanceTimers(300);
+
+    await waitFor(() => {
+      expect(onVoteApplied).toHaveBeenCalledWith(mockDrop);
+    });
+
+    await advanceTimers(backgroundModalCloseDelayMs);
+
+    expect(onVoteRequestStarted).toHaveBeenCalledTimes(1);
   });
 
   it("keeps background submissions open when the API fails before close", async () => {
@@ -493,8 +522,9 @@ describe("SingleWaveDropVoteSubmit", () => {
     });
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
       queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId: mockDrop.wave.id }],
+      refetchType: "none",
     });
-    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+    expect(invalidateQueriesSpy).not.toHaveBeenCalledWith({
       queryKey: [QueryKey.DROPS, { waveId: mockDrop.wave.id }],
     });
   });

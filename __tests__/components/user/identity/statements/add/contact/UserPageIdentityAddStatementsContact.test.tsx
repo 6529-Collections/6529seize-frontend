@@ -1,44 +1,49 @@
-import { render } from '@testing-library/react';
-import { act } from '@testing-library/react';
-import React from 'react';
-import UserPageIdentityAddStatementsContact from '@/components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContact';
-import { STATEMENT_TYPE, STATEMENT_GROUP } from '@/helpers/Types';
+import { render } from "@testing-library/react";
+import { act } from "@testing-library/react";
+import type { ComponentProps } from "react";
+import UserPageIdentityAddStatementsContact from "@/components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContact";
+import type UserPageIdentityAddStatementsContactItems from "@/components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContactItems";
+import type UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { STATEMENT_TYPE, STATEMENT_GROUP } from "@/helpers/Types";
 
-let headerProps: any;
-let itemsProps: any;
-let formProps: any;
+type ItemsProps = ComponentProps<
+  typeof UserPageIdentityAddStatementsContactItems
+>;
+type FormProps = ComponentProps<typeof UserPageIdentityAddStatementsForm>;
+let itemsProps: ItemsProps;
+let formProps: FormProps;
 
-jest.mock('@/components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContactHeader', () => (props: any) => {
-  headerProps = props;
-  return <div data-testid="header" />;
-});
+jest.mock(
+  "@/components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContactItems",
+  () => (props: ItemsProps) => {
+    itemsProps = props;
+    return <div data-testid="items" />;
+  }
+);
 
-jest.mock('@/components/user/identity/statements/add/contact/UserPageIdentityAddStatementsContactItems', () => (props: any) => {
-  itemsProps = props;
-  return <div data-testid="items" />;
-});
+jest.mock(
+  "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm",
+  () => (props: FormProps) => {
+    formProps = props;
+    return <div data-testid="form" />;
+  }
+);
 
-jest.mock('@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm', () => (props: any) => {
-  formProps = props;
-  return <div data-testid="form" />;
-});
-
-describe('UserPageIdentityAddStatementsContact', () => {
-  const profile = { id: 'p1' } as any;
+describe("UserPageIdentityAddStatementsContact", () => {
+  const profile = { id: "p1" } as ApiIdentity;
   const onClose = jest.fn();
 
-  beforeEach(() => {
-    headerProps = undefined;
-    itemsProps = undefined;
-    formProps = undefined;
-  });
+  it("passes props and updates active type", () => {
+    render(
+      <UserPageIdentityAddStatementsContact
+        profile={profile}
+        onClose={onClose}
+      />
+    );
 
-  it('passes props and updates active type', () => {
-    render(<UserPageIdentityAddStatementsContact profile={profile} onClose={onClose} />);
-
-    expect(headerProps.onClose).toBe(onClose);
     expect(itemsProps.activeType).toBe(STATEMENT_TYPE.DISCORD);
-    expect(typeof itemsProps.setContactType).toBe('function');
+    expect(typeof itemsProps.setContactType).toBe("function");
 
     expect(formProps.group).toBe(STATEMENT_GROUP.CONTACT);
     expect(formProps.activeType).toBe(STATEMENT_TYPE.DISCORD);

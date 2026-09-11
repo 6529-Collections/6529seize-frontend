@@ -56,7 +56,6 @@ export default function AboutIndex() {
       <Row>
         <Col>
           <GroupedLinkIndex
-            eyebrow={t(locale, "about.index.eyebrow")}
             title={t(locale, "about.index.title")}
             groups={indexGroups}
             headingIdPrefix="about-index"
@@ -64,6 +63,7 @@ export default function AboutIndex() {
               t(locale, "about.index.cardAriaLabel", { page })
             }
             showArrows
+            variant="editorial"
           />
         </Col>
       </Row>

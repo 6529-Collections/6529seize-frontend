@@ -7,6 +7,7 @@ import type { ReactElement } from "react";
 import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectionsPage";
 import { useXtdhCollectionsQuery } from "@/hooks/useXtdhCollectionsQuery";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import Button from "@/components/utils/button/Button";
 
 import { XtdhCollectionsControls } from "./collections-controls";
 import { useXtdhCollectionsFilters } from "./hooks/useXtdhCollectionsFilters";
@@ -66,10 +67,13 @@ export default function XtdhReceivedSection({
     }
     const normalized = selectedContract.trim().toLowerCase();
     return (
-      collections.find(
-        (collection) =>
-          (collection.contract?.trim().toLowerCase() ?? "") === normalized
-      ) ?? null
+      collections.find((collection) => {
+        const contract: unknown = collection.contract;
+        return (
+          typeof contract === "string" &&
+          contract.trim().toLowerCase() === normalized
+        );
+      }) ?? null
     );
   }, [collections, selectedContract]);
 
@@ -102,7 +106,7 @@ export default function XtdhReceivedSection({
   }
 
   return (
-    <section className="tw-space-y-6 tw-rounded-b-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
+    <section className="tw-space-y-6 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
       <header className="tw-px-6 tw-pt-6">
         <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
           {isViewingTokens ? "xTDH Tokens" : "xTDH Collections"}
@@ -142,17 +146,18 @@ export default function XtdhReceivedSection({
             selectedContract={selectedContract}
             onSelectCollection={handleCollectionSelect}
             isIdentityScoped={isIdentityScoped}
+            searchTerm={searchTerm}
           />
           {showLoadMore ? (
             <div className="tw-flex tw-justify-center tw-px-6 tw-pb-6">
-              <button
-                type="button"
+              <Button
+                variant="tertiary"
+                size="md"
                 onClick={handleLoadMore}
-                disabled={isFetchingNextPage}
-                className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-400 tw-transition desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300"
+                loading={isFetchingNextPage}
               >
-                {isFetchingNextPage ? "Loading..." : "Load More"}
-              </button>
+                Load More
+              </Button>
             </div>
           ) : null}
         </>

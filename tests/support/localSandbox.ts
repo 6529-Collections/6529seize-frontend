@@ -179,6 +179,16 @@ export async function resetSandboxRequests(baseURL: string | undefined) {
   expect(response.ok).toBe(true);
 }
 
+export async function enableSandboxWaveGuidelines(
+  baseURL: string | undefined
+) {
+  const response = await fetch(
+    `${getSandboxApiOrigin(baseURL)}/__composer-sandbox/guidelines`,
+    { method: "POST" }
+  );
+  expect(response.ok).toBe(true);
+}
+
 export async function expectNoUnsafeSandboxMutations(
   baseURL: string | undefined
 ) {

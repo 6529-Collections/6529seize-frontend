@@ -129,7 +129,9 @@ const CreateDropFullDesktop = forwardRef<
     }));
 
     return (
-      <div className={`${getWrapperClasses()} tw-relative tw-bg-iron-900`}>
+      <div
+        className={`create-drop-composer-surface ${getWrapperClasses()} tw-relative tw-bg-iron-900`}
+      >
         <button
           onClick={() => {
             if (!loading) {
@@ -242,9 +244,9 @@ const CreateDropFullDesktop = forwardRef<
               <div className="tw-mt-3" key={`full-desktop-file-${i}`}>
                 <div className="tw-w-full">
                   <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-1 tw-rounded-lg tw-bg-iron-900 tw-px-4 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-ring-iron-600">
-                    <div className="tw-flex tw-items-center tw-gap-x-3">
+                    <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-3">
                       <CreateDropSelectedFileIcon file={file} />
-                      <p className="tw-mb-0 tw-max-w-[456px] tw-truncate tw-text-sm tw-font-medium tw-text-iron-50">
+                      <p className="tw-m-0 tw-max-w-[456px] tw-truncate tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-50">
                         {file.name}
                       </p>
                     </div>

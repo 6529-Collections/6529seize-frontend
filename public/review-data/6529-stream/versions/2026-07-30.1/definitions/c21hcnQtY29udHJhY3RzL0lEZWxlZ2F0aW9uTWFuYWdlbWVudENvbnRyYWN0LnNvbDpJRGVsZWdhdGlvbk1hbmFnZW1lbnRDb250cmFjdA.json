@@ -1,0 +1,1093 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x8bb60cb6",
+          "declaringDefinitionId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_wallet1",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "_wallet2",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "_collectionAddress",
+              "type": "address"
+            }
+          ],
+          "name": "checkConsolidationStatus",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x8bb60cb6",
+          "signature": "checkConsolidationStatus(address,address,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0xc7cc4bb4",
+          "declaringDefinitionId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_delegationAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "_date",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveActiveDelegators",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address[]",
+              "name": "",
+              "type": "address[]"
+            }
+          ],
+          "selector": "0xc7cc4bb4",
+          "signature": "retrieveActiveDelegators(address,address,uint256,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x22b613ef",
+          "declaringDefinitionId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_delegatorAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveDelegationAddresses",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address[]",
+              "name": "",
+              "type": "address[]"
+            }
+          ],
+          "selector": "0x22b613ef",
+          "signature": "retrieveDelegationAddresses(address,address,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x6cfcae20",
+          "declaringDefinitionId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_delegationAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveDelegators",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address[]",
+              "name": "",
+              "type": "address[]"
+            }
+          ],
+          "selector": "0x6cfcae20",
+          "signature": "retrieveDelegators(address,address,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0xd986ff6d",
+          "declaringDefinitionId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_delegatorAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "_delegationAddress",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveGlobalStatusOfDelegation",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xd986ff6d",
+          "signature": "retrieveGlobalStatusOfDelegation(address,address,address,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x73aedfff",
+          "declaringDefinitionId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_delegatorAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveMostRecentDelegation",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x73aedfff",
+          "signature": "retrieveMostRecentDelegation(address,address,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x3465ef11",
+          "declaringDefinitionId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_delegationAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveMostRecentDelegator",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x3465ef11",
+          "signature": "retrieveMostRecentDelegator(address,address,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x234dd639",
+          "declaringDefinitionId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_delegatorAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "_delegationAddress",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "_date",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "internalType": "uint256",
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveStatusOfActiveDelegator",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x234dd639",
+          "signature": "retrieveStatusOfActiveDelegator(address,address,address,uint256,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x782740d5",
+          "declaringDefinitionId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_delegatorAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "_delegationAddress",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveStatusOfMostRecentDelegation",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x782740d5",
+          "signature": "retrieveStatusOfMostRecentDelegation(address,address,address,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x5e5b57a2",
+          "declaringDefinitionId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_delegatorAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "_delegationAddress",
+              "type": "address"
+            }
+          ],
+          "name": "retrieveSubDelegationStatus",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x5e5b57a2",
+          "signature": "retrieveSubDelegationStatus(address,address,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x16eca993",
+          "declaringDefinitionId": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_delegatorAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "_delegationAddress",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "_useCase",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "internalType": "uint256",
+              "name": "_tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveTokenStatus",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x16eca993",
+          "signature": "retrieveTokenStatus(address,address,address,uint256,uint256)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "retrieveDelegationAddresses(address,address,uint256)",
+          "displaySignature": "retrieveDelegationAddresses(address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x22b613ef",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_delegatorAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lEZWxlZ2F0aW9uTWFuYWdlbWVudENvbnRyYWN0LnNvbDpJRGVsZWdhdGlvbk1hbmFnZW1lbnRDb250cmFjdCNmdW5jdGlvbjoweDIyYjYxM2Vm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveDelegationAddresses",
+          "natspec": "@notice Returns an array of all delegation addresses (active AND inactive) assigned by a delegator for a specific use case on a specific NFT collection",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "address[]"
+            }
+          ],
+          "range": {
+            "byteLength": 181,
+            "byteStart": 399,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L13-L17",
+            "lineEnd": 17,
+            "lineStart": 13,
+            "snippetSha256": "sha256:5539bc3bd1b49c121e1387f7013c5374182bc20593aebd64931de8b6700e6a9c",
+            "sourceSha256": "sha256:f50f15d70c19647ad09c23cc414539a7a2ca9293551cdb403978d97c401115ab"
+          },
+          "selector": "0x22b613ef",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveDelegators(address,address,uint256)",
+          "displaySignature": "retrieveDelegators(address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x6cfcae20",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_delegationAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lEZWxlZ2F0aW9uTWFuYWdlbWVudENvbnRyYWN0LnNvbDpJRGVsZWdhdGlvbk1hbmFnZW1lbnRDb250cmFjdCNmdW5jdGlvbjoweDZjZmNhZTIw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveDelegators",
+          "natspec": "@notice Returns an array of all delegators (active AND inactive) that delegated to a delegationAddress for a specific use case on a specific NFT collection",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "address[]"
+            }
+          ],
+          "range": {
+            "byteLength": 173,
+            "byteStart": 766,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L23-L27",
+            "lineEnd": 27,
+            "lineStart": 23,
+            "snippetSha256": "sha256:f3325c92d6f98ecb76e9b775f76020edddb0d80b3aac1bf095ce3d32cdeb10d2",
+            "sourceSha256": "sha256:f50f15d70c19647ad09c23cc414539a7a2ca9293551cdb403978d97c401115ab"
+          },
+          "selector": "0x6cfcae20",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveActiveDelegators(address,address,uint256,uint256)",
+          "displaySignature": "retrieveActiveDelegators(address,address,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0xc7cc4bb4",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_delegationAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_date",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lEZWxlZ2F0aW9uTWFuYWdlbWVudENvbnRyYWN0LnNvbDpJRGVsZWdhdGlvbk1hbmFnZW1lbnRDb250cmFjdCNmdW5jdGlvbjoweGM3Y2M0YmI0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveActiveDelegators",
+          "natspec": "@notice Returns an array of all active delegators on a certain date for a specific use case on a specific NFT collection given a delegation Address",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "address[]"
+            }
+          ],
+          "range": {
+            "byteLength": 202,
+            "byteStart": 1117,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L33-L38",
+            "lineEnd": 38,
+            "lineStart": 33,
+            "snippetSha256": "sha256:602f06fb4b29a496861d32b4c7fb9afa5d7cd8f2cdcdbe241a09e979c57d109b",
+            "sourceSha256": "sha256:f50f15d70c19647ad09c23cc414539a7a2ca9293551cdb403978d97c401115ab"
+          },
+          "selector": "0xc7cc4bb4",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveMostRecentDelegation(address,address,uint256)",
+          "displaySignature": "retrieveMostRecentDelegation(address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x73aedfff",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_delegatorAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lEZWxlZ2F0aW9uTWFuYWdlbWVudENvbnRyYWN0LnNvbDpJRGVsZWdhdGlvbk1hbmFnZW1lbnRDb250cmFjdCNmdW5jdGlvbjoweDczYWVkZmZm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveMostRecentDelegation",
+          "natspec": "@notice Returns the most recent delegation address delegated for a specific use case on a specific NFT collection",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 173,
+            "byteStart": 1463,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L44-L48",
+            "lineEnd": 48,
+            "lineStart": 44,
+            "snippetSha256": "sha256:28f541b102b1922f69d8b7cefe0dbaed18a3c23dfea148dd8a1c6fa9954246ba",
+            "sourceSha256": "sha256:f50f15d70c19647ad09c23cc414539a7a2ca9293551cdb403978d97c401115ab"
+          },
+          "selector": "0x73aedfff",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveMostRecentDelegator(address,address,uint256)",
+          "displaySignature": "retrieveMostRecentDelegator(address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x3465ef11",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_delegationAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lEZWxlZ2F0aW9uTWFuYWdlbWVudENvbnRyYWN0LnNvbDpJRGVsZWdhdGlvbk1hbmFnZW1lbnRDb250cmFjdCNmdW5jdGlvbjoweDM0NjVlZjEx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveMostRecentDelegator",
+          "natspec": "@notice Returns the most recent delegator for a specific use case on a specific NFT collection given a delegation Address",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 173,
+            "byteStart": 1788,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L54-L58",
+            "lineEnd": 58,
+            "lineStart": 54,
+            "snippetSha256": "sha256:f684eca0e8b23a9d9cac171a59e61075e670b01a277c9935f71e04c09cd45df5",
+            "sourceSha256": "sha256:f50f15d70c19647ad09c23cc414539a7a2ca9293551cdb403978d97c401115ab"
+          },
+          "selector": "0x3465ef11",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveGlobalStatusOfDelegation(address,address,address,uint256)",
+          "displaySignature": "retrieveGlobalStatusOfDelegation(address,address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0xd986ff6d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_delegatorAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_delegationAddress",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lEZWxlZ2F0aW9uTWFuYWdlbWVudENvbnRyYWN0LnNvbDpJRGVsZWdhdGlvbk1hbmFnZW1lbnRDb250cmFjdCNmdW5jdGlvbjoweGQ5ODZmZjZk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveGlobalStatusOfDelegation",
+          "natspec": "@notice Returns the status of a delegation given the delegator address as well as the delegation address",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 210,
+            "byteStart": 2096,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L64-L69",
+            "lineEnd": 69,
+            "lineStart": 64,
+            "snippetSha256": "sha256:7be36545436a85419b59aec2e1df7c468cd169783efee4678ad475dd4cd225fb",
+            "sourceSha256": "sha256:f50f15d70c19647ad09c23cc414539a7a2ca9293551cdb403978d97c401115ab"
+          },
+          "selector": "0xd986ff6d",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveTokenStatus(address,address,address,uint256,uint256)",
+          "displaySignature": "retrieveTokenStatus(address,address,address,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x16eca993",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_delegatorAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_delegationAddress",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "_useCase",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "_tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lEZWxlZ2F0aW9uTWFuYWdlbWVudENvbnRyYWN0LnNvbDpJRGVsZWdhdGlvbk1hbmFnZW1lbnRDb250cmFjdCNmdW5jdGlvbjoweDE2ZWNhOTkz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveTokenStatus",
+          "natspec": "@notice Returns the status of a delegation given the delegator address, the collection address, the delegation address as well as a specific token id",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 223,
+            "byteStart": 2486,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L75-L81",
+            "lineEnd": 81,
+            "lineStart": 75,
+            "snippetSha256": "sha256:a7d3de7ffa11f7acfe1ee61ff6da7bf52868cbd888ccaa6567bcf519b3647cd4",
+            "sourceSha256": "sha256:f50f15d70c19647ad09c23cc414539a7a2ca9293551cdb403978d97c401115ab"
+          },
+          "selector": "0x16eca993",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveStatusOfMostRecentDelegation(address,address,address,uint256)",
+          "displaySignature": "retrieveStatusOfMostRecentDelegation(address,address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x782740d5",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_delegatorAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_delegationAddress",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lEZWxlZ2F0aW9uTWFuYWdlbWVudENvbnRyYWN0LnNvbDpJRGVsZWdhdGlvbk1hbmFnZW1lbnRDb250cmFjdCNmdW5jdGlvbjoweDc4Mjc0MGQ1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveStatusOfMostRecentDelegation",
+          "natspec": "@notice Checks if the delegation address performing actions is the most recent delegated by the specific delegator",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 214,
+            "byteStart": 2854,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L87-L92",
+            "lineEnd": 92,
+            "lineStart": 87,
+            "snippetSha256": "sha256:042590ff0ad1604f311013af0f76599edfb66cb3273ac091161cb1db12e9259c",
+            "sourceSha256": "sha256:f50f15d70c19647ad09c23cc414539a7a2ca9293551cdb403978d97c401115ab"
+          },
+          "selector": "0x782740d5",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveSubDelegationStatus(address,address,address)",
+          "displaySignature": "retrieveSubDelegationStatus(address,address,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x5e5b57a2",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_delegatorAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_delegationAddress",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lEZWxlZ2F0aW9uTWFuYWdlbWVudENvbnRyYWN0LnNvbDpJRGVsZWdhdGlvbk1hbmFnZW1lbnRDb250cmFjdCNmdW5jdGlvbjoweDVlNWI1N2Ey",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveSubDelegationStatus",
+          "natspec": "@notice Checks if a delegator granted subdelegation status to an Address",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 179,
+            "byteStart": 3171,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L98-L102",
+            "lineEnd": 102,
+            "lineStart": 98,
+            "snippetSha256": "sha256:55c63d7091547603f4ed7d569c0cc51b6290c349d00f3cb3725dbe692a4a3757",
+            "sourceSha256": "sha256:f50f15d70c19647ad09c23cc414539a7a2ca9293551cdb403978d97c401115ab"
+          },
+          "selector": "0x5e5b57a2",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveStatusOfActiveDelegator(address,address,address,uint256,uint256)",
+          "displaySignature": "retrieveStatusOfActiveDelegator(address,address,address,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x234dd639",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_delegatorAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_collectionAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_delegationAddress",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "_date",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "_useCase",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lEZWxlZ2F0aW9uTWFuYWdlbWVudENvbnRyYWN0LnNvbDpJRGVsZWdhdGlvbk1hbmFnZW1lbnRDb250cmFjdCNmdW5jdGlvbjoweDIzNGRkNjM5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveStatusOfActiveDelegator",
+          "natspec": "@notice Checks the status of an active delegator for a delegation Address",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 232,
+            "byteStart": 3454,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L108-L114",
+            "lineEnd": 114,
+            "lineStart": 108,
+            "snippetSha256": "sha256:9af97085f8e36b0b7e9376c5885526b6744fcb84c28e84d7af6dfb463dee1084",
+            "sourceSha256": "sha256:f50f15d70c19647ad09c23cc414539a7a2ca9293551cdb403978d97c401115ab"
+          },
+          "selector": "0x234dd639",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "checkConsolidationStatus(address,address,address)",
+          "displaySignature": "checkConsolidationStatus(address,address,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract#function:0x8bb60cb6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_wallet1",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_wallet2",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_collectionAddress",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lEZWxlZ2F0aW9uTWFuYWdlbWVudENvbnRyYWN0LnNvbDpJRGVsZWdhdGlvbk1hbmFnZW1lbnRDb250cmFjdCNmdW5jdGlvbjoweDhiYjYwY2I2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "checkConsolidationStatus",
+          "natspec": "@notice This function checks the Consolidation status between 2 addresses",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 157,
+            "byteStart": 3790,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L120-L124",
+            "lineEnd": 124,
+            "lineStart": 120,
+            "snippetSha256": "sha256:2428f80630e57d6481f522c8082a5731874679ae64e17d7c2b3840720f80ecdc",
+            "sourceSha256": "sha256:f50f15d70c19647ad09c23cc414539a7a2ca9293551cdb403978d97c401115ab"
+          },
+          "selector": "0x8bb60cb6",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lEZWxlZ2F0aW9uTWFuYWdlbWVudENvbnRyYWN0LnNvbDpJRGVsZWdhdGlvbk1hbmFnZW1lbnRDb250cmFjdA",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IDelegationManagementContract.sol:IDelegationManagementContract"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IDelegationManagementContract",
+    "natspec": "@dev Interface module which provides a basic access control mechanism of the NFT Delegation Smart Contract",
+    "range": {
+      "byteLength": 3771,
+      "byteStart": 178,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IDelegationManagementContract.sol#L9-L125",
+      "lineEnd": 125,
+      "lineStart": 9,
+      "snippetSha256": "sha256:bf7a7007c6a188fdff630ecb9d94431879a7a0dc18876210d8edeb56744b1c95",
+      "sourceSha256": "sha256:f50f15d70c19647ad09c23cc414539a7a2ca9293551cdb403978d97c401115ab"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IDelegationManagementContract.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

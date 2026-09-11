@@ -141,12 +141,19 @@ describe("mobileLaunchTiming", () => {
     timing.startMobileLaunchTiming();
     currentNow = 120;
     timing.markMobileLaunchStep("wagmi_children_unblocked");
+    currentNow = 180;
+    timing.markMobileLaunchStep("wave_metadata_loaded");
     currentNow = 200;
     timing.markMobileLaunchStep("first_useful_app_shell");
+    currentNow = 240;
+    timing.markMobileLaunchStep("wave_messages_loaded");
     currentNow = 300;
     timing.markMobileLaunchStep("wagmi_ready");
+    currentNow = 340;
+    timing.markMobileLaunchStep("first_drop_rendered");
     currentNow = 360;
     timing.markMobileLaunchStep("waves_first_content_visible");
+    timing.markMobileLaunchStep("route_first_useful_content");
     timing.setMobileLaunchContext({
       app_wallet_count_bucket: "2_5",
       app_wallets_state: "supported_with_wallets",
@@ -167,13 +174,27 @@ describe("mobileLaunchTiming", () => {
         },
         appkit_ready_after_unblock_ms: 180,
         appkit_ready_after_unblock_bucket: "0_500",
+        first_drop_rendered_ms: 340,
+        first_drop_rendered_bucket: "0_500",
+        first_useful_content_ms: 360,
+        first_useful_content_bucket: "0_500",
+        layout_measure_complete_ms: 200,
+        layout_measure_complete_bucket: "0_500",
         provider_gate_ms: 120,
         provider_gate_bucket: "0_500",
         shell_after_wagmi_ms: 80,
         shell_after_wagmi_bucket: "0_500",
+        step_first_drop_rendered_ms: 340,
+        step_route_first_useful_content_ms: 360,
         step_first_useful_app_shell_ms: 200,
         step_wagmi_children_unblocked_ms: 120,
+        step_wave_messages_loaded_ms: 240,
+        step_wave_metadata_loaded_ms: 180,
         total_launch_bucket: "0_500",
+        wave_messages_loaded_ms: 240,
+        wave_messages_loaded_bucket: "0_500",
+        wave_metadata_loaded_ms: 180,
+        wave_metadata_loaded_bucket: "0_500",
         waves_after_wagmi_ms: 240,
         waves_after_wagmi_bucket: "0_500",
       })
@@ -337,6 +358,26 @@ describe("mobileLaunchTiming", () => {
     expect(second.sentry.logger.warn).not.toHaveBeenCalled();
   });
 
+  it("captures focused non-desktop Notifications launches at 100 percent", async () => {
+    globalThis.history.pushState({}, "", "/notifications");
+    const { timing, sentry } = await loadMobileLaunchTiming();
+
+    timing.startMobileLaunchTiming();
+    currentNow = 200;
+    timing.markMobileLaunchStep("route_first_useful_content");
+    flushLaunchTiming(timing, "notifications_content_visible");
+
+    expect(sentry.logger.info).toHaveBeenCalledWith(
+      "mobile_launch_timing",
+      expect.objectContaining({
+        route_family: "/notifications",
+        sample_rate: 1,
+        first_useful_content_ms: 200,
+        flush_reason: "notifications_content_visible",
+      })
+    );
+  });
+
   it("flushes timeout and pagehide launches", async () => {
     const timeoutRun = await loadMobileLaunchTiming();
 
@@ -398,6 +439,14 @@ describe("mobileLaunchTiming", () => {
         durationMs: index * 100,
       });
     }
+    timing.recordMobileLaunchApiRequest({
+      endpoint:
+        "https://api.test.6529.io/api/v2/drops/0x1234567890123456789012345678901234567890/metadata?jwt=secret",
+      method: "GET",
+      status: 200,
+      startedAtMs: 2000,
+      durationMs: 4500,
+    });
 
     currentNow = 3500;
     flushLaunchTiming(timing, "shell_paint");
@@ -405,10 +454,19 @@ describe("mobileLaunchTiming", () => {
     expect(sentry.logger.warn).toHaveBeenCalledWith(
       "mobile_launch_timing",
       expect.objectContaining({
+        api_captured_count: 10,
+        api_dropped_count: 3,
+        api_slowest_bucket: "3000_5000",
+        api_slowest_endpoint: "/api/v2/drops/:wallet/metadata",
+        api_slowest_method: "GET",
+        api_slowest_ms: 4500,
+        api_slowest_start_offset_ms: 2000,
+        api_slowest_status: "200",
+        api_total_count: 13,
         api: expect.objectContaining({
-          total_count: 12,
+          total_count: 13,
           captured_count: 10,
-          dropped_count: 2,
+          dropped_count: 3,
           first_calls: expect.arrayContaining([
             expect.objectContaining({
               endpoint_group: "/api/profiles/:id/waves/:id",
@@ -496,6 +554,9 @@ describe("mobileLaunchTiming", () => {
       )
     ).toBe("/api/waves/:wallet/drops/:id");
     expect(sanitizers.sanitizeRouteFamily("/alice?jwt=secret")).toBe("/[user]");
+    expect(sanitizers.sanitizeRouteFamily("/alice/rep?jwt=secret")).toBe(
+      "/[user]/[...cmsPath]"
+    );
     expect(sanitizers.sanitizeRouteFamily("/messages/wave-123")).toBe(
       "/messages/[wave]"
     );

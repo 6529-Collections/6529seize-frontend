@@ -27,11 +27,15 @@ import {
   LOAD_TIMEOUT_MS,
 } from "../utils/constants";
 import { getNotificationErrorDetails } from "../utils/getNotificationErrorDetails";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import {
+  getVisibleNotificationCauses,
+  getExcludedNotificationCauses,
+  isNotificationVisible,
+} from "../utils/notificationVisibility";
 
 interface NotificationsContentState {
   readonly isLoadingProfile: boolean;
-  readonly hasConnectedProfile: boolean;
-  readonly hasProfileHandle: boolean;
   readonly showProxyDisabledState: boolean;
   readonly showErrorState: boolean;
   readonly resolvedErrorMessage: string;
@@ -41,7 +45,6 @@ interface NotificationsContentState {
 
 interface NotificationsHandlers {
   readonly handleRetry: () => void;
-  readonly handleAuthRetry: () => void;
   readonly handleProxyDisable: () => void;
 }
 
@@ -65,6 +68,7 @@ interface UseNotificationsControllerResult {
 
 export const useNotificationsController =
   (): UseNotificationsControllerResult => {
+    const { hideNftPurchasing } = useNftPurchasingVisibility();
     const {
       connectedProfile,
       isAuthenticated: isAuthContextAuthenticated,
@@ -98,8 +102,6 @@ export const useNotificationsController =
       (isAuthContextAuthenticated ?? !!connectedProfile?.handle) &&
       !activeProfileProxy;
     const isLoadingProfile = fetchingProfile && !connectedProfile;
-    const hasConnectedProfile = !!connectedProfile;
-    const hasProfileHandle = !!connectedProfile?.handle;
 
     useSetTitle("Notifications | My Stream | Brain");
 
@@ -149,8 +151,14 @@ export const useNotificationsController =
       }
     }, [isAuthenticated]);
 
+    const visibleCauses = useMemo(
+      () =>
+        getVisibleNotificationCauses(activeFilter?.cause, hideNftPurchasing),
+      [activeFilter?.cause, hideNftPurchasing]
+    );
+
     const {
-      items,
+      items: queryItems,
       rawItems: rawItemsFromQuery,
       isFetching,
       isFetchingNextPage,
@@ -165,9 +173,23 @@ export const useNotificationsController =
       activeProfileProxy: !!activeProfileProxy,
       limit: "30",
       reverse: true,
-      cause: activeFilter?.cause?.length ? activeFilter.cause : null,
+      cause: visibleCauses,
+      causeExclude: getExcludedNotificationCauses(hideNftPurchasing),
     });
-    const rawItems = rawItemsFromQuery ?? items;
+    const items = useMemo(
+      () =>
+        queryItems.filter((item) =>
+          isNotificationVisible(item, hideNftPurchasing)
+        ),
+      [queryItems, hideNftPurchasing]
+    );
+    const rawItems = useMemo(
+      () =>
+        rawItemsFromQuery.filter((item) =>
+          isNotificationVisible(item, hideNftPurchasing)
+        ),
+      [rawItemsFromQuery, hideNftPurchasing]
+    );
 
     const { mutateAsync: markNotificationIdsAsRead } = useMutation({
       mutationFn: async (ids: number[]) => {
@@ -341,18 +363,6 @@ export const useNotificationsController =
       });
     }, [refetch]);
 
-    const handleAuthRetry = useCallback(() => {
-      requestAuth().catch((error) => {
-        console.error("Failed to re-authenticate:", error);
-        setToast({
-          type: "error",
-          title: "Couldn't reconnect your wallet.",
-          description: "Check your wallet and try again.",
-          details: getToastErrorDetails(error, DEFAULT_ERROR_MESSAGE),
-        });
-      });
-    }, [requestAuth, setToast]);
-
     const handleProxyDisable = useCallback(() => {
       setActiveProfileProxy(null).catch((error) => {
         console.error("Failed to switch to primary profile:", error);
@@ -391,8 +401,6 @@ export const useNotificationsController =
     const contentState = useMemo<NotificationsContentState>(
       () => ({
         isLoadingProfile,
-        hasConnectedProfile,
-        hasProfileHandle,
         showProxyDisabledState,
         showErrorState,
         resolvedErrorMessage,
@@ -400,8 +408,6 @@ export const useNotificationsController =
         showNoItems,
       }),
       [
-        hasConnectedProfile,
-        hasProfileHandle,
         isLoadingProfile,
         resolvedErrorMessage,
         showErrorState,
@@ -414,10 +420,9 @@ export const useNotificationsController =
     const handlers = useMemo(
       () => ({
         handleRetry,
-        handleAuthRetry,
         handleProxyDisable,
       }),
-      [handleAuthRetry, handleProxyDisable, handleRetry]
+      [handleProxyDisable, handleRetry]
     );
 
     const pagination = useMemo(

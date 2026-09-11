@@ -6,6 +6,7 @@ import { getMemeLabCollectionHref } from "@/components/memelab/memeLabRouteParam
 import { MemePageArtViewer } from "@/components/the-memes/MemePageArtViewer";
 import { getSafeExternalUrl } from "@/components/the-memes/MemePageAdditionalDetails";
 import { MemeArtworkDetails } from "@/components/the-memes/MemePageLiveStats";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { addProtocol, numberWithCommas } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -22,11 +23,15 @@ const MEME_LAB_LABEL_CLASS =
 const MEME_LAB_VALUE_CLASS =
   "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
 const MEME_LAB_MARKET_GRID_CLASS =
-  "tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-6 sm:tw-grid-cols-2 xl:tw-grid-cols-3";
+  "tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 [&>*]:tw-min-w-0 sm:tw-gap-x-8 sm:[&>*]:tw-min-w-[8.5rem] xl:tw-grid-cols-3";
+const MEME_LAB_CARD_DETAILS_GRID_CLASS =
+  "tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-8 xl:tw-grid-cols-3";
+const MEME_LAB_CARD_DETAILS_ITEM_CLASS =
+  "tw-min-w-0 sm:tw-min-w-[8.5rem]";
 const MEME_LAB_SECTION_TITLE_CLASS =
-  "tw-mb-4 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400";
+  "tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400";
 export const MEME_LAB_STATS_ROW_CLASS =
-  "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 md:tw-gap-x-10";
+  "tw-grid tw-grid-cols-2 tw-items-start tw-gap-x-4 tw-gap-y-6 [&>*]:tw-min-w-0 sm:tw-flex sm:tw-flex-wrap sm:tw-gap-x-6 sm:[&>*]:tw-min-w-[8.5rem] md:tw-gap-x-10";
 
 const trimToEmpty = (value: unknown): string =>
   typeof value === "string" ? value.trim() : "";
@@ -67,15 +72,17 @@ export function MemeLabStatMetric({
   rank,
   total,
   icon,
+  className,
 }: {
   readonly label: string;
   readonly value: string;
   readonly rank?: number | undefined;
   readonly total?: number | undefined;
   readonly icon?: ReactNode;
+  readonly className?: string | undefined;
 }) {
   return (
-    <div className="tw-min-w-[8.5rem]">
+    <div className={className ?? "tw-min-w-[8.5rem]"}>
       <div className="tw-mb-1 tw-flex tw-items-center tw-gap-2 md:tw-mb-2">
         {icon}
         <span className={MEME_LAB_LABEL_CLASS}>{label}</span>
@@ -156,16 +163,17 @@ function MemeLabDistributionPlanLink({
 
   return (
     <section className="tw-pt-6">
-      <Link
+      <ButtonLink
         href={getDistributionDetailHref({
           basePath: "/meme-lab",
           id: nft.id,
           locale,
         })}
-        className="tw-inline-flex tw-items-center tw-rounded-md tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-white"
+        variant="tertiary"
+        size="xs"
       >
         {t(locale, "distribution.planLink")}
-      </Link>
+      </ButtonLink>
     </section>
   );
 }
@@ -228,7 +236,6 @@ function MemeLabLiveDetails({
         <MemeLabCardDetailsStats nftMeta={nftMeta} locale={locale} />
       </section>
       <section className="tw-pt-6 md:tw-pt-8">
-        <h3 className={MEME_LAB_SECTION_TITLE_CLASS}>Market Overview</h3>
         <div className={MEME_LAB_MARKET_GRID_CLASS}>
           <MemeLabMarketMetric
             label="Mint Price"
@@ -275,8 +282,9 @@ function MemeLabCardDetailsStats({
   const websiteUrls = getMemeLabWebsiteUrls(nftMeta.website);
 
   return (
-    <div className={MEME_LAB_MARKET_GRID_CLASS}>
+    <div className={MEME_LAB_CARD_DETAILS_GRID_CLASS}>
       <MemeLabStatMetric
+        className={MEME_LAB_CARD_DETAILS_ITEM_CLASS}
         label="Edition Size"
         value={numberWithCommas(nftMeta.edition_size)}
         rank={nftMeta.edition_size_rank}
@@ -285,6 +293,7 @@ function MemeLabCardDetailsStats({
       {nftMeta.burnt > 0 && (
         <>
           <MemeLabStatMetric
+            className={MEME_LAB_CARD_DETAILS_ITEM_CLASS}
             label="Burnt"
             value={numberWithCommas(nftMeta.burnt)}
             icon={
@@ -295,6 +304,7 @@ function MemeLabCardDetailsStats({
             }
           />
           <MemeLabStatMetric
+            className={MEME_LAB_CARD_DETAILS_ITEM_CLASS}
             label="Edition Size ex. Burnt"
             value={numberWithCommas(nftMeta.edition_size_not_burnt)}
             rank={nftMeta.edition_size_not_burnt_rank}
@@ -303,24 +313,27 @@ function MemeLabCardDetailsStats({
         </>
       )}
       <MemeLabStatMetric
+        className={MEME_LAB_CARD_DETAILS_ITEM_CLASS}
         label={`ex.${nftMeta.burnt > 0 ? " Burnt and" : ""} 6529 Museum`}
         value={numberWithCommas(nftMeta.edition_size_cleaned)}
         rank={nftMeta.edition_size_cleaned_rank}
         total={nftMeta.collection_size}
       />
-      <MemeLabInfoItem label="Collection">
-        <Link
-          href={getMemeLabCollectionHref({
-            collectionName: nftMeta.metadata_collection,
-            locale,
-          })}
-          className="tw-text-white tw-no-underline hover:tw-text-iron-300"
-        >
-          {nftMeta.metadata_collection}
-        </Link>
-      </MemeLabInfoItem>
+      <div className="tw-col-span-2 sm:tw-col-span-1">
+        <MemeLabInfoItem label="Collection">
+          <Link
+            href={getMemeLabCollectionHref({
+              collectionName: nftMeta.metadata_collection,
+              locale,
+            })}
+            className="tw-text-white tw-no-underline hover:tw-text-iron-300"
+          >
+            {nftMeta.metadata_collection}
+          </Link>
+        </MemeLabInfoItem>
+      </div>
       {websiteUrls.length > 0 && (
-        <div className="tw-min-w-0 sm:tw-col-span-2 xl:tw-col-span-3">
+        <div className="tw-col-span-2 tw-min-w-0 xl:tw-col-span-3">
           <MemeLabInfoItem label="Website">
             <span className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-2">
               {websiteUrls.map((website) => (
@@ -350,7 +363,7 @@ export function MemeLabCardVolumes({ nft }: { readonly nft: LabNFT }) {
         <ChartBarSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500" />
         <h3
           id="meme-lab-card-volumes-heading"
-          className={clsx(MEME_LAB_SECTION_TITLE_CLASS, "tw-mb-0")}
+          className={MEME_LAB_SECTION_TITLE_CLASS}
         >
           Card Volumes
         </h3>

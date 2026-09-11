@@ -4,6 +4,9 @@ import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdow
 
 jest.mock("framer-motion", () => ({
   AnimatePresence: ({ children }: any) => <div>{children}</div>,
+  LazyMotion: ({ children }: any) => <>{children}</>,
+  domAnimation: {},
+  m: { div: (props: any) => <div {...props} /> },
   motion: { div: (props: any) => <div {...props} /> },
 }));
 

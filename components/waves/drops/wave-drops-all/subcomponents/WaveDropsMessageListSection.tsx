@@ -48,8 +48,8 @@ interface WaveDropsMessageListSectionProps {
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
   readonly onScrollToUnread?: ((serialNo: number) => void) | undefined;
   readonly onDismissUnread: () => void;
-  readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
   readonly suspendLightDropHydration?: boolean | undefined;
+  readonly virtualScrollRootMargin?: string | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
@@ -86,8 +86,8 @@ export const WaveDropsMessageListSection: React.FC<
   onBoostedDropClick,
   onScrollToUnread,
   onDismissUnread,
-  autoCollapseSerials,
   suspendLightDropHydration = false,
+  virtualScrollRootMargin,
   winningThreshold,
   winningThresholdMinDurationMs,
   isVotingClosed = false,
@@ -127,8 +127,8 @@ export const WaveDropsMessageListSection: React.FC<
           boostedDrops={boostedDrops}
           boostedDropsDisplayPreference={boostedDropsDisplayPreference}
           onBoostedDropClick={onBoostedDropClick}
-          autoCollapseSerials={autoCollapseSerials}
           suspendLightDropHydration={suspendLightDropHydration}
+          virtualScrollRootMargin={virtualScrollRootMargin}
           winningThreshold={winningThreshold}
           winningThresholdMinDurationMs={winningThresholdMinDurationMs}
           isVotingClosed={isVotingClosed}

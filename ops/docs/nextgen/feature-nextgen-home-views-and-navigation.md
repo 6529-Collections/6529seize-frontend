@@ -44,8 +44,10 @@ Parent: [NextGen Index](README.md)
 - Header `LFG: Start the Show!` opens the NextGen slideshow overlay.
 - `Collections` supports `ALL`, `LIVE`, `UPCOMING`, and `COMPLETED`.
 - Changing the collections status filter resets pagination to page `1`.
+- `Collections` and `Artists` show placeholder cards while their results load.
 - `Collections` shows `No collections found` when a loaded filter/page has no
   results.
+- `Artists` shows `No artists found` when no artist groups are returned.
 - `Artists` groups collections by artist wallet and lists collection links for
   each artist row.
 - On `xl` and smaller layouts, the shared collections dropdown appears under
@@ -66,10 +68,10 @@ Parent: [NextGen Index](README.md)
 
 - Initial load for all home views depends on the featured-collection fetch on
   the server route.
-- `Collections` and `Artists` fetch data client-side with no inline retry
-  control.
-- `Collections` has no explicit loading indicator.
-- `Artists` has no explicit empty/error message.
+- `Collections` and `Artists` fetch data client-side and show loading
+  placeholders, but they do not provide an inline retry control.
+- `Collections` and `Artists` show an empty-state message after a successful
+  request returns no results.
 - If a tab looks empty or stale after a failed request, refresh the route to
   retry the fetches.
 
@@ -77,10 +79,29 @@ Parent: [NextGen Index](README.md)
 
 - Tab switching uses client-side `history.pushState` and updates the URL
   without a full reload.
-- Browser back/forward restores entries with stored `view` state, but returning
-  to the initial entry can leave the previous tab visible until refresh.
+- Browser back/forward restores entries from stored `view` state or the current
+  URL, including the initial `Featured` entry.
 - `Collections` filter and page state are not encoded in the URL.
 - `Artists` view is not paginated.
+
+### Localization fallback debt
+
+- Route/components: `/nextgen`, `/nextgen/about`, and the public NextGen home
+  components, especially `NextGenAbout`.
+- Untranslated surface: the home and navigation controls, accessible names,
+  and About section headings are message-backed, but the long-form About body
+  and remaining public NextGen detail copy are still authored directly in
+  English.
+- Current fallback: the new `nextgen.*` source messages resolve through `t()`;
+  `en-GB`, `fr-FR`, `es-ES`, and `de-DE` fall back to `en-US`. The remaining
+  article and detail copy continues to render its source-authored English.
+- User impact: non-source locales receive functional English copy on the
+  remaining surface until reviewed translations and message keys are added.
+- Owner/follow-up: frontend NextGen localization follow-up.
+- Expected remediation path: extract the remaining About article and public
+  NextGen detail copy into `nextgen.*` source messages, add reviewed entries to
+  each supported locale, verify wrapping and accessible labels, then remove
+  this debt record.
 
 ## Related Pages
 

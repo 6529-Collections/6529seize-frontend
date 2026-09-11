@@ -74,8 +74,64 @@ describe("AppWalletsContext methods", () => {
   beforeEach(() => {
     mockSet.mockClear();
     mockRemove.mockClear();
+    mockKeys.mockClear();
+    mockGet.mockClear();
     mockGet.mockResolvedValue({ value: "{}" });
     mockKeys.mockResolvedValue({ value: [] });
+  });
+
+  it("loads initial wallets without scanning secure storage keys twice", async () => {
+    const olderWallet = {
+      name: "Older",
+      created_at: 1,
+      address: "0x0000000000000000000000000000000000000001",
+      address_hashed: "v2:older-address",
+      mnemonic: "v2:older-mnemonic",
+      private_key: "v2:older-private-key",
+      imported: false,
+      encryption_version: 2,
+      has_mnemonic: true,
+    };
+    const newerWallet = {
+      name: "Newer",
+      created_at: 2,
+      address: "0x0000000000000000000000000000000000000002",
+      address_hashed: "v2:newer-address",
+      mnemonic: "v2:newer-mnemonic",
+      private_key: "v2:newer-private-key",
+      imported: true,
+      encryption_version: 2,
+      has_mnemonic: true,
+    };
+
+    mockKeys.mockResolvedValue({
+      value: [
+        "unrelated",
+        `app-wallet_${newerWallet.address}`,
+        `app-wallet_${olderWallet.address}`,
+      ],
+    });
+    mockGet.mockImplementation(async ({ key }: { key: string }) => {
+      if (key === `app-wallet_${olderWallet.address}`) {
+        return { value: JSON.stringify(olderWallet) };
+      }
+      if (key === `app-wallet_${newerWallet.address}`) {
+        return { value: JSON.stringify(newerWallet) };
+      }
+      throw new Error(`Unexpected key: ${key}`);
+    });
+
+    const wrapper = ({ children }: any) => (
+      <AppWalletsProvider>{children}</AppWalletsProvider>
+    );
+    const { result } = renderHook(() => useAppWallets(), { wrapper });
+
+    await waitFor(() => expect(result.current.appWalletsSupported).toBe(true));
+    await waitFor(() => expect(result.current.fetchingAppWallets).toBe(false));
+
+    expect(result.current.appWallets).toEqual([olderWallet, newerWallet]);
+    expect(mockKeys).toHaveBeenCalledTimes(1);
+    expect(mockGet).toHaveBeenCalledTimes(2);
   });
 
   it("creates and deletes wallet", async () => {

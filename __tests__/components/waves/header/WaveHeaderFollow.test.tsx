@@ -86,7 +86,6 @@ describe("WaveHeaderFollow", () => {
     );
 
     const button = screen.getByRole("button", { name: "Join" });
-    expect(button.parentElement).toHaveClass("tw-w-full");
     expect(button).toHaveClass("tw-h-10", "tw-w-full", "tw-justify-center");
   });
 });

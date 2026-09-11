@@ -1,4 +1,11 @@
 import { buildDropSubmissionMetadata } from "@/components/waves/utils/buildDropSubmissionMetadata";
+import {
+  canAddDropPart,
+  canSubmitComposerAction,
+  canSubmitDrop,
+  createMetadataHandlers,
+  handleComposerFileChange,
+} from "@/components/waves/create-drop-content/content-helpers";
 import { convertMetadataToDropMetadata } from "@/components/waves/utils/convertMetadataToDropMetadata";
 import { getIdentitySubmissionMetadataErrors } from "@/components/waves/utils/identitySubmissionMetadataValidation";
 import {
@@ -10,8 +17,16 @@ import type { SelectableIdentityOption } from "@/components/utils/input/profile-
 import { IDENTITY_SUBMISSION_RESERVED_METADATA_ERROR } from "@/helpers/waves/identity-submission-metadata";
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
+import type { CreateDropConfig, CreateDropPart } from "@/entities/IDrop";
+import type { CreateDropMetadataType } from "@/components/waves/create-drop-content/types";
 
 describe("CreateDropContent utilities", () => {
+  const createFile = (name: string, lastModified: number): File =>
+    new File(["file"], name, {
+      lastModified,
+      type: "text/plain",
+    });
+
   const viewerIdentity: SelectableIdentityOption = {
     value: "0xabc",
     label: "alice",
@@ -105,6 +120,74 @@ describe("CreateDropContent utilities", () => {
     expect(out).toEqual([{ data_key: "identity", data_value: "manual-value" }]);
   });
 
+  describe("composer file changes", () => {
+    it("enforces the upload budget after existing drop part attachments", () => {
+      const setFiles = jest.fn();
+      const setToast = jest.fn();
+      const setShowOptionsState = jest.fn();
+      const currentFile = createFile("current.txt", 100);
+      const newFile = createFile("new.txt", 200);
+
+      handleComposerFileChange({
+        newFiles: [newFile],
+        drop: {
+          parts: [
+            {
+              content: "existing",
+              quoted_drop: null,
+              media: Array.from({ length: 7 }, (_, index) =>
+                createFile(`existing-${index}.txt`, index)
+              ),
+            },
+          ],
+        } as any,
+        files: [currentFile],
+        keepOptionsVisible: true,
+        waveId: "wave-1",
+        setToast,
+        setFiles,
+        setShowOptionsState,
+        closeOnNextInputRef: { current: false },
+      });
+
+      expect(setFiles).toHaveBeenCalledWith([newFile]);
+      expect(setToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "warning",
+          message: expect.stringContaining("1 oldest file was removed"),
+        })
+      );
+      expect(setShowOptionsState).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("metadata handlers", () => {
+    it("clears string metadata values without storing literal null", () => {
+      let metadata: CreateDropMetadataType[] = [
+        {
+          id: "title",
+          key: "title",
+          type: ApiWaveMetadataType.String,
+          value: "Existing title",
+          required: false,
+        },
+      ];
+      const setMetadata = jest.fn((updater: any) => {
+        metadata = typeof updater === "function" ? updater(metadata) : updater;
+      });
+
+      const { onChangeValue } = createMetadataHandlers({
+        metadata,
+        setMetadata,
+        generateMetadataId: () => "metadata-id",
+      });
+
+      onChangeValue({ index: 0, newValue: null });
+
+      expect(metadata[0]?.value).toBeNull();
+    });
+  });
+
   it("flags reserved metadata keys during identity submissions", () => {
     const errors = getIdentitySubmissionMetadataErrors({
       isIdentitySubmissionExperience: true,
@@ -126,6 +209,159 @@ describe("CreateDropContent utilities", () => {
     });
 
     expect(errors).toEqual({});
+  });
+
+  describe("drop content gating", () => {
+    const existingPart: CreateDropPart = {
+      content: "existing part",
+      quoted_drop: null,
+      media: [],
+    };
+    const baseCanSubmitParams = {
+      files: [],
+      hasMetadata: false,
+      hasValidPoll: false,
+      hasPendingInlineImageUpload: false,
+      hasMetadataValidationErrors: false,
+      hasPollValidationError: false,
+    };
+
+    it("applies the storm cap to current editor markdown when parts exist", () => {
+      expect(
+        canSubmitDrop({
+          ...baseCanSubmitParams,
+          markdown: null,
+          parts: [existingPart],
+        })
+      ).toBe(true);
+
+      expect(
+        canSubmitDrop({
+          ...baseCanSubmitParams,
+          markdown: "x".repeat(241),
+          parts: [existingPart],
+        })
+      ).toBe(false);
+    });
+
+    it("allows 50,000 storm characters and rejects the next character", () => {
+      const drop = {
+        parts: [
+          { ...existingPart, content: "a".repeat(15_000) },
+          { ...existingPart, content: "b".repeat(15_000) },
+        ],
+      } as CreateDropConfig;
+
+      expect(
+        canAddDropPart({
+          markdown: "c".repeat(20_000),
+          files: [],
+          drop,
+          hasPendingInlineImageUpload: false,
+        })
+      ).toBe(true);
+
+      expect(
+        canAddDropPart({
+          markdown: "c".repeat(20_001),
+          files: [],
+          drop,
+          hasPendingInlineImageUpload: false,
+        })
+      ).toBe(false);
+    });
+
+    it("allows the former 24,000-character Storm boundary", () => {
+      expect(
+        canAddDropPart({
+          markdown: "b".repeat(9_000),
+          files: [],
+          drop: {
+            parts: [{ ...existingPart, content: "a".repeat(15_000) }],
+          } as CreateDropConfig,
+          hasPendingInlineImageUpload: false,
+        })
+      ).toBe(true);
+    });
+
+    it("enforces the 25,000-character limit for each Storm part", () => {
+      expect(
+        canAddDropPart({
+          markdown: "a".repeat(25_000),
+          files: [],
+          drop: null,
+          hasPendingInlineImageUpload: false,
+        })
+      ).toBe(true);
+
+      expect(
+        canAddDropPart({
+          markdown: "a".repeat(25_001),
+          files: [],
+          drop: null,
+          hasPendingInlineImageUpload: false,
+        })
+      ).toBe(false);
+    });
+
+    it("enforces the 65,535-byte UTF-8 limit for each Storm part", () => {
+      expect(
+        canAddDropPart({
+          markdown: "界".repeat(21_845),
+          files: [],
+          drop: null,
+          hasPendingInlineImageUpload: false,
+        })
+      ).toBe(true);
+
+      expect(
+        canAddDropPart({
+          markdown: "界".repeat(21_846),
+          files: [],
+          drop: null,
+          hasPendingInlineImageUpload: false,
+        })
+      ).toBe(false);
+    });
+
+    it("rejects whitespace-only storm parts", () => {
+      expect(
+        canAddDropPart({
+          markdown: "   ",
+          files: [],
+          drop: null,
+          hasPendingInlineImageUpload: false,
+        })
+      ).toBe(false);
+
+      expect(
+        canSubmitDrop({
+          ...baseCanSubmitParams,
+          markdown: "   ",
+          parts: [],
+        })
+      ).toBe(false);
+    });
+
+    it("keeps save changes disabled when an edited part is empty", () => {
+      expect(
+        canSubmitComposerAction({
+          canAddPart: false,
+          canSubmit: true,
+          editingPartIndex: 0,
+          isStormMode: true,
+        })
+      ).toBe(false);
+
+      expect(
+        canSubmitComposerAction({
+          canAddPart: true,
+          canSubmit: true,
+          editingPartIndex: 0,
+          isStormMode: true,
+        })
+      ).toBe(true);
+    });
   });
 
   describe("identity submission state", () => {

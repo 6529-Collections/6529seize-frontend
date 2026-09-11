@@ -17,6 +17,11 @@ jest.mock("@/components/utils/button/PrimaryButton", () => ({
     </button>
   ),
 }));
+const mockUseWaveSubmissionButtonLabelOverride = jest.fn(() => null);
+jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useWaveSubmissionButtonLabelOverride: (...args: any[]) =>
+    mockUseWaveSubmissionButtonLabelOverride(...args),
+}));
 
 describe("WaveLeaderboardEmptyState", () => {
   const wave = {} as any;
@@ -40,6 +45,8 @@ describe("WaveLeaderboardEmptyState", () => {
     );
 
   beforeEach(() => {
+    mockUseWaveSubmissionButtonLabelOverride.mockReset();
+    mockUseWaveSubmissionButtonLabelOverride.mockReturnValue(null);
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: false,
       isCurationWave: false,
@@ -111,9 +118,10 @@ describe("WaveLeaderboardEmptyState", () => {
       screen.queryByText("Be the first to create a curated drop in this wave")
     ).not.toBeInTheDocument();
     expect(
-      screen.getByText((_, element) =>
-        element?.textContent ===
-        "Curation wave submissions require at least Level 10."
+      screen.getByText(
+        (_, element) =>
+          element?.textContent ===
+          "Curation wave submissions require at least Level 10."
       )
     ).toBeInTheDocument();
     expect(
@@ -130,6 +138,21 @@ describe("WaveLeaderboardEmptyState", () => {
     await user.click(screen.getByRole("button", { name: "Drop" }));
     expect(onCreateDrop).toHaveBeenCalled();
     expect(screen.getByText("No drops to show")).toBeInTheDocument();
+  });
+
+  it("uses custom button label metadata in the default state", async () => {
+    mockUseWaveSubmissionButtonLabelOverride.mockReturnValue("Apply");
+    const onCreateDrop = jest.fn();
+    const user = userEvent.setup();
+    renderWithAuth(
+      <WaveLeaderboardEmptyState
+        wave={{ id: "wave-1" } as any}
+        onCreateDrop={onCreateDrop}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Apply" }));
+    expect(onCreateDrop).toHaveBeenCalled();
   });
 
   it("uses proposal copy for quorum waves", async () => {

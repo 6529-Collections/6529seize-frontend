@@ -14,8 +14,10 @@ import type { ViewKey, NavItem } from "./navTypes";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { getWaveQueryKey } from "@/services/api/wave-query";
 import {
   getHomeRoute,
   getMessagesBaseRoute,
@@ -63,6 +65,7 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   children,
 }) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const myStream = useMyStreamOptional();
   const { isApp } = useDeviceInfo();
   const currentWaveId = myStream?.activeWave.id ?? null;
@@ -94,8 +97,14 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   const fetchWaveDetails = useCallback(
     async (targetWaveId: string) => {
       try {
-        const res = await commonApiFetch<ApiWave>({
-          endpoint: `waves/${targetWaveId}`,
+        const res = await queryClient.fetchQuery({
+          queryKey: getWaveQueryKey(targetWaveId),
+          queryFn: async ({ signal }) =>
+            await commonApiFetch<ApiWave>({
+              endpoint: `waves/${targetWaveId}`,
+              signal,
+            }),
+          staleTime: 60000,
         });
         const fetchedIsDm = Boolean(res.chat.scope.group?.is_direct_message);
         currentIsDmRef.current = fetchedIsDm;
@@ -112,10 +121,10 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
         lastFetchedWaveIdRef.current = targetWaveId;
       }
     },
-    [bumpNavCacheRevision]
+    [bumpNavCacheRevision, queryClient]
   );
 
-  // Effect for fetching wave details - only handles the external API call
+  // Classify the active Wave from the shared metadata query.
   useEffect(() => {
     if (currentWaveId && currentWaveId !== lastFetchedWaveIdRef.current) {
       void fetchWaveDetails(currentWaveId);

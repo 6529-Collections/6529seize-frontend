@@ -1,0 +1,2626 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory#error:0x5c8b9654",
+          "declaringDefinitionId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "DuplicateSplitEntry",
+          "selector": "0x5c8b9654",
+          "signature": "DuplicateSplitEntry(address,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory#error:0x0f54b539",
+          "declaringDefinitionId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidAssetPolicyRegistry",
+          "selector": "0x0f54b539",
+          "signature": "InvalidAssetPolicyRegistry(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory#error:0x22658d16",
+          "declaringDefinitionId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "count",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidEntryCount",
+          "selector": "0x22658d16",
+          "signature": "InvalidEntryCount(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory#error:0x6d4b65f3",
+          "declaringDefinitionId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidSplitAccount",
+          "selector": "0x6d4b65f3",
+          "signature": "InvalidSplitAccount(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory#error:0x8f954ada",
+          "declaringDefinitionId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidSplitShare",
+          "selector": "0x8f954ada",
+          "signature": "InvalidSplitShare(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory#error:0x01527a8a",
+          "declaringDefinitionId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "totalSharePpm",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidSplitTotal",
+          "selector": "0x01527a8a",
+          "signature": "InvalidSplitTotal(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory#error:0xdba25228",
+          "declaringDefinitionId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "name": "SplitWalletAddressPoisoned",
+          "selector": "0xdba25228",
+          "signature": "SplitWalletAddressPoisoned(bytes32,address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory#error:0x0ef313a6",
+          "declaringDefinitionId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "UnknownProfile",
+          "selector": "0x0ef313a6",
+          "signature": "UnknownProfile(bytes32)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory#event:AssetPolicyRegistryPinned(address)",
+          "declaringDefinitionId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            }
+          ],
+          "name": "AssetPolicyRegistryPinned",
+          "signature": "AssetPolicyRegistryPinned(address)",
+          "topic0": "0x8770fa6f81b824657a86141db6a40aeb868b774fb86df871f52ce7880cec6c9a"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory#event:SplitProfileCreated(bytes32,bytes32,bytes32,uint16,uint16,address)",
+          "declaringDefinitionId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "entriesHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "walletVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "name": "SplitProfileCreated",
+          "signature": "SplitProfileCreated(bytes32,bytes32,bytes32,uint16,uint16,address)",
+          "topic0": "0xd0cc56d220b90b8f3a282c6ce2a55c2f71bc9be2704271bd6363af177f5287eb"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory#event:SplitProfileEntry(bytes32,uint16,address,uint32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint16",
+              "name": "index",
+              "type": "uint16"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "SplitProfileEntry",
+          "signature": "SplitProfileEntry(bytes32,uint16,address,uint32,bytes32)",
+          "topic0": "0x13488f7071c5792218cedfa9fc4f1403234e31d28d19b4c0a4cd445600a50bc0"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory#event:SplitWalletDeployed(bytes32,address,uint16,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint16",
+              "name": "walletVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "initCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "SplitWalletDeployed",
+          "signature": "SplitWalletDeployed(bytes32,address,uint16,bytes32,bytes32)",
+          "topic0": "0x75b3ac33ced35fbcdbdda8f1bc561c07be4c9e33a9e2fc044428b65e3feffc0e"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory#event:SplitWalletDiscovered(bytes32,address,uint16,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint16",
+              "name": "walletVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "initCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "SplitWalletDiscovered",
+          "signature": "SplitWalletDiscovered(bytes32,address,uint16,bytes32,bytes32)",
+          "topic0": "0xef32f6d51377a47313103be3bc959cd83723c50d21e614e2234f7aba1260a9c7"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x7d4cb964",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [],
+          "name": "MAX_ENTRIES",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0x7d4cb964",
+          "signature": "MAX_ENTRIES()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x65695602",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [],
+          "name": "MAX_UNIQUE_ACCOUNTS",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0x65695602",
+          "signature": "MAX_UNIQUE_ACCOUNTS()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x761751d9",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [],
+          "name": "PROFILE_DOMAIN",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x761751d9",
+          "signature": "PROFILE_DOMAIN()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x6233b32a",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [],
+          "name": "SCHEMA_VERSION",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0x6233b32a",
+          "signature": "SCHEMA_VERSION()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x6e41b376",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [],
+          "name": "SHARE_DENOMINATOR_PPM",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint32",
+              "name": "",
+              "type": "uint32"
+            }
+          ],
+          "selector": "0x6e41b376",
+          "signature": "SHARE_DENOMINATOR_PPM()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x1127b57e",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [],
+          "name": "WALLET_VERSION",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0x1127b57e",
+          "signature": "WALLET_VERSION()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0xdecadc35",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [],
+          "name": "assetPolicyRegistry",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamAssetPolicyRegistry",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xdecadc35",
+          "signature": "assetPolicyRegistry()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x6c539c25",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamSplitWallet.SplitEntry[]",
+              "name": "entries",
+              "type": "(address,uint32,bytes32)[]"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "createProfile",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "selector": "0x6c539c25",
+          "signature": "createProfile((address,uint32,bytes32)[],bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x6e1a1e9e",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "deployWallet",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "selector": "0x6e1a1e9e",
+          "signature": "deployWallet(bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x472f4153",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "profileEntriesHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x472f4153",
+          "signature": "profileEntriesHash(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x6d9d0dcf",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "profileEntry",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x6d9d0dcf",
+          "signature": "profileEntry(bytes32,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x39e27f9a",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "profileEntryCount",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x39e27f9a",
+          "signature": "profileEntryCount(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x93e9701b",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "profileExists",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x93e9701b",
+          "signature": "profileExists(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x6bcf174f",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamSplitWallet.SplitEntry[]",
+              "name": "entries",
+              "type": "(address,uint32,bytes32)[]"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "profileIdFor",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x6bcf174f",
+          "signature": "profileIdFor((address,uint32,bytes32)[],bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x9236fe29",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "profileMetadataURIHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x9236fe29",
+          "signature": "profileMetadataURIHash(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x73f35546",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "profileUniqueAccount",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            }
+          ],
+          "selector": "0x73f35546",
+          "signature": "profileUniqueAccount(bytes32,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x30743b1e",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "profileUniqueAccountCount",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x30743b1e",
+          "signature": "profileUniqueAccountCount(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x33c0a3d3",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "splitWalletExists",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x33c0a3d3",
+          "signature": "splitWalletExists(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x57de32be",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [],
+          "name": "splitWalletInitCodeHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x57de32be",
+          "signature": "splitWalletInitCodeHash()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x914575a9",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [],
+          "name": "splitWalletRuntimeCodeHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x914575a9",
+          "signature": "splitWalletRuntimeCodeHash()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x7730ab1a",
+          "declaringDefinitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "walletFor",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x7730ab1a",
+          "signature": "walletFor(bytes32)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "production_release_contract",
+    "classificationReason": "Listed in release-artifacts/contracts.json production_contracts.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "PROFILE_DOMAIN()",
+          "displaySignature": "PROFILE_DOMAIN()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x761751d9",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4NzYxNzUxZDk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "PROFILE_DOMAIN",
+          "natspec": "@notice Domain separator label for v1 split profile identifiers.",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 90,
+            "byteStart": 404,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:5041a86175f3a11555bda941ddadcb34a73082bc82acca3c15fa66e51013832f",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x761751d9",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "SCHEMA_VERSION()",
+          "displaySignature": "SCHEMA_VERSION()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x6233b32a",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4NjIzM2IzMmE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "SCHEMA_VERSION",
+          "natspec": "@notice Split profile schema version used in profile identifiers and events.",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "range": {
+            "byteLength": 50,
+            "byteStart": 585,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:757c8f9c77608b48b91bc17a388d61829628ec40e89300acc0435978d03709ee",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x6233b32a",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "WALLET_VERSION()",
+          "displaySignature": "WALLET_VERSION()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x1127b57e",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4MTEyN2I1N2U",
+          "kind": "function",
+          "modifiers": [],
+          "name": "WALLET_VERSION",
+          "natspec": "@notice Split wallet implementation version used in profile identifiers and events.",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "range": {
+            "byteLength": 50,
+            "byteStart": 733,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:aef0779238c80289f732056473a768692309f7a718833f5a8deb5ba0a04d8a4c",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x1127b57e",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "MAX_ENTRIES()",
+          "displaySignature": "MAX_ENTRIES()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x7d4cb964",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4N2Q0Y2I5NjQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "MAX_ENTRIES",
+          "natspec": "@notice Maximum canonical split entries accepted by one profile.",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "range": {
+            "byteLength": 48,
+            "byteStart": 862,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:5752c34617d63453eb9e234cf287c409e2a304aa0ccd4401c450e81450b8102f",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x7d4cb964",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "MAX_UNIQUE_ACCOUNTS()",
+          "displaySignature": "MAX_UNIQUE_ACCOUNTS()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x65695602",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4NjU2OTU2MDI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "MAX_UNIQUE_ACCOUNTS",
+          "natspec": "@notice Maximum unique recipient accounts accepted by one profile.",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "range": {
+            "byteLength": 56,
+            "byteStart": 991,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:d83c9681c9d650a29b57ba118a4e47d61ebe6f487b87b9382906e88486ff1241",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x65695602",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "SHARE_DENOMINATOR_PPM()",
+          "displaySignature": "SHARE_DENOMINATOR_PPM()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x6e41b376",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4NmU0MWIzNzY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "SHARE_DENOMINATOR_PPM",
+          "natspec": "@notice Parts-per-million denominator for split shares.",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint32",
+              "name": "",
+              "type": "uint32"
+            }
+          ],
+          "range": {
+            "byteLength": 65,
+            "byteStart": 1117,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:61b4a83e57a4d4475be2aa528475a6cdeb446b20467b0925c1b819572d00cce9",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x6e41b376",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "assetPolicyRegistry()",
+          "displaySignature": "assetPolicyRegistry()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0xdecadc35",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4ZGVjYWRjMzU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "assetPolicyRegistry",
+          "natspec": "@notice Deployment-wide registry for approved standard ERC-20 split assets.",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamAssetPolicyRegistry",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 72,
+            "byteStart": 1272,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:5d90cf8ba888ec36cfc68a96bddab6d9fe404bad3b1f1b2f8bafaee6207cc02a",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0xdecadc35",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(IStreamAssetPolicyRegistry)",
+          "functionKind": "constructor",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:constructor(IStreamAssetPolicyRegistry)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "assetPolicyRegistry_",
+              "type": "IStreamAssetPolicyRegistry"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOmNvbnN0cnVjdG9yKElTdHJlYW1Bc3NldFBvbGljeVJlZ2lzdHJ5KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 994,
+            "byteStart": 1651,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L38-L59",
+            "lineEnd": 59,
+            "lineStart": 38,
+            "snippetSha256": "sha256:ae63be7a03153ebebbebf96c73e76c61d4282004ad8ab9bc46cfc5c6473e9e8e",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "splitWalletInitCodeHash()",
+          "displaySignature": "splitWalletInitCodeHash()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x57de32be",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4NTdkZTMyYmU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "splitWalletInitCodeHash",
+          "natspec": "@notice Returns the creation-code hash used for deterministic wallet addresses.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 145,
+            "byteStart": 2739,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L62-L64",
+            "lineEnd": 64,
+            "lineStart": 62,
+            "snippetSha256": "sha256:bce0feff5c635eee0d19a36993193d506b93c1e9d5f346e581802a237ed3e74a",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x57de32be",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "splitWalletRuntimeCodeHash()",
+          "displaySignature": "splitWalletRuntimeCodeHash()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x914575a9",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4OTE0NTc1YTk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "splitWalletRuntimeCodeHash",
+          "natspec": "@notice Returns the runtime-code hash accepted for deployed split wallets.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 147,
+            "byteStart": 2973,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L67-L69",
+            "lineEnd": 69,
+            "lineStart": 67,
+            "snippetSha256": "sha256:e2ec81baf2dcbc9262998eb3db34609d5201756919b99780b5ea8a20e3f45cad",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x914575a9",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "createProfile((address,uint32,bytes32)[],bytes32)",
+          "displaySignature": "createProfile(IStreamSplitWallet.SplitEntry[],bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x6c539c25",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "entries",
+              "storageLocation": "calldata",
+              "type": "IStreamSplitWallet.SplitEntry[]"
+            },
+            {
+              "index": 1,
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4NmM1MzljMjU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "createProfile",
+          "natspec": "@notice Creates or reuses a canonical split profile and deploys its deterministic wallet.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 1935,
+            "byteStart": 3224,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L72-L120",
+            "lineEnd": 120,
+            "lineStart": 72,
+            "snippetSha256": "sha256:5d97cfb70535615ea9b5fcc333a702756b53bd2e187d2488cd607f3029c80ed1",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x6c539c25",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "deployWallet(bytes32)",
+          "displaySignature": "deployWallet(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x6e1a1e9e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4NmUxYTFlOWU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "deployWallet",
+          "natspec": "@notice Deploys the deterministic wallet for an existing profile if it is not deployed.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 234,
+            "byteStart": 5261,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L123-L128",
+            "lineEnd": 128,
+            "lineStart": 123,
+            "snippetSha256": "sha256:ce0c5e530e399cdfe6b764e756a61f3caf631d2ae4cbc5a95fbe4da6aade5551",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x6e1a1e9e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "profileExists(bytes32)",
+          "displaySignature": "profileExists(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x93e9701b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4OTNlOTcwMWI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "profileExists",
+          "natspec": "@notice Returns whether a split profile has been created by this factory.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 131,
+            "byteStart": 5583,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L131-L133",
+            "lineEnd": 133,
+            "lineStart": 131,
+            "snippetSha256": "sha256:f8aab7b268c8176524ef9d0cdfd2e4b34a50a2274ef9823215659afa22987355",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x93e9701b",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "splitWalletExists(bytes32)",
+          "displaySignature": "splitWalletExists(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x33c0a3d3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4MzNjMGEzZDM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "splitWalletExists",
+          "natspec": "@notice Returns true when the profile wallet is deployed with expected code and metadata.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 294,
+            "byteStart": 5818,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L136-L142",
+            "lineEnd": 142,
+            "lineStart": 136,
+            "snippetSha256": "sha256:7e2137cc5584871ddeafb198fa11e92a4a2f2f85e85a024e941c3bf310ae8648",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x33c0a3d3",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "profileMetadataURIHash(bytes32)",
+          "displaySignature": "profileMetadataURIHash(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x9236fe29",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4OTIzNmZlMjk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "profileMetadataURIHash",
+          "natspec": "@notice Returns the immutable metadata URI hash committed by a split profile.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 152,
+            "byteStart": 6204,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L145-L147",
+            "lineEnd": 147,
+            "lineStart": 145,
+            "snippetSha256": "sha256:e7d908f21463b9e9364dd4d6d9ae89b0a2bb16cadff4b9d9e4966af5d8448b17",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x9236fe29",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "profileEntriesHash(bytes32)",
+          "displaySignature": "profileEntriesHash(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x472f4153",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4NDcyZjQxNTM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "profileEntriesHash",
+          "natspec": "@notice Returns the canonical entry hash committed by a split profile.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 144,
+            "byteStart": 6441,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L150-L152",
+            "lineEnd": 152,
+            "lineStart": 150,
+            "snippetSha256": "sha256:0f56973066c2fc78df53bb439a1db2a863f1cffeeaf16572257673be4ab3226c",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x472f4153",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "walletFor(bytes32)",
+          "displaySignature": "walletFor(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x7730ab1a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4NzczMGFiMWE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "walletFor",
+          "natspec": "@notice Returns the CREATE2 wallet address for a profile whether or not it is deployed.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 412,
+            "byteStart": 6687,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L155-L167",
+            "lineEnd": 167,
+            "lineStart": 155,
+            "snippetSha256": "sha256:2ae4a47b57b1027d7312ec7b4b7d4dbbbdf14294b27d8778fcb5b0d14127e7c6",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x7730ab1a",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "profileIdFor((address,uint32,bytes32)[],bytes32)",
+          "displaySignature": "profileIdFor(IStreamSplitWallet.SplitEntry[],bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x6bcf174f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "entries",
+              "storageLocation": "calldata",
+              "type": "IStreamSplitWallet.SplitEntry[]"
+            },
+            {
+              "index": 1,
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4NmJjZjE3NGY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "profileIdFor",
+          "natspec": "@notice Computes the profile identifier for entries after canonical sorting.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 298,
+            "byteStart": 7190,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L170-L178",
+            "lineEnd": 178,
+            "lineStart": 170,
+            "snippetSha256": "sha256:4150d3ff27f39df5a785862d70b9f2c9f77dc68084482e2fadfd29b3f84587c4",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x6bcf174f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "profileEntryCount(bytes32)",
+          "displaySignature": "profileEntryCount(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x39e27f9a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4MzllMjdmOWE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "profileEntryCount",
+          "natspec": "@notice Returns the number of canonical entries stored for a profile.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 146,
+            "byteStart": 7572,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L181-L183",
+            "lineEnd": 183,
+            "lineStart": 181,
+            "snippetSha256": "sha256:4ba1b7aa937d3e89dd84c7c860a46fb43151ad998adcc019371b3e8d796b505e",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x39e27f9a",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "profileEntry(bytes32,uint256)",
+          "displaySignature": "profileEntry(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x6d9d0dcf",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4NmQ5ZDBkY2Y",
+          "kind": "function",
+          "modifiers": [],
+          "name": "profileEntry",
+          "natspec": "@notice Returns one canonical profile entry by sorted index.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "index": 2,
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 356,
+            "byteStart": 7793,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L186-L194",
+            "lineEnd": 194,
+            "lineStart": 186,
+            "snippetSha256": "sha256:ae4f0d0f63c84b8d94a9c0f115cad76ce19e1da05226da1cce86ada695921398",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x6d9d0dcf",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "profileUniqueAccountCount(bytes32)",
+          "displaySignature": "profileUniqueAccountCount(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x30743b1e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4MzA3NDNiMWU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "profileUniqueAccountCount",
+          "natspec": "@notice Returns the number of unique accounts after label-level shares are aggregated.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 155,
+            "byteStart": 8250,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L197-L199",
+            "lineEnd": 199,
+            "lineStart": 197,
+            "snippetSha256": "sha256:f104eef939356f9e58ac3cd36b192d6b7854d375a2d10349813a4761ae03273e",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x30743b1e",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "profileUniqueAccount(bytes32,uint256)",
+          "displaySignature": "profileUniqueAccount(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x73f35546",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOjB4NzNmMzU1NDY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "profileUniqueAccount",
+          "natspec": "@notice Returns one unique account and its aggregate share by sorted account index.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "sharePpm",
+              "type": "uint32"
+            }
+          ],
+          "range": {
+            "byteLength": 325,
+            "byteStart": 8503,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L202-L211",
+            "lineEnd": 211,
+            "lineStart": 202,
+            "snippetSha256": "sha256:911dcffc671a8161c93763f10a6091b3ba226339d6e167a2e181f31c6ba49776",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x73f35546",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deployWallet(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:_deployWallet(bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOl9kZXBsb3lXYWxsZXQoYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deployWallet",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 1428,
+            "byteStart": 8834,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L213-L252",
+            "lineEnd": 252,
+            "lineStart": 213,
+            "snippetSha256": "sha256:500aa6714de20827d76be4c057f6ae86e357e15f9cdc174d0298c1269309cd43",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_validateExistingWallet(bytes32,address,Profile)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:_validateExistingWallet(bytes32,address,Profile)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "profile",
+              "storageLocation": "storage",
+              "type": "Profile"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOl92YWxpZGF0ZUV4aXN0aW5nV2FsbGV0KGJ5dGVzMzIsYWRkcmVzcyxQcm9maWxlKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_validateExistingWallet",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 275,
+            "byteStart": 10268,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L254-L261",
+            "lineEnd": 261,
+            "lineStart": 254,
+            "snippetSha256": "sha256:0ff90407b7f3a7993bcdf2a719c3906f0efba2186b33c5966cd9acbaa8f954df",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_walletMatchesProfile(bytes32,address,Profile)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:_walletMatchesProfile(bytes32,address,Profile)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "profile",
+              "storageLocation": "storage",
+              "type": "Profile"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOl93YWxsZXRNYXRjaGVzUHJvZmlsZShieXRlczMyLGFkZHJlc3MsUHJvZmlsZSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_walletMatchesProfile",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 1433,
+            "byteStart": 10549,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L263-L305",
+            "lineEnd": 305,
+            "lineStart": 263,
+            "snippetSha256": "sha256:0aca158ff84c11ad6db9425005d2b57902df7a7aa7059dbee67d25551d7dde7c",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_profileId(bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:_profileId(bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "entriesHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOl9wcm9maWxlSWQoYnl0ZXMzMixieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_profileId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 570,
+            "byteStart": 11988,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L307-L326",
+            "lineEnd": 326,
+            "lineStart": 307,
+            "snippetSha256": "sha256:99cf31a6911a8cd6ab1e8ef5ed299764b5cb0ac29710eb940dc9874c1a5593b3",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_canonicalize(IStreamSplitWallet.SplitEntry[])",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:_canonicalize(IStreamSplitWallet.SplitEntry[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "entries",
+              "storageLocation": "calldata",
+              "type": "IStreamSplitWallet.SplitEntry[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOl9jYW5vbmljYWxpemUoSVN0cmVhbVNwbGl0V2FsbGV0LlNwbGl0RW50cnlbXSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_canonicalize",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "canonicalEntries",
+              "storageLocation": "memory",
+              "type": "IStreamSplitWallet.SplitEntry[]"
+            },
+            {
+              "index": 1,
+              "name": "accounts",
+              "storageLocation": "memory",
+              "type": "address[]"
+            },
+            {
+              "index": 2,
+              "name": "aggregateShares",
+              "storageLocation": "memory",
+              "type": "uint32[]"
+            },
+            {
+              "index": 3,
+              "name": "entriesHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 2515,
+            "byteStart": 12564,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L328-L392",
+            "lineEnd": 392,
+            "lineStart": 328,
+            "snippetSha256": "sha256:63d15bddf0abe9d3cddfc0826fe5e4523d1b3030d86ad664b27fdf52dcffc879",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_sortEntries(IStreamSplitWallet.SplitEntry[])",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:_sortEntries(IStreamSplitWallet.SplitEntry[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "entries",
+              "storageLocation": "memory",
+              "type": "IStreamSplitWallet.SplitEntry[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOl9zb3J0RW50cmllcyhJU3RyZWFtU3BsaXRXYWxsZXQuU3BsaXRFbnRyeVtdKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_sortEntries",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 434,
+            "byteStart": 15085,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L394-L404",
+            "lineEnd": 404,
+            "lineStart": 394,
+            "snippetSha256": "sha256:bc238b8962d40e881158661b186f5b8e218104c88fe9d76b29d0dce4892a55bb",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_entryLess(IStreamSplitWallet.SplitEntry,IStreamSplitWallet.SplitEntry)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:_entryLess(IStreamSplitWallet.SplitEntry,IStreamSplitWallet.SplitEntry)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "left",
+              "storageLocation": "memory",
+              "type": "IStreamSplitWallet.SplitEntry"
+            },
+            {
+              "index": 1,
+              "name": "right",
+              "storageLocation": "memory",
+              "type": "IStreamSplitWallet.SplitEntry"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOl9lbnRyeUxlc3MoSVN0cmVhbVNwbGl0V2FsbGV0LlNwbGl0RW50cnksSVN0cmVhbVNwbGl0V2FsbGV0LlNwbGl0RW50cnkp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_entryLess",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 455,
+            "byteStart": 15525,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L406-L417",
+            "lineEnd": 417,
+            "lineStart": 406,
+            "snippetSha256": "sha256:edef0a5ee4885f6648151934beb89d00191696611ab2dfe07c18cfcddf55b1c0",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_copyEntries(Profile)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:_copyEntries(Profile)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profile",
+              "storageLocation": "storage",
+              "type": "Profile"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOl9jb3B5RW50cmllcyhQcm9maWxlKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_copyEntries",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "entries",
+              "storageLocation": "memory",
+              "type": "IStreamSplitWallet.SplitEntry[]"
+            }
+          ],
+          "range": {
+            "byteLength": 349,
+            "byteStart": 15986,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L419-L428",
+            "lineEnd": 428,
+            "lineStart": 419,
+            "snippetSha256": "sha256:ebc4a75f00865f8ba5368a8c6d811997af24e99adad77b3fc32955149a5227bd",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_copyAccounts(Profile)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:_copyAccounts(Profile)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profile",
+              "storageLocation": "storage",
+              "type": "Profile"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOl9jb3B5QWNjb3VudHMoUHJvZmlsZSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_copyAccounts",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "accounts",
+              "storageLocation": "memory",
+              "type": "address[]"
+            }
+          ],
+          "range": {
+            "byteLength": 312,
+            "byteStart": 16341,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L430-L439",
+            "lineEnd": 439,
+            "lineStart": 430,
+            "snippetSha256": "sha256:1c2f61164d8ef123db285c9b60c7bbc6925b65c8e2a5cffda336e5ee31f8bfdc",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_copyAggregateShares(Profile)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:_copyAggregateShares(Profile)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profile",
+              "storageLocation": "storage",
+              "type": "Profile"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5I2Z1bmN0aW9uOl9jb3B5QWdncmVnYXRlU2hhcmVzKFByb2ZpbGUp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_copyAggregateShares",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "aggregateShares",
+              "storageLocation": "memory",
+              "type": "uint32[]"
+            }
+          ],
+          "range": {
+            "byteLength": 365,
+            "byteStart": 16659,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L441-L450",
+            "lineEnd": 450,
+            "lineStart": 441,
+            "snippetSha256": "sha256:c76ba9c4dacd12696f44e7f46af674696f63d1687ffc2d43ca54e7797d5a7a6b",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_ASSET_STATUS_ACTIVE",
+          "natspec": "",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 277,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:fca11c1bb579c7c6b531d2b398f2fb0f76b8a2d8e9e200f83df5c60dc0f66856",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 323,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x761751d9",
+          "immutable": false,
+          "name": "PROFILE_DOMAIN",
+          "natspec": "@notice Domain separator label for v1 split profile identifiers.",
+          "range": {
+            "byteLength": 90,
+            "byteStart": 404,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:5041a86175f3a11555bda941ddadcb34a73082bc82acca3c15fa66e51013832f",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x761751d9",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 40,
+            "byteStart": 454,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:dafc5385b26f7f0e57871e2be6f1e54a11d91905f82ba9c1bffebe0477d293f9",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "valueSource": "keccak256(\"6529STREAM_SPLIT_PROFILE_V1\")",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x6233b32a",
+          "immutable": false,
+          "name": "SCHEMA_VERSION",
+          "natspec": "@notice Split profile schema version used in profile identifiers and events.",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 585,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:757c8f9c77608b48b91bc17a388d61829628ec40e89300acc0435978d03709ee",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x6233b32a",
+          "type": "uint16",
+          "typeString": "uint16",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 634,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "valueSource": "1",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x1127b57e",
+          "immutable": false,
+          "name": "WALLET_VERSION",
+          "natspec": "@notice Split wallet implementation version used in profile identifiers and events.",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 733,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:aef0779238c80289f732056473a768692309f7a718833f5a8deb5ba0a04d8a4c",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x1127b57e",
+          "type": "uint16",
+          "typeString": "uint16",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 782,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "valueSource": "2",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x7d4cb964",
+          "immutable": false,
+          "name": "MAX_ENTRIES",
+          "natspec": "@notice Maximum canonical split entries accepted by one profile.",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 862,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:5752c34617d63453eb9e234cf287c409e2a304aa0ccd4401c450e81450b8102f",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x7d4cb964",
+          "type": "uint16",
+          "typeString": "uint16",
+          "valueRange": {
+            "byteLength": 2,
+            "byteStart": 908,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:a68b412c4282555f15546cf6e1fc42893b7e07f271557ceb021821098dd66c1b",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "valueSource": "64",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x65695602",
+          "immutable": false,
+          "name": "MAX_UNIQUE_ACCOUNTS",
+          "natspec": "@notice Maximum unique recipient accounts accepted by one profile.",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 991,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:d83c9681c9d650a29b57ba118a4e47d61ebe6f487b87b9382906e88486ff1241",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x65695602",
+          "type": "uint16",
+          "typeString": "uint16",
+          "valueRange": {
+            "byteLength": 2,
+            "byteStart": 1045,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:a68b412c4282555f15546cf6e1fc42893b7e07f271557ceb021821098dd66c1b",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "valueSource": "64",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0x6e41b376",
+          "immutable": false,
+          "name": "SHARE_DENOMINATOR_PPM",
+          "natspec": "@notice Parts-per-million denominator for split shares.",
+          "range": {
+            "byteLength": 65,
+            "byteStart": 1117,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:61b4a83e57a4d4475be2aa528475a6cdeb446b20467b0925c1b819572d00cce9",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0x6e41b376",
+          "type": "uint32",
+          "typeString": "uint32",
+          "valueRange": {
+            "byteLength": 9,
+            "byteStart": 1173,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:1c99c6a271e54cb5c1dddfef6ce74067ed1f1ad5240a205931fbbdc6c5dd77b2",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "valueSource": "1_000_000",
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:0xdecadc35",
+          "immutable": true,
+          "name": "assetPolicyRegistry",
+          "natspec": "@notice Deployment-wide registry for approved standard ERC-20 split assets.",
+          "range": {
+            "byteLength": 72,
+            "byteStart": 1272,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:5d90cf8ba888ec36cfc68a96bddab6d9fe404bad3b1f1b2f8bafaee6207cc02a",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": "0xdecadc35",
+          "type": "IStreamAssetPolicyRegistry",
+          "typeString": "contract IStreamAssetPolicyRegistry",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_profiles",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 1599,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:3e9dc35fde173009f46896b56fc952856dd1e48e6c76bcaab3a4f01a8127be6d",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          },
+          "selector": null,
+          "type": "mapping(bytes32 => Profile)",
+          "typeString": "mapping(bytes32 => struct StreamSplitFactory.Profile)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "exists",
+              "natspec": "",
+              "range": {
+                "byteLength": 11,
+                "byteStart": 1376,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L27",
+                "lineEnd": 27,
+                "lineStart": 27,
+                "snippetSha256": "sha256:041ce23d54f8b35f170b82ee9449e0912fe43a77cf4182d478591f51ef1fb39d",
+                "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+              },
+              "type": "bool",
+              "typeString": "bool"
+            },
+            {
+              "index": 1,
+              "name": "entriesHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 1397,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L28",
+                "lineEnd": 28,
+                "lineStart": 28,
+                "snippetSha256": "sha256:1d4ffbe341ce1e09cbd63b73d106426d9e3e5b7bd3d3a4b41cdbb1a5e11fd750",
+                "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "metadataURIHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 1426,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L29",
+                "lineEnd": 29,
+                "lineStart": 29,
+                "snippetSha256": "sha256:60ce5193663add79b76fd010b36588a0a01490da5d3da835da6a3bd4b36efe4c",
+                "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "wallet",
+              "natspec": "",
+              "range": {
+                "byteLength": 14,
+                "byteStart": 1459,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L30",
+                "lineEnd": 30,
+                "lineStart": 30,
+                "snippetSha256": "sha256:3b7274fae428c46b6e121f22842d54b3aa41e98693566acb5ff40945bda2c006",
+                "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 4,
+              "name": "entries",
+              "natspec": "",
+              "range": {
+                "byteLength": 39,
+                "byteStart": 1483,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L31",
+                "lineEnd": 31,
+                "lineStart": 31,
+                "snippetSha256": "sha256:4a688c66781bc8b27789ae1e0ee10f076b6780460534f75790aef89da6b8c375",
+                "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+              },
+              "type": "IStreamSplitWallet.SplitEntry[]",
+              "typeString": "struct IStreamSplitWallet.SplitEntry[]"
+            },
+            {
+              "index": 5,
+              "name": "accounts",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 1532,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L32",
+                "lineEnd": 32,
+                "lineStart": 32,
+                "snippetSha256": "sha256:ff43c9c2379fc3b7a7a3e52d7d9f78a9a91b0e5d27d56437cb5eaeb0200cfd17",
+                "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+              },
+              "type": "address[]",
+              "typeString": "address[]"
+            },
+            {
+              "index": 6,
+              "name": "aggregateSharePpm",
+              "natspec": "",
+              "range": {
+                "byteLength": 26,
+                "byteStart": 1560,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L33",
+                "lineEnd": 33,
+                "lineStart": 33,
+                "snippetSha256": "sha256:3a99489e6a1bd6ac312b1892b8982cf3f8ffd363f6996e555bed5a1811ce93a0",
+                "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+              },
+              "type": "uint32[]",
+              "typeString": "uint32[]"
+            }
+          ],
+          "name": "Profile",
+          "natspec": "",
+          "range": {
+            "byteLength": 242,
+            "byteStart": 1351,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L26-L34",
+            "lineEnd": 34,
+            "lineStart": 26,
+            "snippetSha256": "sha256:95d5fa32f202309e20fae5d48a914df200d6f8c85161a4dddc989bcb7dadb967",
+            "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory",
+        "name": "IStreamSplitFactory"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0RmFjdG9yeS5zb2w6U3RyZWFtU3BsaXRGYWN0b3J5",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+      "smart-contracts/IStreamSplitFactory.sol:IStreamSplitFactory"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": true,
+      "releaseCatalog": "production_contract"
+    },
+    "name": "StreamSplitFactory",
+    "natspec": "@notice Creates immutable split profiles and their deterministic native split wallets.",
+    "range": {
+      "byteLength": 16806,
+      "byteStart": 220,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitFactory.sol#L8-L451",
+      "lineEnd": 451,
+      "lineStart": 8,
+      "snippetSha256": "sha256:8c410b56e96efd2bd2129ffe9042b7ea11c7d32f2d1d185732b6951523e1022f",
+      "sourceSha256": "sha256:642c79da50928b94bc3cac874e4a5e52efa55dd03dc8b27026c604dfb7b00205"
+    },
+    "release": {
+      "abiSha256": "sha256:63ca06f8b11b4ee66f0b56fe50e6cdac12fdb3bb72179d629cdd7ca6a49f85bf",
+      "bytecodeSha256": "sha256:008b8fd57513d26c30a8cf027daa052e9d75f696bc5c31b5b2e10faefc82db21",
+      "deployedBytecodeSha256": "sha256:f6eca5c303edf83676c86e580e188ca24e23f84484490ce60ac5298318e60cfc",
+      "deployedBytecodeSizeBytes": 16691,
+      "summary": {
+        "custom_error_count": 8,
+        "event_count": 5,
+        "function_count": 21,
+        "payable_function_count": 0,
+        "read_function_count": 19,
+        "write_function_count": 2
+      },
+      "tracked": true
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamSplitFactory.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory#function:constructor(IStreamAssetPolicyRegistry)",
+      "definitionId": "smart-contracts/StreamSplitFactory.sol:StreamSplitFactory",
+      "severity": "advisory"
+    }
+  ]
+}

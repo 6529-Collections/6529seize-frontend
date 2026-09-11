@@ -7,6 +7,10 @@ type MockNextImageProps = ComponentProps<"img"> & {
   readonly unoptimized?: boolean | undefined;
 };
 
+type MockNextLinkProps = ComponentProps<"a"> & {
+  readonly prefetch?: boolean | undefined;
+};
+
 jest.mock("next/image", () => ({
   __esModule: true,
   default: ({
@@ -26,15 +30,8 @@ jest.mock("next/image", () => ({
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({
-    href,
-    children,
-    ...props
-  }: {
-    href: string;
-    children: ReactNode;
-  }) => (
-    <a href={href} {...props}>
+  default: ({ href, children, prefetch, ...props }: MockNextLinkProps) => (
+    <a href={href} data-prefetch={String(prefetch)} {...props}>
       {children}
     </a>
   ),
@@ -71,6 +68,10 @@ describe("NotificationHeader", () => {
     const firstAttempt = screen.getByRole("img", {
       name: "GelatoGenesis",
     });
+    expect(screen.getByRole("link", { name: "GelatoGenesis" })).toHaveAttribute(
+      "data-prefetch",
+      "false"
+    );
     expect(firstAttempt).toHaveAttribute(
       "src",
       "https://media.6529.io/ipfs/gelato"

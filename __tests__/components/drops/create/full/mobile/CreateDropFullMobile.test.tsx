@@ -109,7 +109,12 @@ describe("CreateDropFullMobile", () => {
       target: { value: "Changed" },
     });
     fireEvent.click(screen.getByRole("button", { name: /remove file/i }));
-    fireEvent.click(screen.getByRole("button", { name: "Drop" }));
+    const submitButton = screen.getByRole("button", {
+      name: "Drop in progress",
+    });
+    expect(submitButton).toBeDisabled();
+    expect(submitButton).toHaveAttribute("aria-busy", "true");
+    fireEvent.click(submitButton);
 
     expect(onTitle).not.toHaveBeenCalled();
     expect(onFileRemove).not.toHaveBeenCalled();

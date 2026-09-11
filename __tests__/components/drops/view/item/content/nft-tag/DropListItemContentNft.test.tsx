@@ -8,12 +8,10 @@ jest.mock('next/link', () => {
   );
 });
 
-jest.mock('@/components/drops/view/item/content/nft-tag/DropListItemContentNftDetails', () => (props: any) => (
-  <div data-testid="details" data-contract={props.referencedNft.contract}>{props.referencedNft.name}</div>
-));
-
-jest.mock('@tanstack/react-query', () => ({
-  useQuery: jest.fn().mockReturnValue({ data: [{ token: { imageLarge: 'img' } }] }),
+jest.mock('@/hooks/useAlchemyNftQueries', () => ({
+  useTokenMetadataQuery: jest.fn().mockReturnValue({
+    data: [{ tokenIdRaw: '5', imageUrl: 'img' }],
+  }),
 }));
 
 describe('DropListItemContentNft', () => {
@@ -30,9 +28,35 @@ describe('DropListItemContentNft', () => {
     await waitFor(() => expect(screen.getByTestId('link')).toHaveAttribute('href', `/6529-gradient/${baseNft.token}`));
   });
 
+  it('loads display metadata through the internal Alchemy proxy hook', () => {
+    const {
+      useTokenMetadataQuery,
+    } = require('@/hooks/useAlchemyNftQueries');
+
+    const { container } = render(<DropListItemContentNft nft={baseNft} />);
+
+    expect(useTokenMetadataQuery).toHaveBeenCalledWith({
+      tokens: [{ contract: '0x1', tokenId: '5' }],
+      enabled: true,
+    });
+    expect(container.querySelector('img')).toHaveAttribute('src', 'img');
+    expect(container.querySelector('img')).toHaveAttribute('alt', '');
+  });
+
   it('defaults to external link for other contracts', async () => {
     render(<DropListItemContentNft nft={{ ...baseNft, contract: '0xabc' }} />);
     await waitFor(() => expect(screen.getByTestId('link')).toHaveAttribute('href', `https://opensea.io/assets/ethereum/0xabc/${baseNft.token}`));
     expect(screen.getByTestId('link')).toHaveAttribute('target', '_blank');
+  });
+
+  it('uses phrasing content when rendered inside a markdown paragraph', () => {
+    const { container } = render(
+      <p>
+        <DropListItemContentNft nft={baseNft} />
+      </p>
+    );
+
+    expect(container.querySelector('p a')).not.toBeNull();
+    expect(container.querySelector('p div')).toBeNull();
   });
 });

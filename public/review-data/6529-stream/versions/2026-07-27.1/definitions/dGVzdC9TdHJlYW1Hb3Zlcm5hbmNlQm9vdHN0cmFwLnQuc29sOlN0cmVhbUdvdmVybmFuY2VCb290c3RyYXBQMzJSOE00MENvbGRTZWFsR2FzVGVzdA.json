@@ -1,0 +1,242 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapColdSealGasTestBase#event:ColdBootstrapSealExecutionGas(bytes32,uint256,uint256)",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapColdSealGasTestBase",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profile",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "gasUsed",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "inventoryLeaves",
+              "type": "uint256"
+            }
+          ],
+          "name": "ColdBootstrapSealExecutionGas",
+          "signature": "ColdBootstrapSealExecutionGas(bytes32,uint256,uint256)",
+          "topic0": "0xe98bc6a408ba68fdf710ed4eaaab41327ef7474eb18a4fefb9b20b1ce9d3a527"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapTestBase#function:0x49bbca8f",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapTestBase",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamGovernanceBootstrapHarness.BootstrapArtifacts",
+              "name": "artifacts",
+              "type": "(address,address,address,address,address[],bytes32,bytes32,uint64,address,address,address,address,address,address,address,bytes32,bytes32,uint64,bytes32,uint256)"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "authority",
+              "type": "address"
+            }
+          ],
+          "name": "invokeSeal",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x49bbca8f",
+          "signature": "invokeSeal((address,address,address,address,address[],bytes32,bytes32,uint64,address,address,address,address,address,address,address,bytes32,bytes32,uint64,bytes32,uint256),address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapP32R8M40ColdSealGasTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapP32R8M40ColdSealGasTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapP32R8M40ColdSealGasTest#function:0x9864be57",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapP32R8M40ColdSealGasTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testP32R8M40MaximumTriggerProfileFitsColdSealEnvelope",
+          "outputs": [],
+          "selector": "0x9864be57",
+          "signature": "testP32R8M40MaximumTriggerProfileFitsColdSealEnvelope()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapP32R8M40ColdSealGasTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VCb290c3RyYXBQMzJSOE00MENvbGRTZWFsR2FzVGVzdCNmdW5jdGlvbjoweDBhOTI1NGU0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 238,
+            "byteStart": 98588,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L2377-L2382",
+            "lineEnd": 2382,
+            "lineStart": 2377,
+            "snippetSha256": "sha256:04749bafbbf764cefda53b67a2e0c34e4ff34412e801c8fee1959321bdc1fcc6",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testP32R8M40MaximumTriggerProfileFitsColdSealEnvelope()",
+          "displaySignature": "testP32R8M40MaximumTriggerProfileFitsColdSealEnvelope()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapP32R8M40ColdSealGasTest#function:0x9864be57",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VCb290c3RyYXBQMzJSOE00MENvbGRTZWFsR2FzVGVzdCNmdW5jdGlvbjoweDk4NjRiZTU3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testP32R8M40MaximumTriggerProfileFitsColdSealEnvelope",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 116,
+            "byteStart": 98832,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L2384-L2386",
+            "lineEnd": 2386,
+            "lineStart": 2384,
+            "snippetSha256": "sha256:32cc994b61929fe478ce4ade2bf697e0759c4d937aa7bfa2257c2b29f690c313",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0x9864be57",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapP32R8M40ColdSealGasTest",
+    "inheritance": [
+      {
+        "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapColdSealGasTestBase",
+        "name": "StreamGovernanceBootstrapColdSealGasTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VCb290c3RyYXBQMzJSOE00MENvbGRTZWFsR2FzVGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapP32R8M40ColdSealGasTest",
+      "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapColdSealGasTestBase",
+      "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapTestBase",
+      "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapHarness",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGovernanceBootstrapP32R8M40ColdSealGasTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 478,
+      "byteStart": 98472,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L2374-L2387",
+      "lineEnd": 2387,
+      "lineStart": 2374,
+      "snippetSha256": "sha256:78c7c7447744cffadd054fb8854bcb50e699a2b417240b68057a93abb76d8bbb",
+      "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamGovernanceBootstrap.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapP32R8M40ColdSealGasTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapP32R8M40ColdSealGasTest#function:0x0a9254e4",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapP32R8M40ColdSealGasTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapP32R8M40ColdSealGasTest#function:0x9864be57",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapP32R8M40ColdSealGasTest",
+      "severity": "advisory"
+    }
+  ]
+}

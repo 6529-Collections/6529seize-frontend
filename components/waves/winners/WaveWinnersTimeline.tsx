@@ -61,17 +61,19 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
                 key={`decision-${point.decision_time}`}
                 className="group tw-relative"
               >
-                <div className="tw-absolute tw-left-0 tw-top-[0.3125rem] tw-z-10 lg:tw-left-3">
-                  <div className="tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-700/50 tw-bg-iron-800 tw-transition-all group-hover:tw-border-iron-500">
-                    <div className="tw-size-2 tw-rounded-full tw-bg-iron-500 tw-transition-all group-hover:tw-size-2.5 group-hover:tw-bg-iron-400"></div>
-                  </div>
-                </div>
-
                 <div className="tw-mb-2 tw-ml-6 lg:tw-mb-3 lg:tw-ml-10">
                   <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1">
-                    <h3 className="tw-text-sm tw-font-medium tw-tracking-wide tw-text-iron-300">
-                      {formattedDate}
-                    </h3>
+                    <div className="tw-relative">
+                      <div className="tw-absolute -tw-left-6 tw-top-1/2 tw-z-10 -tw-translate-y-1/2 lg:-tw-left-7">
+                        <div className="tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-iron-700/50 tw-bg-iron-800 tw-transition-all group-hover:tw-border-iron-500">
+                          <div className="tw-size-2 tw-rounded-full tw-bg-iron-500 tw-transition-all group-hover:tw-size-2.5 group-hover:tw-bg-iron-400"></div>
+                        </div>
+                      </div>
+
+                      <h3 className="tw-m-0 tw-text-sm tw-font-medium tw-tracking-wide tw-text-iron-300">
+                        {formattedDate}
+                      </h3>
+                    </div>
 
                     <span className="tw-text-xs tw-font-light tw-tracking-wide tw-text-iron-400">
                       {formattedTime}

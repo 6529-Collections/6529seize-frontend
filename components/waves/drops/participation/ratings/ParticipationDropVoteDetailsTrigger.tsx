@@ -4,9 +4,11 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { trapTabFocus } from "@/components/utils/modal/focusTrap";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import { formatInteger } from "@/i18n/format";
+import { t, tRich } from "@/i18n/messages";
 import {
   type MouseEvent as ReactMouseEvent,
   useCallback,
@@ -19,16 +21,95 @@ import { createPortal } from "react-dom";
 import { ParticipationDropVoteDetailsContent } from "./ParticipationDropVoteDetailsContent";
 
 type VoteDetailsTab = "voters" | "logs";
-type VoteDetailsTriggerDensity = "default" | "compact" | "gallery";
+type VoteDetailsTriggerDensity =
+  | "default"
+  | "compact"
+  | "gallery"
+  | "tight"
+  | "podium";
 
 interface ParticipationDropVoteDetailsTriggerProps {
   readonly drop: ApiDrop;
   readonly density?: VoteDetailsTriggerDensity | undefined;
+  readonly visualVariant?: "default" | "memes" | undefined;
 }
 
 const VIEWPORT_PADDING_PX = 16;
 const POPOVER_GAP_PX = 8;
 const POPOVER_WIDTH_PX = 360;
+
+const DENSITY_CLASS_NAMES: Record<VoteDetailsTriggerDensity, string> = {
+  default: "tw-gap-1.5 tw-px-2 tw-py-1 tw-leading-5",
+  compact: "tw-gap-1 tw-px-1.5 tw-py-0.5 tw-leading-4",
+  gallery: "tw-box-border tw-h-8 tw-gap-1 tw-px-2.5 tw-py-0 tw-leading-4",
+  tight: "tw-gap-1 tw-px-2 tw-py-1 tw-leading-5",
+  podium:
+    "tw-min-h-7 tw-min-w-0 tw-max-w-full tw-flex-nowrap tw-justify-center tw-gap-1 tw-px-2 tw-py-0.5 tw-leading-4 sm:tw-min-h-8 sm:tw-px-2.5 sm:tw-py-1",
+};
+
+const isSmallDensity = (density: VoteDetailsTriggerDensity): boolean =>
+  density === "compact" || density === "gallery" || density === "podium";
+
+const getTriggerTextSizeClassName = (
+  density: VoteDetailsTriggerDensity,
+  isMemesVariant: boolean
+): string => {
+  if (density === "podium") {
+    return "tw-text-[10px] min-[360px]:tw-text-[11px] sm:tw-text-xs";
+  }
+
+  if (isSmallDensity(density)) {
+    return "tw-text-xs";
+  }
+
+  return isMemesVariant ? "tw-text-meta" : "tw-text-sm";
+};
+
+const getTriggerAppearanceClassName = (isMemesVariant: boolean): string =>
+  isMemesVariant
+    ? "tw-rounded-md tw-border-iron-700 tw-bg-white/[0.05] tw-shadow-none desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-white/[0.08]"
+    : "tw-rounded-md tw-border-white/[0.06] tw-bg-white/[0.05] tw-shadow-none desktop-hover:hover:tw-border-white/[0.09] desktop-hover:hover:tw-bg-white/[0.08] desktop-hover:hover:tw-text-iron-100";
+
+interface TriggerClassNames {
+  readonly triggerTextClassName: string;
+  readonly countTextColorClassName: string;
+  readonly labelTextColorClassName: string;
+  readonly triggerClassName: string;
+  readonly chevronClassName: string;
+}
+
+const getTriggerClassNames = (
+  density: VoteDetailsTriggerDensity,
+  visualVariant: NonNullable<
+    ParticipationDropVoteDetailsTriggerProps["visualVariant"]
+  >,
+  isOpen: boolean
+): TriggerClassNames => {
+  const isMemesVariant = visualVariant === "memes";
+  const triggerTextClassName = `${getTriggerTextSizeClassName(
+    density,
+    isMemesVariant
+  )} tw-font-normal`;
+  const appearanceClassName = getTriggerAppearanceClassName(isMemesVariant);
+  const triggerClassName = `tw-inline-flex tw-cursor-pointer tw-items-center tw-border tw-border-solid tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${appearanceClassName} ${DENSITY_CLASS_NAMES[density]}`;
+  const chevronSizeClassName = isSmallDensity(density)
+    ? "tw-size-3"
+    : "tw-size-3.5";
+
+  return {
+    triggerTextClassName,
+    countTextColorClassName: isMemesVariant
+      ? "tw-text-iron-300"
+      : "tw-text-iron-200",
+    labelTextColorClassName: isMemesVariant
+      ? "tw-text-iron-300"
+      : "tw-text-iron-400",
+    triggerClassName,
+    chevronClassName: `tw-flex-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 ${chevronSizeClassName} ${
+      isOpen ? "tw-rotate-180" : ""
+    }`,
+  };
+};
 
 const isInsideElement = (
   element: HTMLElement | null,
@@ -44,7 +125,9 @@ const isInsideElement = (
 export default function ParticipationDropVoteDetailsTrigger({
   drop,
   density = "default",
+  visualVariant = "default",
 }: ParticipationDropVoteDetailsTriggerProps) {
+  const locale = useBrowserLocale();
   const isMobileScreen = useIsMobileScreen();
   const isTouchDevice = useIsTouchDevice();
   const useSheet = isMobileScreen || isTouchDevice;
@@ -248,13 +331,15 @@ export default function ParticipationDropVoteDetailsTrigger({
     isOpen && useSheet && typeof globalThis.document !== "undefined"
       ? createPortal(
           <MobileWrapperDialog
-            title="Votes"
+            title={t(locale, "waves.voteDetails.title")}
             isOpen={isOpen}
             onClose={closeDetails}
+            noPadding
             fixedHeight
             tall
             showScrollbar
-            headerClassName="tw-py-4"
+            headerClassName="tw-pb-0 tw-pt-5"
+            titleClassName="tw-m-0"
           >
             <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
               {detailsContent}
@@ -280,9 +365,9 @@ export default function ParticipationDropVoteDetailsTrigger({
             <div
               ref={surfaceRef}
               role="dialog"
-              aria-label="Votes"
+              aria-label={t(locale, "waves.voteDetails.title")}
               tabIndex={-1}
-              className="tw-flex tw-max-h-[26rem] tw-w-[22.5rem] tw-max-w-[calc(100vw-2rem)] tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/40"
+              className="tw-flex tw-max-h-[26rem] tw-w-[22.5rem] tw-max-w-[calc(100vw-2rem)] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#0E1012] tw-shadow-[0_16px_48px_rgba(0,0,0,0.48)]"
             >
               {detailsContent}
             </div>
@@ -290,22 +375,25 @@ export default function ParticipationDropVoteDetailsTrigger({
           globalThis.document.body
         )
       : null;
-  const isCompact = density === "compact";
-  const isGallery = density === "gallery";
-  const isSmallDensity = isCompact || isGallery;
-  let densityClassName: string;
-  if (isGallery) {
-    densityClassName =
-      "tw-box-border tw-h-8 tw-gap-1 tw-px-2.5 tw-py-0 tw-text-xs tw-leading-4";
-  } else if (isCompact) {
-    densityClassName = "tw-gap-1 tw-px-1.5 tw-py-0.5 tw-text-xs tw-leading-4";
-  } else {
-    densityClassName = "tw-gap-1.5 tw-px-2 tw-py-1 tw-text-sm tw-leading-5";
-  }
-  const triggerClassName = `tw-inline-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-shadow-sm tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100 ${densityClassName}`;
-  const chevronClassName = `tw-flex-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 ${
-    isSmallDensity ? "tw-size-3" : "tw-size-3.5"
-  } ${isOpen ? "tw-rotate-180" : ""}`;
+  const {
+    triggerTextClassName,
+    countTextColorClassName,
+    labelTextColorClassName,
+    triggerClassName,
+    chevronClassName,
+  } = getTriggerClassNames(density, visualVariant, isOpen);
+  const voterPluralCategory = new Intl.PluralRules(locale).select(
+    drop.raters_count
+  );
+  const voterMessageKey =
+    voterPluralCategory === "one"
+      ? "waves.leaderboard.grid.voters.one"
+      : "waves.leaderboard.grid.voters.other";
+  const triggerLabelMessageKey =
+    voterPluralCategory === "one"
+      ? "waves.voteDetails.trigger.one"
+      : "waves.voteDetails.trigger.other";
+  const formattedVoterCount = formatInteger(locale, drop.raters_count);
 
   return (
     <>
@@ -314,17 +402,26 @@ export default function ParticipationDropVoteDetailsTrigger({
         type="button"
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        aria-label={`View voters and vote log for ${formatNumberWithCommas(
-          drop.raters_count
-        )} ${drop.raters_count === 1 ? "voter" : "voters"}`}
+        aria-label={t(locale, triggerLabelMessageKey, {
+          count: formattedVoterCount,
+        })}
         onClick={toggleDetails}
         className={triggerClassName}
       >
-        <span className="tw-font-medium tw-text-iron-50">
-          {formatNumberWithCommas(drop.raters_count)}
-        </span>
-        <span className="tw-font-normal tw-text-iron-400">
-          {drop.raters_count === 1 ? "voter" : "voters"}
+        <span
+          className={`${triggerTextClassName} ${labelTextColorClassName} ${
+            density === "podium"
+              ? "tw-min-w-0 tw-max-w-full tw-whitespace-nowrap"
+              : ""
+          }`}
+        >
+          {tRich(locale, voterMessageKey, {
+            count: (
+              <span key="count" className={countTextColorClassName}>
+                {formattedVoterCount}
+              </span>
+            ),
+          })}
         </span>
         <ChevronDownIcon aria-hidden="true" className={chevronClassName} />
       </button>

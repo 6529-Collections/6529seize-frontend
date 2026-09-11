@@ -8,10 +8,14 @@ import type { CreateWaveDatesConfig } from "@/types/waves.types";
 import TimePicker from "@/components/common/TimePicker";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import type { SupportedLocale } from "@/i18n/locales";
 import {
   clampApproveWaveEndDate,
   getEarliestApproveWaveEndTimestamp,
 } from "./approveWaveDates.helpers";
+import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
 
 interface CreateWaveDatesApproveEndProps {
   readonly dates: CreateWaveDatesConfig;
@@ -19,8 +23,8 @@ interface CreateWaveDatesApproveEndProps {
   readonly setDates: (dates: CreateWaveDatesConfig) => void;
 }
 
-const formatDateTime = (timestamp: number) =>
-  new Date(timestamp).toLocaleString("en-US", {
+const formatDateTime = (timestamp: number, locale: SupportedLocale) =>
+  new Date(timestamp).toLocaleString(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -29,15 +33,12 @@ const formatDateTime = (timestamp: number) =>
     hour12: true,
   });
 
-const END_DATE_TOOLTIP_TEXT =
-  "Choose when the approve wave closes. Leave it blank to keep the wave open " +
-  "until max winners is reached, or indefinitely if max winners is blank.";
-
 export default function CreateWaveDatesApproveEnd({
   dates,
   errors,
   setDates,
 }: CreateWaveDatesApproveEndProps) {
+  const locale = useBrowserLocale();
   const endDate = dates.endDate;
   const selectedEndDate =
     endDate !== null && Number.isFinite(endDate) ? endDate : null;
@@ -109,41 +110,48 @@ export default function CreateWaveDatesApproveEnd({
   };
 
   return (
-    <section className="tw-rounded-xl tw-bg-iron-900 tw-px-5 tw-pb-5 tw-pt-5 tw-shadow-sm tw-ring-1 tw-ring-iron-700/50">
+    <section className="tw-bg-transparent tw-p-5">
       <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
-        <div>
+        <div className="tw-space-y-1">
           <div className="tw-flex tw-items-center tw-gap-x-2">
-            <h3 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-300">
-              Wave End
+            <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
+              {t(locale, "waves.create.dates.approve.end.title")}
             </h3>
             <TooltipIconButton
               icon={faInfoCircle}
-              tooltipText={END_DATE_TOOLTIP_TEXT}
+              tooltipText={t(locale, "waves.create.dates.approve.end.tooltip")}
               tooltipPosition="bottom"
               tooltipWidth="tw-w-80"
+              aria-label={t(locale, "waves.create.dates.approve.endInfoLabel")}
+              className="tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-leading-none"
             />
           </div>
-          <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-400">
-            Optional. Leave blank for no end date.
+          <p className={CREATE_WAVE_FORM_STYLES.compactSupportingText}>
+            {t(locale, "waves.create.dates.approve.end.description")}
           </p>
         </div>
 
         <div className="tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md">
-          <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">Wave Ends</p>
+          <p className="tw-m-0 tw-text-xs tw-text-iron-300/70">
+            {t(locale, "waves.create.dates.approve.end.summaryLabel")}
+          </p>
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <p
-              className={`tw-mb-0 tw-text-sm tw-font-medium ${
+              className={`tw-m-0 tw-text-sm tw-font-medium ${
                 hasEndBeforeStartError ? "tw-text-error" : "tw-text-iron-50"
               }`}
             >
               {selectedEndDate !== null
-                ? formatDateTime(selectedEndDate)
-                : "No end date"}
+                ? formatDateTime(selectedEndDate, locale)
+                : t(locale, "waves.create.dates.approve.end.noEndDate")}
             </p>
             {hasSelectedEndDate && (
               <button
                 type="button"
-                aria-label="Clear end date"
+                aria-label={t(
+                  locale,
+                  "waves.create.dates.approve.end.clearAriaLabel"
+                )}
                 onClick={handleClearEndDate}
                 className="tw-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-text-iron-300 tw-transition tw-duration-300 hover:tw-border-primary-400 hover:tw-text-primary-300"
               >
@@ -176,13 +184,13 @@ export default function CreateWaveDatesApproveEnd({
                 strokeLinejoin="round"
               />
             </svg>
-            <span>Wave end must be after wave start.</span>
+            <span>{t(locale, "waves.create.dates.approve.end.error")}</span>
           </div>
         )}
         <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 md:tw-grid-cols-2">
           <div className="tw-w-full">
-            <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">
-              Select End Date:
+            <p className={`tw-mb-2 ${CREATE_WAVE_FORM_STYLES.fieldLabel}`}>
+              {t(locale, "waves.create.dates.approve.end.dateLabel")}
             </p>
             <CommonCalendar
               initialMonth={displayedDate.getMonth()}
@@ -191,12 +199,13 @@ export default function CreateWaveDatesApproveEnd({
               minTimestamp={earliestValidEndTimestamp}
               maxTimestamp={null}
               setSelectedTimestamp={handleDateSelection}
+              variant="flat"
             />
           </div>
 
           <div className="tw-w-full">
-            <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">
-              Select End Time:
+            <p className={`tw-mb-2 ${CREATE_WAVE_FORM_STYLES.fieldLabel}`}>
+              {t(locale, "waves.create.dates.approve.end.timeLabel")}
             </p>
             <TimePicker
               hours={displayedDate.getHours()}
@@ -204,11 +213,19 @@ export default function CreateWaveDatesApproveEnd({
               onTimeChange={handleTimeChange}
               minTime={isSameDayAsEarliestValidEnd ? minTime : null}
               disabled={!hasSelectedEndDate}
+              variant="flat"
             />
             {!hasSelectedEndDate && (
-              <p className="tw-mt-2 tw-text-xs tw-text-iron-400">
-                Pick an end date first. The earliest allowed end time is{" "}
-                {formatDateTime(earliestValidEndTimestamp)}.
+              <p
+                className={`tw-mt-2 ${CREATE_WAVE_FORM_STYLES.compactSupportingText}`}
+              >
+                {t(
+                  locale,
+                  "waves.create.dates.approve.end.disabledTimeGuidance",
+                  {
+                    earliest: formatDateTime(earliestValidEndTimestamp, locale),
+                  }
+                )}
               </p>
             )}
           </div>

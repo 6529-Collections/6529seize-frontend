@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -14,16 +14,31 @@ import { WaveLeaderboardLoadingBar } from "@/components/waves/leaderboard/drops/
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import MyStreamWaveMyVotesReset from "./MyStreamWaveMyVotesReset";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
+import PrivilegedDropCreator, {
+  DropMode,
+} from "@/components/waves/PrivilegedDropCreator";
+import { ActiveDropAction } from "@/types/dropInteractionTypes";
+import { getVoteRationaleReplyMarkdown } from "@/helpers/waves/vote-rationale.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface MyStreamWaveMyVotesProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
+interface VoteRationaleReplyState {
+  readonly drop: ExtendedDrop;
+  readonly partId: number;
+  readonly markdown: string;
+  readonly markdownKey: string;
+}
+
 const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   wave,
   onDropClick,
 }) => {
+  const locale = useBrowserLocale();
   const [isResettingVotes, setIsResettingVotes] = useState(false);
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
@@ -42,6 +57,9 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   const [checkedDrops, setCheckedDrops] = useState<Set<string>>(
     new Set<string>()
   );
+  const [voteRationaleReply, setVoteRationaleReply] =
+    useState<VoteRationaleReplyState | null>(null);
+  const voteRationaleReplyCounterRef = useRef(0);
 
   const sharedAvailableVotes = useMemo(() => {
     const dropWithContext = drops.find((drop) => drop.context_profile_context);
@@ -105,6 +123,32 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
     });
   };
 
+  const closeVoteRationaleReply = useCallback(() => {
+    setVoteRationaleReply(null);
+  }, []);
+
+  const handleExplainVote = useCallback(
+    (drop: ExtendedDrop, voteTotal: number, voteChange: number) => {
+      const partId = drop.parts.at(0)?.part_id;
+      if (partId === undefined) {
+        return;
+      }
+
+      voteRationaleReplyCounterRef.current += 1;
+      setVoteRationaleReply({
+        drop,
+        partId,
+        markdown: getVoteRationaleReplyMarkdown({
+          voteTotal,
+          voteChange,
+          locale,
+        }),
+        markdownKey: `${drop.id}:${voteRationaleReplyCounterRef.current}`,
+      });
+    },
+    [locale]
+  );
+
   const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
       void fetchNextPage();
@@ -113,17 +157,17 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
 
   return (
     <div
-      className="tw-space-y-4 tw-overflow-y-auto tw-px-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-px-4 lg:tw-space-y-6"
+      className="tw-space-y-4 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 lg:tw-space-y-6"
       style={myVotesViewStyle}
     >
       {drops.length === 0 && !isFetching ? (
-        <div className="tw-mt-10">
+        <div className="tw-mt-10 tw-px-2 sm:tw-px-4">
           <p className="tw-text-center tw-text-sm tw-text-iron-500">
-            You haven&apos;t voted on any submissions in this wave yet.
+            {t(locale, "waves.myVotes.empty")}
           </p>
         </div>
       ) : (
-        <div className="tw-mt-4 tw-space-y-4">
+        <div className="tw-mt-4">
           {!isVotingControlsLocked && (
             <MyStreamWaveMyVotesReset
               waveId={wave.id}
@@ -141,18 +185,44 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
               onResettingChange={setIsResettingVotes}
             />
           )}
-          <div className="tw-space-y-2">
+          <div>
             {drops.map((drop) => (
-              <MyStreamWaveMyVote
+              <div
                 key={drop.id}
-                drop={drop}
-                onDropClick={onDropClick}
-                isChecked={!isVotingControlsLocked && checkedDrops.has(drop.id)}
-                isResetting={isResettingVotes}
-                isVotingClosed={isVotingControlsLocked}
-                winningThreshold={winningThreshold}
-                onToggleCheck={handleToggleCheck}
-              />
+                className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800"
+              >
+                <MyStreamWaveMyVote
+                  drop={drop}
+                  onDropClick={onDropClick}
+                  onExplainVote={handleExplainVote}
+                  isChecked={
+                    !isVotingControlsLocked && checkedDrops.has(drop.id)
+                  }
+                  isResetting={isResettingVotes}
+                  isVotingClosed={isVotingControlsLocked}
+                  winningThreshold={winningThreshold}
+                  onToggleCheck={handleToggleCheck}
+                />
+                {voteRationaleReply?.drop.id === drop.id && (
+                  <div className="tw-mx-2 tw-mb-6 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-iron-950 tw-px-4 tw-py-3 sm:tw-mx-4">
+                    <PrivilegedDropCreator
+                      activeDrop={{
+                        action: ActiveDropAction.REPLY,
+                        drop: voteRationaleReply.drop,
+                        partId: voteRationaleReply.partId,
+                      }}
+                      onCancelReplyQuote={closeVoteRationaleReply}
+                      onDropAddedToQueue={closeVoteRationaleReply}
+                      wave={wave}
+                      dropId={null}
+                      fixedDropMode={DropMode.CHAT}
+                      focusOnInitialActiveDrop
+                      initialMarkdown={voteRationaleReply.markdown}
+                      initialMarkdownKey={voteRationaleReply.markdownKey}
+                    />
+                  </div>
+                )}
+              </div>
             ))}
             {isFetchingNextPage && <WaveLeaderboardLoadingBar />}
             <div ref={intersectionElementRef}></div>

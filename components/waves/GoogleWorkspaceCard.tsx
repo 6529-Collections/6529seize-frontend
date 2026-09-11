@@ -2,11 +2,10 @@
 
 import { useEffect, useId, useMemo, useState } from "react";
 
-import clsx from "clsx";
-
 import Image from "next/image";
-import Link from "next/link";
 
+import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { GoogleWorkspaceLinkPreview } from "@/services/api/link-preview-api";
 import { LinkPreviewCardLayout } from "./OpenGraphPreview";
 
@@ -39,14 +38,6 @@ const PRODUCT_CONFIG: Record<
     fallbackTitle: "Untitled Slides",
   },
 };
-
-const getActionButtonClasses = (variant: "primary" | "secondary") =>
-  clsx(
-    "tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-no-underline tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60",
-    variant === "primary"
-      ? "tw-border-primary-500 tw-bg-primary-500 tw-text-white hover:tw-bg-primary-400"
-      : "tw-border-iron-700 tw-bg-transparent tw-text-iron-100 hover:tw-border-primary-400 hover:tw-text-primary-300"
-  );
 
 export default function GoogleWorkspaceCard({
   href,
@@ -180,40 +171,43 @@ export default function GoogleWorkspaceCard({
             </div>
           </div>
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-            <Link
+            <ButtonLink
               href={data.links.open}
               target="_blank"
               rel="noopener noreferrer"
               prefetch={false}
-              className={getActionButtonClasses("primary")}
+              variant="action"
+              size="sm"
               aria-label={`${openLabel} (opens in a new tab)`}
             >
               {openLabel}
-            </Link>
+            </ButtonLink>
             {canShowPreview ? (
-              <button
+              <Button
                 type="button"
                 onClick={handleTogglePreview}
-                className={getActionButtonClasses("secondary")}
+                variant="tertiary"
+                size="sm"
                 aria-controls={previewContainerId}
                 aria-expanded={viewLiveActive}
                 aria-pressed={viewLiveActive}
                 aria-label={`${viewLiveActive ? "Hide" : "View"} live preview for ${productName}`}
               >
                 {viewLiveActive ? "Hide live preview" : "View live preview"}
-              </button>
+              </Button>
             ) : null}
             {downloadUrl ? (
-              <Link
+              <ButtonLink
                 href={downloadUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 prefetch={false}
-                className={getActionButtonClasses("secondary")}
+                variant="tertiary"
+                size="sm"
                 aria-label={`Download ${productName} as PDF (opens in a new tab)`}
               >
                 Download PDF
-              </Link>
+              </ButtonLink>
             ) : null}
           </div>
           {activePreviewUrl ? (

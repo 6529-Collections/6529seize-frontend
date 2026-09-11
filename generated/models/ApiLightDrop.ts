@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
  * 6529.io API
- * This is the API interface description. Brief terminology overview and an authentication example can be found at <a href=\"https://6529.io/about/api\">https://6529.io/about/api</a>.
+ * JSON REST API for 6529.io. New here? A terminology overview and a step-by-step authentication walkthrough (guides &amp; auth) live at <a href=\"https://6529.io/tools/api\">https://6529.io/tools/api</a>. The raw machine-readable spec is downloadable at <a href=\"/openapi.yaml\">/openapi.yaml</a> and <a href=\"/openapi.json\">/openapi.json</a>.
  *
  * OpenAPI spec version: 1.0.0
  * 
@@ -12,7 +12,9 @@
  */
 
 import { ApiDropMedia } from '../models/ApiDropMedia';
+import { ApiDropModeration } from '../models/ApiDropModeration';
 import { ApiDropType } from '../models/ApiDropType';
+import { ApiDropViewerModerationContext } from '../models/ApiDropViewerModerationContext';
 import { HttpFile } from '../http/http';
 
 export class ApiLightDrop {
@@ -27,6 +29,8 @@ export class ApiLightDrop {
     'serial_no': number;
     'drop_type': ApiDropType;
     'title': string | null;
+    'viewer_context'?: ApiDropViewerModerationContext;
+    'moderation'?: ApiDropModeration;
     'part_1_text': string | null;
     'part_1_medias': Array<ApiDropMedia>;
     'has_quote': boolean;
@@ -83,6 +87,18 @@ export class ApiLightDrop {
             "name": "title",
             "baseName": "title",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "viewer_context",
+            "baseName": "viewer_context",
+            "type": "ApiDropViewerModerationContext",
+            "format": ""
+        },
+        {
+            "name": "moderation",
+            "baseName": "moderation",
+            "type": "ApiDropModeration",
             "format": ""
         },
         {

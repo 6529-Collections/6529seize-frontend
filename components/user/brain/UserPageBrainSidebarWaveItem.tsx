@@ -1,91 +1,67 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { LockClosedIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
-import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
-import { getTimeAgoShort, numberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import type { ProfileWaveActivitySidebarItem } from "@/types/profile-wave-activity.types";
 import Link from "next/link";
 import Image from "next/image";
 import WavesIcon from "@/components/common/icons/WavesIcon";
+import { getUserPageBrainSidebarMessage } from "./userPageBrainSidebar.messages";
 import {
-  getSidebarWaveDropsCount,
+  formatSidebarWaveActivityTime,
   getSidebarWaveHref,
   getSidebarWaveImageSrc,
-  getSidebarWaveIsDirectMessage,
-  getSidebarWaveIsPrivate,
-  getSidebarWaveLatestDropTimestamp,
-  type UserPageBrainSidebarWave,
 } from "./userPageBrainSidebarWave.helpers";
-
-type BrainSidebarWaveItemDisplay = {
-  readonly href: string;
-  readonly isPrivate: boolean;
-  readonly isDirectMessage: boolean;
-  readonly dropsCount: string;
-  readonly lastDropTimestamp: number | null;
-  readonly imageSrc: string | null;
-};
-
-const getBrainSidebarWaveItemDisplay = (
-  wave: UserPageBrainSidebarWave
-): BrainSidebarWaveItemDisplay => {
-  const dropsCount = getSidebarWaveDropsCount(wave);
-
-  return {
-    isDirectMessage: getSidebarWaveIsDirectMessage(wave),
-    href: getSidebarWaveHref(wave),
-    isPrivate: getSidebarWaveIsPrivate(wave),
-    dropsCount: numberWithCommas(dropsCount),
-    lastDropTimestamp: getSidebarWaveLatestDropTimestamp(wave),
-    imageSrc: getSidebarWaveImageSrc(wave, ImageScale.W_200_H_200),
-  };
-};
 
 export default function UserPageBrainSidebarWaveItem({
   wave,
+  showTotalPosts,
 }: {
-  readonly wave: UserPageBrainSidebarWave;
+  readonly wave: ProfileWaveActivitySidebarItem;
+  readonly showTotalPosts: boolean;
 }) {
-  const {
-    href,
-    isPrivate,
-    isDirectMessage,
-    dropsCount,
-    lastDropTimestamp,
-    imageSrc,
-  } = getBrainSidebarWaveItemDisplay(wave);
-  const FallbackIcon = isDirectMessage ? ChatBubbleLeftRightIcon : WavesIcon;
-  let metaContent: ReactNode = <span>No drops yet</span>;
-
-  if (lastDropTimestamp !== null && lastDropTimestamp > 0) {
-    metaContent = (
-      <>
-        <span>{getTimeAgoShort(lastDropTimestamp)}</span>
-        <span className="tw-h-0.5 tw-w-0.5 tw-rounded-full tw-bg-white/30" />
-        <span>{dropsCount} drops</span>
-      </>
-    );
-  }
+  const locale = useBrowserLocale();
+  const href = getSidebarWaveHref(wave);
+  const imageSrc = getSidebarWaveImageSrc(wave, ImageScale.W_200_H_200);
+  const formattedPostCount = formatInteger(locale, wave.totalDropsCount);
+  const hasLatestPost =
+    wave.latestPostTimestamp !== null && wave.latestPostTimestamp > 0;
+  const totalPostsLabel = getUserPageBrainSidebarMessage(
+    locale,
+    wave.totalDropsCount === 1
+      ? "user.brain.sidebar.totalWavePosts.one"
+      : "user.brain.sidebar.totalWavePosts.other",
+    { count: formattedPostCount }
+  );
+  const lastPostLabel = hasLatestPost
+    ? getUserPageBrainSidebarMessage(locale, "user.brain.sidebar.lastPost", {
+        time: formatSidebarWaveActivityTime(locale, wave.latestPostTimestamp),
+      })
+    : getUserPageBrainSidebarMessage(
+        locale,
+        "user.brain.sidebar.noPostsByProfile"
+      );
 
   return (
     <Link
       href={href}
       prefetch={false}
-      className="tw-group tw-flex tw-cursor-pointer tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-p-3 tw-no-underline tw-shadow-2xl tw-transition-all desktop-hover:hover:tw-border-white/15"
+      className="tw-group tw-flex tw-cursor-pointer tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-p-3 tw-no-underline tw-shadow-2xl tw-transition-all focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/15 motion-reduce:tw-transition-none"
     >
       <div className="tw-relative tw-h-10 tw-w-10 tw-shrink-0 tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900 tw-shadow-sm tw-transition-colors desktop-hover:group-hover:tw-border-white/[0.1]">
         {imageSrc ? (
           <Image
             src={imageSrc}
-            alt={wave.name ? `Wave ${wave.name}` : "Wave picture"}
+            alt=""
             fill
             sizes="40px"
             className="tw-object-cover"
           />
         ) : (
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-900">
-            <FallbackIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300" />
+            <WavesIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300" />
           </div>
         )}
       </div>
@@ -93,8 +69,19 @@ export default function UserPageBrainSidebarWaveItem({
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center">
         <div className="tw-mb-1 tw-flex tw-items-center tw-justify-between">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
-            {isPrivate && (
-              <LockClosedIcon className="tw-h-3 tw-w-3 tw-shrink-0 tw-text-white/30" />
+            {wave.isPrivate && (
+              <>
+                <LockClosedIcon
+                  aria-hidden="true"
+                  className="tw-h-3 tw-w-3 tw-shrink-0 tw-text-white/30"
+                />
+                <span className="tw-sr-only">
+                  {getUserPageBrainSidebarMessage(
+                    locale,
+                    "user.brain.sidebar.privateWave"
+                  )}
+                </span>
+              </>
             )}
             <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors desktop-hover:group-hover:tw-text-iron-50">
               {wave.name}
@@ -102,8 +89,26 @@ export default function UserPageBrainSidebarWaveItem({
           </div>
         </div>
 
-        <div className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-500">
-          {metaContent}
+        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-500">
+          {hasLatestPost ? (
+            <time
+              dateTime={new Date(wave.latestPostTimestamp).toISOString()}
+              className="tw-truncate"
+            >
+              {lastPostLabel}
+            </time>
+          ) : (
+            <span className="tw-truncate">{lastPostLabel}</span>
+          )}
+          {showTotalPosts && (
+            <>
+              <span
+                aria-hidden="true"
+                className="tw-h-0.5 tw-w-0.5 tw-shrink-0 tw-rounded-full tw-bg-white/30"
+              />
+              <span className="tw-shrink-0">{totalPostsLabel}</span>
+            </>
+          )}
         </div>
       </div>
 

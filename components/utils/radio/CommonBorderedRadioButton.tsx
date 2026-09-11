@@ -3,6 +3,8 @@ type CommonBorderedRadioButtonProps<T extends string> = {
   readonly selected: T;
   readonly disabled?: boolean | undefined;
   readonly variant?: "default" | "subtle" | undefined;
+  readonly ariaLabel?: string | undefined;
+  readonly name?: string | undefined;
   readonly onChange: (type: T) => void;
 } & (
   | { readonly label: string; readonly children?: undefined }
@@ -19,7 +21,7 @@ function getWrapperClasses({
   readonly isSubtle: boolean;
 }) {
   if (isSelected && isSubtle) {
-    return "tw-rounded-xl tw-border-primary-400 tw-bg-primary-500/5 tw-ring-primary-500/30 tw-shadow-inner";
+    return "tw-rounded-xl tw-border-primary-500/60 tw-bg-iron-900 tw-shadow-inner";
   }
 
   if (isSelected) {
@@ -29,8 +31,8 @@ function getWrapperClasses({
   if (isSubtle) {
     const hoverClasses = disabled
       ? ""
-      : "hover:tw-border-white/10 hover:tw-bg-iron-800 hover:tw-ring-white/10";
-    return `tw-rounded-xl tw-border-white/5 tw-bg-iron-900 tw-ring-white/5 tw-shadow-inner ${hoverClasses}`;
+      : "hover:tw-border-white/10 hover:tw-bg-iron-900";
+    return `tw-rounded-xl tw-border-white/5 tw-bg-iron-900/60 tw-shadow-none ${hoverClasses}`;
   }
 
   const hoverClasses = disabled ? "" : "hover:tw-ring-iron-650";
@@ -65,6 +67,8 @@ export default function CommonBorderedRadioButton<T extends string>({
   label,
   disabled = false,
   variant = "default",
+  ariaLabel,
+  name,
   onChange,
   children,
 }: CommonBorderedRadioButtonProps<T>) {
@@ -92,15 +96,23 @@ export default function CommonBorderedRadioButton<T extends string>({
       onClick={onSelectedChange}
       className={`${wrapperClasses} tw-group tw-relative tw-flex tw-flex-1 ${
         isSubtle ? "tw-items-start" : "tw-items-center"
-      } tw-gap-x-3 tw-border tw-border-solid tw-px-4 tw-py-4 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none ${
+      } tw-gap-x-3 tw-border tw-border-solid tw-px-4 tw-py-4 ${
+        isSubtle ? "" : "tw-ring-1 tw-ring-inset"
+      } ${
+        isSubtle
+          ? "focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400"
+          : ""
+      } tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none ${
         disabled ? "tw-cursor-not-allowed tw-opacity-50" : "tw-cursor-pointer"
       }`}
     >
       <input
         id={type}
         type="radio"
+        name={name}
         disabled={disabled}
         checked={isSelected}
+        aria-label={ariaLabel}
         onChange={onSelectedChange}
         className={
           isSubtle
@@ -111,7 +123,7 @@ export default function CommonBorderedRadioButton<T extends string>({
       {isSubtle && (
         <span
           aria-hidden="true"
-          className={`tw-mt-1 tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${
+          className={`tw-mt-0.5 tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out ${
             isSelected
               ? "tw-border-primary-400 tw-bg-primary-500/10"
               : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"
@@ -125,7 +137,7 @@ export default function CommonBorderedRadioButton<T extends string>({
         </span>
       )}
       <div className="tw-flex tw-items-center tw-truncate tw-whitespace-nowrap tw-transition tw-duration-300 tw-ease-out">
-        <div className="tw-flex tw-flex-col tw-truncate tw-text-base tw-font-semibold tw-transition tw-duration-300 tw-ease-out">
+        <div className="tw-flex tw-flex-col tw-truncate tw-text-sm tw-font-medium tw-transition tw-duration-300 tw-ease-out">
           {label ? (
             <span
               className={`${labelClasses} ${

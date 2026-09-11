@@ -38,9 +38,11 @@ jest.mock("@/components/navigation/ViewContext", () => ({
 }));
 
 const mockGoBack = jest.fn();
+const mockGoBackTo = jest.fn();
 jest.mock("@/contexts/NavigationHistoryContext", () => ({
   useNavigationHistoryContext: () => ({
     goBack: mockGoBack,
+    goBackTo: mockGoBackTo,
   }),
 }));
 
@@ -51,15 +53,21 @@ const { useMyStreamOptional } = require("@/contexts/wave/MyStreamContext");
 
 function setup(
   query: Record<string, string> = {},
-  opts: { wave?: object | undefined; isDm?: boolean | undefined; activeWaveId?: string | null | undefined } = {}
+  opts: {
+    wave?: object | undefined;
+    isDm?: boolean | undefined;
+    activeWaveId?: string | null | undefined;
+    returnTo?: string | null | undefined;
+  } = {}
 ) {
   const replace = jest.fn();
   const back = jest.fn();
+  const prefetch = jest.fn();
   const setActiveWave = jest.fn();
   const searchParams = new URLSearchParams();
   Object.keys(query).forEach((key) => searchParams.set(key, query[key]));
 
-  (useRouter as jest.Mock).mockReturnValue({ replace, back });
+  (useRouter as jest.Mock).mockReturnValue({ replace, back, prefetch });
   (useSearchParams as jest.Mock).mockReturnValue(searchParams);
   (usePathname as jest.Mock).mockReturnValue("/test");
   (useWaveData as jest.Mock).mockReturnValue({ data: opts.wave });
@@ -71,8 +79,8 @@ function setup(
     },
   });
 
-  const utils = render(<BackButton />);
-  return { ...utils, replace, back, setActiveWave };
+  const utils = render(<BackButton returnTo={opts.returnTo} />);
+  return { ...utils, replace, back, prefetch, setActiveWave };
 }
 
 describe("BackButton", () => {
@@ -112,5 +120,20 @@ describe("BackButton", () => {
     setup({});
     await userEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(mockGoBack).toHaveBeenCalled();
+  });
+
+  it("uses the explicit collected return target when provided", async () => {
+    const returnTo =
+      "/Shelby/collected?collection=memelab#collected-card-memelab-65";
+    const { prefetch } = setup({}, { returnTo });
+
+    expect(prefetch).toHaveBeenCalledWith(returnTo);
+
+    await userEvent.click(screen.getByRole("button", { name: "Back" }));
+
+    expect(mockGoBackTo).toHaveBeenCalledWith(returnTo);
+    expect(mockGoBack).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Back" })).toBeDisabled();
+    expect(screen.queryByTestId("spinner")).not.toBeInTheDocument();
   });
 });

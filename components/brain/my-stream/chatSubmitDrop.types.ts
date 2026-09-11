@@ -1,4 +1,6 @@
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 export interface ChatSubmitDropAction {
   readonly isVisible: boolean;
@@ -16,20 +18,33 @@ export interface ChatSubmitDropState {
 }
 
 export const getChatSubmitDropLabels = (
-  submissionExperience: WaveSubmissionExperience
+  submissionExperience: WaveSubmissionExperience,
+  customButtonLabel: string | null = null
 ): {
   readonly label: string;
   readonly compactLabel: string;
 } => {
-  if (submissionExperience === WaveSubmissionExperience.QUORUM_PROPOSAL) {
+  if (customButtonLabel) {
     return {
-      label: "Create proposal",
-      compactLabel: "Proposal",
+      label: customButtonLabel,
+      compactLabel: customButtonLabel,
+    };
+  }
+
+  if (submissionExperience === WaveSubmissionExperience.QUORUM_PROPOSAL) {
+    const proposalLabel = t(
+      DEFAULT_LOCALE,
+      "waves.submissionButtonLabel.defaultCreateProposal"
+    );
+
+    return {
+      label: proposalLabel,
+      compactLabel: proposalLabel,
     };
   }
 
   return {
-    label: "Submit drop",
-    compactLabel: "Drop",
+    label: t(DEFAULT_LOCALE, "waves.submissionButtonLabel.defaultSubmitDrop"),
+    compactLabel: t(DEFAULT_LOCALE, "waves.submissionButtonLabel.defaultDrop"),
   };
 };

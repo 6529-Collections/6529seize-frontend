@@ -1,8 +1,8 @@
 "use client";
 
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
-import PencilIcon from "@/components/utils/icons/PencilIcon";
+import PencilIcon, {
+  PencilIconSize,
+} from "@/components/utils/icons/PencilIcon";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import React, { useState } from "react";
 import UserPageHeaderEditName from "./UserPageHeaderEditName";
@@ -26,7 +26,8 @@ export default function UserPageHeaderNameWrapper({
   }
 
   return (
-    <div>
+    <div className="tw-group tw-relative">
+      {children}
       <button
         type="button"
         onClick={() => setIsEditNameOpen(true)}
@@ -34,33 +35,23 @@ export default function UserPageHeaderNameWrapper({
           "user.profileHeader.name.edit",
           { name: profileLabel }
         )}
-        className="tw-group tw-relative tw-m-0 tw-border-none tw-bg-transparent tw-p-0 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-400"
+        className="tw-absolute tw-inset-0 tw-m-0 tw-hidden tw-rounded-md tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-block"
       >
-        {children}
         <div
           aria-hidden="true"
-          className="tw-absolute tw-inset-0 tw-hidden tw-text-iron-400 group-hover:tw-block"
+          className="tw-absolute tw-inset-0 tw-hidden tw-text-iron-400 group-focus-within:tw-block desktop-hover:group-hover:tw-block touch-only:tw-block"
         >
-          <div className="tw-absolute -tw-left-5 tw-top-1.5 tw-z-10">
-            <PencilIcon />
+          <div className="tw-absolute -tw-left-5 tw-top-1/2 tw-z-10 tw-flex tw-size-5 -tw-translate-y-1/2 tw-items-center tw-justify-center">
+            <PencilIcon size={PencilIconSize.SMALL} />
           </div>
         </div>
       </button>
-      <CommonAnimationWrapper mode="sync" initial={true}>
-        {isEditNameOpen && (
-          <CommonAnimationOpacity
-            key="modal"
-            elementClasses="tw-absolute tw-z-10"
-            elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
-          >
-            <UserPageHeaderEditName
-              profile={profile}
-              onClose={() => setIsEditNameOpen(false)}
-            />
-          </CommonAnimationOpacity>
-        )}
-      </CommonAnimationWrapper>
+      {isEditNameOpen && (
+        <UserPageHeaderEditName
+          profile={profile}
+          onClose={() => setIsEditNameOpen(false)}
+        />
+      )}
     </div>
   );
 }

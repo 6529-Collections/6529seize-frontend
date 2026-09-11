@@ -10,15 +10,20 @@ import {
 } from "@/helpers/waves/drop.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import useIsMobileScreen from "@/hooks/isMobileScreen";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
 import { useCallback, useMemo } from "react";
 import { MemesDropArtworkHero } from "./MemesDropArtworkHero";
 import { MemesDropDetailsSection } from "./MemesDropDetailsSection";
 import { MemesDropSummarySection } from "./MemesDropSummarySection";
+import {
+  DISABLED_DROP_VOTE_SUMMARY_STATE,
+  type DropVoteSummaryState,
+} from "./useDropVoteSummary";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
+  readonly voteSummary?: DropVoteSummaryState | undefined;
   readonly wave: ApiWave | null;
   readonly onClose?: (() => void) | undefined;
   readonly isVotingClosed?: boolean | undefined;
@@ -28,13 +33,14 @@ interface MemesSingleWaveDropInfoPanelProps {
 
 export const MemesSingleWaveDropInfoPanel = ({
   drop,
+  voteSummary = DISABLED_DROP_VOTE_SUMMARY_STATE,
   wave,
   onClose,
   isVotingClosed = false,
   isVotingControlsLocked = false,
   outcomesVisible = true,
 }: MemesSingleWaveDropInfoPanelProps) => {
-  const isMobileScreen = useIsMobileScreen();
+  const isCompactLayout = useIsMobileLayoutViewport();
   const { isWinner, canDelete, canShowVote, isVotingEnded } =
     useDropInteractionRules(drop);
   const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
@@ -137,6 +143,7 @@ export const MemesSingleWaveDropInfoPanel = ({
 
         <MemesDropDetailsSection
           drop={drop}
+          voteSummary={voteSummary}
           wave={wave}
           artworkMedia={artworkMedia}
           fileInfo={fileInfo}
@@ -148,7 +155,7 @@ export const MemesSingleWaveDropInfoPanel = ({
         />
       </div>
 
-      {isMobileScreen ? (
+      {isCompactLayout ? (
         <MobileVotingModal
           drop={drop}
           isOpen={isVotingOpen}

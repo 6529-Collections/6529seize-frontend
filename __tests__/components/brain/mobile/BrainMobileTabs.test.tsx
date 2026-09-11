@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import BrainMobileTabs from "@/components/brain/mobile/BrainMobileTabs";
+import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 
 enum BrainView {
   DEFAULT = "DEFAULT",
@@ -21,12 +22,12 @@ enum BrainView {
 
 const push = jest.fn();
 const replace = jest.fn();
+let searchParams = new URLSearchParams();
+let mockCurations: ApiWaveCuration[] = [];
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push, replace }),
-  useSearchParams: () => ({
-    get: jest.fn().mockReturnValue(null),
-  }),
+  useSearchParams: () => searchParams,
   usePathname: () => "/brain",
 }));
 
@@ -55,8 +56,8 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
 }));
 
-jest.mock("@/hooks/waves/useWaveCurations", () => ({
-  useWaveCurations: () => ({ data: [] }),
+jest.mock("@/hooks/waves/useWaveCurationTabs", () => ({
+  useWaveCurationTabs: () => ({ data: mockCurations }),
 }));
 
 const leaderboardMock = jest.fn();
@@ -83,13 +84,28 @@ const { useAuth } = require("@/components/auth/Auth");
 const createWave = () =>
   ({
     id: "1",
-    wave: { authenticated_user_eligible_for_admin: false },
+    name: "Parent wave",
+    parent_wave: null,
+    visibility: { scope: { group: null } },
+    chat: { scope: { group: { is_direct_message: false } } },
+    wave: {
+      authenticated_user_eligible_for_admin: false,
+      admin_group: {
+        group: {
+          id: "parent-admin-group",
+          name: "Parent admins",
+          is_hidden: false,
+        },
+      },
+    },
   }) as any;
 
 describe("BrainMobileTabs", () => {
   const onViewChange = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
+    searchParams = new URLSearchParams();
+    mockCurations = [];
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: false,
       isCurationWave: false,
@@ -102,6 +118,81 @@ describe("BrainMobileTabs", () => {
     });
     (useAuth as jest.Mock).mockReturnValue({
       connectedProfile: { handle: "alice" },
+    });
+  });
+
+  it("switches native curation tabs while preserving other URL state", async () => {
+    const user = userEvent.setup();
+    searchParams = new URLSearchParams("curation=curation-1&filter=active");
+    mockCurations = [
+      {
+        id: "curation-1",
+        name: "Curators' choice",
+        wave_id: "1",
+        group_id: "group-1",
+        priority_order: 1,
+        created_at: 1,
+        updated_at: 1,
+      },
+      {
+        id: "curation-2",
+        name: "Community highlights",
+        wave_id: "1",
+        group_id: "group-1",
+        priority_order: 2,
+        created_at: 2,
+        updated_at: 2,
+      },
+    ];
+
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.DEFAULT}
+        onViewChange={onViewChange}
+        wave={createWave()}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={true}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Curators' choice" })
+    ).toHaveAttribute("aria-current", "true");
+    await user.click(
+      screen.getByRole("button", { name: "Community highlights" })
+    );
+    expect(onViewChange).toHaveBeenCalledWith(BrainView.DEFAULT);
+    expect(replace).toHaveBeenCalledWith(
+      "/brain?curation=curation-2&filter=active",
+      { scroll: false }
+    );
+  });
+
+  it("keeps an unresolved native curation reachable until availability is confirmed", async () => {
+    const user = userEvent.setup();
+    searchParams = new URLSearchParams("curation=missing&filter=active");
+
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.DEFAULT}
+        onViewChange={onViewChange}
+        wave={createWave()}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={true}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: "Curation" })).toHaveAttribute(
+      "aria-current",
+      "true"
+    );
+    await user.click(screen.getByRole("button", { name: "Chat" }));
+    expect(replace).toHaveBeenCalledWith("/brain?filter=active", {
+      scroll: false,
     });
   });
 
@@ -128,6 +219,65 @@ describe("BrainMobileTabs", () => {
     await userEvent.click(button);
     expect(push).toHaveBeenCalledWith("/waves");
     expect(onViewChange).toHaveBeenCalledWith(BrainView.DEFAULT);
+  });
+
+  it("keeps the back action visible while wave sections load", () => {
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.DEFAULT}
+        onViewChange={onViewChange}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={true}
+        isApp={false}
+        wave={createWave()}
+        waveNavigationReady={false}
+      />
+    );
+
+    expect(
+      screen.getByRole("status", { name: /loading wave sections/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /my stream/i })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^chat$/i })).toBeNull();
+  });
+
+  it("keeps the mobile create menu outside the scrollable tabs", async () => {
+    const wave = createWave();
+    wave.wave.authenticated_user_eligible_for_admin = true;
+
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.DEFAULT}
+        onViewChange={onViewChange}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={true}
+        wave={wave}
+      />
+    );
+
+    const createButton = screen.getByRole("button", {
+      name: /open create menu/i,
+    });
+    const scrollableTabs = createButton
+      .closest("nav")
+      ?.querySelector(".tw-overflow-x-auto");
+
+    expect(scrollableTabs).toBeInTheDocument();
+    expect(scrollableTabs).not.toContainElement(createButton);
+    expect(createButton).toHaveClass("tw-size-11");
+
+    await userEvent.click(createButton);
+    expect(
+      screen.getByRole("menuitem", { name: "New curation" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("menuitem", { name: "New subwave" })
+    ).toBeInTheDocument();
   });
 
   it("shows unread indicators and handles message/notification clicks", async () => {
@@ -212,6 +362,9 @@ describe("BrainMobileTabs", () => {
         hasPolls={true}
       />
     );
+
+    expect(screen.getByText("About")).toHaveClass("tw-font-medium");
+    expect(screen.getByText("About")).not.toHaveClass("tw-font-semibold");
 
     expect(screen.getByRole("button", { name: /polls/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /chat/i })).toBeInTheDocument();

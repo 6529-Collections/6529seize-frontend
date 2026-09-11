@@ -33,6 +33,10 @@ export enum CreateWaveGroupConfigType {
 
 export interface WaveOverviewConfig {
   readonly type: ApiWaveType;
+  // Starts false so the type selector opens with nothing highlighted, forcing
+  // an explicit choice; flips true once the user picks. `type` still holds a
+  // valid value throughout, so downstream steps never see an unset type.
+  readonly typeSelected: boolean;
   readonly name: string;
   readonly image: File | null;
 }
@@ -89,6 +93,7 @@ export enum CreateWaveStep {
   APPROVAL = "APPROVAL",
   OUTCOMES = "OUTCOMES",
   DESCRIPTION = "DESCRIPTION",
+  REVIEW = "REVIEW",
 }
 
 export interface CreateWaveDatesConfig {
@@ -98,6 +103,10 @@ export interface CreateWaveDatesConfig {
   readonly firstDecisionTime: number;
   readonly subsequentDecisions: number[];
   readonly isRolling: boolean;
+  // Rank waves only: when true the wave ranks continuously with no winner
+  // announcements (no decision strategy) and no end date. Omitted/false means
+  // the wave uses the scheduled winner-announcement flow.
+  readonly ongoingRanking?: boolean;
 }
 
 export interface CreateWaveApprovalConfig {
@@ -111,10 +120,37 @@ export interface CreateWaveApproveDisplayConfig {
   readonly approvedTabLabel: string;
 }
 
+export type CreateWaveProposalCardMode = "standard" | "custom";
+
+export interface CreateWaveProposalCardConfig {
+  readonly mode: CreateWaveProposalCardMode;
+  readonly excerptMaxCharacters: number;
+  readonly showMediaThumbnail: boolean;
+}
+
+export interface WaveProposalCardRecipe {
+  readonly version: 1;
+  readonly layout: "summary";
+  readonly excerptMaxCharacters: number;
+  readonly showMediaThumbnail: boolean;
+}
+
+export type WaveProposalCardPresentation =
+  | {
+      readonly version: 1;
+      readonly layout: "full";
+    }
+  | WaveProposalCardRecipe;
+
 export interface CreateWaveDisplayConfig {
   readonly approve: CreateWaveApproveDisplayConfig;
+  /** Omitted in older saved drafts; absence preserves the standard display. */
+  readonly proposalCards?: CreateWaveProposalCardConfig;
+  /** Legacy saved-draft field. New waves persist `proposalCards` as a recipe. */
+  readonly compactProposalCards?: boolean;
   readonly customRules: string | null;
   readonly outcomesVisible: boolean;
+  readonly submissionButtonLabel: string | null;
 }
 
 export enum CreateWaveOutcomeType {
@@ -207,7 +243,7 @@ export interface SidebarWave {
   readonly firstUnreadFollowedSubwaveDropSerialNo: number | null;
   readonly unreadDropsCount: number;
   readonly followedSubwavesCount: number;
-  readonly unreadFollowedSubwaveDrops: number;
+  readonly unreadSubwaveDrops: number;
   readonly latestReadTimestamp: number;
   readonly pinned: boolean;
   readonly muted: boolean;

@@ -54,7 +54,12 @@ distribution routes.
 7. Open mint-day cells to view details, export links, and any override note.
 8. On fallback routes, the compact panel auto-selects the URL id and stays
    local-time read-only (no timezone toggle, no `Next Mint` button, no `Meme #`
-   input, no upcoming table).
+   input, no upcoming table). When an unresolved route is the canonical next
+   Meme and the Main Stage winner is mapped to that id, its revealed artwork
+   panel appears above the compact calendar independently of the current mint
+   and homepage mode. On unresolved positive `/the-memes/{id}` pages, use
+   the header-row `Distribution Plan` link to open
+   `/the-memes/{id}/distribution`.
 
 ## Common Scenarios
 
@@ -63,9 +68,10 @@ distribution routes.
 - Export any upcoming mint to calendar from the top panel or day tooltip.
 - Compare `Local` vs `UTC` renderings for cross-time-zone coordination.
 - Open unresolved future card URLs and still see timing details in the fallback
-  panel.
+  panel. The mapped next Meme also shows its winning artwork and drop details;
+  positive ids show a header-row `Distribution Plan` link for that card.
 - Open early distribution URLs and still see the same fallback timing panel
-  above the "Distribution Plan will be made available soon!" message.
+  above the centered "Distribution Plan will be made available soon!" message.
 - Query `/api/meme-calendar/{id}` for a mint timeline summary.
 
 ## Edge Cases
@@ -87,8 +93,9 @@ distribution routes.
 - Invalid or non-positive top-panel/calendar `Meme #` input is ignored.
 - `/the-memes/{id}` behavior:
   - Non-integer ids show `MEME` not-found.
-  - Integer ids that do not resolve (including `0` or negative integers) show
-    the fallback panel.
+  - Integer ids that do not resolve show the fallback panel.
+  - Positive integer ids that do not resolve also show a header-row
+    `Distribution Plan` link.
 - `/the-memes/{id}/distribution` behavior:
   - Non-positive or non-integer ids show `DISTRIBUTION` not-found.
 - `/about/memes-calendar` is unsupported; use `/meme-calendar`.

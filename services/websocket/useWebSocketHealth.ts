@@ -167,8 +167,9 @@ export function useWebSocketHealth() {
   }, [performHealthCheck]);
 
   useEffect(() => {
+    // Unexpected-close recovery belongs to WebSocketProvider's backoff loop.
     performHealthCheck();
-  }, [performHealthCheck, webSocketState.status]);
+  }, [performHealthCheck]);
 
   useEffect(() => {
     if (typeof document === "undefined") {

@@ -8,6 +8,7 @@ interface WaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onVoteClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly onSourceDropDeleted?: (() => void) | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
@@ -17,6 +18,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
   drop,
   wave,
   onDropClick,
+  onVoteClick,
   onSourceDropDeleted,
   isVotingClosed = false,
   isVotingControlsLocked = false,
@@ -34,6 +36,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
       drop={drop}
       wave={wave}
       onDropClick={onDropClick}
+      onVoteClick={onVoteClick}
       onSourceDropDeleted={onSourceDropDeleted}
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}

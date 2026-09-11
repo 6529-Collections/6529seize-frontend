@@ -2,20 +2,23 @@
 
 import React from "react";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { Tooltip } from "react-tooltip";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import DropActionTooltip from "./DropActionTooltip";
+import ProposalCardReadFullButton from "./proposal/ProposalCardReadFullButton";
 
 interface WaveDropActionsOpenProps {
   readonly drop: ExtendedDrop;
   readonly isDropdownItem?: boolean | undefined;
   readonly onOpen?: (() => void) | undefined;
+  readonly variant?: "icon" | "readFull";
 }
 
 const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
   drop,
   isDropdownItem = false,
   onOpen,
+  variant = "icon",
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -32,11 +35,24 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
     return null;
   }
 
+  if (variant === "readFull") {
+    return (
+      <ProposalCardReadFullButton
+        drop={drop}
+        onReadFull={(targetDrop) => {
+          onDropClick(targetDrop);
+          onOpen?.();
+        }}
+      />
+    );
+  }
+
   if (isDropdownItem) {
     return (
       <button
         type="button"
-        onClick={() => {
+        onClick={(event) => {
+          event.stopPropagation();
           onDropClick(drop);
           onOpen?.();
         }}
@@ -63,13 +79,15 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
   }
 
   return (
-    <>
+    <DropActionTooltip content={<span className="tw-text-xs">Open</span>}>
       <button
         type="button"
         className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-px-2 tw-text-iron-400 tw-transition-colors desktop-hover:hover:tw-text-white"
-        onClick={() => onDropClick(drop)}
+        onClick={(event) => {
+          event.stopPropagation();
+          onDropClick(drop);
+        }}
         aria-label="Open drop"
-        data-tooltip-id={`open-${drop.id}`}
       >
         <svg
           viewBox="0 0 24 24"
@@ -87,27 +105,7 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
           />
         </svg>
       </button>
-      <Tooltip
-        id={`open-${drop.id}`}
-        place="top-end"
-        offset={8}
-        opacity={1}
-        positionStrategy="fixed"
-        style={{
-          padding: "4px 8px",
-          background: "#1F2937",
-          color: "white",
-          fontSize: "13px",
-          fontWeight: 500,
-          borderRadius: "6px",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-          zIndex: 10000,
-          pointerEvents: "none",
-        }}
-      >
-        <span className="tw-text-xs">Open</span>
-      </Tooltip>
-    </>
+    </DropActionTooltip>
   );
 };
 

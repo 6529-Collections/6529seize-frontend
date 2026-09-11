@@ -1,7 +1,10 @@
 "use client";
 
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
+import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
+import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
@@ -14,17 +17,20 @@ import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileM
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import { MemesArtResubmitAction } from "@/components/waves/memes/submission/MemesArtResubmitAction";
-import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
+import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
+import useCardTouchNavigationGuard from "@/hooks/useCardTouchNavigationGuard";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
-import Link from "next/link";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import MemeDropTraits from "./MemeDropTraits";
@@ -37,6 +43,7 @@ import MemesLeaderboardDropVoteSummary from "./MemesLeaderboardDropVoteSummary";
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onVoteClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly wave?: ApiWave | undefined;
   readonly location?: DropLocation | undefined;
   readonly onSourceDropDeleted?: (() => void) | undefined;
@@ -55,6 +62,7 @@ const getMetadataValue = (drop: ExtendedDrop, dataKey: string): string | null =>
 export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   drop,
   onDropClick,
+  onVoteClick,
   wave,
   location = DropLocation.WAVE,
   onSourceDropDeleted,
@@ -65,10 +73,28 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   const [isVotingModalOpen, setIsVotingModalOpen] = useState<boolean>(false);
   const [isResubmitModalOpen, setIsResubmitModalOpen] =
     useState<boolean>(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const openResubmitAfterMenuCloseRef = useRef<boolean>(false);
+  const locale = useBrowserLocale();
+  const {
+    cardRef,
+    handleTouchStart: guardTouchStart,
+    handleTouchMove: guardTouchMove,
+    handleTouchEnd: guardTouchEnd,
+    handleTouchCancel: guardTouchCancel,
+    handleClickCapture: guardClickCapture,
+  } = useCardTouchNavigationGuard();
+  const {
+    markNextClickForSuppression,
+    releaseSuppressionAfterTouchEnd,
+    clearSuppression,
+    handleClickCapture,
+  } = useLongPressClickSuppression();
 
   // Get device info from useDeviceInfo hook
-  const { hasTouchScreen } = useDeviceInfo();
+  const { hasTouchScreen, isApp } = useDeviceInfo();
+  const opensWholeCard = isApp && hasTouchScreen;
+  const canOpenCard = opensWholeCard || !hasTouchScreen;
   let mediaImageScale = ImageScale.AUTOx800;
   if (isMobileScreen) {
     mediaImageScale = ImageScale.AUTOx450;
@@ -80,6 +106,11 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
     openResubmitAfterMenuCloseRef.current = false;
   }, []);
 
+  const handleInteractionStart = useCallback(() => {
+    clearDeferredResubmitOpen();
+    markNextClickForSuppression();
+  }, [clearDeferredResubmitOpen, markNextClickForSuppression]);
+
   useEffect(
     () => () => {
       clearDeferredResubmitOpen();
@@ -90,13 +121,29 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   // Use long press interaction hook with touch screen info from device hook
   const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
     hasTouchScreen,
-    onInteractionStart: clearDeferredResubmitOpen,
+    onInteractionStart: handleInteractionStart,
+    preventDefault: false,
   });
+
+  const handleMobileMenuOpenChange = useCallback(
+    (nextIsActive: boolean) => {
+      if (!nextIsActive) {
+        clearSuppression();
+      }
+
+      setIsActive(nextIsActive);
+    },
+    [clearSuppression, setIsActive]
+  );
+
+  const handleMobileMenuClose = useCallback(() => {
+    handleMobileMenuOpenChange(false);
+  }, [handleMobileMenuOpenChange]);
 
   const openResubmitAfterMobileMenuCloses = useCallback(() => {
     openResubmitAfterMenuCloseRef.current = true;
-    setIsActive(false);
-  }, [setIsActive]);
+    handleMobileMenuClose();
+  }, [handleMobileMenuClose]);
 
   const handleMobileMenuAfterLeave = useCallback(() => {
     if (!openResubmitAfterMenuCloseRef.current) {
@@ -120,144 +167,185 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   // Get artwork media URL if available
   const artworkMedia = firstPart?.media.at(0);
 
-  // Get top voters for votes display
-  const firstThreeVoters = drop.top_raters.slice(0, 3);
+  const openDrop = useCallback(() => {
+    startDropOpen({
+      dropId: drop.id,
+      waveId: drop.wave.id,
+      source: "leaderboard_memes",
+      isMobile: isMobileScreen,
+    });
+    onDropClick(drop);
+  }, [drop, isMobileScreen, onDropClick]);
 
   return (
     <div
-      className="tw-w-full tw-cursor-pointer tw-@container"
-      onClick={() => {
-        if (hasTouchScreen) return;
-        startDropOpen({
-          dropId: drop.id,
-          waveId: drop.wave.id,
-          source: "leaderboard_memes",
-          isMobile: isMobileScreen,
-        });
-        onDropClick(drop);
+      ref={cardRef}
+      className="tw-w-full tw-cursor-pointer tw-rounded-xl tw-@container has-[[data-leaderboard-card-open]:focus-visible]:tw-outline has-[[data-leaderboard-card-open]:focus-visible]:tw-outline-2 has-[[data-leaderboard-card-open]:focus-visible]:tw-outline-offset-2 has-[[data-leaderboard-card-open]:focus-visible]:tw-outline-white"
+      onClick={(event) => {
+        if (
+          !hasTouchScreen &&
+          event.currentTarget.contains(event.target as Node)
+        ) {
+          openDrop();
+        }
+      }}
+      onClickCapture={(event) => {
+        if (!guardClickCapture(event)) handleClickCapture(event);
+      }}
+      onTouchStartCapture={(event) => {
+        clearSuppression();
+        guardTouchStart(event);
+      }}
+      onTouchMoveCapture={guardTouchMove}
+      onTouchEndCapture={(event) => {
+        guardTouchEnd(event);
+        releaseSuppressionAfterTouchEnd();
+      }}
+      onTouchCancelCapture={(event) => {
+        guardTouchCancel(event);
+        clearSuppression();
       }}
     >
       <div className="tw-group tw-w-full">
         <div {...touchHandlers}>
-          <MemesLeaderboardDropCard drop={drop}>
-            <div>
-              {/* Artist info section with border */}
-              <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4 tw-pb-3">
-                <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
-                  <MemesLeaderboardDropArtistInfo drop={drop} />
-                  <div className="tw-flex tw-gap-2 tw-text-iron-400">
-                    {!hasTouchScreen && (
-                      <>
-                        <WaveDropActionsOpen drop={drop} />
-                        <MemesArtResubmitAction
-                          drop={drop}
-                          wave={wave}
-                          onSourceDropDeleted={onSourceDropDeleted}
-                        />
-                        {canDelete && <WaveDropActionsOptions drop={drop} />}
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Title and Description */}
-              <div className="tw-px-4 tw-pb-4 tw-pt-4">
-                <div className="tw-space-y-1">
-                  <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-                    <MediaTypeBadge
-                      mimeType={artworkMedia?.mime_type}
-                      dropId={drop.id}
-                      size="sm"
-                    />
-                    <MemesLeaderboardDropHeader title={title} />
-                    {drop.is_additional_action_promised === true && (
-                      <AdditionalActionPromiseBadge />
-                    )}
-                  </div>
-                  <MemesLeaderboardDropDescription description={description} />
-                </div>
-              </div>
-
-              {artworkMedia && (
-                <div
-                  className={`tw-flex tw-h-96 tw-justify-center ${
-                    location === DropLocation.WAVE
-                      ? "tw-bg-iron-950"
-                      : "tw-bg-iron-900/40"
-                  }`}
-                >
-                  <DropListItemContentMedia
-                    media_mime_type={artworkMedia.mime_type}
-                    media_url={artworkMedia.url}
-                    isCompetitionDrop={true}
-                    imageScale={mediaImageScale}
-                  />
-                </div>
+          <MemesLeaderboardDropCard>
+            <div className="tw-relative tw-isolate">
+              {canOpenCard && (
+                <button
+                  type="button"
+                  data-leaderboard-card-open
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    openDrop();
+                  }}
+                  aria-label={t(locale, "waves.leaderboard.grid.openNamed", {
+                    title,
+                  })}
+                  className="tw-absolute tw-inset-0 tw-z-0 tw-cursor-pointer tw-rounded-xl tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline-none"
+                />
               )}
-
-              {/* Footer Section: Traits + Vote Summary + Vote Button */}
-              <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4">
-                <MemeDropTraits drop={drop} />
-
-                <div className="tw-flex tw-flex-col tw-justify-between tw-gap-4 @[700px]:tw-flex-row @[700px]:tw-items-center">
-                  <MemesLeaderboardDropVoteSummary drop={drop} />
-
-                  <div
-                    className="tw-flex tw-w-full tw-flex-shrink-0 tw-items-center tw-justify-between tw-gap-4 @[700px]:tw-w-auto @[700px]:tw-justify-end"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {/* Voters - only on small containers */}
-                    <div className="tw-flex tw-items-center tw-gap-2 @[700px]:tw-hidden">
-                      <div className="tw-flex tw-items-center -tw-space-x-2">
-                        {firstThreeVoters.map((voter) => (
-                          <Link
-                            key={
-                              voter.profile.handle ??
-                              voter.profile.primary_address
-                            }
-                            href={`/${voter.profile.handle ?? voter.profile.primary_address}`}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {voter.profile.pfp ? (
-                              <img
-                                className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
-                                src={voter.profile.pfp}
-                                alt="Recent voter"
-                              />
-                            ) : (
-                              <div className="tw-h-6 tw-w-6 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
-                            )}
-                          </Link>
-                        ))}
-                      </div>
-                      <ParticipationDropVoteDetailsTrigger
-                        drop={drop}
-                        density="compact"
-                      />
-                    </div>
-                    <VotingModalButton
+              <div
+                className={`tw-relative tw-z-10 ${opensWholeCard ? "tw-pointer-events-none [&_[data-tooltip-id]]:tw-pointer-events-auto [&_[tabindex]]:tw-pointer-events-auto [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto" : ""}`}
+              >
+                {/* Artist info section */}
+                <div className="tw-p-4 tw-pb-3">
+                  <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+                    <MemesLeaderboardDropArtistInfo
                       drop={drop}
-                      onClick={() => setIsVotingModalOpen(true)}
+                      isNativeTouch={opensWholeCard}
+                    />
+                    <div className="tw-flex tw-h-10 tw-items-center tw-gap-2 tw-text-iron-400 [&>button]:tw-flex [&>button]:tw-h-8 [&>button]:tw-items-center [&>button]:tw-justify-center [&>button]:tw-py-0">
+                      {!hasTouchScreen && (
+                        <>
+                          <WaveDropActionsOpen drop={drop} />
+                          <MemesArtResubmitAction
+                            drop={drop}
+                            wave={wave}
+                            onSourceDropDeleted={onSourceDropDeleted}
+                          />
+                          {canDelete && <WaveDropActionsOptions drop={drop} />}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Title and Description */}
+                <div className="tw-px-4 tw-pb-4 tw-pt-4">
+                  <div className="tw-max-w-screen-sm tw-space-y-1">
+                    <div className="tw-flex tw-items-start tw-gap-2">
+                      <MediaTypeBadge
+                        mimeType={artworkMedia?.mime_type}
+                        dropId={drop.id}
+                        size="xs"
+                        className="tw-mt-0.5"
+                        showTooltip={!opensWholeCard}
+                      />
+                      <div className="tw-min-w-0 tw-flex-1">
+                        <MemesLeaderboardDropHeader title={title} />
+                        {drop.is_additional_action_promised === true && (
+                          <AdditionalActionPromiseBadge
+                            className="tw-mt-2"
+                            focusable={!opensWholeCard}
+                          />
+                        )}
+                      </div>
+                    </div>
+                    <MemesLeaderboardDropDescription
+                      description={description}
                     />
                   </div>
+                </div>
+
+                {artworkMedia && (
+                  <div
+                    inert={opensWholeCard}
+                    className={`${opensWholeCard ? "tw-pointer-events-none" : "tw-pointer-events-auto"} tw-flex tw-h-96 tw-justify-center tw-overflow-hidden ${
+                      location === DropLocation.WAVE
+                        ? "tw-bg-iron-900/30"
+                        : "tw-bg-iron-900/40"
+                    }`}
+                  >
+                    {opensWholeCard ? (
+                      <MediaDisplay
+                        media_mime_type={artworkMedia.mime_type}
+                        media_url={artworkMedia.url}
+                        disableMediaInteraction
+                        isInertPreview
+                        fillVideoContainer
+                        imageScale={mediaImageScale}
+                        previewImageUrl={getDropPreviewImageUrl(drop.metadata)}
+                      />
+                    ) : (
+                      <DropListItemContentMedia
+                        media_mime_type={artworkMedia.mime_type}
+                        media_url={artworkMedia.url}
+                        isCompetitionDrop={true}
+                        fillVideoContainer={true}
+                        imageScale={mediaImageScale}
+                      />
+                    )}
+                  </div>
+                )}
+
+                {/* Footer Section: Traits + Vote Summary + Vote Button */}
+                <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4">
+                  <MemeDropTraits drop={drop} />
+
+                  <MemesLeaderboardDropVoteSummary
+                    drop={drop}
+                    voteButton={
+                      <VotingModalButton
+                        drop={drop}
+                        className="!tw-text-meta"
+                        onClick={() => {
+                          if (onVoteClick) {
+                            onVoteClick(drop);
+                            return;
+                          }
+                          setIsVotingModalOpen(true);
+                        }}
+                      />
+                    }
+                  />
                 </div>
               </div>
             </div>
 
-            {isMobileScreen ? (
-              <MobileVotingModal
-                drop={drop}
-                isOpen={isVotingModalOpen}
-                onClose={() => setIsVotingModalOpen(false)}
-              />
-            ) : (
-              <VotingModal
-                drop={drop}
-                isOpen={isVotingModalOpen}
-                onClose={() => setIsVotingModalOpen(false)}
-              />
-            )}
+            {!onVoteClick &&
+              (isMobileScreen ? (
+                <MobileVotingModal
+                  drop={drop}
+                  isOpen={isVotingModalOpen}
+                  onClose={() => setIsVotingModalOpen(false)}
+                />
+              ) : (
+                <VotingModal
+                  drop={drop}
+                  isOpen={isVotingModalOpen}
+                  onClose={() => setIsVotingModalOpen(false)}
+                />
+              ))}
           </MemesLeaderboardDropCard>
         </div>
 
@@ -266,18 +354,29 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
           createPortal(
             <CommonDropdownItemsMobileWrapper
               isOpen={isActive}
-              setOpen={setIsActive}
+              setOpen={handleMobileMenuOpenChange}
               onAfterLeave={handleMobileMenuAfterLeave}
             >
-              <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
+              <div
+                className="tw-grid tw-grid-cols-1 tw-gap-y-2"
+                onClickCapture={clearSuppression}
+              >
                 {/* Open drop option */}
                 <WaveDropMobileMenuOpen
                   drop={drop}
-                  onOpenChange={() => setIsActive(false)}
+                  onOpenChange={handleMobileMenuClose}
                 />
                 <WaveDropMobileMenuCopyLink
                   drop={drop}
-                  onCopy={() => setIsActive(false)}
+                  onCopy={handleMobileMenuClose}
+                />
+                <ContentModerationDropActions
+                  drop={drop}
+                  mobile
+                  onReport={() => {
+                    handleMobileMenuClose();
+                    setIsReportOpen(true);
+                  }}
                 />
 
                 <MemesArtResubmitAction
@@ -292,7 +391,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                 {canDelete && (
                   <WaveDropMobileMenuDelete
                     drop={drop}
-                    onDropDeleted={() => setIsActive(false)}
+                    onDropDeleted={handleMobileMenuClose}
                   />
                 )}
               </div>
@@ -308,6 +407,11 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
             onSourceDropDeleted={onSourceDropDeleted}
           />
         )}
+        <ReportDropModal
+          drop={drop}
+          isOpen={isReportOpen}
+          onClose={() => setIsReportOpen(false)}
+        />
       </div>
     </div>
   );

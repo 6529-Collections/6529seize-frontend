@@ -3,8 +3,14 @@
 import { publicEnv } from "@/config/env";
 import { useEffect, useState } from "react";
 
-const CURRENT = publicEnv.VERSION!; // baked into the bundle
+const CURRENT = publicEnv.VERSION ?? "unknown"; // baked into the bundle
 const SHOW_NEW_VERSION_TOAST_PARAM = "showNewVersionToast";
+const CLIENT_VERSION_HEADER = "x-6529-client-version";
+const VERSION_ENDPOINT = "/api/version";
+
+type VersionStatusResponse = {
+  readonly stale?: unknown;
+};
 
 const shouldForceShowNewVersionToast = () =>
   globalThis.window !== undefined &&
@@ -25,10 +31,16 @@ export function useIsVersionStale(interval = 120_000) {
 
     async function check() {
       try {
-        const { version } = await fetch("/api/version", {
+        const { stale } = await fetch(VERSION_ENDPOINT, {
           cache: "no-store",
-        }).then((r) => r.json());
-        setStale(version !== CURRENT);
+          headers: {
+            [CLIENT_VERSION_HEADER]: CURRENT,
+          },
+        }).then((r) => r.json() as Promise<VersionStatusResponse>);
+
+        if (typeof stale === "boolean") {
+          setStale(stale);
+        }
       } catch {
         /* ignore network errors */
       }

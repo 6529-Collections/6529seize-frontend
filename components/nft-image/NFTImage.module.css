@@ -12,6 +12,10 @@
   width: 100%;
 }
 
+.nftAnimation iframe {
+  border: 0;
+}
+
 .nftAnimation video {
   max-width: 100%;
 }

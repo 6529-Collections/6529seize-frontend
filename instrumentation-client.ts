@@ -4,33 +4,57 @@
 
 import { publicEnv } from "@/config/env";
 import {
+  SENTRY_APPLICATION_KEY,
+  SENTRY_THIRD_PARTY_FILTER_BEHAVIOUR,
+} from "@/config/sentryThirdPartyFiltering";
+import {
   INDEXEDDB_ERROR_MESSAGE,
   isIndexedDBError,
 } from "@/utils/error-sanitizer";
 import { startMobileLaunchTiming } from "@/utils/monitoring/mobileLaunchTiming";
 import {
+  enrichCyclicJsonTimerEvent,
+  installCyclicJsonTimerDiagnostics,
+} from "@/utils/monitoring/cyclicJsonTimerDiagnostics";
+import {
   sanitizeSentryBreadcrumb,
   sanitizeSentryEvent,
+  sanitizeSentrySpan,
   sanitizeUrlString,
 } from "@/utils/sentry-sanitizer";
 import {
   getLowValueNetworkErrorDecision,
   getNetworkErrorMessageTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
+  redactDropReactionFailureIdentifiers,
+  shouldFilterAnonymousUnsafeEvalCspError,
+  shouldFilterAppleWebKitSortedTrackListTypeError,
   shouldFilterByFilenameExceptions,
+  shouldFilterBrowserExtensionMessagingConnectionError,
+  shouldFilterBrowserExtensionSendMessageError,
+  shouldFilterBrowserExtensionWalletRejection,
+  shouldFilterBraveWalletPageEvaluationError,
+  shouldFilterChromeMobileIosInjectedGaError,
+  shouldFilterPoperBlockerOrphanFetchRejection,
+  shouldFilterExpectedWaveRequestReplacementAbort,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
+  shouldFilterInjectedIosAutoplayNotAllowedError,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
+  shouldFilterInstagramPageHideBridgeError,
+  shouldFilterKnownWalletProviderObjectRejection,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
+  shouldFilterRabbyChromeUserRejectedRequest,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterThirdPartyTelemetryNetworkError,
   shouldFilterThirdPartyTelemetrySpan,
+  shouldFilterTwitterCurrentInsetReferenceError,
   shouldFilterTwitterConfigReferenceError,
   shouldFilterWalletConnectStaleSessionTopic,
   tagSampledLowValueNetworkError,
@@ -64,6 +88,9 @@ const APP_WRAPPED_NETWORK_ERROR_PREFIXES = [
   "Network request failed.",
   "Network error:",
 ];
+const NEXT_SERVER_COMPONENT_RENDER_ERROR_MESSAGE =
+  "An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.";
+const NEXT_SERVER_COMPONENT_DIGEST_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 const RAW_BROWSER_NETWORK_ERROR_PATTERNS = [
   /\bfailed to fetch\b/i,
   /\bload failed\b/i,
@@ -127,7 +154,19 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterBraveWalletPageEvaluationError(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterDisconnectedWalletProviderRejection(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterKnownWalletProviderObjectRejection(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterRabbyChromeUserRejectedRequest(event, hint)) {
     return true;
   }
 
@@ -139,7 +178,31 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterAnonymousUnsafeEvalCspError(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterInjectedProviderProxyStartsWithError(event)) {
+    return true;
+  }
+
+  if (shouldFilterBrowserExtensionMessagingConnectionError(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterBrowserExtensionSendMessageError(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterBrowserExtensionWalletRejection(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterPoperBlockerOrphanFetchRejection(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterExpectedWaveRequestReplacementAbort(event)) {
     return true;
   }
 
@@ -159,6 +222,14 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterTwitterCurrentInsetReferenceError(event)) {
+    return true;
+  }
+
+  if (shouldFilterInstagramPageHideBridgeError(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterReactDomInsertBeforeNotFoundError(event)) {
     return true;
   }
@@ -171,7 +242,19 @@ function shouldFilterEvent(
     return true;
   }
 
-  if (shouldFilterSentryRouteParameterizationError(event)) {
+  if (shouldFilterSentryRouteParameterizationError(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterAppleWebKitSortedTrackListTypeError(event)) {
+    return true;
+  }
+
+  if (shouldFilterChromeMobileIosInjectedGaError(event)) {
+    return true;
+  }
+
+  if (shouldFilterInjectedIosAutoplayNotAllowedError(event)) {
     return true;
   }
 
@@ -189,6 +272,43 @@ function shouldFilterEvent(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function getNextServerComponentDigest(value: unknown): string | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  const digest = value["digest"];
+  return typeof digest === "string" &&
+    NEXT_SERVER_COMPONENT_DIGEST_PATTERN.test(digest)
+    ? digest
+    : undefined;
+}
+
+function enrichNextServerComponentRenderError(
+  event: Sentry.Event,
+  hint: Sentry.EventHint | undefined,
+  message: string
+): void {
+  if (message !== NEXT_SERVER_COMPONENT_RENDER_ERROR_MESSAGE) {
+    return;
+  }
+
+  const digest =
+    getNextServerComponentDigest(hint?.originalException) ??
+    getNextServerComponentDigest(hint?.syntheticException);
+  if (!digest) {
+    return;
+  }
+
+  event.tags = {
+    ...event.tags,
+    next_error_digest: digest,
+  };
+  if (!event.fingerprint?.length) {
+    event.fingerprint = ["next-server-component-render", digest];
+  }
 }
 
 function filterNoisyThirdPartyTransactionSpans(
@@ -244,6 +364,10 @@ function filterNoisyThirdPartyTransactionSpans(
 }
 
 function handleIndexedDBError(event: Sentry.Event): void {
+  const mechanism = event.exception?.values?.[0]?.mechanism;
+  if (mechanism) {
+    mechanism.handled = true;
+  }
   event.level = "warning";
   event.tags = {
     ...event.tags,
@@ -407,8 +531,16 @@ Sentry.init({
   enabled: sentryEnabled,
 
   integrations(integrations) {
-    if (!replayEnabled) return integrations;
-    return [...integrations, Sentry.replayIntegration()];
+    const configuredIntegrations = [
+      ...integrations,
+      Sentry.thirdPartyErrorFilterIntegration({
+        filterKeys: [SENTRY_APPLICATION_KEY],
+        behaviour: SENTRY_THIRD_PARTY_FILTER_BEHAVIOUR,
+      }),
+    ];
+
+    if (!replayEnabled) return configuredIntegrations;
+    return [...configuredIntegrations, Sentry.replayIntegration()];
   },
 
   tracesSampleRate: 0.1,
@@ -428,10 +560,16 @@ Sentry.init({
     return sanitizeSentryBreadcrumb(breadcrumb);
   },
 
+  beforeSendSpan(span) {
+    return sanitizeSentrySpan(span);
+  },
+
   beforeSend(event, hint) {
     if (shouldFilterEvent(event, hint)) {
       return null;
     }
+
+    enrichCyclicJsonTimerEvent(event, hint);
 
     const error = hint?.originalException ?? hint?.syntheticException;
     const value = event.exception?.values?.[0];
@@ -439,6 +577,8 @@ Sentry.init({
       (typeof value?.value === "string" && value.value) ||
       getFallbackMessage(hint) ||
       (typeof event.message === "string" ? event.message : "");
+
+    enrichNextServerComponentRenderError(event, hint, message);
 
     if (
       (error && isIndexedDBError(error)) ||
@@ -471,6 +611,7 @@ Sentry.init({
     }
     if (networkNoiseDecision === "keep_sampled") {
       tagSampledLowValueNetworkError(event);
+      redactDropReactionFailureIdentifiers(event);
     }
 
     return sanitizeSentryEvent(event);
@@ -482,6 +623,17 @@ Sentry.init({
     );
   },
 });
+
+if (sentryEnabled && isProduction) {
+  try {
+    // Install after Sentry so BrowserApiErrors remains the sole event capture
+    // path. This wrapper only associates sampled scheduling provenance with
+    // the original Error and then rethrows it unchanged.
+    installCyclicJsonTimerDiagnostics();
+  } catch {
+    // Diagnostics must never affect application startup.
+  }
+}
 
 if (globalThis.window !== undefined) {
   globalThis.window.addEventListener("error", (event) => {

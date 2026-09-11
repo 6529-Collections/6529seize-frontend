@@ -1,5 +1,5 @@
 import React from "react";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 
 interface WaveLeaderboardDefaultEmptyStateProps {
   readonly onCreateDrop?: (() => void) | undefined;
@@ -27,14 +27,15 @@ export const WaveLeaderboardDefaultEmptyState: React.FC<
       </h3>
       <p className="tw-mb-4 tw-text-iron-500">{emptyDescription}</p>
       {onCreateDrop && (
-        <PrimaryButton
-          loading={false}
+        <Button
           disabled={!canCreateDrop}
-          onClicked={onCreateDrop}
-          padding="tw-px-4 tw-py-2"
+          onClick={onCreateDrop}
+          variant="primary"
+          size="sm"
+          className="tw-px-4"
         >
           <svg
-            className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
+            className="tw-h-4 tw-w-4 tw-flex-shrink-0"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
@@ -47,7 +48,7 @@ export const WaveLeaderboardDefaultEmptyState: React.FC<
             />
           </svg>
           <span>{createDropLabel}</span>
-        </PrimaryButton>
+        </Button>
       )}
       {!canCreateDrop && dropRestrictionMessage && (
         <p className="tw-mt-3 tw-text-xs tw-text-iron-500">

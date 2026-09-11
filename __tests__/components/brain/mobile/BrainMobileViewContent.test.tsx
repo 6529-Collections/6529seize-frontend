@@ -303,7 +303,7 @@ describe("BrainMobileViewContent", () => {
     expect(screen.getByTestId("notifications")).toBeInTheDocument();
   });
 
-  it("renders the profile feed with a back link", () => {
+  it("renders the profile feed at the mobile waves height", () => {
     render(
       <BrainMobileViewContent
         activeView={BrainView.PROFILE_FEED}
@@ -320,13 +320,9 @@ describe("BrainMobileViewContent", () => {
     );
 
     expect(screen.getByTestId("profile-feed")).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /back to waves/i })
-    ).toHaveAttribute("href", "/waves");
     expect(mockCommunityCurations).toHaveBeenCalledWith(
       expect.objectContaining({
         heightStyle: { height: "42px" },
-        topContent: expect.anything(),
       })
     );
   });

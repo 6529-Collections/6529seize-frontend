@@ -8,6 +8,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import type { ApiIdentityOverview } from "@/generated/models/ApiIdentityOverview";
 import type { ApiIdentityOverviewBadges } from "@/generated/models/ApiIdentityOverviewBadges";
+import type { ApiIdentityWaveParticipation } from "@/generated/models/ApiIdentityWaveParticipation";
 import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
@@ -26,6 +27,7 @@ import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 
 type ApiProfileMinWithBadges = ApiProfileMin & {
   readonly badges?: ApiIdentityOverviewBadges;
+  readonly wave_participation?: ApiIdentityWaveParticipation;
 };
 
 type ApiWaveOverviewWithVoteRestrictions = ApiWaveOverview & {
@@ -68,6 +70,9 @@ export const mapIdentityOverviewToProfileMin = (
     profile_wave_id: profileWaveId,
     is_wave_creator: profileWaveId !== null,
     badges: identity.badges,
+    ...(identity.wave_participation
+      ? { wave_participation: identity.wave_participation }
+      : {}),
   };
 };
 
@@ -248,6 +253,10 @@ const mapReplyToDropPreview = (
   top_raters: [],
   raters_count: 0,
   context_profile_context: null,
+  ...(replyToDrop.viewer_context
+    ? { viewer_context: replyToDrop.viewer_context }
+    : {}),
+  ...(replyToDrop.moderation ? { moderation: replyToDrop.moderation } : {}),
   subscribed_actions: [],
   is_signed: false,
   reactions: [],

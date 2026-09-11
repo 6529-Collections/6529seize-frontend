@@ -1,0 +1,187 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IERC2981.sol:IERC2981#function:0x2a55205a",
+          "declaringDefinitionId": "smart-contracts/IERC2981.sol:IERC2981",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "salePrice",
+              "type": "uint256"
+            }
+          ],
+          "name": "royaltyInfo",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "royaltyAmount",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x2a55205a",
+          "signature": "royaltyInfo(uint256,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IERC165.sol:IERC165#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/IERC165.sol:IERC165",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "royaltyInfo(uint256,uint256)",
+          "displaySignature": "royaltyInfo(uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IERC2981.sol:IERC2981#function:0x2a55205a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "salePrice",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkMyOTgxLnNvbDpJRVJDMjk4MSNmdW5jdGlvbjoweDJhNTUyMDVh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "royaltyInfo",
+          "natspec": "@dev Returns how much royalty is owed and to whom, based on a sale price that may be denominated in any unit of\n exchange. The royalty amount is denominated and should be paid in that same unit of exchange.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "royaltyAmount",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 143,
+            "byteStart": 690,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC2981.sol#L19-L22",
+            "lineEnd": 22,
+            "lineStart": 19,
+            "snippetSha256": "sha256:94fd99d8a9cbe9c1dbcfaaaa898278ef75071686a250ab8e357255007181a283",
+            "sourceSha256": "sha256:e937a4817f399cbdde795de41cc414ad422b780cf9966fcc191dcf912add5fb4"
+          },
+          "selector": "0x2a55205a",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IERC2981.sol:IERC2981",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IERC165.sol:IERC165",
+        "name": "IERC165"
+      }
+    ],
+    "interface": {
+      "abiSha256": "sha256:aacd60a298b69f44e9d96171c56834a694c547138a5eb0c6a45ac5c905db20ca",
+      "interfaceId": "0x2a55205a",
+      "interfaceIdSource": "configured",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lFUkMyOTgxLnNvbDpJRVJDMjk4MQ",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IERC2981.sol:IERC2981",
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IERC2981",
+    "natspec": "@dev Interface for the NFT Royalty Standard.\n A standardized way to retrieve royalty payment information for non-fungible tokens (NFTs) to enable universal\n support for royalty payments across all NFT marketplaces and ecosystem participants.",
+    "range": {
+      "byteLength": 417,
+      "byteStart": 418,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC2981.sol#L14-L23",
+      "lineEnd": 23,
+      "lineStart": 14,
+      "snippetSha256": "sha256:7aaceee730aa047e1affa2bec29b65ba3251b1ed8bd9b57ff170293c3a9a6bdf",
+      "sourceSha256": "sha256:e937a4817f399cbdde795de41cc414ad422b780cf9966fcc191dcf912add5fb4"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IERC2981.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

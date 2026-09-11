@@ -119,7 +119,6 @@ describe("useTraitsValidation", () => {
   });
 
   it("focuses first invalid field when element exists", () => {
-    jest.useFakeTimers();
     const traits = createTraits();
     mockValidate.mockReturnValue({
       isValid: false,
@@ -127,53 +126,44 @@ describe("useTraitsValidation", () => {
       errorCount: 1,
       firstInvalidField: "title",
     });
-    const element = document.createElement("div");
-    element.focus = jest.fn();
-    element.scrollIntoView = jest.fn();
-    element.classList.add = jest.fn();
-    element.classList.remove = jest.fn();
-    element.getBoundingClientRect = jest.fn(() => ({ top: 0 } as any));
-    const querySpy = jest
-      .spyOn(document, "querySelector")
-      .mockReturnValue(element);
-    const scrollSpy = jest
-      .spyOn(globalThis, "scrollTo")
-      .mockImplementation(() => {});
+    const wrapper = document.createElement("div");
+    wrapper.id = "field-title";
+    wrapper.scrollIntoView = jest.fn();
+    const input = document.createElement("input");
+    input.focus = jest.fn();
+    wrapper.appendChild(input);
+    document.body.appendChild(wrapper);
 
     const { result } = renderHook(() => useTraitsValidation(traits, traits));
     act(() => {
       result.current.focusFirstInvalidField();
     });
-    expect(querySpy).toHaveBeenCalled();
-    expect(element.focus).toHaveBeenCalled();
-    expect(element.scrollIntoView).toHaveBeenCalled();
-    expect(element.classList.add).toHaveBeenCalledWith("tw-highlight-focus");
-    jest.advanceTimersByTime(2000);
-    expect(element.classList.remove).toHaveBeenCalledWith("tw-highlight-focus");
 
-    querySpy.mockRestore();
-    scrollSpy.mockRestore();
-    jest.useRealTimers();
+    expect(input.focus).toHaveBeenCalled();
+    expect(wrapper.scrollIntoView).toHaveBeenCalled();
+    wrapper.remove();
   });
 
-  it("logs warning when element not found in development", () => {
-    const { publicEnv } = require("@/config/env");
-    publicEnv.NODE_ENV = "development";
+  it("does nothing when the invalid field element is missing", () => {
     mockValidate.mockReturnValue({
       isValid: false,
       errors: {},
       errorCount: 1,
       firstInvalidField: "title",
     });
-    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
-    jest.spyOn(document, "querySelector").mockReturnValue(null);
+    const getElementByIdSpy = jest
+      .spyOn(document, "getElementById")
+      .mockReturnValue(null);
 
     const traits = createTraits();
     const { result } = renderHook(() => useTraitsValidation(traits, traits));
-    act(() => {
-      result.current.focusFirstInvalidField();
-    });
-    expect(warnSpy).toHaveBeenCalled();
-    warnSpy.mockRestore();
+
+    expect(() => {
+      act(() => {
+        result.current.focusFirstInvalidField();
+      });
+    }).not.toThrow();
+    expect(getElementByIdSpy).toHaveBeenCalledWith("field-title");
+    getElementByIdSpy.mockRestore();
   });
 });

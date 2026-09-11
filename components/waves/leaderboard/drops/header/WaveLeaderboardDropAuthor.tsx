@@ -103,6 +103,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
         />
         <DropAuthorBadges
           profile={drop.author}
+          wave={drop.wave}
           tooltipIdPrefix={`leaderboard-author-badges-${drop.id}`}
         />
         {authorStatusBadge}

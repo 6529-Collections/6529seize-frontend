@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-29T09:23:18.000Z",
+  "generated_at": "2026-08-11T15:43:52Z",
   "base_url": "https://6529.io",
   "description": "Glossary of 6529 terms projected from the site's curated help corpus. Each term links back to its help-index.json record via id.",
   "source": "/help-index.json",
-  "term_count": 27,
+  "term_count": 28,
   "terms": [
     {
       "id": "about.license",
@@ -134,7 +134,11 @@
         "EMMA is the Editor for Managing Multiphase Allowlists and the first reference implementation of Janus.",
         "The EMMA landing route lives at /emma and the plans route lives at /emma/plans.",
         "The distribution plan tool helps build mint plans with airdrops, allowlists, and public minting in one or more phases.",
-        "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation."
+        "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation.",
+        "In Create Snapshots at /emma/plans/{planId}, Use a 6529 collection presents five image rows: The Memes by 6529 (ERC1155), Meme Lab (ERC1155), 6529 Gradient (ERC721), 6529 RAW (ERC721), and 6529 Intern JPGs (ERC1155). Tab reaches each shortcut; Enter or Space selects it.",
+        "The Memes shortcut opens a season picker; choosing all or no seasons uses the full collection. Intern JPGs loads its subcollection token IDs. The other shortcuts fill name and contract address and clear old token IDs. Switching shortcuts preserves block numbers.",
+        "Or enter another collection keeps manual name and full contract address entry available, together with block number, optional token IDs, and optional consolidation block number. A full address can autofill an empty name. If metadata lookup fails, enter the name yourself. Collection-name search is unavailable.",
+        "The five shortcuts remain available without metadata lookup. If Intern JPG token IDs fail to load or are empty, the form stays unchanged and shows an error. Select the shortcut to retry, or enter its name, contract address, and token IDs manually; leaving token IDs empty selects all tokens in the shared contract."
       ],
       "canonical_path": "/emma",
       "related_paths": [
@@ -183,17 +187,18 @@
       "aliases": [
         "groups",
         "community groups",
-        "group list",
-        "network groups"
+        "saved groups"
       ],
       "facts": [
         "Groups are reusable community/member sets used across app workflows such as waves.",
-        "The groups area provides list, filter, card, and create/edit surfaces.",
-        "Group routes include Network-scoped group discovery and profile group tabs."
+        "On Network, open Filter to create and apply a criteria-based group. The Network filter does not offer Choose group.",
+        "Criteria-based groups are created inline from workflows such as Network filtering and Wave setup; there is no standalone Network Groups page.",
+        "A profile's Groups tab remains available at /{user}/groups."
       ],
-      "canonical_path": "/network/groups",
+      "canonical_path": "/network",
       "related_paths": [
-        "/{user}/groups"
+        "/{user}/groups",
+        "/waves/create"
       ],
       "tags": [
         "groups",
@@ -276,7 +281,7 @@
       "facts": [
         "Nakamoto Set is a SZN1 Category B TDH boost term.",
         "Under current TDH 1.4 rules, SZN1 can use a complete set boost or the Genesis Set and Nakamoto Set boosts.",
-        "The current Nakamoto Set boost shown on the TDH page is 1.01x."
+        "Holding Nakamoto (Meme #4) adds the configured Nakamoto partial-set bonus when SZN1 is boostable and incomplete. The complete SZN1 boost replaces its partial-set bonuses. See Current boosts at /network/tdh#tdh-1-4 for the current API-derived amount."
       ],
       "canonical_path": "/network/tdh",
       "related_paths": [
@@ -305,6 +310,7 @@
       ],
       "facts": [
         "Network definitions explain Cards Collected, Unique Memes, Meme Sets, TDH variants, purchases, sales, transfers, and related Network metrics.",
+        "The glossary groups terms into Collection metrics, Activity metrics, and TDH metrics.",
         "Genesis Sets are complete sets of the first three Meme NFTs.",
         "Use the definitions page when users ask what a Network metric means.",
         "For a single TDH explanation, point users to the TDH page."
@@ -332,7 +338,9 @@
       ],
       "facts": [
         "Network Levels are an integrated signal based on TDH and REP.",
-        "The levels page explains the current thresholds and how the displayed level is derived.",
+        "The levels page presents its explanation above a full-width table of all Level 0 through 100 thresholds.",
+        "When a signed-in active profile is available, the levels page shows its current Level, combined TDH and REP, next Level, and additional amount needed; an active proxy profile takes precedence.",
+        "Signed-out users and users whose profile data is unavailable see the general reference page without a personalized empty state or calculator.",
         "Levels are shown across profile and Network surfaces where relevant."
       ],
       "canonical_path": "/network/levels",
@@ -389,6 +397,15 @@
       "facts": [
         "The Profile Brain tab surfaces Brain-related profile activity and wave context.",
         "Brain views include activity and wave sidebar surfaces where available.",
+        "Created Waves lists accessible non-direct-message root waves and subwaves created by the profile, ordered by that profile's latest post in each wave; waves without a qualifying profile post appear after active waves.",
+        "When a profile has no accessible created waves, the Created Waves section is omitted instead of showing an empty message.",
+        "Recently Active In lists accessible non-direct-message root waves and subwaves ordered by the profile's latest post, whether or not the profile created them; a wave can appear in both sections.",
+        "Each row labels the profile-specific time as Last post. Created Waves also labels its separate total wave posts count, which includes retained CHAT posts by all authors; Recently Active In does not show that wave-wide total.",
+        "Created Waves initially shows five rows on desktop, and both lists provide Load more controls so cursor pages remain reachable.",
+        "On desktop, Created Waves and Recently Active In share one independently scrollable sidebar, so scrolling it does not advance the Brain feed.",
+        "On small screens, More opens the Created waves modal with the same profile-specific ordering and Load more pagination; it does not show a partial page count as a total.",
+        "When a focused Load more control retrieves the final cursor page, focus moves to an All waves loaded status so keyboard focus is preserved.",
+        "Created Waves and Recently Active In load and recover independently, and results refresh for a connected-viewer change so private-wave access is not reused across viewers.",
         "Use /{user}/brain for profile-specific Brain context."
       ],
       "canonical_path": "/{user}/brain",
@@ -414,6 +431,9 @@
         "network identity check",
         "rate nic",
         "rep dialog",
+        "grant rep",
+        "rep category spelling",
+        "memesnominee rep",
         "activity log"
       ],
       "facts": [
@@ -421,6 +441,9 @@
         "NIC is the 6529 network identity trust signal shown on profile identity surfaces.",
         "App copy refers to NIC as Network Identity Credits in the FAQ and Network Identity Check in the profile identity header.",
         "The Identity tab surfaces profile identity, REP behavior, NIC ratings, NIC statements, and activity log behavior where available.",
+        "On mobile, a compact selector switches between Total Rep, NIC, and ID Statements without changing the profile URL.",
+        "Grant REP keeps its compact category pills and existing search and selection behavior, including similarly named categories remaining separate and selectable.",
+        "The exact MemesNominee category pill is marked as counting toward the 50,000 REP submission requirement and is surfaced first when the typed value differs only by capitalization, spacing, punctuation, or Unicode width; search guidance stays neutral until a category is selected, selecting exact MemesNominee confirms the requirement in green, and selecting a subdued look-alike shows an amber note explaining that it remains a separate category.",
         "Owner and permission rules affect which identity actions are visible."
       ],
       "canonical_path": "/{user}",
@@ -463,6 +486,35 @@
       "tags": [
         "profiles",
         "proxy",
+        "glossary"
+      ]
+    },
+    {
+      "id": "profiles.quick-tags",
+      "term": "Profile Quick Tags",
+      "aliases": [
+        "quick tags",
+        "quick tag settings",
+        "mention shortcuts",
+        "personal mention aliases"
+      ],
+      "facts": [
+        "Quick Tags are managed from the compact owner-only section beneath Activity on the Profile Brain tab.",
+        "The section shows up to three tags and uses a +N more chip when additional tags exist; controls wrap at narrow widths.",
+        "Manage and +N more open the inline Quick Tags manager inside the same Brain-tab card.",
+        "On mobile, New Quick Tag and existing-tag editing open in a bottom sheet; on wider screens, create and edit forms remain inline.",
+        "The section is hidden on other profiles and while acting through a proxy.",
+        "Quick Tags do not have a dedicated profile tab or route."
+      ],
+      "canonical_path": "/{user}/brain",
+      "related_paths": [
+        "/{user}/brain",
+        "/waves"
+      ],
+      "tags": [
+        "profiles",
+        "waves",
+        "mentions",
         "glossary"
       ]
     },
@@ -541,16 +593,25 @@
         "TDH is 6529's time-weighted holding metric for eligible NFTs.",
         "Conceptually, TDH measures long-term participation and skin in the 6529 ecosystem.",
         "Each eligible NFT contributes value based on how long it has been held; that base holding time is then adjusted by edition-size weighting and by collection boosters.",
+        "FirstGM (Meme #8) was designed to establish the one-TDH reference: one copy held for one complete day earns one base TDH before boosts. Its open-mint design is central to its role as the original reference card, explained near the start of the TDH page at #tdh-reference.",
+        "Ordinary burns do not reduce the minted count used for TDH edition weighting. FirstGM (Meme #8) has a fixed exception that subtracts 2,588 from its 6,529 minted copies, giving 3,941 before the edition-size floor is applied.",
         "The calculation has three layers: unweighted days, edition weighting, and boosts.",
         "Unweighted days means each NFT contributes 1 unit per day it is held.",
-        "Edition weighting means days held are multiplied by a HODL or edition-size rate; on the frontend TDH page, FirstGM with edition size 3,941 is the 1.0 baseline.",
+        "Edition weighting means days held are multiplied by a HODL or edition-size rate. The calculator derives rates from the largest eligible effective Meme edition.",
+        "An edition-size floor is a minimum count used for TDH: when fewer copies were minted, the calculation uses the floor instead. The exact calculation section explains how floors are set and gives a worked example.",
         "Boosts multiply weighted TDH by active boosters based on what the holder owns.",
-        "The backend stores the distinctions separately: tdh__raw is raw full days held, tdh is raw days multiplied by HODL or edition weighting, and boosted_tdh is weighted TDH multiplied by the active boost.",
-        "Current TDH 1.4 rules use the higher of Category A or Category B boosters, plus Category C.",
-        "Category A is the complete Meme Card set boost, with diminishing additional-set boosts.",
-        "Category B covers season, genesis, and nakamoto set boosts.",
-        "Category C is the Gradient boost, up to 5 Gradients.",
-        "TDH is calculated daily at 00:00 UTC and is used throughout the network: profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
+        "The TDH page has anchors for FirstGM's reference role, a fixed worked example, profile lookup, current boosts, and exact calculation details.",
+        "The worked example compares Today and +30 days and can remove Nakamoto #4 before the snapshot; it demonstrates that a sale removes both the card contribution and any boost component it supplied.",
+        "Profile lookup accepts a public handle or wallet-like identity without requiring wallet authentication, and shows loading, empty, not-found, retryable error, snapshot, holdings, boost breakdown, and paginated collection states.",
+        "The daily snapshot uses the Ethereum block at or immediately before 00:00 UTC; holding age uses that block timestamp, while a displayed API date can reflect later processing time.",
+        "The current boost is deterministic for a particular snapshot once eligible cards, ownership history, rates, and season configuration are known; future inputs can still change the result.",
+        "The Current boosts section at /network/tdh#tdh-1-4 loads configured bonus amounts, boosted-season limits, additional-set decay and Gradient limits from GET /tdh/rules. Consult that section for current values and the future schedule.",
+        "The highest eligible season is excluded from season boosts; later seasons do not automatically extend the configured boosted-season limit.",
+        "A full eligible Meme collection uses the configured season sum plus geometrically diminishing bonuses for additional full sets, with no hard set-count cap.",
+        "Distinct Gradients add the configured per-token bonus up to the configured count limit. The page derives the eventual rounded multiplier ceiling from the full season schedule, additional-set series and Gradient limit.",
+        "The displayed future ceiling is conditional: future cards must become eligible and can make a previously complete collection incomplete.",
+        "Rates are rounded before wallet and token-level TDH rounding; consolidated wallets preserve qualifying internal-transfer ages, recompute the boost, and sum per-token rounded final contributions.",
+        "TDH is used throughout the network, including profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
       ],
       "canonical_path": "/network/tdh",
       "related_paths": [
@@ -578,7 +639,7 @@
       ],
       "facts": [
         "TDH (unboosted) is TDH weighted by edition size before boosters are applied.",
-        "FirstGM with edition size 3,941 is the 1.0 baseline for edition weighting on the TDH page."
+        "FirstGM (Meme #8) was designed as the original one-TDH reference: one copy held for one complete day earns one base TDH before boosts. The calculator derives edition rates from the largest eligible effective Meme edition."
       ],
       "canonical_path": "/network/definitions",
       "related_paths": [
@@ -658,13 +719,23 @@
         "subscribe to memes"
       ],
       "facts": [
-        "The Memes subscriptions are an optional way to mint Meme Cards remotely, with potential gas savings or set-and-forget minting.",
+        "The Memes subscriptions are an optional way to mint eligible Meme Cards remotely without being online at mint time, with estimated gas savings of about 80% for one card and up to 98% for ten cards funded by one ETH transfer.",
         "Subscriptions are not a mintpass and do not create extra allowlist access.",
-        "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab."
+        "The setup path is: connect a wallet, open the profile Subscriptions tab, add a completely non-refundable ETH balance, choose Automatic or Manual mode, and select or skip upcoming eligible cards.",
+        "The /about/subscriptions primary action says Connect to Subscribe when a wallet or profile handoff is needed and Manage when the user can continue to their profile subscription settings.",
+        "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
+        "Automatic mode mints eligible cards until the balance is used unless the user opts out; Manual mode only mints cards the user opts into.",
+        "Automatic mode does not expire when the balance is insufficient; coverage describes what the current balance funds, not an expiration date for the mode.",
+        "Coverage counts consecutive fully funded intended drops from the immediate next intended drop and accounts for mode, eligibility, edition preference, selections, opt-outs, balance, and the published schedule.",
+        "Coverage is green at 7 or more funded drops, gives an early plan-a-top-up warning at 4 to 6, shows running low at 2 to 3, and requires action at 0 to 1.",
+        "When available, Funded through and Next unfunded identify the Meme card and date; Top up by is shown only for an authoritative backend deadline.",
+        "If an eligible card is unavailable, no card is airdropped and the unused balance stays available.",
+        "The About Subscriptions overview links to the Subscriptions Report for aggregate subscribed and redeemed subscription counts."
       ],
       "canonical_path": "/about/subscriptions",
       "related_paths": [
-        "/{user}/subscriptions"
+        "/{user}/subscriptions",
+        "/tools/subscriptions-report"
       ],
       "tags": [
         "subscriptions",
@@ -742,7 +813,15 @@
         "Waves are the main social threads for conversations, drops, reactions, voting, and wave-specific activity.",
         "Standard wave threads live at /waves/{waveId}; direct messages live at /messages/{waveId}.",
         "Public wave content can remain readable for authenticated wallets without a profile, but posting and other participation actions require profile setup.",
-        "The Waves panel includes wave lists, pinned waves, highly rated waves, a Discover Waves link, and create controls."
+        "The Waves panel includes wave lists, pinned waves, highly rated waves, a Discover Waves link, and create controls.",
+        "On desktop with no selected Wave, /waves shows the latest posts from members' effective public Profile Wave curations, newest first.",
+        "Each latest-profile-post card identifies the author, posting time, and originating Profile Wave; curated replies can also appear. On small screens, the default /waves view remains a Wave navigator.",
+        "In Worth Checking Out, each avatar and its overlaid score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
+        "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
+        "A Wave opened from a direct link remains visible and highlighted in the left sidebar even when it is not followed, pinned, or present in the loaded overview; this temporary route context does not join or pin it.",
+        "When a direct link opens a subwave, the sidebar surfaces its visible parent, loads and expands the subwave list, reveals the selected child row, and keeps that parent tree ahead of paginated activity rows so every sibling remains reachable.",
+        "An active subwave header shows an up-left arrow and a linked parent wave name; selecting that name opens the parent wave.",
+        "Pin and unpin check the selected profile session before changing the list. If the session cannot renew, reconnect that wallet and retry; a failed session check leaves the pin state unchanged. Public waves can remain readable after session expiry but are not added to saved pins. Failed server pin changes roll back and show an error."
       ],
       "canonical_path": "/waves",
       "related_paths": [
@@ -779,6 +858,8 @@
         "Daily xTDH rate is xtdh_rate = produced_today - granted_out_today + received_today.",
         "Total xTDH accumulates as xtdh_total = xtdh_total_previous + xtdh_rate.",
         "The key idea is grants: a profile that produces xTDH can grant future xTDH flow to all tokens in an external ERC-721 collection or to a selected subset of tokens.",
+        "To select a collection in Create New Grant, paste its Ethereum contract address (0x followed by 40 hexadecimal characters), select the ERC-721 result, then choose all tokens, individual IDs, or ranges. Collection-name search, ENS names, and marketplace URLs are not supported for this lookup.",
+        "If collection metadata fails to load, use Try again. A missing or non-ERC-721 result cannot be selected. Contract metadata lookup is not a spam or authenticity check.",
         "If you own a token with an active grant, you receive your share of that grant while you own the token.",
         "Per-token grant flow is grant_amount_per_token = rate / denominator, where the denominator is either the collection total supply for full-collection grants or the number of selected tokens for partial grants.",
         "Transfers inside the same consolidation group do not reset the ownership window; sales or transfers across groups do reset it.",

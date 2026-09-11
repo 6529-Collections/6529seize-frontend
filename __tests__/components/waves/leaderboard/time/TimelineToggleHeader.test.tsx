@@ -46,10 +46,16 @@ describe("TimelineToggleHeader", () => {
       </SeizeSettingsProvider>
     );
     expect(screen.getByText("Decision Timeline")).toBeInTheDocument();
-    const toggle = screen.getByText(/Decision Timeline/).closest("div");
-    if (!toggle) {
-      throw new Error("Toggle container not found");
-    }
+    expect(screen.getByText("Next winner")).toBeInTheDocument();
+    expect(screen.getByText("Next winner").parentElement).toHaveClass(
+      "tw-text-xs"
+    );
+    const toggle = screen.getByRole("button", {
+      name: "Toggle decision timeline",
+    });
+    expect(toggle).toHaveAccessibleDescription(
+      "Next winner in 1 hour, 2 minutes, 3 seconds"
+    );
     fireEvent.click(toggle);
     expect(setIsOpen).toHaveBeenCalledWith(true);
   });
@@ -60,11 +66,14 @@ describe("TimelineToggleHeader", () => {
       start_time: Date.UTC(2026, 3, 8, 12, 0, 0),
       end_time: Date.UTC(2026, 3, 9, 12, 0, 0),
     };
-    const formatSpy = jest
-      .spyOn(Date.prototype, "toLocaleDateString")
-      .mockImplementation(function mockToLocaleDateString() {
-        return `formatted:${this.getTime()}`;
-      });
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+    }).format(nextDecisionTime);
+    const pauseEndDate = new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+    }).format(currentPause.end_time);
 
     render(
       <SeizeSettingsProvider>
@@ -80,14 +89,14 @@ describe("TimelineToggleHeader", () => {
     );
 
     expect(
-      screen.getByText(`Next decision after formatted:${nextDecisionTime}`)
+      screen.getByText(`Next decision after ${formattedDate}`)
     ).toBeInTheDocument();
     expect(
-      screen.queryByText(
-        `Next decision after formatted:${currentPause.end_time}`
-      )
+      screen.getByRole("button", { name: "Toggle decision timeline" })
+    ).toHaveAccessibleDescription(`Paused Next decision after ${formattedDate}`);
+    expect(
+      screen.queryByText(`Next decision after ${pauseEndDate}`)
     ).not.toBeInTheDocument();
-    expect(formatSpy).toHaveBeenCalled();
   });
 
   it("shows no decision scheduled when paused without a next decision time", () => {
@@ -110,5 +119,8 @@ describe("TimelineToggleHeader", () => {
     );
 
     expect(screen.getByText("No decision scheduled")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Toggle decision timeline" })
+    ).toHaveAccessibleDescription("Paused No decision scheduled");
   });
 });

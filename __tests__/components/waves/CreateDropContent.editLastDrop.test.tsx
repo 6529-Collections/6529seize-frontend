@@ -55,6 +55,8 @@ jest.mock("framer-motion", () => {
     m: {
       div: MotionDiv,
     },
+    useIsPresent: () => true,
+    useReducedMotion: () => false,
   };
 });
 
@@ -109,6 +111,9 @@ jest.mock("@/components/waves/CreateDropActions", () => (props: any) => (
     </button>
   </div>
 ));
+jest.mock("@/components/waves/CreateDropStormParts", () => () => (
+  <div data-testid="storm-parts" />
+));
 jest.mock("@/components/waves/CreateDropInput", () => {
   const ReactLib = require("react");
   return {
@@ -117,6 +122,10 @@ jest.mock("@/components/waves/CreateDropInput", () => {
       const hasSentEditorStateRef = ReactLib.useRef(false);
       ReactLib.useImperativeHandle(ref, () => ({
         clearEditorState: jest.fn(),
+        expandMentionAliases: async () => ({
+          completed: true,
+          editorState: undefined,
+        }),
         focus: jest.fn(),
       }));
 

@@ -2,10 +2,6 @@ import { render } from "@testing-library/react";
 import CollectionPageShell from "@/app/nextgen/collection/[collection]/CollectionPageShell";
 
 jest.mock(
-  "@/components/nextGen/collections/collectionParts/NextGenCollectionHeader",
-  () => ({ NextGenCollectionHead: () => <div data-testid="head" /> })
-);
-jest.mock(
   "@/components/nextGen/collections/NextGenNavigationHeader",
   () => () => <div data-testid="nav" />
 );

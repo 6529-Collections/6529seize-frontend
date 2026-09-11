@@ -11,6 +11,7 @@ const WAVE_POLLS_AVAILABILITY_PAGE_SIZE = 1;
 interface WavePollSummary {
   readonly hasPolls: boolean;
   readonly unansweredPolls: number;
+  readonly isPending: boolean;
 }
 
 interface UseWaveHasPollsProps {
@@ -21,6 +22,7 @@ interface UseWaveHasPollsProps {
 const EMPTY_WAVE_POLL_SUMMARY: WavePollSummary = {
   hasPolls: false,
   unansweredPolls: 0,
+  isPending: false,
 };
 
 const normalizeUnansweredPollCount = (value: unknown): number => {
@@ -48,7 +50,7 @@ export function useWavePollSummary({
   const normalizedWaveId = waveId?.trim() ?? "";
   const isEnabled = enabled && normalizedWaveId.length > 0;
 
-  const { data } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: [
       QueryKey.WAVE_POLLS,
       {
@@ -79,7 +81,10 @@ export function useWavePollSummary({
     ...getDefaultQueryRetry(),
   });
 
-  return data ?? EMPTY_WAVE_POLL_SUMMARY;
+  return {
+    ...(data ?? EMPTY_WAVE_POLL_SUMMARY),
+    isPending: Boolean(isEnabled && isPending),
+  };
 }
 
 export function useWaveHasPolls(props: UseWaveHasPollsProps): boolean {

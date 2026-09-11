@@ -29,7 +29,7 @@ const ConnectWallet: React.FC<ConnectWalletProps> = ({
       />
       <div className="tw-flex tw-flex-col tw-items-center tw-gap-4 tw-text-center md:tw-items-start md:tw-text-left">
         <h1 className="tw-text-xl tw-font-bold">{title}</h1>
-        <p className="tw-text-base tw-text-gray-400">{description}</p>
+        <p className="tw-text-base tw-text-iron-400">{description}</p>
         {action ?? <HeaderUserConnect />}
       </div>
     </div>

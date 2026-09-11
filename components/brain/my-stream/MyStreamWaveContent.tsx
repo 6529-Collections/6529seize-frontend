@@ -13,6 +13,9 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
 import MyStreamWaveCurationContent from "./curations/MyStreamWaveCurationContent";
 import { useWaveData } from "@/hooks/useWaveData";
+import { useDrop } from "@/hooks/useDrop";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";
 import MyStreamWaveSubmissions from "./MyStreamWaveSubmissions";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
@@ -25,16 +28,24 @@ import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import MyStreamWaveSales from "./MyStreamWaveSales";
 import MyStreamWavePolls from "./MyStreamWavePolls";
-import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
+import {
+  useWaveOutcomeVisibility,
+  useWaveSubmissionButtonLabelOverride,
+} from "@/hooks/waves/useWaveMetadata";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { createBreakpoint } from "react-use";
 import { getHomeRoute, getWaveHomeRoute } from "@/helpers/navigation.helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { MEMES_NOMINEE_REQUIRED_REP } from "@/helpers/waves/memes-nomination";
 import { useWaveViewMode } from "@/hooks/useWaveViewMode";
 import { SubmissionStatus, useWave } from "@/hooks/useWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getDropQueryKey } from "@/services/api/drop-api";
+import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
 import {
   resolveWaveSubmissionExperience,
@@ -77,7 +88,11 @@ const getChatSubmitDropRestrictionMessage = ({
 
 type MemesHeaderDropActionState = Pick<
   HeaderWaveDropAction,
-  "canOpen" | "label" | "compactLabel" | "restrictionMessage"
+  | "canOpen"
+  | "label"
+  | "compactLabel"
+  | "restrictionMessage"
+  | "restrictionKind"
 >;
 
 interface MemesHeaderParticipationState {
@@ -154,7 +169,8 @@ const getMemesHeaderDropActionState = ({
       canOpen: false,
       label: "How to Submit",
       compactLabel: "Submit",
-      restrictionMessage: "You are not eligible to submit to this wave",
+      restrictionMessage: `Reach ${formatNumberWithCommas(MEMES_NOMINEE_REQUIRED_REP)} MemesNominee REP to become eligible to submit work.`,
+      restrictionKind: "memes-nomination",
     };
   }
 
@@ -194,9 +210,15 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
   const queryClient = useQueryClient();
-  const { connectedProfile, activeProfileProxy } = useAuth();
+  const locale = useBrowserLocale();
+  const { connectedProfile, activeProfileProxy, setToast } = useAuth();
   const { setWaveDropAction } = useHeaderContext();
-  const { waves, directMessages, registerWave } = useMyStream();
+  const {
+    waves,
+    directMessages,
+    registerWave,
+    serverFeedSeed: { completeInitialRegistration },
+  } = useMyStream();
   const { updateEligibility } = useWaveEligibility();
   const { data: wave } = useWaveData({
     waveId,
@@ -213,10 +235,20 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       router.push(newUrl, { scroll: false });
     },
   });
+  const metadataWaveId = wave?.id;
 
   useEffect(() => {
     registerWave(waveId, true);
-  }, [registerWave, waveId]);
+    completeInitialRegistration(waveId);
+  }, [completeInitialRegistration, registerWave, waveId]);
+
+  useEffect(() => {
+    if (!metadataWaveId) {
+      return;
+    }
+
+    markMobileLaunchStep("wave_metadata_loaded");
+  }, [metadataWaveId]);
 
   useEffect(() => {
     if (!wave) {
@@ -246,11 +278,22 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   }, [waves.list, directMessages.list, waveId]);
 
   const newDropsCount = enhancedData.newDropsCount;
+  const currentWaveId = wave?.id ?? null;
+  const currentWaveName = wave?.name ?? null;
 
   // Update wave data in title context
-  useSetWaveData(
-    wave ? { name: wave.name, newItemsCount: newDropsCount } : null
+  const waveTitleData = useMemo(
+    () =>
+      currentWaveId === waveId && currentWaveName !== null
+        ? {
+            id: currentWaveId,
+            name: currentWaveName,
+            newItemsCount: newDropsCount,
+          }
+        : null,
+    [currentWaveId, currentWaveName, newDropsCount, waveId]
   );
+  useSetWaveData(waveTitleData);
 
   // Create a stable key for proper remounting
   const stableWaveKey = `wave-${waveId}`;
@@ -259,7 +302,59 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const { activeContentTab } = useContentTab();
   const activeCurationId = searchParams.get("curation");
   const loadedWaveId = wave?.id ?? null;
-  const { editingDropId } = useEditingDrop();
+  const { editingDropId, setEditingDropId } = useEditingDrop();
+  const requestedEditPostId = searchParams.get("editPost") ?? "";
+  const { drop: requestedEditPost } = useDrop({
+    dropId: requestedEditPostId,
+    enabled: requestedEditPostId.length > 0,
+  });
+
+  useEffect(() => {
+    if (!requestedEditPostId || !requestedEditPost) {
+      return;
+    }
+
+    const nextParams = new URLSearchParams(searchParams.toString() || "");
+    nextParams.delete("editPost");
+    const nextQuery = nextParams.toString();
+    const clearEditRequest = () => {
+      router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
+        scroll: false,
+      });
+    };
+    const canEdit =
+      requestedEditPost.wave.id === waveId &&
+      requestedEditPost.drop_type !== ApiDropType.Participatory &&
+      !activeProfileProxy &&
+      areSameProfileIdentity({
+        left: requestedEditPost.author,
+        right: connectedProfile,
+      });
+
+    if (!canEdit) {
+      clearEditRequest();
+      setToast({
+        type: "warning",
+        message: t(locale, "profileCuration.actions.authorOnly"),
+      });
+      return;
+    }
+
+    setEditingDropId(requestedEditPost.id);
+    clearEditRequest();
+  }, [
+    activeProfileProxy,
+    connectedProfile,
+    locale,
+    pathname,
+    requestedEditPost,
+    requestedEditPostId,
+    router,
+    searchParams,
+    setEditingDropId,
+    setToast,
+    waveId,
+  ]);
 
   // View mode for chat/gallery toggle
   const { viewMode, setViewMode, toggleViewMode } = useWaveViewMode(waveId);
@@ -326,7 +421,14 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     !isChatWave &&
     !isMemesWave &&
     submissionExperience !== WaveSubmissionExperience.MEMES_LEGACY;
-  const chatSubmitDropLabels = getChatSubmitDropLabels(submissionExperience);
+  const customSubmissionButtonLabel = useWaveSubmissionButtonLabelOverride({
+    enabled: showChatSubmitDropAction,
+    waveId: loadedWaveId,
+  });
+  const chatSubmitDropLabels = getChatSubmitDropLabels(
+    submissionExperience,
+    customSubmissionButtonLabel
+  );
   const isMemesLegacySubmission =
     submissionExperience === WaveSubmissionExperience.MEMES_LEGACY;
   const outcomesVisible = useWaveOutcomeVisibility(wave);
@@ -470,6 +572,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
         label: memesHeaderDropActionState.label,
         compactLabel: memesHeaderDropActionState.compactLabel,
         restrictionMessage: memesHeaderDropActionState.restrictionMessage,
+        restrictionKind: memesHeaderDropActionState.restrictionKind,
         onOpen: openAppMemesSubmit,
       };
     }

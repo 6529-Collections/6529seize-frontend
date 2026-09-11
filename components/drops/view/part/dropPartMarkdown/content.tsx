@@ -9,6 +9,7 @@ import type { ExtraProps } from "react-markdown";
 import emojiRegex from "emoji-regex";
 
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import { ApiDropGroupMention as ApiDropGroupMentionValue } from "@/generated/models/ApiDropGroupMention";
@@ -20,12 +21,13 @@ import {
   type DropListItemContentPartProps,
 } from "@/components/drops/view/item/content/DropListItemContentPart.types";
 import {
-  ALL_GROUP_MENTION_TEXT,
+  GROUP_MENTION_TEXT,
   hasMentionedGroup,
-  markAllGroupMentionTokens,
+  markGroupMentionTokens,
 } from "@/helpers/waves/drop-group-mentions";
 import { isDirectImageUrl } from "./linkUtils";
 import { normalizeDropMarkdownContent } from "./normalizeContent";
+import { isPreviewableHrefSource } from "./sourcePositions";
 import {
   DropPartMarkdownImageGroup,
   type DropPartMarkdownImageLayout,
@@ -50,6 +52,7 @@ interface CustomEmojiImageProps {
 interface MarkdownElementProps {
   readonly children?: ReactNode | undefined;
   readonly href?: unknown;
+  readonly node?: unknown;
   readonly src?: unknown;
 }
 
@@ -82,6 +85,7 @@ type MarkdownImageElement = ReactElement<{
 }>;
 
 type MarkdownLinkElement = ReactElement<{
+  readonly children?: ReactNode | undefined;
   readonly href: string;
 }>;
 
@@ -132,11 +136,31 @@ const getSmartHref = (
 ): string | null =>
   typeof elementProps?.href === "string" ? elementProps.href : null;
 
+const isBareHrefLabel = (
+  children: ReactNode | undefined,
+  href: string
+): boolean => {
+  const linkText = getTextFromChildren(children)?.trim();
+  if (linkText === null) {
+    return false;
+  }
+
+  const trimmedHref = href.trim();
+  return (
+    linkText === trimmedHref ||
+    linkText === ensureStableSeizeLink(trimmedHref).trim()
+  );
+};
+
 const getBareImageHref = (
   elementProps: MarkdownElementProps | null
 ): string | null => {
   const href = getSmartHref(elementProps);
   if (!href || !isDirectImageUrl(href)) {
+    return null;
+  }
+
+  if (!isPreviewableHrefSource(elementProps?.node)) {
     return null;
   }
 
@@ -172,8 +196,84 @@ const isSmartLinkElement = (
   node: ReactNode,
   isSmartLink: (href: string) => boolean
 ): node is MarkdownLinkElement => {
-  const href = getSmartHref(getMarkdownElementProps(node));
-  return href !== null && href.length > 0 && isSmartLink(href);
+  const elementProps = getMarkdownElementProps(node);
+  const href = getSmartHref(elementProps);
+
+  return (
+    href !== null &&
+    href.length > 0 &&
+    isBareHrefLabel(elementProps?.children, href) &&
+    isPreviewableHrefSource(elementProps?.node) &&
+    isSmartLink(href)
+  );
+};
+
+const isWhitespaceOnlyReactNode = (node: ReactNode): boolean => {
+  if (typeof node === "string") {
+    return node.trim().length === 0;
+  }
+
+  if (!isValidElement<MarkdownElementProps>(node)) {
+    return false;
+  }
+
+  const children = Children.toArray(node.props.children);
+  return children.length > 0 && children.every(isWhitespaceOnlyReactNode);
+};
+
+const liftNestedMarkdownBlocks = (
+  node: ReactNode,
+  isBlockElement: (candidate: ReactNode) => boolean,
+  path: string
+): ReactNode[] => {
+  if (isBlockElement(node) || !isValidElement<MarkdownElementProps>(node)) {
+    return [node];
+  }
+
+  const children = Children.toArray(node.props.children);
+  if (children.length === 0) {
+    return [node];
+  }
+
+  const liftedChildren = children.flatMap((child, index) =>
+    liftNestedMarkdownBlocks(child, isBlockElement, `${path}.${index}`)
+  );
+  if (!liftedChildren.some(isBlockElement)) {
+    return [node];
+  }
+
+  const result: ReactNode[] = [];
+  let inlineChildren: ReactNode[] = [];
+  let inlineChunkIndex = 0;
+
+  const flushInlineChildren = () => {
+    if (
+      inlineChildren.length > 0 &&
+      !inlineChildren.every(isWhitespaceOnlyReactNode)
+    ) {
+      result.push(
+        cloneElement(
+          node,
+          { key: `markdown-inline:${path}:${inlineChunkIndex}` },
+          inlineChildren
+        )
+      );
+      inlineChunkIndex += 1;
+    }
+    inlineChildren = [];
+  };
+
+  for (const child of liftedChildren) {
+    if (isBlockElement(child)) {
+      flushInlineChildren();
+      result.push(child);
+    } else {
+      inlineChildren.push(child);
+    }
+  }
+  flushInlineChildren();
+
+  return result;
 };
 
 const containsOnlyNativeEmojis = (str: string): boolean => {
@@ -260,15 +360,20 @@ export const createMarkdownContentRenderers = ({
         }),
         {}
       ),
-      ...(hasMentionedGroup(mentionedGroups, ApiDropGroupMentionValue.All)
-        ? {
-            [ALL_GROUP_MENTION_TEXT]: {
-              type: DropContentPartType.GROUP_MENTION,
-              value: ApiDropGroupMentionValue.All,
-              match: ALL_GROUP_MENTION_TEXT,
-            },
-          }
-        : {}),
+      ...Object.values(ApiDropGroupMentionValue).reduce(
+        (acc, group) =>
+          hasMentionedGroup(mentionedGroups, group)
+            ? {
+                ...acc,
+                [GROUP_MENTION_TEXT[group]]: {
+                  type: DropContentPartType.GROUP_MENTION,
+                  value: group,
+                  match: GROUP_MENTION_TEXT[group],
+                },
+              }
+            : acc,
+        {} as Record<string, DropListItemContentPartProps>
+      ),
       ...mentionedWaves.reduce(
         (acc, wave) => ({
           ...acc,
@@ -312,21 +417,33 @@ export const createMarkdownContentRenderers = ({
       );
     }
 
-    if (hasMentionedGroup(mentionedGroups, ApiDropGroupMentionValue.All)) {
-      currentContent = markAllGroupMentionTokens({
-        content: currentContent,
-        marker: splitter,
-      });
+    for (const group of Object.values(ApiDropGroupMentionValue)) {
+      if (hasMentionedGroup(mentionedGroups, group)) {
+        currentContent = markGroupMentionTokens({
+          content: currentContent,
+          group,
+          marker: splitter,
+        });
+      }
     }
 
     return currentContent
       .split(splitter)
       .filter((part) => part !== "")
       .map((part): ReactNode => {
-        const partProps = values[part];
+        const partProps = values[part] ?? values[part.toLowerCase()];
         if (partProps) {
           const randomId = getRandomObjectId();
-          return <DropListItemContentPart key={randomId} part={partProps} />;
+          return (
+            <DropListItemContentPart
+              key={randomId}
+              part={
+                partProps.type === DropContentPartType.GROUP_MENTION
+                  ? { ...partProps, match: part }
+                  : partProps
+              }
+            />
+          );
         }
 
         const segments = part.split(customEmojiRegex);
@@ -407,7 +524,11 @@ export const createMarkdownContentRenderers = ({
     };
 
     const { children } = params;
-    const flattened = Children.toArray(children);
+    const isBlockElement = (node: ReactNode): boolean =>
+      isMarkdownImageElement(node) || isSmartLinkElement(node, isSmartLink);
+    const flattened = Children.toArray(children).flatMap((node, index) =>
+      liftNestedMarkdownBlocks(node, isBlockElement, String(index))
+    );
 
     const elements: ReactNode[] = [];
     let currentTextChunk: ReactNode[] = [];

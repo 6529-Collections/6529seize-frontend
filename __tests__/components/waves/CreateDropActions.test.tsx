@@ -9,15 +9,15 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn(),
 }));
 
-let ORIGINAL_TENOR_KEY: string | undefined;
+let ORIGINAL_GIPHY_KEY: string | undefined;
 
 beforeAll(() => {
-  ORIGINAL_TENOR_KEY = require("@/config/env").publicEnv.TENOR_API_KEY;
+  ORIGINAL_GIPHY_KEY = require("@/config/env").publicEnv.GIPHY_API_KEY;
 });
 
 afterEach(() => {
-  // restore TENOR key to avoid cross-test leakage
-  require("@/config/env").publicEnv.TENOR_API_KEY = ORIGINAL_TENOR_KEY;
+  // restore GIPHY key to avoid cross-test leakage
+  require("@/config/env").publicEnv.GIPHY_API_KEY = ORIGINAL_GIPHY_KEY;
   jest.clearAllMocks();
 });
 
@@ -83,13 +83,14 @@ jest.mock("framer-motion", () => {
       ),
     LayoutGroup: ({ children }: { children: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children),
+    useReducedMotion: () => false,
   };
 });
 
 jest.mock("@/components/waves/StormButton", () => {
   return function MockStormButton({
     isStormMode,
-    canAddPart,
+    isPollActive,
     submitting,
     breakIntoStorm,
   }: any) {
@@ -97,7 +98,7 @@ jest.mock("@/components/waves/StormButton", () => {
       <button
         data-testid="storm-button"
         onClick={breakIntoStorm}
-        disabled={submitting || !canAddPart}
+        disabled={submitting || isPollActive}
       >
         {isStormMode ? "Storm Mode" : "Storm"}
       </button>
@@ -106,9 +107,14 @@ jest.mock("@/components/waves/StormButton", () => {
 });
 
 jest.mock("@/components/waves/CreateDropGifPicker", () => {
-  return function MockCreateDropGifPicker({ show, setShow, onSelect }: any) {
+  return function MockCreateDropGifPicker({
+    giphyApiKey,
+    show,
+    setShow,
+    onSelect,
+  }: any) {
     return show ? (
-      <div data-testid="gif-picker">
+      <div data-testid="gif-picker" data-api-key={giphyApiKey}>
         <button
           onClick={() => onSelect("test-gif.gif")}
           data-testid="select-gif"
@@ -148,7 +154,6 @@ describe("CreateDropActions", () => {
   const defaultProps = {
     isStormMode: false,
     isDropMode: true,
-    canAddPart: true,
     submitting: false,
     isRequiredMetadataMissing: false,
     isRequiredMediaMissing: false,
@@ -285,6 +290,14 @@ describe("CreateDropActions", () => {
     expect(screen.getAllByTestId("storm-button").length).toBeGreaterThan(0);
   });
 
+  it("centers the desktop action row against the input", () => {
+    render(<CreateDropActions {...defaultProps} />);
+
+    const actionSlot = screen.getByTestId("drop-actions-motion-shell").parentElement;
+    expect(actionSlot).toHaveClass("tw-self-center");
+    expect(actionSlot).not.toHaveClass("tw-self-end", "tw-mb-1");
+  });
+
   it("renders poll action for admins and toggles it", async () => {
     render(<CreateDropActions {...defaultProps} canCreatePoll={true} />);
 
@@ -305,7 +318,7 @@ describe("CreateDropActions", () => {
     ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it("shows active poll action state", () => {
+  it("hides the poll action while a poll is active", () => {
     render(
       <CreateDropActions
         {...defaultProps}
@@ -314,9 +327,94 @@ describe("CreateDropActions", () => {
       />
     );
 
-    const pollButton = screen.getByLabelText("Remove poll");
-    expect(pollButton).toHaveAttribute("aria-pressed", "true");
-    expect(pollButton).toHaveClass("tw-bg-primary-500/20");
+    expect(screen.queryByLabelText("Add poll")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Remove poll")).not.toBeInTheDocument();
+  });
+
+  it("uses the compact action slot to indicate an active poll", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        isCompactLayout={true}
+        canCreatePoll={true}
+        isPollActive={true}
+      />
+    );
+
+    expect(screen.getByTestId("drop-actions-compact-slot")).toHaveClass(
+      "tw-size-10",
+      "desktop-hover:tw-size-9"
+    );
+    expect(
+      screen.getByTestId("drop-actions-compact-slot").querySelector("button")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("drop-actions-toggle-motion")
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps compact tray spacing inside its animated height", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        isCompactLayout={true}
+        showOptions={true}
+      />
+    );
+
+    const tray = screen.getByTestId("drop-actions-compact-tray");
+    expect(tray).not.toHaveClass("tw-mt-2");
+    expect(tray).toHaveClass("tw-col-span-2", "tw-col-start-2");
+    expect(tray).not.toHaveClass("md:tw-col-span-1");
+    expect(tray.firstElementChild).toHaveClass("tw-h-2");
+  });
+
+  it("keeps compact controls touch sized and scales their surfaces for fine pointers", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        isCompactLayout={true}
+        showOptions={true}
+      />
+    );
+
+    const toggle = screen.getByTestId("drop-actions-toggle-motion");
+    expect(toggle).toHaveClass("tw-size-10", "desktop-hover:tw-size-9");
+    expect(screen.getByTestId("drop-actions-compact-slot")).toHaveClass(
+      "tw-self-end",
+      "desktop-hover:tw-self-center"
+    );
+
+    const tray = screen.getByTestId("drop-actions-compact-tray");
+    const firstActionSurface = tray.querySelector("button > span");
+    expect(firstActionSurface).toHaveClass(
+      "tw-size-10",
+      "desktop-hover:tw-size-9"
+    );
+  });
+
+  it("disables the storm action while a poll is active", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        canCreatePoll={true}
+        isPollActive={true}
+      />
+    );
+
+    expect(screen.getByTestId("storm-button")).toBeDisabled();
+  });
+
+  it("disables the poll action while a storm is active", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        canCreatePoll={true}
+        isStormMode={true}
+      />
+    );
+
+    expect(screen.getByLabelText("Add poll")).toBeDisabled();
   });
 
   it("calls onAddMetadataClick when metadata button is clicked", async () => {
@@ -351,6 +449,10 @@ describe("CreateDropActions", () => {
     await userEvent.click(gifButtons[0]);
 
     expect(screen.getByTestId("gif-picker")).toBeInTheDocument();
+    expect(screen.getByTestId("gif-picker")).toHaveAttribute(
+      "data-api-key",
+      "test-giphy-api-key"
+    );
   });
 
   it("calls onGifDrop when GIF is selected", async () => {
@@ -394,14 +496,19 @@ describe("CreateDropActions", () => {
     });
   });
 
-  it("does not show GIF button when API key is not available", () => {
+  it("keeps the GIF action visible when API configuration is unavailable", async () => {
     const { publicEnv } = require("@/config/env");
-    const prevKey = publicEnv.TENOR_API_KEY;
-    publicEnv.TENOR_API_KEY = undefined;
+    publicEnv.GIPHY_API_KEY = undefined;
     render(<CreateDropActions {...defaultProps} />);
 
-    expect(screen.queryByLabelText("Add GIF")).not.toBeInTheDocument();
-    publicEnv.TENOR_API_KEY = prevKey;
+    const gifButton = screen.getByRole("button", { name: "Add GIF" });
+    expect(gifButton).toBeVisible();
+
+    await userEvent.click(gifButton);
+
+    expect(screen.getByTestId("gif-picker")).not.toHaveAttribute(
+      "data-api-key"
+    );
   });
 
   it("highlights metadata button when metadata is missing", () => {
@@ -450,19 +557,16 @@ describe("CreateDropActions", () => {
     expect(fileInput).toHaveAttribute("multiple");
   });
 
-  it("passes correct props to StormButton", () => {
+  it("hides the storm action after storm mode starts", () => {
     render(
       <CreateDropActions
         {...defaultProps}
         isStormMode={true}
-        canAddPart={false}
         submitting={true}
       />
     );
 
-    const stormButtons = screen.getAllByTestId("storm-button");
-    expect(stormButtons[0]).toHaveTextContent("Storm Mode");
-    expect(stormButtons[0]).toBeDisabled();
+    expect(screen.queryByTestId("storm-button")).not.toBeInTheDocument();
   });
 
   it("calls breakIntoStorm when storm button is clicked", async () => {

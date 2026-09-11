@@ -10,17 +10,66 @@ import {
 import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import { formatAddress } from "@/helpers/Helpers";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useContext, useEffect, useMemo, useState } from "react";
-import Toggle from "react-toggle";
 import { Tooltip } from "react-tooltip";
 import SubscriptionHeaderLinks, {
   SubscriptionBalanceLabel,
 } from "./SubscriptionHeaderLinks";
+import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
+
+const SUBSCRIPTION_COUNT_SELECT_CLASS =
+  "tw-h-10 tw-w-12 tw-appearance-none tw-border-0 tw-bg-transparent tw-py-0 tw-pl-3 tw-pr-5 tw-text-sm tw-leading-none tw-text-iron-200 focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-text-iron-500";
+
+function MintingTodayLabel({
+  tokenId,
+  locale,
+  className = "",
+}: {
+  readonly tokenId: number;
+  readonly locale: ReturnType<typeof useBrowserLocale>;
+  readonly className?: string | undefined;
+}) {
+  const tooltipId = `minting-today-${tokenId}`;
+
+  return (
+    <>
+      <button
+        type="button"
+        className={`tw-inline-flex tw-items-center tw-gap-1 tw-border-0 tw-bg-transparent tw-p-0 ${className}`}
+        data-tooltip-id={tooltipId}
+        aria-describedby={tooltipId}
+      >
+        {t(locale, "profile.subscriptions.mintingToday.label")}
+        <FontAwesomeIcon
+          icon={faInfoCircle}
+          className="tw-size-4"
+          aria-hidden="true"
+        />
+      </button>
+      <Tooltip
+        id={tooltipId}
+        place="top"
+        positionStrategy="fixed"
+        offset={8}
+        delayShow={250}
+        opacity={1}
+        style={TOOLTIP_STYLES}
+      >
+        {t(locale, "profile.subscriptions.mintingToday.tooltip")}
+      </Tooltip>
+    </>
+  );
+}
 
 export default function MemeSubscriptionRow(
   props: Readonly<{
@@ -42,6 +91,7 @@ export default function MemeSubscriptionRow(
 ) {
   const id = `subscription-${props.subscription.token_id}`;
   const isCompact = props.variant === "compact";
+  const locale = useBrowserLocale();
 
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useContext(AuthContext);
@@ -240,41 +290,49 @@ export default function MemeSubscriptionRow(
   };
 
   const renderCountSelector = ({
-    selectClassName,
     disableWhenSingleOption,
   }: {
-    selectClassName: string;
     disableWhenSingleOption: boolean;
   }) => {
     if (!subscribed) {
       return null;
     }
 
+    const isCountSelectDisabled =
+      (disableWhenSingleOption && props.eligibilityCount <= 1) ||
+      props.readonly ||
+      isSubmitting ||
+      props.minting_today;
+
     return (
-      <>
-        <select
-          className={selectClassName}
-          value={selectedCount}
-          disabled={
-            (disableWhenSingleOption && props.eligibilityCount <= 1) ||
-            props.readonly ||
-            isSubmitting ||
-            props.minting_today
-          }
-          onChange={(e) => {
-            handleCountChange(e.target.value).catch(() => undefined);
-          }}
-          style={{ minWidth: "3ch" }}
-          aria-label={`Select subscription quantity for ${props.title}`}
-        >
-          {countOptions.map((num) => (
-            <option key={num} value={num}>
-              {num}
-            </option>
-          ))}
-        </select>
-        <span className="tw-text-iron-400">/ {props.eligibilityCount}</span>
-      </>
+      <span className="tw-inline-flex tw-h-10 tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/[0.03] tw-transition-shadow focus-within:tw-ring-2 focus-within:tw-ring-primary-400/25">
+        <span className="tw-relative tw-inline-flex tw-items-center">
+          <select
+            className={SUBSCRIPTION_COUNT_SELECT_CLASS}
+            value={selectedCount}
+            disabled={isCountSelectDisabled}
+            onChange={(e) => {
+              handleCountChange(e.target.value).catch(() => undefined);
+            }}
+            aria-label={`Select subscription quantity for ${props.title}`}
+          >
+            {countOptions.map((num) => (
+              <option key={num} value={num}>
+                {num}
+              </option>
+            ))}
+          </select>
+          <ChevronDownIcon
+            className={`tw-pointer-events-none tw-absolute tw-right-0.5 tw-size-4 ${
+              isCountSelectDisabled ? "tw-text-iron-600" : "tw-text-iron-500"
+            }`}
+            aria-hidden="true"
+          />
+        </span>
+        <span className="tw-pl-1 tw-pr-3 tw-text-sm tw-leading-none tw-text-iron-500">
+          / {props.eligibilityCount}
+        </span>
+      </span>
     );
   };
 
@@ -303,52 +361,34 @@ export default function MemeSubscriptionRow(
           ) : (
             <div className="tw-flex tw-items-center tw-gap-2">
               {isSubmitting && <Spinner />}
-              <Toggle
+              {renderCountSelector({
+                disableWhenSingleOption: false,
+              })}
+              <UserPageSubscriptionsToggle
                 disabled={isToggleDisabled}
                 id={id}
                 checked={subscribed}
-                icons={false}
                 onChange={submit}
-                aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
+                ariaLabel={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
               />
-              <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
-                {renderCountSelector({
-                  selectClassName:
-                    "tw-rounded tw-border tw-border-iron-400 tw-bg-transparent tw-px-1 tw-text-iron-400",
-                  disableWhenSingleOption: false,
-                })}
-              </span>
             </div>
           )}
         </div>
         {finalWithMetadata && (
           <div className="tw-mt-2 tw-pr-2 tw-text-sm tw-text-iron-400">
             Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
-            {finalWithMetadata.phasePosition.toLocaleString()} /{" "}
-            {finalWithMetadata.phaseSubscriptions.toLocaleString()} - Airdrop
-            Address: {formatAddress(finalWithMetadata.airdropAddress)} -
+            {formatInteger(locale, finalWithMetadata.phasePosition)} /{" "}
+            {formatInteger(locale, finalWithMetadata.phaseSubscriptions)} -
+            Airdrop Address: {formatAddress(finalWithMetadata.airdropAddress)} -
             Subscription Count: x{finalWithMetadata.subscribedCount}
           </div>
         )}
         {props.minting_today && (
           <div className="tw-mt-2 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-400">
-            <span
-              data-tooltip-id={`minting-today-${props.subscription.token_id}`}
-            >
-              Minting Today{" "}
-              <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
-            </span>
-            <Tooltip
-              id={`minting-today-${props.subscription.token_id}`}
-              place="right"
-              style={{
-                backgroundColor: "#f8f9fa",
-                color: "#212529",
-                padding: "4px 8px",
-              }}
-            >
-              No changes allowed on minting day
-            </Tooltip>
+            <MintingTodayLabel
+              tokenId={props.subscription.token_id}
+              locale={locale}
+            />
           </div>
         )}
       </div>
@@ -356,76 +396,57 @@ export default function MemeSubscriptionRow(
   }
 
   return (
-    <div className="tw-py-2">
-      <div>
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
-            <span className="tw-flex tw-items-center tw-gap-2">
-              <span className="tw-font-medium">
-                {props.title} #{props.subscription.token_id}{" "}
-              </span>
-              {props.date && (
-                <>
-                  <span>
-                    - SZN
-                    {displayedSeasonNumberFromIndex(props.date.seasonIndex)}
-                  </span>
-                  {" / "}
-                  {props.minting_today ? (
-                    <>
-                      <span
-                        data-tooltip-id={`minting-today-${props.subscription.token_id}`}
-                      >
-                        - Minting Today{" "}
-                        <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
-                      </span>
-                      <Tooltip
-                        id={`minting-today-${props.subscription.token_id}`}
-                        place="right"
-                        style={{
-                          backgroundColor: "#f8f9fa",
-                          color: "#212529",
-                          padding: "4px 8px",
-                        }}
-                      >
-                        No changes allowed on minting day
-                      </Tooltip>
-                    </>
-                  ) : (
-                    <span>{formatFullDate(props.date.utcDay, "utc")}</span>
-                  )}
-                </>
-              )}
+    <div className="tw-rounded-xl tw-p-4 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-900/40 motion-reduce:tw-transition-none">
+      <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-4">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
+            <span className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
+              {props.title} #{props.subscription.token_id}
             </span>
-            {finalWithMetadata && (
-              <span className="tw-text-sm tw-text-iron-400">
-                Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
-                {finalWithMetadata.phasePosition.toLocaleString()} /{" "}
-                {finalWithMetadata.phaseSubscriptions.toLocaleString()} -
-                Airdrop Address:{" "}
-                {formatAddress(finalWithMetadata.airdropAddress)} - Subscription
-                Count: x{finalWithMetadata.subscribedCount}
+            {props.date && (
+              <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-xs tw-leading-4">
+                <span className="tw-text-iron-500">
+                  SZN{displayedSeasonNumberFromIndex(props.date.seasonIndex)}
+                </span>
+                <span className="tw-text-iron-600" aria-hidden="true">
+                  /
+                </span>
+                {props.minting_today ? (
+                  <MintingTodayLabel
+                    tokenId={props.subscription.token_id}
+                    locale={locale}
+                    className="tw-font-medium tw-text-primary-300"
+                  />
+                ) : (
+                  <span className="tw-text-iron-600">
+                    {formatFullDate(props.date.utcDay, "utc")}
+                  </span>
+                )}
               </span>
             )}
           </div>
-          <div className="tw-flex tw-items-center tw-gap-2">
-            {isSubmitting && <Spinner />}
-            <Toggle
-              disabled={isToggleDisabled}
-              id={id}
-              checked={subscribed}
-              icons={false}
-              onChange={submit}
-              aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
-            />
-            <span className="tw-flex tw-min-w-16 tw-items-center tw-gap-1">
-              {renderCountSelector({
-                selectClassName:
-                  "tw-text-iron-400 tw-bg-transparent tw-border tw-border-iron-400 tw-rounded tw-px-1",
-                disableWhenSingleOption: true,
-              })}
+          {finalWithMetadata && (
+            <span className="tw-break-words tw-text-xs tw-leading-5 tw-text-iron-600">
+              Phase: {finalWithMetadata.phase} - Subscription Position:{" "}
+              {formatInteger(locale, finalWithMetadata.phasePosition)} /{" "}
+              {formatInteger(locale, finalWithMetadata.phaseSubscriptions)} -
+              Airdrop Address: {formatAddress(finalWithMetadata.airdropAddress)}{" "}
+              - Subscription Count: x{finalWithMetadata.subscribedCount}
             </span>
-          </div>
+          )}
+        </div>
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-3">
+          {isSubmitting && <Spinner />}
+          {renderCountSelector({
+            disableWhenSingleOption: true,
+          })}
+          <UserPageSubscriptionsToggle
+            disabled={isToggleDisabled}
+            id={id}
+            checked={subscribed}
+            onChange={submit}
+            ariaLabel={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
+          />
         </div>
       </div>
     </div>

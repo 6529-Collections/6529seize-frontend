@@ -117,7 +117,7 @@ const getExpandedFrameClassName = (floating: boolean): string => {
     return `tw-pointer-events-auto ${MEMES_WAVE_FLOATING_FOOTER_WIDTH_CLASS_NAME} tw-origin-bottom tw-scale-[var(--memes-wave-floating-footer-scale)] tw-flex-shrink-0 tw-transform-gpu tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] tw-will-change-transform motion-reduce:tw-transition-none`;
   }
 
-  return "tw-mt-auto tw-w-full tw-flex-shrink-0 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-bg-black tw-p-4";
+  return "tw-mt-auto tw-w-full tw-flex-shrink-0 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-bg-black tw-p-3";
 };
 
 const getContainerStyle = ({
@@ -151,6 +151,7 @@ export const MemesWaveFooterView: React.FC<MemesWaveFooterViewProps> = ({
   } = stats;
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
+  const isCompactAppFooter = floating && isApp;
   const floatingFooterRef = useMeasuredMobileBottomNavDockBottom({
     dockGapPx: MEMES_WAVE_FLOATING_FOOTER_DOCK_GAP_PX,
     enabled: floating,
@@ -164,6 +165,15 @@ export const MemesWaveFooterView: React.FC<MemesWaveFooterViewProps> = ({
     locale
   );
   const unratedText = formatMemesQuickVoteUnratedText(unratedCount, locale);
+  const compactPowerText =
+    typeof uncastPower === "number" ? formatInteger(locale, uncastPower) : null;
+  const compactVotingLabel =
+    votingLabel ?? t(locale, "memes.waveFooter.uncastPower.votesVisible");
+  const compactLeftText = t(
+    locale,
+    "memes.waveFooter.uncastPower.compactLeft",
+    { count: formatInteger(locale, leftThisRoundCount) }
+  );
   const { buttonAriaLabel, buttonTitle, buttonValue } =
     getMemesWaveFooterLabels({
       isReady,
@@ -225,7 +235,7 @@ export const MemesWaveFooterView: React.FC<MemesWaveFooterViewProps> = ({
                 data-memes-wave-footer-frame={floating ? "floating" : undefined}
                 className={expandedFrameClassName}
               >
-                <div className="tw-flex tw-items-stretch tw-gap-2">
+                {isCompactAppFooter ? (
                   <button
                     type="button"
                     aria-label={buttonAriaLabel}
@@ -233,39 +243,81 @@ export const MemesWaveFooterView: React.FC<MemesWaveFooterViewProps> = ({
                     onFocus={handlePrefetchQuickVote}
                     onMouseEnter={handlePrefetchQuickVote}
                     onPointerDown={handlePrefetchQuickVote}
-                    className="tw-group tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+                    data-memes-wave-footer-variant="compact-app"
+                    className="tw-group tw-flex tw-h-11 tw-w-full tw-min-w-0 tw-cursor-pointer tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#0c0d10] tw-px-4 tw-py-0 tw-text-left tw-shadow-lg tw-shadow-black/35 tw-transition-[background-color,border-color] tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400/70 active:tw-bg-[#111319]"
                   >
-                    <div className="tw-relative tw-flex tw-h-full tw-items-center tw-justify-between tw-gap-4 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-[#2d3753] tw-bg-[#0c1018] tw-px-4 tw-py-2.5 tw-shadow-lg tw-transition-all tw-duration-200 desktop-hover:group-hover:tw-border-[#3a4670] desktop-hover:group-hover:tw-bg-[#0f1420]">
-                      <span
-                        aria-hidden="true"
-                        className="tw-pointer-events-none tw-absolute tw-inset-0 -tw-translate-x-full tw-bg-gradient-to-r tw-from-white/0 tw-via-white/[0.08] tw-to-white/0 tw-opacity-50 tw-transition-transform tw-duration-1000 tw-ease-out desktop-hover:group-hover:tw-translate-x-full"
-                      />
-                      <div className="tw-relative tw-z-10 tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5">
-                        <span className="tw-whitespace-nowrap tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-widest tw-text-iron-400">
-                          {buttonTitle}
+                    <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+                      <MemesWaveZapIcon className="tw-size-4 tw-flex-shrink-0 tw-fill-none tw-text-primary-400" />
+                      {compactPowerText === null ? (
+                        <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
+                          {buttonValue}
                         </span>
-
-                        <div className="tw-flex tw-items-center tw-gap-2">
-                          <MemesWaveZapIcon className="tw-size-4 tw-flex-shrink-0 tw-fill-primary-400/20 tw-text-primary-400" />
-                          <span className="tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white">
-                            {buttonValue}
+                      ) : (
+                        <span className="tw-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap">
+                          <span className="tw-text-sm tw-font-semibold tw-tracking-tight tw-text-iron-100">
+                            {compactPowerText}
                           </span>
-                        </div>
-                      </div>
-
-                      {isReady && (
-                        <div className="tw-relative tw-z-10 tw-flex tw-flex-col tw-items-end tw-gap-0.5 tw-text-right">
-                          <span className="tw-text-xs tw-font-semibold tw-text-[#8199ea] tw-shadow-sm">
-                            {leftThisRoundText}
+                          <span className="tw-text-sm tw-font-normal tw-text-iron-500">
+                            {compactVotingLabel}
                           </span>
-                          <span className="tw-text-[11px] tw-font-medium tw-text-iron-400">
-                            {unratedText}
-                          </span>
-                        </div>
+                        </span>
                       )}
-                    </div>
+                    </span>
+
+                    {isReady && (
+                      <span className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-shrink tw-items-center tw-gap-3 tw-pl-3">
+                        <span className="tw-truncate tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-primary-300">
+                          {compactLeftText}
+                        </span>
+                        <span
+                          aria-hidden="true"
+                          className="tw-h-5 tw-w-px tw-flex-shrink-0 tw-bg-white/[0.14]"
+                        />
+                        <span className="tw-truncate tw-whitespace-nowrap tw-text-[11px] tw-font-normal tw-text-iron-500">
+                          {unratedText}
+                        </span>
+                      </span>
+                    )}
                   </button>
-                </div>
+                ) : (
+                  <div className="tw-flex tw-items-stretch tw-gap-2">
+                    <button
+                      type="button"
+                      aria-label={buttonAriaLabel}
+                      onClick={handleOpenQuickVote}
+                      onFocus={handlePrefetchQuickVote}
+                      onMouseEnter={handlePrefetchQuickVote}
+                      onPointerDown={handlePrefetchQuickVote}
+                      className="tw-group tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-rounded-xl tw-border-0 tw-bg-transparent tw-p-0 tw-text-left focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400/70"
+                    >
+                      <div className="tw-flex tw-h-full tw-items-center tw-justify-between tw-gap-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#0c1018] tw-px-3 tw-py-2.5 tw-shadow-sm tw-shadow-black/30 tw-transition-[background-color,border-color] tw-duration-200 desktop-hover:group-hover:tw-border-white/[0.14] desktop-hover:group-hover:tw-bg-[#0f1420]">
+                        <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
+                          <span className="tw-whitespace-nowrap tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
+                            {buttonTitle}
+                          </span>
+
+                          <div className="tw-flex tw-items-center tw-gap-1.5">
+                            <MemesWaveZapIcon className="tw-size-3.5 tw-flex-shrink-0 tw-fill-none tw-text-primary-400" />
+                            <span className="tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-iron-100">
+                              {buttonValue}
+                            </span>
+                          </div>
+                        </div>
+
+                        {isReady && (
+                          <div className="tw-flex tw-flex-shrink-0 tw-flex-col tw-items-end tw-gap-0.5 tw-text-right">
+                            <span className="tw-text-xs tw-font-medium tw-text-primary-300">
+                              {leftThisRoundText}
+                            </span>
+                            <span className="tw-text-[11px] tw-font-normal tw-text-iron-500">
+                              {unratedText}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </m.div>

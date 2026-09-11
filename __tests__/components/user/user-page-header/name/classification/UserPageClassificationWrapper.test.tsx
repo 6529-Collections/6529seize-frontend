@@ -21,15 +21,36 @@ jest.mock('@/components/utils/animation/CommonAnimationOpacity', () => ({ childr
 describe('UserPageClassificationWrapper', () => {
   it('opens and closes edit modal when button clicked', async () => {
     render(
-      <UserPageClassificationWrapper profile={{} as any} canEdit={true}>
+      <UserPageClassificationWrapper
+        profile={{} as any}
+        canEdit={true}
+        profileLabel="Alice"
+      >
         <span data-testid="child" />
       </UserPageClassificationWrapper>
     );
 
-    await userEvent.click(screen.getByRole('button'));
+    await userEvent.click(
+      screen.getByRole('button', { name: "Edit Alice's classification" })
+    );
     expect(screen.getByTestId('edit')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('edit'));
     expect(screen.queryByTestId('edit')).toBeNull();
+  });
+
+  it('renders classification as plain content when editing is unavailable', () => {
+    render(
+      <UserPageClassificationWrapper
+        profile={{} as any}
+        canEdit={false}
+        profileLabel="Alice"
+      >
+        <span data-testid="child" />
+      </UserPageClassificationWrapper>
+    );
+
+    expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.getByTestId('child')).toBeInTheDocument();
   });
 });

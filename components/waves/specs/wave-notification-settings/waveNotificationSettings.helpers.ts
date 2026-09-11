@@ -1,8 +1,10 @@
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
-export type NotificationLoadingTarget = "all-group" | "all-drops";
+export type NotificationLoadingTarget = "broadcast-mentions" | "all-drops";
 
-export const ALL_GROUP_MENTION = ApiDropGroupMention.All;
+// The persisted ALL value is the backward-compatible preference key for both
+// admin-only broadcast mentions: @all and @contributors.
+export const BROADCAST_MENTION_PREFERENCE = ApiDropGroupMention.All;
 
 export const getErrorMessage = (error: unknown, defaultMessage: string) => {
   if (error instanceof Error) {
@@ -22,23 +24,3 @@ export const getErrorMessage = (error: unknown, defaultMessage: string) => {
 
   return defaultMessage;
 };
-
-export function getAllDropsTooltip({
-  disableAllDropsSelection,
-  subscribedToAllDrops,
-  subscribersLimit,
-}: {
-  readonly disableAllDropsSelection: boolean;
-  readonly subscribedToAllDrops: boolean;
-  readonly subscribersLimit: number;
-}) {
-  if (disableAllDropsSelection && !subscribedToAllDrops) {
-    return `All-message notifications are unavailable for waves with ${subscribersLimit.toLocaleString()}+ followers.`;
-  }
-
-  if (subscribedToAllDrops) {
-    return "Click to disable notifications for all messages";
-  }
-
-  return "Click to enable notifications for all messages";
-}

@@ -1,0 +1,76 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMintManager.t.sol:NoMarkerMintModuleRegistry",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpOb01hcmtlck1pbnRNb2R1bGVSZWdpc3RyeQ",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMintManager.t.sol:NoMarkerMintModuleRegistry"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "NoMarkerMintModuleRegistry",
+    "natspec": "",
+    "range": {
+      "byteLength": 39,
+      "byteStart": 6649,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L194",
+      "lineEnd": 194,
+      "lineStart": 194,
+      "snippetSha256": "sha256:7ca8cf9defdfc30c115f7641b0f48603303749d20cfd718e12dd6c496e1e6bc5",
+      "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMintManager.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMintManager.t.sol:NoMarkerMintModuleRegistry",
+      "severity": "advisory"
+    }
+  ]
+}

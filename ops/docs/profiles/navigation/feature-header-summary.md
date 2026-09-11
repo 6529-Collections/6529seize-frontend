@@ -6,6 +6,7 @@ The profile header appears on profile routes under `/{user}` and shows:
 
 - identity and profile metadata
 - profile actions (edit, follow, direct message)
+- a **Website** link when a published profile website is available
 - quick stats links (`TDH`, `xTDH`, `NIC`, `Rep`, `Followers`)
 - artist activity entry when available
 
@@ -32,6 +33,8 @@ The profile header appears on profile routes under `/{user}` and shows:
 3. The header renders:
    - banner (image or gradient fallback)
    - profile picture (image or gradient fallback)
+   - profile picture overlapping the lower banner edge, with the name and
+     metadata on the content surface below the banner
    - title row (display name, CIC icon, level, optional artist badge)
    - metadata row (classification and `Profile enabled: <Month Year>` when data
      exists)
@@ -51,8 +54,19 @@ The profile header appears on profile routes under `/{user}` and shows:
    - winners-only: opens `Winning Artworks`
    - both: opens `Active Submissions` first
 7. Actions depend on viewer context:
-   - own profile with handle and no active proxy: edit banner, profile picture,
-     name, classification, and About
+   - own profile with handle and no active proxy: fine-pointer desktop layouts
+     expose direct edit controls on the banner, profile picture, name,
+     classification, and About
+   - smaller and touch-first layouts show an `Edit profile` action that opens
+     an editing hub for those same identity fields
+   - `Preferences` remains a distinct owner action for privacy, direct-message,
+     and notification settings; it sits in the right-side action area below the
+     banner on desktop, remains an icon-only action beside `Edit profile` in the
+     banner's top-right corner on touch-first and phone layouts, and sits to the
+     right of the identity on smaller fine-pointer layouts
+   - subscription coverage remains a separate status and navigation surface:
+     a subtle row beneath Preferences on desktop layouts, and a full-width
+     subtle row below the identity block on smaller layouts
    - other profile, signed-in viewer with handle, and target profile with
      handle: follow/unfollow button
    - if that target also has a primary wallet: direct-message button appears
@@ -62,12 +76,26 @@ The profile header appears on profile routes under `/{user}` and shows:
      loader, stays disabled, and ignores repeated clicks until the request
      settles
 
+The **Website** action opens the profile's published custom website. Its home
+page can use a readable address such as `/{user}/studio`; the normal profile stays
+at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
+
 ## Common Scenarios
 
 - Display name fallback order: `handle` -> `display` -> primary wallet -> route
   value.
 - Long About text (`>240` chars) is clamped on mobile with `See more` /
   `See less`; desktop stays expanded.
+- Mobile profile banners retain their existing full-strength artwork and
+  top-right owner controls. Desktop banners fade into the content surface at
+  the bottom; only the profile picture crosses that boundary.
+- The subscription status can link directly to the relevant settings,
+  upcoming-drops, or top-up section. The complete status row is the link, with
+  its label, current state, and contextual action kept inline when space allows.
+  It remains a full-width contextual row on smaller layouts and can wrap when
+  translated or dynamic content cannot fit.
+- Touch-first layouts use the profile editing hub; fine-pointer desktop layouts
+  retain the field-level editing controls.
 - `Followers` opens a modal list; it does not navigate to a followers tab.
 - On non-touch desktop devices, the artist badge shows a tooltip with activity
   counts.
@@ -85,9 +113,13 @@ The profile header appears on profile routes under `/{user}` and shows:
 - If header-side fetches fail (BIO statement, profile-enabled date, followers
   count), the profile route still loads and missing header fields are omitted.
 - Followers count falls back to `0` if the count request fails.
+- If the published website cannot be loaded, its header link is omitted; other
+  profile actions remain available.
 - If direct-message creation fails, users get an error toast, the paper-plane
   button returns to its idle state, and they can retry.
 - If profile header edits fail, users get a toast or inline error and can retry.
+- If subscription coverage cannot load, the header shows
+  `Coverage unavailable`; owners can still open Subscriptions and recover there.
 - If the profile cannot be resolved, users see the shared not-found screen:
   - [Route Error and Not-Found Screens](../../shared/feature-route-error-and-not-found.md).
 
@@ -98,9 +130,12 @@ The profile header appears on profile routes under `/{user}` and shows:
   profile with a handle, and a target primary wallet.
 - Artist badge and modal tabs depend on loaded
   `active_main_stage_submission_ids` and `winner_main_stage_drop_ids`.
+- `Edit profile`, `Preferences`, and owner subscription coverage are hidden
+  while an active profile proxy is in use.
 
 ## Related Pages
 
+- [Profile Website Studio](../feature-profile-cms-builder.md)
 - [Profiles Index](../README.md)
 - [Profiles Navigation Index](README.md)
 - [Profile Routes and Tab Visibility](feature-tabs.md)

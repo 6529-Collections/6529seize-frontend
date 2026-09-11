@@ -7,10 +7,13 @@ import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
+import NftMarketActivity from "@/components/nft-market-activity/NftMarketActivity";
+import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import CollectEntryLink from "@/components/collect/CollectEntryLink";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
 import { TransferSingleActions } from "@/components/nft-transfer/TransferSingle";
+import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
 import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import { MemePageArtViewer } from "@/components/the-memes/MemePageArtViewer";
 import {
@@ -25,22 +28,34 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFT } from "@/entities/INFT";
 import { CollectedCollectionType } from "@/entities/IProfile";
-import type { Transaction } from "@/entities/ITransaction";
 import {
   areEqualAddresses,
   numberWithCommas,
   printMintDate,
 } from "@/helpers/Helpers";
+import {
+  getProfileCollectedReturnContext,
+  PROFILE_COLLECTED_RETURN_PARAM,
+} from "@/helpers/profile-collected-navigation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIdentity } from "@/hooks/useIdentity";
+import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import { ContractType } from "@/types/enums";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 interface NftWithOwner extends NFT {
   owner: string;
@@ -49,11 +64,6 @@ interface NftWithOwner extends NFT {
 
 type GradientNftsResponse = Omit<DBResponse<NftWithOwner>, "next"> & {
   readonly next: string | null | undefined;
-};
-
-type TransactionsState = {
-  readonly nftId: string;
-  readonly data: Transaction[];
 };
 
 const GRADIENT_COLLECTION_START_INDEX = 0;
@@ -120,9 +130,16 @@ function GradientMarketMetric({
 }
 
 function GradientMarketplaceLinks({ nft }: { readonly nft: NftWithOwner }) {
+  const locale = useBrowserLocale();
   return (
-    <div className="tw-flex tw-min-w-[8.5rem] tw-items-end">
+    <div className="tw-flex tw-min-w-[8.5rem] tw-flex-wrap tw-items-end tw-gap-3">
       <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
+      <CollectEntryLink
+        collection="gradients"
+        intent="specific"
+        tokenId={String(nft.id)}
+        locale={locale}
+      />
     </div>
   );
 }
@@ -299,9 +316,6 @@ function GradientDetailsPanel({
         </div>
       </section>
       <section className="tw-pt-6 md:tw-pt-8">
-        <h3 className="tw-mb-4 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-          Market Overview
-        </h3>
         <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-8 md:tw-grid-cols-3 md:tw-gap-x-10">
           <GradientMarketMetric
             label="Floor Price"
@@ -353,17 +367,8 @@ function GradientTransferWidget({ nft }: { readonly nft: NftWithOwner }) {
   );
 }
 
-function GradientActivitySection({
-  nft,
-  transactions,
-}: {
-  readonly nft: NftWithOwner;
-  readonly transactions: Transaction[];
-}) {
-  if (transactions.length === 0) {
-    return null;
-  }
-
+function GradientActivitySection({ nft }: { readonly nft: NftWithOwner }) {
+  const locale = useBrowserLocale();
   return (
     <section
       aria-labelledby="gradient-card-activity-heading"
@@ -374,30 +379,45 @@ function GradientActivitySection({
           id="gradient-card-activity-heading"
           className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200"
         >
-          Card Activity
+          {t(locale, "nftActivity.cardTitle")}
         </h3>
       </div>
-      <div className="tw-overflow-x-auto tw-overflow-y-hidden tw-pb-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-        <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
-          <tbody>
-            {transactions.map((tr) => (
-              <LatestActivityRow
-                nft={nft}
-                tr={tr}
-                variant="tailwind"
-                rowStyle="striped"
-                key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <NftMarketActivity
+        contract={GRADIENT_CONTRACT}
+        tokenId={String(nft.id)}
+        pageSize={25}
+      />
     </section>
   );
 }
 
-export default function GradientPageComponent({ id }: { readonly id: string }) {
+export default function GradientPageComponent({
+  id,
+  searchParamsString = "",
+}: {
+  readonly id: string;
+  readonly searchParamsString?: string | undefined;
+}) {
   const capacitor = useCapacitor();
+  const locale = useBrowserLocale();
+  const returnContext = useMemo(
+    () =>
+      getProfileCollectedReturnContext(
+        new URLSearchParams(searchParamsString).get(
+          PROFILE_COLLECTED_RETURN_PARAM
+        )
+      ),
+    [searchParamsString]
+  );
+  const navigationParams = useMemo(
+    () =>
+      new URLSearchParams(
+        returnContext
+          ? { [PROFILE_COLLECTED_RETURN_PARAM]: returnContext.href }
+          : undefined
+      ),
+    [returnContext]
+  );
   const { country } = useCookieConsent();
   const { address: connectedAddress } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
@@ -405,12 +425,8 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   useSetTitle(`6529 Gradient #${id}`);
 
   const [allNfts, setAllNfts] = useState<NftWithOwner[]>([]);
-  const [transactionsState, setTransactionsState] = useState<TransactionsState>(
-    {
-      nftId: id,
-      data: [],
-    }
-  );
+  const activitySectionRef = useRef<HTMLDivElement | null>(null);
+  const [activityNearViewport, setActivityNearViewport] = useState(false);
 
   const rankedNFTs = useMemo(
     () => [...allNfts].sort((a, b) => (a.tdh_rank > b.tdh_rank ? 1 : -1)),
@@ -446,9 +462,6 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
 
     return areEqualAddresses(connectedAddress, nft.owner);
   }, [connectedAddress, nft]);
-  const transactions =
-    transactionsState.nftId === id ? transactionsState.data : [];
-
   const fetchNfts = useCallback(
     async function fetchNftsInner(
       url: string,
@@ -492,53 +505,56 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   }, [fetchNfts]);
 
   useEffect(() => {
-    if (!id) {
+    setActivityNearViewport(false);
+
+    const element = activitySectionRef.current;
+    if (!nft || !element) {
       return;
     }
 
-    const abortController = new AbortController();
-
-    async function fetchTransactions() {
-      try {
-        const response = await fetchUrl<DBResponse<Transaction>>(
-          `${publicEnv.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${id}`,
-          { signal: abortController.signal }
-        );
-        if (abortController.signal.aborted) {
-          return;
-        }
-        setTransactionsState({ nftId: id, data: response.data });
-      } catch (error: unknown) {
-        if (error instanceof Error && error.name === "AbortError") {
-          return;
-        }
-        console.error(
-          `Failed to fetch gradient transactions for id ${id}`,
-          error
-        );
-        setTransactionsState({ nftId: id, data: [] });
-      }
+    if (typeof globalThis.IntersectionObserver === "undefined") {
+      setActivityNearViewport(true);
+      return;
     }
 
-    fetchTransactions();
+    const observer = new globalThis.IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setActivityNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px 0px" }
+    );
 
-    return () => abortController.abort();
-  }, [id]);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [id, nft]);
 
   return (
     <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
       <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
         <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">
-            <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
-              <div className="tw-mb-0 tw-flex tw-items-center">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
+              <ProfileCollectedReturnLink
+                locale={locale}
+                returnTo={returnContext?.href}
+              />
+              <div
+                className={`tw-mb-0 tw-items-center ${
+                  returnContext && !capacitor.isCapacitor
+                    ? "tw-hidden md:tw-flex"
+                    : "tw-flex"
+                }`}
+              >
                 <Link
                   href="/6529-gradient"
                   className="tw-group -tw-ml-2 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-py-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 >
                   <ArrowLeftIcon
                     aria-hidden="true"
-                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
+                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform tw-duration-150 group-hover:-tw-translate-x-0.5 motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
                   />
                   6529 Gradient
                 </Link>
@@ -552,10 +568,11 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
                     path="/6529-gradient"
                     startIndex={GRADIENT_COLLECTION_START_INDEX}
                     endIndex={GRADIENT_COLLECTION_END_INDEX}
+                    params={navigationParams}
                   />
                 </div>
                 <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
-                  <h1 className="tw-mb-0 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl md:tw-truncate">
+                  <h1 className="tw-m-0 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl md:tw-truncate">
                     {nft.name}
                   </h1>
                 </div>
@@ -597,7 +614,10 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
                 />
               </div>
             </div>
-            <GradientActivitySection nft={nft} transactions={transactions} />
+            <MarketDepthPanel contract={GRADIENT_CONTRACT} tokenId={nft.id} />
+            <div ref={activitySectionRef} className="tw-min-h-px">
+              {activityNearViewport && <GradientActivitySection nft={nft} />}
+            </div>
           </>
         ) : (
           <MemePageSkeleton />

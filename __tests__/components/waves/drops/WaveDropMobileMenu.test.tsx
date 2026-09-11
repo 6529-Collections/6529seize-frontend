@@ -1,20 +1,32 @@
 import { AuthContext } from "@/components/auth/Auth";
 import WaveDropMobileMenu from "@/components/waves/drops/WaveDropMobileMenu";
 import { WaveDropLayerProvider } from "@/components/waves/drops/WaveDropLayerContext";
+import { ProfileConnectedStatus } from "@/entities/IProfile";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import useCapacitor from "@/hooks/useCapacitor";
 import { render, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import userEvent from "@testing-library/user-event";
+
+jest.mock(
+  "@/components/waves/drops/WaveDropDocumentationAction",
+  () => () => null
+);
 
 const mockIsMemesWave = jest.fn();
 const mockIsQuorumWave = jest.fn();
 const writeText = jest.fn().mockResolvedValue(undefined);
 const addReactionMock = jest.fn((props: any) => (
-  <div
+  <button
+    type="button"
     data-testid="add-reaction"
     data-dialog-z-index={props.dialogZIndexClassName}
+    onClick={props.onMobilePickerOpen}
   />
 ));
 const mobileWrapperMock = jest.fn((props: any) =>
@@ -28,6 +40,7 @@ const mobileWrapperMock = jest.fn((props: any) =>
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: jest.fn(),
 }));
+jest.mock("@/hooks/useCapacitor");
 jest.mock("@/hooks/drops/useCanShowDropCurationsAction", () => ({
   useCanShowDropCurationsAction: jest.fn(() => false),
 }));
@@ -58,12 +71,13 @@ jest.mock("@/components/waves/drops/WaveDropActionsQuickReact", () => () => (
   <div data-testid="quick-react" />
 ));
 jest.mock(
-  "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
-  () => ({
-    __esModule: true,
-    default: (props: any) => mobileWrapperMock(props),
-  })
+  "@/components/waves/drops/WaveDropMobileMenuReactionPicker",
+  () => () => <div data-testid="reaction-picker" />
 );
+jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
+  __esModule: true,
+  default: (props: any) => mobileWrapperMock(props),
+}));
 
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: () => ({
@@ -93,7 +107,103 @@ beforeAll(() => {
 });
 
 const mockedUseDropInteractionRules = jest.mocked(useDropInteractionRules);
+const mockedUseCapacitor = jest.mocked(useCapacitor);
 type AuthProviderValue = ComponentProps<typeof AuthContext.Provider>["value"];
+
+const unauthenticatedAuth: AuthProviderValue = {
+  connectedProfile: null,
+  isAuthenticated: false,
+  fetchingProfile: false,
+  connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
+  receivedProfileProxies: [],
+  activeProfileProxy: null,
+  showWaves: false,
+  sessionUpgradeRequired: false,
+  requestAuth: jest.fn(async () => ({ success: false })),
+  requestSessionUpgrade: jest.fn(async () => ({ success: false })),
+  ensureActiveSessionV2WebSession: jest.fn(async () => false),
+  setToast: jest.fn(),
+  setActiveProfileProxy: jest.fn(async () => {}),
+};
+
+const dropFixture = {
+  id: "1",
+  serial_no: 1,
+  drop_type: ApiDropType.Chat,
+  rank: null,
+  wave: {
+    id: "w",
+    name: "Test wave",
+    picture: null,
+    description_drop_id: "description-drop",
+    last_drop_time: 0,
+    submission_type: null,
+    authenticated_user_eligible_to_vote: true,
+    authenticated_user_eligible_to_participate: true,
+    authenticated_user_eligible_to_chat: true,
+    authenticated_user_admin: false,
+    visibility_group_id: null,
+    participation_group_id: null,
+    chat_group_id: null,
+    voting_group_id: null,
+    admin_group_id: null,
+    voting_period_start: null,
+    voting_period_end: null,
+    voting_credit_type: ApiWaveCreditType.Tdh,
+    voting_credit_scope: ApiWaveCreditScope.Wave,
+    voting_credit_nfts: null,
+    admin_drop_deletion_enabled: false,
+    forbid_negative_votes: false,
+    pinned: false,
+    identity_wave: false,
+  },
+  author: {
+    id: "author-1",
+    handle: "alice",
+    pfp: null,
+    banner1_color: null,
+    banner2_color: null,
+    cic: 0,
+    rep: 0,
+    tdh: 0,
+    tdh_rate: 0,
+    xtdh: 0,
+    xtdh_rate: 0,
+    level: 1,
+    classification: ApiProfileClassification.Pseudonym,
+    sub_classification: null,
+    primary_address: "0x0000000000000000000000000000000000000000",
+    subscribed_actions: [],
+    archived: false,
+    active_main_stage_submission_ids: [],
+    winner_main_stage_drop_ids: [],
+    artist_of_prevote_cards: [],
+    profile_wave_id: null,
+    is_wave_creator: false,
+  },
+  created_at: 0,
+  updated_at: null,
+  title: null,
+  parts: [],
+  parts_count: 0,
+  referenced_nfts: [],
+  mentioned_users: [],
+  mentioned_groups: [],
+  mentioned_waves: [],
+  metadata: [],
+  rating: 0,
+  realtime_rating: 0,
+  rating_prediction: 0,
+  top_raters: [],
+  raters_count: 0,
+  context_profile_context: null,
+  subscribed_actions: [],
+  is_signed: false,
+  reactions: [],
+  boosts: 0,
+  is_additional_action_promised: false,
+  hide_link_preview: false,
+} satisfies ApiDrop;
 
 beforeEach(() => {
   writeText.mockClear();
@@ -101,6 +211,9 @@ beforeEach(() => {
   mobileWrapperMock.mockClear();
   mockIsMemesWave.mockReturnValue(false);
   mockIsQuorumWave.mockReturnValue(false);
+  mockedUseCapacitor.mockReturnValue({ isCapacitor: false } as ReturnType<
+    typeof useCapacitor
+  >);
   mockedUseDropInteractionRules.mockReturnValue({
     canShowVote: true,
     canVote: true,
@@ -111,6 +224,57 @@ beforeEach(() => {
     isWinner: false,
     isVotingEnded: false,
   });
+});
+
+test("never opens an empty curation-only sheet when no removal is available", () => {
+  render(
+    <WaveDropMobileMenu
+      drop={dropFixture}
+      isOpen
+      showReplyAndQuote={false}
+      longPressTriggered={false}
+      setOpen={jest.fn()}
+      onReply={jest.fn()}
+      onAddReaction={jest.fn()}
+      showOnlyQuickRemove
+    />
+  );
+
+  expect(screen.queryByTestId("wrapper")).not.toBeInTheDocument();
+});
+
+test("shows the confirmed curation removal immediately without unrelated mobile actions", () => {
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          ...unauthenticatedAuth,
+          connectedProfile: { handle: "curator" },
+        } as AuthProviderValue
+      }
+    >
+      <WaveDropMobileMenu
+        drop={dropFixture}
+        isOpen
+        showReplyAndQuote={false}
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+        showOnlyQuickRemove
+        standaloneQuickRemoveCuration={{
+          id: "curation-1",
+          name: "Marketplace",
+        }}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.getByRole("button", { name: "Remove" })).toBeInTheDocument();
+  expect(screen.queryByText("Copy link")).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Flag Content" })
+  ).not.toBeInTheDocument();
 });
 
 test("copies serial jump links for non-memes drops", async () => {
@@ -376,6 +540,50 @@ test("shows full menu when a profile handle is present", () => {
   expect(screen.getByTestId("delete")).toBeInTheDocument();
 });
 
+test("does not hide the native drop action sheet when desktop hover CSS is active", () => {
+  mockedUseCapacitor.mockReturnValue({ isCapacitor: true } as ReturnType<
+    typeof useCapacitor
+  >);
+
+  render(
+    <AuthContext.Provider value={unauthenticatedAuth}>
+      <WaveDropMobileMenu
+        drop={dropFixture}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(mobileWrapperMock.mock.calls.at(-1)?.[0]).toEqual(
+    expect.objectContaining({ hideOnDesktopHover: false })
+  );
+});
+
+test("preserves desktop-hover hiding outside the native app", () => {
+  render(
+    <AuthContext.Provider value={unauthenticatedAuth}>
+      <WaveDropMobileMenu
+        drop={dropFixture}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(mobileWrapperMock.mock.calls.at(-1)?.[0]).toEqual(
+    expect.objectContaining({ hideOnDesktopHover: true })
+  );
+});
+
 test("does not show mobile download actions for media", () => {
   const drop = {
     id: "1",
@@ -450,6 +658,34 @@ test("shows clap by default for non-author profiles", () => {
   );
 
   expect(screen.getByTestId("clap")).toBeInTheDocument();
+});
+
+test("shows one Flag Content action as the final authenticated mobile menu entry", () => {
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { id: "viewer-1", handle: "bob" },
+          activeProfileProxy: null,
+        } as unknown as AuthProviderValue
+      }
+    >
+      <WaveDropMobileMenu
+        drop={dropFixture}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  const reportAction = screen.getByRole("button", { name: "Flag Content" });
+  expect(reportAction.parentElement?.lastElementChild).toBe(reportAction);
+  expect(screen.queryByRole("button", { name: "Hide post" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Block author" })).toBeNull();
 });
 
 test("hides clap when voting is hidden", () => {
@@ -529,7 +765,7 @@ test("shows only copy link in the mobile menu for guests", () => {
   expect(screen.queryByTestId("delete")).toBeNull();
 });
 
-test("uses single-drop layer overrides when provided by context", () => {
+test("uses the single-drop mobile menu layer override", () => {
   const drop = {
     id: "1",
     serial_no: 1,
@@ -570,13 +806,9 @@ test("uses single-drop layer overrides when provided by context", () => {
     "data-z-index",
     "tw-z-[1020]"
   );
-  expect(screen.getByTestId("add-reaction")).toHaveAttribute(
-    "data-dialog-z-index",
-    "tw-z-[1030]"
-  );
 });
 
-test("preserves default layer values when context overrides are undefined", () => {
+test("preserves the default mobile menu layer when its override is undefined", () => {
   const drop = {
     id: "1",
     serial_no: 1,
@@ -617,8 +849,37 @@ test("preserves default layer values when context overrides are undefined", () =
     "data-z-index",
     "tw-z-[1000]"
   );
-  expect(screen.getByTestId("add-reaction")).toHaveAttribute(
-    "data-dialog-z-index",
-    "tw-z-[1030]"
+});
+
+test("resets the reaction view when the underlying drop changes", async () => {
+  const user = userEvent.setup();
+  const renderMenu = (drop: ApiDrop) => (
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "alice" },
+          activeProfileProxy: null,
+        } as AuthProviderValue
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
   );
+  const { rerender } = render(renderMenu(dropFixture));
+
+  await user.click(screen.getByTestId("add-reaction"));
+  expect(screen.getByTestId("reaction-picker")).toBeInTheDocument();
+
+  rerender(renderMenu({ ...dropFixture, id: "2" }));
+
+  expect(screen.queryByTestId("reaction-picker")).not.toBeInTheDocument();
+  expect(screen.getByTestId("add-reaction")).toBeInTheDocument();
 });

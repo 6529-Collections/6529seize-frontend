@@ -44,6 +44,14 @@ describe("CommunityMembersTableHeader", () => {
       screen.getByText(ApiCommunityMembersSortOption.Cic)
     ).toBeInTheDocument();
     expect(screen.getByText("Last Seen")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Rank" })).toHaveClass(
+      "tw-text-xs",
+      "md:tw-text-sm"
+    );
+    expect(screen.getByRole("button", { name: "level" })).toHaveClass(
+      "tw-text-xs",
+      "md:tw-text-sm"
+    );
   });
 
   it("calls onSort when clicking sortable column", () => {
@@ -54,10 +62,11 @@ describe("CommunityMembersTableHeader", () => {
       </table>
     );
 
-    const tdhHeader = screen
-      .getByText(ApiCommunityMembersSortOption.Tdh)
-      .closest("th")!;
-    fireEvent.click(tdhHeader);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: ApiCommunityMembersSortOption.Tdh,
+      })
+    );
 
     expect(onSort).toHaveBeenCalledWith(ApiCommunityMembersSortOption.Tdh);
   });

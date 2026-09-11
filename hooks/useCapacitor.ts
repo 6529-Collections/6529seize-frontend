@@ -9,6 +9,22 @@ enum CapacitorOrientationType {
   LANDSCAPE,
 }
 
+function getCurrentOrientation(
+  isCapacitor: boolean
+): CapacitorOrientationType {
+  if (
+    !isCapacitor ||
+    typeof window === "undefined" ||
+    typeof window.matchMedia !== "function"
+  ) {
+    return CapacitorOrientationType.PORTRAIT;
+  }
+
+  return window.matchMedia("(orientation: portrait)").matches
+    ? CapacitorOrientationType.PORTRAIT
+    : CapacitorOrientationType.LANDSCAPE;
+}
+
 const useCapacitor = () => {
   const isCapacitor = Capacitor.isNativePlatform();
   const platform = Capacitor.getPlatform();
@@ -51,25 +67,22 @@ const useCapacitor = () => {
     };
   }, [isCapacitor]);
 
-  const [orientation, setOrientation] = useState<CapacitorOrientationType>(
-    CapacitorOrientationType.PORTRAIT
+  const [orientation, setOrientation] = useState<CapacitorOrientationType>(() =>
+    getCurrentOrientation(isCapacitor)
   );
 
   useEffect(() => {
     if (!isCapacitor) return;
 
-    const isPortrait = () =>
-      window.matchMedia("(orientation: portrait)").matches;
-
     const handleOrientationChange = () => {
-      setOrientation(
-        isPortrait()
-          ? CapacitorOrientationType.PORTRAIT
-          : CapacitorOrientationType.LANDSCAPE
+      const nextOrientation = getCurrentOrientation(isCapacitor);
+
+      setOrientation((currentOrientation) =>
+        currentOrientation === nextOrientation
+          ? currentOrientation
+          : nextOrientation
       );
     };
-
-    handleOrientationChange();
 
     window.addEventListener("orientationchange", handleOrientationChange);
 

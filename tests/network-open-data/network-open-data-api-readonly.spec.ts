@@ -151,17 +151,19 @@ test.describe("Network, Open Data, and public API read-only coverage @surface @m
   }) => {
     await gotoReady(page, "/tools/api");
 
-    await expect(page).toHaveTitle("API");
+    await expect(page).toHaveTitle("API | Tools");
     await expect(
       page.getByRole("heading", { level: 1, name: "6529.io API" })
     ).toBeVisible();
     for (const section of [
       "Introduction",
       "Key terminology",
-      "Authentication",
+      "Authentication quickstart",
       "Creating drops with embedded media",
     ]) {
-      await expect(page.getByText(section, { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { level: 2, name: section })
+      ).toBeVisible();
     }
     await expect(
       page.getByRole("link", { name: "https://api.6529.io/docs" })
@@ -196,12 +198,22 @@ test.describe("Network, Open Data, and public API read-only coverage @surface @m
       400,
       "address is required"
     );
-    await expectNoStoreJsonError(
-      request,
-      "/api/alchemy/collections?query=",
-      400,
-      "query is required"
-    );
+    const collections = await request.get("/api/alchemy/collections?query=");
+    expect(collections.headers()["cache-control"] ?? "").toContain("no-store");
+    // Both the active and retired endpoint reject this request without caching.
+    expect([
+      { status: 400, body: { error: "query is required" } },
+      {
+        status: 410,
+        body: {
+          error:
+            "Collection name search is no longer available. Use a contract address.",
+        },
+      },
+    ]).toContainEqual({
+      status: collections.status(),
+      body: await collections.json(),
+    });
     await expectNoStoreJsonError(
       request,
       "/api/alchemy/owner-nfts?chainId=not-a-number",

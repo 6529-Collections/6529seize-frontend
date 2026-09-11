@@ -248,4 +248,11 @@ describe("createSecurityHeaders CSP", () => {
     expect(permissionsPolicy).not.toContain("execution-while-not-rendered");
     expect(permissionsPolicy).not.toContain("execution-while-out-of-viewport");
   });
+
+  it("allows same-origin system sharing", () => {
+    const permissionsPolicy = getPermissionsPolicy();
+
+    expect(permissionsPolicy).toContain("web-share=(self)");
+    expect(permissionsPolicy).not.toContain("web-share=()");
+  });
 });

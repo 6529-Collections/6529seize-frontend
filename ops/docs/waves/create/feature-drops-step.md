@@ -8,6 +8,11 @@ requirements:
 - one required media type
 - optional required metadata keys
 - optional simultaneous-submission limit
+- rules participants must accept and sign before submitting
+
+The submission type stays visible. Optional media requirements, metadata,
+simultaneous-submission limits, and signing rules are in `Submission requirements`.
+The section is always visible and has no expand/collapse control.
 
 ## Location in the Site
 
@@ -23,23 +28,26 @@ requirements:
 ## Entry Points
 
 - Follow the `Rank` or `Approve` path:
-  `Overview -> Groups -> Dates -> Drops`.
-- Use `Back` from `Rules` to return in one step.
+  `Setup -> Access -> Schedule -> Drops`.
+- Use `Back` from `Voting` to return in one step.
 - On large screens, use the step rail after you move past `Drops`.
 
 ## User Journey
 
-1. Choose one required submission type:
+1. Review the always-visible `Submission requirements` section.
+2. Choose one required media type:
    - `None` (default)
    - `Image`
    - `Audio`
    - `Video`
-2. Optionally add required metadata rows:
+3. Optionally add required metadata rows:
    - set row type (`Text` or `Number`)
    - set metadata name
    - remove rows you do not need
-3. Optionally set `Maximum number of simultaneous submissions per participant`.
-4. Click `Next` to continue to `Rules`.
+4. Optionally set `Maximum number of simultaneous submissions per participant`.
+5. Optionally enter `Rules that require acceptance`. Leave the textbox empty if
+   no rules require signing. There is no separate acceptance toggle.
+6. Click `Next` to continue to `Voting`.
 
 ## Common Scenarios
 
@@ -49,7 +57,9 @@ requirements:
   added`).
 - Add metadata rules for fields every participant must provide.
 - Leave submission-limit blank for unlimited simultaneous submissions.
-- Add creator rules and acceptance requirements in the next `Rules` step.
+- Add signing rules in `Submission requirements` when participants must accept
+  and sign custom rules before submitting.
+- Add chat guidelines in `Guidelines`, directly before `Description`.
 
 ## Edge Cases
 
@@ -62,10 +72,14 @@ requirements:
 - Submission-limit input keeps only positive integers:
   - `0`, negative, or invalid input clears the value.
   - decimal input is reduced to its integer part (example: `2.5` becomes `2`).
+- Entering signing rules requires a wallet signature before submission. Clearing
+  them, including whitespace-only text, removes the requirement.
+- Visiting another step preserves the entered requirements and signing rules.
 
 ## Failure and Recovery
 
 - If `Next` does not advance, resolve duplicate metadata names, then retry.
+- Requirement fields and their validation messages remain visible.
 - If submission-limit input keeps clearing, enter a positive whole number or
   leave it blank.
 
@@ -73,17 +87,21 @@ requirements:
 
 - `Chat` waves skip `Drops`.
 - Required metadata is optional.
-- Custom creator rules are configured in `Rules`, not `Drops`.
+- Chat guidelines are configured in `Guidelines`.
+
+Signing rules use the existing participation terms and wallet-signature flow.
+They appear in the final Overview and the wave rules panel. Wave admins can
+edit them later from Configuration.
 
 ## Related Pages
 
 - [Wave Creation Index](README.md)
 - [Waves Index](../README.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
-- [Wave Creation Overview Step](feature-overview-step.md)
+- [Wave Creation Setup Step](feature-overview-step.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
-- [Wave Creation Dates and Timeline](feature-dates-step.md)
-- [Wave Creation Rules Step](feature-rules-step.md)
+- [Wave Creation Schedule](feature-dates-step.md)
+- [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Creation Voting Configuration](feature-voting-step.md)
 - [Wave Drop Composer Metadata Submissions](../composer/feature-metadata-submissions.md)
 - [Docs Home](../../README.md)

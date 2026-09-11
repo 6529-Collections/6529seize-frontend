@@ -2,6 +2,8 @@
 
 import type { InitialConfigType } from "@lexical/react/LexicalComposer";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type { EditorState } from "lexical";
 import { MentionNode } from "../lexical/nodes/MentionNode";
 import { HashtagNode } from "../lexical/nodes/HashtagNode";
@@ -25,6 +27,7 @@ import type {
   ReferencedNft,
 } from "@/entities/IDrop";
 import { MaxLengthPlugin } from "../lexical/plugins/MaxLengthPlugin";
+import { MAX_DROP_PART_UTF16_UNITS } from "@/helpers/waves/drop-content-limits";
 import ToggleViewButtonPlugin from "../lexical/plugins/ToggleViewButtonPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 
@@ -193,7 +196,9 @@ const CreateDropContent = forwardRef<
     const getPlaceHolderText = () => {
       switch (type) {
         case CreateDropType.DROP:
-          return "Drop a post";
+          // This legacy editor's only remaining consumer is the create-wave
+          // Description step, so the placeholder speaks to that context.
+          return t(DEFAULT_LOCALE, "waves.create.description.placeholder");
         case CreateDropType.QUOTE:
           return "Quote a drop";
         default:
@@ -201,6 +206,7 @@ const CreateDropContent = forwardRef<
           return "";
       }
     };
+    const placeholderText = getPlaceHolderText();
 
     const urlRegExp = new RegExp(
       /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=+$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=+$,\w]+@)[A-Za-z0-9.-]+)((?:\/[+~%/.\w-_]*)?\??(?:[-+=&;%@.\w_]*)#?(?:[\w]*))?)/
@@ -304,6 +310,7 @@ const CreateDropContent = forwardRef<
                       spellCheck={true}
                       autoCorrect="on"
                       aria-disabled={loading}
+                      ariaLabel={placeholderText}
                       className={`${
                         viewType === CreateDropViewType.COMPACT
                           ? "editor-input-one-liner tw-pr-12"
@@ -316,8 +323,14 @@ const CreateDropContent = forwardRef<
                   </div>
                 }
                 placeholder={
-                  <span className="editor-placeholder">
-                    {getPlaceHolderText()}
+                  <span
+                    className={`editor-placeholder ${
+                      viewType === CreateDropViewType.COMPACT
+                        ? "tw-top-1/2 -tw-translate-y-1/2 tw-leading-6"
+                        : ""
+                    }`}
+                  >
+                    {placeholderText}
                   </span>
                 }
                 ErrorBoundary={LexicalErrorBoundary}
@@ -340,7 +353,7 @@ const CreateDropContent = forwardRef<
                 onSelect={onHashtagAdded}
                 ref={hashtagPluginRef}
               />
-              <MaxLengthPlugin maxLength={25000} />
+              <MaxLengthPlugin maxLength={MAX_DROP_PART_UTF16_UNITS} />
               <DragDropPastePlugin
                 disabled={loading}
                 onUploadEditorStateChange={onUploadEditorStateChange}

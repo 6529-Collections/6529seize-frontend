@@ -9,6 +9,7 @@ import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildNextgenLandingPageJsonLd } from "@/lib/structured-data/nextgen";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { Metadata } from "next";
+import { getNextgenTitle } from "../title-utils";
 import NextGenPageClient from "./NextGenPageClient";
 import { getNextGenView } from "./view-utils";
 
@@ -28,7 +29,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { view } = await params;
   const nextgenView = getNextGenView(view?.[0] ?? "");
-  const title = nextgenView ? `NextGen ${nextgenView}` : "NextGen";
+  const title = getNextgenTitle(nextgenView, "NextGen");
 
   return getAppMetadata(
     getLargeSocialCardMetadata({

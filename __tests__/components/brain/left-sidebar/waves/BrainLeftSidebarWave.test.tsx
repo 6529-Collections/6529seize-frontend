@@ -213,7 +213,7 @@ describe("BrainLeftSidebarWave", () => {
       id: "parent",
       newDropsCount: { count: 0, latestDropTimestamp: null },
       unreadDropsCount: 2,
-      unreadFollowedSubwaveDrops: 7,
+      unreadSubwaveDrops: 7,
     };
 
     render(

@@ -1,19 +1,45 @@
 import type { Breadcrumb, Event } from "@sentry/nextjs";
+import {
+  sanitizeEndpointGroup,
+  sanitizeRouteFamily,
+} from "./monitoring/mobileLaunchTimingSanitizers";
 
 const REDACTED = "[Filtered]";
+const THIRD_PARTY = "third-party";
 const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
-const UNUSABLE_URL_TOKENS = new Set([
-  "[filtered]",
-  "[redacted]",
-  "filtered",
-  "unknown",
-]);
-
+const UNUSABLE_URL_TOKENS = new Set(
+  "[filtered] [redacted] filtered unknown".split(" ")
+);
 const JWT_PATTERN = /eyJ[A-Za-z0-9-_]+\.eyJ[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+/g;
 const STRIPE_KEY_PATTERN = /\b(sk|pk)_[a-zA-Z0-9]{16,}\b/g;
 const BEARER_PATTERN = /\bBearer\s+([A-Za-z0-9._~+/=-]+)\b/g;
 const BASIC_PATTERN = /\bBasic\s+([A-Za-z0-9+/=]+)\b/g;
+const ROUTE_SPAN_OPERATION_PATTERN = /^(?:navigation|pageload)(?:\.|$)/;
+const STATIC_RESOURCE_ROOT_SEGMENTS = new Set(
+  ".well-known _next api assets cdn-cgi favicon.ico fonts icons images manifest.json robots.txt sitemap.xml static".split(
+    " "
+  )
+);
+const NON_APP_FIRST_PARTY_SUBDOMAIN_PATTERN =
+  /^(?:allowlist-api|api|cdn|media)\./i;
+const SENTRY_IDENTIFIER_PARENT_SEGMENTS = new Set(
+  "author authors competition competitions entries entry media nft nfts outcome outcomes package packages profile-cms upload uploads".split(
+    " "
+  )
+);
+const SENTRY_IDENTIFIER_CONTAINER_PATTERN = /^(?:author|media)[_-]/;
+const SENTRY_ROUTE_PLACEHOLDER_PATTERN =
+  /^(?::[a-z][a-z0-9_-]*|\[\[?(?:\.\.\.)?[a-z][a-z0-9_-]*\]?\])$/i;
+const URL_VALUE_KEY_PATTERN =
+  /^(?:from|http\.target|http\.url|targetUrl|to|url|url\.full|url\.path)$/i;
+const URL_DETAIL_KEY_PATTERN =
+  /^(?:http\.(?:fragment|query)|url\.(?:fragment|query))$/i;
+const HOST_VALUE_KEY_PATTERN = /^(?:http\.host|server\.address|url\.domain)$/i;
+const HOST_ATTRIBUTION_VALUES = new Set(
+  `first-party first-party-api first-party-app ${THIRD_PARTY}`.split(" ")
+);
+const OMIT_SANITIZED_VALUE = Symbol("omit-sanitized-value");
 
 const SENSITIVE_KEY_FRAGMENT_PATTERN =
   /(auth|authorization|cookie|set-cookie|token|secret|password|passwd|session|api[_-]?key|private[_-]?key|signature|body|payload)/i;
@@ -21,10 +47,22 @@ const SENSITIVE_KEY_FRAGMENT_PATTERN =
 const SENSITIVE_HEADER_NAME_PATTERN =
   /^(authorization|cookie|set-cookie|x-api-key|x-auth-token|x-csrf-token|x-xsrf-token|proxy-authorization|x-forwarded-for|x-real-ip|cf-connecting-ip)$/i;
 
-type SanitizableSentryEvent<T extends Event> = Omit<T, "request" | "user"> & {
+type SanitizableSentrySpan = {
+  description?: string | undefined;
+  op?: string | undefined;
+  data?: Record<string, unknown> | undefined;
+};
+
+type SanitizableSentryEvent<T extends Event> = Omit<
+  T,
+  "request" | "spans" | "user"
+> & {
   request?: Record<string, unknown> | null;
+  spans?: SanitizableSentrySpan[] | undefined;
   user?: unknown;
 };
+
+type SentryPathKind = "auto" | "endpoint" | "route";
 
 function isFirstPartyHost(hostname: string): boolean {
   const normalized = hostname.toLowerCase();
@@ -48,6 +86,140 @@ function isFirstPartyApiHost(hostname: string): boolean {
 
 function isAbsoluteUrlLike(value: string): boolean {
   return /^[a-z][a-z\d+\-.]*:/i.test(value) || value.startsWith("//");
+}
+
+function isFirstPartyAppHost(hostname: string): boolean {
+  return (
+    isFirstPartyHost(hostname) &&
+    !isFirstPartyApiHost(hostname) &&
+    !NON_APP_FIRST_PARTY_SUBDOMAIN_PATTERN.test(hostname)
+  );
+}
+
+function isStaticResourcePath(pathname: string): boolean {
+  const basePath = pathname.split(/[?#]/, 1)[0] ?? pathname;
+  const pathWithoutLeadingSlash = basePath.startsWith("/")
+    ? basePath.slice(1)
+    : basePath;
+  const slashIndex = pathWithoutLeadingSlash.indexOf("/");
+  const rootSegment = (
+    slashIndex === -1
+      ? pathWithoutLeadingSlash
+      : pathWithoutLeadingSlash.slice(0, slashIndex)
+  ).toLowerCase();
+
+  return STATIC_RESOURCE_ROOT_SEGMENTS.has(rootSegment);
+}
+
+function hasRoutePlaceholder(pathname: string): boolean {
+  return /\/(?:\[[^/]+\]|:[a-z][a-z0-9_-]*)/i.test(pathname);
+}
+
+function sanitizeSentryEndpointFamily(pathname: string): string {
+  const basePath = pathname.split(/[?#]/, 1)[0] ?? pathname;
+  const rawSegments = basePath.split("/").filter(Boolean);
+  const baselineSegments = sanitizeEndpointGroup(basePath)
+    .split("/")
+    .filter(Boolean);
+  const sanitizedSegments = rawSegments.map((segment, index) => {
+    let decoded: string;
+    try {
+      decoded = decodeURIComponent(segment);
+    } catch {
+      decoded = segment;
+    }
+    const lower = decoded.toLowerCase();
+    const baseline = baselineSegments[index] ?? ":segment";
+
+    if (SENTRY_ROUTE_PLACEHOLDER_PATTERN.test(lower)) {
+      return lower;
+    }
+
+    const previousRaw = rawSegments[index - 1];
+    let previous = previousRaw?.toLowerCase();
+    if (previousRaw !== undefined) {
+      try {
+        previous = decodeURIComponent(previousRaw).toLowerCase();
+      } catch {
+        previous = previousRaw.toLowerCase();
+      }
+    }
+    if (lower === "by-wallet") {
+      return lower;
+    }
+    if (
+      previous !== undefined &&
+      (SENTRY_IDENTIFIER_PARENT_SEGMENTS.has(previous) ||
+        SENTRY_IDENTIFIER_CONTAINER_PATTERN.test(previous))
+    ) {
+      return ":id";
+    }
+
+    return baseline;
+  });
+
+  return sanitizedSegments.length > 0 ? `/${sanitizedSegments.join("/")}` : "/";
+}
+
+function sanitizeRoutePath(pathname: string): string {
+  return hasRoutePlaceholder(pathname)
+    ? sanitizeSentryEndpointFamily(pathname)
+    : sanitizeRouteFamily(pathname);
+}
+
+function shouldUseRouteFamily(
+  parsed: URL,
+  pathname: string,
+  kind: SentryPathKind,
+  isRelativeInput = false
+): boolean {
+  if (kind === "route") {
+    return true;
+  }
+  if (
+    kind === "endpoint" ||
+    pathname.startsWith("/api/") ||
+    isStaticResourcePath(pathname)
+  ) {
+    return false;
+  }
+
+  return isRelativeInput || isFirstPartyAppHost(parsed.hostname);
+}
+
+function sanitizeUrlLikeString(
+  value: string,
+  kind: SentryPathKind = "auto"
+): string {
+  const trimmed = value.trim();
+  const noHash = trimmed.split("#", 1)[0] ?? trimmed;
+  const noQuery = noHash.split("?", 1)[0] ?? noHash;
+  if (isUnusableUrlToken(noQuery)) {
+    return noQuery;
+  }
+
+  if (!isAbsoluteUrlLike(trimmed) && !isRelativeUrlPathLike(noQuery)) {
+    return noQuery;
+  }
+  if (/^data:/i.test(trimmed)) {
+    return "data:[Filtered]";
+  }
+
+  try {
+    const parsed = new URL(trimmed, "https://relative.invalid");
+    const pathname = parsed.pathname || "/";
+    const useRouteFamily = shouldUseRouteFamily(
+      parsed,
+      pathname,
+      kind,
+      !isAbsoluteUrlLike(trimmed)
+    );
+    return useRouteFamily
+      ? sanitizeRoutePath(pathname)
+      : sanitizeSentryEndpointFamily(pathname);
+  } catch {
+    return sanitizeSentryEndpointFamily(noQuery);
+  }
 }
 
 function isUnusableUrlToken(value: unknown): boolean {
@@ -173,6 +345,39 @@ function getBreadcrumbUrlIsFirstPartyApi(
   }
 }
 
+function parseHostValue(value: string): URL | undefined {
+  try {
+    const hasAuthority = value.startsWith("//") || value.indexOf("://") > 0;
+    return new URL(hasAuthority ? value : `http://${value}`);
+  } catch {
+    return undefined;
+  }
+}
+
+function classifyHostAttribution(hostname: string): string {
+  if (isFirstPartyApiHost(hostname)) {
+    return "first-party-api";
+  }
+  if (isFirstPartyAppHost(hostname)) {
+    return "first-party-app";
+  }
+  return isFirstPartyHost(hostname) ? "first-party" : THIRD_PARTY;
+}
+
+function sanitizeHostAttribution(value: unknown): string {
+  if (typeof value !== "string") {
+    return THIRD_PARTY;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (!normalized || HOST_ATTRIBUTION_VALUES.has(normalized)) {
+    return normalized || THIRD_PARTY;
+  }
+
+  const parsed = parseHostValue(normalized);
+  return parsed ? classifyHostAttribution(parsed.hostname) : THIRD_PARTY;
+}
+
 function sanitizeString(value: string): string {
   if (!value) return value;
   let sanitized = value;
@@ -185,26 +390,7 @@ function sanitizeString(value: string): string {
 
 export function sanitizeUrlString(value: unknown): unknown {
   if (typeof value !== "string") return value;
-
-  const trimmed = value.trim();
-  // Fast-path: drop query / hash without needing URL parsing.
-  const noHash = trimmed.split("#", 1)[0] ?? trimmed;
-  const noQuery = noHash.split("?", 1)[0] ?? noHash;
-  if (isUnusableUrlToken(noQuery)) {
-    return noQuery;
-  }
-
-  if (!isAbsoluteUrlLike(trimmed) && !isRelativeUrlPathLike(noQuery)) {
-    return noQuery;
-  }
-
-  // If it looks like a URL, keep only the pathname.
-  try {
-    const parsed = new URL(trimmed, "http://localhost");
-    return parsed.pathname || "/";
-  } catch {
-    return noQuery;
-  }
+  return sanitizeUrlLikeString(value);
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -214,6 +400,47 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
     (Object.getPrototypeOf(value) === Object.prototype ||
       Object.getPrototypeOf(value) === null)
   );
+}
+
+function sanitizeObjectValue(
+  key: string,
+  value: unknown,
+  depth: number,
+  seen: WeakSet<object>
+): unknown {
+  if (URL_DETAIL_KEY_PATTERN.test(key)) {
+    return OMIT_SANITIZED_VALUE;
+  }
+  if (SENSITIVE_KEY_FRAGMENT_PATTERN.test(key)) {
+    return REDACTED;
+  }
+  if (HOST_VALUE_KEY_PATTERN.test(key)) {
+    return sanitizeHostAttribution(value);
+  }
+  if (URL_VALUE_KEY_PATTERN.test(key)) {
+    return sanitizeUrlString(value);
+  }
+  return sanitizeUnknown(value, depth + 1, seen);
+}
+
+function sanitizePlainObject(
+  value: Record<string, unknown>,
+  depth: number,
+  seen: WeakSet<object>
+): Record<string, unknown> | string {
+  if (seen.has(value)) {
+    return REDACTED;
+  }
+  seen.add(value);
+
+  const result: Record<string, unknown> = {};
+  for (const [key, nestedValue] of Object.entries(value)) {
+    const sanitizedValue = sanitizeObjectValue(key, nestedValue, depth, seen);
+    if (sanitizedValue !== OMIT_SANITIZED_VALUE) {
+      result[key] = sanitizedValue;
+    }
+  }
+  return result;
 }
 
 function sanitizeUnknown(
@@ -232,24 +459,7 @@ function sanitizeUnknown(
   }
 
   if (isPlainObject(value)) {
-    if (seen.has(value)) return REDACTED;
-    seen.add(value);
-
-    const result: Record<string, unknown> = {};
-    for (const [key, val] of Object.entries(value)) {
-      if (SENSITIVE_KEY_FRAGMENT_PATTERN.test(key)) {
-        result[key] = REDACTED;
-        continue;
-      }
-
-      if (key === "url" || key === "from" || key === "to") {
-        result[key] = sanitizeUrlString(val);
-        continue;
-      }
-
-      result[key] = sanitizeUnknown(val, depth + 1, seen);
-    }
-    return result;
+    return sanitizePlainObject(value, depth, seen);
   }
 
   return value;
@@ -342,10 +552,38 @@ function sanitizeBreadcrumbData(
     ? withBreadcrumbUrlMetadata(data)
     : data;
 
+  let sanitizedTopLevelUrl: string | undefined;
+  if (isPlainObject(dataWithMetadata)) {
+    const url = dataWithMetadata["url"];
+    if (typeof url === "string") {
+      const isFirstParty = dataWithMetadata[URL_IS_FIRST_PARTY_KEY] === true;
+      const isFirstPartyApi =
+        dataWithMetadata[URL_IS_FIRST_PARTY_API_KEY] === true;
+      let kind: SentryPathKind = "endpoint";
+      if (isAbsoluteUrlLike(url)) {
+        kind = isRouteUrl(url) ? "route" : "endpoint";
+      } else if (
+        isFirstParty &&
+        !isFirstPartyApi &&
+        !isStaticResourcePath(url)
+      ) {
+        kind = "route";
+      }
+      sanitizedTopLevelUrl = sanitizeUrlLikeString(url, kind);
+      dataWithMetadata["url"] = sanitizedTopLevelUrl;
+    }
+  }
+
   const seen = new WeakSet<object>();
-  return sanitizeUnknown(dataWithMetadata, 0, seen) as NonNullable<
-    Breadcrumb["data"]
-  >;
+  const sanitizedData = sanitizeUnknown(
+    dataWithMetadata,
+    0,
+    seen
+  ) as NonNullable<Breadcrumb["data"]>;
+  if (sanitizedTopLevelUrl !== undefined && isPlainObject(sanitizedData)) {
+    sanitizedData["url"] = sanitizedTopLevelUrl;
+  }
+  return sanitizedData;
 }
 
 export function sanitizeSentryBreadcrumb(
@@ -361,6 +599,126 @@ export function sanitizeSentryBreadcrumb(
   }
 
   return crumb;
+}
+
+function isRouteUrl(value: unknown): boolean {
+  if (typeof value !== "string" || !isAbsoluteUrlLike(value)) {
+    return false;
+  }
+
+  try {
+    const parsed = new URL(value);
+    return shouldUseRouteFamily(parsed, parsed.pathname || "/", "auto");
+  } catch {
+    return false;
+  }
+}
+
+function getSpanPathKind(span: SanitizableSentrySpan): SentryPathKind {
+  if (ROUTE_SPAN_OPERATION_PATTERN.test(span.op ?? "")) {
+    return "route";
+  }
+
+  const fullUrl = span.data?.["http.url"] ?? span.data?.["url.full"];
+  if (isRouteUrl(fullUrl)) {
+    return "route";
+  }
+
+  const url = span.data?.["url"];
+  if (isRouteUrl(url)) {
+    return "route";
+  }
+  if (span.data?.["url.same_origin"] === true && typeof url === "string") {
+    let pathname = url.split(/[?#]/, 1)[0] ?? url;
+    try {
+      pathname = new URL(url, "https://relative.invalid").pathname || "/";
+    } catch {
+      // Keep the query-free path fallback for malformed URL-like values.
+    }
+    if (!pathname.startsWith("/api/") && !isStaticResourcePath(pathname)) {
+      return "route";
+    }
+  }
+
+  return "endpoint";
+}
+
+function sanitizeSpanDescription(
+  description: string,
+  kind: SentryPathKind
+): string {
+  const methodTarget = parseHttpMethodDescription(description);
+  const method = methodTarget?.[0];
+  const target = methodTarget?.[1];
+  if (
+    method &&
+    target &&
+    (isAbsoluteUrlLike(target) || isRelativeUrlPathLike(target))
+  ) {
+    return `${method} ${sanitizeUrlLikeString(target, kind)}`;
+  }
+  if (isAbsoluteUrlLike(description) || isRelativeUrlPathLike(description)) {
+    return sanitizeUrlLikeString(description, kind);
+  }
+
+  return sanitizeString(description);
+}
+
+function isAsciiLetterAt(value: string, index: number): boolean {
+  const code = value.codePointAt(index) ?? -1;
+  return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+}
+
+function parseHttpMethodDescription(
+  value: string
+): [method: string, target: string] | undefined {
+  let methodEnd = 0;
+  while (isAsciiLetterAt(value, methodEnd)) methodEnd += 1;
+  let targetStart = methodEnd;
+  while (value[targetStart]?.trim() === "") targetStart += 1;
+  if (!methodEnd || targetStart === methodEnd || targetStart === value.length) {
+    return undefined;
+  }
+  return [value.slice(0, methodEnd), value.slice(targetStart)];
+}
+
+function sanitizeSpanData(
+  data: Record<string, unknown>,
+  kind: SentryPathKind
+): Record<string, unknown> {
+  const nextData: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (URL_DETAIL_KEY_PATTERN.test(key)) {
+      continue;
+    }
+    if (HOST_VALUE_KEY_PATTERN.test(key)) {
+      nextData[key] = sanitizeHostAttribution(value);
+      continue;
+    }
+    if (URL_VALUE_KEY_PATTERN.test(key)) {
+      nextData[key] =
+        typeof value === "string" ? sanitizeUrlLikeString(value, kind) : value;
+      continue;
+    }
+    nextData[key] = sanitizeUnknown(value, 0, new WeakSet<object>());
+  }
+  return nextData;
+}
+
+export function sanitizeSentrySpan<T extends SanitizableSentrySpan>(
+  span: T
+): T {
+  const next = { ...span };
+  const kind = getSpanPathKind(next);
+
+  if (typeof next.description === "string") {
+    next.description = sanitizeSpanDescription(next.description, kind);
+  }
+  if (next.data) {
+    next.data = sanitizeSpanData(next.data, kind);
+  }
+
+  return next;
 }
 
 export function sanitizeSentryEvent<T extends Event>(event: T): T {
@@ -396,6 +754,10 @@ export function sanitizeSentryEvent<T extends Event>(event: T): T {
     next.message = sanitizeString(next.message);
   }
 
+  if (typeof next.transaction === "string") {
+    next.transaction = sanitizeSpanDescription(next.transaction, "auto");
+  }
+
   if (next.exception?.values) {
     next.exception = {
       ...next.exception,
@@ -416,6 +778,10 @@ export function sanitizeSentryEvent<T extends Event>(event: T): T {
     next.breadcrumbs = next.breadcrumbs
       .map((b) => sanitizeSentryBreadcrumb(b))
       .filter(Boolean) as Breadcrumb[];
+  }
+
+  if (Array.isArray(next.spans)) {
+    next.spans = next.spans.map((span) => sanitizeSentrySpan(span));
   }
 
   const seen = new WeakSet<object>();

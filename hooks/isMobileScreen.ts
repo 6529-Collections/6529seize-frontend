@@ -1,24 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
-export default function useIsMobileScreen() {
-  const [isMobile, setIsMobile] = useState(false);
+const MOBILE_SCREEN_MAX_WIDTH = 750;
 
-  function checkMobile() {
-    const screenSize = window.innerWidth;
-    if (screenSize <= 750) {
-      setIsMobile(true);
-    } else {
-      setIsMobile(false);
-    }
+const getBrowserWindow = (): Window | undefined =>
+  (globalThis as typeof globalThis & { window?: Window }).window;
+
+const isMobileScreen = () => {
+  const browserWindow = getBrowserWindow();
+  return (
+    browserWindow !== undefined &&
+    browserWindow.innerWidth <= MOBILE_SCREEN_MAX_WIDTH
+  );
+};
+
+const subscribe = (onStoreChange: () => void) => {
+  const browserWindow = getBrowserWindow();
+  if (browserWindow === undefined) {
+    return () => undefined;
   }
 
-  useEffect(() => {
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+  browserWindow.addEventListener("resize", onStoreChange);
+  return () => browserWindow.removeEventListener("resize", onStoreChange);
+};
 
-  return isMobile;
+export default function useIsMobileScreen() {
+  return useSyncExternalStore(subscribe, isMobileScreen, () => false);
 }

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveOutcomesRepApprove from "@/components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRepApprove";
 
@@ -57,6 +57,20 @@ describe("CreateWaveOutcomesRepApprove", () => {
     expect(screen.queryByLabelText("Max Winners")).not.toBeInTheDocument();
   });
 
+  it("names the broken category rule live and blocks submit", async () => {
+    const { user, categoryInput, creditInput, saveButton } = await setup();
+
+    await user.type(categoryInput, "Bad@Category");
+    await user.type(creditInput, "5");
+
+    // The violation surfaces while typing, before any submit attempt.
+    expect(screen.getByRole("alert")).toHaveTextContent('"@"');
+
+    await user.click(saveButton);
+
+    expect(onOutcome).not.toHaveBeenCalled();
+  });
+
   it("shows errors when required fields missing", async () => {
     const { user, saveButton } = await setup();
 
@@ -65,5 +79,18 @@ describe("CreateWaveOutcomesRepApprove", () => {
     expect(
       screen.getByText("Rep must be a positive number")
     ).toBeInTheDocument();
+  });
+
+  it("rejects non-finite Rep amounts", async () => {
+    const { user, categoryInput, creditInput, saveButton } = await setup();
+
+    await user.type(categoryInput, "cat");
+    fireEvent.change(creditInput, { target: { value: "Infinity" } });
+    await user.click(saveButton);
+
+    expect(
+      screen.getByText("Rep must be a positive number")
+    ).toBeInTheDocument();
+    expect(onOutcome).not.toHaveBeenCalled();
   });
 });

@@ -36,7 +36,11 @@ jest.mock("undici", () => ({
   fetch: (...args: unknown[]) => mockUndiciFetch(...args),
 }));
 
-import { fetchPublicUrl, parsePublicUrl } from "@/lib/security/urlGuard";
+import {
+  fetchPublicUrl,
+  parsePublicUrl,
+  type FetchPublicUrlOptions,
+} from "@/lib/security/urlGuard";
 
 const { lookup } = require("node:dns/promises") as {
   lookup: jest.Mock;
@@ -44,6 +48,7 @@ const { lookup } = require("node:dns/promises") as {
 
 const SAFE_EXAMPLE_ADDRESS = ["93", "184", "216", "34"].join(".");
 const CDN_SAFE_EXAMPLE_ADDRESS = ["93", "184", "216", "35"].join(".");
+const SAFE_EXAMPLE_IPV6 = "2606:2800:220:1:248:1893:25c8:1946";
 
 type MockResponseOptions = {
   readonly headers?: Record<string, string> | undefined;
@@ -105,13 +110,17 @@ describe("urlGuard", () => {
     mockUndiciFetch.mockReset();
   });
 
-  it("validates redirect hops before fetching content", async () => {
+  it("validates and pins every redirect hop before fetching content", async () => {
+    let cdnLookupCount = 0;
     lookup.mockImplementation(async (hostname: string) => {
       if (hostname === "safe.example") {
         return [{ address: SAFE_EXAMPLE_ADDRESS, family: 4 }];
       }
       if (hostname === "cdn.safe.example") {
-        return [{ address: CDN_SAFE_EXAMPLE_ADDRESS, family: 4 }];
+        cdnLookupCount += 1;
+        return cdnLookupCount === 1
+          ? [{ address: CDN_SAFE_EXAMPLE_ADDRESS, family: 4 }]
+          : [{ address: "127.0.0.1", family: 4 }];
       }
       throw new Error(`Unexpected host: ${hostname}`);
     });
@@ -139,14 +148,28 @@ describe("urlGuard", () => {
         ).resolves.toEqual({ address: CDN_SAFE_EXAMPLE_ADDRESS, family: 4 });
         return success;
       });
+    const buildRequestInit = jest.fn(
+      (_url: URL, requestInit: RequestInit) => requestInit
+    );
 
     const response = await fetchPublicUrl(
       "https://safe.example/article",
       {},
-      { userAgent: "test-agent", timeoutMs: 5000 }
+      {
+        userAgent: "test-agent",
+        timeoutMs: 5000,
+        buildRequestInit,
+        revalidateFinalUrl: false,
+      }
     );
 
     expect(mockUndiciFetch).toHaveBeenCalledTimes(2);
+    expect(lookup).toHaveBeenCalledTimes(2);
+    expect(cdnLookupCount).toBe(1);
+    expect(buildRequestInit.mock.calls.map(([url]) => url.toString())).toEqual([
+      "https://safe.example/article",
+      "https://cdn.safe.example/page",
+    ]);
     expect(mockUndiciFetch).toHaveBeenNthCalledWith(
       1,
       "https://safe.example/article",
@@ -184,6 +207,178 @@ describe("urlGuard", () => {
     expect(mockUndiciFetch).toHaveBeenCalledTimes(1);
     expect(lookup).toHaveBeenCalledTimes(1);
     expect(await response.text()).toBe("ok");
+  });
+
+  it("pins public IPv6 answers without changing the request hostname", async () => {
+    lookup.mockResolvedValue([{ address: SAFE_EXAMPLE_IPV6, family: 6 }]);
+
+    const success = createResponse(200, {
+      body: "ipv6",
+      url: "https://safe.example/article",
+    });
+    mockUndiciFetch.mockImplementation(async (url, init) => {
+      expect(url).toBe("https://safe.example/article");
+      await expect(
+        readPinnedLookupAddress("safe.example", init)
+      ).resolves.toEqual({ address: SAFE_EXAMPLE_IPV6, family: 6 });
+      return success;
+    });
+
+    const response = await fetchPublicUrl(
+      "https://safe.example/article",
+      {},
+      { revalidateFinalUrl: false }
+    );
+
+    expect(lookup).toHaveBeenCalledTimes(1);
+    expect(await response.text()).toBe("ipv6");
+  });
+
+  it("rejects mixed public and private DNS answers before opening a socket", async () => {
+    lookup.mockResolvedValue([
+      { address: SAFE_EXAMPLE_ADDRESS, family: 4 },
+      { address: "10.0.0.8", family: 4 },
+    ]);
+
+    await expect(
+      fetchPublicUrl("https://mixed.safe.example/article")
+    ).rejects.toThrow("Resolved host is not reachable.");
+
+    expect(mockUndiciFetch).not.toHaveBeenCalled();
+  });
+
+  it("rejects IPv4-mapped IPv6 loopback answers before opening a socket", async () => {
+    lookup.mockResolvedValue([{ address: "::ffff:127.0.0.1", family: 6 }]);
+
+    await expect(
+      fetchPublicUrl("https://mapped.safe.example/article")
+    ).rejects.toThrow("Resolved host is not reachable.");
+
+    expect(mockUndiciFetch).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { label: "IPv4 link-local", address: "169.254.169.254", family: 4 },
+    { label: "IPv6 link-local", address: "fe80::1", family: 6 },
+    { label: "IPv6 private-use", address: "fd00::1", family: 6 },
+  ])(
+    "rejects $label DNS answers before opening a socket",
+    async ({ address, family }) => {
+      lookup.mockResolvedValue([{ address, family }]);
+
+      await expect(
+        fetchPublicUrl("https://blocked.safe.example/article")
+      ).rejects.toThrow("Resolved host is not reachable.");
+
+      expect(mockUndiciFetch).not.toHaveBeenCalled();
+    }
+  );
+
+  it("blocks a redirect hop that resolves to a private address", async () => {
+    lookup.mockImplementation(async (hostname: string) => {
+      if (hostname === "safe.example") {
+        return [{ address: SAFE_EXAMPLE_ADDRESS, family: 4 }];
+      }
+      if (hostname === "private.safe.example") {
+        return [{ address: "192.168.1.20", family: 4 }];
+      }
+      throw new Error(`Unexpected host: ${hostname}`);
+    });
+    mockUndiciFetch.mockResolvedValue(
+      createResponse(302, {
+        headers: { location: "https://private.safe.example/secret" },
+        url: "https://safe.example/article",
+      })
+    );
+
+    await expect(
+      fetchPublicUrl("https://safe.example/article")
+    ).rejects.toThrow("Resolved host is not reachable.");
+
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(1);
+    expect(lookup).toHaveBeenCalledTimes(2);
+  });
+
+  it("ignores legacy custom fetch implementations that could discard DNS pinning", async () => {
+    lookup.mockResolvedValue([{ address: SAFE_EXAMPLE_ADDRESS, family: 4 }]);
+
+    const success = createResponse(200, {
+      body: "pinned",
+      url: "https://safe.example/article",
+    });
+    mockUndiciFetch.mockImplementation(async (_url, init) => {
+      await expect(
+        readPinnedLookupAddress("safe.example", init)
+      ).resolves.toEqual({ address: SAFE_EXAMPLE_ADDRESS, family: 4 });
+      return success;
+    });
+
+    const unrestrictedFetch = jest.fn().mockResolvedValue(
+      createResponse(200, {
+        body: "unpinned",
+        url: "http://127.0.0.1/private",
+      })
+    );
+    const options = {
+      revalidateFinalUrl: false,
+      fetchImpl: unrestrictedFetch,
+    } as FetchPublicUrlOptions & { fetchImpl: typeof fetch };
+
+    const response = await fetchPublicUrl(
+      "https://safe.example/article",
+      {},
+      options
+    );
+
+    expect(unrestrictedFetch).not.toHaveBeenCalled();
+    expect(mockUndiciFetch).toHaveBeenCalledTimes(1);
+    expect(await response.text()).toBe("pinned");
+  });
+
+  it("does not let request options replace guard-controlled transport or abort settings", async () => {
+    lookup.mockResolvedValue([{ address: SAFE_EXAMPLE_ADDRESS, family: 4 }]);
+    const unrestrictedDispatcher = { dispatch: jest.fn() };
+    const unrestrictedAgent = { addRequest: jest.fn() };
+    const unrestrictedController = new AbortController();
+    const success = createResponse(200, {
+      body: "pinned",
+      url: "https://safe.example/article",
+    });
+    mockUndiciFetch.mockImplementation(async (_url, init) => {
+      expect(
+        (init as RequestInit & { dispatcher?: unknown }).dispatcher
+      ).not.toBe(unrestrictedDispatcher);
+      expect((init as RequestInit & { agent?: unknown }).agent).toBeUndefined();
+      expect(init.redirect).toBe("manual");
+      expect(init.signal).not.toBe(unrestrictedController.signal);
+      await expect(
+        readPinnedLookupAddress("safe.example", init)
+      ).resolves.toEqual({ address: SAFE_EXAMPLE_ADDRESS, family: 4 });
+      return success;
+    });
+
+    const response = await fetchPublicUrl(
+      "https://safe.example/article",
+      {
+        dispatcher: unrestrictedDispatcher,
+        agent: unrestrictedAgent,
+        redirect: "follow",
+        signal: unrestrictedController.signal,
+      } as RequestInit,
+      {
+        revalidateFinalUrl: false,
+        buildRequestInit: (_url, init) =>
+          ({
+            ...init,
+            dispatcher: unrestrictedDispatcher,
+            agent: unrestrictedAgent,
+            redirect: "follow",
+            signal: unrestrictedController.signal,
+          }) as RequestInit,
+      }
+    );
+
+    expect(await response.text()).toBe("pinned");
   });
 
   it("throws when URL cannot be parsed", () => {

@@ -24,11 +24,11 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import type { DropMutationBody } from "./CreateDrop";
+import type { DropMutationBody } from "./create-drop-content/drop-submission.types";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import { CreateDropSubmit } from "./CreateDropSubmit";
 import CreateCurationDropUrlInput from "./CreateCurationDropUrlInput";
-import PrimaryButton from "../utils/button/PrimaryButton";
+import Button from "../utils/button/Button";
 import type { CurationComposerVariant } from "./dropComposer.types";
 import {
   normalizeCurationDropInput,
@@ -416,17 +416,19 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
               </div>
             )}
           </div>
-          <PrimaryButton
-            onClicked={onDrop}
+          <Button
+            onClick={onDrop}
             loading={submitting}
             disabled={!canSubmit}
-            ariaLabel={
+            aria-label={
               submitting ? "Submitting to curation" : "Submit to Curation"
             }
-            padding="tw-w-full tw-px-4 tw-py-2.5"
+            variant="primary"
+            size="md"
+            fullWidth
           >
             <span>Submit to Curation</span>
-          </PrimaryButton>
+          </Button>
         </div>
       ) : (
         <div className="tw-flex tw-w-full tw-items-start">

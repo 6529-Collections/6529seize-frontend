@@ -1,7 +1,10 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import MyStreamWaveTabsHeader from "@/components/brain/my-stream/tabs/MyStreamWaveTabsHeader";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import type { ReactNode } from "react";
+
+let mockIsRightSidebarOpen = false;
+const mockToggleRightSidebar = jest.fn();
 
 jest.mock("next/navigation", () => ({
   usePathname: () => "/waves/wave-1",
@@ -29,8 +32,8 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 
 jest.mock("@/hooks/useSidebarState", () => ({
   useSidebarState: () => ({
-    isRightSidebarOpen: false,
-    toggleRightSidebar: jest.fn(),
+    isRightSidebarOpen: mockIsRightSidebarOpen,
+    toggleRightSidebar: mockToggleRightSidebar,
   }),
 }));
 
@@ -47,8 +50,21 @@ jest.mock("@/components/waves/WavePicture", () => () => (
   <span data-testid="wave-picture" />
 ));
 
-jest.mock("@/components/waves/drops/search/WaveDropsSearchModal", () => () => (
-  <div data-testid="wave-drops-search-modal" />
+jest.mock(
+  "@/components/waves/drops/search/WaveDropsSearchModal",
+  () =>
+    ({ isOpen, onSearchAll }: { isOpen: boolean; onSearchAll?: () => void }) =>
+      isOpen ? (
+        <div data-testid="wave-drops-search-modal">
+          <button type="button" onClick={onSearchAll}>
+            Search all 6529
+          </button>
+        </div>
+      ) : null
+);
+
+jest.mock("@/components/header/header-search/HeaderSearchModal", () => () => (
+  <div data-testid="header-search-modal" />
 ));
 
 jest.mock("@/components/waves/header/WaveDescriptionPopover", () => ({
@@ -81,7 +97,37 @@ const wave = {
 } as any;
 
 describe("MyStreamWaveTabsHeader", () => {
-  it("offsets the score actions row so the score icon aligns with the title", () => {
+  beforeEach(() => {
+    mockIsRightSidebarOpen = false;
+    mockToggleRightSidebar.mockClear();
+  });
+
+  it("can expand Wave search into the site-wide search", () => {
+    render(
+      <MyStreamWaveTabsHeader
+        wave={wave}
+        activeContentTab={MyStreamWaveTab.CHAT}
+        setActiveContentTab={jest.fn()}
+        onSelectCuration={jest.fn()}
+        isCompact={false}
+        showBackButton={false}
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+      />
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Search messages in this wave" })
+    );
+    expect(screen.getByTestId("wave-drops-search-modal")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Search all 6529" }));
+    expect(screen.queryByTestId("wave-drops-search-modal")).toBeNull();
+    expect(screen.getByTestId("header-search-modal")).toBeInTheDocument();
+  });
+
+  it("keeps the score actions in a compact row below the description", () => {
     render(
       <MyStreamWaveTabsHeader
         wave={wave}
@@ -98,11 +144,47 @@ describe("MyStreamWaveTabsHeader", () => {
 
     const scoreActions = screen.getByText("Add REP").parentElement;
 
-    expect(scoreActions).toHaveClass("-tw-ml-1.5");
-    expect(scoreActions).toHaveClass("tw-mt-1");
+    expect(scoreActions).toHaveClass("tw-mt-1.5");
+    expect(scoreActions).toHaveClass("tw-gap-1.5");
   });
 
-  it("keeps the compact mobile header to score only", () => {
+  it("shows a linked parent wave above a subwave title", () => {
+    render(
+      <MyStreamWaveTabsHeader
+        wave={{
+          ...wave,
+          id: "child-wave",
+          name: "CI-PRODUCTION",
+          parent_wave: {
+            id: "parent-wave",
+            name: "Follow The Repo",
+          },
+        }}
+        activeContentTab={MyStreamWaveTab.CHAT}
+        setActiveContentTab={jest.fn()}
+        onSelectCuration={jest.fn()}
+        isCompact={false}
+        showBackButton={false}
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+      />
+    );
+
+    expect(
+      screen.getByRole("navigation", { name: "Wave hierarchy" })
+    ).toHaveTextContent(/Subwave of\s*Follow The Repo/);
+    const parentLink = screen.getByRole("link", {
+      name: "Subwave of Follow The Repo",
+    });
+    expect(parentLink).toHaveAttribute(
+      "title",
+      "Open parent wave: Follow The Repo"
+    );
+    expect(parentLink).toHaveAttribute("href", "/waves/parent-wave");
+  });
+
+  it("hides score actions in the compact mobile header", () => {
     render(
       <MyStreamWaveTabsHeader
         wave={wave}
@@ -117,7 +199,41 @@ describe("MyStreamWaveTabsHeader", () => {
       />
     );
 
-    expect(screen.getByTestId("wave-score")).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-score")).toBeNull();
     expect(screen.queryByText("Add REP")).toBeNull();
+  });
+
+  it("exposes the right-sidebar toggle state and controlled panel", () => {
+    const header = () => (
+      <MyStreamWaveTabsHeader
+        wave={wave}
+        activeContentTab={MyStreamWaveTab.CHAT}
+        setActiveContentTab={jest.fn()}
+        onSelectCuration={jest.fn()}
+        isCompact={false}
+        showBackButton={false}
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+      />
+    );
+    const { rerender } = render(header());
+
+    const closedToggle = screen.getByRole("button", {
+      name: "Show right sidebar",
+    });
+    expect(closedToggle).toHaveAttribute("aria-expanded", "false");
+    expect(closedToggle).toHaveAttribute("aria-pressed", "false");
+    expect(closedToggle).not.toHaveAttribute("aria-controls");
+
+    mockIsRightSidebarOpen = true;
+    rerender(header());
+
+    const openToggle = screen.getByRole("button", {
+      name: "Hide right sidebar",
+    });
+    expect(openToggle).toHaveAttribute("aria-expanded", "true");
+    expect(openToggle).toHaveAttribute("aria-pressed", "true");
+    expect(openToggle).toHaveAttribute("aria-controls", "brain-right-sidebar");
   });
 });

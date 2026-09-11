@@ -6,11 +6,22 @@ import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimation
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import { useAuth } from "@/components/auth/Auth";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
+import {
+  type QuickCurationAction,
+  useCanShowDropCurationsAction,
+} from "@/hooks/drops/useCanShowDropCurationsAction";
+import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
+import { getProfileWaveIdentity } from "@/hooks/useProfileWave";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import {
+  EllipsisVerticalIcon,
+  PlusIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { useRef, useState } from "react";
-import { Tooltip } from "react-tooltip";
+import DropActionTooltip from "./DropActionTooltip";
 import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
 import WaveDropActionsCopyText from "./WaveDropActionsCopyText";
 import WaveDropCurationsActionIcon from "./WaveDropCurationsActionIcon";
@@ -20,28 +31,55 @@ import WaveDropActionsOpen from "./WaveDropActionsOpen";
 import WaveDropActionsOptions from "./WaveDropActionsOptions";
 import WaveDropActionsRestoreLinkPreviews from "./WaveDropActionsRestoreLinkPreviews";
 import WaveDropActionsSetPinnedDrop from "./WaveDropActionsSetPinnedDrop";
+import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
+import ReportDropModal from "@/components/content-moderation/ReportDropModal";
+import WaveDropDocumentationAction from "./WaveDropDocumentationAction";
 
 interface WaveDropActionsMoreProps {
   readonly drop: ExtendedDrop;
   readonly onOpenChange?: (isOpen: boolean) => void;
+  readonly showOnlyQuickRemove?: boolean | undefined;
+  readonly standaloneQuickRemoveCuration?:
+    | QuickCurationAction
+    | null
+    | undefined;
 }
 
 export default function WaveDropActionsMore({
   drop,
   onOpenChange,
+  showOnlyQuickRemove = false,
+  standaloneQuickRemoveCuration = null,
 }: WaveDropActionsMoreProps) {
   const { connectedProfile } = useAuth();
+  const locale = useBrowserLocale();
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCurationsDialogOpen, setIsCurationsDialogOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
-  const showCurationsAction = useCanShowDropCurationsAction({
+  const {
+    showManageCurations,
+    quickAddCuration,
+    quickRemoveCuration: availableQuickRemoveCuration,
+  } = useCanShowDropCurationsAction({
     dropId: drop.id,
+    waveId: drop.wave.id,
+    profileIdentity: getProfileWaveIdentity(connectedProfile),
     isTemporaryDrop: drop.id.startsWith("temp-"),
     isWaveAdmin: drop.wave.authenticated_user_admin === true,
     enabled:
-      (isOpen || isCurationsDialogOpen) && Boolean(connectedProfile?.handle),
+      !showOnlyQuickRemove &&
+      (isOpen || isCurationsDialogOpen) &&
+      Boolean(connectedProfile?.handle),
+  });
+  const quickRemoveCuration = showOnlyQuickRemove
+    ? standaloneQuickRemoveCuration
+    : availableQuickRemoveCuration;
+  const { updateMembershipAsync } = useDropCurationMembershipMutation({
+    dropId: drop.id,
+    waveId: drop.wave.id,
   });
 
   const handleOpenChange = (newIsOpen: boolean) => {
@@ -56,40 +94,67 @@ export default function WaveDropActionsMore({
     setIsDeleteModalOpen(true);
   };
 
+  const handleQuickAdd = async () => {
+    if (!quickAddCuration) {
+      return;
+    }
+
+    closeDropdown();
+    try {
+      await updateMembershipAsync(quickAddCuration.id, "add", {
+        successMessage: t(locale, "profileCuration.membership.addedTo", {
+          curationName: quickAddCuration.name,
+        }),
+      });
+    } catch {
+      // The mutation owns the user-facing error toast.
+    }
+  };
+
+  const handleQuickRemove = async () => {
+    if (!quickRemoveCuration) {
+      return;
+    }
+
+    closeDropdown();
+    try {
+      await updateMembershipAsync(quickRemoveCuration.id, "remove", {
+        successMessage: t(locale, "profileCuration.membership.removedFrom", {
+          curationName: quickRemoveCuration.name,
+        }),
+      });
+    } catch {
+      // The mutation owns the user-facing error toast.
+    }
+  };
+
+  if (
+    showOnlyQuickRemove &&
+    (!quickRemoveCuration || drop.id.startsWith("temp-"))
+  ) {
+    return null;
+  }
+
   return (
     <>
-      <button
-        ref={buttonRef}
-        className="tw-flex tw-h-7 tw-w-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
-        onClick={() => handleOpenChange(!isOpen)}
-        aria-label="More actions"
-        aria-haspopup="true"
-        aria-expanded={isOpen}
-        data-tooltip-id={`more-actions-${drop.id}`}
+      <DropActionTooltip
+        content={<span className="tw-text-xs">More</span>}
+        disabled={isOpen}
       >
-        <EllipsisHorizontalIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out" />
-      </button>
-      {!isOpen && (
-        <Tooltip
-          id={`more-actions-${drop.id}`}
-          place="top"
-          offset={8}
-          opacity={1}
-          style={{
-            padding: "4px 8px",
-            background: "#37373E",
-            color: "white",
-            fontSize: "13px",
-            fontWeight: 500,
-            borderRadius: "6px",
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-            zIndex: 99999,
-            pointerEvents: "none",
+        <button
+          ref={buttonRef}
+          className="tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
+          onClick={(event) => {
+            event.stopPropagation();
+            handleOpenChange(!isOpen);
           }}
+          aria-label="More actions"
+          aria-haspopup="true"
+          aria-expanded={isOpen}
         >
-          <span className="tw-text-xs">More</span>
-        </Tooltip>
-      )}
+          <EllipsisVerticalIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out" />
+        </button>
+      </DropActionTooltip>
       <CommonDropdownItemsDefaultWrapper
         isOpen={isOpen}
         setOpen={handleOpenChange}
@@ -97,51 +162,116 @@ export default function WaveDropActionsMore({
       >
         <li className="tw-list-none">
           <div className="tw-flex tw-flex-col tw-gap-y-1 tw-py-1">
-            <WaveDropActionsMarkUnread
-              drop={drop}
-              isDropdownItem={true}
-              onMarkUnread={closeDropdown}
-            />
-            <WaveDropActionsCopyLink
-              drop={drop}
-              isDropdownItem={true}
-              onCopy={closeDropdown}
-            />
-            <WaveDropActionsCopyText drop={drop} onCopy={closeDropdown} />
-            {showCurationsAction && (
+            {!showOnlyQuickRemove && (
+              <>
+                <WaveDropActionsMarkUnread
+                  drop={drop}
+                  isDropdownItem={true}
+                  onMarkUnread={closeDropdown}
+                />
+                <WaveDropActionsCopyLink
+                  drop={drop}
+                  isDropdownItem={true}
+                  onCopy={closeDropdown}
+                />
+                <WaveDropActionsCopyText drop={drop} onCopy={closeDropdown} />
+                {quickAddCuration && (
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void handleQuickAdd();
+                    }}
+                    className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
+                  >
+                    <PlusIcon className="tw-size-4 tw-flex-shrink-0" />
+                    <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-medium">
+                      {t(locale, "profileCuration.actions.quickAdd", {
+                        curationName: quickAddCuration.name,
+                      })}
+                    </span>
+                  </button>
+                )}
+                {showManageCurations && (
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      closeDropdown();
+                      setIsCurationsDialogOpen(true);
+                    }}
+                    className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
+                  >
+                    <WaveDropCurationsActionIcon className="tw-size-4 tw-flex-shrink-0" />
+                    <span className="tw-text-sm tw-font-medium">
+                      {t(locale, "profileCuration.actions.manage")}
+                    </span>
+                  </button>
+                )}
+              </>
+            )}
+            {quickRemoveCuration && (
               <button
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation();
-                  closeDropdown();
-                  setIsCurationsDialogOpen(true);
+                  void handleQuickRemove();
                 }}
-                className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
+                className={`tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-2 tw-text-rose-400 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-rose-500/10 ${
+                  showOnlyQuickRemove
+                    ? "tw-gap-x-2 tw-px-2"
+                    : "tw-gap-x-3 tw-px-3"
+                }`}
               >
-                <WaveDropCurationsActionIcon className="tw-size-4 tw-flex-shrink-0" />
-                <span className="tw-text-sm tw-font-medium">Curate</span>
+                <XMarkIcon className="tw-size-4 tw-flex-shrink-0" />
+                <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-medium">
+                  {showOnlyQuickRemove
+                    ? t(locale, "profileCuration.actions.removeConfirm")
+                    : t(locale, "profileCuration.actions.quickRemove", {
+                        curationName: quickRemoveCuration.name,
+                      })}
+                </span>
               </button>
             )}
-            <WaveDropActionsRestoreLinkPreviews
-              drop={drop}
-              onRestored={closeDropdown}
-            />
-            <WaveDropActionsOpen
-              drop={drop}
-              isDropdownItem={true}
-              onOpen={closeDropdown}
-            />
-            {canSetPinnedDrop && (
-              <WaveDropActionsSetPinnedDrop
-                drop={drop}
-                onPinnedDropSet={closeDropdown}
-              />
+            {!showOnlyQuickRemove && (
+              <>
+                <WaveDropActionsRestoreLinkPreviews
+                  drop={drop}
+                  onRestored={closeDropdown}
+                />
+                <WaveDropActionsOpen
+                  drop={drop}
+                  isDropdownItem={true}
+                  onOpen={closeDropdown}
+                />
+                {isOpen && (
+                  <WaveDropDocumentationAction
+                    drop={drop}
+                    onSelected={closeDropdown}
+                  />
+                )}
+                {canSetPinnedDrop && (
+                  <WaveDropActionsSetPinnedDrop
+                    drop={drop}
+                    onPinnedDropSet={closeDropdown}
+                  />
+                )}
+                {canDelete && (
+                  <WaveDropActionsOptions
+                    drop={drop}
+                    isDropdownItem={true}
+                    onDelete={handleDeleteClick}
+                  />
+                )}
+              </>
             )}
-            {canDelete && (
-              <WaveDropActionsOptions
+            {!showOnlyQuickRemove && (
+              <ContentModerationDropActions
                 drop={drop}
-                isDropdownItem={true}
-                onDelete={handleDeleteClick}
+                onReport={() => {
+                  closeDropdown();
+                  setIsReportOpen(true);
+                }}
               />
             )}
           </div>
@@ -162,7 +292,7 @@ export default function WaveDropActionsMore({
           </CommonAnimationOpacity>
         )}
       </CommonAnimationWrapper>
-      {showCurationsAction && (
+      {showManageCurations && (
         <WaveDropCurationsDialog
           dropId={drop.id}
           wave={drop.wave}
@@ -170,6 +300,11 @@ export default function WaveDropActionsMore({
           onClose={() => setIsCurationsDialogOpen(false)}
         />
       )}
+      <ReportDropModal
+        drop={drop}
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+      />
     </>
   );
 }

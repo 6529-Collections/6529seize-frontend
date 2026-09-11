@@ -1,0 +1,597 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0xdd62ed3e",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "allowance",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xdd62ed3e",
+          "signature": "allowance(address,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x095ea7b3",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "approve",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x095ea7b3",
+          "signature": "approve(address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x70a08231",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x70a08231",
+          "signature": "balanceOf(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock#function:0x54c682d1",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock",
+          "inherited": false,
+          "inputs": [],
+          "name": "callbackAttempted",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x54c682d1",
+          "signature": "callbackAttempted()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock#function:0x415aeaa5",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock",
+          "inherited": false,
+          "inputs": [],
+          "name": "callbackSucceeded",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x415aeaa5",
+          "signature": "callbackSucceeded()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x40c10f19",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "mint",
+          "outputs": [],
+          "selector": "0x40c10f19",
+          "signature": "mint(address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock#function:0x524972ae",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract StreamPrimarySaleSettlement",
+              "name": "settlement_",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "struct IStreamPrimarySaleSettlement.PrimarySale",
+              "name": "sale_",
+              "type": "(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32)"
+            }
+          ],
+          "name": "setCallback",
+          "outputs": [],
+          "selector": "0x524972ae",
+          "signature": "setCallback(address,(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0xa9059cbb",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "transfer",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xa9059cbb",
+          "signature": "transfer(address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock#function:0x23b872dd",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "transferFrom",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x23b872dd",
+          "signature": "transferFrom(address,address,uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "callbackAttempted()",
+          "displaySignature": "callbackAttempted()",
+          "functionKind": "getter",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock#function:0x54c682d1",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UmVlbnRyYW50UHJpbWFyeUVSQzIwTW9jayNmdW5jdGlvbjoweDU0YzY4MmQx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "callbackAttempted",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 29,
+            "byteStart": 75138,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1648",
+            "lineEnd": 1648,
+            "lineStart": 1648,
+            "snippetSha256": "sha256:e1ac613b707603264508a236a904932a5d78608f25efbb19af4e481430e9d12d",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x54c682d1",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "callbackSucceeded()",
+          "displaySignature": "callbackSucceeded()",
+          "functionKind": "getter",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock#function:0x415aeaa5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UmVlbnRyYW50UHJpbWFyeUVSQzIwTW9jayNmdW5jdGlvbjoweDQxNWFlYWE1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "callbackSucceeded",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 29,
+            "byteStart": 75173,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1649",
+            "lineEnd": 1649,
+            "lineStart": 1649,
+            "snippetSha256": "sha256:d59fa37267dce5d6e36514ba22ff67ed6a73ed7236c8e495dd2480f55865fc85",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x415aeaa5",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "setCallback(address,(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+          "displaySignature": "setCallback(StreamPrimarySaleSettlement,IStreamPrimarySaleSettlement.PrimarySale)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock#function:0x524972ae",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "settlement_",
+              "type": "StreamPrimarySaleSettlement"
+            },
+            {
+              "index": 1,
+              "name": "sale_",
+              "storageLocation": "calldata",
+              "type": "IStreamPrimarySaleSettlement.PrimarySale"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UmVlbnRyYW50UHJpbWFyeUVSQzIwTW9jayNmdW5jdGlvbjoweDUyNDk3MmFl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setCallback",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 221,
+            "byteStart": 75209,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1651-L1657",
+            "lineEnd": 1657,
+            "lineStart": 1651,
+            "snippetSha256": "sha256:39bd4d2e83122bd04dc4c10a146d4ee3376d17cbde452eaebf8e0d2d4e4b4e45",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x524972ae",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "transferFrom(address,address,uint256)",
+          "displaySignature": "transferFrom(address,address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock#function:0x23b872dd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UmVlbnRyYW50UHJpbWFyeUVSQzIwTW9jayNmdW5jdGlvbjoweDIzYjg3MmRk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transferFrom",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 486,
+            "byteStart": 75436,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1659-L1673",
+            "lineEnd": 1673,
+            "lineStart": 1659,
+            "snippetSha256": "sha256:13547958de3092eade7aedfdea00fb30b93fd632432eeedefb5bf28a3c45ca5e",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x23b872dd",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "settlement",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 75019,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1646",
+            "lineEnd": 1646,
+            "lineStart": 1646,
+            "snippetSha256": "sha256:de119812a250cca6a9c69c00fcc8037148e6623895c71f227a71a3581a888f65",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "StreamPrimarySaleSettlement",
+          "typeString": "contract StreamPrimarySaleSettlement",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "callbackSale",
+          "natspec": "",
+          "range": {
+            "byteLength": 61,
+            "byteStart": 75071,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1647",
+            "lineEnd": 1647,
+            "lineStart": 1647,
+            "snippetSha256": "sha256:df16a5674e0dc8f9fc6ee8a46cacec8ca4a817142891549bdecf9b469334ad95",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "IStreamPrimarySaleSettlement.PrimarySale",
+          "typeString": "struct IStreamPrimarySaleSettlement.PrimarySale",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock#function:0x54c682d1",
+          "immutable": false,
+          "name": "callbackAttempted",
+          "natspec": "",
+          "range": {
+            "byteLength": 29,
+            "byteStart": 75138,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1648",
+            "lineEnd": 1648,
+            "lineStart": 1648,
+            "snippetSha256": "sha256:e1ac613b707603264508a236a904932a5d78608f25efbb19af4e481430e9d12d",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x54c682d1",
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock#function:0x415aeaa5",
+          "immutable": false,
+          "name": "callbackSucceeded",
+          "natspec": "",
+          "range": {
+            "byteLength": 29,
+            "byteStart": 75173,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1649",
+            "lineEnd": 1649,
+            "lineStart": 1649,
+            "snippetSha256": "sha256:d59fa37267dce5d6e36514ba22ff67ed6a73ed7236c8e495dd2480f55865fc85",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x415aeaa5",
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock",
+    "inheritance": [
+      {
+        "definitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+        "name": "PrimarySettlementERC20Mock"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UmVlbnRyYW50UHJpbWFyeUVSQzIwTW9jaw",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock",
+      "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ReentrantPrimaryERC20Mock",
+    "natspec": "",
+    "range": {
+      "byteLength": 976,
+      "byteStart": 74948,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1645-L1674",
+      "lineEnd": 1674,
+      "lineStart": 1645,
+      "snippetSha256": "sha256:22dd3358dcbe40cdef9929754f2ff22bae2f92e3d577e73d831a583aeeb08ff7",
+      "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamPrimarySaleSettlement.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 5
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 4
+    },
+    "totalCount": 5
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock#function:0x23b872dd",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock#function:0x415aeaa5",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock#function:0x524972ae",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock#function:0x54c682d1",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:ReentrantPrimaryERC20Mock",
+      "severity": "advisory"
+    }
+  ]
+}

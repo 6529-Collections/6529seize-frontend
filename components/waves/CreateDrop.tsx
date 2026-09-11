@@ -3,8 +3,6 @@
 import { useRef, useState, useCallback, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 import type { CreateDropConfig } from "@/entities/IDrop";
-import CreateDropStormParts from "./CreateDropStormParts";
-import { AnimatePresence, motion } from "framer-motion";
 import CreateDropContent from "./CreateDropContent";
 import CreateCurationDropContent from "./CreateCurationDropContent";
 import QuorumProposalDropModal from "./quorum/QuorumProposalDropModal";
@@ -14,23 +12,20 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../react-query-wrapper/ReactQueryWrapper";
-import { commonApiPost } from "@/services/api/common-api";
+import {
+  commonApiPost,
+  getStructuredApiErrorCode,
+  getStructuredApiErrorStatus,
+} from "@/services/api/common-api";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiContentModerationProfileStatusResponse } from "@/generated/models/ApiContentModerationProfileStatusResponse";
+import { ApiModeratedProfileStatus } from "@/generated/models/ApiModeratedProfileStatus";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useAuth } from "../auth/Auth";
 import { useKeyPressEvent } from "react-use";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type {
-  CurationComposerVariant,
-  IdentityPickerPlacement,
-} from "./dropComposer.types";
 import { DropMode } from "./dropComposer.types";
-import {
-  ChatRestriction,
-  type DropPrivileges,
-} from "@/hooks/useDropPriviledges";
+import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
@@ -39,67 +34,28 @@ import {
   resolveWaveSubmissionExperience,
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
-import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
-
-interface CreateDropProps {
-  readonly activeDrop: ActiveDropState | null;
-  readonly onCancelReplyQuote: () => void;
-  readonly onDropAddedToQueue: () => void;
-  readonly onAllDropsAdded?: (() => void) | undefined;
-  readonly onServerDropCreated?:
-    | ((drop: ApiDrop) => Promise<void> | void)
-    | undefined;
-  readonly onExitFixedDropMode?: (() => void) | undefined;
-  readonly wave: ApiWave;
-  readonly dropId: string | null;
-  readonly fixedDropMode: DropMode;
-  readonly privileges: DropPrivileges;
-  readonly curationComposerVariant?: CurationComposerVariant | undefined;
-  readonly initialCurationUrl?: string | null | undefined;
-  readonly onSubmitCurationUrl?: ((url: string) => void) | undefined;
-  readonly canSubmitCurationUrl?: boolean | undefined;
-  readonly curationUrlSubmitRestrictionMessage?: string | null | undefined;
-  readonly externalAttachmentDrop?:
-    | {
-        readonly token: number;
-        readonly files: File[];
-      }
-    | null
-    | undefined;
-  readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
-  readonly termsSignatureFlowEnabled?: boolean | undefined;
-  readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
-  readonly forceStandardDropComposer?: boolean | undefined;
-}
-
-export interface DropMutationBody {
-  readonly drop: ApiCreateDropRequest;
-  readonly dropId: string | null;
-  readonly onSuccess?: (() => void) | undefined;
-  readonly onError?: ((error: unknown) => void) | undefined;
-}
-
-const ANIMATION_DURATION = 0.3;
-
-interface SlowModeChatReservation {
-  readonly id: number;
-  readonly waveId: string;
-  readonly cooldownMs: number;
-}
-
-interface QueuedDropMutationBody extends DropMutationBody {
-  readonly slowModeChatReservation?: SlowModeChatReservation | undefined;
-}
-
-interface SlowModeChatWaveState {
-  pendingReservationId: number | null;
-  cooldownUntil: number | null;
-  cooldownMs: number | null;
-}
+import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { useModerationRejectedDropDelivery } from "./useModerationRejectedDropDelivery";
+import { PROFILE_SUSPENDED_ERROR_CODE } from "@/services/api/content-moderation-api";
+import { PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
+import WaveGuidelinesAgreementDialog from "./create-drop-content/WaveGuidelinesAgreementDialog";
+import { useWaveGuidelinesAgreement } from "./create-drop-content/useWaveGuidelinesAgreement";
+import { useWaveGuidelinesSubmission } from "./create-drop-content/useWaveGuidelinesSubmission";
+import type {
+  DropMutationBody,
+  QueuedDropMutationBody,
+  SlowModeChatReservation,
+  SlowModeChatWaveState,
+} from "./create-drop-content/drop-submission.types";
+import { getDropSubmissionErrorContent } from "./create-drop-content/drop-submission-error.helpers";
+import type { CreateDropProps } from "./create-drop-content/create-drop.types";
 
 export default function CreateDrop({
   activeDrop,
   onCancelReplyQuote,
+  onReplyTargetUnavailable,
   onDropAddedToQueue,
   onAllDropsAdded,
   onServerDropCreated,
@@ -118,7 +74,11 @@ export default function CreateDrop({
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
   forceStandardDropComposer = false,
+  focusOnInitialActiveDrop = false,
+  initialMarkdown = null,
+  initialMarkdownKey = null,
 }: CreateDropProps) {
+  const locale = useBrowserLocale();
   const { setToast, connectedProfile } = useAuth();
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
   const queryClient = useQueryClient();
@@ -136,7 +96,23 @@ export default function CreateDrop({
   } | null>(null);
   const [dismissedQuorumProposalScope, setDismissedQuorumProposalScope] =
     useState<string | null>(null);
-  const { processDropRemoved, processIncomingDrop } = useMyStream();
+  const { applyOptimisticDropUpdate, processDropRemoved, processIncomingDrop } =
+    useMyStream();
+  const retainModerationRejectedDrop = useModerationRejectedDropDelivery({
+    applyOptimisticDropUpdate,
+    processDropRemoved,
+    waveId: wave.id,
+  });
+  const {
+    agreeToGuidelines,
+    declineGuidelines,
+    dialogGuidelines,
+    markChatSubmitted,
+    requestGuidelinesAgreement,
+  } = useWaveGuidelinesAgreement({
+    profileId: connectedProfile?.id ?? null,
+    wave,
+  });
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
   const resolvedSubmissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
@@ -190,8 +166,6 @@ export default function CreateDrop({
   const isQuorumProposalModalOpen =
     isQuorumProposalDropMode &&
     dismissedQuorumProposalScope !== quorumProposalScopeKey;
-  const canMentionAll =
-    wave.wave.authenticated_user_eligible_for_admin === true;
   const canUseCurationUrlSubmit =
     fixedDropMode === DropMode.CHAT
       ? onSubmitCurationUrl !== undefined && canSubmitCurationUrl !== false
@@ -307,28 +281,6 @@ export default function CreateDrop({
       onDropModeChange(true);
     }
   }, [isDropMode, onDropModeChange]);
-
-  const onRemovePart = useCallback(
-    (partIndex: number) => {
-      setDrop((prevDrop) => {
-        if (!prevDrop) return null;
-        const newParts = prevDrop.parts.filter((_, i) => i !== partIndex);
-        return {
-          ...prevDrop,
-          parts: newParts,
-          referenced_nfts: prevDrop.referenced_nfts,
-          mentioned_users: prevDrop.mentioned_users,
-          mentioned_groups: getMentionedGroupsFromParts(
-            newParts,
-            canMentionAll
-          ),
-          mentioned_waves: prevDrop.mentioned_waves ?? [],
-          metadata: prevDrop.metadata,
-        };
-      });
-    },
-    [canMentionAll]
-  );
 
   const slowModeChatStateByWaveRef = useRef<Map<string, SlowModeChatWaveState>>(
     new Map()
@@ -491,6 +443,7 @@ export default function CreateDrop({
       return commonApiPost<ApiCreateDropRequest, ApiDrop>({
         endpoint: `drops`,
         body: body.drop,
+        errorMode: "structured",
       });
     },
     onSuccess: (serverDrop, body) => {
@@ -498,7 +451,9 @@ export default function CreateDrop({
         processDropRemoved(body.drop.wave_id, body.dropId);
       }
       startLocalSlowModeCooldown(body);
-      processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT);
+      void Promise.resolve(
+        processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT)
+      ).catch(() => undefined);
       body.onSuccess?.();
 
       if (
@@ -513,21 +468,54 @@ export default function CreateDrop({
     },
     onError: (error, body) => {
       clearSlowModeChatPending(body.slowModeChatReservation);
+      const isContentModerationRejection =
+        getStructuredApiErrorStatus(error) === 422 &&
+        getStructuredApiErrorCode(error) === "CONTENT_MODERATION_REJECTED";
+      const isProfileSuspendedRejection =
+        getStructuredApiErrorStatus(error) === 403 &&
+        getStructuredApiErrorCode(error) === PROFILE_SUSPENDED_ERROR_CODE;
+      if (isProfileSuspendedRejection && connectedProfile?.id) {
+        queryClient.setQueryData<ApiContentModerationProfileStatusResponse>(
+          [...PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY, connectedProfile.id],
+          {
+            profile_id: connectedProfile.id,
+            status: ApiModeratedProfileStatus.Suspended,
+          }
+        );
+      }
       setTimeout(() => {
-        if (body.dropId) {
-          processDropRemoved(body.drop.wave_id, body.dropId);
+        if (!body.dropId) {
+          return;
         }
+
+        if (
+          isContentModerationRejection &&
+          retainModerationRejectedDrop({
+            dropId: body.dropId,
+            rejectedWaveId: body.drop.wave_id,
+          })
+        ) {
+          return;
+        }
+
+        processDropRemoved(body.drop.wave_id, body.dropId);
       }, 0);
-      setToast({
-        type: "error",
-        title: "Couldn't submit this drop.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
-      });
-      body.onError?.(error);
+      const isHandled = body.onError?.(error) === true;
+      if (!isHandled) {
+        const errorContent = getDropSubmissionErrorContent({
+          error,
+          isContentModerationRejection,
+          isProfileSuspendedRejection,
+          locale,
+        });
+        setToast({
+          type: "error",
+          title: t(locale, "contentModeration.dropSubmitErrorTitle"),
+          ...errorContent,
+        });
+      }
     },
-    retry: (failureCount) => failureCount < 3,
-    retryDelay: (failureCount) => failureCount * 1000,
+    retry: false,
   });
 
   // Use refs to avoid stale closures - fixes the stream unmounting issue
@@ -591,7 +579,7 @@ export default function CreateDrop({
     waitAndInvalidateDrops,
   ]);
 
-  const submitDrop = useCallback(
+  const enqueueDrop = useCallback(
     (dropRequest: DropMutationBody): boolean => {
       const slowModeChatReservation = reserveSlowModeChatQueueSlot(
         dropRequest.drop
@@ -622,6 +610,10 @@ export default function CreateDrop({
       // Trigger UI updates
       onDropAddedToQueue();
 
+      if (dropRequest.drop.drop_type === ApiDropType.Chat) {
+        markChatSubmitted();
+      }
+
       // Explicitly blur any focused input to close keyboard for drop flows.
       if (
         dropRequest.drop.drop_type !== ApiDropType.Chat &&
@@ -633,6 +625,7 @@ export default function CreateDrop({
       return true;
     },
     [
+      markChatSubmitted,
       onDropAddedToQueue,
       processNextDrop,
       reserveSlowModeChatQueueSlot,
@@ -640,11 +633,18 @@ export default function CreateDrop({
     ]
   );
 
+  const submitDrop = useWaveGuidelinesSubmission({
+    enqueueDrop,
+    requestGuidelinesAgreement,
+    setToast,
+  });
+
   const createDropContentProps = useMemo(() => {
     const hasExitFixedDropMode = onExitFixedDropMode !== undefined;
     return {
       activeDrop,
       onCancelReplyQuote,
+      onReplyTargetUnavailable,
       drop,
       isStormMode,
       isDropMode,
@@ -671,10 +671,13 @@ export default function CreateDrop({
       curationUrlSubmitRestrictionMessage: curationUrlRestrictionMessage,
       termsSignatureFlowEnabled,
       identityPickerPlacement,
+      initialMarkdown,
+      initialMarkdownKey,
     };
   }, [
     activeDrop,
     onCancelReplyQuote,
+    onReplyTargetUnavailable,
     drop,
     isStormMode,
     isDropMode,
@@ -693,6 +696,8 @@ export default function CreateDrop({
     curationUrlRestrictionMessage,
     termsSignatureFlowEnabled,
     identityPickerPlacement,
+    initialMarkdown,
+    initialMarkdownKey,
   ]);
 
   let dropComposerContent: ReactNode;
@@ -711,13 +716,9 @@ export default function CreateDrop({
         />
         {!isQuorumProposalModalOpen && (
           <div className="tw-flex tw-w-full tw-justify-end">
-            <button
-              type="button"
-              onClick={onOpenQuorumProposal}
-              className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800"
-            >
-              Create Proposal
-            </button>
+            <Button onClick={onOpenQuorumProposal} variant="tertiary" size="sm">
+              {t(locale, "waves.submissionButtonLabel.defaultCreateProposal")}
+            </Button>
           </div>
         )}
       </>
@@ -742,33 +743,19 @@ export default function CreateDrop({
         {...createDropContentProps}
         wave={wave}
         submissionExperience={submissionExperience}
+        focusOnInitialActiveDrop={focusOnInitialActiveDrop}
       />
     );
   }
 
   return (
     <>
-      <AnimatePresence>
-        {isStormMode && !isCurationDropMode && !isQuorumProposalDropMode && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: ANIMATION_DURATION }}
-          >
-            <CreateDropStormParts
-              parts={drop?.parts ?? []}
-              mentionedUsers={drop?.mentioned_users ?? []}
-              mentionedGroups={drop?.mentioned_groups ?? []}
-              mentionedWaves={drop?.mentioned_waves ?? []}
-              referencedNfts={drop?.referenced_nfts ?? []}
-              onRemovePart={onRemovePart}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {dropComposerContent}
+      <WaveGuidelinesAgreementDialog
+        guidelines={dialogGuidelines}
+        onAgree={agreeToGuidelines}
+        onDecline={declineGuidelines}
+      />
     </>
   );
 }

@@ -1,0 +1,780 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0x82359740",
+          "declaringDefinitionId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "subId",
+              "type": "uint64"
+            }
+          ],
+          "name": "acceptSubscriptionOwnerTransfer",
+          "outputs": [],
+          "selector": "0x82359740",
+          "signature": "acceptSubscriptionOwnerTransfer(uint64)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0x7341c10c",
+          "declaringDefinitionId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "subId",
+              "type": "uint64"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "consumer",
+              "type": "address"
+            }
+          ],
+          "name": "addConsumer",
+          "outputs": [],
+          "selector": "0x7341c10c",
+          "signature": "addConsumer(uint64,address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0xd7ae1d30",
+          "declaringDefinitionId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "subId",
+              "type": "uint64"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            }
+          ],
+          "name": "cancelSubscription",
+          "outputs": [],
+          "selector": "0xd7ae1d30",
+          "signature": "cancelSubscription(uint64,address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0xa21a23e4",
+          "declaringDefinitionId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface",
+          "inherited": false,
+          "inputs": [],
+          "name": "createSubscription",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "subId",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0xa21a23e4",
+          "signature": "createSubscription()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0x00012291",
+          "declaringDefinitionId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface",
+          "inherited": false,
+          "inputs": [],
+          "name": "getRequestConfig",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "internalType": "uint32",
+              "name": "",
+              "type": "uint32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32[]",
+              "name": "",
+              "type": "bytes32[]"
+            }
+          ],
+          "selector": "0x00012291",
+          "signature": "getRequestConfig()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0xa47c7696",
+          "declaringDefinitionId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "subId",
+              "type": "uint64"
+            }
+          ],
+          "name": "getSubscription",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint96",
+              "name": "balance",
+              "type": "uint96"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "reqCount",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "address[]",
+              "name": "consumers",
+              "type": "address[]"
+            }
+          ],
+          "selector": "0xa47c7696",
+          "signature": "getSubscription(uint64)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0xe82ad7d4",
+          "declaringDefinitionId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "subId",
+              "type": "uint64"
+            }
+          ],
+          "name": "pendingRequestExists",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xe82ad7d4",
+          "signature": "pendingRequestExists(uint64)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0x9f87fad7",
+          "declaringDefinitionId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "subId",
+              "type": "uint64"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "consumer",
+              "type": "address"
+            }
+          ],
+          "name": "removeConsumer",
+          "outputs": [],
+          "selector": "0x9f87fad7",
+          "signature": "removeConsumer(uint64,address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0x5d3b1d30",
+          "declaringDefinitionId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "keyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "subId",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "internalType": "uint16",
+              "name": "minimumRequestConfirmations",
+              "type": "uint16"
+            },
+            {
+              "index": 3,
+              "internalType": "uint32",
+              "name": "callbackGasLimit",
+              "type": "uint32"
+            },
+            {
+              "index": 4,
+              "internalType": "uint32",
+              "name": "numWords",
+              "type": "uint32"
+            }
+          ],
+          "name": "requestRandomWords",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x5d3b1d30",
+          "signature": "requestRandomWords(bytes32,uint64,uint16,uint32,uint32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0x04c357cb",
+          "declaringDefinitionId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "subId",
+              "type": "uint64"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "requestSubscriptionOwnerTransfer",
+          "outputs": [],
+          "selector": "0x04c357cb",
+          "signature": "requestSubscriptionOwnerTransfer(uint64,address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "getRequestConfig()",
+          "displaySignature": "getRequestConfig()",
+          "functionKind": "function",
+          "id": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0x00012291",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2Uuc29sOlZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2UjZnVuY3Rpb246MHgwMDAxMjI5MQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getRequestConfig",
+          "natspec": "@notice Get configuration relevant for making requests\n @return minimumRequestConfirmations global min for request confirmations\n @return maxGasLimit global max for request gas limit\n @return s_provingKeyHashes list of registered key hashes",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "uint32"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            }
+          ],
+          "range": {
+            "byteLength": 85,
+            "byteStart": 381,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/VRFCoordinatorV2Interface.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:33e05474fb990c742a4a4ba3c63939f7ff42754d805f37f7397bee9546cc6f6f",
+            "sourceSha256": "sha256:070256bd500d626715ba2f85c83c27aff047ebc0ba268c70e206d0b61c6007b8"
+          },
+          "selector": "0x00012291",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "requestRandomWords(bytes32,uint64,uint16,uint32,uint32)",
+          "displaySignature": "requestRandomWords(bytes32,uint64,uint16,uint32,uint32)",
+          "functionKind": "function",
+          "id": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0x5d3b1d30",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "keyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "subId",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "name": "minimumRequestConfirmations",
+              "type": "uint16"
+            },
+            {
+              "index": 3,
+              "name": "callbackGasLimit",
+              "type": "uint32"
+            },
+            {
+              "index": 4,
+              "name": "numWords",
+              "type": "uint32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2Uuc29sOlZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2UjZnVuY3Rpb246MHg1ZDNiMWQzMA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestRandomWords",
+          "natspec": "@notice Request a set of random words.\n @param keyHash - Corresponds to a particular oracle job which uses\n that key for generating the VRF proof. Different keyHash's have different gas price\n ceilings, so you can select a specific one to bound your maximum per request cost.\n @param subId  - The ID of the VRF subscription. Must be funded\n with the minimum subscription balance required for the selected keyHash.\n @param minimumRequestConfirmations - How many blocks you'd like the\n oracle to wait before responding to the request. See SECURITY CONSIDERATIONS\n for why you may want to request more. The acceptable range is\n [minimumRequestBlockConfirmations, 200].\n @param callbackGasLimit - How much gas you'd like to receive in your\n fulfillRandomWords callback. Note that gasleft() inside fulfillRandomWords\n may be slightly less than this amount because of gas used calling the function\n (argument decoding etc.), so you may need to request slightly more than you expect\n to have inside fulfillRandomWords. The acceptable range is\n [0, maxGasLimit]\n @param numWords - The number of uint256 random values you'd like to receive\n in your fulfillRandomWords callback. Note these numbers are expanded in a\n secure way by the VRFCoordinator from a single random value supplied by the oracle.\n @return requestId - A unique identifier of the request. Can be used to match\n a request to a response in fulfillRandomWords.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 220,
+            "byteStart": 2032,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/VRFCoordinatorV2Interface.sol#L36-L42",
+            "lineEnd": 42,
+            "lineStart": 36,
+            "snippetSha256": "sha256:18c839cf50573082584b2cd113b6749502b4da8b7951b342848f21d84fdcf2e4",
+            "sourceSha256": "sha256:070256bd500d626715ba2f85c83c27aff047ebc0ba268c70e206d0b61c6007b8"
+          },
+          "selector": "0x5d3b1d30",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "createSubscription()",
+          "displaySignature": "createSubscription()",
+          "functionKind": "function",
+          "id": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0xa21a23e4",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2Uuc29sOlZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2UjZnVuY3Rpb246MHhhMjFhMjNlNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "createSubscription",
+          "natspec": "@notice Create a VRF subscription.\n @return subId - A unique subscription id.\n @dev You can manage the consumer set dynamically with addConsumer/removeConsumer.\n @dev Note to fund the subscription, use transferAndCall. For example\n @dev  LINKTOKEN.transferAndCall(\n @dev    address(COORDINATOR),\n @dev    amount,\n @dev    abi.encode(subId));",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "subId",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 62,
+            "byteStart": 2665,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/VRFCoordinatorV2Interface.sol#L54",
+            "lineEnd": 54,
+            "lineStart": 54,
+            "snippetSha256": "sha256:5b310ddb173dadb01adb3850cf95047744546677ed4e38d27c2f2a8673d6fbff",
+            "sourceSha256": "sha256:070256bd500d626715ba2f85c83c27aff047ebc0ba268c70e206d0b61c6007b8"
+          },
+          "selector": "0xa21a23e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getSubscription(uint64)",
+          "displaySignature": "getSubscription(uint64)",
+          "functionKind": "function",
+          "id": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0xa47c7696",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "subId",
+              "type": "uint64"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2Uuc29sOlZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2UjZnVuY3Rpb246MHhhNDdjNzY5Ng",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getSubscription",
+          "natspec": "@notice Get a VRF subscription.\n @param subId - ID of the subscription\n @return balance - LINK balance of the subscription in juels.\n @return reqCount - number of requests for this subscription, determines fee tier.\n @return owner - owner of the subscription.\n @return consumers - list of consumer address which are able to use this subscription.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "balance",
+              "type": "uint96"
+            },
+            {
+              "index": 1,
+              "name": "reqCount",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "consumers",
+              "storageLocation": "memory",
+              "type": "address[]"
+            }
+          ],
+          "range": {
+            "byteLength": 162,
+            "byteStart": 3133,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/VRFCoordinatorV2Interface.sol#L64-L67",
+            "lineEnd": 67,
+            "lineStart": 64,
+            "snippetSha256": "sha256:a1b1f5f8908df0f8d8e8e42fca8e66e592bad88a289dd90e29f02710f68eda42",
+            "sourceSha256": "sha256:070256bd500d626715ba2f85c83c27aff047ebc0ba268c70e206d0b61c6007b8"
+          },
+          "selector": "0xa47c7696",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "requestSubscriptionOwnerTransfer(uint64,address)",
+          "displaySignature": "requestSubscriptionOwnerTransfer(uint64,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0x04c357cb",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "subId",
+              "type": "uint64"
+            },
+            {
+              "index": 1,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2Uuc29sOlZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2UjZnVuY3Rpb246MHgwNGMzNTdjYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestSubscriptionOwnerTransfer",
+          "natspec": "@notice Request subscription owner transfer.\n @param subId - ID of the subscription\n @param newOwner - proposed new owner of the subscription",
+          "outputs": [],
+          "range": {
+            "byteLength": 83,
+            "byteStart": 3478,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/VRFCoordinatorV2Interface.sol#L74",
+            "lineEnd": 74,
+            "lineStart": 74,
+            "snippetSha256": "sha256:0c3192d705afcab220bca9fcc9ef32d78e993be4252e710bbb6595428b2a927a",
+            "sourceSha256": "sha256:070256bd500d626715ba2f85c83c27aff047ebc0ba268c70e206d0b61c6007b8"
+          },
+          "selector": "0x04c357cb",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "acceptSubscriptionOwnerTransfer(uint64)",
+          "displaySignature": "acceptSubscriptionOwnerTransfer(uint64)",
+          "functionKind": "function",
+          "id": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0x82359740",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "subId",
+              "type": "uint64"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2Uuc29sOlZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2UjZnVuY3Rpb246MHg4MjM1OTc0MA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "acceptSubscriptionOwnerTransfer",
+          "natspec": "@notice Request subscription owner transfer.\n @param subId - ID of the subscription\n @dev will revert if original owner of subId has\n not requested that msg.sender become the new owner.",
+          "outputs": [],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 3794,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/VRFCoordinatorV2Interface.sol#L82",
+            "lineEnd": 82,
+            "lineStart": 82,
+            "snippetSha256": "sha256:22133c7f9db77b05eafa9dafaa72b47aa3909dc4f4ea387cdb6b4766b68b3591",
+            "sourceSha256": "sha256:070256bd500d626715ba2f85c83c27aff047ebc0ba268c70e206d0b61c6007b8"
+          },
+          "selector": "0x82359740",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "addConsumer(uint64,address)",
+          "displaySignature": "addConsumer(uint64,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0x7341c10c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "subId",
+              "type": "uint64"
+            },
+            {
+              "index": 1,
+              "name": "consumer",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2Uuc29sOlZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2UjZnVuY3Rpb246MHg3MzQxYzEwYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "addConsumer",
+          "natspec": "@notice Add a consumer to a VRF subscription.\n @param subId - ID of the subscription\n @param consumer - New consumer which can use the subscription",
+          "outputs": [],
+          "range": {
+            "byteLength": 62,
+            "byteStart": 4047,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/VRFCoordinatorV2Interface.sol#L89",
+            "lineEnd": 89,
+            "lineStart": 89,
+            "snippetSha256": "sha256:cc4af600c63d031a0199f16c58e00d76aa00026a543eb24aaee2a25c532c1254",
+            "sourceSha256": "sha256:070256bd500d626715ba2f85c83c27aff047ebc0ba268c70e206d0b61c6007b8"
+          },
+          "selector": "0x7341c10c",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "removeConsumer(uint64,address)",
+          "displaySignature": "removeConsumer(uint64,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0x9f87fad7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "subId",
+              "type": "uint64"
+            },
+            {
+              "index": 1,
+              "name": "consumer",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2Uuc29sOlZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2UjZnVuY3Rpb246MHg5Zjg3ZmFkNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "removeConsumer",
+          "natspec": "@notice Remove a consumer from a VRF subscription.\n @param subId - ID of the subscription\n @param consumer - Consumer to remove from the subscription",
+          "outputs": [],
+          "range": {
+            "byteLength": 65,
+            "byteStart": 4300,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/VRFCoordinatorV2Interface.sol#L96",
+            "lineEnd": 96,
+            "lineStart": 96,
+            "snippetSha256": "sha256:fe46bd7139482677ceb4ec0d27450c187920ba97a7b19d91a565c3cdabf82551",
+            "sourceSha256": "sha256:070256bd500d626715ba2f85c83c27aff047ebc0ba268c70e206d0b61c6007b8"
+          },
+          "selector": "0x9f87fad7",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "cancelSubscription(uint64,address)",
+          "displaySignature": "cancelSubscription(uint64,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0xd7ae1d30",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "subId",
+              "type": "uint64"
+            },
+            {
+              "index": 1,
+              "name": "to",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2Uuc29sOlZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2UjZnVuY3Rpb246MHhkN2FlMWQzMA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "cancelSubscription",
+          "natspec": "@notice Cancel a subscription\n @param subId - ID of the subscription\n @param to - Where to send the remaining LINK to",
+          "outputs": [],
+          "range": {
+            "byteLength": 63,
+            "byteStart": 4524,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/VRFCoordinatorV2Interface.sol#L103",
+            "lineEnd": 103,
+            "lineStart": 103,
+            "snippetSha256": "sha256:4e2d168276bd7749b32c3c6e8f6a7abf6eaeac6f232759d279d568c1877f2d1a",
+            "sourceSha256": "sha256:070256bd500d626715ba2f85c83c27aff047ebc0ba268c70e206d0b61c6007b8"
+          },
+          "selector": "0xd7ae1d30",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "pendingRequestExists(uint64)",
+          "displaySignature": "pendingRequestExists(uint64)",
+          "functionKind": "function",
+          "id": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0xe82ad7d4",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "subId",
+              "type": "uint64"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2Uuc29sOlZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2UjZnVuY3Rpb246MHhlODJhZDdkNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "pendingRequestExists",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 73,
+            "byteStart": 4899,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/VRFCoordinatorV2Interface.sol#L112",
+            "lineEnd": 112,
+            "lineStart": 112,
+            "snippetSha256": "sha256:58a03dfe6492d8b3773030bfc0953d2cffc699d13413cdfdab0b5c6fbaec5600",
+            "sourceSha256": "sha256:070256bd500d626715ba2f85c83c27aff047ebc0ba268c70e206d0b61c6007b8"
+          },
+          "selector": "0xe82ad7d4",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1ZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2Uuc29sOlZSRkNvb3JkaW5hdG9yVjJJbnRlcmZhY2U",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "VRFCoordinatorV2Interface",
+    "natspec": "",
+    "range": {
+      "byteLength": 4917,
+      "byteStart": 57,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/VRFCoordinatorV2Interface.sol#L4-L113",
+      "lineEnd": 113,
+      "lineStart": 4,
+      "snippetSha256": "sha256:7e90a609d34c8c1de12c414385ba3fdc3f58727efc5f303f3d12fb5191818e7b",
+      "sourceSha256": "sha256:070256bd500d626715ba2f85c83c27aff047ebc0ba268c70e206d0b61c6007b8"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/VRFCoordinatorV2Interface.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface#function:0xe82ad7d4",
+      "definitionId": "smart-contracts/VRFCoordinatorV2Interface.sol:VRFCoordinatorV2Interface",
+      "severity": "advisory"
+    }
+  ]
+}

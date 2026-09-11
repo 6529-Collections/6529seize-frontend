@@ -143,13 +143,21 @@ describe("About contents dropdown", () => {
     expect(trigger).not.toHaveTextContent("Contents");
   });
 
+  it("shows the modern divider for Legal sections", async () => {
+    await renderAboutSection(AboutSection.LICENSE);
+
+    expect(
+      screen.getByTestId("about-contents-menu-trigger").parentElement
+    ).toHaveClass("tw-border-b", "tw-border-white/[0.06]");
+  });
+
   it("separates dropdown items by category", async () => {
     setCookieCountry("US");
     await renderAboutSection(AboutSection.MEMES);
 
     openContentsMenu();
 
-    expect(screen.getByText("About 6529")).toBeInTheDocument();
+    expect(screen.getByText("Overview")).toBeInTheDocument();
     expect(screen.getByText("Collections & Minting")).toBeInTheDocument();
     expect(screen.getByText("Network & Reputation")).toBeInTheDocument();
     expect(screen.getByText("Delegation & Wallets")).toBeInTheDocument();
@@ -262,7 +270,7 @@ describe("About contents dropdown", () => {
     ).toHaveAttribute("href", "/about/subscriptions");
   });
 
-  it("shows connected subscriptions action before the subscriptions dropdown", () => {
+  it("keeps mobile focus order aligned with the subscriptions dropdown layout", () => {
     setCookieCountry("US");
     render(
       <AuthContext.Provider
@@ -291,12 +299,42 @@ describe("About contents dropdown", () => {
     const trigger = screen.getByRole("button", {
       name: /open about contents navigation/i,
     });
+    const menuTrigger = screen.getByTestId("about-contents-menu-trigger");
+    const leadingAction = screen.getByTestId("about-contents-leading-action");
 
     expect(profileLink).toHaveAttribute("href", "/test-handle/subscriptions");
     expect(
-      profileLink.compareDocumentPosition(trigger) &
+      trigger.compareDocumentPosition(profileLink) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
+    expect(menuTrigger).toHaveClass("tw-order-1", "sm:tw-order-2");
+    expect(leadingAction).toHaveClass("tw-order-2", "sm:tw-order-1");
+  });
+
+  it("uses a native profile link for the authenticated white action", () => {
+    setCookieCountry("US");
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: {
+              handle: "test-handle",
+              normalised_handle: "test-handle",
+              primary_wallet: "0x123",
+              wallets: [],
+            },
+            isAuthenticated: true,
+          } as any
+        }
+      >
+        <AboutSubscriptionsProfileButton variant="white" />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByRole("link", { name: /manage/i })).toHaveAttribute(
+      "href",
+      "/test-handle/subscriptions"
+    );
   });
 
   it("opens wallet connection from disconnected subscriptions action", () => {
@@ -501,7 +539,7 @@ describe("About contents dropdown", () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: /manage/i,
+        name: /connect to subscribe/i,
       })
     );
 
@@ -544,7 +582,9 @@ describe("About contents dropdown", () => {
     );
     const { rerender } = render(renderButton("test-handle"));
 
-    fireEvent.click(screen.getByRole("button", { name: /manage/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /connect to subscribe/i })
+    );
     await waitFor(() => {
       expect(requestAuth).toHaveBeenCalledTimes(1);
     });

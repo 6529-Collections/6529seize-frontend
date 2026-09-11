@@ -1,47 +1,44 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import Page from '@/app/om/6529-museum-district/page';
+import Page, { generateMetadata } from "@/app/om/6529-museum-district/page";
+import { om_6529MuseumDistrictMigratedWordPressPage } from "@/app/om/6529-museum-district/content";
+import { render, screen } from "@testing-library/react";
 
+describe("6529 Museum District Page (migrated WordPress static page)", () => {
+  it("renders the district title and core description", () => {
+    render(<Page />);
 
-describe('6529 Museum District Page', () => {
-  const renderComponent = () => render(<Page />);
-
-  it('renders the page title', () => {
-    renderComponent();
-    const title = document.querySelector('title');
-    expect(title?.textContent).toBe('6529 MUSEUM DISTRICT - 6529.io');
+    expect(
+      screen.getByRole("heading", { level: 1, name: "6529 MUSEUM DISTRICT" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/the leading educational and onboarding start/i)
+    ).toBeInTheDocument();
   });
 
-  it('includes canonical link', () => {
-    renderComponent();
-    const canonical = document.querySelector('link[rel="canonical"]');
-    expect(canonical).toBeInTheDocument();
-    expect(canonical?.getAttribute('href')).toBe('/om/6529-museum-district/');
+  it("marks the page with its auditable migration source", () => {
+    render(<Page />);
+
+    expect(document.querySelector("main")).toHaveAttribute(
+      "data-content-source",
+      "migrated-wordpress"
+    );
   });
 
-  it('includes robots meta tag', () => {
-    renderComponent();
-    const robots = document.querySelector('meta[name="robots"]');
-    expect(robots?.getAttribute('content')).toBe('index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+  it("exposes title and Open Graph metadata via generateMetadata", () => {
+    const metadata = generateMetadata();
+
+    expect(metadata.title).toBe("6529 MUSEUM DISTRICT - 6529.io");
+    expect(metadata.openGraph).toMatchObject({
+      siteName: "6529.io",
+      title: "6529 MUSEUM DISTRICT - 6529.io",
+    });
   });
 
-  it('includes Open Graph title', () => {
-    renderComponent();
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    expect(ogTitle?.getAttribute('content')).toBe('6529 MUSEUM DISTRICT - 6529.io');
-  });
-
-  it('has skip to content link', () => {
-    renderComponent();
-    const skip = screen.getByText('Skip to content');
-    expect(skip).toBeInTheDocument();
-    expect(skip).toHaveAttribute('href', '#content');
-  });
-
-  it('has go to top link', () => {
-    renderComponent();
-    const link = document.querySelector('#toTop');
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveClass('fusion-top-top-link');
+  it("keeps the content module aligned with the page path", () => {
+    expect(om_6529MuseumDistrictMigratedWordPressPage.path).toBe(
+      "/om/6529-museum-district"
+    );
+    expect(om_6529MuseumDistrictMigratedWordPressPage.source).toBe(
+      "migrated-wordpress"
+    );
   });
 });

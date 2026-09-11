@@ -1,4 +1,5 @@
 import { useDropReaction } from "@/hooks/drops/useDropReaction";
+import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -6,9 +7,17 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { QueryKey as AppQueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useAuth } from "@/components/auth/Auth";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import * as commonApi from "@/services/api/common-api";
 import * as dropReactionMonitoring from "@/utils/monitoring/dropReactionMonitoring";
-import { act, renderHook } from "@testing-library/react";
+import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
+import { __resetDropReactionAuthRecoveryForTests } from "@/hooks/drops/useDropReactionAuthRecovery";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { createDeferredPromise as createDeferred } from "@/__tests__/utils/deferredPromise";
+import {
+  __resetDropReactionRequestQueueForTests,
+  DropReactionRequestTimeoutError,
+} from "@/helpers/reactions/dropReactionRequestQueue";
 
 const setToastMock = jest.fn();
 const rollbackMock = jest.fn();
@@ -17,6 +26,10 @@ const applyOptimisticDropUpdateMock = jest.fn(() => ({
 }));
 const mockQueryCacheFindAll = jest.fn(() => []);
 const mockSetQueryData = jest.fn();
+const mockSetQueriesData = jest.fn();
+const mockGetEligibility = jest.fn();
+const mockUpdateEligibility = jest.fn();
+const requestAuthMock = jest.fn(async () => ({ success: true }));
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
@@ -26,9 +39,22 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(),
 }));
 
+jest.mock("@/contexts/wave/WaveEligibilityContext", () => ({
+  useWaveEligibility: jest.fn(() => ({
+    getEligibility: mockGetEligibility,
+    updateEligibility: mockUpdateEligibility,
+  })),
+}));
+
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
   commonApiDelete: jest.fn(),
+}));
+
+jest.mock("@/services/auth/auth.utils", () => ({
+  ...jest.requireActual("@/services/auth/auth.utils"),
+  getAuthJwt: jest.fn(),
+  getWalletAddress: jest.fn(),
 }));
 
 jest.mock("@/services/api/drop-api", () => ({
@@ -46,7 +72,7 @@ jest.mock("@tanstack/react-query", () => ({
   useQueryClient: jest.fn(() => ({
     getQueryCache: jest.fn(() => ({ findAll: mockQueryCacheFindAll })),
     setQueryData: mockSetQueryData,
-    setQueriesData: jest.fn(),
+    setQueriesData: mockSetQueriesData,
   })),
 }));
 
@@ -73,9 +99,14 @@ jest.mock("@/utils/monitoring/dropReactionMonitoring", () => ({
     supersededByMutationId: null,
   })),
   recordReactionRollbackApplied: jest.fn(),
+  recordReactionTimeoutReconciled: jest.fn(),
 }));
 
 const mockUseAuth = useAuth as jest.Mock;
+const mockGetAuthJwt = getAuthJwt as jest.MockedFunction<typeof getAuthJwt>;
+const mockGetWalletAddress = getWalletAddress as jest.MockedFunction<
+  typeof getWalletAddress
+>;
 const mockUseMyStream = useMyStream as jest.Mock;
 const { fetchDropByIdBatched } = require("@/services/api/drop-api");
 const {
@@ -108,17 +139,6 @@ const mockLatestOnlyMonitoringResults = () => {
   );
 };
 
-const createDeferred = <T>() => {
-  let resolve!: (value: T) => void;
-  let reject!: (reason?: unknown) => void;
-  const promise = new Promise<T>((promiseResolve, promiseReject) => {
-    resolve = promiseResolve;
-    reject = promiseReject;
-  });
-
-  return { promise, resolve, reject };
-};
-
 const createStructuredReactionError = ({
   body,
   headers,
@@ -146,7 +166,7 @@ const createStructuredReactionError = ({
 
 const mockDrop = {
   id: "drop-1",
-  wave: { id: "wave-1" },
+  wave: { id: "wave-1", authenticated_user_eligible_to_chat: true },
   context_profile_context: { reaction: null },
   author: { handle: "author-handle" },
   parts: [],
@@ -190,9 +210,244 @@ const createNotificationQuery = ({
 };
 
 describe("useDropReaction", () => {
+  it.each([null, ":smile:"])(
+    "reconciles community-curation cards with canonical reaction %s after a timeout",
+    async (canonicalReaction) => {
+      jest.useFakeTimers();
+      try {
+        const otherDrop = { ...mockDrop, id: "other-drop" };
+        const query = {
+          queryKey: [COMMUNITY_CURATIONS_DROPS_QUERY_KEY, { limit: 20 }],
+          state: {
+            data: {
+              pages: [{ data: [mockDrop, otherDrop], next: true }],
+              pageParams: [1],
+            },
+          },
+        };
+        (mockQueryCacheFindAll as jest.Mock).mockImplementation(
+          ({ predicate }: { predicate: (entry: typeof query) => boolean }) =>
+            [query].filter(predicate)
+        );
+        mockSetQueryData.mockImplementation(
+          (_key, data: typeof query.state.data) => {
+            query.state.data = data;
+          }
+        );
+        mockSetQueriesData.mockImplementation(
+          (
+            { queryKey }: { queryKey: readonly unknown[] },
+            update: (data: typeof query.state.data) => typeof query.state.data
+          ) => {
+            if (queryKey[0] === COMMUNITY_CURATIONS_DROPS_QUERY_KEY)
+              query.state.data = update(query.state.data);
+          }
+        );
+        const canonicalDrop = {
+          ...mockDrop,
+          context_profile_context: {
+            ...mockDrop.context_profile_context,
+            reaction: canonicalReaction,
+          },
+          reactions: [{ reaction: ":wave:", count: 4, profiles: [] }],
+        };
+        (fetchDropByIdBatched as jest.Mock).mockResolvedValue(canonicalDrop);
+        jest
+          .mocked(commonApi.commonApiPost)
+          .mockRejectedValueOnce(new DropReactionRequestTimeoutError());
+        const { result } = renderHook(() =>
+          useDropReaction(mockDrop, { updateCurationCache: true })
+        );
+        await act(async () => {
+          const pending = result.current.react(":smile:");
+          expect(
+            query.state.data.pages[0]!.data[0]!.context_profile_context
+              ?.reaction
+          ).toBe(":smile:");
+          await jest.advanceTimersByTimeAsync(3_000);
+          await pending;
+        });
+        expect(
+          query.state.data.pages[0]!.data[0]!.context_profile_context?.reaction
+        ).toBe(canonicalReaction);
+        expect(query.state.data.pages[0]!.data[0]!.reactions).toEqual(
+          canonicalDrop.reactions
+        );
+        expect(query.state.data.pages[0]!.data[1]).toBe(otherDrop);
+        expect(query.state.data.pages[0]!.next).toBe(true);
+        expect(query.state.data.pageParams).toEqual([1]);
+        expect(rollbackMock).not.toHaveBeenCalled();
+      } finally {
+        jest.useRealTimers();
+      }
+    }
+  );
+  it.each([
+    { previous: null, intended: ":smile:" },
+    { previous: ":wave:", intended: ":smile:" },
+    { previous: ":smile:", intended: null },
+  ])(
+    "retains saved reaction $previous -> $intended after timeout without rollback or retry",
+    async ({ previous, intended }) => {
+      const drop = {
+        ...mockDrop,
+        context_profile_context: {
+          ...mockDrop.context_profile_context!,
+          reaction: previous,
+        },
+      };
+      const canonicalDrop = {
+        ...drop,
+        context_profile_context: {
+          ...drop.context_profile_context,
+          reaction: intended,
+        },
+      };
+      (fetchDropByIdBatched as jest.Mock).mockResolvedValue(canonicalDrop);
+      const request =
+        intended === null
+          ? jest.mocked(commonApi.commonApiDelete)
+          : jest.mocked(commonApi.commonApiPost);
+      request.mockRejectedValueOnce(new DropReactionRequestTimeoutError());
+      const onSuccess = jest.fn();
+      const { result } = renderHook(() => useDropReaction(drop, { onSuccess }));
+      await act(async () => {
+        await result.current.react(":smile:");
+      });
+      expect(setToastMock).not.toHaveBeenCalled();
+      expect(rollbackMock).not.toHaveBeenCalled();
+      expect(updateDropInCachedDrops).toHaveBeenCalledWith(
+        expect.anything(),
+        canonicalDrop
+      );
+      expect(onSuccess).toHaveBeenCalledTimes(1);
+      expect(
+        intended === null ? commonApi.commonApiDelete : commonApi.commonApiPost
+      ).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it("keeps recovery bounded when canonical reads fail and gives honest guidance", async () => {
+    jest.useFakeTimers();
+    try {
+      (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+        new DropReactionRequestTimeoutError()
+      );
+      (fetchDropByIdBatched as jest.Mock).mockRejectedValue(
+        new Error("read unavailable")
+      );
+      const { result } = renderHook(() => useDropReaction(mockDrop));
+      await act(async () => {
+        const request = result.current.react(":smile:");
+        await jest.advanceTimersByTimeAsync(9_000);
+        await request;
+      });
+      expect(rollbackMock).not.toHaveBeenCalled();
+      expect(setToastMock).toHaveBeenCalledWith({
+        title:
+          "Could not confirm your reaction. Refresh to check before trying again.",
+        type: "warning",
+        autoClose: 8_000,
+      });
+      expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+      expect(fetchDropByIdBatched).toHaveBeenCalledTimes(3);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it.each(["timeout", "failure"])(
+    "ignores a late canonical read after a newer intent following %s",
+    async (kind) => {
+      const read = createDeferred<ApiDrop>();
+      (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+        kind === "timeout"
+          ? new DropReactionRequestTimeoutError()
+          : new Error("failed")
+      );
+      (fetchDropByIdBatched as jest.Mock).mockReturnValueOnce(read.promise);
+      const { result } = renderHook(() => useDropReaction(mockDrop));
+      let request!: Promise<void>;
+      await act(async () => {
+        request = result.current.react(":smile:");
+      });
+      (
+        dropReactionMonitoring.isReactionMutationLatest as jest.Mock
+      ).mockReturnValue(false);
+      await act(async () => {
+        read.resolve(mockDrop);
+        await request;
+      });
+      expect(updateDropInCachedDrops).not.toHaveBeenCalled();
+      if (kind === "timeout") expect(setToastMock).not.toHaveBeenCalled();
+    }
+  );
+
+  it("ignores a timed-out request after the account changes", async () => {
+    const request = createDeferred<ApiDrop>();
+    (commonApi.commonApiPost as jest.Mock).mockReturnValueOnce(request.promise);
+    const { result } = renderHook(() => useDropReaction(mockDrop));
+    let reaction!: Promise<void>;
+    await act(async () => {
+      reaction = result.current.react(":smile:");
+    });
+    mockGetWalletAddress.mockReturnValue(
+      "0x2222222222222222222222222222222222222222"
+    );
+    await act(async () => {
+      request.reject(new DropReactionRequestTimeoutError());
+      await reaction;
+    });
+    expect(setToastMock).not.toHaveBeenCalled();
+    expect(rollbackMock).not.toHaveBeenCalled();
+    expect(fetchDropByIdBatched).not.toHaveBeenCalled();
+  });
+
+  it("does not show a stale message or success callback after unmount", async () => {
+    const read = createDeferred<ApiDrop>();
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      new DropReactionRequestTimeoutError()
+    );
+    (fetchDropByIdBatched as jest.Mock).mockReturnValueOnce(read.promise);
+    const onSuccess = jest.fn();
+    const { result, unmount } = renderHook(() =>
+      useDropReaction(mockDrop, { onSuccess })
+    );
+    let request!: Promise<void>;
+    await act(async () => {
+      request = result.current.react(":smile:");
+    });
+    unmount();
+    await act(async () => {
+      read.resolve({
+        ...mockDrop,
+        context_profile_context: {
+          ...mockDrop.context_profile_context!,
+          reaction: ":smile:",
+        },
+      });
+      await request;
+    });
+    expect(setToastMock).not.toHaveBeenCalled();
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(rollbackMock).not.toHaveBeenCalled();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(commonApi.commonApiPost).mockReset();
+    jest.mocked(commonApi.commonApiDelete).mockReset();
+    (fetchDropByIdBatched as jest.Mock).mockReset();
+    __resetDropReactionRequestQueueForTests();
+    __resetDropReactionAuthRecoveryForTests();
+    mockGetAuthJwt.mockReturnValue("auth-token-before-recovery");
+    mockGetWalletAddress.mockReturnValue(
+      "0x1111111111111111111111111111111111111111"
+    );
+    requestAuthMock.mockResolvedValue({ success: true });
     mockSetQueryData.mockReset();
+    mockSetQueriesData.mockReset();
+    mockGetEligibility.mockReturnValue(null);
     mockQueryCacheFindAll.mockReturnValue([]);
     applyOptimisticDropUpdateMock.mockReset();
     applyOptimisticDropUpdateMock.mockImplementation(() => ({
@@ -219,6 +474,8 @@ describe("useDropReaction", () => {
     (fetchDropByIdBatched as jest.Mock).mockResolvedValue(null);
     mockUseAuth.mockReturnValue({
       setToast: setToastMock,
+      requestAuth: requestAuthMock,
+      activeProfileProxy: null,
       connectedProfile: {
         id: "identity-1",
         handle: "user",
@@ -245,7 +502,189 @@ describe("useDropReaction", () => {
     });
   });
 
-  it("shows structured API error messages for quick react failures", async () => {
+  it("disables reactions while a proxy profile is active", async () => {
+    mockUseAuth.mockReturnValue({
+      setToast: setToastMock,
+      activeProfileProxy: { id: "proxy-1" },
+      connectedProfile: { id: "identity-1", handle: "user" },
+    });
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    expect(result.current.canReact).toBe(false);
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(dropReactionMonitoring.beginReactionMutation).not.toHaveBeenCalled();
+    expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+    expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
+  });
+
+  it("disables reactions when chat and reactions are disabled for the wave", async () => {
+    mockGetEligibility.mockReturnValue({
+      authenticated_user_eligible_to_chat: false,
+      authenticated_user_chat_restriction: ChatRestriction.DISABLED,
+    });
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    expect(result.current.canReact).toBe(false);
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(dropReactionMonitoring.beginReactionMutation).not.toHaveBeenCalled();
+    expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+    expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
+  });
+
+  it("sends a normal reaction when the current wave capability is enabled", async () => {
+    mockGetEligibility.mockReturnValue({
+      authenticated_user_eligible_to_chat: true,
+    });
+    (commonApi.commonApiPost as jest.Mock).mockResolvedValueOnce({});
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    expect(result.current.canReact).toBe(true);
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+    expect(commonApi.commonApiPost).toHaveBeenCalledWith({
+      endpoint: "drops/drop-1/reaction",
+      body: { reaction: ":smile:" },
+      errorMode: "structured",
+      signal: expect.any(AbortSignal),
+    });
+  });
+
+  it("allows reactions when slow mode is the only chat restriction", async () => {
+    mockGetEligibility.mockReturnValue({
+      authenticated_user_eligible_to_chat: false,
+      authenticated_user_chat_restriction: ChatRestriction.SLOW_MODE,
+    });
+    (commonApi.commonApiPost as jest.Mock).mockResolvedValueOnce({});
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    expect(result.current.canReact).toBe(true);
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+  });
+
+  it("allows reactions when the viewer lacks chat-group permission", async () => {
+    mockGetEligibility.mockReturnValue({
+      authenticated_user_eligible_to_chat: false,
+      authenticated_user_chat_restriction: ChatRestriction.NO_PERMISSION,
+    });
+    (commonApi.commonApiPost as jest.Mock).mockResolvedValueOnce({});
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    expect(result.current.canReact).toBe(true);
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+  });
+
+  it("handles an exact stale capability 403 and disables later reactions", async () => {
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError({
+        body: JSON.stringify({
+          error: "Chatting and reacting is not enabled in this wave",
+        }),
+        message: "Chatting and reacting is not enabled in this wave",
+        status: 403,
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(mockUpdateEligibility).toHaveBeenCalledWith("wave-1", {
+      authenticated_user_eligible_to_chat: false,
+      authenticated_user_chat_restriction: ChatRestriction.DISABLED,
+    });
+    expect(setToastMock).toHaveBeenCalledWith({
+      message: "Reactions are disabled for this wave.",
+      type: "error",
+    });
+    expect(rollbackMock).toHaveBeenCalledTimes(1);
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith("drop-1");
+  });
+
+  it("rolls back and reconciles a 504 without retrying the reaction write", async () => {
+    const canonicalDrop = {
+      ...(mockDrop as unknown as ApiDrop),
+      context_profile_context: {
+        ...(mockDrop.context_profile_context as NonNullable<
+          ApiDrop["context_profile_context"]
+        >),
+        reaction: null,
+      },
+      reactions: [],
+    };
+    (fetchDropByIdBatched as jest.Mock).mockResolvedValueOnce(canonicalDrop);
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError({
+        body: JSON.stringify({ error: "Endpoint request timed out" }),
+        message: "Endpoint request timed out",
+        status: 504,
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(setToastMock).toHaveBeenCalledWith({
+      message:
+        "The reaction request timed out. Refreshing the latest reaction state; wait before trying again.",
+      type: "error",
+    });
+    expect(rollbackMock).toHaveBeenCalledTimes(1);
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith("drop-1");
+    expect(updateDropInCachedDrops).toHaveBeenCalledWith(
+      expect.anything(),
+      canonicalDrop
+    );
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+    expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
+  });
+
+  it("resolves after surfacing a structured quick react failure", async () => {
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
       createStructuredReactionError({
         body: JSON.stringify({ error: "Reaction not allowed" }),
@@ -259,13 +698,14 @@ describe("useDropReaction", () => {
     );
 
     await act(async () => {
-      await result.current.react(":smile:");
+      await expect(result.current.react(":smile:")).resolves.toBeUndefined();
     });
 
     expect(commonApi.commonApiPost).toHaveBeenCalledWith({
       endpoint: "drops/drop-1/reaction",
       body: { reaction: ":smile:" },
       errorMode: "structured",
+      signal: expect.any(AbortSignal),
     });
     expect(setToastMock).toHaveBeenCalledWith({
       message: "Reaction not allowed",
@@ -545,6 +985,50 @@ describe("useDropReaction", () => {
     expect(rollbackMock).not.toHaveBeenCalled();
   });
 
+  it("applies the optimistic reaction without waiting for request success", async () => {
+    const request = createDeferred<ApiDrop>();
+    (commonApi.commonApiPost as jest.Mock).mockReturnValueOnce(request.promise);
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    let reaction!: Promise<void>;
+    act(() => {
+      reaction = result.current.react(":smile:");
+    });
+
+    expect(
+      dropReactionMonitoring.recordReactionOptimisticApplied
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      (dropReactionMonitoring.recordReactionOptimisticApplied as jest.Mock).mock
+        .invocationCallOrder[0]
+    ).toBeLessThan(
+      (commonApi.commonApiPost as jest.Mock).mock.invocationCallOrder[0]!
+    );
+    const optimisticUpdate = applyOptimisticDropUpdateMock.mock.calls[0]![0];
+    const optimisticDrop = {
+      ...mockDrop,
+      context_profile_context: { ...mockDrop.context_profile_context },
+      reactions: [...mockDrop.reactions],
+    };
+    optimisticUpdate.update(optimisticDrop);
+    expect(optimisticDrop.context_profile_context?.reaction).toBe(":smile:");
+    expect(optimisticDrop.reactions).toEqual([
+      expect.objectContaining({
+        reaction: ":smile:",
+        count: 1,
+        profiles: [expect.objectContaining({ id: "identity-1" })],
+      }),
+    ]);
+
+    await act(async () => {
+      request.resolve({} as ApiDrop);
+      await reaction;
+    });
+  });
+
   it("falls back for unsafe structured quick react failures", async () => {
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
       createStructuredReactionError({
@@ -568,7 +1052,7 @@ describe("useDropReaction", () => {
     });
   });
 
-  it("maps unauthorized status when the structured body is empty", async () => {
+  it("recovers a rejected session without replaying the failed reaction", async () => {
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
       createStructuredReactionError({
         message: "Something went wrong",
@@ -588,6 +1072,200 @@ describe("useDropReaction", () => {
       message: "Unauthorized",
       type: "error",
     });
+    expect(requestAuthMock).toHaveBeenCalledTimes(1);
+    expect(requestAuthMock).toHaveBeenCalledWith({
+      serverRejected: true,
+      expectedAuthStateFingerprint: expect.any(String),
+    });
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+    expect(rollbackMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not start another recovery for concurrent 401s from the same auth state", async () => {
+    const unauthorizedError = createStructuredReactionError({
+      message: "Unauthorized",
+      status: 401,
+    });
+    const firstRequest = createDeferred<ApiDrop>();
+    const secondRequest = createDeferred<ApiDrop>();
+    const recovery = createDeferred<{ success: boolean }>();
+    (commonApi.commonApiPost as jest.Mock)
+      .mockReturnValueOnce(firstRequest.promise)
+      .mockReturnValueOnce(secondRequest.promise);
+    requestAuthMock.mockReturnValueOnce(recovery.promise);
+    useSequentialMutationIds();
+    mockLatestOnlyMonitoringResults();
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    let firstReaction!: Promise<void>;
+    let secondReaction!: Promise<void>;
+    act(() => {
+      firstReaction = result.current.react(":smile:");
+      secondReaction = result.current.react(":wave:");
+    });
+
+    act(() => {
+      firstRequest.reject(unauthorizedError);
+    });
+    await waitFor(() =>
+      expect(
+        dropReactionMonitoring.recordReactionRequestFailed
+      ).toHaveBeenCalledTimes(1)
+    );
+    expect(requestAuthMock).not.toHaveBeenCalled();
+
+    act(() => {
+      secondRequest.reject(unauthorizedError);
+    });
+    await waitFor(() =>
+      expect(
+        dropReactionMonitoring.recordReactionRequestFailed
+      ).toHaveBeenCalledTimes(2)
+    );
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(2);
+    expect(requestAuthMock).toHaveBeenCalledTimes(1);
+    expect(requestAuthMock).toHaveBeenCalledWith({
+      serverRejected: true,
+      expectedAuthStateFingerprint: expect.any(String),
+    });
+
+    await act(async () => {
+      mockGetAuthJwt.mockReturnValue("auth-token-after-recovery");
+      recovery.resolve({ success: true });
+      await Promise.all([firstReaction, secondReaction]);
+    });
+  });
+
+  it("does not repeat recovery after the same auth state is rejected again", async () => {
+    const unauthorizedError = createStructuredReactionError({
+      message: "Unauthorized",
+      status: 401,
+    });
+    (commonApi.commonApiPost as jest.Mock)
+      .mockRejectedValueOnce(unauthorizedError)
+      .mockRejectedValueOnce(unauthorizedError);
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+    await act(async () => {
+      await result.current.react(":wave:");
+    });
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(2);
+    expect(requestAuthMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not repeat recovery when switching back to the same rejected account session", async () => {
+    const accountA = "0x1111111111111111111111111111111111111111";
+    const accountB = "0x2222222222222222222222222222222222222222";
+    const accountAToken = "account-a-token";
+    const accountBToken = "account-b-token";
+    const unauthorizedError = createStructuredReactionError({
+      message: "Unauthorized",
+      status: 401,
+    });
+    (commonApi.commonApiPost as jest.Mock)
+      .mockRejectedValueOnce(unauthorizedError)
+      .mockRejectedValueOnce(unauthorizedError)
+      .mockRejectedValueOnce(unauthorizedError);
+    mockGetWalletAddress.mockReturnValue(accountA);
+    mockGetAuthJwt.mockReturnValue(accountAToken);
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    mockGetWalletAddress.mockReturnValue(accountB);
+    mockGetAuthJwt.mockReturnValue(accountBToken);
+    await act(async () => {
+      await result.current.react(":wave:");
+    });
+
+    mockGetWalletAddress.mockReturnValue(accountA);
+    mockGetAuthJwt.mockReturnValue(accountAToken);
+    await act(async () => {
+      await result.current.react(":heart:");
+    });
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(3);
+    expect(requestAuthMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not recover a stale 401 after the auth state changes", async () => {
+    const request = createDeferred<ApiDrop>();
+    (commonApi.commonApiPost as jest.Mock).mockReturnValueOnce(request.promise);
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    let reaction!: Promise<void>;
+    act(() => {
+      reaction = result.current.react(":smile:");
+    });
+    mockGetAuthJwt.mockReturnValue("replacement-auth-token");
+
+    await act(async () => {
+      request.reject(
+        createStructuredReactionError({
+          message: "Unauthorized",
+          status: 401,
+        })
+      );
+      await reaction;
+    });
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+    expect(requestAuthMock).not.toHaveBeenCalled();
+    expect(rollbackMock).not.toHaveBeenCalled();
+    expect(setToastMock).not.toHaveBeenCalled();
+  });
+
+  it("allows an explicit retry after recovery changes the auth state", async () => {
+    (commonApi.commonApiPost as jest.Mock)
+      .mockRejectedValueOnce(
+        createStructuredReactionError({
+          message: "Unauthorized",
+          status: 401,
+        })
+      )
+      .mockResolvedValueOnce({});
+    requestAuthMock.mockImplementationOnce(async () => {
+      mockGetAuthJwt.mockReturnValue("auth-token-after-recovery");
+      return { success: true };
+    });
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(2);
+    expect(requestAuthMock).toHaveBeenCalledTimes(1);
+    expect(
+      dropReactionMonitoring.recordReactionRequestSucceeded
+    ).toHaveBeenCalledTimes(1);
   });
 
   it("maps rate-limit status when the structured body is blank", async () => {
@@ -687,6 +1365,7 @@ describe("useDropReaction", () => {
       secondReaction = result.current.react(":wave:");
     });
 
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
     expect(firstRollback).not.toHaveBeenCalled();
     expect(secondRollback).not.toHaveBeenCalled();
 
@@ -756,6 +1435,9 @@ describe("useDropReaction", () => {
       await firstReaction;
     });
 
+    await waitFor(() =>
+      expect(commonApi.commonApiPost).toHaveBeenCalledTimes(2)
+    );
     expect(onSuccess).not.toHaveBeenCalled();
     expect(secondRollback).not.toHaveBeenCalled();
 

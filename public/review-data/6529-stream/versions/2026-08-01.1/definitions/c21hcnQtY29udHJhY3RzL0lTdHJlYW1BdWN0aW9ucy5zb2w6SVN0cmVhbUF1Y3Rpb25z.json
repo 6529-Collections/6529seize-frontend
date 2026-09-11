@@ -1,0 +1,253 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamAuctions.sol:IStreamAuctions#function:0x38d4f6f6",
+          "declaringDefinitionId": "smart-contracts/IStreamAuctions.sol:IStreamAuctions",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamAuctionsContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x38d4f6f6",
+          "signature": "isStreamAuctionsContract()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamAuctions.sol:IStreamAuctions#function:0x89dd4dc6",
+          "declaringDefinitionId": "smart-contracts/IStreamAuctions.sol:IStreamAuctions",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "_dropId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "_tokenid",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "_collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "address",
+              "name": "_poster",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "internalType": "uint256",
+              "name": "_reservePrice",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "internalType": "uint256",
+              "name": "_auctionEndTime",
+              "type": "uint256"
+            }
+          ],
+          "name": "registerAuction",
+          "outputs": [],
+          "selector": "0x89dd4dc6",
+          "signature": "registerAuction(bytes32,uint256,uint256,address,uint256,uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "isStreamAuctionsContract()",
+          "displaySignature": "isStreamAuctionsContract()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamAuctions.sol:IStreamAuctions#function:0x38d4f6f6",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BdWN0aW9ucy5zb2w6SVN0cmVhbUF1Y3Rpb25zI2Z1bmN0aW9uOjB4MzhkNGY2ZjY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamAuctionsContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 65,
+            "byteStart": 91,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAuctions.sol#L6",
+            "lineEnd": 6,
+            "lineStart": 6,
+            "snippetSha256": "sha256:e8ddb60544878b89bfcbdefa7119825cc25f9783cd532c54060a0242bbde61e4",
+            "sourceSha256": "sha256:f4220c88d41769ed759d52bbd75e5ea367d7d72126fc6cf88133e12b3d7d19db"
+          },
+          "selector": "0x38d4f6f6",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "registerAuction(bytes32,uint256,uint256,address,uint256,uint256)",
+          "displaySignature": "registerAuction(bytes32,uint256,uint256,address,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamAuctions.sol:IStreamAuctions#function:0x89dd4dc6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_dropId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "_tokenid",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "_collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "_poster",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "name": "_reservePrice",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "_auctionEndTime",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BdWN0aW9ucy5zb2w6SVN0cmVhbUF1Y3Rpb25zI2Z1bmN0aW9uOjB4ODlkZDRkYzY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "registerAuction",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 211,
+            "byteStart": 162,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAuctions.sol#L8-L15",
+            "lineEnd": 15,
+            "lineStart": 8,
+            "snippetSha256": "sha256:681353f96249a00dc6260d743b3419bf6022097ebf5afad8df65283849e1e1ea",
+            "sourceSha256": "sha256:f4220c88d41769ed759d52bbd75e5ea367d7d72126fc6cf88133e12b3d7d19db"
+          },
+          "selector": "0x89dd4dc6",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamAuctions.sol:IStreamAuctions",
+    "inheritance": [],
+    "interface": {
+      "abiSha256": "sha256:449284cbe3ae9f0744769204c9157e74bf0d9f89868dae34073586a51cf8f400",
+      "interfaceId": "0xb109bb30",
+      "interfaceIdSource": "selector_xor",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BdWN0aW9ucy5zb2w6SVN0cmVhbUF1Y3Rpb25z",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamAuctions.sol:IStreamAuctions"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IStreamAuctions",
+    "natspec": "",
+    "range": {
+      "byteLength": 316,
+      "byteStart": 59,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamAuctions.sol#L5-L16",
+      "lineEnd": 16,
+      "lineStart": 5,
+      "snippetSha256": "sha256:d970a4200009abcdb06d978ceecd9a73ec19672a335732327584dd4170daf130",
+      "sourceSha256": "sha256:f4220c88d41769ed759d52bbd75e5ea367d7d72126fc6cf88133e12b3d7d19db"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamAuctions.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/IStreamAuctions.sol:IStreamAuctions",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamAuctions.sol:IStreamAuctions#function:0x38d4f6f6",
+      "definitionId": "smart-contracts/IStreamAuctions.sol:IStreamAuctions",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamAuctions.sol:IStreamAuctions#function:0x89dd4dc6",
+      "definitionId": "smart-contracts/IStreamAuctions.sol:IStreamAuctions",
+      "severity": "advisory"
+    }
+  ]
+}

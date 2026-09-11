@@ -83,7 +83,6 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
               onClicked={onContinue}
               loading={false}
               disabled={!agreements}
-              padding="tw-px-6 tw-py-3"
             >
               I Agree & Continue
             </PrimaryButton>

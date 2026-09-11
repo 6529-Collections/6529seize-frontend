@@ -1,0 +1,134 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IERC165.sol:IERC165#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/IERC165.sol:IERC165",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/IERC165.sol:IERC165#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkMxNjUuc29sOklFUkMxNjUjZnVuY3Rpb246MHgwMWZmYzlhNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "@dev Returns true if this contract implements the interface defined by\n `interfaceId`. See the corresponding\n https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\n to learn more about how these ids are created.\n This function call must use less than 30 000 gas.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 76,
+            "byteStart": 774,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC165.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:430ee8572a90061eac8ee1ea6121c559ac3d40e06311ff45ca62d115eb5cde9e",
+            "sourceSha256": "sha256:92762629f91532d937e795ceee7391d5e4e9db0ca8eba233da3dd1e95ce9d792"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IERC165.sol:IERC165",
+    "inheritance": [],
+    "interface": {
+      "abiSha256": "sha256:fc839607f64e5467d99b3595b1238161897b3d186fa7ddc7d190df4b4e73ca46",
+      "interfaceId": "0x01ffc9a7",
+      "interfaceIdSource": "configured",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lFUkMxNjUuc29sOklFUkMxNjU",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IERC165",
+    "natspec": "@dev Interface of the ERC165 standard, as defined in the\n https://eips.ethereum.org/EIPS/eip-165[EIP].\n Implementers can declare support of contract interfaces, which can then be\n queried by others ({ERC165Checker}).\n For an implementation, see {ERC165}.",
+    "range": {
+      "byteLength": 447,
+      "byteStart": 405,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC165.sol#L15-L25",
+      "lineEnd": 25,
+      "lineStart": 15,
+      "snippetSha256": "sha256:f98775a7d0f9b65704282466277d7b3561bb6c62916bab7bada3d249e261dd3d",
+      "sourceSha256": "sha256:92762629f91532d937e795ceee7391d5e4e9db0ca8eba233da3dd1e95ce9d792"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IERC165.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

@@ -6,6 +6,8 @@ import type { ApiIdentity } from '@/generated/models/ApiIdentity';
 import * as commonApi from '@/services/api/common-api';
 import * as memeCalendarHelpers from '@/components/meme-calendar/meme-calendar.helpers';
 
+const mockCoverageRefetch = jest.fn();
+
 // Mock child components
 jest.mock('@/components/user/subscriptions/UserPageSubscriptionsBalance', () => ({
   __esModule: true,
@@ -29,6 +31,22 @@ jest.mock('@/components/user/subscriptions/UserPageSubscriptionsMode', () => ({
 jest.mock('@/components/user/subscriptions/UserPageSubscriptionsTopUp', () => ({
   __esModule: true,
   default: () => <div data-testid="subscriptions-topup">TopUp Component</div>,
+}));
+
+jest.mock('@/components/user/subscriptions/coverage/SubscriptionCoverageSummary', () => ({
+  __esModule: true,
+  default: () => (
+    <div data-testid="subscription-coverage-summary">Coverage summary</div>
+  ),
+}));
+
+jest.mock('@/components/user/subscriptions/coverage/useSubscriptionCoverage', () => ({
+  useSubscriptionCoverage: () => ({
+    data: undefined,
+    isError: false,
+    isLoading: false,
+    refetch: mockCoverageRefetch,
+  }),
 }));
 
 jest.mock('@/components/user/subscriptions/UserPageSubscriptionsUpcoming', () => ({
@@ -264,7 +282,9 @@ describe('UserPageSubscriptions', () => {
         { connectedProfile: { consolidation_key: 'test-key' } as ApiIdentity }
       );
 
-      // Clear previous calls
+      await waitFor(() => {
+        expect(mockCommonApiFetch).toHaveBeenCalledTimes(6);
+      });
       jest.clearAllMocks();
 
       await user.click(screen.getByText('Refresh'));
@@ -379,7 +399,7 @@ describe('UserPageSubscriptions', () => {
         { connectedProfile: null }
       );
 
-      const learnMoreLink = screen.getByText('Learn More');
+      const learnMoreLink = screen.getByText('Learn more');
       expect(learnMoreLink).toBeInTheDocument();
       expect(learnMoreLink.closest('a')).toHaveAttribute('href', '/about/subscriptions');
     });

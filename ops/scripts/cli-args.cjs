@@ -21,7 +21,7 @@ function parseArgs(argv) {
     }
 
     const nextToken = argv[index + 1];
-    if (!nextToken || nextToken.startsWith("--")) {
+    if (nextToken === undefined || nextToken.startsWith("--")) {
       args[rawKey] = true;
       index += 1;
       continue;

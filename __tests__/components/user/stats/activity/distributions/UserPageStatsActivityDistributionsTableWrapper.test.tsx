@@ -72,7 +72,9 @@ describe("UserPageStatsActivityDistributionsTableWrapper", () => {
         locale="de-DE"
       />
     );
-    expect(screen.getByRole("status")).toHaveTextContent(
+    const emptyState = screen.getByRole("status");
+    expect(emptyState).toHaveClass("tw-block", "tw-py-5");
+    expect(emptyState).toHaveTextContent(
       getDistributionsMessage(
         "user.collected.stats.distributions.empty",
         undefined,

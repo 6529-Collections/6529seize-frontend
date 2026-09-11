@@ -1,17 +1,66 @@
 "use client";
 
 import { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import {
+  mapApiWaveOverviewToSidebarWave,
+  mapApiWaveToSidebarWave,
+} from "@/services/api/waves-v2-api";
 import type { SidebarWave } from "@/types/waves.types";
 
 export type SidebarDiscoverySection = "highly-rated" | "all";
 
 export type SidebarWaveWithDiscoverySection = SidebarWave & {
   readonly sidebarSection?: SidebarDiscoverySection;
+  readonly isInAllWaves?: boolean;
 };
 
 export const SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED: SidebarDiscoverySection =
   "highly-rated";
-const SIDEBAR_DISCOVERY_SECTION_ALL: SidebarDiscoverySection = "all";
+export const SIDEBAR_DISCOVERY_SECTION_ALL: SidebarDiscoverySection = "all";
+
+interface ActiveSidebarContext {
+  readonly containerWave: SidebarWaveWithDiscoverySection | null;
+  readonly subwave: SidebarWave | null;
+}
+
+export const getActiveSidebarContext = (
+  activeWave: ApiWave | null
+): ActiveSidebarContext => {
+  if (activeWave === null) {
+    return { containerWave: null, subwave: null };
+  }
+
+  const activeSidebarWave = mapApiWaveToSidebarWave(activeWave);
+  if (activeSidebarWave.isDirectMessage) {
+    return { containerWave: null, subwave: null };
+  }
+
+  if (activeSidebarWave.parentWaveId === null) {
+    return {
+      containerWave: {
+        ...activeSidebarWave,
+        isInAllWaves: true,
+        sidebarSection: SIDEBAR_DISCOVERY_SECTION_ALL,
+      },
+      subwave: null,
+    };
+  }
+
+  if (!activeWave.parent_wave) {
+    return { containerWave: null, subwave: null };
+  }
+
+  return {
+    containerWave: {
+      ...mapApiWaveOverviewToSidebarWave(activeWave.parent_wave),
+      hasSubwaves: true,
+      isInAllWaves: true,
+      sidebarSection: SIDEBAR_DISCOVERY_SECTION_ALL,
+    },
+    subwave: activeSidebarWave,
+  };
+};
 
 const HIGHLY_RATED_WAVE_LIMIT = 10;
 
@@ -22,13 +71,16 @@ const mapAllActivityWave = (
   wave: SidebarWave
 ): SidebarWaveWithDiscoverySection => ({
   ...wave,
+  isInAllWaves: true,
   sidebarSection: SIDEBAR_DISCOVERY_SECTION_ALL,
 });
 
 const mapHighlyRatedWave = (
-  wave: SidebarWave
+  wave: SidebarWave,
+  isJoinedMode: boolean
 ): SidebarWaveWithDiscoverySection => ({
   ...wave,
+  isInAllWaves: !isJoinedMode,
   sidebarSection: SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED,
 });
 
@@ -54,10 +106,10 @@ export const buildMainWaves = ({
   const highlyRatedDiscoveryWaves = highlyRatedWaves
     .filter((wave) => !isKnownWaveForCurrentViewer(wave))
     .slice(0, HIGHLY_RATED_WAVE_LIMIT)
-    .map(mapHighlyRatedWave);
-  const activityWaves = isJoinedMode
-    ? followedActivityWaves
-    : allActivityWaves.map(mapAllActivityWave);
+    .map((wave) => mapHighlyRatedWave(wave, isJoinedMode));
+  const activityWaves = (
+    isJoinedMode ? followedActivityWaves : allActivityWaves
+  ).map(mapAllActivityWave);
 
   return [...highlyRatedDiscoveryWaves, ...activityWaves];
 };

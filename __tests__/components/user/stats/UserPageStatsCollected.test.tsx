@@ -149,6 +149,33 @@ test("renders placeholders for sparse collected stats without NaN", () => {
   ).toBeInTheDocument();
 });
 
+test("shows an empty state when there are no Meme seasons", () => {
+  render(
+    <UserPageStatsCollected
+      ownerBalance={ownerBalance}
+      balanceMemes={[]}
+      seasons={[]}
+    />
+  );
+
+  expect(
+    screen.getByText(
+      t(
+        DEFAULT_LOCALE,
+        "user.collected.stats.details.tables.memesBySeasonEmpty"
+      )
+    )
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole("table", {
+      name: t(
+        DEFAULT_LOCALE,
+        "user.collected.stats.details.tables.memesBySeasonCaption"
+      ),
+    })
+  ).not.toBeInTheDocument();
+});
+
 test("formats collected stats with the active locale", () => {
   const locale = "de-DE";
   const localizedOwnerBalance = {

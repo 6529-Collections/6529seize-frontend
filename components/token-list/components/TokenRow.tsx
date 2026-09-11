@@ -57,7 +57,10 @@ export function TokenRow({
         {action ? (
           <button
             type="button"
-            className="tw-rounded tw-border tw-border-iron-700 tw-bg-transparent tw-px-2 tw-py-1.5 tw-text-xs tw-text-iron-200 hover:tw-border-primary-500 hover:tw-text-white"
+            className={clsx(
+              "tw-inline-flex tw-items-center tw-justify-center tw-rounded tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-2 tw-py-1.5 tw-text-xs tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-500 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400",
+              action.className
+            )}
             onClick={() => action.onClick(token.tokenId, metadata)}
             aria-label={
               action.getAriaLabel?.(`#${token.decimalId}`) ?? action.label

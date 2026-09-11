@@ -2,12 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const repoRoot = path.resolve(__dirname, "..");
-const helpIndexSourcePath = path.join(
-  repoRoot,
-  "ops",
-  "help",
-  "help-index.json"
-);
+const helpIndexSourcePath = path.join(repoRoot, "public", "help-index.json");
 const llmsTemplatePath = path.join(
   repoRoot,
   "ops",

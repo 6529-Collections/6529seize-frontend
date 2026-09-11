@@ -2,11 +2,6 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import SocialStatementIcon from "@/components/user/utils/icons/SocialStatementIcon";
 import { STATEMENT_TYPE } from "@/helpers/Types";
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-
-jest.mock("@/helpers/AllowlistToolHelpers", () => ({
-  assertUnreachable: jest.fn(),
-}));
 
 jest.mock("@/components/user/utils/icons/XIcon", () => () => (
   <div data-testid="X" />
@@ -61,17 +56,15 @@ describe("SocialStatementIcon", () => {
     expect(screen.getByTestId("LINKTREE")).toBeInTheDocument();
   });
 
-  it("calls assertUnreachable for unknown type", () => {
+  it("uses the link fallback for an unknown type", () => {
     render(<SocialStatementIcon statementType={"UNKNOWN" as any} />);
-    expect(assertUnreachable).toHaveBeenCalledWith("UNKNOWN");
+    expect(document.querySelector("svg")).toBeInTheDocument();
   });
 
-  it("handles every statement type without calling assertUnreachable", () => {
-    jest.clearAllMocks();
+  it("handles every statement type", () => {
     for (const type of Object.values(STATEMENT_TYPE)) {
       const { unmount } = render(<SocialStatementIcon statementType={type} />);
       unmount();
     }
-    expect(assertUnreachable).not.toHaveBeenCalled();
   });
 });

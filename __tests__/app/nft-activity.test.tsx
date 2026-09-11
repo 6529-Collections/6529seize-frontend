@@ -1,7 +1,10 @@
 import NFTActivityPage, { generateMetadata } from "@/app/nft-activity/page";
+import { AuthContext } from "@/components/auth/Auth";
+import { publicEnv } from "@/config/env";
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { AuthContext } from "@/components/auth/Auth";
+
+const domain = new URL(publicEnv.BASE_ENDPOINT).hostname;
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -82,12 +85,12 @@ describe("NFTActivityPage", () => {
     expect(screen.getByTestId("showMore")).toHaveTextContent("Show More: true");
   });
 
-  it("applies correct CSS classes", () => {
+  it("applies the activity page spacing", () => {
     const { container } = renderComponent();
 
     const section = container.querySelector("main > section");
-    expect(section).toHaveClass("leaderboardContainer");
-    expect(section).toHaveClass("tailwind-scope");
+    expect(section).toHaveClass("tw-px-4");
+    expect(section).toHaveClass("tw-py-4");
   });
 
   it("sets the page title on mount", () => {
@@ -98,14 +101,15 @@ describe("NFTActivityPage", () => {
     const metadata = await generateMetadata();
     expect(metadata).toMatchObject({
       title: "NFT Activity | Network",
-      description: "Network | 6529.io",
+      description: `Network | ${domain}`,
     });
   });
 
-  it("renders with main element having correct class", () => {
+  it("renders inside the shared Tailwind page shell", () => {
     const { container } = renderComponent();
 
     const mainElement = container.querySelector("main");
-    expect(mainElement).toHaveClass("main");
+    expect(mainElement).toHaveClass("tailwind-scope");
+    expect(mainElement).toHaveClass("tw-border-iron-800");
   });
 });

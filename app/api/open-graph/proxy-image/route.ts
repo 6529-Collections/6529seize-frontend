@@ -14,33 +14,6 @@ const IMAGE_ACCEPT_HEADER = "image/avif,image/webp,image/png,image/jpeg;q=0.8,*/
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
-function normalizeInputToUrl(input: RequestInfo | URL): URL {
-  if (typeof input === "string") {
-    return new URL(input);
-  }
-
-  if (input instanceof URL) {
-    return new URL(input.toString());
-  }
-
-  if (typeof Request !== "undefined" && input instanceof Request) {
-    return new URL(input.url);
-  }
-
-  if (typeof input === "object" && input !== null) {
-    const maybeUrl = (input as { url?: unknown | undefined }).url;
-    if (typeof maybeUrl === "string") {
-      return new URL(maybeUrl);
-    }
-
-    if (maybeUrl instanceof URL) {
-      return new URL(maybeUrl.toString());
-    }
-  }
-
-  throw new UrlGuardError("Unsupported request input type.", "invalid-url");
-}
-
 function ensureHttpsDefaultPort(url: URL): void {
   if (url.protocol !== "https:") {
     throw new UrlGuardError("Only HTTPS URLs are supported.", "unsupported-protocol");
@@ -51,10 +24,12 @@ function ensureHttpsDefaultPort(url: URL): void {
   }
 }
 
-const httpsOnlyFetch: typeof fetch = async (input, init) => {
-  const url = normalizeInputToUrl(input);
+const buildHttpsOnlyRequestInit = (
+  url: URL,
+  init: RequestInit
+): RequestInit => {
   ensureHttpsDefaultPort(url);
-  return fetch(input, init);
+  return init;
 };
 
 const PROXY_FETCH_OPTIONS: FetchPublicUrlOptions = {
@@ -63,7 +38,7 @@ const PROXY_FETCH_OPTIONS: FetchPublicUrlOptions = {
   },
   timeoutMs: IMAGE_PROXY_TIMEOUT_MS,
   userAgent: USER_AGENT,
-  fetchImpl: httpsOnlyFetch,
+  buildRequestInit: buildHttpsOnlyRequestInit,
 };
 
 function ensureAllowedHttps(url: URL): NextResponse | null {

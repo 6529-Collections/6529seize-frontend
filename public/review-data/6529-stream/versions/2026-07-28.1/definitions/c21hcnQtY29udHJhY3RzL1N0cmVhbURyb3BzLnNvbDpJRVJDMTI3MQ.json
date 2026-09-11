@@ -1,0 +1,162 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/StreamDrops.sol:IERC1271#function:0x1626ba7e",
+          "declaringDefinitionId": "smart-contracts/StreamDrops.sol:IERC1271",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "_hash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes",
+              "name": "_signature",
+              "type": "bytes"
+            }
+          ],
+          "name": "isValidSignature",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "selector": "0x1626ba7e",
+          "signature": "isValidSignature(bytes32,bytes)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "isValidSignature(bytes32,bytes)",
+          "displaySignature": "isValidSignature(bytes32,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamDrops.sol:IERC1271#function:0x1626ba7e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_hash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "_signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbURyb3BzLnNvbDpJRVJDMTI3MSNmdW5jdGlvbjoweDE2MjZiYTdl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isValidSignature",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "range": {
+            "byteLength": 97,
+            "byteStart": 398,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:7864f96adf0b00aa815826222db8e099cafe552fc03fa69cb575982c3563055a",
+            "sourceSha256": "sha256:f2793a5d5c94a32b55b55c70072c92526528d67ccb39aac0d0df9899cd8707b4"
+          },
+          "selector": "0x1626ba7e",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamDrops.sol:IERC1271",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbURyb3BzLnNvbDpJRVJDMTI3MQ",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamDrops.sol:IERC1271"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IERC1271",
+    "natspec": "",
+    "range": {
+      "byteLength": 124,
+      "byteStart": 373,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L20-L22",
+      "lineEnd": 22,
+      "lineStart": 20,
+      "snippetSha256": "sha256:bd9094e2355036914cd6f145ff82d760a1174043d7a2ede516563929b9561ccc",
+      "sourceSha256": "sha256:f2793a5d5c94a32b55b55c70072c92526528d67ccb39aac0d0df9899cd8707b4"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamDrops.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/StreamDrops.sol:IERC1271",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamDrops.sol:IERC1271#function:0x1626ba7e",
+      "definitionId": "smart-contracts/StreamDrops.sol:IERC1271",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -79,8 +79,7 @@ describe("TheMemesMintPage", () => {
 
     expect(metadata).toMatchObject({
       title: "Mint | The Memes",
-      description: "Collections | 6529.io",
-      icons: { icon: "/favicon.ico" },
+      description: "Collections | test.6529.io",
       other: { version: "test-version" },
       twitter: {
         card: "summary_large_image",
@@ -91,7 +90,7 @@ describe("TheMemesMintPage", () => {
       type: "website",
       siteName: "6529.io",
       title: "Mint | The Memes",
-      description: "Collections | 6529.io",
+      description: "Collections | test.6529.io",
     });
     expect(image).toMatchObject({
       alt: "The Memes mint social card",

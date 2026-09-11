@@ -14,14 +14,14 @@ export default function WaveWinnersDropHeaderAuthorHandle({
 }: WaveWinnersDropHeaderAuthorHandleProps) {
   return (
     <>
-      <p className="tw-text-md tw-mb-0 tw-font-semibold tw-leading-none">
+      <p className="tw-m-0 tw-text-md tw-font-semibold tw-leading-none">
         <UserProfileTooltipWrapper
           user={winner.drop.author.handle ?? winner.drop.author.id}
         >
           <Link
             href={`/${winner.drop.author.handle}`}
             onClick={(e) => e.stopPropagation()}
-            className="tw-no-underline tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-underline desktop-hover:hover:tw-text-opacity-80"
+            className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
           >
             {winner.drop.author.handle}
           </Link>

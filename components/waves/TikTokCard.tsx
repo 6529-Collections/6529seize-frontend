@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import {
   fetchTikTokPreview,
   getCachedTikTokPreview,
@@ -176,14 +177,15 @@ export default function TikTokCard({ href }: TikTokCardProps) {
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
               This TikTok is unavailable or private.
             </p>
-            <Link
+            <ButtonLink
               href={canonicalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-primary-500 tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-no-underline tw-transition tw-duration-200 hover:tw-bg-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+              variant="action"
+              size="sm"
               aria-label="Open this TikTok on TikTok">
               Open on TikTok
-            </Link>
+            </ButtonLink>
           </div>
         </div>
       </LinkPreviewCardLayout>
@@ -310,14 +312,15 @@ export default function TikTokCard({ href }: TikTokCardProps) {
               </div>
             )}
             <div>
-              <Link
+              <ButtonLink
                 href={openHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-primary-500 tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-no-underline tw-transition tw-duration-200 hover:tw-bg-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                variant="action"
+                size="sm"
                 aria-label="Open this TikTok on TikTok">
                 Open on TikTok
-              </Link>
+              </ButtonLink>
             </div>
           </div>
         </div>

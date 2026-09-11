@@ -1,11 +1,14 @@
 "use client";
 
-import CurationEmptyState from "@/components/brain/my-stream/curations/CurationEmptyState";
+import { useAuth } from "@/components/auth/Auth";
+import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
+import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
+import CommonConfirmationModal from "@/components/utils/modal/CommonConfirmationModal";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import CurationDropFooter from "@/components/waves/drops/CurationDropFooter";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
@@ -18,17 +21,18 @@ import { ImageScale } from "@/helpers/image.helpers";
 import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useCurationManagementPermission } from "@/hooks/useCurationManagementPermission";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
 import { useNavigateToDropWave } from "@/hooks/useNavigateToDropWave";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import { t } from "@/i18n/messages";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { Masonry } from "masonic";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 interface UserPageProfileWaveMasonryProps {
   readonly curationId: string;
-  readonly curationName?: string | null | undefined;
   readonly containerWidth: number;
   readonly drops: readonly ExtendedDrop[];
   readonly fetchNextPage: () => Promise<void>;
@@ -45,6 +49,8 @@ const CURATION_CARD_CLASS_NAME =
   "tw-group tw-relative tw-isolate tw-rounded-xl";
 const CURATION_CARD_HOVER_FRAME_CLASS_NAME =
   "tw-pointer-events-none tw-absolute tw-inset-0 tw-z-10 tw-rounded-xl tw-border tw-border-solid tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:group-hover:tw-border-white/10 motion-reduce:tw-transition-none";
+const CURATION_ACTION_TRIGGER_CLASS_NAME =
+  "tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
 
 export type ProfileIdentitySummary = {
   readonly id?: string | null | undefined;
@@ -166,47 +172,99 @@ export function useProfileMasonryContainerWidth() {
   return { containerRef, containerWidth };
 }
 
-function CurationMasonryRemoveButton({
+function CurationMasonryActions({
   drop,
   curationId,
 }: {
   readonly drop: ExtendedDrop;
   readonly curationId: string;
 }) {
-  const { hasTouchScreen, isApp } = useDeviceInfo();
-  const isTouchDevice = useIsTouchDevice();
-  const { updateMembership, isPending } = useDropCurationMembershipMutation({
-    dropId: drop.id,
-  });
-  const shouldAlwaysShow = isTouchDevice || (isApp && hasTouchScreen);
+  const { connectedProfile, activeProfileProxy } = useAuth();
+  const locale = useBrowserLocale();
+  const [isRemoveOpen, setIsRemoveOpen] = useState(false);
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  const navigateToDropWave = useNavigateToDropWave();
+  const { updateMembershipAsync, isPending } =
+    useDropCurationMembershipMutation({
+      dropId: drop.id,
+      waveId: drop.wave.id,
+    });
+  const canEdit =
+    !activeProfileProxy &&
+    drop.drop_type !== ApiDropType.Participatory &&
+    areSameProfileIdentity({ left: drop.author, right: connectedProfile });
+  const menuItems: CompactMenuItem[] = [
+    {
+      id: "open",
+      label: t(locale, "profileCuration.actions.openOriginal"),
+      onSelect: () => navigateToDropWave(drop),
+    },
+    ...(canEdit
+      ? [
+          {
+            id: "edit",
+            label: t(locale, "profileCuration.actions.editPost"),
+            onSelect: () => navigateToDropWave(drop, { edit: true }),
+          },
+        ]
+      : []),
+    {
+      id: "remove",
+      label: t(locale, "profileCuration.actions.remove"),
+      onSelect: () => setIsRemoveOpen(true),
+      className: "tw-text-red desktop-hover:hover:tw-text-red",
+    },
+  ];
+  const menuLabel = t(locale, "profileCuration.actions.menuAria");
+  const triggerContent = isPending ? (
+    <Spinner dimension={10} />
+  ) : (
+    <EllipsisVerticalIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out" />
+  );
 
   return (
-    <div
-      className={[
-        "tw-pointer-events-none tw-absolute tw-right-3 tw-top-3 tw-z-[1000] tw-transition-all tw-duration-300",
-        shouldAlwaysShow
-          ? "tw-translate-y-0 tw-opacity-100"
-          : "tw-translate-y-[-5px] tw-opacity-0 group-focus-within:tw-translate-y-0 group-focus-within:tw-opacity-100 group-hover:tw-translate-y-0 group-hover:tw-opacity-100",
-      ].join(" ")}
-    >
-      <button
-        type="button"
-        onClick={(event) => {
-          event.stopPropagation();
-          updateMembership(curationId, "remove");
-        }}
-        disabled={isPending}
-        aria-label="Remove drop from this curation"
-        title="Remove from wave"
-        className="tw-pointer-events-auto tw-relative tw-z-[1000] tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/50 tw-text-iron-400 tw-shadow-lg tw-backdrop-blur-md tw-transition-all tw-duration-200 hover:tw-border-rose-500/30 hover:tw-bg-rose-500/20 hover:tw-text-rose-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
-      >
-        {isPending ? (
-          <Spinner dimension={10} />
+    <>
+      <div className="tw-absolute tw-right-4 tw-top-3 tw-z-[1000]">
+        {isMobileLayoutViewport ? (
+          <CompactMenuMobileBottomSheet
+            title={menuLabel}
+            ariaLabel={menuLabel}
+            items={menuItems}
+            trigger={triggerContent}
+            triggerClassName={CURATION_ACTION_TRIGGER_CLASS_NAME}
+            disabled={isPending}
+          />
         ) : (
-          <XMarkIcon className="tw-size-5 tw-flex-shrink-0" />
+          <CompactMenu
+            aria-label={menuLabel}
+            items={menuItems}
+            disabled={isPending}
+            triggerClassName={CURATION_ACTION_TRIGGER_CLASS_NAME}
+            unstyledTrigger
+            trigger={triggerContent}
+            menuWidthClassName="tw-w-52"
+          />
         )}
-      </button>
-    </div>
+      </div>
+      <CommonConfirmationModal
+        isOpen={isRemoveOpen}
+        onClose={() => setIsRemoveOpen(false)}
+        onConfirm={() => {
+          void (async () => {
+            try {
+              await updateMembershipAsync(curationId, "remove");
+              setIsRemoveOpen(false);
+            } catch {
+              // The mutation hook keeps the dialog open and reports the error.
+            }
+          })();
+        }}
+        title={t(locale, "profileCuration.actions.removeTitle")}
+        message={t(locale, "profileCuration.actions.removeMessage")}
+        confirmText={t(locale, "profileCuration.actions.removeConfirm")}
+        isConfirming={isPending}
+      />
+    </>
   );
 }
 
@@ -235,8 +293,8 @@ function UserPageProfileWaveMasonryCard({
     showIdentity,
   });
 
-  const removeButton = canManageActiveCuration ? (
-    <CurationMasonryRemoveButton drop={drop} curationId={curationId} />
+  const actions = canManageActiveCuration ? (
+    <CurationMasonryActions drop={drop} curationId={curationId} />
   ) : null;
   const dropContent = (
     <WaveDropContent
@@ -255,7 +313,7 @@ function UserPageProfileWaveMasonryCard({
   if (layout.usesDefaultDropRenderer) {
     return (
       <article className={CURATION_CARD_CLASS_NAME}>
-        {removeButton}
+        {actions}
 
         <Drop
           drop={drop}
@@ -284,70 +342,74 @@ function UserPageProfileWaveMasonryCard({
   }
 
   return (
-    <article className={CURATION_CARD_CLASS_NAME}>
-      {removeButton}
+    <ContentModerationDropGate drop={drop} compact>
+      <article className={CURATION_CARD_CLASS_NAME}>
+        {actions}
 
-      <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
-        {layout.shouldUseInlineMinimalLayout ? (
-          <div className="tw-flex tw-items-start tw-gap-x-3 tw-px-4 tw-pb-4 tw-pt-4">
-            <WaveDropAuthorPfp drop={drop} />
-            <div className="tw-min-w-0 tw-flex-1">
-              <DropMinimalIdentityRow drop={drop} timestampLayout="stacked" />
-              <div className="tw-mt-2">{dropContent}</div>
+        <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
+          {layout.shouldUseInlineMinimalLayout ? (
+            <div className="tw-flex tw-items-start tw-gap-x-3 tw-px-4 tw-pb-4 tw-pt-4">
+              <WaveDropAuthorPfp drop={drop} />
+              <div className="tw-min-w-0 tw-flex-1">
+                <DropMinimalIdentityRow drop={drop} timestampLayout="stacked" />
+                <div className="tw-mt-2">{dropContent}</div>
+                {drop.metadata.length > 0 && (
+                  <WaveDropMetadata metadata={drop.metadata} />
+                )}
+                <CurationDropFooter drop={drop} className="tw-mt-3" />
+              </div>
+            </div>
+          ) : (
+            <>
+              {layout.showMinimalIdentityRow && (
+                <div className="tw-flex tw-items-start tw-gap-x-3 tw-px-4 tw-pt-4">
+                  <WaveDropAuthorPfp drop={drop} />
+                  <div className="tw-min-w-0 tw-flex-1">
+                    <DropMinimalIdentityRow
+                      drop={drop}
+                      timestampLayout="stacked"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className={layout.contentWrapperClassName}>
+                {replyTo && (
+                  <div className="tw-mb-3">
+                    <WaveDropReply
+                      dropId={replyTo.drop_id}
+                      dropPartId={replyTo.drop_part_id}
+                      maybeDrop={
+                        replyTo.drop
+                          ? { ...replyTo.drop, wave: drop.wave }
+                          : null
+                      }
+                      onReplyClick={(_serialNo: number) => {}}
+                    />
+                  </div>
+                )}
+
+                {dropContent}
+              </div>
+
               {drop.metadata.length > 0 && (
-                <WaveDropMetadata metadata={drop.metadata} />
-              )}
-              <CurationDropFooter drop={drop} className="tw-mt-3" />
-            </div>
-          </div>
-        ) : (
-          <>
-            {layout.showMinimalIdentityRow && (
-              <div className="tw-flex tw-items-start tw-gap-x-3 tw-px-4 tw-pt-4">
-                <WaveDropAuthorPfp drop={drop} />
-                <div className="tw-min-w-0 tw-flex-1">
-                  <DropMinimalIdentityRow
-                    drop={drop}
-                    timestampLayout="stacked"
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className={layout.contentWrapperClassName}>
-              {replyTo && (
-                <div className="tw-mb-3">
-                  <WaveDropReply
-                    dropId={replyTo.drop_id}
-                    dropPartId={replyTo.drop_part_id}
-                    maybeDrop={
-                      replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null
-                    }
-                    onReplyClick={(_serialNo: number) => {}}
-                  />
+                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
+                  <WaveDropMetadata metadata={drop.metadata} />
                 </div>
               )}
-
-              {dropContent}
-            </div>
-
-            {drop.metadata.length > 0 && (
-              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
-                <WaveDropMetadata metadata={drop.metadata} />
-              </div>
-            )}
-            <CurationDropFooter
-              drop={drop}
-              className="tw-px-4 tw-pb-4 tw-pt-2"
-            />
-          </>
-        )}
-      </div>
-      <div
-        aria-hidden="true"
-        className={CURATION_CARD_HOVER_FRAME_CLASS_NAME}
-      />
-    </article>
+              <CurationDropFooter
+                drop={drop}
+                className="tw-px-4 tw-pb-4 tw-pt-2"
+              />
+            </>
+          )}
+        </div>
+        <div
+          aria-hidden="true"
+          className={CURATION_CARD_HOVER_FRAME_CLASS_NAME}
+        />
+      </article>
+    </ContentModerationDropGate>
   );
 }
 
@@ -369,7 +431,6 @@ function UserPageProfileWaveMasonryRenderItem({
 
 export default function UserPageProfileWaveMasonry({
   curationId,
-  curationName,
   containerWidth,
   drops,
   fetchNextPage,
@@ -383,7 +444,6 @@ export default function UserPageProfileWaveMasonry({
     curationId,
     probeDropId: permissionProbeDropId,
   });
-  const curationTitle = curationName?.trim() ?? "Curation";
   const masonryItems = useMemo(
     () =>
       drops.map((drop) => ({
@@ -415,10 +475,6 @@ export default function UserPageProfileWaveMasonry({
     },
     [fetchNextPage, hasNextPage, isFetchingNextPage]
   );
-
-  if (drops.length === 0) {
-    return <CurationEmptyState curationTitle={curationTitle} />;
-  }
 
   return (
     <div className="tw-px-1 tw-pb-2">

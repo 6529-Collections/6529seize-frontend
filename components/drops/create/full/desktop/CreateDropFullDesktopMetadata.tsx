@@ -1,7 +1,9 @@
 "use client";
 
 import CreateDropMetadataItems from "@/components/drops/create/utils/metadata/CreateDropMetadataItems";
+import TooltipIconButton from "@/components/common/TooltipIconButton";
 import type { DropMetadata } from "@/entities/IDrop";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useRef, useState } from "react";
 
 export default function CreateDropFullDesktopMetadata({
@@ -77,29 +79,17 @@ export default function CreateDropFullDesktopMetadata({
             className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-py-2.5 tw-pr-3 tw-text-md tw-font-normal tw-leading-6 tw-text-iron-50 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-400 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
           />
         </div>
-        <button
+        <TooltipIconButton
           type="submit"
           aria-label="Add metadata"
-          title="Add metadata"
+          tooltipText="Add metadata"
+          tooltipWidth="tw-w-32"
+          tooltipPosition="top"
+          icon={faPlus}
+          iconClassName="tw-size-4 tw-text-current"
           disabled={disabled}
-          className="tw-inline-flex tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-2.5 tw-py-2.5 tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-200 focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
-        >
-          <svg
-            className="tw-flex tw-h-5 tw-w-5"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 5V19M5 12H19"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+          className="!tw-size-8 !tw-rounded-lg !tw-bg-iron-800 tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-300 tw-ease-out after:tw-absolute after:-tw-inset-1.5 after:tw-content-[''] disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:!tw-bg-iron-700 desktop-hover:hover:tw-text-iron-200 desktop-hover:hover:tw-ring-white/15"
+        />
       </form>
       <CreateDropMetadataItems
         items={metadata}

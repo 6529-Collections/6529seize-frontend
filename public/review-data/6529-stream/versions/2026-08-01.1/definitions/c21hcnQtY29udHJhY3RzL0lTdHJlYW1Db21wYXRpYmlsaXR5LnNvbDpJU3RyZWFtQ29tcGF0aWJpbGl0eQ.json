@@ -1,0 +1,455 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility#function:0x0bc9af69",
+          "declaringDefinitionId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamCompatibility",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x0bc9af69",
+          "signature": "isStreamCompatibility()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility#function:0xe601af13",
+          "declaringDefinitionId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamMetadataSchemaVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0xe601af13",
+          "signature": "streamMetadataSchemaVersion()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility#function:0x8b560515",
+          "declaringDefinitionId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamProtocolName",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x8b560515",
+          "signature": "streamProtocolName()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility#function:0x95dc3981",
+          "declaringDefinitionId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamProtocolVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x95dc3981",
+          "signature": "streamProtocolVersion()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility#function:0x3749a20c",
+          "declaringDefinitionId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamReleaseHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x3749a20c",
+          "signature": "streamReleaseHash()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility#function:0x73f2859e",
+          "declaringDefinitionId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamReleaseTag",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x73f2859e",
+          "signature": "streamReleaseTag()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility#function:0x97a6b721",
+          "declaringDefinitionId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsStreamInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x97a6b721",
+          "signature": "supportsStreamInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "isStreamCompatibility()",
+          "displaySignature": "isStreamCompatibility()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility#function:0x0bc9af69",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db21wYXRpYmlsaXR5LnNvbDpJU3RyZWFtQ29tcGF0aWJpbGl0eSNmdW5jdGlvbjoweDBiYzlhZjY5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamCompatibility",
+          "natspec": "@notice Returns true for deployed 6529Stream compatibility adapters.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 62,
+            "byteStart": 173,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCompatibility.sol#L7",
+            "lineEnd": 7,
+            "lineStart": 7,
+            "snippetSha256": "sha256:73840360af4afa27f200dceecee0f817a801cba0c5a61737ce5197544524d57d",
+            "sourceSha256": "sha256:9c96270b4072a565cf263b3a28cc51532c51603a835211f6a1bb1e35424b8e90"
+          },
+          "selector": "0x0bc9af69",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamProtocolName()",
+          "displaySignature": "streamProtocolName()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility#function:0x8b560515",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db21wYXRpYmlsaXR5LnNvbDpJU3RyZWFtQ29tcGF0aWJpbGl0eSNmdW5jdGlvbjoweDhiNTYwNTE1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamProtocolName",
+          "natspec": "@notice Returns the canonical protocol family name for integration checks.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 68,
+            "byteStart": 324,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCompatibility.sol#L10",
+            "lineEnd": 10,
+            "lineStart": 10,
+            "snippetSha256": "sha256:ef5557f6d70a8a7ab3b4b552b5e87eded0a62fbbffd66d76837d15e8a2591370",
+            "sourceSha256": "sha256:9c96270b4072a565cf263b3a28cc51532c51603a835211f6a1bb1e35424b8e90"
+          },
+          "selector": "0x8b560515",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamProtocolVersion()",
+          "displaySignature": "streamProtocolVersion()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility#function:0x95dc3981",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db21wYXRpYmlsaXR5LnNvbDpJU3RyZWFtQ29tcGF0aWJpbGl0eSNmdW5jdGlvbjoweDk1ZGMzOTgx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamProtocolVersion",
+          "natspec": "@notice Returns the protocol version used by release artifacts and docs.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 71,
+            "byteStart": 479,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCompatibility.sol#L13",
+            "lineEnd": 13,
+            "lineStart": 13,
+            "snippetSha256": "sha256:6b9dcd7091ba9da185b3fe6bb10ea056c7c8f91e19e995a3a525cba0f72d074f",
+            "sourceSha256": "sha256:9c96270b4072a565cf263b3a28cc51532c51603a835211f6a1bb1e35424b8e90"
+          },
+          "selector": "0x95dc3981",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamMetadataSchemaVersion()",
+          "displaySignature": "streamMetadataSchemaVersion()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility#function:0xe601af13",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db21wYXRpYmlsaXR5LnNvbDpJU3RyZWFtQ29tcGF0aWJpbGl0eSNmdW5jdGlvbjoweGU2MDFhZjEz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamMetadataSchemaVersion",
+          "natspec": "@notice Returns the JSON metadata schema version emitted by tokenURI.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 77,
+            "byteStart": 634,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCompatibility.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:8335dc084e32cfc41869a17bac532482677830d4341a3a1a8abcef07d0cd3082",
+            "sourceSha256": "sha256:9c96270b4072a565cf263b3a28cc51532c51603a835211f6a1bb1e35424b8e90"
+          },
+          "selector": "0xe601af13",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamReleaseTag()",
+          "displaySignature": "streamReleaseTag()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility#function:0x73f2859e",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db21wYXRpYmlsaXR5LnNvbDpJU3RyZWFtQ29tcGF0aWJpbGl0eSNmdW5jdGlvbjoweDczZjI4NTll",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamReleaseTag",
+          "natspec": "@notice Returns the release artifact tag expected for ABI and event decoding.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 66,
+            "byteStart": 803,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCompatibility.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:7c1db0593406dd727f5ce21af000266237c0cff7ec67aef433727a92e5cf646d",
+            "sourceSha256": "sha256:9c96270b4072a565cf263b3a28cc51532c51603a835211f6a1bb1e35424b8e90"
+          },
+          "selector": "0x73f2859e",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamReleaseHash()",
+          "displaySignature": "streamReleaseHash()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility#function:0x3749a20c",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db21wYXRpYmlsaXR5LnNvbDpJU3RyZWFtQ29tcGF0aWJpbGl0eSNmdW5jdGlvbjoweDM3NDlhMjBj",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamReleaseHash",
+          "natspec": "@notice Returns keccak256(bytes(streamReleaseTag())) for compact comparisons.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 61,
+            "byteStart": 961,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCompatibility.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:d1ca81f26950e63a7a6b466a78e89af447f01b1d80e8082ca3d9c92411f0b96c",
+            "sourceSha256": "sha256:9c96270b4072a565cf263b3a28cc51532c51603a835211f6a1bb1e35424b8e90"
+          },
+          "selector": "0x3749a20c",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "supportsStreamInterface(bytes4)",
+          "displaySignature": "supportsStreamInterface(bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility#function:0x97a6b721",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db21wYXRpYmlsaXR5LnNvbDpJU3RyZWFtQ29tcGF0aWJpbGl0eSNmdW5jdGlvbjoweDk3YTZiNzIx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsStreamInterface",
+          "natspec": "@notice Returns whether this adapter or its core contract supports an interface.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 82,
+            "byteStart": 1117,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCompatibility.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:aeb583b9f5cad9cdb7869feb3a2eb7d751e34f848923666b5d6d7878622d96b3",
+            "sourceSha256": "sha256:9c96270b4072a565cf263b3a28cc51532c51603a835211f6a1bb1e35424b8e90"
+          },
+          "selector": "0x97a6b721",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility",
+    "inheritance": [],
+    "interface": {
+      "abiSha256": "sha256:6bd73e252a944619732c85628400e6718bf263c6e98effffa45900a6279c636d",
+      "interfaceId": "0x205fac5d",
+      "interfaceIdSource": "selector_xor",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db21wYXRpYmlsaXR5LnNvbDpJU3RyZWFtQ29tcGF0aWJpbGl0eQ",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IStreamCompatibility",
+    "natspec": "",
+    "range": {
+      "byteLength": 1142,
+      "byteStart": 59,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCompatibility.sol#L5-L26",
+      "lineEnd": 26,
+      "lineStart": 5,
+      "snippetSha256": "sha256:01e4a20db95d1c194cb27dd6283cb902c3dbffa7952accfbdad961e7ed3367cd",
+      "sourceSha256": "sha256:9c96270b4072a565cf263b3a28cc51532c51603a835211f6a1bb1e35424b8e90"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamCompatibility.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/IStreamCompatibility.sol:IStreamCompatibility",
+      "severity": "advisory"
+    }
+  ]
+}

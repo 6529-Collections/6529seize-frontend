@@ -1,0 +1,266 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock#function:0xefb1a4dc",
+          "declaringDefinitionId": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "ASSET_STATUS_ACTIVE",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0xefb1a4dc",
+          "signature": "ASSET_STATUS_ACTIVE()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock#function:0x76057d1a",
+          "declaringDefinitionId": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "assetStatus",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x76057d1a",
+          "signature": "assetStatus(address)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock#function:0x99ce40d6",
+          "declaringDefinitionId": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamAssetPolicyRegistry",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x99ce40d6",
+          "signature": "isStreamAssetPolicyRegistry()",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "isStreamAssetPolicyRegistry()",
+          "displaySignature": "isStreamAssetPolicyRegistry()",
+          "functionKind": "function",
+          "id": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock#function:0x99ce40d6",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpHYXNHcmllZkFzc2V0UG9saWN5UmVnaXN0cnlNb2NrI2Z1bmN0aW9uOjB4OTljZTQwZDY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamAssetPolicyRegistry",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 96,
+            "byteStart": 76378,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1658-L1660",
+            "lineEnd": 1660,
+            "lineStart": 1658,
+            "snippetSha256": "sha256:7d180b035178e2a55973967246f02d087170c312eba091288f48efbcab1d10b0",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": "0x99ce40d6",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "ASSET_STATUS_ACTIVE()",
+          "displaySignature": "ASSET_STATUS_ACTIVE()",
+          "functionKind": "function",
+          "id": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock#function:0xefb1a4dc",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpHYXNHcmllZkFzc2V0UG9saWN5UmVnaXN0cnlNb2NrI2Z1bmN0aW9uOjB4ZWZiMWE0ZGM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "ASSET_STATUS_ACTIVE",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 86,
+            "byteStart": 76480,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1662-L1664",
+            "lineEnd": 1664,
+            "lineStart": 1662,
+            "snippetSha256": "sha256:e211d70778f786a328d11a847716d87cb57293c8d07332e962baedefd84fd794",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": "0xefb1a4dc",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "assetStatus(address)",
+          "displaySignature": "assetStatus(address)",
+          "functionKind": "function",
+          "id": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock#function:0x76057d1a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpHYXNHcmllZkFzc2V0UG9saWN5UmVnaXN0cnlNb2NrI2Z1bmN0aW9uOjB4NzYwNTdkMWE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "assetStatus",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 144,
+            "byteStart": 76572,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1666-L1671",
+            "lineEnd": 1671,
+            "lineStart": 1666,
+            "snippetSha256": "sha256:579ec11fff9239805f4c1af342a480ede6baccda79ce3145780472e960885439",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": "0x76057d1a",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpHYXNHcmllZkFzc2V0UG9saWN5UmVnaXN0cnlNb2Nr",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "GasGriefAssetPolicyRegistryMock",
+    "natspec": "",
+    "range": {
+      "byteLength": 387,
+      "byteStart": 76331,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1657-L1672",
+      "lineEnd": 1672,
+      "lineStart": 1657,
+      "snippetSha256": "sha256:2a81dcb329d40cade7df85ef0e14858a5987329a12ce29abe61cfd11684ea88e",
+      "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamSplitWallet.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock#function:0x76057d1a",
+      "definitionId": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock#function:0x99ce40d6",
+      "definitionId": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock#function:0xefb1a4dc",
+      "definitionId": "test/StreamSplitWallet.t.sol:GasGriefAssetPolicyRegistryMock",
+      "severity": "advisory"
+    }
+  ]
+}

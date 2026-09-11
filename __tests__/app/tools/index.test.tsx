@@ -4,9 +4,11 @@
 
 import ToolsIndexPage, { metadata } from "@/app/tools/page";
 import { getVisibleToolsNavGroups } from "@/components/tools/tools.routes";
+import { publicEnv } from "@/config/env";
 import { render, screen } from "@testing-library/react";
 
 const mockSetTitle = jest.fn();
+const domain = new URL(publicEnv.BASE_ENDPOINT).hostname;
 
 let country = "US";
 let appWalletsSupported = true;
@@ -69,7 +71,7 @@ describe("Tools index page", () => {
   it("exposes metadata", () => {
     expect(metadata.title).toEqual("Tools");
     expect(metadata.description).toEqual(
-      "6529 Tools, reports and Open Data. | 6529.io"
+      `6529 Tools, reports and Open Data. | ${domain}`
     );
   });
 

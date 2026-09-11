@@ -31,4 +31,21 @@ describe('WaveManualOutcome', () => {
     expect(screen.queryByText('View 1 more')).toBeNull();
     expect(screen.getByText('D')).toBeInTheDocument();
   });
+
+  it('shows a placeholder when a winner description is missing', async () => {
+    const user = userEvent.setup();
+    render(
+      <WaveManualOutcome
+        outcome={outcome}
+        distribution={{
+          ...distribution,
+          items: [{ index: 1, amount: null, description: null }],
+          totalCount: 1,
+        }}
+      />
+    );
+
+    await user.click(screen.getByRole('button'));
+    expect(screen.getByText('-')).toBeInTheDocument();
+  });
 });

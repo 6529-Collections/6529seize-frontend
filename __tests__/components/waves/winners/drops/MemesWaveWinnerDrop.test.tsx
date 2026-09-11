@@ -1,14 +1,25 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { getMintTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
 import { MemesWaveWinnersDrop } from "@/components/waves/winners/drops/MemesWaveWinnerDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 
 const mockMobileMenuOpenClick = jest.fn();
 
+const setBrowserLanguages = (languages: readonly string[]) => {
+  Object.defineProperty(globalThis.navigator, "languages", {
+    configurable: true,
+    value: languages,
+  });
+};
+
 jest.mock("@/helpers/waves/drop.helpers", () => ({
   convertApiDropToExtendedDrop: jest.fn(() => ({ id: "ext" })),
+}));
+jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
+  getMintTimelineDetails: jest.fn(),
 }));
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -57,8 +68,25 @@ jest.mock("@/hooks/useLongPressInteraction", () => ({
   default: jest.fn(),
 }));
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
-  <div data-testid="actions" />
+  <button
+    type="button"
+    data-testid="desktop-open-action"
+    onClick={(event) => event.stopPropagation()}
+  >
+    Open drop
+  </button>
 ));
+jest.mock(
+  "@/components/content-moderation/ContentModerationDropActions",
+  () => ({
+    __esModule: true,
+    default: () => null,
+  })
+);
+jest.mock("@/components/content-moderation/ReportDropModal", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 jest.mock(
   "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
   () => (p: any) =>
@@ -150,10 +178,12 @@ const wave: ApiWave = { voting: { credit_type: "votes" } } as any;
 const useDeviceInfo = require("@/hooks/useDeviceInfo").default as jest.Mock;
 const useLongPressInteraction = require("@/hooks/useLongPressInteraction")
   .default as jest.Mock;
+const getMintTimelineDetailsMock = jest.mocked(getMintTimelineDetails);
 
 describe("MemesWaveWinnersDrop", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getMintTimelineDetailsMock.mockReset();
     mockMobileMenuOpenClick.mockClear();
     useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
     useLongPressInteraction.mockReturnValue({
@@ -174,10 +204,161 @@ describe("MemesWaveWinnersDrop", () => {
     ).toHaveBeenCalledWith(winner.drop);
     await user.click(container.firstElementChild as HTMLElement);
     expect(onClick).toHaveBeenCalledWith({ id: "ext" });
+    expect(screen.getByRole("heading", { name: "T" })).toHaveClass(
+      "tw-mt-0",
+      "tw-leading-tight"
+    );
     expect(screen.getByText("5")).toBeInTheDocument();
     expect(screen.getByTestId("author-badges")).toBeInTheDocument();
     expect(screen.getByTestId("identity")).toBeInTheDocument();
+    expect(screen.getByTestId("desktop-open-action")).toBeInTheDocument();
+    expect(screen.queryByTestId("more-actions")).not.toBeInTheDocument();
     expect(screen.getByAltText("alice's profile picture")).toBeInTheDocument();
+  });
+
+  it("opens from the direct action without triggering the winner card", async () => {
+    const user = userEvent.setup();
+    const onDropClick = jest.fn();
+
+    render(
+      <MemesWaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={onDropClick}
+      />
+    );
+
+    await user.click(screen.getByTestId("desktop-open-action"));
+
+    expect(onDropClick).not.toHaveBeenCalled();
+  });
+
+  it("opens the mapped Meme card without opening the winner drop", async () => {
+    const user = userEvent.setup();
+    const onDropClick = jest.fn();
+    render(
+      <MemesWaveWinnersDrop
+        winner={
+          {
+            ...winner,
+            drop: {
+              ...winner.drop,
+              submission_context: { meme_card_id: 521 },
+            },
+          } as ApiWaveDecisionWinner
+        }
+        wave={wave}
+        onDropClick={onDropClick}
+      />
+    );
+
+    await user.click(screen.getByRole("link", { name: "The Memes #521" }));
+
+    expect(onDropClick).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("link", { name: "The Memes #521" })
+    ).toHaveAttribute("href", "/the-memes/521");
+  });
+
+  it("shows the mapped Meme card mint date in the viewer's locale and timezone", async () => {
+    const originalLanguagesDescriptor = Object.getOwnPropertyDescriptor(
+      globalThis.navigator,
+      "languages"
+    );
+    setBrowserLanguages(["en-GB"]);
+
+    const mintInstant = new Date("2026-08-07T14:40:00.000Z");
+    getMintTimelineDetailsMock.mockReturnValue({
+      instantUtc: mintInstant,
+    } as ReturnType<typeof getMintTimelineDetails>);
+    const expectedMintDate = new Intl.DateTimeFormat("en-GB", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    }).format(mintInstant);
+
+    try {
+      render(
+        <MemesWaveWinnersDrop
+          winner={
+            {
+              ...winner,
+              drop: {
+                ...winner.drop,
+                submission_context: { meme_card_id: 532 },
+              },
+            } as ApiWaveDecisionWinner
+          }
+          wave={wave}
+          onDropClick={jest.fn()}
+        />
+      );
+
+      expect(await screen.findByText("Mint date:")).toBeInTheDocument();
+      const mintDate = await screen.findByText(expectedMintDate);
+      expect(mintDate.tagName).toBe("TIME");
+      expect(mintDate).toHaveAttribute("datetime", mintInstant.toISOString());
+    } finally {
+      if (originalLanguagesDescriptor) {
+        Object.defineProperty(
+          globalThis.navigator,
+          "languages",
+          originalLanguagesDescriptor
+        );
+      } else {
+        Reflect.deleteProperty(globalThis.navigator, "languages");
+      }
+    }
+  });
+
+  it.each([
+    [
+      "throws",
+      () => {
+        throw new Error("schedule unavailable");
+      },
+    ],
+    ["returns an invalid date", () => ({ instantUtc: new Date(Number.NaN) })],
+  ])("omits the mint date when the schedule %s", async (_case, schedule) => {
+    getMintTimelineDetailsMock.mockImplementation(
+      () => schedule() as ReturnType<typeof getMintTimelineDetails>
+    );
+
+    render(
+      <MemesWaveWinnersDrop
+        winner={
+          {
+            ...winner,
+            drop: {
+              ...winner.drop,
+              submission_context: { meme_card_id: 532 },
+            },
+          } as ApiWaveDecisionWinner
+        }
+        wave={wave}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(getMintTimelineDetailsMock).toHaveBeenCalledWith(532);
+    });
+    expect(screen.queryByText("Mint date:")).not.toBeInTheDocument();
+  });
+
+  it("does not infer a Meme card link when the mapping is absent", () => {
+    render(
+      <MemesWaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.queryByRole("link", { name: /The Memes #/ })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Mint date:")).not.toBeInTheDocument();
   });
 
   it("keeps native tap behavior for touch long-press handlers", () => {
@@ -236,10 +417,10 @@ describe("MemesWaveWinnersDrop", () => {
         name: "View voters and vote log for 2 voters",
       })
     ).toHaveClass(
-      "tw-rounded-lg",
+      "tw-rounded-md",
       "tw-border",
       "tw-border-iron-700",
-      "tw-bg-iron-900/40"
+      "tw-bg-white/[0.05]"
     );
   });
 

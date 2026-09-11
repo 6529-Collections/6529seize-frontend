@@ -1,0 +1,2328 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard#error:0x3ee5aeb5",
+          "declaringDefinitionId": "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard",
+          "inherited": true,
+          "inputs": [],
+          "name": "ReentrancyGuardReentrantCall",
+          "selector": "0x3ee5aeb5",
+          "signature": "ReentrancyGuardReentrantCall()"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#event:CuratorCreditCreated(address,uint256,uint256)",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "_add",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "funds",
+              "type": "uint256"
+            }
+          ],
+          "name": "CuratorCreditCreated",
+          "signature": "CuratorCreditCreated(address,uint256,uint256)",
+          "topic0": "0xed5a80d57e86051fa6af452e8509124711acd649df4f972309adbdb4419c5465"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#event:CuratorCreditWithdrawn(address,address,uint256)",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "_add",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "_recipient",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "funds",
+              "type": "uint256"
+            }
+          ],
+          "name": "CuratorCreditWithdrawn",
+          "signature": "CuratorCreditWithdrawn(address,address,uint256)",
+          "topic0": "0xb9a3a7afb6923ec79a669c79f05b4dd60e7c5c9e5b068c4365c7039e251adbff"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#event:EmergencyWithdrawal(address,address,bytes32,uint256,uint256)",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "_admin",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "_recipient",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "_domain",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "funds",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "resultingSurplus",
+              "type": "uint256"
+            }
+          ],
+          "name": "EmergencyWithdrawal",
+          "signature": "EmergencyWithdrawal(address,address,bytes32,uint256,uint256)",
+          "topic0": "0xa26a565fb7b765d82314f2acbbdc45f04e62ad24536797471d46c27ec9e0d4d8"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#event:MerkleRootUpdated(uint256,uint256,bytes32)",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "rootEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "merkleRoot",
+              "type": "bytes32"
+            }
+          ],
+          "name": "MerkleRootUpdated",
+          "signature": "MerkleRootUpdated(uint256,uint256,bytes32)",
+          "topic0": "0xe7142ec587218ed60e9f6763c0f8fe53e15b8582a508ef812375a163acc3a9ff"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#event:Reward(address,uint256,uint256)",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "_add",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "Reward",
+          "signature": "Reward(address,uint256,uint256)",
+          "topic0": "0x02a6a2be713fedf52f113c0a759f1c1a23a113476d9b1b1a2a453c910660de4e"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#event:Withdraw(address,bool,uint256)",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "_add",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "status",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "funds",
+              "type": "uint256"
+            }
+          ],
+          "name": "Withdraw",
+          "signature": "Withdraw(address,bool,uint256)",
+          "topic0": "0x4a48cb98c5be023b78a0b3ec94107a01a0397b2e389d4b5f252aef518e633ec3"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x13ab809f",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [],
+          "name": "CURATOR_REWARD_LEAF_DOMAIN",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x13ab809f",
+          "signature": "CURATOR_REWARD_LEAF_DOMAIN()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xb326283b",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "_amount",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32[]",
+              "name": "merkleProof",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 3,
+              "internalType": "address",
+              "name": "_delegator",
+              "type": "address"
+            }
+          ],
+          "name": "claimRewards",
+          "outputs": [],
+          "selector": "0xb326283b",
+          "signature": "claimRewards(uint256,uint256,bytes32[],address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xceddc6a6",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionMerkleRoot",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xceddc6a6",
+          "signature": "collectionMerkleRoot(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x7ebcbf5d",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionMerkleRootEpoch",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x7ebcbf5d",
+          "signature": "collectionMerkleRootEpoch(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x0a7ba9dc",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "curatorCredits",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x0a7ba9dc",
+          "signature": "curatorCredits(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xdb2e21bc",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [],
+          "name": "emergencyWithdraw",
+          "outputs": [],
+          "selector": "0xdb2e21bc",
+          "signature": "emergencyWithdraw()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x3e9d39ab",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [],
+          "name": "emergencyWithdrawable",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x3e9d39ab",
+          "signature": "emergencyWithdrawable()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xa2fd842e",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_rewardAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "_amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "hashRewardLeaf",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xa2fd842e",
+          "signature": "hashRewardLeaf(address,uint256,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xb6ea29c8",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_rewardAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "_amount",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "_rootEpoch",
+              "type": "uint256"
+            }
+          ],
+          "name": "hashRewardLeaf",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xb6ea29c8",
+          "signature": "hashRewardLeaf(address,uint256,uint256,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x571308f7",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "rewardsClaimPerAddress",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x571308f7",
+          "signature": "rewardsClaimPerAddress(uint256,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xe7d3146f",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "rewardsPerAddress",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xe7d3146f",
+          "signature": "rewardsPerAddress(uint256,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x18712c21",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "_merkleRoot",
+              "type": "bytes32"
+            }
+          ],
+          "name": "setMerkleRoot",
+          "outputs": [],
+          "selector": "0x18712c21",
+          "signature": "setMerkleRoot(uint256,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x8834674a",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256[]",
+              "name": "_collectionIDs",
+              "type": "uint256[]"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32[]",
+              "name": "_merkleRoot",
+              "type": "bytes32[]"
+            }
+          ],
+          "name": "setMultipleMerkleRoots",
+          "outputs": [],
+          "selector": "0x8834674a",
+          "signature": "setMultipleMerkleRoots(uint256[],bytes32[])",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x13888565",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [],
+          "name": "surplus",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x13888565",
+          "signature": "surplus()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x2fb347a5",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [],
+          "name": "totalCuratorOwed",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x2fb347a5",
+          "signature": "totalCuratorOwed()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xe7fa9f7d",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [],
+          "name": "totalOwed",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xe7fa9f7d",
+          "signature": "totalOwed()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xc71b0e1c",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [],
+          "name": "totalReserved",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xc71b0e1c",
+          "signature": "totalReserved()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xff6b4a12",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_newContract",
+              "type": "address"
+            }
+          ],
+          "name": "updateAdminContracts",
+          "outputs": [],
+          "selector": "0xff6b4a12",
+          "signature": "updateAdminContracts(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x0797d812",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [],
+          "name": "withdrawCuratorCredit",
+          "outputs": [],
+          "selector": "0x0797d812",
+          "signature": "withdrawCuratorCredit()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x3165c4b8",
+          "declaringDefinitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address payable",
+              "name": "_recipient",
+              "type": "address"
+            }
+          ],
+          "name": "withdrawCuratorCreditTo",
+          "outputs": [],
+          "selector": "0x3165c4b8",
+          "signature": "withdrawCuratorCreditTo(address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "production_release_contract",
+    "classificationReason": "Listed in release-artifacts/contracts.json production_contracts.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 42060,
+          "canonicalSignature": "Reward(address,uint256,uint256)",
+          "displaySignature": "Reward(address,uint256,uint256)",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#event:Reward(address,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "_add",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2V2ZW50OlJld2FyZChhZGRyZXNzLHVpbnQyNTYsdWludDI1Nik",
+          "kind": "event",
+          "name": "Reward",
+          "natspec": "",
+          "range": {
+            "byteLength": 89,
+            "byteStart": 1472,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L47",
+            "lineEnd": 47,
+            "lineStart": 47,
+            "snippetSha256": "sha256:cb6047f9b9156dd534c6c64d2b7abf409f077429cfa015379037876cdeedca5e",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "topic0": "0x02a6a2be713fedf52f113c0a759f1c1a23a113476d9b1b1a2a453c910660de4e"
+        },
+        {
+          "anonymous": false,
+          "astId": 42068,
+          "canonicalSignature": "MerkleRootUpdated(uint256,uint256,bytes32)",
+          "displaySignature": "MerkleRootUpdated(uint256,uint256,bytes32)",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#event:MerkleRootUpdated(uint256,uint256,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "rootEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "merkleRoot",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2V2ZW50Ok1lcmtsZVJvb3RVcGRhdGVkKHVpbnQyNTYsdWludDI1NixieXRlczMyKQ",
+          "kind": "event",
+          "name": "MerkleRootUpdated",
+          "natspec": "",
+          "range": {
+            "byteLength": 123,
+            "byteStart": 1566,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L48-L50",
+            "lineEnd": 50,
+            "lineStart": 48,
+            "snippetSha256": "sha256:0ce4e1d822593bf82ac911264b8c2cba7429216b3416095fabc39c2f771668d0",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "topic0": "0xe7142ec587218ed60e9f6763c0f8fe53e15b8582a508ef812375a163acc3a9ff"
+        },
+        {
+          "anonymous": false,
+          "astId": 42076,
+          "canonicalSignature": "CuratorCreditCreated(address,uint256,uint256)",
+          "displaySignature": "CuratorCreditCreated(address,uint256,uint256)",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#event:CuratorCreditCreated(address,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "_add",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "funds",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2V2ZW50OkN1cmF0b3JDcmVkaXRDcmVhdGVkKGFkZHJlc3MsdWludDI1Nix1aW50MjU2KQ",
+          "kind": "event",
+          "name": "CuratorCreditCreated",
+          "natspec": "",
+          "range": {
+            "byteLength": 116,
+            "byteStart": 1694,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L51-L53",
+            "lineEnd": 53,
+            "lineStart": 51,
+            "snippetSha256": "sha256:e06c9bb3c0e20c305039329e584331e4ca1a1fc506d4ca25544b9c4200c03afc",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "topic0": "0xed5a80d57e86051fa6af452e8509124711acd649df4f972309adbdb4419c5465"
+        },
+        {
+          "anonymous": false,
+          "astId": 42084,
+          "canonicalSignature": "CuratorCreditWithdrawn(address,address,uint256)",
+          "displaySignature": "CuratorCreditWithdrawn(address,address,uint256)",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#event:CuratorCreditWithdrawn(address,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "_add",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "_recipient",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "funds",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2V2ZW50OkN1cmF0b3JDcmVkaXRXaXRoZHJhd24oYWRkcmVzcyxhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "event",
+          "name": "CuratorCreditWithdrawn",
+          "natspec": "",
+          "range": {
+            "byteLength": 116,
+            "byteStart": 1815,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L54-L56",
+            "lineEnd": 56,
+            "lineStart": 54,
+            "snippetSha256": "sha256:49583c01cccba5a8449e969aed7952ce8eead95dbb238c747af8a5a29853110a",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "topic0": "0xb9a3a7afb6923ec79a669c79f05b4dd60e7c5c9e5b068c4365c7039e251adbff"
+        },
+        {
+          "anonymous": false,
+          "astId": 42092,
+          "canonicalSignature": "Withdraw(address,bool,uint256)",
+          "displaySignature": "Withdraw(address,bool,uint256)",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#event:Withdraw(address,bool,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "_add",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "status",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "funds",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2V2ZW50OldpdGhkcmF3KGFkZHJlc3MsYm9vbCx1aW50MjU2KQ",
+          "kind": "event",
+          "name": "Withdraw",
+          "natspec": "",
+          "range": {
+            "byteLength": 73,
+            "byteStart": 1936,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L57",
+            "lineEnd": 57,
+            "lineStart": 57,
+            "snippetSha256": "sha256:4450f9689b3a6b7b9acb13445450f27c5d2c68244e08fae156c3952d6ff10688",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "topic0": "0x4a48cb98c5be023b78a0b3ec94107a01a0397b2e389d4b5f252aef518e633ec3"
+        },
+        {
+          "anonymous": false,
+          "astId": 42104,
+          "canonicalSignature": "EmergencyWithdrawal(address,address,bytes32,uint256,uint256)",
+          "displaySignature": "EmergencyWithdrawal(address,address,bytes32,uint256,uint256)",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#event:EmergencyWithdrawal(address,address,bytes32,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "_admin",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "_recipient",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "_domain",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "funds",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "resultingSurplus",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2V2ZW50OkVtZXJnZW5jeVdpdGhkcmF3YWwoYWRkcmVzcyxhZGRyZXNzLGJ5dGVzMzIsdWludDI1Nix1aW50MjU2KQ",
+          "kind": "event",
+          "name": "EmergencyWithdrawal",
+          "natspec": "",
+          "range": {
+            "byteLength": 190,
+            "byteStart": 2014,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L58-L64",
+            "lineEnd": 64,
+            "lineStart": 58,
+            "snippetSha256": "sha256:8a1061fc437fbfbb80f57a7d9406a655990b736c47df200ce031b6292ca4b8b3",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "topic0": "0xa26a565fb7b765d82314f2acbbdc45f04e62ad24536797471d46c27ec9e0d4d8"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "CURATOR_REWARD_LEAF_DOMAIN()",
+          "displaySignature": "CURATOR_REWARD_LEAF_DOMAIN()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x13ab809f",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4MTNhYjgwOWY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "CURATOR_REWARD_LEAF_DOMAIN",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 124,
+            "byteStart": 564,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L22-L23",
+            "lineEnd": 23,
+            "lineStart": 22,
+            "snippetSha256": "sha256:0b2c98ef0d5c6526a51c2e7b1ac453326f9cdedb26b4aeb2e02d27b92c2a97ba",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x13ab809f",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "collectionMerkleRoot(uint256)",
+          "displaySignature": "collectionMerkleRoot(uint256)",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xceddc6a6",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4Y2VkZGM2YTY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionMerkleRoot",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 55,
+            "byteStart": 725,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:fd98bc6f7f3537a793743ae63c4fd2f0a0d52b61f98d00816ccd404c948adba9",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0xceddc6a6",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "collectionMerkleRootEpoch(uint256)",
+          "displaySignature": "collectionMerkleRootEpoch(uint256)",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x7ebcbf5d",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4N2ViY2JmNWQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionMerkleRootEpoch",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 60,
+            "byteStart": 786,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:b27c101c00d9a869545ac09bef3e68b49610ac708c03bcc3ccef7174c057bac6",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x7ebcbf5d",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "rewardsPerAddress(uint256,address)",
+          "displaySignature": "rewardsPerAddress(uint256,address)",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xe7d3146f",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4ZTdkMzE0NmY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "rewardsPerAddress",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 72,
+            "byteStart": 852,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:6589c4a4d49689b5ccfa8262b743117531924beba0454a39da52b3cfb4de75a2",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0xe7d3146f",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "rewardsClaimPerAddress(uint256,address)",
+          "displaySignature": "rewardsClaimPerAddress(uint256,address)",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x571308f7",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4NTcxMzA4Zjc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "rewardsClaimPerAddress",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 74,
+            "byteStart": 930,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:a7433d1d2357375854cf9aa65e4c6ec2d7d8bd4f4582b152bc5771d0b5843282",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x571308f7",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "curatorCredits(address)",
+          "displaySignature": "curatorCredits(address)",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x0a7ba9dc",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4MGE3YmE5ZGM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "curatorCredits",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 49,
+            "byteStart": 1010,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:4c5560c4680d6b93f24d237a8f61175a7e6601868450c919d18bdef1ade2cdb7",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x0a7ba9dc",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "totalCuratorOwed()",
+          "displaySignature": "totalCuratorOwed()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x2fb347a5",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4MmZiMzQ3YTU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalCuratorOwed",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 31,
+            "byteStart": 1065,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:5afe23175ad0bf345555e4fbba0972e4c94ec657c6bcc29e18f8dfa3fb2e912e",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x2fb347a5",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(address,address)",
+          "functionKind": "constructor",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:constructor(address,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_adminsContract",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_del",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOmNvbnN0cnVjdG9yKGFkZHJlc3MsYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 284,
+            "byteStart": 2210,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L66-L71",
+            "lineEnd": 71,
+            "lineStart": 66,
+            "snippetSha256": "sha256:7587dac9668536caccd21ea6958f54aa4da306e396eab835586c8c119f294f22",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "setMerkleRoot(uint256,bytes32)",
+          "displaySignature": "setMerkleRoot(uint256,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x18712c21",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "_merkleRoot",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4MTg3MTJjMjE",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "setMerkleRoot",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 368,
+            "byteStart": 2555,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L74-L81",
+            "lineEnd": 81,
+            "lineStart": 74,
+            "snippetSha256": "sha256:326e2d1e5f1ef78a477f9b9f50b04e34b0005b3f9e791577aecafc844cee0e09",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x18712c21",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "setMultipleMerkleRoots(uint256[],bytes32[])",
+          "displaySignature": "setMultipleMerkleRoots(uint256[],bytes32[])",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x8834674a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionIDs",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            },
+            {
+              "index": 1,
+              "name": "_merkleRoot",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4ODgzNDY3NGE",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "setMultipleMerkleRoots",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 621,
+            "byteStart": 2978,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L84-L96",
+            "lineEnd": 96,
+            "lineStart": 84,
+            "snippetSha256": "sha256:2792dd144fb6569aa8fa3ece7739f8875f11baadb519b51824f90bfeeb01a81d",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x8834674a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "claimRewards(uint256,uint256,bytes32[],address)",
+          "displaySignature": "claimRewards(uint256,uint256,bytes32[],address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xb326283b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "_amount",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "merkleProof",
+              "storageLocation": "calldata",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 3,
+              "name": "_delegator",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4YjMyNjI4M2I",
+          "kind": "function",
+          "modifiers": [
+            "nonReentrant"
+          ],
+          "name": "claimRewards",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1485,
+            "byteStart": 3638,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L99-L132",
+            "lineEnd": 132,
+            "lineStart": 99,
+            "snippetSha256": "sha256:aabf332bbfcc3250e5a891d5475509d2abe058ecd0344ba780d11b59acec7840",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0xb326283b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "withdrawCuratorCredit()",
+          "displaySignature": "withdrawCuratorCredit()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x0797d812",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4MDc5N2Q4MTI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "withdrawCuratorCredit",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 103,
+            "byteStart": 5129,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L134-L136",
+            "lineEnd": 136,
+            "lineStart": 134,
+            "snippetSha256": "sha256:00e015a9f210ef8779c4c9ea76739e0f4ede54a5f2cc8ad2aa579e1f805ce72f",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x0797d812",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "withdrawCuratorCreditTo(address)",
+          "displaySignature": "withdrawCuratorCreditTo(address payable)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x3165c4b8",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_recipient",
+              "type": "address payable"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4MzE2NWM0Yjg",
+          "kind": "function",
+          "modifiers": [
+            "nonReentrant"
+          ],
+          "name": "withdrawCuratorCreditTo",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 496,
+            "byteStart": 5238,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L138-L149",
+            "lineEnd": 149,
+            "lineStart": 138,
+            "snippetSha256": "sha256:05915feb71e7364a70083c48e00914ea24e1d45dcb1928b1d152e9af54f419d7",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x3165c4b8",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "hashRewardLeaf(address,uint256,uint256)",
+          "displaySignature": "hashRewardLeaf(address,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xa2fd842e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_rewardAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "_amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4YTJmZDg0MmU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "hashRewardLeaf",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 288,
+            "byteStart": 5740,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L151-L159",
+            "lineEnd": 159,
+            "lineStart": 151,
+            "snippetSha256": "sha256:07f7697a6cd3e9e90a0ab24a0fc544b7c600db071af251c6f5e583dd6d50777b",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0xa2fd842e",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "hashRewardLeaf(address,uint256,uint256,uint256)",
+          "displaySignature": "hashRewardLeaf(address,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xb6ea29c8",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_rewardAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "_amount",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "_rootEpoch",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4YjZlYTI5Yzg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "hashRewardLeaf",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 636,
+            "byteStart": 6034,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L161-L182",
+            "lineEnd": 182,
+            "lineStart": 161,
+            "snippetSha256": "sha256:44de36f577613e47b278161830b4f9fe8fac6bc6c8a8052e1b77a86e53722f1f",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0xb6ea29c8",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "totalOwed()",
+          "displaySignature": "totalOwed()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xe7fa9f7d",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4ZTdmYTlmN2Q",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalOwed",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 91,
+            "byteStart": 6676,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L184-L186",
+            "lineEnd": 186,
+            "lineStart": 184,
+            "snippetSha256": "sha256:7df164d02f401cea890d9689bca03695e9dd16a6b45f2384084c05658828169c",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0xe7fa9f7d",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "totalReserved()",
+          "displaySignature": "totalReserved()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xc71b0e1c",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4YzcxYjBlMWM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalReserved",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 80,
+            "byteStart": 6773,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L188-L190",
+            "lineEnd": 190,
+            "lineStart": 188,
+            "snippetSha256": "sha256:f762e70eae2c0f86debece91e1b1697580583ba7b59a999b19ea5853ce817721",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0xc71b0e1c",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "emergencyWithdrawable()",
+          "displaySignature": "emergencyWithdrawable()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x3e9d39ab",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4M2U5ZDM5YWI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "emergencyWithdrawable",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 96,
+            "byteStart": 6859,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L192-L194",
+            "lineEnd": 194,
+            "lineStart": 192,
+            "snippetSha256": "sha256:62737c3913fd437d5eeb4feeaf82ed8e731e85efb3a60b9cfdcbb712f89874a5",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x3e9d39ab",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "surplus()",
+          "displaySignature": "surplus()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x13888565",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4MTM4ODg1NjU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "surplus",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 235,
+            "byteStart": 6961,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L196-L203",
+            "lineEnd": 203,
+            "lineStart": 196,
+            "snippetSha256": "sha256:8fdd52d0c8c354d98da06065c24c4e5b5ba85f9c69ca851b42d7cca59b01a776",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x13888565",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "updateAdminContracts(address)",
+          "displaySignature": "updateAdminContracts(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xff6b4a12",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_newContract",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4ZmY2YjRhMTI",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "updateAdminContracts",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 287,
+            "byteStart": 7243,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L206-L212",
+            "lineEnd": 212,
+            "lineStart": 206,
+            "snippetSha256": "sha256:78c4599b5dfb4b0a5f1c6053f8dab3fb28953d593118c9d9ac4eaf59a3b90d9e",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0xff6b4a12",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "emergencyWithdraw()",
+          "displaySignature": "emergencyWithdraw()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xdb2e21bc",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOjB4ZGIyZTIxYmM",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "emergencyWithdraw",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 521,
+            "byteStart": 7600,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L215-L224",
+            "lineEnd": 224,
+            "lineStart": 215,
+            "snippetSha256": "sha256:2b9b1333e4960893a13b6b3e53f1c64617ff7dc43d7df5e279d1fe02d34b70e6",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0xdb2e21bc",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "receive()",
+          "functionKind": "receive",
+          "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:receive()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29sI2Z1bmN0aW9uOnJlY2VpdmUoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 30,
+            "byteStart": 8127,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L226",
+            "lineEnd": 226,
+            "lineStart": 226,
+            "snippetSha256": "sha256:5b6a98427c1f43e7515585164def7acd95a33725cb1caad01f96b99fb5352509",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": null,
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [
+        {
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_selector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "FunctionAdminRequired",
+          "natspec": "",
+          "overrides": [],
+          "range": {
+            "byteLength": 275,
+            "byteStart": 1177,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L37-L44",
+            "lineEnd": 44,
+            "lineStart": 37,
+            "snippetSha256": "sha256:de34775b097d43cd8f3c52a110df523301db7f1605a4406afb5caa0a7f5ad439",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "virtual": false
+        }
+      ],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "DELEGATION_COLLECTION",
+          "natspec": "",
+          "range": {
+            "byteLength": 91,
+            "byteStart": 409,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:ee50e6805c6790a1b004f3172e4e96fd45c181fdb57e3584868042d3c2b2745b",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 42,
+            "byteStart": 458,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:c5ccdaf285f572c251d3c54346575723255ce78e119af161b3c76792a078879e",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "valueSource": "0x8888888888888888888888888888888888888888",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CURATOR_REWARD_USE_CASE",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 506,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:653fe11132f2bc789120259d30aa6dca6764a3772df8116109c28d0415a1b172",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 557,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x13ab809f",
+          "immutable": false,
+          "name": "CURATOR_REWARD_LEAF_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 124,
+            "byteStart": 564,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L22-L23",
+            "lineEnd": 23,
+            "lineStart": 22,
+            "snippetSha256": "sha256:0b2c98ef0d5c6526a51c2e7b1ac453326f9cdedb26b4aeb2e02d27b92c2a97ba",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x13ab809f",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 63,
+            "byteStart": 625,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:5530e8a41453246c7ce382a8a6f50bd9ea06fff5f7f5a2df382aa623dc648aa2",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "valueSource": "keccak256(\"6529Stream.StreamCuratorsPool.curatorRewardLeaf.v2\")",
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xceddc6a6",
+          "immutable": false,
+          "name": "collectionMerkleRoot",
+          "natspec": "",
+          "range": {
+            "byteLength": 55,
+            "byteStart": 725,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:fd98bc6f7f3537a793743ae63c4fd2f0a0d52b61f98d00816ccd404c948adba9",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0xceddc6a6",
+          "type": "mapping(uint256 => bytes32)",
+          "typeString": "mapping(uint256 => bytes32)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x7ebcbf5d",
+          "immutable": false,
+          "name": "collectionMerkleRootEpoch",
+          "natspec": "",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 786,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:b27c101c00d9a869545ac09bef3e68b49610ac708c03bcc3ccef7174c057bac6",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x7ebcbf5d",
+          "type": "mapping(uint256 => uint256)",
+          "typeString": "mapping(uint256 => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xe7d3146f",
+          "immutable": false,
+          "name": "rewardsPerAddress",
+          "natspec": "",
+          "range": {
+            "byteLength": 72,
+            "byteStart": 852,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:6589c4a4d49689b5ccfa8262b743117531924beba0454a39da52b3cfb4de75a2",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0xe7d3146f",
+          "type": "mapping(uint256 => mapping(address => uint256))",
+          "typeString": "mapping(uint256 => mapping(address => uint256))",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x571308f7",
+          "immutable": false,
+          "name": "rewardsClaimPerAddress",
+          "natspec": "",
+          "range": {
+            "byteLength": 74,
+            "byteStart": 930,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:a7433d1d2357375854cf9aa65e4c6ec2d7d8bd4f4582b152bc5771d0b5843282",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x571308f7",
+          "type": "mapping(uint256 => mapping(address => bool))",
+          "typeString": "mapping(uint256 => mapping(address => bool))",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x0a7ba9dc",
+          "immutable": false,
+          "name": "curatorCredits",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 1010,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:4c5560c4680d6b93f24d237a8f61175a7e6601868450c919d18bdef1ade2cdb7",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x0a7ba9dc",
+          "type": "mapping(address => uint256)",
+          "typeString": "mapping(address => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x2fb347a5",
+          "immutable": false,
+          "name": "totalCuratorOwed",
+          "natspec": "",
+          "range": {
+            "byteLength": 31,
+            "byteStart": 1065,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:5afe23175ad0bf345555e4fbba0972e4c94ec657c6bcc29e18f8dfa3fb2e912e",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": "0x2fb347a5",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "adminsContract",
+          "natspec": "",
+          "range": {
+            "byteLength": 28,
+            "byteStart": 1103,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:625db86caa1a7f8e5bebccf170c34d8d18480f198db630b18f09af23dfc94acd",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": null,
+          "type": "IStreamAdmins",
+          "typeString": "contract IStreamAdmins",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "internal"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "dmc",
+          "natspec": "",
+          "range": {
+            "byteLength": 33,
+            "byteStart": 1137,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:b79eca3cdadc17b995cb1ea922c9f5a6fd4129b88de23914bdc651f0451fa50c",
+            "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+          },
+          "selector": null,
+          "type": "IDelegationManagementContract",
+          "typeString": "contract IDelegationManagementContract",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "internal"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard",
+        "name": "ReentrancyGuard"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUN1cmF0b3JzUG9vbC5zb2w6U3RyZWFtQ3VyYXRvcnNQb29s",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "production_contract"
+    },
+    "name": "StreamCuratorsPool",
+    "natspec": "",
+    "range": {
+      "byteLength": 7803,
+      "byteStart": 356,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCuratorsPool.sol#L19-L227",
+      "lineEnd": 227,
+      "lineStart": 19,
+      "snippetSha256": "sha256:12428414706b3e0e7dff498a338facfe488e61c3d50733d5d5b42a5daf1c2790",
+      "sourceSha256": "sha256:aeaab7f3da8d5d42df2cee46ab6554696d1ab8bc37545a2d6e3afffb300ce43e"
+    },
+    "release": {
+      "abiSha256": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
+      "bytecodeSha256": "sha256:d3acb7c52ffb7c0eef402327580923728e67456ffddc7399766bec9629911d83",
+      "deployedBytecodeSha256": "sha256:6aa604286175f5884ad3aa2a56eab4a785f83bfdd5fe18ff38e23708ac51cd2e",
+      "deployedBytecodeSizeBytes": 4867,
+      "summary": {
+        "custom_error_count": 1,
+        "event_count": 6,
+        "function_count": 20,
+        "payable_function_count": 0,
+        "read_function_count": 13,
+        "write_function_count": 7
+      },
+      "tracked": true
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamCuratorsPool.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 23
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 22
+    },
+    "totalCount": 23
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x0797d812",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x0a7ba9dc",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x13888565",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x13ab809f",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x18712c21",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x2fb347a5",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x3165c4b8",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x3e9d39ab",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x571308f7",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x7ebcbf5d",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0x8834674a",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xa2fd842e",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xb326283b",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xb6ea29c8",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xc71b0e1c",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xceddc6a6",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xdb2e21bc",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xe7d3146f",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xe7fa9f7d",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:0xff6b4a12",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:constructor(address,address)",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool#function:receive()",
+      "definitionId": "smart-contracts/StreamCuratorsPool.sol:StreamCuratorsPool",
+      "severity": "advisory"
+    }
+  ]
+}

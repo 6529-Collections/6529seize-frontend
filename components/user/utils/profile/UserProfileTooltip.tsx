@@ -20,7 +20,9 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useIdentity } from "@/hooks/useIdentity";
+import { t } from "@/i18n/messages";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
@@ -44,6 +46,7 @@ export default function UserProfileTooltip({
   onArtistPreviewOpen,
 }: UserProfileTooltipProps) {
   const router = useRouter();
+  const locale = useBrowserLocale();
   const { isApp } = useDeviceInfo();
   const { profile } = useIdentity({
     handleOrWallet: user,
@@ -111,25 +114,16 @@ export default function UserProfileTooltip({
 
   const { connectedProfile, activeProfileProxy, setToast } = useAuth();
   const profileHandle = profile?.handle ?? null;
-  const normalizedProfileHandle = useMemo(
-    () => profileHandle?.toLowerCase() ?? null,
-    [profileHandle]
-  );
-  const normalizedConnectedHandle = useMemo(
-    () => connectedProfile?.handle?.toLowerCase() ?? null,
-    [connectedProfile?.handle]
-  );
+  const normalizedProfileHandle = profileHandle?.toLowerCase() ?? null;
+  const normalizedConnectedHandle =
+    connectedProfile?.handle?.toLowerCase() ?? null;
   const showFollowButton = Boolean(
     normalizedConnectedHandle &&
     normalizedProfileHandle &&
     normalizedProfileHandle !== normalizedConnectedHandle
   );
   const tooltipInstanceId = useId();
-  const badgesTooltipIdPrefix = useMemo(
-    () =>
-      `user-profile-tooltip-author-badges-${tooltipInstanceId.replaceAll(":", "")}`,
-    [tooltipInstanceId]
-  );
+  const badgesTooltipIdPrefix = `user-profile-tooltip-author-badges-${tooltipInstanceId.replaceAll(":", "")}`;
 
   const handleCreateDirectMessage = async (
     primaryWallet: string | undefined
@@ -147,11 +141,12 @@ export default function UserProfileTooltip({
       navigateToDirectMessage({ waveId: wave.id, router, isApp });
     } catch (error) {
       console.error(error);
+      const errorMessage = getToastErrorDetails(error);
       setToast({
         type: "error",
         title: "Couldn't create this direct message.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
+        description:
+          errorMessage ?? t(locale, "profilePreferences.dm.createRetry"),
       });
     } finally {
       setDirectMessageLoading(false);
@@ -161,36 +156,8 @@ export default function UserProfileTooltip({
   return (
     <div className="tailwind-scope tw-min-w-[280px] tw-max-w-[320px] tw-rounded-xl tw-bg-iron-950">
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-3">
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
-          <div className="tw-flex-shrink-0">
-            <DropPfp pfpUrl={profile?.pfp} />
-          </div>
-          <div className="tw-flex tw-min-w-0 tw-flex-col">
-            <div className="tw-flex tw-items-center tw-gap-x-2">
-              <span className="tw-max-w-[180px] tw-truncate tw-text-base tw-font-bold tw-text-iron-50">
-                {profile?.handle ?? profile?.display}
-              </span>
-              {profile && (
-                <UserCICAndLevel
-                  level={profile.level}
-                  size={UserCICAndLevelSize.SMALL}
-                />
-              )}
-              {profile && (
-                <DropAuthorBadges
-                  profile={profile}
-                  tooltipIdPrefix={badgesTooltipIdPrefix}
-                  showProfileWaveBadge={false}
-                  onArtistPreviewOpen={onArtistPreviewOpen}
-                />
-              )}
-            </div>
-            {description && (
-              <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
-                {description}
-              </p>
-            )}
-          </div>
+        <div className="tw-flex-shrink-0">
+          <DropPfp pfpUrl={profile?.pfp} />
         </div>
         {showFollowButton && profileHandle && (
           <div className="tw-flex-shrink-0">
@@ -207,6 +174,33 @@ export default function UserProfileTooltip({
               directMessageLoading={directMessageLoading}
             />
           </div>
+        )}
+      </div>
+      <div className="tw-mt-2 tw-flex tw-min-w-0 tw-flex-col">
+        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
+          <span className="tw-min-w-0 tw-truncate tw-text-base tw-font-bold tw-leading-5 tw-text-iron-50">
+            {profile?.handle ?? profile?.display}
+          </span>
+          {profile && (
+            <div className="tw-flex tw-flex-shrink-0 tw-items-center">
+              <UserCICAndLevel
+                level={profile.level}
+                size={UserCICAndLevelSize.SMALL}
+              />
+            </div>
+          )}
+          {profile && (
+            <DropAuthorBadges
+              profile={profile}
+              tooltipIdPrefix={badgesTooltipIdPrefix}
+              className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-gap-x-1.5"
+              showProfileWaveBadge={false}
+              onArtistPreviewOpen={onArtistPreviewOpen}
+            />
+          )}
+        </div>
+        {description && (
+          <p className="tw-mb-0 tw-text-xs tw-text-iron-400">{description}</p>
         )}
       </div>
       {aboutStatement && (

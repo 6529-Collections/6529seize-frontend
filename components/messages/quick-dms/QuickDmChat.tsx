@@ -7,11 +7,11 @@ import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getMessagePathRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 import { useWaveData } from "@/hooks/useWaveData";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getDropQueryKey } from "@/services/api/drop-api";
+import { useDmUnreadConversation } from "@/services/dm-unread/DmUnreadStateProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type React from "react";
@@ -24,7 +24,6 @@ import {
 import {
   getFormattedWaveName,
   getQuickDmAvatarSource,
-  getUnreadCount,
 } from "./QuickDirectMessagesUtils";
 
 interface QuickDmChatProps {
@@ -56,13 +55,13 @@ export const QuickDmChat = ({
   const { directMessages, registerWave } = useMyStream();
   const markDirectMessageRead = directMessages.markWaveRead;
   const { updateEligibility } = useWaveEligibility();
-  const markWaveNotificationsRead = useMarkWaveNotificationsRead();
   const { data: wave, isFetching, isError } = useWaveData({ waveId });
+  const unreadConversation = useDmUnreadConversation(waveId);
   const title = getFormattedWaveName({
     name: wave?.name ?? listWave?.name ?? "",
   });
   const avatar = getQuickDmAvatarSource(title, listWave, wave);
-  const listUnreadCount = listWave ? getUnreadCount(listWave) : 0;
+  const listUnreadCount = unreadConversation?.unread_count ?? 0;
   const hasMarkedInitialReadRef = useRef<string | null>(null);
   let chatContent: React.ReactNode = null;
 
@@ -74,9 +73,12 @@ export const QuickDmChat = ({
       return;
     }
 
-    markDirectMessageRead(waveId);
-    void markWaveNotificationsRead(waveId).catch(() => undefined);
-  }, [markDirectMessageRead, markWaveNotificationsRead, waveId]);
+    markDirectMessageRead(waveId, unreadConversation?.latest_drop_serial_no);
+  }, [
+    markDirectMessageRead,
+    unreadConversation?.latest_drop_serial_no,
+    waveId,
+  ]);
 
   useEffect(() => {
     const shouldMarkRead =
@@ -140,20 +142,21 @@ export const QuickDmChat = ({
         viewMode="chat"
         onDropClick={openDropInMessages}
         waveViewStyleOverride={CHAT_PANEL_STYLE}
+        composerDensity="compact"
       />
     );
   } else if (isFetching) {
     chatContent = <QuickDmLoadingRows locale={locale} />;
   } else if (isError) {
     chatContent = (
-      <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-p-6 tw-text-center tw-text-sm tw-text-iron-300">
+      <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-bg-iron-950 tw-p-8 tw-text-center tw-text-sm tw-leading-5 tw-text-iron-300">
         {t(locale, "quickDm.chatLoadError")}
       </div>
     );
   }
 
   return (
-    <div className="tw-flex tw-h-[560px] tw-max-h-[calc(100dvh-2rem)] tw-w-[380px] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
+    <div className="tw-flex tw-h-[560px] tw-max-h-[calc(100dvh-8rem)] tw-w-[380px] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-[0_24px_80px_rgba(0,0,0,0.55)]">
       <QuickDmPanelHeader
         hasBackUnreadIndicator={hasUnreadOutsideCurrentChat}
         locale={locale}
@@ -164,7 +167,7 @@ export const QuickDmChat = ({
         onClose={onClose}
         onOpenAll={onOpenAll}
       />
-      <div className="tw-min-h-0 tw-flex-1">{chatContent}</div>
+      <div className="tw-min-h-0 tw-flex-1 tw-bg-iron-950">{chatContent}</div>
     </div>
   );
 };

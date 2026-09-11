@@ -1,6 +1,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWave } from "@/hooks/useWave";
+import { useWaveSubmissionButtonLabelOverride } from "@/hooks/waves/useWaveMetadata";
 import React from "react";
 import { getWaveDropEligibility } from "../dropEligibility";
 import { WaveLeaderboardCurationEmptyState } from "./WaveLeaderboardCurationEmptyState";
@@ -19,6 +20,10 @@ export const WaveLeaderboardEmptyState: React.FC<
     React.useContext(AuthContext);
   const { isMemesWave, isCurationWave, isQuorumWave, participation } =
     useWave(wave);
+  const customCreateDropLabel = useWaveSubmissionButtonLabelOverride({
+    enabled: Boolean(!isMemesWave && wave.id),
+    waveId: wave.id,
+  });
   const isLoggedIn = Boolean(connectedProfile?.handle);
   const { canCreateDrop, restrictionMessage, restrictionLink } =
     getWaveDropEligibility({
@@ -37,6 +42,7 @@ export const WaveLeaderboardEmptyState: React.FC<
       <WaveLeaderboardCurationEmptyState
         onCreateDrop={onCreateDrop}
         canCreateDrop={canCreateDrop}
+        createDropLabel={customCreateDropLabel ?? undefined}
         dropRestrictionMessage={restrictionMessage}
         dropRestrictionLink={restrictionLink}
       />
@@ -48,7 +54,9 @@ export const WaveLeaderboardEmptyState: React.FC<
       onCreateDrop={onCreateDrop}
       canCreateDrop={canCreateDrop}
       dropRestrictionMessage={restrictionMessage}
-      createDropLabel={isQuorumWave ? "Create Proposal" : undefined}
+      createDropLabel={
+        customCreateDropLabel ?? (isQuorumWave ? "Create Proposal" : undefined)
+      }
       emptyTitle={isQuorumWave ? "No proposals to show" : undefined}
       emptyDescription={
         isQuorumWave

@@ -1,10 +1,12 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import Button from "@/components/utils/button/Button";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
+import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import type { ApiChangeWaveRepRating } from "@/generated/models/ApiChangeWaveRepRating";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import {
@@ -18,9 +20,7 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useWaveRepAllocation } from "@/hooks/useWaveRepAllocation";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useContext, useEffect, useId, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 
 const WAVE_REP_CATEGORY_PATTERN = /^[\p{L}\p{N}?!,.'() ]{1,100}$/u;
 const CATEGORY_SETTLE_DELAY_MS = 350;
@@ -39,13 +39,10 @@ export default function WaveRepRatingModal({
 }) {
   const queryClient = useQueryClient();
   const { activeProfileProxy, requestAuth, setToast } = useContext(AuthContext);
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const dialogTitleId = useId();
+  const contentRef = useRef<HTMLDivElement>(null);
   const categoryInputId = useId();
   const categoryErrorId = useId();
   const amountInputId = useId();
-  const [isMounted, setIsMounted] = useState(false);
   const [category, setCategory] = useState(() => getInitialCategory(wave));
   const trimmedCategory = category.trim();
   const debouncedCategory = useDebouncedValue(
@@ -62,24 +59,7 @@ export default function WaveRepRatingModal({
       waveId: wave.id,
       category: settledCategory || null,
     });
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isMounted) {
-      return;
-    }
-    const dialog = dialogRef.current;
-    if (!dialog) {
-      return;
-    }
-    if (!dialog.open) {
-      dialog.showModal();
-    }
-    inputRef.current?.focus();
-  }, [isMounted]);
+  useKeyboardFocusScroll(contentRef);
 
   useEffect(() => {
     if (WAVE_REP_CATEGORY_PATTERN.test(debouncedCategory)) {
@@ -243,41 +223,26 @@ export default function WaveRepRatingModal({
     await saveRating(0);
   };
 
-  if (!isMounted || globalThis.document === undefined) {
-    return null;
-  }
-
-  return createPortal(
-    <dialog
-      ref={dialogRef}
-      aria-labelledby={dialogTitleId}
-      onCancel={onClose}
+  return (
+    <MobileWrapperDialog
+      title={t(WAVE_REP_MODAL_LOCALE, "waves.rep.modal.title")}
+      isOpen
       onClose={onClose}
-      className="tailwind-scope tw-w-[min(100%-1rem,28rem)] tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0 tw-text-left tw-text-iron-100 tw-shadow-xl backdrop:tw-bg-gray-600/50 backdrop:tw-backdrop-blur-[1px]"
+      closeLabel={t(
+        WAVE_REP_MODAL_LOCALE,
+        "waves.rep.modal.closeAriaLabel"
+      )}
+      tabletModal
+      showScrollbar
+      enableDragToClose
+      focusTitleOnOpen
+      maxWidthClass="md:tw-max-w-md"
+      headerClassName="tw-mb-4 tw-pt-2 md:tw-pt-0"
     >
-      <div className="tw-p-6">
-        <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
-          <div className="tw-min-w-0">
-            <h2
-              id={dialogTitleId}
-              className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-white"
-            >
-              Rate Wave REP
-            </h2>
-            <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-500">
-              {wave.name}
-            </p>
-          </div>
-          <button
-            type="button"
-            aria-label="Close Wave REP dialog"
-            onClick={onClose}
-            className="tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition hover:tw-bg-iron-800 hover:tw-text-white"
-          >
-            <XMarkIcon className="tw-size-5" aria-hidden="true" />
-          </button>
-        </div>
-
+      <div ref={contentRef} className="tw-px-4 sm:tw-px-6">
+        <p className="tw-mb-0 tw-break-words tw-text-sm tw-text-iron-500">
+          {wave.name}
+        </p>
         <form onSubmit={onSubmit} className="tw-mt-5">
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1.5 tw-text-xs tw-font-medium tw-text-iron-500">
             <span>
@@ -303,7 +268,6 @@ export default function WaveRepRatingModal({
               Category
             </label>
             <input
-              ref={inputRef}
               id={categoryInputId}
               name="wave-rep-category"
               type="text"
@@ -365,50 +329,45 @@ export default function WaveRepRatingModal({
           </div>
 
           <div className="tw-mt-8 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row-reverse">
-            <button
+            <Button
               type="submit"
               disabled={isSaveDisabled}
-              aria-busy={mutating}
+              loading={mutating}
               aria-label={mutating ? "Saving Wave REP" : "Save Wave REP"}
-              className={`${
-                isSaveDisabled
-                  ? "tw-cursor-not-allowed tw-opacity-50"
-                  : "tw-cursor-pointer hover:tw-border-primary-600 hover:tw-bg-primary-600"
-              } tw-flex tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition sm:tw-w-auto`}
+              variant="action"
+              size="lg"
+              fullWidth
+              className="sm:tw-w-auto"
             >
-              {mutating ? (
-                <span className="tw-w-10">
-                  <CircleLoader />
-                  <span className="tw-sr-only">Saving Wave REP</span>
-                </span>
-              ) : (
-                "Save"
-              )}
-            </button>
+              Save
+            </Button>
             {canRemoveRating && (
-              <button
-                type="button"
+              <Button
                 onClick={onRemove}
                 aria-label={t(
                   WAVE_REP_MODAL_LOCALE,
                   "waves.rep.modal.removeAriaLabel"
                 )}
-                className="tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-red/40 tw-bg-red/10 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-red tw-transition hover:tw-border-red/70 hover:tw-bg-red/15 sm:tw-w-auto"
+                variant="destructive"
+                size="lg"
+                fullWidth
+                className="sm:tw-w-auto"
               >
                 {t(WAVE_REP_MODAL_LOCALE, "waves.rep.modal.remove")}
-              </button>
+              </Button>
             )}
-            <button
-              type="button"
+            <Button
               onClick={onClose}
-              className="tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition hover:tw-bg-iron-800 sm:tw-w-auto"
+              variant="secondary"
+              size="lg"
+              fullWidth
+              className="sm:tw-w-auto"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </form>
       </div>
-    </dialog>,
-    document.body
+    </MobileWrapperDialog>
   );
 }

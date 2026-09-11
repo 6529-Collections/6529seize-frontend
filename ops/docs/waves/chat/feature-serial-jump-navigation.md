@@ -24,7 +24,7 @@ as one-time setup values and removes them from the URL.
   - `/waves/{waveId}?serialNo={serialNo}`
   - `/messages/{waveId}?serialNo={serialNo}`
 - Select a result from thread `Search messages`.
-- Select a result from header search `In this Wave`.
+- Select a result from the Wave's `Search messages` view.
 - Use jump controls that target a serial:
   - Reply preview click
   - Quote-card click

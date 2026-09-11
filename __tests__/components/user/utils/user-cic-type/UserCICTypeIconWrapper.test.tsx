@@ -24,6 +24,10 @@ describe('UserCICTypeIconWrapper', () => {
   it('renders icon with react-tooltip', () => {
     const profile = { cic: 0, id: 'test-id' } as ApiIdentity;
     render(<UserCICTypeIconWrapper profile={profile} />);
+
+    expect(
+      screen.getByRole('button', { name: 'Network ID Check details' })
+    ).toHaveClass('tw-size-5');
     
     // Check that the icon is rendered
     expect(screen.getByTestId('icon')).toBeInTheDocument();

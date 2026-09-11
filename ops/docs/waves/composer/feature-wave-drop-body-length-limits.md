@@ -2,10 +2,12 @@
 
 ## Overview
 
-The standard thread composer enforces three text-length rules:
+The standard thread composer enforces four text-length rules:
 
-- Body input is capped at `25,000` characters.
-- Storm add is blocked when `existing storm text + current draft text >= 24,000`.
+- Each part is capped at `25,000` UTF-16 code units.
+- Each part is also capped at `65,535` UTF-8 bytes so it fits the persisted
+  text field for every supported script and emoji combination.
+- A Storm may contain up to `50,000` UTF-16 code units across all of its parts.
 - When a storm already has at least one part, submit is blocked if current
   draft text is over `240` characters.
 
@@ -20,26 +22,30 @@ These rules apply to non-curation thread composer flows in both `Post` and
 
 ## Entry Points
 
-1. Open a wave or DM thread composer and type in the body input.
-2. Use the storm button (`Break into storm` / `Add a part`) to split content.
-3. Use submit (`Post` / `Drop`) or desktop `Enter` submit behavior.
+1. Open a wave or DM thread composer and select the Storm action.
+2. Write the first part and use the primary `Add part` action to save it.
+3. Continue adding later parts, then use `Post storm` from an
+   empty current editor to publish the completed storm.
 
 ## Rules in Practice
 
-- A single-part post/drop can submit above `240` chars, up to `25,000`.
-- Storm add uses the `24,000` total-text rule, not the `240` submit rule.
+- A single-part post/drop can submit above `240` UTF-16 units, up to the
+  per-part unit and byte limits.
+- Storm add uses the `50,000` total-text rule, not the `240` submit rule.
 - With existing storm parts, submit can only finalize when current draft text is
   `240` chars or less.
-- When submit is enabled and existing storm parts plus current draft content are
-  present, submit adds the current draft as another part (it does not finalize
-  the storm).
+- When current content is eligible, the primary action is `Add part`; it saves
+  the current draft instead of publishing the storm.
 - To finalize and send the storm, submit from an empty current draft.
+- Blank or whitespace-only text is not saved as a storm part. Media-only parts
+  remain valid.
 
 ## Common Scenarios
 
-- A `24,500`-char draft can submit as one part, but cannot be split into storm.
-- In storm mode, a `500`-char draft can still be added with the storm button
-  (if total text stays under `24,000`), but submit stays blocked until the
+- Two `25,000`-unit ASCII parts can form one Storm at the total limit. Text
+  that uses more UTF-8 bytes per unit may reach the per-part byte limit first.
+- In storm mode, a `500`-character draft can still be added with `Add part`
+  (if total text stays at or below `50,000`), but submit stays blocked until the
   draft is shortened or cleared.
 - In `Drop` mode, required media/metadata can still block submit even when
   length checks pass.
@@ -69,6 +75,7 @@ These rules apply to non-curation thread composer flows in both `Post` and
 ## Related Pages
 
 - [Wave Composer Index](README.md)
+- [Storm Composer](feature-storm-composer.md)
 - [Waves Index](../README.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
 - [Wave Drop Composer Metadata Submissions](feature-metadata-submissions.md)

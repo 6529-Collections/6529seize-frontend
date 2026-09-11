@@ -15,15 +15,17 @@ and mobile app layouts.
 
 ## Route Coverage
 
-- Web/sidebar primary section switching: `NFTs` (`/the-memes`), `Waves`
-  (`/waves`), `DMs` (`/messages`), and `About` (`/about`), plus gated
-  `Drop Forge` (`/drop-forge`) when the connected wallet can access it. Home
-  remains available through the 6529 logo link to `/`.
+- Web/sidebar primary section switching: `NFTs` (`/the-memes`), `Museum`
+  (`/museum/network`), `Waves` (`/waves`), `DMs` (`/messages`), `Join 6529`
+  (`/join-6529`), and `About` (`/about`), plus gated `Drop Forge`
+  (`/drop-forge`) when the connected wallet can access it. Home remains
+  available through the 6529 logo link to `/`.
 - App bottom section switching: `/discover`, `/waves`, `/messages`, `/`,
   `/network`, `/the-memes`, and `/notifications`.
 - Secondary jumps: `Discover Waves` (`/discover`), `/network/*`,
   `/xtdh` (`xTDH Allocations Dashboard`), `/nft-activity`, `/meme-calendar`,
-  collection routes, tools routes, and about routes grouped under `About 6529`,
+  collection routes, tools routes, and about routes including `6529 Apps`
+  (`/about/6529-apps`) grouped under `About 6529`,
   `Collections & Minting`, `Network & Reputation`, `Delegation & Wallets`,
   `Data & Developer Tools`, and `Legal`.
 
@@ -38,8 +40,8 @@ and mobile app layouts.
   `Collections`, and `Notifications`.
 - [App Sidebar Menu](feature-app-sidebar-menu.md): app drawer with sidebar
   primary concepts, a connected profile-avatar shortcut, gated `Drop Forge`
-  access when available, grouped secondary links under `NFTs`, `Waves`, and
-  `About`, and footer account actions.
+  access when available, a direct `Museum` row below `NFTs`, grouped secondary
+  links under `NFTs`, `Waves`, and `About`, and footer account actions.
 
 ### Shared Shell Controls
 
@@ -51,12 +53,15 @@ and mobile app layouts.
   history-aware back behavior.
 - [Wallet and Account Controls](feature-wallet-account-controls.md):
   connect, disconnect, share, and proxy/account actions.
-- [Share Modal](feature-share-modal.md): desktop-web QR/deep-link sharing for
-  current routes, authenticated connection handoff, and 6529 app targets.
+- [Page Sharing and Device Connection](feature-share-modal.md): page sharing
+  across desktop web, mobile web, and the native app, plus authenticated device
+  connection.
 - [Internal Link Navigation](feature-internal-link-navigation.md): internal
   route links, hash anchors, and drop-content link behavior.
 - [Join 6529 Journey](feature-join-6529-journey.md): state-aware setup and
-  acquisition guide at `/join`.
+  acquisition guide at `/join-6529`.
+- [6529 Apps Page](feature-6529-apps-page.md): official 6529 Mobile and 6529
+  Desktop downloads at `/about/6529-apps`.
 
 ### Mobile-Specific Behavior
 

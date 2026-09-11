@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
  * 6529.io API
- * This is the API interface description. Brief terminology overview and an authentication example can be found at <a href=\"https://6529.io/about/api\">https://6529.io/about/api</a>.
+ * JSON REST API for 6529.io. New here? A terminology overview and a step-by-step authentication walkthrough (guides &amp; auth) live at <a href=\"https://6529.io/tools/api\">https://6529.io/tools/api</a>. The raw machine-readable spec is downloadable at <a href=\"/openapi.yaml\">/openapi.yaml</a> and <a href=\"/openapi.json\">/openapi.json</a>.
  *
  * OpenAPI spec version: 1.0.0
  * 
@@ -20,6 +20,10 @@ export class ApiWaveOverviewContextProfileContext {
     'next_drop_allowed'?: number;
     'unread_drops': number;
     'first_unread_drop_serial_no'?: number;
+    /**
+    * Unread drops across all visible subwaves, independent of whether the authenticated profile follows each subwave.
+    */
+    'subwave_unread_drops'?: number;
     'followed_subwaves_count'?: number;
     'latest_followed_subwave_activity_timestamp'?: number;
     'hidden_followed_subwave_unread_drops'?: number;
@@ -64,6 +68,12 @@ export class ApiWaveOverviewContextProfileContext {
         {
             "name": "first_unread_drop_serial_no",
             "baseName": "first_unread_drop_serial_no",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "subwave_unread_drops",
+            "baseName": "subwave_unread_drops",
             "type": "number",
             "format": "int64"
         },

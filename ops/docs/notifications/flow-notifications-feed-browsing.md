@@ -27,23 +27,30 @@ load older notifications.
 3. Wait for `Loading notifications...`.
 4. When the feed opens, notifications are marked read for the active profile.
 5. Browse newest rows.
-6. Filter with chips:
-   `All`, `Mentions`, `Replies`, `Identity`, `Reactions`, `Invites`.
-7. If chips overflow, use the left/right chip scroll controls.
-8. Open rows to inspect drop context or actor activity.
-9. For grouped `New reactions` rows, review
+6. Activate the filter control. Mobile-layout viewports open the
+   `Filter notifications` bottom sheet; wider viewports open an anchored
+   dropdown.
+7. Select or deselect any combination of `Mentions`, `Replies`, `Identity`,
+   `Reactions`, `Invites`, and `Subscriptions`. Changes apply immediately, and
+   the mobile sheet remains open while selections change.
+8. Choose `All` to clear category filters and show the complete feed. The
+   trigger shows `All`, the single selected category, or the selected count.
+9. Close the mobile sheet with its close button, Escape, or the backdrop.
+   Reopening it preserves the current selection.
+10. Open rows to inspect drop context or actor activity.
+11. For grouped `New reactions` rows, review
    reactors, reaction badges, and the related drop preview.
-10. Use `Follow All` when present, or see
+12. Use `Follow All` when present, or see
    `Following All` when everyone in the group is already followed.
-11. Open drop content to route into wave or DM context with serial context.
-12. For grouped reactions, opening the related drop marks grouped
+13. Open drop content to route into wave or DM context with serial context.
+14. For grouped reactions, opening the related drop marks grouped
     notification IDs as read.
-13. Use `Show full drop` for long inline previews.
-14. Priority alerts (`sent a priority alert 🚨`) can be:
+15. Use `Show full drop` for long inline previews.
+16. Priority alerts (`sent a priority alert 🚨`) can be:
     text-only, or text plus one drop preview.
-15. Scroll upward to load older pages. `Loading older notifications...` and a
+17. Scroll upward to load older pages. `Loading older notifications...` and a
     top progress bar appear while current rows stay visible.
-16. If no rows are available, use `Explore Waves` or `Create a Wave` from the
+18. If no rows are available, use `Explore Waves` or `Create a Wave` from the
     empty state.
 
 ## Edge Cases
@@ -57,6 +64,8 @@ load older notifications.
   indicators refresh for the active account.
 - Unknown causes render with a generic row so feed browsing continues.
 - Priority alerts without related drops stay text-only.
+- Resizing across the mobile/desktop layout boundary dismisses an open filter
+  surface and returns focus to the trigger.
 
 ## Failure and Recovery
 
@@ -72,7 +81,8 @@ load older notifications.
 
 - Feed access requires wallet + profile readiness.
 - Notifications are blocked in proxy profile mode until you switch back.
-- Filters only change `/notifications` results.
+- Filters only change `/notifications` results and do not change notification
+  read state, paging, or navigation behavior.
 
 ## Related Pages
 

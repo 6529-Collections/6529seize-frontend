@@ -12,25 +12,33 @@ export default function CreateWaveActions({
   config,
   step,
   submitting,
+  nextDisabled = false,
   setStep,
   onComplete,
 }: {
   readonly config: CreateWaveConfig;
   readonly step: CreateWaveStep;
   readonly submitting: boolean;
+  readonly nextDisabled?: boolean | undefined;
   readonly setStep: (
     step: CreateWaveStep,
     direction: "forward" | "backward"
-  ) => void;
+  ) => Promise<void>;
   readonly onComplete: () => Promise<void>;
 }) {
+  const ongoingRanking = config.dates?.ongoingRanking ?? false;
+
   const onNextStep = (): void => {
+    if (nextDisabled) {
+      return;
+    }
     const nextStep = getCreateWaveNextStep({
       step,
       waveType: config.overview.type,
+      ongoingRanking,
     });
     if (nextStep !== null) {
-      setStep(nextStep, "forward");
+      void setStep(nextStep, "forward");
       return;
     }
     void onComplete();
@@ -39,21 +47,25 @@ export default function CreateWaveActions({
   const previousStep = getCreateWavePreviousStep({
     step,
     waveType: config.overview.type,
+    ongoingRanking,
   });
 
   return (
     <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
-      <div className="-tw-ml-6">
+      <div>
         {previousStep !== null && (
           <CreateWaveBackStep
-            onPreviousStep={() => setStep(previousStep, "backward")}
+            disabled={submitting}
+            onPreviousStep={() => {
+              void setStep(previousStep, "backward");
+            }}
           />
         )}
       </div>
       <div className="tw-ml-auto">
         <CreateWaveNextStep
           onClick={onNextStep}
-          disabled={false}
+          disabled={nextDisabled}
           step={step}
           submitting={submitting}
         />

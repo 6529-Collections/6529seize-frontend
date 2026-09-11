@@ -1,5 +1,6 @@
 import React from "react";
-import { act, render, renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import type { QueryClient } from "@tanstack/react-query";
 import {
   ViewProvider,
   useViewContext,
@@ -10,6 +11,11 @@ import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import {
+  createTestQueryClient,
+  renderWithQueryClient,
+} from "@/__tests__/utils/reactQuery";
+import { getWaveQueryKey } from "@/services/api/wave-query";
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -36,6 +42,7 @@ const commonApiFetchMock = commonApiFetch as jest.Mock;
 const useDeviceInfoMock = useDeviceInfo as jest.Mock;
 let activeWaveId: string | null = null;
 let capturedContext: ViewContextValue | null = null;
+let queryClient: QueryClient;
 const waveTypes = new Map<string, boolean>();
 
 type ViewContextValue = ReturnType<typeof useViewContext>;
@@ -111,14 +118,15 @@ const setDeviceInfo = ({
 };
 
 const renderCapturedProvider = () =>
-  render(
+  renderWithQueryClient(
     <ViewProvider>
       <ContextCapture />
-    </ViewProvider>
+    </ViewProvider>,
+    { queryClient }
   );
 
 const setActiveWave = async (
-  rerender: ReturnType<typeof render>["rerender"],
+  rerender: ReturnType<typeof renderWithQueryClient>["rerender"],
   waveId: string | null
 ) => {
   activeWaveId = waveId;
@@ -134,9 +142,12 @@ const setActiveWave = async (
 
   if (waveId) {
     await waitFor(() =>
-      expect(commonApiFetchMock).toHaveBeenCalledWith({
-        endpoint: `waves/${waveId}`,
-      })
+      expect(commonApiFetchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: `waves/${waveId}`,
+          signal: expect.any(AbortSignal),
+        })
+      )
     );
     await act(async () => {
       await Promise.resolve();
@@ -148,6 +159,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   activeWaveId = null;
   capturedContext = null;
+  queryClient = createTestQueryClient();
   waveTypes.clear();
   setDeviceInfo();
   useRouterMock.mockReturnValue({
@@ -175,7 +187,7 @@ describe("ViewContext", () => {
   });
 
   it("handles route navigation", () => {
-    render(
+    renderWithQueryClient(
       <ViewProvider>
         <TestNavComponent
           item={
@@ -187,13 +199,14 @@ describe("ViewContext", () => {
             } as NavItem
           }
         />
-      </ViewProvider>
+      </ViewProvider>,
+      { queryClient }
     );
     expect(push).toHaveBeenCalledWith("/");
   });
 
   it("navigates to home (latest) when Home is clicked", () => {
-    render(
+    renderWithQueryClient(
       <ViewProvider>
         <TestNavComponent
           item={
@@ -205,13 +218,14 @@ describe("ViewContext", () => {
             } as NavItem
           }
         />
-      </ViewProvider>
+      </ViewProvider>,
+      { queryClient }
     );
     expect(push).toHaveBeenCalledWith("/");
   });
 
   it("navigates to waves view when no last visited wave", () => {
-    render(
+    renderWithQueryClient(
       <ViewProvider>
         <TestNavComponent
           item={
@@ -224,7 +238,8 @@ describe("ViewContext", () => {
           }
           afterNav={({ hardBack }) => hardBack("waves")}
         />
-      </ViewProvider>
+      </ViewProvider>,
+      { queryClient }
     );
     expect(push).toHaveBeenCalledWith("/waves");
     expect(push).toHaveBeenLastCalledWith("/waves");
@@ -240,6 +255,49 @@ describe("ViewContext", () => {
     expect(prefetch).toHaveBeenCalledWith("/messages");
     expect(prefetch).not.toHaveBeenCalledWith("/?view=waves");
     expect(prefetch).not.toHaveBeenCalledWith("/?view=messages");
+  });
+
+  it("shares an in-flight Wave metadata query with navigation classification", async () => {
+    const waveId = "shared-dm";
+    const wave = makeWave(waveId, true);
+    let resolveWave: (value: ApiWave) => void = () => {};
+    const pendingWave = new Promise<ApiWave>((resolve) => {
+      resolveWave = resolve;
+    });
+    activeWaveId = waveId;
+    commonApiFetchMock.mockReturnValueOnce(pendingWave);
+
+    const prefetchPromise = queryClient.prefetchQuery({
+      queryKey: getWaveQueryKey(waveId),
+      queryFn: async ({ signal }) =>
+        await commonApiFetch<ApiWave>({
+          endpoint: `waves/${waveId}`,
+          signal,
+        }),
+      staleTime: 60000,
+    });
+
+    await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalledTimes(1));
+    const { rerender } = renderCapturedProvider();
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveWave(wave);
+      await prefetchPromise;
+    });
+
+    await setActiveWave(rerender, null);
+    await waitFor(() =>
+      expect(getCapturedContext().getNavHref(messagesItem)).toBe(
+        `/messages/${waveId}`
+      )
+    );
+    expect(queryClient.getQueryData(getWaveQueryKey(waveId))).toBe(wave);
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("from a DM, clicking Waves restores the last normal wave", async () => {

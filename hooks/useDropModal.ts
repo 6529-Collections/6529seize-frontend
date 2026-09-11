@@ -2,7 +2,6 @@ import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useCallback } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import {
   DROP_DETAIL_STALE_TIME_MS,
@@ -35,7 +34,6 @@ export function useDropModal() {
   const onDropClose = useCallback(() => {
     if (dropId) {
       beginClosingDrop(dropId);
-      markDropCloseNavigation();
     }
     const params = new URLSearchParams(searchParams.toString() || "");
     params.delete("drop");

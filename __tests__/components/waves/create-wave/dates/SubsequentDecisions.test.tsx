@@ -1,21 +1,29 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import SubsequentDecisions from '@/components/waves/create-wave/dates/SubsequentDecisions';
-import { Period } from '@/helpers/Types';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import SubsequentDecisions from "@/components/waves/create-wave/dates/SubsequentDecisions";
+import { Period } from "@/helpers/Types";
 
-jest.mock('@/components/waves/create-wave/dates/DecisionPointDropdown', () => ({
+jest.mock("@/components/waves/create-wave/dates/DecisionPointDropdown", () => ({
   __esModule: true,
-  default: ({ onChange }: any) => <button data-testid="dropdown" onClick={() => onChange(Period.HOURS)}>select</button>,
+  default: ({ onChange }: any) => (
+    <button data-testid="dropdown" onClick={() => onChange(Period.HOURS)}>
+      select
+    </button>
+  ),
 }));
 
-jest.mock('@/components/utils/button/PrimaryButton', () => (props: any) => (
-  <button onClick={props.onClicked} disabled={props.disabled}>{props.children}</button>
+jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
+  <button onClick={props.onClicked} disabled={props.disabled}>
+    {props.children}
+  </button>
 ));
 
-describe('SubsequentDecisions', () => {
-  it('adds and removes additional decision times', async () => {
+describe("SubsequentDecisions", () => {
+  it("adds and removes additional decision times", async () => {
     const decisions: number[] = [];
-    const setSubsequentDecisions = jest.fn((vals) => decisions.splice(0, decisions.length, ...vals));
+    const setSubsequentDecisions = jest.fn((vals) =>
+      decisions.splice(0, decisions.length, ...vals)
+    );
     render(
       <SubsequentDecisions
         firstDecisionTime={0}
@@ -24,12 +32,29 @@ describe('SubsequentDecisions', () => {
       />
     );
 
-    const input = screen.getByRole('spinbutton');
+    const input = screen.getByRole("spinbutton");
     await userEvent.clear(input);
-    await userEvent.type(input, '2');
-    await userEvent.click(screen.getByTestId('dropdown'));
-    await userEvent.click(screen.getByRole('button', { name: /add to timeline/i }));
+    await userEvent.type(input, "2");
+    await userEvent.click(screen.getByTestId("dropdown"));
+    await userEvent.click(
+      screen.getByRole("button", { name: /add to timeline/i })
+    );
 
     expect(setSubsequentDecisions).toHaveBeenCalledWith([3600000 * 2]);
+  });
+
+  it("preserves non-day intervals and exposes the remove action on focus", () => {
+    render(
+      <SubsequentDecisions
+        firstDecisionTime={Date.UTC(2026, 0, 1)}
+        subsequentDecisions={[36 * 60 * 60 * 1000]}
+        setSubsequentDecisions={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("+36h")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /remove announcement #2/i })
+    ).toHaveClass("desktop-hover:focus-visible:tw-opacity-100");
   });
 });

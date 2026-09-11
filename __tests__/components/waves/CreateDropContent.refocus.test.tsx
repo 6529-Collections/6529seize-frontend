@@ -15,6 +15,7 @@ const mockSetDrop = jest.fn();
 const mockSetIsStormMode = jest.fn();
 const mockOnDropModeChange = jest.fn();
 const mockAddOptimisticDrop = jest.fn();
+let mockIsApp = false;
 
 jest.mock("next/dynamic", () => () => () => null);
 
@@ -52,6 +53,8 @@ jest.mock("framer-motion", () => {
     m: {
       div: MotionDiv,
     },
+    useIsPresent: () => true,
+    useReducedMotion: () => false,
   };
 });
 
@@ -64,7 +67,7 @@ jest.mock("@/contexts/EditingDropContext", () => ({
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: jest.fn(() => ({ isApp: false })),
+  default: jest.fn(() => ({ isApp: mockIsApp })),
 }));
 
 jest.mock("@/components/waves/CreateDropReplyingWrapper", () => () => (
@@ -80,6 +83,10 @@ jest.mock("@/components/waves/CreateDropInput", () => {
     default: ReactLib.forwardRef((props: any, ref: any) => {
       ReactLib.useImperativeHandle(ref, () => ({
         clearEditorState: mockInputClear,
+        expandMentionAliases: async () => ({
+          completed: true,
+          editorState: undefined,
+        }),
         focus: mockInputFocus,
       }));
       return (
@@ -91,6 +98,12 @@ jest.mock("@/components/waves/CreateDropInput", () => {
     }),
   };
 });
+jest.mock(
+  "@/components/waves/create-drop-content/exportComposerMarkdown",
+  () => ({
+    exportComposerMarkdown: jest.fn(() => ""),
+  })
+);
 jest.mock("@/components/waves/CreateDropContentRequirements", () => () => (
   <div data-testid="requirements" />
 ));
@@ -263,6 +276,8 @@ describe("CreateDropContent chat refocus", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRequestAuth.mockReset().mockResolvedValue({ success: true });
+    mockIsApp = false;
     globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
       callback(0);
       return 1;
@@ -299,6 +314,68 @@ describe("CreateDropContent chat refocus", () => {
       throw new Error("Expected clear and focus to be called");
     }
     expect(clearOrder).toBeLessThan(focusOrder);
+  });
+
+  describe.each([
+    { surface: "web", isApp: false },
+    { surface: "native app", isApp: true },
+  ])("authentication recovery in $surface", ({ isApp }) => {
+    it.each([
+      {
+        failure: "rejects with Safari's Load failed error",
+        authenticate: async () => {
+          throw new TypeError("Load failed");
+        },
+        expectedToasts: [
+          [
+            {
+              type: "error",
+              title: "Couldn't submit this drop.",
+              description: "Please try again.",
+              details: "Load failed.",
+            },
+          ],
+        ],
+      },
+      {
+        failure: "returns an unsuccessful result",
+        authenticate: async () => ({ success: false }),
+        expectedToasts: [],
+      },
+    ])(
+      "preserves the draft and allows retry when authentication $failure",
+      async ({ authenticate, expectedToasts }) => {
+        mockIsApp = isApp;
+        mockRequestAuth.mockImplementationOnce(authenticate);
+        const { submitDrop } = renderSubject();
+        const submitButton = screen.getByRole("button", { name: "submit" });
+
+        await userEvent.click(submitButton);
+
+        await waitFor(() => expect(submitButton).toBeEnabled());
+        expect(mockRequestAuth).toHaveBeenCalledTimes(1);
+        expect(submitDrop).not.toHaveBeenCalled();
+        expect(mockInputClear).not.toHaveBeenCalled();
+        expect(mockSetDrop).not.toHaveBeenCalled();
+        expect(mockInputFocus).not.toHaveBeenCalled();
+        expect(mockSetToast.mock.calls).toEqual(expectedToasts);
+
+        await userEvent.click(submitButton);
+
+        await waitFor(() => expect(submitDrop).toHaveBeenCalledTimes(1));
+        expect(mockRequestAuth).toHaveBeenCalledTimes(2);
+        expect(submitDrop).toHaveBeenCalledWith(
+          expect.objectContaining({
+            drop: expect.objectContaining({
+              drop_type: ApiDropType.Chat,
+              parts: [expect.objectContaining({ content: "queued part" })],
+            }),
+          })
+        );
+        await waitFor(() => expect(mockInputFocus).toHaveBeenCalledTimes(1));
+        expect(mockInputClear).toHaveBeenCalled();
+      }
+    );
   });
 
   it("does not submit, reset, or focus while slow-mode chat is blocked", async () => {

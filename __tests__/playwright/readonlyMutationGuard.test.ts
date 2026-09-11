@@ -125,7 +125,9 @@ describe("Playwright read-only mutation guard", () => {
   it("allows first-party read-only alchemy proxy POST lookups", () => {
     for (const url of [
       "https://api.6529.io/alchemy-proxy/contracts",
+      "https://api.6529.io/alchemy-proxy/token-metadata",
       "https://api.staging.6529.io/alchemy-proxy/contracts",
+      "https://api.staging.6529.io/alchemy-proxy/token-metadata",
     ]) {
       expect(
         decideReadonlyRequest({
@@ -171,6 +173,8 @@ describe("Playwright read-only mutation guard", () => {
       "https://6529.io/api/open-graph",
       "https://6529.io/api/twitter/preview",
       "https://6529.io/api/alchemy/contracts",
+      "https://6529.io/api/alchemy/token-metadata",
+      "https://6529.io/api/github-preview",
     ]) {
       expect(
         decideReadonlyRequest({
@@ -621,6 +625,8 @@ describe("Playwright read-only mutation guard", () => {
       "https://eth.llamarpc.com/",
       "https://cloudflare-eth.com/",
       "https://ethereum-rpc.publicnode.com/",
+      "https://eth.drpc.org/",
+      "https://rpc.flashbots.net/",
     ]) {
       expect(
         decideReadonlyRequest({
@@ -638,22 +644,24 @@ describe("Playwright read-only mutation guard", () => {
         reason: "read-only-ethereum-rpc",
       });
 
-      expect(
-        decideReadonlyRequest({
-          baseURL: "https://6529.io",
-          method: "POST",
-          postData: JSON.stringify({
-            id: 1,
-            jsonrpc: "2.0",
-            method: "eth_sendRawTransaction",
-          }),
-          readonly: true,
-          url,
-        })
-      ).toMatchObject({
-        action: "block",
-        reason: "unsafe-ethereum-rpc",
-      });
+      for (const method of ["eth_sendRawTransaction", "eth_sendTransaction"]) {
+        expect(
+          decideReadonlyRequest({
+            baseURL: "https://6529.io",
+            method: "POST",
+            postData: JSON.stringify({
+              id: 1,
+              jsonrpc: "2.0",
+              method,
+            }),
+            readonly: true,
+            url,
+          })
+        ).toMatchObject({
+          action: "block",
+          reason: "unsafe-ethereum-rpc",
+        });
+      }
     }
 
     expect(

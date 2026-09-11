@@ -1,0 +1,431 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock#function:0xd0cab440",
+          "declaringDefinitionId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes",
+              "name": "",
+              "type": "bytes"
+            }
+          ],
+          "name": "isAuthorizedRecordWriter",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xd0cab440",
+          "signature": "isAuthorizedRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock#function:0x651f7d26",
+          "declaringDefinitionId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamRecordFamilyAuthorityProvider",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x651f7d26",
+          "signature": "isStreamRecordFamilyAuthorityProvider()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock#function:0x711bf9b2",
+          "declaringDefinitionId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "authorized",
+              "type": "bool"
+            }
+          ],
+          "name": "setAuthorized",
+          "outputs": [],
+          "selector": "0x711bf9b2",
+          "signature": "setAuthorized(address,bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock#function:0x71f66e75",
+          "declaringDefinitionId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "malformed",
+              "type": "bool"
+            }
+          ],
+          "name": "setMalformed",
+          "outputs": [],
+          "selector": "0x71f66e75",
+          "signature": "setMalformed(bool)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "isStreamRecordFamilyAuthorityProvider()",
+          "displaySignature": "isStreamRecordFamilyAuthorityProvider()",
+          "functionKind": "function",
+          "id": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock#function:0x651f7d26",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlJlY29yZEZhbWlseUF1dGhvcml0eVByb3ZpZGVyTW9jayNmdW5jdGlvbjoweDY1MWY3ZDI2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamRecordFamilyAuthorityProvider",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 106,
+            "byteStart": 539,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L15-L17",
+            "lineEnd": 17,
+            "lineStart": 15,
+            "snippetSha256": "sha256:8f5f0c750715128d4740729b7430c0d0523484ccf2aebaeb53f858912edd5a2e",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": "0x651f7d26",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setAuthorized(address,bool)",
+          "displaySignature": "setAuthorized(address,bool)",
+          "functionKind": "function",
+          "id": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock#function:0x711bf9b2",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "authorized",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlJlY29yZEZhbWlseUF1dGhvcml0eVByb3ZpZGVyTW9jayNmdW5jdGlvbjoweDcxMWJmOWIy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setAuthorized",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 112,
+            "byteStart": 651,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L19-L21",
+            "lineEnd": 21,
+            "lineStart": 19,
+            "snippetSha256": "sha256:6c3ac0c553ef54744f139aee52f6e91d2d1a589feb358bf11721cad9d0056606",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": "0x711bf9b2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setMalformed(bool)",
+          "displaySignature": "setMalformed(bool)",
+          "functionKind": "function",
+          "id": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock#function:0x71f66e75",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "malformed",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlJlY29yZEZhbWlseUF1dGhvcml0eVByb3ZpZGVyTW9jayNmdW5jdGlvbjoweDcxZjY2ZTc1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setMalformed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 86,
+            "byteStart": 769,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L23-L25",
+            "lineEnd": 25,
+            "lineStart": 23,
+            "snippetSha256": "sha256:c4edc4d89b6ae8e756df7eec1ca30e335610ee72232f82325dac21652f8833b6",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": "0x71f66e75",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isAuthorizedRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+          "displaySignature": "isAuthorizedRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock#function:0xd0cab440",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "name": "",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlJlY29yZEZhbWlseUF1dGhvcml0eVByb3ZpZGVyTW9jayNmdW5jdGlvbjoweGQwY2FiNDQw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isAuthorizedRecordWriter",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 339,
+            "byteStart": 861,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L27-L39",
+            "lineEnd": 39,
+            "lineStart": 27,
+            "snippetSha256": "sha256:6aaddedce06bfb458eeace059453a09bfff98d4a805284d0cd04364fd1d7efef",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": "0xd0cab440",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_authorized",
+          "natspec": "",
+          "range": {
+            "byteLength": 44,
+            "byteStart": 459,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:f32720b46257087f9b0277e291405e6c8b8b4e3b3d591db4cb90d297e6d0df22",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "type": "mapping(address => bool)",
+          "typeString": "mapping(address => bool)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_malformed",
+          "natspec": "",
+          "range": {
+            "byteLength": 23,
+            "byteStart": 509,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L13",
+            "lineEnd": 13,
+            "lineStart": 13,
+            "snippetSha256": "sha256:cc982f33785b288cfac223c0b6a68e753e7a0a045c4b58219538cc95712692b1",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol:IStreamRecordFamilyAuthorityProvider",
+        "name": "IStreamRecordFamilyAuthorityProvider"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlJlY29yZEZhbWlseUF1dGhvcml0eVByb3ZpZGVyTW9jaw",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock",
+      "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol:IStreamRecordFamilyAuthorityProvider"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RecordFamilyAuthorityProviderMock",
+    "natspec": "",
+    "range": {
+      "byteLength": 832,
+      "byteStart": 370,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L11-L40",
+      "lineEnd": 40,
+      "lineStart": 11,
+      "snippetSha256": "sha256:128d35bb12c1b35a6da52afe75cb8c55e23cd1fea14bfb0c8180edb808d45acb",
+      "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamRecordFamilyAuthorization.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 5
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 4
+    },
+    "totalCount": 5
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock#function:0x651f7d26",
+      "definitionId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock#function:0x711bf9b2",
+      "definitionId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock#function:0x71f66e75",
+      "definitionId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock#function:0xd0cab440",
+      "definitionId": "test/StreamRecordFamilyAuthorization.t.sol:RecordFamilyAuthorityProviderMock",
+      "severity": "advisory"
+    }
+  ]
+}

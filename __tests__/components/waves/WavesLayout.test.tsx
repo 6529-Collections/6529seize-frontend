@@ -4,6 +4,15 @@ import React from "react";
 
 const mockUseAuthenticatedContent = jest.fn();
 const mockUseDeviceInfo = jest.fn();
+const mockMarkMobileLaunchStep = jest.fn();
+const mockScheduleMobileLaunchFlush = jest.fn();
+
+jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
+  markMobileLaunchStep: (...args: unknown[]) =>
+    mockMarkMobileLaunchStep(...args),
+  scheduleMobileLaunchFlush: (...args: unknown[]) =>
+    mockScheduleMobileLaunchFlush(...args),
+}));
 
 jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
   const loaderSource = loader.toString();
@@ -58,6 +67,8 @@ jest.mock("@/components/common/ConnectWallet", () => ({
 
 describe("WavesLayout", () => {
   beforeEach(() => {
+    mockMarkMobileLaunchStep.mockClear();
+    mockScheduleMobileLaunchFlush.mockClear();
     mockUseAuthenticatedContent.mockReturnValue({
       contentState: "not-authenticated",
     });
@@ -77,6 +88,13 @@ describe("WavesLayout", () => {
       "true"
     );
     expect(screen.queryByTestId("waves-mobile")).not.toBeInTheDocument();
+    expect(mockMarkMobileLaunchStep).toHaveBeenCalledWith(
+      "route_first_useful_content"
+    );
+    expect(mockScheduleMobileLaunchFlush).toHaveBeenCalledWith(
+      "waves_content_visible",
+      250
+    );
   });
 
   it("renders WavesMobile and children for logged-out app users", () => {
@@ -110,6 +128,23 @@ describe("WavesLayout", () => {
       screen.getByRole("status", { name: "Loading waves" })
     ).toBeInTheDocument();
     expect(screen.queryByTestId("wave-content")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
+  });
+
+  it("renders Waves content while layout measurement is settling", () => {
+    mockUseAuthenticatedContent.mockReturnValue({
+      contentState: "measuring",
+    });
+
+    render(
+      <WavesLayout>
+        <div data-testid="wave-content">Real wave content</div>
+      </WavesLayout>
+    );
+
+    expect(screen.getByTestId("waves-desktop")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-content")).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });
 

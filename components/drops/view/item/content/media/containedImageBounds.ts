@@ -25,6 +25,27 @@ interface ContainedImageBounds {
   readonly width: number;
 }
 
+function areBoundsStylesEqual(
+  current: CSSProperties | null,
+  next: CSSProperties | null
+) {
+  if (current === next) {
+    return true;
+  }
+
+  if (!current || !next) {
+    return false;
+  }
+
+  // Compare the style fields created from measured interaction-layer bounds.
+  return (
+    current.height === next.height &&
+    current.left === next.left &&
+    current.top === next.top &&
+    current.width === next.width
+  );
+}
+
 function getAxisOffset({
   axis,
   objectPosition,
@@ -113,12 +134,16 @@ export function useContainedImageBoundsStyle({
 }): CSSProperties | null {
   const [boundsStyle, setBoundsStyle] = useState<CSSProperties | null>(null);
 
+  const clearBoundsStyle = useCallback(() => {
+    setBoundsStyle((current) => (current === null ? current : null));
+  }, []);
+
   const updateBounds = useCallback(() => {
     const container = containerRef.current;
     const image = imageRef.current;
 
     if (!container || !image) {
-      setBoundsStyle(null);
+      clearBoundsStyle();
       return false;
     }
 
@@ -132,28 +157,32 @@ export function useContainedImageBoundsStyle({
     });
 
     if (!bounds) {
-      setBoundsStyle(null);
+      clearBoundsStyle();
       return false;
     }
 
-    setBoundsStyle({
+    const nextBoundsStyle = {
       height: `${bounds.height}px`,
       left: `${bounds.left}px`,
       top: `${bounds.top}px`,
       width: `${bounds.width}px`,
-    });
+    };
+
+    setBoundsStyle((current) =>
+      areBoundsStylesEqual(current, nextBoundsStyle) ? current : nextBoundsStyle
+    );
     return true;
-  }, [containerRef, imageRef, objectPosition]);
+  }, [clearBoundsStyle, containerRef, imageRef, objectPosition]);
 
   useEffect(() => {
     if (!loaded) {
-      setBoundsStyle(null);
+      clearBoundsStyle();
       return;
     }
 
     const container = containerRef.current;
     if (!container) {
-      setBoundsStyle(null);
+      clearBoundsStyle();
       return;
     }
 
@@ -225,7 +254,7 @@ export function useContainedImageBoundsStyle({
       resizeObserver?.disconnect();
       globalThis.removeEventListener("resize", resetAndScheduleMeasure);
     };
-  }, [containerRef, imageRef, loaded, updateBounds]);
+  }, [clearBoundsStyle, containerRef, imageRef, loaded, updateBounds]);
 
   return loaded ? boundsStyle : null;
 }

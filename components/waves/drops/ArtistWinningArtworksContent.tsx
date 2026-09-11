@@ -37,6 +37,7 @@ const WinnerTrophyCard: React.FC<{
 }> = ({ drop, onDropClick }) => {
   const extendedDrop = convertApiDropToExtendedDrop(drop);
   const decisionTime = drop.winning_context?.decision_time;
+  const topRaters = drop.top_raters.slice(0, 3);
   const hasDecisionTime = typeof decisionTime === "number" && decisionTime > 0;
 
   return (
@@ -45,10 +46,10 @@ const WinnerTrophyCard: React.FC<{
       className="tw-flex tw-h-full tw-flex-col"
     >
       <div
-        className="tw-group tw-relative tw-flex tw-flex-1 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-shadow-lg tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-shadow-xl"
+        className="tw-group tw-relative tw-flex tw-flex-1 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-shadow-xl tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-white/20"
         onClick={() => onDropClick(extendedDrop)}
       >
-        <div className="tw-relative tw-aspect-square tw-overflow-hidden tw-bg-iron-950/50">
+        <div className="tw-relative tw-aspect-square tw-overflow-hidden tw-bg-iron-950">
           <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center">
             {drop.parts[0]?.media && drop.parts[0].media.length > 0 ? (
               <MediaDisplay
@@ -74,87 +75,82 @@ const WinnerTrophyCard: React.FC<{
           </div>
         </div>
 
-        <div className="tw-flex tw-flex-1 tw-flex-col tw-justify-between tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-3">
-          <div className="tw-mb-3 tw-flex tw-items-start tw-justify-between">
-            <div className="tw-mr-2 tw-min-w-0 tw-flex-1">
-              {drop.title && (
-                <p className="tw-mb-0 tw-truncate tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-100">
-                  {drop.title}
-                </p>
-              )}
+        <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-1.5 tw-bg-iron-950 tw-p-4">
+          {drop.title && (
+            <h3 className="tw-m-0 tw-line-clamp-1 tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100 tw-transition-colors group-hover:tw-text-white">
+              {drop.title}
+            </h3>
+          )}
+
+          <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-2.5">
+            <div className="tw-flex tw-items-baseline tw-gap-1.5">
+              <span className="tw-text-[13px] tw-font-semibold tw-text-amber-300">
+                {formatNumberWithCommas(drop.rating)}
+              </span>
+              <span className="tw-whitespace-nowrap tw-text-[13px] tw-font-semibold tw-text-iron-600">
+                {drop.wave.voting_credit_type} total
+              </span>
             </div>
           </div>
 
-          <div className="tw-mb-3">
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5">
-              <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-text-sm">
-                <span className="tw-font-medium tw-text-[#D4AF37]">
-                  {formatNumberWithCommas(drop.rating)}
-                </span>
+          <div className="tw-mt-1 tw-flex tw-items-center tw-gap-2">
+            {topRaters.length > 0 && (
+              <div className="tw-flex tw-items-center -tw-space-x-2">
+                {topRaters.map((voter) => (
+                  <div key={voter.profile.handle}>
+                    <Link
+                      href={`/${voter.profile.handle ?? voter.profile.primary_address}`}
+                    >
+                      {voter.profile.pfp ? (
+                        <Image
+                          className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
+                          src={getScaledImageUri(
+                            voter.profile.pfp,
+                            ImageScale.W_AUTO_H_50
+                          )}
+                          alt={
+                            voter.profile.handle ??
+                            voter.profile.primary_address
+                          }
+                          width={24}
+                          height={24}
+                          data-tooltip-id={`winning-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
+                        />
+                      ) : (
+                        <div
+                          className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800"
+                          data-tooltip-id={`winning-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
+                        />
+                      )}
+                    </Link>
+                    <Tooltip
+                      id={`winning-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
+                      style={{
+                        backgroundColor: "#1F2937",
+                        color: "white",
+                        padding: "4px 8px",
+                      }}
+                    >
+                      {voter.profile.handle} -{" "}
+                      {formatNumberWithCommas(voter.rating)}
+                    </Tooltip>
+                  </div>
+                ))}
               </div>
-              <div className="tw-whitespace-nowrap tw-text-sm tw-text-iron-500">
-                <span className="tw-font-medium">
-                  {drop.wave.voting_credit_type} total
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="tw-flex tw-items-center tw-gap-2">
-            <div className="tw-flex tw-items-center -tw-space-x-2">
-              {drop.top_raters.slice(0, 3).map((voter) => (
-                <div key={voter.profile.handle}>
-                  <Link
-                    href={`/${voter.profile.handle ?? voter.profile.primary_address}`}
-                  >
-                    {voter.profile.pfp ? (
-                      <Image
-                        className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
-                        src={getScaledImageUri(
-                          voter.profile.pfp,
-                          ImageScale.W_AUTO_H_50
-                        )}
-                        alt={
-                          voter.profile.handle ?? voter.profile.primary_address
-                        }
-                        width={24}
-                        height={24}
-                        data-tooltip-id={`winning-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
-                      />
-                    ) : (
-                      <div
-                        className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800"
-                        data-tooltip-id={`winning-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
-                      />
-                    )}
-                  </Link>
-                  <Tooltip
-                    id={`winning-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
-                    style={{
-                      backgroundColor: "#1F2937",
-                      color: "white",
-                      padding: "4px 8px",
-                    }}
-                  >
-                    {voter.profile.handle} -{" "}
-                    {formatNumberWithCommas(voter.rating)}
-                  </Tooltip>
-                </div>
-              ))}
-            </div>
-            <span className="tw-text-xs tw-font-bold tw-text-white">
+            )}
+            <span className="tw-text-[13px] tw-font-semibold tw-text-iron-300">
               {formatNumberWithCommas(drop.raters_count)}{" "}
-              <span className="tw-font-normal tw-text-iron-500">
+              <span className="tw-font-semibold tw-text-iron-600">
                 {drop.raters_count === 1 ? "voter" : "voters"}
               </span>
             </span>
           </div>
 
           {hasDecisionTime && (
-            <div className="tw-mt-3 tw-flex tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
+            <div className="tw-mt-1 tw-flex tw-items-center tw-gap-2 tw-text-[11px] tw-font-medium tw-text-iron-500">
               <FontAwesomeIcon
                 icon={faTrophy}
-                className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-[#D4AF37]"
+                className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-amber-300/80"
               />
               <span>
                 Won on {Time.millis(decisionTime).toDate().toLocaleDateString()}
@@ -202,7 +198,7 @@ export const ArtistWinningArtworksContent: React.FC<
     return (
       <div className="tw-flex tw-h-96 tw-items-center tw-justify-center">
         <div className="tw-flex tw-flex-col tw-items-center tw-gap-4">
-          <div className="tw-h-8 tw-w-8 tw-animate-spin tw-rounded-full tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-amber-400"></div>
+          <div className="tw-h-8 tw-w-8 tw-animate-spin tw-rounded-full tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-400"></div>
           <span className="tw-animate-fade-in-out tw-text-sm tw-text-iron-400">
             Loading minted memes...
           </span>
@@ -214,7 +210,7 @@ export const ArtistWinningArtworksContent: React.FC<
   return (
     <div className="tw-relative tw-z-[100] tw-max-h-[calc(75vh-120px)] tw-overflow-y-auto tw-p-6 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-max-h-[calc(90vh-140px)]">
       {trophyItems.length > 0 && (
-        <div className="tw-grid tw-grid-cols-1 tw-gap-6 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-6 sm:tw-grid-cols-2 md:tw-grid-cols-3">
           {trophyItems.map((item) =>
             item.type === "winner" ? (
               <WinnerTrophyCard

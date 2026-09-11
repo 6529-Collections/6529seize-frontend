@@ -30,7 +30,7 @@ const mockState: any = {
   fetching: false,
   setFetching: jest.fn(),
   getUrl: () => "api/url",
-  getSharedProps: () => ({ fetching: false, results_count: 0 } as any),
+  getSharedProps: () => ({ fetching: false, results_count: 0 }) as any,
   fromBlock: undefined,
   toBlock: undefined,
 };
@@ -55,6 +55,8 @@ beforeEach(() => {
     royalties: [],
     fetching: false,
     collectionFocus: "the-memes",
+    isPrimary: false,
+    isCustomBlocks: false,
   });
 });
 
@@ -72,6 +74,22 @@ it("shows message when no royalties are returned", async () => {
   await waitFor(() => {
     expect(screen.getByText(/No royalties found/i)).toBeInTheDocument();
   });
+});
+
+it("shows an error and clears fetching when royalties fail to load", async () => {
+  const consoleError = jest
+    .spyOn(console, "error")
+    .mockImplementation(() => undefined);
+  (fetchUrl as jest.Mock).mockRejectedValue(new Error("request failed"));
+
+  renderRoyalties();
+
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /failed to load royalties data/i
+  );
+  expect(mockState.setFetching).toHaveBeenLastCalledWith(false);
+  expect(screen.queryByText(/No royalties found/i)).not.toBeInTheDocument();
+  consoleError.mockRestore();
 });
 
 it("renders royalties table when data exists", async () => {
@@ -92,4 +110,45 @@ it("renders royalties table when data exists", async () => {
   expect(screen.getByAltText("Meme1")).toBeInTheDocument();
   expect(screen.getByText("Alice")).toBeInTheDocument();
   expect(screen.getAllByText("1.00").length).toBeGreaterThan(0);
+});
+
+it("guards effective royalty percentages when volume is zero", async () => {
+  (fetchUrl as jest.Mock).mockResolvedValue([
+    {
+      token_id: 1,
+      name: "Meme1",
+      artist: "Alice",
+      volume: 0,
+      proceeds: 2,
+      artist_split: 0.5,
+      artist_take: 0,
+      thumbnail: "img.png",
+    },
+  ]);
+
+  renderRoyalties();
+  await waitFor(() => screen.getByTestId("token-image"));
+
+  expect(document.body).not.toHaveTextContent(/Infinity|NaN/);
+});
+
+it("guards the total artist percentage when proceeds are zero", async () => {
+  mockState.collectionFocus = "meme-lab";
+  (fetchUrl as jest.Mock).mockResolvedValue([
+    {
+      token_id: 1,
+      name: "Meme1",
+      artist: "Alice",
+      volume: 0,
+      proceeds: 0,
+      artist_split: 0.5,
+      artist_take: 1,
+      thumbnail: "img.png",
+    },
+  ]);
+
+  renderRoyalties();
+  await waitFor(() => screen.getByTestId("token-image"));
+
+  expect(document.body).not.toHaveTextContent(/Infinity|NaN/);
 });

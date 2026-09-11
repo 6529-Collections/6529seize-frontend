@@ -1,5 +1,8 @@
 import { SingleWaveDropChat } from "@/components/waves/drop/SingleWaveDropChat";
+import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "@/components/waves/create-drop-content/reply-target-unavailable";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { WsMessageType, type WsDropDeleteMessage } from "@/helpers/Types";
 import { act, fireEvent, render } from "@testing-library/react";
 
 jest.mock("@/hooks/useDeviceInfo", () => () => ({
@@ -11,16 +14,21 @@ jest.mock("@/hooks/useDeviceInfo", () => () => ({
 
 // Mock useNativeKeyboard with configurable values
 let mockKeyboardVisible = false;
+let mockKeyboardPhase: "hidden" | "hiding" = "hidden";
 
 jest.mock("@/hooks/useNativeKeyboard", () => ({
   useNativeKeyboard: () => ({
     isVisible: mockKeyboardVisible,
     keyboardHeight: mockKeyboardVisible ? 350 : 0,
+    phase: mockKeyboardPhase,
   }),
 }));
 
 let capturedProps: any;
 let capturedCreatorProps: any;
+const mockSetToast = jest.fn();
+const mockUseWebSocketMessage = jest.fn();
+let mockDmUnreadConversation: { readonly unread_count: number } | null = null;
 jest.mock("@/components/waves/drops/wave-drops-all", () => ({
   __esModule: true,
   default: (props: any) => {
@@ -54,6 +62,18 @@ jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
   DropMode: { BOTH: "BOTH", CHAT: "CHAT" },
 }));
 
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({ setToast: mockSetToast }),
+}));
+
+jest.mock("@/services/websocket/useWebSocketMessage", () => ({
+  useWebSocketMessage: (...args: unknown[]) => mockUseWebSocketMessage(...args),
+}));
+
+jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
+  useDmUnreadConversation: () => mockDmUnreadConversation,
+}));
+
 // Mock globalThis.matchMedia for useDeviceInfo hook
 Object.defineProperty(globalThis, "matchMedia", {
   writable: true,
@@ -70,6 +90,8 @@ Object.defineProperty(globalThis, "matchMedia", {
 });
 
 describe("SingleWaveDropChat", () => {
+  const createDrop = (id = "d1"): ApiDrop => ({ id }) as ApiDrop;
+
   const createWave = (overrides: Record<string, unknown> = {}) => {
     const waveDefaults = {
       type: ApiWaveType.Rank,
@@ -93,9 +115,24 @@ describe("SingleWaveDropChat", () => {
 
   beforeEach(() => {
     mockKeyboardVisible = false;
+    mockKeyboardPhase = "hidden";
+    mockDmUnreadConversation = null;
     capturedProps = undefined;
     capturedCreatorProps = undefined;
+    mockSetToast.mockClear();
+    mockUseWebSocketMessage.mockReset();
+    mockUseWebSocketMessage.mockReturnValue({ isConnected: true });
   });
+
+  const getDropDeleteCallback = () => {
+    const dropDeleteSubscription = mockUseWebSocketMessage.mock.calls.find(
+      ([messageType]) => messageType === WsMessageType.DROP_DELETE
+    );
+    expect(dropDeleteSubscription).toBeDefined();
+    return dropDeleteSubscription?.[1] as (
+      messageData: WsDropDeleteMessage["data"]
+    ) => void;
+  };
 
   it("handles reply and reset actions", () => {
     const wave = createWave();
@@ -111,6 +148,119 @@ describe("SingleWaveDropChat", () => {
 
     fireEvent.click(document.querySelector('[data-testid="creator"]')!);
     expect(document.querySelector('[data-part="1"]')).toBeInTheDocument();
+  });
+
+  it("uses the canonical DM unread count", () => {
+    mockDmUnreadConversation = { unread_count: 4 };
+
+    render(
+      <SingleWaveDropChat
+        wave={createWave({
+          chat: { scope: { group: { is_direct_message: true } } },
+        })}
+        drop={createDrop()}
+      />
+    );
+
+    expect(capturedProps.unreadCount).toBe(4);
+  });
+
+  it("does not fall back to the wave API unread count before DM snapshot hydration", () => {
+    render(
+      <SingleWaveDropChat
+        wave={createWave({
+          chat: { scope: { group: { is_direct_message: true } } },
+          metrics: { muted: false, your_unread_drops_count: 7 },
+        })}
+        drop={createDrop()}
+      />
+    );
+
+    expect(capturedProps.unreadCount).toBe(0);
+  });
+
+  it("preserves the wave API unread count for ordinary waves", () => {
+    render(
+      <SingleWaveDropChat
+        wave={createWave({
+          metrics: { muted: false, your_unread_drops_count: 8 },
+        })}
+        drop={createDrop()}
+      />
+    );
+
+    expect(capturedProps.unreadCount).toBe(8);
+  });
+
+  it("clears the root reply when the root drop is deleted", () => {
+    const wave = createWave();
+    const drop: any = { id: "d1" };
+    render(<SingleWaveDropChat wave={wave} drop={drop} />);
+
+    expect(capturedCreatorProps.activeDrop?.drop.id).toBe("d1");
+
+    act(() => {
+      getDropDeleteCallback()({
+        wave_id: wave.id,
+        drop_id: "d1",
+        drop_serial: 1,
+      });
+    });
+
+    expect(capturedCreatorProps.activeDrop).toBeNull();
+    expect(mockSetToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "warning",
+        toastId: REPLY_TARGET_UNAVAILABLE_TOAST_ID,
+      })
+    );
+
+    fireEvent.click(document.querySelector('[data-testid="creator"]')!);
+    expect(capturedCreatorProps.activeDrop).toBeNull();
+  });
+
+  it("keeps a nested reply active when only the root drop is deleted", () => {
+    const wave = createWave();
+    const drop: any = { id: "d1" };
+    const nestedDrop: any = { id: "nested-drop" };
+    render(<SingleWaveDropChat wave={wave} drop={drop} />);
+
+    act(() => {
+      capturedProps.onReply({ drop: nestedDrop, partId: 3 });
+    });
+
+    expect(capturedCreatorProps.activeDrop?.drop.id).toBe("nested-drop");
+
+    act(() => {
+      getDropDeleteCallback()({
+        wave_id: wave.id,
+        drop_id: "d1",
+        drop_serial: 1,
+      });
+    });
+
+    expect(capturedCreatorProps.activeDrop?.drop.id).toBe("nested-drop");
+    expect(mockSetToast).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the root reply when a nested reply target is unavailable", () => {
+    const wave = createWave();
+    const drop: any = { id: "d1" };
+    const nestedDrop: any = { id: "nested-drop" };
+    render(<SingleWaveDropChat wave={wave} drop={drop} />);
+
+    act(() => {
+      capturedProps.onReply({ drop: nestedDrop, partId: 3 });
+    });
+
+    expect(capturedCreatorProps.activeDrop?.drop.id).toBe("nested-drop");
+
+    act(() => {
+      capturedCreatorProps.onReplyTargetUnavailable();
+    });
+
+    expect(capturedCreatorProps.activeDrop?.drop.id).toBe("d1");
+    expect(capturedCreatorProps.activeDrop?.partId).toBe(1);
   });
 
   it("applies safe-area-inset-bottom padding when keyboard is hidden", () => {
@@ -143,6 +293,24 @@ describe("SingleWaveDropChat", () => {
     const container = wrapper?.parentElement as HTMLElement;
 
     expect(container.style.paddingBottom).toBe("0px");
+  });
+
+  it("restores safe-area padding while keyboard dismissal finishes", () => {
+    mockKeyboardVisible = false;
+    mockKeyboardPhase = "hiding";
+
+    const wave = createWave();
+    const drop = createDrop();
+    render(<SingleWaveDropChat wave={wave} drop={drop} />);
+
+    const wrapper = document.querySelector(
+      '[data-testid="wrapper"]'
+    ) as HTMLElement;
+    const container = wrapper?.parentElement as HTMLElement;
+
+    expect(container.style.paddingBottom).toBe(
+      "calc(env(safe-area-inset-bottom))"
+    );
   });
 
   it("passes approve wave state to WaveDropsAll", () => {

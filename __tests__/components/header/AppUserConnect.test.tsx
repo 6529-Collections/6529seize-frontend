@@ -5,11 +5,13 @@ import React from "react";
 jest.mock("@/components/header/share/HeaderQRScanner", () => () => (
   <div data-testid="scanner" />
 ));
+jest.mock("@/components/common/icons/BellIcon", () => () => (
+  <svg data-testid="push-notifications-bell" />
+));
 
 jest.mock("@/components/header/PushNotificationSettings", () => () => (
   <div data-testid="push-settings" />
 ));
-
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
@@ -123,6 +125,18 @@ describe("AppUserConnect", () => {
     const disconnectBtn = screen.getByRole("button", {
       name: "Disconnect & Logout",
     });
+    const preferencesLink = screen.getByRole("link", {
+      name: "Preferences",
+    });
+    const pushNotificationsButton = screen.getByRole("button", {
+      name: "Push Notifications",
+    });
+    expect(preferencesLink).toHaveAttribute("href", "/preferences");
+    expect(pushNotificationsButton).toContainElement(
+      screen.getByTestId("push-notifications-bell")
+    );
+    fireEvent.click(preferencesLink);
+    expect(onNavigate).toHaveBeenCalledTimes(1);
 
     fireEvent.click(disconnectWalletBtn);
     expect(seizeDisconnect).toHaveBeenCalled();
@@ -133,7 +147,7 @@ describe("AppUserConnect", () => {
     fireEvent.click(disconnectBtn);
     await waitFor(() => {
       expect(seizeDisconnectAndLogout).toHaveBeenCalledWith();
-      expect(onNavigate).toHaveBeenCalledTimes(2);
+      expect(onNavigate).toHaveBeenCalledTimes(3);
     });
   });
 

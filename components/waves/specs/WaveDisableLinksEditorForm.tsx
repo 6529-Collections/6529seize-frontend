@@ -31,7 +31,7 @@ export default function WaveDisableLinksEditorForm({
           checked={checked}
           disabled={disabled}
           onChange={(event) => onCheckedChange(event.target.checked)}
-          className="tw-mt-0.5 tw-h-4 tw-w-4 tw-rounded tw-border-iron-600 tw-bg-iron-900 tw-text-primary-500 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+          className="tw-mt-0.5 tw-h-4 tw-w-4 tw-rounded tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-900 tw-text-primary-500 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
         />
         <span>Disable links</span>
       </label>

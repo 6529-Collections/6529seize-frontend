@@ -20,7 +20,11 @@ describe("AppWalletAvatar", () => {
     // height and width should default to 36
     expect(img).toHaveAttribute("height", "36");
     expect(img).toHaveAttribute("width", "36");
-    expect(img).toHaveClass("appWalletAvatar");
+    expect(img).toHaveClass(
+      "tw-rounded-full",
+      "tw-border-white/10",
+      "tw-bg-black/30"
+    );
     expect(img).toHaveAttribute("fetchPriority", "high");
     expect(img).toHaveAttribute("loading", "eager");
   });

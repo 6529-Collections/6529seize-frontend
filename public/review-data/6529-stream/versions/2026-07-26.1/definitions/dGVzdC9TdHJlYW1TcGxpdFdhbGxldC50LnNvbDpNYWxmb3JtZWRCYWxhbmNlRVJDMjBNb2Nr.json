@@ -1,0 +1,112 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "fallback()",
+          "functionKind": "fallback",
+          "id": "test/StreamSplitWallet.t.sol:MalformedBalanceERC20Mock#function:fallback()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpNYWxmb3JtZWRCYWxhbmNlRVJDMjBNb2NrI2Z1bmN0aW9uOmZhbGxiYWNrKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fallback",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 276,
+            "byteStart": 75403,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1618-L1626",
+            "lineEnd": 1626,
+            "lineStart": 1618,
+            "snippetSha256": "sha256:3f2e6b176a920068c0e2f174ac1417b689e0fb0aab57f53a8ab06aeb40f708d2",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamSplitWallet.t.sol:MalformedBalanceERC20Mock",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpNYWxmb3JtZWRCYWxhbmNlRVJDMjBNb2Nr",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamSplitWallet.t.sol:MalformedBalanceERC20Mock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MalformedBalanceERC20Mock",
+    "natspec": "",
+    "range": {
+      "byteLength": 319,
+      "byteStart": 75362,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1617-L1627",
+      "lineEnd": 1627,
+      "lineStart": 1617,
+      "snippetSha256": "sha256:a56d945ade81988b6f1c025c165ea30ce92658f177002ed6eca7254871e550e8",
+      "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamSplitWallet.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamSplitWallet.t.sol:MalformedBalanceERC20Mock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSplitWallet.t.sol:MalformedBalanceERC20Mock#function:fallback()",
+      "definitionId": "test/StreamSplitWallet.t.sol:MalformedBalanceERC20Mock",
+      "severity": "advisory"
+    }
+  ]
+}

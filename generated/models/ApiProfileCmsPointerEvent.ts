@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
  * 6529.io API
- * This is the API interface description. Brief terminology overview and an authentication example can be found at <a href=\"https://6529.io/about/api\">https://6529.io/about/api</a>.
+ * JSON REST API for 6529.io. New here? A terminology overview and a step-by-step authentication walkthrough (guides &amp; auth) live at <a href=\"https://6529.io/tools/api\">https://6529.io/tools/api</a>. The raw machine-readable spec is downloadable at <a href=\"/openapi.yaml\">/openapi.yaml</a> and <a href=\"/openapi.json\">/openapi.json</a>.
  *
  * OpenAPI spec version: 1.0.0
  * 
@@ -26,6 +26,8 @@ export class ApiProfileCmsPointerEvent {
     'previous_package_db_id'?: string;
     'actor_profile_id': string;
     'signer_address'?: string;
+    'signature'?: string;
+    'typed_data'?: { [key: string]: any; };
     'typed_data_hash'?: string;
     'storage_receipt'?: { [key: string]: any; };
     /**
@@ -112,6 +114,18 @@ export class ApiProfileCmsPointerEvent {
             "format": ""
         },
         {
+            "name": "signature",
+            "baseName": "signature",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "typed_data",
+            "baseName": "typed_data",
+            "type": "{ [key: string]: any; }",
+            "format": ""
+        },
+        {
             "name": "typed_data_hash",
             "baseName": "typed_data_hash",
             "type": "string",
@@ -149,6 +163,7 @@ export enum ApiProfileCmsPointerEventEventTypeEnum {
     SetPrimary = 'set_primary',
     Supersede = 'supersede',
     Rollback = 'rollback',
-    Archive = 'archive'
+    Archive = 'archive',
+    Unpublish = 'unpublish'
 }
 

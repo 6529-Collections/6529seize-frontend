@@ -13,8 +13,7 @@ import { AuthContext } from "../../../auth/Auth";
 import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
 import HeaderUserConnect from "../../../header/user/HeaderUserConnect";
 import UserSetUpProfileCta from "../../../user/utils/set-up-profile/UserSetUpProfileCta";
-import PrimaryButton from "../../../utils/button/PrimaryButton";
-import CreateDirectMessageModal from "../../../waves/create-dm/CreateDirectMessageModal";
+import Button from "../../../utils/button/Button";
 import UnifiedWavesListEmpty from "../waves/UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
 import WebUnifiedWavesListWaves from "./WebUnifiedWavesListWaves";
@@ -30,8 +29,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
 }) => {
   const { hasValidWalletAuth } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
-  const { isDirectMessageModalOpen, openDirectMessage, close, isApp } =
-    useCreateModalState();
+  const { openDirectMessage, isApp } = useCreateModalState();
   const isTouchDevice = useIsTouchDevice();
 
   const shouldRenderCreateDirectMessage = !isApp;
@@ -161,17 +159,18 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
                 data-tooltip-id="create-dm-tooltip"
                 data-tooltip-content="New direct message"
               >
-                <PrimaryButton
-                  onClicked={openDirectMessage}
-                  loading={false}
-                  disabled={false}
-                  padding="tw-p-2.5"
+                <Button
+                  onClick={openDirectMessage}
+                  aria-label="New direct message"
+                  variant="primary"
+                  size={null}
+                  className="tw-size-9 tw-p-0"
                 >
                   <FontAwesomeIcon
                     icon={faPaperPlane}
                     className="tw-size-4 tw-flex-shrink-0"
                   />
-                </PrimaryButton>
+                </Button>
               </div>
             )}
           </div>
@@ -207,11 +206,6 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
         />
       )}
 
-      <CreateDirectMessageModal
-        isOpen={isDirectMessageModalOpen}
-        onClose={close}
-        profile={connectedProfile}
-      />
     </div>
   );
 };

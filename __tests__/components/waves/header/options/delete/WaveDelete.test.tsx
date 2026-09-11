@@ -1,19 +1,25 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import WaveDelete from '@/components/waves/header/options/delete/WaveDelete';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import WaveDelete from "@/components/waves/header/options/delete/WaveDelete";
 
-jest.mock('@/components/utils/animation/CommonAnimationWrapper', () => ({ __esModule: true, default: ({ children }: any) => <div>{children}</div> }));
-jest.mock('@/components/utils/animation/CommonAnimationOpacity', () => ({ __esModule: true, default: ({ children, onClicked }: any) => <div onClick={onClicked}>{children}</div> }));
-jest.mock('@/components/waves/header/options/delete/WaveDeleteModal', () => ({ __esModule: true, default: (props: any) => <div data-testid="modal" onClick={() => props.closeModal()} /> }));
-
-describe('WaveDelete', () => {
-  it('opens and closes modal', async () => {
+describe("WaveDelete", () => {
+  it("requests deletion from a desktop menu item", async () => {
     const user = userEvent.setup();
-    render(<WaveDelete wave={{ id: 'w' } as any} />);
-    expect(screen.queryByTestId('modal')).toBeNull();
-    await user.click(screen.getByRole('menuitem'));
-    expect(screen.getByTestId('modal')).toBeInTheDocument();
-    await user.click(screen.getByTestId('modal'));
-    expect(screen.queryByTestId('modal')).toBeNull();
+    const onDeleteRequest = jest.fn();
+
+    render(<WaveDelete onDeleteRequest={onDeleteRequest} />);
+
+    await user.click(screen.getByRole("menuitem", { name: "Delete" }));
+
+    expect(onDeleteRequest).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses a touch-sized button in the mobile sheet", () => {
+    render(<WaveDelete isMobile onDeleteRequest={jest.fn()} />);
+
+    const button = screen.getByRole("button", { name: "Delete" });
+    expect(button).toHaveClass("tw-min-h-12", "tw-rounded-xl");
+    expect(button).not.toHaveAttribute("role", "menuitem");
+    expect(button).not.toHaveAttribute("tabindex", "-1");
   });
 });

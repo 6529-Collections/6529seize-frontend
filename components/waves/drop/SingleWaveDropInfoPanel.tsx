@@ -11,9 +11,14 @@ import { SingleWaveDropInfoContainer } from "./SingleWaveDropInfoContainer";
 import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
 import { WaveDropMetaRow } from "./WaveDropMetaRow";
 import { WaveDropVoteSummary } from "./WaveDropVoteSummary";
+import {
+  DISABLED_DROP_VOTE_SUMMARY_STATE,
+  type DropVoteSummaryState,
+} from "./useDropVoteSummary";
 
 interface SingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
+  readonly voteSummary?: DropVoteSummaryState | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
@@ -21,6 +26,7 @@ interface SingleWaveDropInfoPanelProps {
 
 export const SingleWaveDropInfoPanel = ({
   drop,
+  voteSummary = DISABLED_DROP_VOTE_SUMMARY_STATE,
   isVotingClosed = false,
   isVotingControlsLocked = false,
   winningThreshold,
@@ -63,7 +69,10 @@ export const SingleWaveDropInfoPanel = ({
 
             {!isChatWave && (
               <div className="tw-mt-6">
-                <SingleWaveDropInfoDetails drop={drop} />
+                <SingleWaveDropInfoDetails
+                  drop={drop}
+                  voteSummary={voteSummary}
+                />
               </div>
             )}
             {canDelete && drop.drop_type !== ApiDropType.Winner && (

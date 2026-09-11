@@ -2,6 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { UseInfiniteQueryResult } from '@tanstack/react-query';
 import { QueryKey } from '@/components/react-query-wrapper/ReactQueryWrapper';
+import { WsMessageType } from '@/helpers/Types';
 
 // Setup mock for useInfiniteQuery so tests can control its behaviour
 const useInfiniteQueryMock = jest.fn();
@@ -193,15 +194,22 @@ it('ignores websocket messages when dropId is null', () => {
     refetch,
   } as Partial<UseInfiniteQueryResult>);
 
-  let wsCallback: any;
+  const wsCallbacks = new Map<WsMessageType, (message: unknown) => void>();
   const { useWebSocketMessage } = require('@/services/websocket/useWebSocketMessage');
   (useWebSocketMessage as jest.Mock).mockImplementation((type, cb) => {
-    wsCallback = cb;
+    wsCallbacks.set(type, cb);
     return { isConnected: true };
   });
 
   renderHook(() => useDropMessages('wave-1', null), { wrapper: createWrapper() });
 
-  wsCallback({ wave: { id: 'wave-1' } });
+  wsCallbacks.get(WsMessageType.DROP_UPDATE)?.({ wave: { id: 'wave-1' } });
+  wsCallbacks.get(WsMessageType.DROP_UPDATE_REF)?.({
+    author_id: 'author-1',
+    drop_id: 'drop-1',
+    wave_id: 'wave-1',
+    serial_no: 1,
+    update_type: WsMessageType.DROP_UPDATE,
+  });
   expect(refetch).not.toHaveBeenCalled();
 });

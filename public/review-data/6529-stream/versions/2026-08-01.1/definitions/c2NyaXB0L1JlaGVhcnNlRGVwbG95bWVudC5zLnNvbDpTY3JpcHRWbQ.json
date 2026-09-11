@@ -1,0 +1,399 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "script/RehearseDeployment.s.sol:ScriptVm#function:0x350d56bf",
+          "declaringDefinitionId": "script/RehearseDeployment.s.sol:ScriptVm",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "key",
+              "type": "string"
+            }
+          ],
+          "name": "envAddress",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "value",
+              "type": "address"
+            }
+          ],
+          "selector": "0x350d56bf",
+          "signature": "envAddress(string)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "script/RehearseDeployment.s.sol:ScriptVm#function:0xf877cb19",
+          "declaringDefinitionId": "script/RehearseDeployment.s.sol:ScriptVm",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "key",
+              "type": "string"
+            }
+          ],
+          "name": "envString",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "value",
+              "type": "string"
+            }
+          ],
+          "selector": "0xf877cb19",
+          "signature": "envString(string)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "script/RehearseDeployment.s.sol:ScriptVm#function:0xc1978d1f",
+          "declaringDefinitionId": "script/RehearseDeployment.s.sol:ScriptVm",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "key",
+              "type": "string"
+            }
+          ],
+          "name": "envUint",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xc1978d1f",
+          "signature": "envUint(string)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "script/RehearseDeployment.s.sol:ScriptVm#function:0x7fec2a8d",
+          "declaringDefinitionId": "script/RehearseDeployment.s.sol:ScriptVm",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "broadcaster",
+              "type": "address"
+            }
+          ],
+          "name": "startBroadcast",
+          "outputs": [],
+          "selector": "0x7fec2a8d",
+          "signature": "startBroadcast(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "script/RehearseDeployment.s.sol:ScriptVm#function:0x76eadd36",
+          "declaringDefinitionId": "script/RehearseDeployment.s.sol:ScriptVm",
+          "inherited": false,
+          "inputs": [],
+          "name": "stopBroadcast",
+          "outputs": [],
+          "selector": "0x76eadd36",
+          "signature": "stopBroadcast()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "deployment_or_operational_source",
+    "classificationReason": "Declared under the pinned deployment-script source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "startBroadcast(address)",
+          "displaySignature": "startBroadcast(address)",
+          "functionKind": "function",
+          "id": "script/RehearseDeployment.s.sol:ScriptVm#function:0x7fec2a8d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "broadcaster",
+              "type": "address"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRGVwbG95bWVudC5zLnNvbDpTY3JpcHRWbSNmdW5jdGlvbjoweDdmZWMyYThk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "startBroadcast",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 54,
+            "byteStart": 1176,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeployment.s.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:b70216c0d1ecd7ba3688da2f3da14931c2ea14d174bfeff5c89dd2c1a116d40b",
+            "sourceSha256": "sha256:492c39fb0ccbfda1fe33b0aeb0e45ca2ceb16fde1151ad68cbcded59174b950b"
+          },
+          "selector": "0x7fec2a8d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "stopBroadcast()",
+          "displaySignature": "stopBroadcast()",
+          "functionKind": "function",
+          "id": "script/RehearseDeployment.s.sol:ScriptVm#function:0x76eadd36",
+          "inputs": [],
+          "key": "c2NyaXB0L1JlaGVhcnNlRGVwbG95bWVudC5zLnNvbDpTY3JpcHRWbSNmdW5jdGlvbjoweDc2ZWFkZDM2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "stopBroadcast",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 34,
+            "byteStart": 1235,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeployment.s.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:18810af604c8419a23308dd4206bdc86582b67243348d5cdc2aaf95eadcfeb83",
+            "sourceSha256": "sha256:492c39fb0ccbfda1fe33b0aeb0e45ca2ceb16fde1151ad68cbcded59174b950b"
+          },
+          "selector": "0x76eadd36",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "envAddress(string)",
+          "displaySignature": "envAddress(string)",
+          "functionKind": "function",
+          "id": "script/RehearseDeployment.s.sol:ScriptVm#function:0x350d56bf",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "key",
+              "storageLocation": "calldata",
+              "type": "string"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRGVwbG95bWVudC5zLnNvbDpTY3JpcHRWbSNmdW5jdGlvbjoweDM1MGQ1NmJm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "envAddress",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 79,
+            "byteStart": 1274,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeployment.s.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:6c4366303888e975929827cb7e348aa8d73c39e5f32c19112812f3358cd3a37e",
+            "sourceSha256": "sha256:492c39fb0ccbfda1fe33b0aeb0e45ca2ceb16fde1151ad68cbcded59174b950b"
+          },
+          "selector": "0x350d56bf",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "envString(string)",
+          "displaySignature": "envString(string)",
+          "functionKind": "function",
+          "id": "script/RehearseDeployment.s.sol:ScriptVm#function:0xf877cb19",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "key",
+              "storageLocation": "calldata",
+              "type": "string"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRGVwbG95bWVudC5zLnNvbDpTY3JpcHRWbSNmdW5jdGlvbjoweGY4NzdjYjE5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "envString",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 84,
+            "byteStart": 1358,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeployment.s.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:d764d1fad1e55017ed720b93a4fc892014c4509c967cdb79d3382a8103c9ba78",
+            "sourceSha256": "sha256:492c39fb0ccbfda1fe33b0aeb0e45ca2ceb16fde1151ad68cbcded59174b950b"
+          },
+          "selector": "0xf877cb19",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "envUint(string)",
+          "displaySignature": "envUint(string)",
+          "functionKind": "function",
+          "id": "script/RehearseDeployment.s.sol:ScriptVm#function:0xc1978d1f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "key",
+              "storageLocation": "calldata",
+              "type": "string"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRGVwbG95bWVudC5zLnNvbDpTY3JpcHRWbSNmdW5jdGlvbjoweGMxOTc4ZDFm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "envUint",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 76,
+            "byteStart": 1447,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeployment.s.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:3e7d377089fc850aa7d5b6885b177be19596af1bc2df9e31c6e217e5c75e208f",
+            "sourceSha256": "sha256:492c39fb0ccbfda1fe33b0aeb0e45ca2ceb16fde1151ad68cbcded59174b950b"
+          },
+          "selector": "0xc1978d1f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "script/RehearseDeployment.s.sol:ScriptVm",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c2NyaXB0L1JlaGVhcnNlRGVwbG95bWVudC5zLnNvbDpTY3JpcHRWbQ",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "script/RehearseDeployment.s.sol:ScriptVm"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ScriptVm",
+    "natspec": "",
+    "range": {
+      "byteLength": 374,
+      "byteStart": 1151,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeployment.s.sol#L26-L32",
+      "lineEnd": 32,
+      "lineStart": 26,
+      "snippetSha256": "sha256:46dfcf731c18497ca5e7312c2496ab6ba9a755f0d6055e7e866af6239f006690",
+      "sourceSha256": "sha256:492c39fb0ccbfda1fe33b0aeb0e45ca2ceb16fde1151ad68cbcded59174b950b"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "script",
+    "sourcePath": "script/RehearseDeployment.s.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 6
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 5
+    },
+    "totalCount": 6
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "script/RehearseDeployment.s.sol:ScriptVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseDeployment.s.sol:ScriptVm#function:0x350d56bf",
+      "definitionId": "script/RehearseDeployment.s.sol:ScriptVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseDeployment.s.sol:ScriptVm#function:0x76eadd36",
+      "definitionId": "script/RehearseDeployment.s.sol:ScriptVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseDeployment.s.sol:ScriptVm#function:0x7fec2a8d",
+      "definitionId": "script/RehearseDeployment.s.sol:ScriptVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseDeployment.s.sol:ScriptVm#function:0xc1978d1f",
+      "definitionId": "script/RehearseDeployment.s.sol:ScriptVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseDeployment.s.sol:ScriptVm#function:0xf877cb19",
+      "definitionId": "script/RehearseDeployment.s.sol:ScriptVm",
+      "severity": "advisory"
+    }
+  ]
+}

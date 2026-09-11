@@ -10,7 +10,7 @@ import type {
   GroupedReactionsItem,
   INotificationDropReacted,
 } from "@/types/feed.types";
-import { Fragment, useEffect, useRef } from "react";
+import { Fragment, memo, useEffect, useRef } from "react";
 import NotificationsFollowAllBtn from "../NotificationsFollowAllBtn";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import NotificationDrop from "../subcomponents/NotificationDrop";
@@ -35,9 +35,9 @@ function getNonEmptyIdentityValue(
 
 function getIdentityKey(profile: ApiProfileMin): string {
   return (
-    getNonEmptyIdentityValue(profile.id) ||
-    getNonEmptyIdentityValue(profile.handle) ||
-    getNonEmptyIdentityValue(profile.primary_address) ||
+    getNonEmptyIdentityValue(profile.id) ??
+    getNonEmptyIdentityValue(profile.handle) ??
+    getNonEmptyIdentityValue(profile.primary_address) ??
     "unknown-profile"
   );
 }
@@ -62,8 +62,10 @@ function mergeProfiles(
     handle:
       getNonEmptyIdentityValue(preferred.handle) ??
       getNonEmptyIdentityValue(fallback.handle),
-    pfp: preferred.pfp || fallback.pfp,
-    primary_address: preferred.primary_address || fallback.primary_address,
+    pfp: getNonEmptyIdentityValue(preferred.pfp) ?? fallback.pfp,
+    primary_address:
+      getNonEmptyIdentityValue(preferred.primary_address) ??
+      fallback.primary_address,
   };
 }
 
@@ -215,13 +217,12 @@ function notificationsLatestPerUser(
     }
   }
 
-  const list = Array.from(byUser.values())
+  return Array.from(byUser.values())
     .map(({ latest, identity }) => ({
       ...latest,
       related_identity: identity,
     }))
     .sort((a, b) => a.created_at - b.created_at || a.id - b.id);
-  return list;
 }
 
 type ReactionGroup = {
@@ -261,7 +262,7 @@ interface NotificationDropReactedGroupProps {
   readonly onMarkAsRead?: ((notificationIds: number[]) => void) | undefined;
 }
 
-export default function NotificationDropReactedGroup({
+function NotificationDropReactedGroupComponent({
   group,
   activeDrop,
   onReply,
@@ -326,8 +327,8 @@ export default function NotificationDropReactedGroup({
         </NotificationHeader>
       ) : (
         <div className="tw-flex tw-items-center tw-gap-x-2">
-          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-start tw-gap-y-2 min-[390px]:tw-flex-row min-[390px]:tw-items-center min-[390px]:tw-justify-between min-[390px]:tw-gap-x-2">
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1">
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-2">
+            <div className="tw-flex tw-min-w-[min(100%,16rem)] tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-1">
               <span className="tw-mr-1 tw-text-sm tw-font-normal tw-text-iron-400">
                 New reactions
               </span>
@@ -382,7 +383,11 @@ export default function NotificationDropReactedGroup({
               <NotificationTimestamp createdAt={createdAt} />
             </div>
             {fullReactors.length > 0 && (
-              <div className="tw-flex-shrink-0">
+              <div className="tw-flex tw-max-w-full tw-flex-none tw-items-start tw-gap-x-3">
+                <div
+                  aria-hidden="true"
+                  className="tw-h-7 tw-w-7 tw-flex-shrink-0"
+                />
                 <NotificationsFollowAllBtn
                   profiles={fullReactors}
                   size={UserFollowBtnSize.SMALL}
@@ -404,3 +409,11 @@ export default function NotificationDropReactedGroup({
     </div>
   );
 }
+
+const NotificationDropReactedGroup = memo(
+  NotificationDropReactedGroupComponent
+);
+
+NotificationDropReactedGroup.displayName = "NotificationDropReactedGroup";
+
+export default NotificationDropReactedGroup;

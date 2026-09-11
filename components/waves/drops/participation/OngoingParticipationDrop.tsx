@@ -26,6 +26,9 @@ import ParticipationDropContent from "./ParticipationDropContent";
 import ParticipationDropMetadata from "./ParticipationDropMetadata";
 import ParticipationDropFooter from "./ParticipationDropFooter";
 import ParticipationIdentityProfileCard from "./ParticipationIdentityProfileCard";
+import ProposalCardContextLabel from "../proposal/ProposalCardContextLabel";
+import ProposalCardDetachedHeader from "../proposal/ProposalCardDetachedHeader";
+import ProposalCardReadFullButton from "../proposal/ProposalCardReadFullButton";
 import {
   getParticipationIdentityProfile,
   getParticipationVisibleMetadata,
@@ -34,10 +37,9 @@ import type { DropContentPresentation } from "../dropContentPresentation";
 import type {
   DropIdentityMode,
   DropInteractionParams,
-  DropLocation,
   DropTimestampLayout,
 } from "../drop.types";
-import { hasDropFooter } from "../drop.types";
+import { DropLocation, hasDropFooter } from "../drop.types";
 
 interface OngoingParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -108,6 +110,7 @@ function OngoingParticipationDropInner({
     wave: drop.wave,
     metadata: drop.metadata,
   });
+  const isProposalCard = contentPresentation === "proposalCard";
   const isSelfNominee = identityProfile
     ? areSameProfileIdentity({
         left: drop.author,
@@ -115,6 +118,7 @@ function OngoingParticipationDropInner({
       })
     : false;
   const showIdentity = identityMode !== "hidden";
+  const isChatProposal = isProposalCard && location === DropLocation.WAVE;
   const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
 
   const [activePartIndex, setActivePartIndex] = useState(0);
@@ -195,7 +199,51 @@ function OngoingParticipationDropInner({
       maxEmbedDepth={maxEmbedDepth}
     />
   );
-  const shouldOffsetRows = showIdentity && !inlineAuthorOnDesktop;
+  const shouldOffsetRows =
+    showIdentity && !inlineAuthorOnDesktop && !isChatProposal;
+
+  const detachedProposalHeader =
+    isChatProposal && showIdentity ? (
+      <ProposalCardDetachedHeader drop={drop} identityHeader={identityHeader} />
+    ) : null;
+
+  const primaryContent = isChatProposal ? (
+    <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-flex-col tw-gap-y-1 tw-border-0 tw-bg-transparent tw-px-4 tw-pt-3 tw-text-left">
+      <ProposalCardContextLabel />
+      {content}
+      <ProposalCardReadFullButton drop={drop} onReadFull={onDropContentClick} />
+    </div>
+  ) : (
+    <div
+      className={`tw-relative tw-z-10 tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-px-4 tw-pt-4 tw-text-left ${
+        inlineAuthorOnDesktop ? "tw-flex-col tw-gap-y-2" : "tw-gap-x-3"
+      }`}
+    >
+      {inlineAuthorOnDesktop ? (
+        <>
+          {showIdentity && (
+            <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
+              <WaveDropAuthorPfp drop={drop} />
+              <div className="tw-min-w-0 tw-flex-1">{identityHeader}</div>
+            </div>
+          )}
+          {content}
+        </>
+      ) : (
+        <>
+          {showIdentity && <WaveDropAuthorPfp drop={drop} />}
+          <div className="tw-flex tw-w-full tw-flex-col">
+            {showIdentity && identityHeader}
+            {isProposalCard && showIdentity ? (
+              <div className="tw-mt-2">{content}</div>
+            ) : (
+              content
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
 
   const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
   const useRankStyles =
@@ -232,6 +280,9 @@ function OngoingParticipationDropInner({
       isActiveDrop={isActiveDrop}
       location={location}
       useRankStyles={useRankStyles}
+      contentPresentation={contentPresentation}
+      alignCardWithContent={isChatProposal}
+      leadingContent={detachedProposalHeader}
       floatingActions={
         canUseDesktopHoverActions && showInteractions && showReplyAndQuote ? (
           <WaveDropActions
@@ -243,31 +294,7 @@ function OngoingParticipationDropInner({
         ) : null
       }
     >
-      <div
-        className={`tw-relative tw-z-10 tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-px-4 tw-pt-4 tw-text-left ${
-          inlineAuthorOnDesktop ? "tw-flex-col tw-gap-y-2" : "tw-gap-x-3"
-        }`}
-      >
-        {inlineAuthorOnDesktop ? (
-          <>
-            {showIdentity && (
-              <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
-                <WaveDropAuthorPfp drop={drop} />
-                <div className="tw-min-w-0 tw-flex-1">{identityHeader}</div>
-              </div>
-            )}
-            {content}
-          </>
-        ) : (
-          <>
-            {showIdentity && <WaveDropAuthorPfp drop={drop} />}
-            <div className="tw-flex tw-w-full tw-flex-col">
-              {showIdentity && identityHeader}
-              {content}
-            </div>
-          </>
-        )}
-      </div>
+      {primaryContent}
 
       <div className="tw-flex tw-w-full tw-flex-col">
         {identityProfile && (
@@ -290,6 +317,9 @@ function OngoingParticipationDropInner({
           <ParticipationDropFooter
             drop={drop}
             voteAction={voteAction}
+            contentPresentation={contentPresentation}
+            indentContent={!isChatProposal}
+            inlineVotingActions={location === DropLocation.WAVE}
             showInteractions={showInteractions}
             winningThreshold={winningThreshold}
             winningThresholdMinDurationMs={winningThresholdMinDurationMs}

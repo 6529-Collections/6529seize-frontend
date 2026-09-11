@@ -4,19 +4,30 @@ import { publicEnv } from "@/config/env";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ChartBarIcon } from "@heroicons/react/24/outline";
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import React, { memo, useEffect, useRef, useState } from "react";
+import {
+  ArrowUpTrayIcon,
+  ChartBarIcon,
+  CodeBracketIcon,
+} from "@heroicons/react/24/outline";
+import {
+  AnimatePresence,
+  LayoutGroup,
+  motion,
+  useReducedMotion,
+} from "framer-motion";
+import React, { memo, useEffect, useId, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import CreateDropGifPicker from "./CreateDropGifPicker";
 import StormButton from "./StormButton";
 
 interface CreateDropActionsProps {
   readonly isStormMode: boolean;
   readonly isDropMode: boolean;
-  readonly canAddPart: boolean;
   readonly submitting: boolean;
+  readonly isCompactLayout?: boolean;
   readonly showOptions: boolean;
   readonly animateOptions: boolean;
   readonly isRequiredMetadataMissing: boolean;
@@ -31,12 +42,114 @@ interface CreateDropActionsProps {
   readonly onGifDrop: (gif: string) => void;
 }
 
+interface CompactActionButtonProps {
+  readonly label: string;
+  readonly icon: React.ReactNode;
+  readonly onClick: () => void;
+  readonly disabled?: boolean;
+  readonly pressed?: boolean;
+  readonly required?: boolean;
+}
+
+const getCompactActionSurfaceStyles = ({
+  pressed,
+  disabled,
+  required,
+}: {
+  readonly pressed: boolean | undefined;
+  readonly disabled: boolean;
+  readonly required: boolean;
+}) => {
+  if (pressed) {
+    return "tw-bg-primary-500/15 tw-text-primary-200";
+  }
+  if (disabled) {
+    return "tw-bg-iron-900 tw-text-iron-600";
+  }
+  if (required) {
+    return "tw-bg-amber-300/10 tw-text-amber-200";
+  }
+  return "tw-bg-iron-800 tw-text-iron-300 group-hover:tw-bg-iron-700 group-hover:tw-text-white";
+};
+
+const getCompactToggleLabel = ({
+  showOptions,
+  hideActionsLabel,
+  showActionsLabel,
+}: {
+  readonly showOptions: boolean;
+  readonly hideActionsLabel: string;
+  readonly showActionsLabel: string;
+}) => {
+  return showOptions ? hideActionsLabel : showActionsLabel;
+};
+
+const getCompactToggleStyles = ({
+  isActive,
+  isRequired,
+}: {
+  readonly isActive: boolean;
+  readonly isRequired: boolean;
+}) => {
+  if (isActive) {
+    return "tw-border-primary-400/20 tw-bg-primary-500/10 tw-text-primary-300";
+  }
+  if (isRequired) {
+    return "tw-border-amber-300/25 tw-bg-amber-300/10 tw-text-amber-200";
+  }
+  return "tw-border-white/10 tw-bg-iron-800 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-white";
+};
+
+const getPollActionStyles = ({
+  isStormMode,
+}: {
+  readonly isStormMode: boolean;
+}) => {
+  if (isStormMode) {
+    return "tw-cursor-default tw-bg-iron-900 tw-text-iron-600 desktop-hover:hover:tw-bg-iron-900";
+  }
+  return "tw-cursor-pointer tw-bg-iron-700 tw-text-iron-300";
+};
+
+const CompactActionButton: React.FC<CompactActionButtonProps> = ({
+  label,
+  icon,
+  onClick,
+  disabled = false,
+  pressed,
+  required = false,
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    aria-pressed={pressed}
+    className={`tw-group tw-flex tw-w-11 tw-flex-none tw-flex-col tw-items-center tw-gap-1.5 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${
+      disabled
+        ? "tw-cursor-default tw-text-iron-600"
+        : "tw-cursor-pointer tw-text-iron-300 desktop-hover:hover:tw-text-white"
+    }`}
+  >
+    <span
+      className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition desktop-hover:tw-size-9 ${getCompactActionSurfaceStyles(
+        { pressed, disabled, required }
+      )}`}
+      aria-hidden="true"
+    >
+      {icon}
+    </span>
+    <span className="tw-line-clamp-2 tw-w-11 tw-text-center tw-text-[11px] tw-font-medium tw-leading-4">
+      {label}
+    </span>
+  </button>
+);
+
 const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
   ({
     isStormMode,
     isDropMode,
-    canAddPart,
     submitting,
+    isCompactLayout = false,
     showOptions,
     animateOptions,
     isRequiredMediaMissing,
@@ -51,15 +164,25 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     onGifDrop,
   }) => {
     const isMobile = useIsMobileScreen();
-    const gifPickerKey = publicEnv.TENOR_API_KEY;
-    const gifPickerEnabled = !!gifPickerKey;
+    const prefersReducedMotion = useReducedMotion();
+    const locale = useBrowserLocale();
+    const actionTrayId = useId();
+    const addGifLabel = t(locale, "waves.gifPicker.open");
+    const showActionsLabel = t(locale, "waves.composer.actions.show");
+    const hideActionsLabel = t(locale, "waves.composer.actions.hide");
+    const actionsLabel = t(locale, "waves.composer.actions.label");
+    const metadataLabel = t(locale, "waves.composer.actions.metadata");
+    const uploadLabel = t(locale, "waves.composer.actions.upload");
+    const gifLabel = t(locale, "waves.composer.actions.gif");
+    const pollLabel = t(locale, "waves.composer.actions.poll");
+    const addPollLabel = t(locale, "waves.poll.composer.add");
+    const stormLabel = t(locale, "waves.composer.actions.storm");
+    const gifPickerKey = publicEnv.GIPHY_API_KEY;
     const [showGifPicker, setShowGifPicker] = useState(false);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [isUploadPickerOpen, setIsUploadPickerOpen] = useState(false);
 
-    const onSetShowIconsClick = () => {
-      setShowOptions(true);
-    };
+    const onSetShowIconsClick = () => setShowOptions(!showOptions);
 
     const onUploadClick = () => {
       if (isUploadPickerOpen) {
@@ -80,8 +203,13 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
       e.target.value = "";
     };
 
+    const runCompactAction = (action: () => void) => {
+      setShowOptions(false);
+      action();
+    };
+
     useEffect(() => {
-      if (!showGifPicker || !gifPickerEnabled) return;
+      if (!showGifPicker) return;
 
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Escape") {
@@ -91,7 +219,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
 
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [showGifPicker, gifPickerEnabled]);
+    }, [showGifPicker]);
 
     useEffect(() => {
       if (!isUploadPickerOpen) {
@@ -104,12 +232,13 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
       return () => window.removeEventListener("focus", resetUploadPicker);
     }, [isUploadPickerOpen]);
 
+    const shouldAnimateOptions = animateOptions && !prefersReducedMotion;
     const optionMotionTransition = {
       duration: 0.22,
-      ease: [0.22, 1, 0.36, 1],
+      ease: [0.22, 1, 0.36, 1] as const,
     };
 
-    const shellMotionProps = animateOptions
+    const shellMotionProps = shouldAnimateOptions
       ? {
           initial: false,
           animate: { width: showOptions ? "auto" : "32px" },
@@ -121,7 +250,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
           transition: { duration: 0 },
         };
 
-    const actionGroupMotionProps = animateOptions
+    const actionGroupMotionProps = shouldAnimateOptions
       ? {
           initial: { opacity: 0, x: -4 },
           animate: { opacity: 1, x: 0 },
@@ -134,7 +263,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
           transition: { duration: 0 },
         };
 
-    const chevronMotionProps = animateOptions
+    const chevronMotionProps = shouldAnimateOptions
       ? {
           initial: { opacity: 0, scale: 0.92 },
           animate: { opacity: 1, scale: 1 },
@@ -147,22 +276,47 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
           transition: { duration: 0 },
         };
 
-    const pollAction = canCreatePoll ? (
+    const compactTrayMotionProps = shouldAnimateOptions
+      ? {
+          initial: { opacity: 0, height: 0, y: 4 },
+          animate: { opacity: 1, height: "auto", y: 0 },
+          exit: { opacity: 0, height: 0, y: 4 },
+          transition: optionMotionTransition,
+        }
+      : {
+          initial: false,
+          animate: { opacity: 1, height: "auto", y: 0 },
+          exit: { opacity: 0, height: 0, y: 0 },
+          transition: { duration: 0 },
+        };
+
+    const isCompactToggleActive = showOptions;
+    const isCompactToggleRequired =
+      (isDropMode && isRequiredMetadataMissing) || isRequiredMediaMissing;
+    const compactToggleLabel = getCompactToggleLabel({
+      showOptions,
+      hideActionsLabel,
+      showActionsLabel,
+    });
+    const compactToggleStyles = getCompactToggleStyles({
+      isActive: isCompactToggleActive,
+      isRequired: isCompactToggleRequired,
+    });
+
+    const pollAction = canCreatePoll && !isPollActive ? (
       <>
         <button
           type="button"
-          aria-label={isPollActive ? "Remove poll" : "Add poll"}
-          aria-pressed={isPollActive}
+          aria-label={addPollLabel}
           onClick={onTogglePoll}
-          className={`tw-flex tw-size-8 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7 ${
-            isPollActive
-              ? "tw-text-primary-200 tw-bg-primary-500/20"
-              : "tw-bg-iron-700 tw-text-iron-300"
-          }`}
+          disabled={isStormMode}
+          className={`tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7 ${getPollActionStyles(
+            { isStormMode }
+          )}`}
           data-tooltip-id="add-poll-tooltip"
         >
           <ChartBarIcon
-            className="tw-size-5 tw-flex-shrink-0 lg:tw-size-4"
+            className="tw-size-4 tw-flex-shrink-0"
             aria-hidden="true"
           />
         </button>
@@ -175,9 +329,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
             positionStrategy="fixed"
             style={TOOLTIP_STYLES}
           >
-            <span className="tw-text-xs">
-              {isPollActive ? "Remove poll" : "Add poll"}
-            </span>
+            <span className="tw-text-xs">{addPollLabel}</span>
           </Tooltip>
         )}
       </>
@@ -185,118 +337,227 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
 
     return (
       <LayoutGroup>
-        <div className="tw-relative">
-          <motion.div
-            data-testid="drop-actions-motion-shell"
-            {...shellMotionProps}
-            className="tw-relative tw-flex tw-h-8 tw-items-center tw-overflow-hidden"
-          >
-            <AnimatePresence mode="sync" initial={false}>
-              {showOptions ? (
-                <motion.div
-                  key="default-buttons"
-                  data-testid="drop-actions-expanded-motion"
-                  {...actionGroupMotionProps}
-                  className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-overflow-hidden"
-                >
-                  {isDropMode && (
-                    <>
-                      <button
-                        aria-label="Add metadata"
-                        onClick={onAddMetadataClick}
-                        className={`tw-flex-shrink-0 ${
-                          isRequiredMetadataMissing
-                            ? "tw-text-[#FEDF89]"
-                            : "tw-text-iron-300"
-                        } tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/80 lg:tw-size-7`}
-                        data-tooltip-id="add-metadata-tooltip"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="tw-size-5 tw-flex-shrink-0 lg:tw-size-4"
-                          aria-hidden="true"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
+        <div className="tw-contents">
+          {isCompactLayout ? (
+            <>
+              <div
+                data-testid="drop-actions-compact-slot"
+                className="tw-col-start-1 tw-row-start-2 tw-mb-0.5 tw-size-10 tw-self-end desktop-hover:tw-mb-0 desktop-hover:tw-size-9 desktop-hover:tw-self-center"
+              >
+                {isPollActive ? (
+                  <span
+                    aria-hidden="true"
+                    className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-primary-400/20 tw-bg-primary-500/10 tw-text-primary-300 desktop-hover:tw-size-9"
+                  >
+                    <ChartBarIcon
+                      className="tw-size-5"
+                      aria-hidden="true"
+                    />
+                  </span>
+                ) : (
+                  <motion.button
+                    data-testid="drop-actions-toggle-motion"
+                    type="button"
+                    onClick={onSetShowIconsClick}
+                    aria-label={compactToggleLabel}
+                    aria-expanded={showOptions}
+                    aria-controls={actionTrayId}
+                    animate={{ rotate: showOptions ? 45 : 0 }}
+                    transition={
+                      shouldAnimateOptions
+                        ? optionMotionTransition
+                        : { duration: 0 }
+                    }
+                    className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:tw-size-9 ${compactToggleStyles}`}
+                  >
+                    <FontAwesomeIcon
+                      icon={faPlus}
+                      aria-hidden="true"
+                      className="tw-size-4"
+                    />
+                  </motion.button>
+                )}
+              </div>
+              <AnimatePresence initial={false}>
+                {showOptions && !isPollActive && (
+                  <motion.div
+                    id={actionTrayId}
+                    key="compact-action-tray"
+                    data-testid="drop-actions-compact-tray"
+                    {...compactTrayMotionProps}
+                    role="group"
+                    aria-label={actionsLabel}
+                    className="tw-col-span-2 tw-col-start-2 tw-row-start-3 tw-overflow-hidden"
+                  >
+                    <div aria-hidden="true" className="tw-h-2" />
+                    <div className="tw-rounded-2xl tw-border tw-border-white/10 tw-bg-iron-950/95 tw-p-2 tw-pl-0 tw-shadow-[0_12px_32px_rgba(0,0,0,0.28)]">
+                      <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-start tw-gap-6">
+                        {isDropMode && (
+                          <CompactActionButton
+                            label={metadataLabel}
+                            required={isRequiredMetadataMissing}
+                            onClick={() => runCompactAction(onAddMetadataClick)}
+                            icon={<CodeBracketIcon className="tw-size-5" />}
                           />
-                        </svg>
-                      </button>
-                      {!isMobile && (
-                        <Tooltip
-                          id="add-metadata-tooltip"
-                          place="top"
-                          offset={8}
-                          opacity={1}
-                          positionStrategy="fixed"
-                          style={TOOLTIP_STYLES}
-                        >
-                          <span className="tw-text-xs">Add metadata</span>
-                        </Tooltip>
-                      )}
-                    </>
-                  )}
-                  <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2">
-                    <>
-                      <button
-                        type="button"
-                        aria-label={
-                          isUploadPickerOpen
-                            ? "Close upload picker"
-                            : "Upload a file"
-                        }
-                        onClick={onUploadClick}
-                        className={`tw-flex-shrink-0 ${
-                          isRequiredMediaMissing
-                            ? "tw-text-[#FEDF89]"
-                            : "tw-text-iron-300"
-                        } tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7`}
-                        data-tooltip-id="upload-file-tooltip"
-                      >
-                        <FontAwesomeIcon
-                          icon={faPlus}
-                          aria-hidden="true"
-                          className={`tw-size-5 tw-flex-shrink-0 tw-transform tw-transition-transform tw-duration-300 tw-ease-out lg:tw-size-4 ${
-                            isUploadPickerOpen ? "tw-rotate-45" : "tw-rotate-0"
-                          }`}
+                        )}
+                        <CompactActionButton
+                          label={uploadLabel}
+                          required={isRequiredMediaMissing}
+                          onClick={() => runCompactAction(onUploadClick)}
+                          icon={<ArrowUpTrayIcon className="tw-size-5" />}
                         />
-                      </button>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        className="tw-hidden"
-                        accept="image/*,video/*,audio/*,application/pdf,text/csv,.pdf,.csv"
-                        multiple
-                        onChange={onFiles}
-                      />
-                      {!isMobile && (
-                        <Tooltip
-                          id="upload-file-tooltip"
-                          place="top-start"
-                          offset={8}
-                          opacity={1}
-                          positionStrategy="fixed"
-                          style={TOOLTIP_STYLES}
-                        >
-                          <span className="tw-text-xs">Upload a file</span>
-                        </Tooltip>
+                        <CompactActionButton
+                          label={gifLabel}
+                          onClick={() =>
+                            runCompactAction(() => setShowGifPicker(true))
+                          }
+                          icon={
+                            <span className="tw-text-[11px] tw-font-bold tw-tracking-[-0.02em]">
+                              GIF
+                            </span>
+                          }
+                        />
+                        {canCreatePoll && (
+                          <CompactActionButton
+                            label={pollLabel}
+                            disabled={isStormMode}
+                            onClick={() => runCompactAction(onTogglePoll)}
+                            icon={<ChartBarIcon className="tw-size-5" />}
+                          />
+                        )}
+                        <CompactActionButton
+                          label={stormLabel}
+                          disabled={isStormMode || submitting}
+                          pressed={isStormMode}
+                          onClick={() => runCompactAction(breakIntoStorm)}
+                          icon={
+                            <svg
+                              className="tw-size-5"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          }
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
+          ) : (
+            <div className="tw-relative tw-col-start-1 tw-row-start-2 tw-self-center">
+              <motion.div
+                data-testid="drop-actions-motion-shell"
+                {...shellMotionProps}
+                className="tw-relative tw-flex tw-h-8 tw-items-center tw-overflow-hidden"
+              >
+                <AnimatePresence mode="sync" initial={false}>
+                  {showOptions ? (
+                    <motion.div
+                      key="default-buttons"
+                      data-testid="drop-actions-expanded-motion"
+                      {...actionGroupMotionProps}
+                      className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-overflow-hidden"
+                    >
+                      {isDropMode && (
+                        <>
+                          <button
+                            aria-label="Add metadata"
+                            onClick={onAddMetadataClick}
+                            className={`tw-flex-shrink-0 ${
+                              isRequiredMetadataMissing
+                                ? "tw-text-[#FEDF89]"
+                                : "tw-text-iron-300"
+                            } tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/80 lg:tw-size-7`}
+                            data-tooltip-id="add-metadata-tooltip"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth="1.5"
+                              stroke="currentColor"
+                              className="tw-size-4 tw-flex-shrink-0"
+                              aria-hidden="true"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
+                              />
+                            </svg>
+                          </button>
+                          {!isMobile && (
+                            <Tooltip
+                              id="add-metadata-tooltip"
+                              place="top"
+                              offset={8}
+                              opacity={1}
+                              positionStrategy="fixed"
+                              style={TOOLTIP_STYLES}
+                            >
+                              <span className="tw-text-xs">Add metadata</span>
+                            </Tooltip>
+                          )}
+                        </>
                       )}
-                    </>
-                    {gifPickerEnabled && (
-                      <>
+                      <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2">
+                        <>
+                          <button
+                            type="button"
+                            aria-label={
+                              isUploadPickerOpen
+                                ? "Close upload picker"
+                                : "Upload a file"
+                            }
+                            onClick={onUploadClick}
+                            className={`tw-flex-shrink-0 ${
+                              isRequiredMediaMissing
+                                ? "tw-text-[#FEDF89]"
+                                : "tw-text-iron-300"
+                            } tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7`}
+                            data-tooltip-id="upload-file-tooltip"
+                          >
+                            <FontAwesomeIcon
+                              icon={faPlus}
+                              aria-hidden="true"
+                              className={`tw-size-4 tw-flex-shrink-0 tw-transform tw-transition-transform tw-duration-300 tw-ease-out ${
+                                isUploadPickerOpen
+                                  ? "tw-rotate-45"
+                                  : "tw-rotate-0"
+                              }`}
+                            />
+                          </button>
+                          {!isMobile && (
+                            <Tooltip
+                              id="upload-file-tooltip"
+                              place="top-start"
+                              offset={8}
+                              opacity={1}
+                              positionStrategy="fixed"
+                              style={TOOLTIP_STYLES}
+                            >
+                              <span className="tw-text-xs">Upload a file</span>
+                            </Tooltip>
+                          )}
+                        </>
                         <button
                           onClick={() => setShowGifPicker(true)}
-                          aria-label="Add GIF"
-                          className={`tw-flex tw-size-8 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-text-iron-300 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7`}
+                          aria-label={addGifLabel}
+                          className="tw-flex tw-size-8 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-text-iron-300 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7"
                           data-tooltip-id="add-gif-tooltip"
                         >
                           <svg
-                            className="tw-size-5 tw-flex-shrink-0"
+                            className="tw-size-4 tw-flex-shrink-0"
                             viewBox="0 0 24 24"
                             version="1.1"
                             xmlns="http://www.w3.org/2000/svg"
@@ -335,67 +596,75 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                             positionStrategy="fixed"
                             style={TOOLTIP_STYLES}
                           >
-                            <span className="tw-text-xs">Add GIF</span>
+                            <span className="tw-text-xs">{addGifLabel}</span>
                           </Tooltip>
                         )}
-                      </>
-                    )}
-                    {pollAction}
-                    <StormButton
-                      isStormMode={isStormMode}
-                      canAddPart={canAddPart}
-                      submitting={submitting}
-                      breakIntoStorm={breakIntoStorm}
-                    />
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.button
-                  key="chevron-button"
-                  data-testid="drop-actions-chevron-motion"
-                  {...chevronMotionProps}
-                  onClick={onSetShowIconsClick}
-                  type="button"
-                  aria-label="Show drop actions"
-                  className={`tw-absolute tw-inset-y-0 tw-left-0 tw-my-auto tw-flex-shrink-0 ${
-                    (isDropMode && isRequiredMetadataMissing) ||
-                    isRequiredMediaMissing ||
-                    isPollActive
-                      ? "tw-text-[#FEDF89]"
-                      : "tw-text-iron-400"
-                  } tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70`}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                    className="tw-size-4 tw-flex-shrink-0"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="m8.25 4.5 7.5 7.5-7.5 7.5"
-                    />
-                  </svg>
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        </div>
-        {gifPickerEnabled && (
-          <CreateDropGifPicker
-            tenorApiKey={gifPickerKey}
-            show={showGifPicker}
-            setShow={setShowGifPicker}
-            onSelect={(gif) => {
-              onGifDrop(gif);
-              setShowGifPicker(false);
-            }}
+                        {pollAction}
+                        {!isStormMode && (
+                          <StormButton
+                            isStormMode={false}
+                            isPollActive={isPollActive}
+                            submitting={submitting}
+                            breakIntoStorm={breakIntoStorm}
+                          />
+                        )}
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.button
+                      key="chevron-button"
+                      data-testid="drop-actions-chevron-motion"
+                      {...chevronMotionProps}
+                      onClick={onSetShowIconsClick}
+                      type="button"
+                      aria-label="Show drop actions"
+                      className={`tw-absolute tw-inset-y-0 tw-left-0 tw-my-auto tw-flex-shrink-0 ${
+                        (isDropMode && isRequiredMetadataMissing) ||
+                        isRequiredMediaMissing ||
+                        isPollActive
+                          ? "tw-text-[#FEDF89]"
+                          : "tw-text-iron-400"
+                      } tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70`}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                        className="tw-size-4 tw-flex-shrink-0"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                        />
+                      </svg>
+                    </motion.button>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </div>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="tw-hidden"
+            accept="image/*,video/*,audio/*,application/pdf,text/csv,.pdf,.csv"
+            multiple
+            onChange={onFiles}
           />
-        )}
+        </div>
+        <CreateDropGifPicker
+          giphyApiKey={gifPickerKey}
+          show={showGifPicker}
+          setShow={setShowGifPicker}
+          onSelect={(gif) => {
+            onGifDrop(gif);
+            setShowGifPicker(false);
+          }}
+        />
       </LayoutGroup>
     );
   }

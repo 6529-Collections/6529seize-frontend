@@ -8,11 +8,17 @@ import MessagesMobile from "../MessagesMobile";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import ConnectWallet from "../../common/ConnectWallet";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
+import useCreateModalState from "@/hooks/useCreateModalState";
+import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 // Main layout content that uses the Layout context
 function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
-  const { contentState } = useAuthenticatedContent();
+  const { contentState, connectedProfile } = useAuthenticatedContent();
   const { isApp } = useDeviceInfo();
+  const locale = useBrowserLocale();
+  const { isDirectMessageModalOpen, close } = useCreateModalState();
 
   const containerClassName =
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
@@ -54,8 +60,8 @@ function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
     if (contentState === "needs-profile") {
       return (
         <ConnectWallet
-          title="You need to set up a profile to continue."
-          description="Create a profile to access messages."
+          title={t(locale, "profileSetup.requiredTitle")}
+          description={t(locale, "profileSetup.messagesDescription")}
           action={<UserSetUpProfileCta />}
         />
       );
@@ -74,11 +80,25 @@ function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
 
     // Loading/measuring states
     return null;
-  }, [contentState, connectPrompt, containerClassName, children, isApp]);
+  }, [
+    contentState,
+    connectPrompt,
+    containerClassName,
+    children,
+    isApp,
+    locale,
+  ]);
 
   return (
     <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black">
       {content}
+      {contentState === "ready" && !isApp && connectedProfile && (
+        <CreateDirectMessageModal
+          isOpen={isDirectMessageModalOpen}
+          onClose={close}
+          profile={connectedProfile}
+        />
+      )}
     </div>
   );
 }

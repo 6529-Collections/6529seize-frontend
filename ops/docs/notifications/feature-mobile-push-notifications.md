@@ -51,7 +51,7 @@ push to open the matching app route.
   - On open, settings load for this device ID.
   - `404` settings response defaults all toggles to enabled.
   - Toggles include follows, mentions, REP/NIC updates, quoted/replied drops,
-    votes/reactions/boosts, and wave invites.
+    votes/reactions/boosts, wave invites, and subscription coverage.
   - Footer states: `No Changes`, `Save Changes`, `Saving...`.
   - Successful save shows `Notification settings updated` and closes the modal.
   - Save failure shows `Failed to save notification settings` and keeps the
@@ -63,7 +63,8 @@ push to open the matching app route.
     `notification_id`, `redirect`, `target_profile_id`, and
     `target_profile_handle`.
   - Device-push redirect types are `profile` and `waves`.
-  - `profile` redirects can include `subroute` (`rep` or `identity`);
+  - `profile` redirects can include `subroute` (`rep`, `identity`, or
+    `subscriptions`);
     unknown subroutes fall back to profile root.
   - `waves` redirects use `wave_id` with optional `drop_id`.
   - Before navigating, the app resolves the target profile to a currently
@@ -73,6 +74,13 @@ push to open the matching app route.
     found in connected accounts, or profile-switch settlement failures all
     result in ignored taps (no navigation).
   - Missing usable redirect data does not navigate.
+- Subscription coverage push:
+  - Running-low and action-required transitions can send a push when the
+    device's `Subscription Coverage` setting is enabled.
+  - Early plan-a-top-up coverage remains available in the in-app notifications
+    feed without sending the higher-interruption mobile push.
+  - Tapping a coverage push opens the matching profile's Subscriptions tab
+    after the normal connected-profile resolution.
 - iOS delivered-notification cleanup:
   - Tapped pushes are removed from iOS delivered notifications after successful
     registration.

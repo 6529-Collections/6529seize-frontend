@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Generative method</title>
+  <desc id="desc">A triptych showing source data, a deterministic script, and a reproducible result with sample dots and trait analysis.</desc>
+  <rect width="1600" height="1000" fill="#090A0C"/>
+  <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+    <text x="86" y="92" fill="#79A9FF" font-size="22" font-weight="700" letter-spacing="5">DIGITAL-ART STEWARDSHIP</text>
+    <text x="86" y="160" fill="#F4F0E7" font-size="58" font-weight="650">Generative method</text>
+    <text x="86" y="204" fill="#A6A7AE" font-size="25">A descriptor should show how an edition can be read, checked, and repeated.</text>
+    <text x="1514" y="154" fill="#79A9FF" font-size="20" font-weight="700" letter-spacing="3" text-anchor="end">OPEN REPRODUCIBILITY</text>
+
+    <g fill="#111419" stroke="#3A4350" stroke-width="3">
+      <rect x="70" y="270" width="438" height="500" rx="4"/><rect x="581" y="270" width="438" height="500" rx="4"/><rect x="1092" y="270" width="438" height="500" rx="4"/>
+    </g>
+    <g fill="#79A9FF" font-size="19" font-weight="800" letter-spacing="4">
+      <text x="112" y="332">01 / SOURCE</text><text x="623" y="332">02 / SCRIPT</text><text x="1134" y="332">03 / RESULT</text>
+    </g>
+    <g fill="#F4F0E7" font-size="34" font-weight="700">
+      <text x="112" y="390">The given material</text><text x="623" y="390">The fixed reading</text><text x="1134" y="390">The visible account</text>
+    </g>
+    <g fill="#A6A7AE" font-size="20">
+      <text x="112" y="432"><tspan x="112" dy="0">edition sample</tspan><tspan x="112" dy="30">metadata and seed</tspan><tspan x="112" dy="30">source snapshot</tspan></text>
+      <text x="623" y="432"><tspan x="623" dy="0">method and version</tspan><tspan x="623" dy="30">parameters and rules</tspan><tspan x="623" dy="30">descriptor configuration</tspan></text>
+      <text x="1134" y="432"><tspan x="1134" dy="0">trait counts</tspan><tspan x="1134" dy="30">ranked observations</tspan><tspan x="1134" dy="30">deterministic result set</tspan></text>
+    </g>
+
+    <g fill="none" stroke="#252A34" stroke-width="2">
+      <rect x="112" y="550" width="344" height="140"/><rect x="623" y="550" width="344" height="140"/><rect x="1134" y="550" width="344" height="140"/>
+    </g>
+    <g fill="#F4F0E7">
+      <circle cx="146" cy="590" r="7"/><circle cx="184" cy="638" r="7"/><circle cx="222" cy="582" r="7"/><circle cx="260" cy="660" r="7"/><circle cx="298" cy="610" r="7"/><circle cx="336" cy="678" r="7"/><circle cx="374" cy="596" r="7"/><circle cx="412" cy="648" r="7"/>
+      <circle cx="147" cy="646" r="7"/><circle cx="185" cy="590" r="7"/><circle cx="223" cy="672" r="7"/><circle cx="261" cy="608" r="7"/><circle cx="299" cy="650" r="7"/><circle cx="337" cy="584" r="7"/><circle cx="375" cy="666" r="7"/><circle cx="413" cy="620" r="7"/>
+    </g>
+    <g fill="none" stroke="#79A9FF" stroke-width="5">
+      <circle cx="795" cy="620" r="74"/><circle cx="795" cy="620" r="42"/><path d="M795 546 V694 M721 620 H869"/>
+      <path d="M1160 672 H1192 V644 H1224 V612 H1256 V588 H1288 V570 H1320 V550"/>
+    </g>
+    <g fill="#79A9FF">
+      <circle cx="795" cy="620" r="9"/><circle cx="1160" cy="672" r="8"/><circle cx="1192" cy="644" r="8"/><circle cx="1224" cy="612" r="8"/><circle cx="1256" cy="588" r="8"/><circle cx="1288" cy="570" r="8"/><circle cx="1320" cy="550" r="8"/>
+    </g>
+    <g fill="#A6A7AE" font-size="17" font-weight="700" letter-spacing="2">
+      <text x="112" y="730">SAMPLE</text><text x="623" y="730">SAME INPUTS / SAME RULES</text><text x="1134" y="730">TRAIT PREVALENCE</text>
+    </g>
+
+    <path d="M160 844 C420 812 548 812 800 844 C1052 876 1180 876 1440 844" fill="none" stroke="#79A9FF" stroke-width="4"/>
+    <circle cx="160" cy="844" r="10" fill="#F4F0E7"/><circle cx="800" cy="844" r="10" fill="#F4F0E7"/><circle cx="1440" cy="844" r="10" fill="#F4F0E7"/>
+    <g fill="#F4F0E7" font-size="25" font-weight="600" text-anchor="middle">
+      <text x="160" y="906">PUBLISH THE INPUTS</text><text x="800" y="906">SHOW THE METHOD</text><text x="1440" y="906">REPEAT THE RESULT</text>
+    </g>
+  </g>
+</svg>

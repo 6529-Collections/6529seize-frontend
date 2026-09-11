@@ -149,6 +149,12 @@ afterEach(() => {
 });
 
 describe("MemePageArtViewer", () => {
+  it("fills the available width in row and column layout wrappers", () => {
+    const { container } = render(<MemePageArtViewer nft={baseNft as any} />);
+
+    expect(container.firstElementChild).toHaveClass("tw-w-full");
+  });
+
   it("sizes carousel renderer wrappers without depending on Bootstrap Col", () => {
     const styles = readFileSync(
       join(process.cwd(), "components/the-memes/TheMemes.module.css"),

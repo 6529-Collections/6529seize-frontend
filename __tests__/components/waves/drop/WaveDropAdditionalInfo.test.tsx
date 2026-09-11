@@ -3,6 +3,10 @@ import { WaveDropAdditionalInfo } from "@/components/waves/drop/WaveDropAddition
 import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
 import { FallbackImage } from "@/components/common/FallbackImage";
 
+const mockVideoPlayer = jest.fn((props: any) => (
+  <video data-testid="video-player" preload={props.preload} />
+));
+
 jest.mock("next/image", () => ({
   __esModule: true,
   default: (props: any) => <img {...props} alt={props.alt ?? ""} />,
@@ -13,6 +17,14 @@ jest.mock("@/components/common/FallbackImage", () => ({
     <img src={props.primarySrc} alt={props.alt ?? ""} />
   )),
 }));
+
+jest.mock(
+  "@/components/drops/view/item/content/media/SeizeVideoPlayer",
+  () => ({
+    __esModule: true,
+    default: (props: any) => mockVideoPlayer(props),
+  })
+);
 
 jest.mock("@/components/ipfs/IPFSContext", () => ({
   resolveIpfsUrlSync: (url: string) =>
@@ -29,6 +41,7 @@ const fallbackImageMock = FallbackImage as jest.Mock;
 describe("WaveDropAdditionalInfo", () => {
   beforeEach(() => {
     fallbackImageMock.mockClear();
+    mockVideoPlayer.mockClear();
   });
 
   it("does not render when there is no commentary or media", () => {
@@ -102,6 +115,33 @@ describe("WaveDropAdditionalInfo", () => {
     );
 
     expect(screen.getByText("Promo Video")).toBeInTheDocument();
+    expect(mockVideoPlayer).toHaveBeenCalledWith(
+      expect.objectContaining({ preload: "metadata", layout: "prominent" })
+    );
+  });
+
+  it("does not preload additional videos below the fold", () => {
+    const additionalMedia = JSON.stringify({
+      artist_profile_media: [],
+      artwork_commentary_media: ["https://example.com/process.mp4"],
+      preview_image: "",
+      promo_video: "",
+    });
+
+    render(
+      <WaveDropAdditionalInfo
+        drop={buildDrop([
+          {
+            data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+            data_value: additionalMedia,
+          },
+        ])}
+      />
+    );
+
+    expect(mockVideoPlayer).toHaveBeenCalledWith(
+      expect.objectContaining({ preload: "none", layout: "fill" })
+    );
   });
 
   it("does not render promo video section when not provided", () => {

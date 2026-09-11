@@ -5,19 +5,18 @@ import { multiPartUpload } from "@/components/waves/create-wave/services/multiPa
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
-import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { commonApiPost } from "@/services/api/common-api";
+import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
+import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
 import { useMutation } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { OperationalData } from "../types/OperationalData";
 import type { TraitsData } from "../types/TraitsData";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
-import {
-  buildSubmissionMetadata,
-  getSubmissionMetadataLengthValidation,
-} from "../utils/submissionMetadata";
+import { getSubmissionMetadataLengthValidation } from "../utils/submissionMetadata";
+import { transformToApiRequest } from "../utils/artworkSubmissionRequest";
 
 /**
  * Interface for the artwork submission data
@@ -44,63 +43,6 @@ interface ArtworkSubmissionData {
 }
 
 /**
- * Function to transform form data into API request format
- */
-const transformToApiRequest = (data: {
-  waveId: string;
-  traits: TraitsData;
-  operationalData?: OperationalData | undefined;
-  isAdditionalActionPromised?: boolean | undefined;
-  mediaUrl: string;
-  mimeType: string;
-  signerAddress: string;
-  isSafeSignature: boolean;
-}): ApiCreateDropRequest => {
-  const {
-    waveId,
-    traits,
-    operationalData,
-    isAdditionalActionPromised = false,
-    mediaUrl,
-    mimeType,
-    signerAddress,
-    isSafeSignature,
-  } = data;
-
-  const metadata = buildSubmissionMetadata({
-    traits,
-    operationalData,
-  });
-
-  // Create the request object
-  const request: ApiCreateDropRequest = {
-    wave_id: waveId,
-    drop_type: ApiDropType.Participatory,
-    is_additional_action_promised: isAdditionalActionPromised,
-    title: traits.title,
-    parts: [
-      {
-        content: traits.description,
-        media: [
-          {
-            url: mediaUrl,
-            mime_type: mimeType,
-          },
-        ],
-      },
-    ],
-    referenced_nfts: [],
-    mentioned_users: [],
-    metadata,
-    signature: null,
-    is_safe_signature: isSafeSignature,
-    signer_address: signerAddress,
-  };
-
-  return request;
-};
-
-/**
  * Phase transition callback type
  */
 interface PhaseChangeCallbacks {
@@ -108,6 +50,37 @@ interface PhaseChangeCallbacks {
     | ((phase: SubmissionPhase, error?: string) => void)
     | undefined;
 }
+
+interface SubmissionOptions extends PhaseChangeCallbacks {
+  readonly onSuccess?: ((data: ApiDrop) => void) | undefined;
+  readonly onError?: ((error: Error) => void) | undefined;
+  readonly expectedAuthStateFingerprint: string;
+  readonly identityChangedMessage: string;
+}
+
+const ACTIVE_WALLET_CHANGED_ERROR =
+  "The active wallet changed during submission";
+
+const isSubmissionSignerCurrent = (signerAddress: string): boolean =>
+  getWalletAddress()?.toLowerCase() === signerAddress.toLowerCase();
+
+const isSubmissionWalletCurrent = ({
+  signerAddress,
+  expectedAuthStateFingerprint,
+}: {
+  readonly signerAddress: string;
+  readonly expectedAuthStateFingerprint: string;
+}): boolean => {
+  const walletAddress = getWalletAddress();
+  if (!isSubmissionSignerCurrent(signerAddress)) {
+    return false;
+  }
+
+  return (
+    getAuthStateFingerprint({ walletAddress, jwt: getAuthJwt() }) ===
+    expectedAuthStateFingerprint
+  );
+};
 
 /**
  * Hook for submitting artwork with enhanced UX
@@ -121,6 +94,8 @@ export function useArtworkSubmissionMutation() {
   const [submissionError, setSubmissionError] = useState<string | undefined>(
     undefined
   );
+  const submissionInFlightRef = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Update submission phase with callbacks
   const updatePhase = useCallback(
@@ -178,16 +153,31 @@ export function useArtworkSubmissionMutation() {
     {
       data: ApiCreateDropRequest;
       callbacks?: PhaseChangeCallbacks | undefined;
+      expectedAuthStateFingerprint: string;
+      signerAddress: string;
+      identityChangedMessage: string;
     }
   >({
-    mutationFn: async ({ data, callbacks }) => {
+    mutationFn: async ({
+      data,
+      callbacks,
+      expectedAuthStateFingerprint,
+      signerAddress,
+    }) => {
       // Update phase to processing
       updatePhase("processing", callbacks);
 
       // Ensure user is authenticated
-      const { success } = await requestAuth();
+      const { success } = await requestAuth({
+        expectedAuthStateFingerprint,
+      });
       if (!success) {
         throw new Error("Authentication required");
+      }
+
+      const currentWalletAddress = getWalletAddress();
+      if (currentWalletAddress?.toLowerCase() !== signerAddress.toLowerCase()) {
+        throw new Error(ACTIVE_WALLET_CHANGED_ERROR);
       }
 
       // Submit to API
@@ -207,6 +197,11 @@ export function useArtworkSubmissionMutation() {
     },
     onError: (error, variables) => {
       console.error("Submission error:", error);
+      if (error.message === ACTIVE_WALLET_CHANGED_ERROR) {
+        updatePhase("error", variables.callbacks, error.message);
+        setToast({ message: variables.identityChangedMessage, type: "error" });
+        return;
+      }
       const errorMsg =
         getToastErrorDetails(error) ?? "Submission failed. Please try again.";
       updatePhase("error", variables.callbacks, errorMsg);
@@ -227,14 +222,12 @@ export function useArtworkSubmissionMutation() {
     data: ArtworkSubmissionData,
     signerAddress: string,
     isSafeSignature: boolean,
-    options?: {
-      onSuccess?: ((data: ApiDrop) => void) | undefined;
-      onError?: ((error: Error) => void) | undefined;
-      onPhaseChange?:
-        | ((phase: SubmissionPhase, error?: string) => void)
-        | undefined;
-    }
+    options: SubmissionOptions
   ) => {
+    if (submissionInFlightRef.current) {
+      return null;
+    }
+
     try {
       // Reset state for a new submission
       setUploadProgress(0);
@@ -295,6 +288,22 @@ export function useArtworkSubmissionMutation() {
         return null;
       }
 
+      if (
+        !isSubmissionWalletCurrent({
+          signerAddress,
+          expectedAuthStateFingerprint: options.expectedAuthStateFingerprint,
+        })
+      ) {
+        setToast({
+          message: options.identityChangedMessage,
+          type: "error",
+        });
+        return null;
+      }
+
+      submissionInFlightRef.current = true;
+      setIsSubmitting(true);
+
       // Create callbacks object
       const callbacks = { onPhaseChange: options?.onPhaseChange };
 
@@ -320,14 +329,22 @@ export function useArtworkSubmissionMutation() {
         return null;
       }
 
+      if (!isSubmissionSignerCurrent(signerAddress)) {
+        setToast({ message: options.identityChangedMessage, type: "error" });
+        throw new Error(ACTIVE_WALLET_CHANGED_ERROR);
+      }
+      const signingAuthStateFingerprint = getAuthStateFingerprint({
+        walletAddress: getWalletAddress(),
+        jwt: getAuthJwt(),
+      });
+
       // Step 2: Transform data to API format
       const transformedRequest = transformToApiRequest({
         waveId: data.waveId,
         traits: data.traits,
         operationalData: data.operationalData,
         isAdditionalActionPromised: data.isAdditionalActionPromised,
-        mediaUrl: media.url,
-        mimeType: media.mime_type,
+        media,
         signerAddress,
         isSafeSignature,
       });
@@ -340,7 +357,8 @@ export function useArtworkSubmissionMutation() {
       });
 
       if (!signatureResult.success) {
-        throw new Error("Failed to sign the drop");
+        updatePhase("idle", callbacks);
+        return null;
       }
 
       // Add signature to the request
@@ -353,6 +371,9 @@ export function useArtworkSubmissionMutation() {
       const result = await submissionMutation.mutateAsync({
         data: transformedRequest,
         callbacks,
+        expectedAuthStateFingerprint: signingAuthStateFingerprint,
+        signerAddress,
+        identityChangedMessage: options.identityChangedMessage,
       });
 
       // Call success callback if provided
@@ -362,19 +383,31 @@ export function useArtworkSubmissionMutation() {
 
       return result;
     } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Submission failed. Please try again.";
+      updatePhase(
+        "error",
+        { onPhaseChange: options.onPhaseChange },
+        errorMessage
+      );
+
       // Call error callback if provided
       if (options?.onError && error instanceof Error) {
         options.onError(error);
       }
 
       return null;
+    } finally {
+      submissionInFlightRef.current = false;
+      setIsSubmitting(false);
     }
   };
 
   return {
     submitArtwork,
-    isSubmitting:
-      uploadMutation.isPending ?? isSigningDrop ?? submissionMutation.isPending,
+    isSubmitting,
     isUploading: uploadMutation.isPending,
     isSigning: isSigningDrop,
     isProcessing: submissionMutation.isPending,
@@ -382,7 +415,7 @@ export function useArtworkSubmissionMutation() {
     submissionPhase,
     submissionError,
     isSuccess: submissionMutation.isSuccess,
-    isError: uploadMutation.isError ?? submissionMutation.isError,
+    isError: uploadMutation.isError || submissionMutation.isError,
     error: uploadMutation.error ?? submissionMutation.error,
     reset: () => {
       uploadMutation.reset();

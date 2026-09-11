@@ -1,8 +1,8 @@
-# Wave Creation Overview Step
+# Wave Creation Setup Step
 
 ## Overview
 
-`Overview` is the first step in wave creation.
+`Setup` is the first step in wave creation.
 Set the wave name, optional image, and wave type before moving to later steps.
 
 ## Location in the Site
@@ -11,16 +11,21 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - Desktop create-wave modal mode: `?create=wave` on supported waves and
   messages routes
   - route ownership: [Wave Create Modal Entry Points](feature-modal-entry-points.md)
-- Step label: `Overview`
+- Step label: `Setup`
+- Content heading: `Create Wave` for a standalone wave.
+- For a subwave, both the modal header and Setup heading say
+  `Create subwave of "parent wave name"`. The fields are labeled
+  `Subwave Name`, `Subwave Profile Picture`, and `Subwave Type`.
+- The `Saved Drafts` list is hidden during subwave creation.
 - Create form renders only when a connected profile is available.
 
 ## Step Paths
 
-- `Chat`: `Overview` -> `Groups` -> `Rules` -> `Description`
-- `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
-  `Voting` -> `Outcomes` -> `Description`
-- `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Rules` ->
-  `Voting` -> `Outcomes` -> `Description`
+- `Chat`: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
+- `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
+- `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
+  `Guidelines` -> `Description` -> `Overview`
 
 ## What You Can Set
 
@@ -32,8 +37,25 @@ Set the wave name, optional image, and wave type before moving to later steps.
   - `Chat`
   - `Rank`
   - `Approve`
-- `Show outcomes` for `Rank` and `Approve` waves.
-- Approve tab labels for `Approve` waves:
+- `Ranking mode` for `Rank` waves:
+  - `Announce Winners`
+  - `Perpetual Ranking`
+- `Display settings` inside `Appearance and labels` for `Rank` and `Approve`
+  waves:
+  - submission-button label
+  - proposal-card appearance
+  - Approve tab labels for `Approve` waves
+- `Proposal card appearance` for `Rank` and `Approve` waves:
+  - open `Appearance and labels` to change the proposal-card presentation
+  - `Summary card` is the default for new waves and applies a reusable compact
+    presentation in chat and list views
+  - `Full proposal` keeps the previous full-content presentation
+  - `Text preview limit` accepts a whole-number proposal-text limit from `120`
+    to `1000` characters and controls excerpt length
+  - `Image on summary card` controls whether the first ready still image
+    appears beside the summary
+- Approve tab labels:
+  - appear in their own `Tab labels` group under `Appearance and labels`
   - proposals tab defaults to `Proposals`
   - approved tab defaults to `Approved`
 - Uploaded image shows a preview; `Delete` removes it.
@@ -41,25 +63,34 @@ Set the wave name, optional image, and wave type before moving to later steps.
 
 ## Navigation Behavior
 
-- `Overview` always opens first.
-- `Next` moves to `Groups` when overview validation passes.
+- `Setup` always opens first.
+- `Next` moves to `Access` when overview validation passes.
 - `Next` stays enabled; validation runs when clicked.
-- `Previous` is not shown on `Overview`.
+- `Previous` is not shown on `Setup`.
 - On large screens, the step rail can reopen completed steps, including
-  `Overview`.
-- On smaller screens, use `Previous` from later steps to return to `Overview`.
+  `Setup`.
+- On smaller screens, use `Previous` from later steps to return to `Setup`.
 
 ## Validation and State Rules
 
 - Empty name blocks forward navigation and shows `Name is required`.
 - Name length above `250` characters blocks forward navigation.
+- A Summary card proposal-text limit outside `120`–`1000`, or a value that is
+  not a whole number, blocks forward navigation and focuses the invalid field.
 - Image upload accepts `JPEG`, `JPG`, `PNG`, `GIF`, and `WEBP` only.
 - Unsupported image formats show toast: `Invalid file type`.
 - Images larger than `10MB` show toast: `File size must be less than 10MB`.
 - Changing wave type resets all non-overview settings to that type's defaults
   (`groups`, `chat`, `dates`, `drops`, `voting`, `outcomes`).
-- `Show outcomes` defaults to on. Turning it off hides outcome displays after
-  the wave is created.
+- Outcome visibility is configured on the `Outcomes` step for scheduled `Rank`
+  and `Approve` waves.
+- `Proposal card appearance` is inside `Appearance and labels` and defaults to
+  `Summary card` for newly created Waves. The default stores a versioned
+  Wave-level display recipe when the Wave is created. Existing Waves and older
+  drafts without this setting keep the `Full proposal` presentation. The 6529
+  Network Museum compatibility fallback uses `Summary card` until an explicit
+  setting is saved. The setting does not alter Chat messages or specialized
+  Memes, Curation, and Quorum presentations.
 
 ## Failure and Recovery
 
@@ -72,14 +103,17 @@ Set the wave name, optional image, and wave type before moving to later steps.
 
 ## Limitations / Notes
 
-- This page documents wave-creation `Overview` only.
+- This page documents wave-creation `Setup` only.
 - Direct-message creation is documented separately.
 
 ## Related Pages
 
+- [Final Overview](feature-final-overview-step.md)
+
 - [Wave Creation Index](README.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
-- [Wave Creation Rules Step](feature-rules-step.md)
+- [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Creation Description Step](feature-description-step.md)
+- [Summary Proposal Cards](../drop-actions/feature-proposal-cards.md)
 - [Docs Home](../../README.md)

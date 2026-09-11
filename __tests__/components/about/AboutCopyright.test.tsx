@@ -4,7 +4,9 @@ import AboutCopyright from '@/components/about/AboutCopyright';
 describe('AboutCopyright', () => {
   it('renders headings', () => {
     render(<AboutCopyright />);
-    expect(screen.getByRole('heading', { name: /copyright/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: /copyright/i })
+    ).toBeInTheDocument();
     expect(screen.getByText(/Repeat Infringer Policy/i)).toBeInTheDocument();
   });
 

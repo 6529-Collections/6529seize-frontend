@@ -1,9 +1,12 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { resolveWaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
+import { useWaveSubmissionButtonLabel } from "@/hooks/waves/useWaveMetadata";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useWave } from "@/hooks/useWave";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { AnimatePresence, motion } from "framer-motion";
@@ -286,9 +289,25 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   maxPrice,
   onPriceRangeChange,
 }) => {
+  const isLargeScreen = useMediaQuery("(min-width: 1024px)");
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { isMemesWave, isCurationWave, isQuorumWave, participation } =
     useWave(wave);
+  const submissionExperience = useMemo(
+    () =>
+      resolveWaveSubmissionExperience({
+        isMemesWave: Boolean(isMemesWave),
+        isCurationWave: Boolean(isCurationWave),
+        isQuorumWave: Boolean(isQuorumWave),
+        submissionStrategy: wave.participation?.submission_strategy ?? null,
+      }),
+    [
+      isCurationWave,
+      isMemesWave,
+      isQuorumWave,
+      wave.participation?.submission_strategy,
+    ]
+  );
   const isLoggedIn = Boolean(connectedProfile?.handle);
   const { canCreateDrop } = getWaveDropEligibility({
     isLoggedIn,
@@ -328,7 +347,13 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     showPriceActions,
     showCreateAction,
   });
-  const remeasureKey = `${activeSortLabel}|actions:${actionsRemeasureVariant}`;
+  const showDefaultCreateRow = !showPriceActions && isLoggedIn;
+  const createLabel = useWaveSubmissionButtonLabel({
+    enabled: showCreateAction || showDefaultCreateRow,
+    submissionExperience,
+    waveId: wave.id,
+  });
+  const remeasureKey = `${activeSortLabel}|actions:${actionsRemeasureVariant}|create:${createLabel}`;
 
   const {
     headerRowRef,
@@ -358,6 +383,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
       }),
     [measurements, showPriceActions]
   );
+  const sortMode = isLargeScreen ? "tabs" : "dropdown";
 
   const onTogglePriceFilters = () => {
     if (hasActivePriceFilters) {
@@ -378,10 +404,9 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   const controlsRowBasisClass =
     layout.wrapActions && !shouldRenderActionsInPriceRow ? "tw-basis-full" : "";
   const showHeaderActions = showPriceActions && !shouldRenderActionsInPriceRow;
-  const showDefaultCreateRow = !showPriceActions && isLoggedIn;
-  const defaultCreateLabel = isQuorumWave ? "Create Proposal" : "Drop";
   const priceActionControls = (
     <PriceActions
+      createLabel={createLabel}
       isCompactActions={isCompactActions}
       isPriceFiltersOpen={isPriceFiltersOpen}
       hasActivePriceFilters={hasActivePriceFilters}
@@ -402,11 +427,11 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
         <div
           ref={controlsRowRef}
           data-testid="leaderboard-header-controls-row"
-          className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-gap-2 ${
+          className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-start tw-gap-2 ${
             controlsRowBasisClass
           } ${
             layout.enableControlsScroll
-              ? "horizontal-menu-hide-scrollbar tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
+              ? "tw-no-scrollbar tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
               : "tw-overflow-x-hidden"
           }`}
         >
@@ -421,7 +446,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             <WaveleaderboardSort
               sort={sort}
               onSortChange={onSortChange}
-              mode={layout.sortMode}
+              mode={sortMode}
               items={sortItems}
             />
           </div>
@@ -443,15 +468,14 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             className={`tw-flex tw-flex-col tw-items-end ${isMemesWave ? "lg:tw-hidden" : ""}`}
           >
             {canCreateDrop && onCreateDrop && (
-              <PrimaryButton
-                loading={false}
-                disabled={false}
-                onClicked={onCreateDrop}
-                padding="tw-px-3 tw-py-2"
+              <Button
+                onClick={onCreateDrop}
+                variant="primary"
+                size="sm"
               >
-                <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                <span>{defaultCreateLabel}</span>
-              </PrimaryButton>
+                <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                <span>{createLabel}</span>
+              </Button>
             )}
           </div>
         )}
@@ -501,6 +525,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
         activeSortLabel={activeSortLabel}
         showPriceActions={showPriceActions}
         showCreateAction={showCreateAction}
+        createLabel={createLabel}
         sortTabsProbeRef={sortTabsProbeRef}
         sortDropdownProbeRef={sortDropdownProbeRef}
         actionsFullProbeRef={actionsFullProbeRef}

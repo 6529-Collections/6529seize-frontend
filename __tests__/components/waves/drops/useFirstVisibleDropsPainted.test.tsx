@@ -1,6 +1,13 @@
 import { act, renderHook } from "@testing-library/react";
 
 import { useFirstVisibleDropsPainted } from "@/components/waves/drops/wave-drops-all/hooks/useFirstVisibleDropsPainted";
+import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
+
+jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
+  markMobileLaunchStep: jest.fn(),
+}));
+
+const markMobileLaunchStepMock = markMobileLaunchStep as jest.Mock;
 
 const flushPaintGate = () => {
   act(() => {
@@ -17,6 +24,7 @@ describe("useFirstVisibleDropsPainted", () => {
   });
 
   afterEach(() => {
+    jest.clearAllMocks();
     jest.useRealTimers();
   });
 
@@ -58,10 +66,14 @@ describe("useFirstVisibleDropsPainted", () => {
 
       expect(result.current).toBe(false);
       expect(requestAnimationFrame).toHaveBeenCalledTimes(1);
+      expect(markMobileLaunchStepMock).not.toHaveBeenCalled();
 
       flushPaintGate();
 
       expect(result.current).toBe(true);
+      expect(markMobileLaunchStepMock).toHaveBeenCalledWith(
+        "first_drop_rendered"
+      );
     } finally {
       Object.defineProperty(window, "requestAnimationFrame", {
         configurable: true,

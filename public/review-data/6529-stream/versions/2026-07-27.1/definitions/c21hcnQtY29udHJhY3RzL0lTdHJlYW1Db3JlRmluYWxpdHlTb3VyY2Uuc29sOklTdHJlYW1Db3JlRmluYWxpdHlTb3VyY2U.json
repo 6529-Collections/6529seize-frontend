@@ -1,0 +1,957 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x5923b379",
+          "declaringDefinitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionBurnsBlocked",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x5923b379",
+          "signature": "collectionBurnsBlocked(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x185153c3",
+          "declaringDefinitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionExists",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x185153c3",
+          "signature": "collectionExists(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x2ed330f7",
+          "declaringDefinitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionFreezeStatus",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x2ed330f7",
+          "signature": "collectionFreezeStatus(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x36180788",
+          "declaringDefinitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionHasMaxSupply",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x36180788",
+          "signature": "collectionHasMaxSupply(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x43567a66",
+          "declaringDefinitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionMaxSupply",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x43567a66",
+          "signature": "collectionMaxSupply(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0xd1b08e67",
+          "declaringDefinitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionMintedEver",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xd1b08e67",
+          "signature": "collectionMintedEver(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x382f4a13",
+          "declaringDefinitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionNextSerial",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x382f4a13",
+          "signature": "collectionNextSerial(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x1ea5ea29",
+          "declaringDefinitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionStatus",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x1ea5ea29",
+          "signature": "collectionStatus(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x61f2d35c",
+          "declaringDefinitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionSupplyMode",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x61f2d35c",
+          "signature": "collectionSupplyMode(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0xa6b638c9",
+          "declaringDefinitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenCollectionIdentity",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "mappingExists",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "collectionSerial",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bool",
+              "name": "burned",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xa6b638c9",
+          "signature": "tokenCollectionIdentity(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x8c46d901",
+          "declaringDefinitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenLifecycle",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "lifecycle",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x8c46d901",
+          "signature": "tokenLifecycle(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0xf18332dd",
+          "declaringDefinitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "totalSupplyOfCollection",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xf18332dd",
+          "signature": "totalSupplyOfCollection(uint256)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "collectionExists(uint256)",
+          "displaySignature": "collectionExists(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x185153c3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2Uuc29sOklTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2UjZnVuY3Rpb246MHgxODUxNTNjMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionExists",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 77,
+            "byteStart": 392,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCoreFinalitySource.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:1bdd3c1cd3f4ee04aeb53b5d19ba5abc33b95693484eaf95378cbf75415c0df0",
+            "sourceSha256": "sha256:b57d02113bb9586a6fd3828f1d7867024fa20898efb0a8e75b429195495cee77"
+          },
+          "selector": "0x185153c3",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionHasMaxSupply(uint256)",
+          "displaySignature": "collectionHasMaxSupply(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x36180788",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2Uuc29sOklTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2UjZnVuY3Rpb246MHgzNjE4MDc4OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionHasMaxSupply",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 83,
+            "byteStart": 475,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCoreFinalitySource.sol#L10",
+            "lineEnd": 10,
+            "lineStart": 10,
+            "snippetSha256": "sha256:8e03a6c2130916da2b47cd2588f9ccfa5b09d74a252c7924b43af81b0b3532fc",
+            "sourceSha256": "sha256:b57d02113bb9586a6fd3828f1d7867024fa20898efb0a8e75b429195495cee77"
+          },
+          "selector": "0x36180788",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionStatus(uint256)",
+          "displaySignature": "collectionStatus(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x1ea5ea29",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2Uuc29sOklTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2UjZnVuY3Rpb246MHgxZWE1ZWEyOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionStatus",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 78,
+            "byteStart": 564,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCoreFinalitySource.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:e539204f946738e01bdcf0bb3046ac90f92aa1c23061b1fc030ae3c588c65dd3",
+            "sourceSha256": "sha256:b57d02113bb9586a6fd3828f1d7867024fa20898efb0a8e75b429195495cee77"
+          },
+          "selector": "0x1ea5ea29",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionSupplyMode(uint256)",
+          "displaySignature": "collectionSupplyMode(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x61f2d35c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2Uuc29sOklTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2UjZnVuY3Rpb246MHg2MWYyZDM1Yw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionSupplyMode",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 82,
+            "byteStart": 648,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCoreFinalitySource.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:646f0c2909298fa22299b80ebe87996caefa37157bb8131f008e636f5edfe62f",
+            "sourceSha256": "sha256:b57d02113bb9586a6fd3828f1d7867024fa20898efb0a8e75b429195495cee77"
+          },
+          "selector": "0x61f2d35c",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionMaxSupply(uint256)",
+          "displaySignature": "collectionMaxSupply(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x43567a66",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2Uuc29sOklTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2UjZnVuY3Rpb246MHg0MzU2N2E2Ng",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionMaxSupply",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 83,
+            "byteStart": 736,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCoreFinalitySource.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:7dc518ddf2a96d4285c7186c139e6c380cfe682eeaa9447a8951fa47a438737c",
+            "sourceSha256": "sha256:b57d02113bb9586a6fd3828f1d7867024fa20898efb0a8e75b429195495cee77"
+          },
+          "selector": "0x43567a66",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionMintedEver(uint256)",
+          "displaySignature": "collectionMintedEver(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0xd1b08e67",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2Uuc29sOklTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2UjZnVuY3Rpb246MHhkMWIwOGU2Nw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionMintedEver",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 84,
+            "byteStart": 825,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCoreFinalitySource.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:1b1a70b85ae64e08f86ca5fb74b0868d6103ff409be2ea9ab7e151cc8db11826",
+            "sourceSha256": "sha256:b57d02113bb9586a6fd3828f1d7867024fa20898efb0a8e75b429195495cee77"
+          },
+          "selector": "0xd1b08e67",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionNextSerial(uint256)",
+          "displaySignature": "collectionNextSerial(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x382f4a13",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2Uuc29sOklTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2UjZnVuY3Rpb246MHgzODJmNGExMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionNextSerial",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 84,
+            "byteStart": 915,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCoreFinalitySource.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:dee1eaf85218902dbb11a2a570edec83bfc362c923ce4773c615144e95e6c43b",
+            "sourceSha256": "sha256:b57d02113bb9586a6fd3828f1d7867024fa20898efb0a8e75b429195495cee77"
+          },
+          "selector": "0x382f4a13",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "totalSupplyOfCollection(uint256)",
+          "displaySignature": "totalSupplyOfCollection(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0xf18332dd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2Uuc29sOklTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2UjZnVuY3Rpb246MHhmMTgzMzJkZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalSupplyOfCollection",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 87,
+            "byteStart": 1005,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCoreFinalitySource.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:21a455d570f5901ec4f636137a783c6455aea19a4f29ef19fc1aa74c190aef37",
+            "sourceSha256": "sha256:b57d02113bb9586a6fd3828f1d7867024fa20898efb0a8e75b429195495cee77"
+          },
+          "selector": "0xf18332dd",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "tokenCollectionIdentity(uint256)",
+          "displaySignature": "tokenCollectionIdentity(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0xa6b638c9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2Uuc29sOklTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2UjZnVuY3Rpb246MHhhNmI2MzhjOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "tokenCollectionIdentity",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "mappingExists",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "collectionSerial",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "burned",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 178,
+            "byteStart": 1098,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCoreFinalitySource.sol#L24-L27",
+            "lineEnd": 27,
+            "lineStart": 24,
+            "snippetSha256": "sha256:0644c89cd52ecb42cc293ad71e22f5b53ee6fa1c1f8d874fe347224f30df1be8",
+            "sourceSha256": "sha256:b57d02113bb9586a6fd3828f1d7867024fa20898efb0a8e75b429195495cee77"
+          },
+          "selector": "0xa6b638c9",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "tokenLifecycle(uint256)",
+          "displaySignature": "tokenLifecycle(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x8c46d901",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2Uuc29sOklTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2UjZnVuY3Rpb246MHg4YzQ2ZDkwMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "tokenLifecycle",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "lifecycle",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 81,
+            "byteStart": 1282,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCoreFinalitySource.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:0438aad7c3e9d358e027324f787a6b4d785ff7bc422a5f19a0fc155084db9735",
+            "sourceSha256": "sha256:b57d02113bb9586a6fd3828f1d7867024fa20898efb0a8e75b429195495cee77"
+          },
+          "selector": "0x8c46d901",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionBurnsBlocked(uint256)",
+          "displaySignature": "collectionBurnsBlocked(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x5923b379",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2Uuc29sOklTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2UjZnVuY3Rpb246MHg1OTIzYjM3OQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionBurnsBlocked",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 83,
+            "byteStart": 1369,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCoreFinalitySource.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:0ac0ce7a7f62c55ca92ee3ee2667c3252aff29b57b48a710ee943d1da9346e38",
+            "sourceSha256": "sha256:b57d02113bb9586a6fd3828f1d7867024fa20898efb0a8e75b429195495cee77"
+          },
+          "selector": "0x5923b379",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionFreezeStatus(uint256)",
+          "displaySignature": "collectionFreezeStatus(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x2ed330f7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2Uuc29sOklTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2UjZnVuY3Rpb246MHgyZWQzMzBmNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionFreezeStatus",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 83,
+            "byteStart": 1458,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCoreFinalitySource.sol#L33",
+            "lineEnd": 33,
+            "lineStart": 33,
+            "snippetSha256": "sha256:edc1226d8f891e9a4c02ae03145106060841906255f4a3081962167078c89450",
+            "sourceSha256": "sha256:b57d02113bb9586a6fd3828f1d7867024fa20898efb0a8e75b429195495cee77"
+          },
+          "selector": "0x2ed330f7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2Uuc29sOklTdHJlYW1Db3JlRmluYWxpdHlTb3VyY2U",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IStreamCoreFinalitySource",
+    "natspec": "@notice Granular target-Core reads consumed by the immutable finality adapter and registry.\n @dev This seam deliberately excludes aggregate finality helpers so no aggregate bytecode is\n      spent in StreamCore. Every read is non-mutating and part of the locked pre-genesis target.",
+    "range": {
+      "byteLength": 1193,
+      "byteStart": 350,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamCoreFinalitySource.sol#L7-L34",
+      "lineEnd": 34,
+      "lineStart": 7,
+      "snippetSha256": "sha256:238f79c2c375b5f2cbb63cf5971587d51fc18dc263288ea72e427ca5d145efdc",
+      "sourceSha256": "sha256:b57d02113bb9586a6fd3828f1d7867024fa20898efb0a8e75b429195495cee77"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamCoreFinalitySource.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 12
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 12
+    },
+    "totalCount": 12
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x185153c3",
+      "definitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x1ea5ea29",
+      "definitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x2ed330f7",
+      "definitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x36180788",
+      "definitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x382f4a13",
+      "definitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x43567a66",
+      "definitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x5923b379",
+      "definitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x61f2d35c",
+      "definitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0x8c46d901",
+      "definitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0xa6b638c9",
+      "definitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0xd1b08e67",
+      "definitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource#function:0xf18332dd",
+      "definitionId": "smart-contracts/IStreamCoreFinalitySource.sol:IStreamCoreFinalitySource",
+      "severity": "advisory"
+    }
+  ]
+}

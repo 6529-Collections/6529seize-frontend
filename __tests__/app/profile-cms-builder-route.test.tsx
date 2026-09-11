@@ -1,8 +1,14 @@
 import { render, screen } from "@testing-library/react";
 
 import ProfileCmsBuilderPage from "@/app/[user]/cms/builder/page";
+import { publicEnv } from "@/config/env";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { getUserProfile } from "@/helpers/server.helpers";
+
+jest.mock("@/config/env", () => {
+  const actual = jest.requireActual("@/config/env");
+  return { ...actual, publicEnv: { ...actual.publicEnv } };
+});
 
 jest.mock("@/components/profile-cms-builder/ProfileCmsBuilder", () => ({
   __esModule: true,
@@ -41,8 +47,8 @@ const getUserProfileMock = getUserProfile as jest.Mock;
 describe("profile CMS builder route", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    delete process.env["PROFILE_CMS_BUILDER_ENABLED"];
-    delete process.env["NEXT_PUBLIC_PROFILE_CMS_BUILDER_ENABLED"];
+    delete publicEnv.PROFILE_CMS_BUILDER_ENABLED;
+    delete publicEnv.NEXT_PUBLIC_PROFILE_CMS_BUILDER_ENABLED;
     getAppCommonHeadersMock.mockResolvedValue({});
     getUserProfileMock.mockResolvedValue({
       id: "profile-punk6529",
@@ -50,7 +56,8 @@ describe("profile CMS builder route", () => {
     });
   });
 
-  it("is hidden behind a feature flag", async () => {
+  it("returns not found when explicitly disabled", async () => {
+    publicEnv.PROFILE_CMS_BUILDER_ENABLED = "false";
     await expect(
       ProfileCmsBuilderPage({
         params: Promise.resolve({ user: "punk6529" }),
@@ -58,9 +65,7 @@ describe("profile CMS builder route", () => {
     ).rejects.toThrow("NEXT_NOT_FOUND");
   });
 
-  it("renders the builder for a profile handle when enabled", async () => {
-    process.env["PROFILE_CMS_BUILDER_ENABLED"] = "true";
-
+  it("renders the direct builder route by default", async () => {
     const page = await ProfileCmsBuilderPage({
       params: Promise.resolve({ user: "punk6529" }),
     });
@@ -76,7 +81,7 @@ describe("profile CMS builder route", () => {
   });
 
   it("returns not found when the profile lookup fails", async () => {
-    process.env["PROFILE_CMS_BUILDER_ENABLED"] = "true";
+    publicEnv.PROFILE_CMS_BUILDER_ENABLED = "true";
     getUserProfileMock.mockRejectedValueOnce(new Error("not found"));
 
     await expect(
@@ -87,7 +92,7 @@ describe("profile CMS builder route", () => {
   });
 
   it("returns not found when the profile lookup has no profile id", async () => {
-    process.env["PROFILE_CMS_BUILDER_ENABLED"] = "true";
+    publicEnv.PROFILE_CMS_BUILDER_ENABLED = "true";
     getUserProfileMock.mockResolvedValueOnce({ handle: "punk6529" });
 
     await expect(

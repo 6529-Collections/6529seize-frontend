@@ -4,6 +4,7 @@ import {
   getCreateWavePreviousStep,
   calculateLastDecisionTime,
 } from "@/helpers/waves/create-wave.helpers";
+import { getCreateWaveMainSteps } from "@/helpers/waves/waves.constants";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeSubType } from "@/generated/models/ApiWaveOutcomeSubType";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
@@ -99,13 +100,13 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.DROPS,
           waveType: ApiWaveType.Approve,
         })
-      ).toBe(CreateWaveStep.RULES);
+      ).toBe(CreateWaveStep.VOTING);
       expect(
         getCreateWaveNextStep({
           step: CreateWaveStep.RULES,
           waveType: ApiWaveType.Approve,
         })
-      ).toBe(CreateWaveStep.VOTING);
+      ).toBe(CreateWaveStep.DESCRIPTION);
       expect(
         getCreateWaveNextStep({
           step: CreateWaveStep.VOTING,
@@ -117,9 +118,94 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.DESCRIPTION,
           waveType: ApiWaveType.Rank,
         })
-      ).toBeNull();
+      ).toBe(CreateWaveStep.REVIEW);
+    });
+
+    it("skips the outcomes step for perpetual rank waves", () => {
+      expect(
+        getCreateWaveNextStep({
+          step: CreateWaveStep.VOTING,
+          waveType: ApiWaveType.Rank,
+          ongoingRanking: true,
+        })
+      ).toBe(CreateWaveStep.RULES);
+      expect(
+        getCreateWaveNextStep({
+          step: CreateWaveStep.VOTING,
+          waveType: ApiWaveType.Rank,
+          ongoingRanking: false,
+        })
+      ).toBe(CreateWaveStep.OUTCOMES);
+      // A stray flag never changes other wave types' flows.
+      expect(
+        getCreateWaveNextStep({
+          step: CreateWaveStep.VOTING,
+          waveType: ApiWaveType.Approve,
+          ongoingRanking: true,
+        })
+      ).toBe(CreateWaveStep.OUTCOMES);
+      expect(
+        getCreateWavePreviousStep({
+          step: CreateWaveStep.RULES,
+          waveType: ApiWaveType.Rank,
+          ongoingRanking: true,
+        })
+      ).toBe(CreateWaveStep.VOTING);
+      expect(
+        getCreateWavePreviousStep({
+          step: CreateWaveStep.RULES,
+          waveType: ApiWaveType.Rank,
+          ongoingRanking: false,
+        })
+      ).toBe(CreateWaveStep.OUTCOMES);
+    });
+
+    it("filters the outcomes step from the perpetual rank stepper", () => {
+      expect(
+        getCreateWaveMainSteps({
+          waveType: ApiWaveType.Rank,
+          ongoingRanking: true,
+        })
+      ).not.toContain(CreateWaveStep.OUTCOMES);
+      expect(
+        getCreateWaveMainSteps({
+          waveType: ApiWaveType.Rank,
+          ongoingRanking: false,
+        })
+      ).toContain(CreateWaveStep.OUTCOMES);
+      expect(
+        getCreateWaveMainSteps({
+          waveType: ApiWaveType.Approve,
+          ongoingRanking: true,
+        })
+      ).toContain(CreateWaveStep.OUTCOMES);
     });
   });
+
+  it.each([
+    [ApiWaveType.Chat, false],
+    [ApiWaveType.Rank, false],
+    [ApiWaveType.Rank, true],
+    [ApiWaveType.Approve, false],
+  ] as const)(
+    "places Guidelines before Description with matching forward and backward navigation for %s (perpetual=%s)",
+    (waveType, ongoingRanking) => {
+      const steps = getCreateWaveMainSteps({ waveType, ongoingRanking });
+      expect(steps.slice(-3)).toEqual([
+        CreateWaveStep.RULES,
+        CreateWaveStep.DESCRIPTION,
+        CreateWaveStep.REVIEW,
+      ]);
+      for (const [index, step] of steps.entries()) {
+        expect(getCreateWaveNextStep({ step, waveType, ongoingRanking })).toBe(
+          steps[index + 1] ?? null
+        );
+        expect(
+          getCreateWavePreviousStep({ step, waveType, ongoingRanking })
+        ).toBe(steps[index - 1] ?? null);
+      }
+    }
+  );
 
   describe("getCreateWavePreviousStep", () => {
     it("returns expected previous steps based on wave type", () => {
@@ -140,7 +226,7 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.VOTING,
           waveType: ApiWaveType.Approve,
         })
-      ).toBe(CreateWaveStep.RULES);
+      ).toBe(CreateWaveStep.DROPS);
       expect(
         getCreateWavePreviousStep({
           step: CreateWaveStep.OUTCOMES,
@@ -348,6 +434,148 @@ describe("create-wave.helpers", () => {
       });
 
       expect(res.voting.forbid_negative_votes).toBe(false);
+    });
+
+    it("omits the decision strategy, end date and outcomes for ongoing rank waves", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.dates.ongoingRanking = true;
+      // Even with a fixed schedule and outcomes configured, ongoing mode wins.
+      config.dates.firstDecisionTime = 2;
+      config.dates.subsequentDecisions = [3, 5];
+      config.dates.endDate = 10;
+      config.outcomes = [{ title: "stale outcome" }];
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.decisions_strategy).toBeNull();
+      expect(res.voting.period.max).toBeNull();
+      expect(res.participation.period.max).toBeNull();
+      expect(res.outcomes).toEqual([]);
+      // Time-weighted voting is disabled in the base config, so no time lock.
+      expect(res.wave.time_lock_ms).toBeNull();
+    });
+
+    it("normalizes the after-a-win duplicates rule for ongoing rank waves", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.dates.ongoingRanking = true;
+      config.drops.submissionStrategy = {
+        type: "IDENTITY",
+        config: {
+          duplicates: "ALLOW_AFTER_WIN",
+          who_can_be_submitted: "EVERYONE",
+        },
+      };
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      // Behaviorally identical under perpetual rules (nothing ever wins), so
+      // a bypassed validation still produces a coherent wave.
+      expect(res.participation.submission_strategy).toEqual({
+        type: "IDENTITY",
+        config: {
+          duplicates: "NEVER_ALLOW",
+          who_can_be_submitted: "EVERYONE",
+        },
+      });
+    });
+
+    it("keeps the after-a-win duplicates rule for scheduled rank waves", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.drops.submissionStrategy = {
+        type: "IDENTITY",
+        config: {
+          duplicates: "ALLOW_AFTER_WIN",
+          who_can_be_submitted: "EVERYONE",
+        },
+      };
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.participation.submission_strategy?.config.duplicates).toBe(
+        "ALLOW_AFTER_WIN"
+      );
+    });
+
+    it("keeps the time-weighted vote lock for ongoing rank waves", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.dates.ongoingRanking = true;
+      // Time-weighted voting drives the live leaderboard (not just decision
+      // snapshots), so it stays meaningful for perpetual waves.
+      config.voting.timeWeighted = {
+        enabled: true,
+        averagingInterval: 10,
+        averagingIntervalUnit: "minutes",
+      };
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.decisions_strategy).toBeNull();
+      expect(res.wave.time_lock_ms).toBe(10 * 60 * 1000);
+    });
+
+    it("ignores a stray ongoing flag on approve waves", () => {
+      const config = createBaseConfig(ApiWaveType.Approve);
+      // ongoingRanking is a Rank-only concept; a stray flag must not leak into
+      // other wave types' payloads.
+      config.dates.ongoingRanking = true;
+      config.dates.endDate = 999;
+      config.outcomes = [
+        {
+          type: "MANUAL",
+          title: "outcome",
+          credit: null,
+          category: null,
+          winnersConfig: null,
+          maxWinners: null,
+        },
+      ];
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.voting.period.max).toBe(999);
+      expect(res.participation.period.max).toBe(999);
+      expect(res.outcomes).not.toEqual([]);
+    });
+
+    it("keeps the rolling decision strategy for open-ended scheduled rank waves", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.dates.firstDecisionTime = 2;
+      config.dates.subsequentDecisions = [3];
+      config.dates.isRolling = true;
+      config.dates.endDate = null;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.decisions_strategy).toEqual({
+        first_decision_time: 2,
+        subsequent_decisions: [3],
+        is_rolling: true,
+      });
+      expect(res.voting.period.max).toBeNull();
     });
 
     it("includes identity submission strategy when configured", () => {

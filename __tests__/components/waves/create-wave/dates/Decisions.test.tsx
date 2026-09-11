@@ -24,7 +24,7 @@ jest.mock("@/components/waves/create-wave/services/waveDecisionService", () => {
     calculateEndDateForCycles: jest.fn(() => 3),
   };
 });
-jest.mock("@/components/common/DateAccordion", () => (props: any) => (
+jest.mock("@/components/common/CollapsibleCard", () => (props: any) => (
   <div data-testid="accordion" data-expanded={String(props.isExpanded)}>
     {props.isExpanded ? props.children : props.collapsedContent}
   </div>
@@ -45,6 +45,13 @@ describe("Decisions", () => {
     endDate: 0,
   } as any;
 
+  const openAdvancedSettings = () =>
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Winner schedule/,
+      })
+    );
+
   it("updates decisions when subsequent decisions added", async () => {
     const setDates = jest.fn();
     render(
@@ -55,9 +62,9 @@ describe("Decisions", () => {
         onRollingEnabled={jest.fn()}
         isExpanded={true}
         setIsExpanded={jest.fn()}
-        onInteraction={jest.fn()}
       />
     );
+    openAdvancedSettings();
     fireEvent.click(screen.getByTestId("sub"));
     expect(setDates).toHaveBeenCalledWith({
       ...baseDates,
@@ -76,9 +83,9 @@ describe("Decisions", () => {
         onRollingEnabled={onRollingEnabled}
         isExpanded={true}
         setIsExpanded={jest.fn()}
-        onInteraction={jest.fn()}
       />
     );
+    openAdvancedSettings();
     fireEvent.click(screen.getByRole("switch"));
     expect(onRollingEnabled).toHaveBeenCalled();
     expect(setDates).toHaveBeenCalledWith(
@@ -97,7 +104,6 @@ describe("Decisions", () => {
         onRollingEnabled={jest.fn()}
         isExpanded={false}
         setIsExpanded={jest.fn()}
-        onInteraction={jest.fn()}
       />
     );
 
@@ -121,7 +127,6 @@ describe("Decisions", () => {
         onRollingEnabled={jest.fn()}
         isExpanded={false}
         setIsExpanded={jest.fn()}
-        onInteraction={jest.fn()}
       />
     );
 
@@ -145,7 +150,6 @@ describe("Decisions", () => {
         onRollingEnabled={jest.fn()}
         isExpanded={false}
         setIsExpanded={jest.fn()}
-        onInteraction={jest.fn()}
       />
     );
 
@@ -156,5 +160,27 @@ describe("Decisions", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(
       "First winners announcement cannot be before voting begins. Move voting start earlier or move first winners announcement later."
     );
+  });
+
+  it("opens advanced settings when an advanced date has an error", () => {
+    render(
+      <Decisions
+        dates={{ ...baseDates, subsequentDecisions: [1] }}
+        errors={[]}
+        setDates={jest.fn()}
+        onRollingEnabled={jest.fn()}
+        isExpanded={true}
+        setIsExpanded={jest.fn()}
+        hasAdvancedError={true}
+        advancedContent={<div>Invalid optional end date</div>}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: /Winner schedule Needs attention/,
+      })
+    ).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("Invalid optional end date")).toBeVisible();
   });
 });

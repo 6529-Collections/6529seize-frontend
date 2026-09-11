@@ -5,6 +5,7 @@ import {
   WaveDropMobileMenuProvider,
 } from "@/components/waves/drops/WaveDropMobileMenuContext";
 import { useWaveDropMobileMenuController } from "@/components/waves/drops/useWaveDropMobileMenuController";
+import type { QuickCurationAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 
 const menuRender = jest.fn();
 
@@ -65,9 +66,11 @@ function OpenMenuButton({
 function ControlledMenuOwner({
   dropId,
   onOpenChange,
+  standaloneQuickRemoveCuration,
 }: {
   readonly dropId: string;
   readonly onOpenChange?: ((open: boolean) => void) | undefined;
+  readonly standaloneQuickRemoveCuration?: QuickCurationAction | undefined;
 }) {
   useWaveDropMobileMenuController({
     drop: createDrop(dropId),
@@ -78,6 +81,8 @@ function ControlledMenuOwner({
     onOpenChange,
     onReply: jest.fn(),
     onAddReaction: jest.fn(),
+    showOnlyQuickRemove: Boolean(standaloneQuickRemoveCuration),
+    standaloneQuickRemoveCuration,
   });
 
   return null;
@@ -126,6 +131,26 @@ describe("WaveDropMobileMenuProvider", () => {
     fireEvent.click(screen.getByTestId("close-menu"));
 
     expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("passes the confirmed curation removal action through the shared mobile menu", async () => {
+    const action = { id: "curation-1", name: "Marketplace" };
+    render(
+      <WaveDropMobileMenuProvider>
+        <ControlledMenuOwner
+          dropId="drop-a"
+          standaloneQuickRemoveCuration={action}
+        />
+      </WaveDropMobileMenuProvider>
+    );
+
+    await screen.findByTestId("shared-menu");
+    expect(menuRender).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        showOnlyQuickRemove: true,
+        standaloneQuickRemoveCuration: action,
+      })
+    );
   });
 
   it("clears the shared menu when its opener unmounts", async () => {

@@ -13,6 +13,7 @@ import {
   getUserProfileHeaderDisplayName,
   getUserProfileHeaderMessage,
 } from "../user-page-header.messages";
+import type { ReactNode } from "react";
 
 export default function UserPageHeaderName({
   profile,
@@ -21,6 +22,7 @@ export default function UserPageHeaderName({
   level,
   profileEnabledAt,
   variant = "full",
+  titleAccessory,
 }: {
   readonly profile: ApiIdentity;
   readonly canEdit: boolean;
@@ -28,6 +30,7 @@ export default function UserPageHeaderName({
   readonly level: number;
   readonly profileEnabledAt: string | null;
   readonly variant?: "full" | "title" | "meta";
+  readonly titleAccessory?: ReactNode;
 }) {
   const displayName = getUserProfileHeaderDisplayName(profile, mainAddress);
   const profileEnabledLabel = profileEnabledAt
@@ -40,51 +43,64 @@ export default function UserPageHeaderName({
   return (
     <div className={showTitle && showMeta ? "tw-space-y-2" : ""}>
       {showTitle && (
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
           <UserPageHeaderNameWrapper
             profile={profile}
             canEdit={canEdit}
             profileLabel={displayName}
           >
-            <ProfileNameWithAiMarker
-              classification={profile.classification}
-              markerClassName="tw-text-base md:tw-text-lg"
+            <h1
+              id="profile-heading"
+              className="tw-m-0 tw-break-all tw-text-left tw-text-xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-iron-50 md:tw-text-2xl"
             >
-              <span className="tw-break-all tw-text-left tw-text-xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-white md:tw-text-2xl">
-                {displayName}
-              </span>
-            </ProfileNameWithAiMarker>
+              <ProfileNameWithAiMarker
+                classification={profile.classification}
+                markerClassName="tw-text-base md:tw-text-lg"
+              >
+                <span>{displayName}</span>
+              </ProfileNameWithAiMarker>
+            </h1>
           </UserPageHeaderNameWrapper>
-          {profile.handle && (
-            <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center xl:-tw-mt-1">
-              <UserCICTypeIconWrapper profile={profile} />
-            </div>
-          )}
-          <UserCICAndLevel level={level} size={UserCICAndLevelSize.SMALL} />
-          <ProfileCurationBadge profile={profile} />
+          <div className="tw-flex tw-h-5 tw-flex-shrink-0 tw-items-center tw-gap-1.5">
+            {profile.handle && (
+              <div className="tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center [&_svg]:tw-block">
+                <UserCICTypeIconWrapper profile={profile} />
+              </div>
+            )}
+            <UserCICAndLevel level={level} size={UserCICAndLevelSize.SMALL} />
+            <ProfileCurationBadge profile={profile} />
+          </div>
+          {titleAccessory}
         </div>
       )}
 
       {showMeta && (
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-          <UserPageClassificationWrapper profile={profile} canEdit={canEdit}>
-            <div className="tw-block tw-text-sm tw-font-medium tw-leading-4 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-white">
+          <UserPageClassificationWrapper
+            profile={profile}
+            canEdit={canEdit}
+            profileLabel={displayName}
+          >
+            <div className="tw-block tw-text-[13px] tw-font-medium tw-leading-4 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out desktop-hover:group-hover:tw-text-iron-50">
               {CLASSIFICATIONS[profile.classification].title}
             </div>
           </UserPageClassificationWrapper>
           {profileEnabledLabel && (
-            <span className="tw-text-iron-600 sm:tw-text-iron-700">&bull;</span>
-          )}
-          {profileEnabledLabel && (
-            <p
-              className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-500"
-              suppressHydrationWarning
-            >
-              {getUserProfileHeaderMessage(
-                "user.profileHeader.name.profileEnabled",
-                { date: profileEnabledLabel }
-              )}
-            </p>
+            <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
+              <span
+                aria-hidden="true"
+                className="tw-size-1 tw-flex-none tw-rounded-full tw-bg-iron-400"
+              />
+              <p
+                className="tw-m-0 tw-whitespace-nowrap tw-text-[13px] tw-font-normal tw-leading-4 tw-text-iron-400"
+                suppressHydrationWarning
+              >
+                {getUserProfileHeaderMessage(
+                  "user.profileHeader.name.profileEnabled",
+                  { date: profileEnabledLabel }
+                )}
+              </p>
+            </div>
           )}
         </div>
       )}

@@ -1,13 +1,214 @@
+import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.de-DE.json";
+import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.de-DE.json";
+import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.de-DE.json";
 import { DE_DE_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { DE_DE_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { DE_DE_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
+import { DE_DE_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
+import { DE_DE_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
+import { DE_DE_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { DE_DE_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
+import stormComposerDeMessages from "@/i18n/messages/stormComposer.de-DE.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
+import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.json";
+
+const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  ...profileCmsStudioMessages,
+  ...studioTemplateDescriptions,
+  ...profileCmsStudioUploadMessages,
+  ...studioWalletImportMessages,
+  "profileCms.builder.gallery.snapshot.required":
+    "Fordere eine Wallet-Momentaufnahme an und prüfe sie, bevor du diese Galerie speicherst oder veröffentlichst.",
+  "profileCms.builder.publish.savedNotCurrent":
+    "Diese signierte Veröffentlichung ist gespeichert, aber nicht die aktive Website. Prüfe den Versionsverlauf, bevor du die Website änderst.",
+  "profileCms.builder.gallery.snapshot.warning.unmeasuredImages":
+    "Einige Bildgrößen konnten nicht geprüft werden. Diese Werke behalten ihre NFT-Details ohne Bild in der Veröffentlichung. Aktualisiere die Momentaufnahme, um es erneut zu versuchen.",
+  "profileCms.builder.json.pending":
+    "Übernimm oder verwirf deine JSON-Änderungen vor dem Speichern oder Veröffentlichen.",
+  "profileCms.builder.json.reviewPending": "JSON-Änderungen prüfen",
+  "profileCms.builder.json.discardPending": "JSON-Änderungen verwerfen",
+  "profileCms.builder.history.actionFailed":
+    "Die Website konnte nicht aktualisiert werden. Aktualisiere den Versionsverlauf und versuche es erneut.",
+  "profileCms.builder.gallery.snapshot.warning.unresolvedWallets":
+    "Einige Wallets konnten nicht zugeordnet werden und fehlen in dieser Momentaufnahme.",
+  "profileCms.builder.gallery.snapshot.warning.truncated":
+    "Die Momentaufnahme hat die Höchstzahl an Werken erreicht. Einige erfasste Werke werden nicht angezeigt.",
+  "profileCms.builder.api.serverValidationInvalid":
+    "Die Serverprüfung hat Probleme gefunden, die die Veröffentlichung dieses Pakets verhindern.",
+  "profileCms.builder.drafts.title": "Gespeicherte Entwürfe",
+  "profileCms.builder.drafts.refresh": "Entwürfe aktualisieren",
+  "profileCms.builder.drafts.loading": "Wird geladen …",
+  "profileCms.builder.drafts.failed":
+    "Gespeicherte Entwürfe konnten nicht geladen werden.",
+  "profileCms.builder.drafts.empty": "Noch keine gespeicherten Entwürfe.",
+  "profileCms.builder.drafts.version": "Version {version}",
+  "profileCms.builder.drafts.load": "Laden",
+  "profileCms.builder.drafts.status.draft": "Entwurf",
+  "profileCms.builder.drafts.status.validating": "Wird geprüft",
+  "profileCms.builder.drafts.status.published": "Veröffentlicht",
+  "profileCms.builder.drafts.status.failed": "Fehlgeschlagen",
+  "profileCms.builder.drafts.status.archived": "Archiviert",
+  "profileCms.builder.drafts.status.superseded": "Ersetzt",
+  "profileCms.builder.drafts.loadFailed":
+    "Dieser Entwurf konnte nicht in den Editor geladen werden.",
+  "profileCms.builder.publish.title": "Veröffentlichen",
+  "profileCms.builder.publish.description":
+    "Speichere und prüfe das Paket, lade es in den dezentralen Speicher hoch, signiere es mit deiner Wallet und veröffentliche es als Hauptwebsite deines Profils.",
+  "profileCms.builder.publish.publish": "Website veröffentlichen",
+  "profileCms.builder.publish.publishing": "Wird veröffentlicht …",
+  "profileCms.builder.publish.retry": "Erneut versuchen",
+  "profileCms.builder.publish.reSign": "Erneut signieren",
+  "profileCms.builder.publish.walletRequired":
+    "Verbinde die mit diesem Profil verknüpfte Wallet, um die Veröffentlichung zu signieren.",
+  "profileCms.builder.publish.safeNotice":
+    "Smart-Contract-Wallet erkannt. Deine Wallet muss diese Signaturanfrage unterstützen. Andernfalls verwende eine andere für dieses Profil autorisierte Wallet.",
+  "profileCms.builder.publish.success":
+    "Veröffentlicht. Deine Profilwebsite ist jetzt hier erreichbar:",
+  "profileCms.builder.publish.step.validate": "Entwurf speichern und prüfen",
+  "profileCms.builder.publish.step.upload": "In den Speicher hochladen",
+  "profileCms.builder.publish.step.sign": "Mit der Wallet signieren",
+  "profileCms.builder.publish.step.publish": "Website freischalten",
+  "profileCms.builder.publish.error.validationInvalid":
+    "Die Serverprüfung hat blockierende Probleme gefunden. Behebe sie und veröffentliche erneut.",
+  "profileCms.builder.publish.error.saveFailed":
+    "Der Entwurf konnte vor der Veröffentlichung nicht gespeichert werden.",
+  "profileCms.builder.publish.error.validateFailed":
+    "Die Serverprüfung ist fehlgeschlagen.",
+  "profileCms.builder.publish.error.uploadFailed":
+    "Das Paket konnte nicht in den dezentralen Speicher hochgeladen werden.",
+  "profileCms.builder.publish.error.signatureRejected":
+    "Die Signaturanfrage wurde in deiner Wallet abgebrochen.",
+  "profileCms.builder.publish.error.signatureFailed":
+    "Die Signierung ist fehlgeschlagen. Prüfe deine Wallet und versuche es erneut.",
+  "profileCms.builder.publish.error.deadlineExpired":
+    "Die Signatur ist vor der Veröffentlichung abgelaufen. Signiere erneut, um fortzufahren.",
+  "profileCms.builder.publish.error.publishConflict":
+    "Die veröffentlichte Website wurde während dieses Versuchs geändert. Prüfe den Versionsverlauf vor einer erneuten Veröffentlichung.",
+  "profileCms.builder.publish.error.storagePending":
+    "Der dauerhafte Speicher stellt deine signierte Veröffentlichung noch bereit. Warte kurz und versuche es erneut. Deine Signatur und die gespeicherte Version werden wiederverwendet.",
+  "profileCms.builder.publish.signedPublication": "Signierte Veröffentlichung",
+  "profileCms.builder.publish.signedPublicationHash": "Manifest-Hash: {hash}",
+  "profileCms.builder.publish.error.publishFailed":
+    "Die Veröffentlichung ist fehlgeschlagen. Bitte versuche es erneut.",
+  "profileCms.builder.history.title": "Versionsverlauf",
+  "profileCms.builder.history.refresh": "Aktualisieren",
+  "profileCms.builder.history.loading": "Wird geladen …",
+  "profileCms.builder.history.unavailable":
+    "Verbinde dich als Inhaber dieses Profils, um veröffentlichte Versionen anzuzeigen.",
+  "profileCms.builder.history.failed":
+    "Der Versionsverlauf konnte nicht geladen werden.",
+  "profileCms.builder.history.empty": "Noch keine gespeicherten Versionen.",
+  "profileCms.builder.history.version": "Version {version}",
+  "profileCms.builder.history.primary": "Hauptversion",
+  "profileCms.builder.history.rollback": "Als Hauptversion festlegen",
+  "profileCms.builder.history.rollbackFailed":
+    "Die Wiederherstellung ist fehlgeschlagen.",
+  "profileCms.builder.history.confirm.title": "Wiederherstellung bestätigen",
+  "profileCms.builder.history.confirm.body":
+    "Version {version} wieder als Hauptwebsite deines Profils verwenden? Sie ersetzt die aktuell veröffentlichte Version.",
+  "profileCms.builder.history.confirm.confirm": "Bestätigen",
+  "profileCms.builder.history.confirm.working": "Wird wiederhergestellt …",
+  "profileCms.builder.history.confirm.cancel": "Abbrechen",
+  "profileCms.builder.history.unpublish": "Website zurückziehen",
+  "profileCms.builder.history.unpublishConfirm":
+    "Diese Website aus dem öffentlichen Profil entfernen? Gespeicherte Versionen bleiben zur Wiederherstellung verfügbar.",
+  "profileCms.builder.recovery.title":
+    "Auf diesem Gerät ist ein ungespeicherter Entwurf verfügbar.",
+  "profileCms.builder.recovery.restore": "Entwurf wiederherstellen",
+  "profileCms.builder.recovery.discard": "Wiederherstellungskopie verwerfen",
+  "profileCms.builder.recovery.failed":
+    "Dieser Browser konnte keine Wiederherstellungskopie speichern. Speichere einen Entwurf oder lade die JSON-Datei herunter, bevor du die Seite verlässt.",
+  "profileCms.builder.recovery.unsaved": "Ungespeicherte Änderungen",
+  "profileCms.builder.recovery.saved": "Alle Änderungen gespeichert",
+  "profileCms.builder.recovery.leave":
+    "Editor mit ungespeicherten Änderungen oder während eines laufenden Vorgangs verlassen? Eine Wiederherstellungskopie bleibt erhalten, wenn der Browserspeicher verfügbar ist.",
+  "profileCms.builder.recovery.replace":
+    "Den aktuellen Editorinhalt ersetzen? Speichere oder lade deine Änderungen zuerst herunter.",
+  "profileCms.builder.editor.advanced":
+    "Dieses Paket enthält eine individuelle Website. Bearbeite sie mit JSON oder Agent, um alle Seiten und Medien zu erhalten.",
+  "profileCms.builder.history.changed":
+    "Die öffentliche Website wurde aktualisiert. Es kann einige Sekunden dauern, bis Besucher die Änderung sehen.",
+  "profileCms.builder.publish.error.stale":
+    "Der Entwurf oder die Wallet wurde geändert. Starte die Veröffentlichung erneut.",
+  "navigation.primary.loading.home": "Startseite wird geladen",
+  "navigation.primary.loading.discovery": "Entdecken wird geladen",
+  "navigation.primary.loading.network": "Netzwerk wird geladen",
+  "navigation.primary.loading.collections": "Sammlungen werden geladen",
+  "navigation.primary.loading.notifications":
+    "Benachrichtigungen werden geladen",
+  "headerSearch.wave.byAuthor": "von {author}",
+  "headerSearch.wave.serial": "Wave Nr. {serial}",
+  "headerSearch.wave.label": "Wave",
+  "waves.subwaves.accessWarning.title":
+    "Die Einschränkungen der übergeordneten Wave gelten",
+  "waves.subwaves.accessWarning.message":
+    "Einige Mitglieder dieser Gruppe haben keinen Zugriff auf die übergeordnete Wave und können diese Subwave daher nicht öffnen. Du kannst diese Gruppe trotzdem verwenden.",
+  "waves.subwaves.accessWarning.continue": "Trotzdem fortfahren",
+  "waves.subwaves.accessWarning.back": "Zurück",
+  "waves.subwaves.accessWarning.checkFailed":
+    "Der Zugriff auf die übergeordnete Wave konnte nicht geprüft werden. Bitte versuche es erneut.",
+  "network.groupInspection.bulkRep":
+    "Allen Profilen, die den Kriterien entsprechen, REP geben",
+  "network.groupInspection.bulkNic":
+    "Allen Profilen, die den Kriterien entsprechen, NIC geben",
+  "network.groupInspection.bulkActionsLabel": "Massenbewertungsaktionen",
+  "network.groupInspection.bulkRepSuccess": "REP wurde verteilt.",
+  "network.groupInspection.bulkNicSuccess": "NIC wurde verteilt.",
+  "network.groupInspection.source":
+    "Quelle: Filter und optionale manuelle Liste",
+  "user.brain.sidebar.createdHeading": "Erstellte Waves",
+  "user.brain.sidebar.createdMobileHeading": "Erstellt",
+  "user.brain.sidebar.recentlyActiveHeading": "Kürzlich aktiv in",
+  "user.brain.sidebar.lastPost": "Letzter Beitrag {time}",
+  "user.brain.sidebar.noPostsByProfile": "Keine Beiträge von diesem Profil",
+  "user.brain.sidebar.totalWavePosts.one":
+    "{count} Beitrag insgesamt in der Wave",
+  "user.brain.sidebar.totalWavePosts.other":
+    "{count} Beiträge insgesamt in der Wave",
+  "user.brain.sidebar.privateWave": "Private Wave",
+  "user.brain.sidebar.loadingWaveActivity":
+    "Wave-Aktivität des Profils wird geladen",
+  "user.brain.sidebar.loadingMoreWaveActivity":
+    "Weitere Wave-Aktivität des Profils wird geladen",
+  "user.brain.sidebar.desktopScrollRegionLabel": "Brain-Waves",
+  "user.brain.sidebar.mobileStripLabel": "Brain-Waves",
+  "user.brain.sidebar.createdEmpty": "Keine zugänglichen erstellten Waves.",
+  "user.brain.sidebar.recentEmpty": "Keine kürzlichen Wave-Beiträge.",
+  "user.brain.sidebar.createdLoadError":
+    "Erstellte Waves konnten nicht geladen werden.",
+  "user.brain.sidebar.recentLoadError":
+    "Die kürzliche Wave-Aktivität konnte nicht geladen werden.",
+  "user.brain.sidebar.loadMoreError":
+    "Weitere Waves konnten nicht geladen werden.",
+  "user.brain.sidebar.retry": "Erneut versuchen",
+  "user.brain.sidebar.retryLoadMore": "Mehr erneut laden",
+  "user.brain.sidebar.loadMore": "Mehr laden",
+  "user.brain.sidebar.loadingMore": "Wird geladen…",
+  "user.brain.sidebar.allWavesLoaded": "Alle Waves sind geladen.",
+  "user.brain.sidebar.more": "Mehr",
+  "user.brain.sidebar.showLess": "Weniger anzeigen",
+  "user.brain.sidebar.showMore": "Mehr anzeigen",
+  "user.brain.sidebar.viewMoreCreatedWaves": "Weitere erstellte Waves anzeigen",
+  "user.brain.sidebar.createdModalTitle": "Erstellte Waves von {profile}",
+  "user.brain.sidebar.loadedCreatedCount.one":
+    "{count} geladene Wave wird angezeigt",
+  "user.brain.sidebar.loadedCreatedCount.other":
+    "{count} geladene Waves werden angezeigt",
+  "user.brain.sidebar.createdCount.one": "{count} erstellte Wave",
+  "user.brain.sidebar.createdCount.other": "{count} erstellte Waves",
+  "user.brain.sidebar.closeCreatedWaves": "Erstellte Waves schließen",
+  "linkPreview.twitter.kind.article": "Artikel",
+  "linkPreview.twitter.kind.post": "Beitrag",
+  "linkPreview.twitter.article.provider": "Artikel auf X",
+  "linkPreview.twitter.article.read": "Artikel lesen: {title}",
   "waves.drop.actions.copyText": "Text kopieren",
   "waves.drop.actions.copyLink": "Link kopieren",
   "waves.drop.actions.copied": "Kopiert!",
   "waves.drop.actions.copyFailed": "Kopieren fehlgeschlagen",
+  "waves.drop.actions.menuLabel": "Drop-Aktionen",
+  "waves.drop.actions.reactionPickerLabel": "Reaktion zum Drop hinzufügen",
   "media.video.captions": "Untertitel",
   "media.video.download": "Medien herunterladen",
   "media.video.downloading": "Medien werden heruntergeladen",
@@ -28,6 +229,9 @@ export const DE_DE_MESSAGES = {
   "attachment.safety.sha256": "SHA-256",
   "attachment.safety.size": "Größe {size}",
   "attachment.safety.viewDetails": "Sicherheitsdetails anzeigen",
+  "linkPreview.collection.maximumEdition": "Maximale Edition",
+  "linkPreview.collection.minted": "Geprägt",
+  "linkPreview.collection.mintingLive": "Mint läuft",
   "linkPreview.file.externalSource": "Externe Quelle",
   "linkPreview.file.fact.mime": "MIME",
   "linkPreview.file.fact.size": "Größe",
@@ -53,6 +257,37 @@ export const DE_DE_MESSAGES = {
   "linkPreview.github.fact.mime": "MIME",
   "linkPreview.github.fact.type": "Typ",
   "linkPreview.github.fileKind": "{kind}-Datei",
+  "linkPreview.etherscan.provider": "Etherscan",
+  "linkPreview.etherscan.previewLabel":
+    "Etherscan-Vorschau für {kind} auf {network}",
+  "linkPreview.etherscan.open": "Auf Etherscan öffnen",
+  "linkPreview.etherscan.copy": "{kind} kopieren",
+  "linkPreview.etherscan.copied": "{kind} kopiert",
+  "linkPreview.etherscan.copyFailed": "{kind} konnte nicht kopiert werden",
+  "linkPreview.etherscan.retry": RETRY_LABEL,
+  "linkPreview.etherscan.loading": "Etherscan-Vorschau wird geladen",
+  "linkPreview.etherscan.partial": "Einige Live-Details sind nicht verfügbar",
+  "linkPreview.etherscan.liveUnavailable": "Live-Daten nicht verfügbar",
+  "linkPreview.etherscan.legacy":
+    "Historisches Netzwerk — für diesen archivierten Explorer sind keine Live-Daten verfügbar.",
+  "linkPreview.etherscan.status.success": "Erfolgreich",
+  "linkPreview.etherscan.status.pending": "Ausstehend",
+  "linkPreview.etherscan.status.reverted": "Zurückgesetzt",
+  "linkPreview.etherscan.status.finalized": "Finalisiert",
+  "linkPreview.etherscan.status.proposed": "Vorgeschlagen",
+  "linkPreview.etherscan.status.future": "Zukünftiger Block",
+  "linkPreview.etherscan.status.unknown": "Status nicht verfügbar",
+  "linkPreview.etherscan.action.nativeTransfer": "{value} ETH gesendet",
+  "linkPreview.etherscan.action.tokenTransfer": "Token-Übertragung",
+  "linkPreview.etherscan.action.contractCreation": "Vertrag erstellt",
+  "linkPreview.etherscan.action.contractInteraction": "Vertragsinteraktion",
+  "linkPreview.etherscan.action.transaction": "Ethereum-Transaktion",
+  "linkPreview.etherscan.action.compound":
+    "Compound {action}: {amount} {token}",
+  "linkPreview.etherscan.description.tool":
+    "Ein schreibgeschützter Link zu einem Etherscan-Werkzeug. 6529 sendet dessen Formular nicht ab.",
+  "linkPreview.etherscan.description.unknown":
+    "Eine Etherscan-Seite. Öffne sie, um die vollständige Route zu prüfen.",
   "profileCms.block.audioUnavailable": "Audio nicht verfügbar",
   "profileCms.block.collectionFallback": "Kollektion",
   "profileCms.block.galleryUnavailable": "Galerie nicht verfügbar",
@@ -211,6 +446,10 @@ export const DE_DE_MESSAGES = {
   "profileCms.builder.gallery.review.title": "Snapshot-Überprüfung",
   "profileCms.builder.gallery.settings": "Galerieeinstellungen",
   "profileCms.builder.gallery.snapshot.api": "Server-Snapshot",
+  "profileCms.builder.gallery.snapshot.signInRequired":
+    "Melden Sie sich an, um einen Wallet-Snapshot anzufordern.",
+  "profileCms.builder.gallery.snapshot.sessionExpired":
+    "Ihre Sitzung konnte nicht bestätigt werden. Melden Sie sich erneut an, um einen Wallet-Snapshot anzufordern.",
   "profileCms.builder.gallery.snapshot.failed":
     "Galerie-Snapshot konnte nicht erstellt werden.",
   "profileCms.builder.gallery.snapshot.fixture": "Fixture-Snapshot",
@@ -251,7 +490,7 @@ export const DE_DE_MESSAGES = {
   "profileCms.builder.publishState.packageHash": "Paket-Hash",
   "profileCms.builder.publishState.payloadHash": "Nutzlast-Hash",
   "profileCms.builder.publishState.pending":
-    "Speichern und Veröffentlichen erfordern die Backend-Builder-Endpunkte. Diese Benutzeroberfläche wird keine Produktionsveröffentlichung simulieren.",
+    "Speichere einen Entwurf, um eine bearbeitbare Version zu behalten. Veröffentliche die Website, wenn du bereit bist, sie öffentlich zu machen.",
   "profileCms.builder.publishState.title":
     "Entwurfs- und Veröffentlichungsstatus",
   "profileCms.builder.siteSettings": "Website-Einstellungen",
@@ -277,7 +516,7 @@ export const DE_DE_MESSAGES = {
   "profileCms.builder.workspaceLabel": "CMS-Builder-Arbeitsbereich",
   "profileCms.error.description":
     "Diese Profil-Website konnte nicht gerendert werden.",
-  "profileCms.error.retry": "Erneut versuchen",
+  "profileCms.error.retry": RETRY_LABEL,
   "profileCms.error.title": "Website nicht verfügbar",
   "profileCms.header.openWebsite": "Website {handle} öffnen",
   "profileCms.header.website": "Website",
@@ -332,7 +571,7 @@ export const DE_DE_MESSAGES = {
   "drop.media.loading": "Bild wird geladen",
   "drop.media.unavailable": "Bild nicht verfuegbar",
   "drop.media.loadFailed": "Bild konnte nicht geladen werden.",
-  "drop.media.retry": "Erneut versuchen",
+  "drop.media.retry": RETRY_LABEL,
   "drop.media.openPreview": "Bildvorschau oeffnen",
   "drop.media.openMedia": "Drop-Medium oeffnen",
   "drop.media.saveDialogTitle": "Bild speichern",
@@ -359,11 +598,30 @@ export const DE_DE_MESSAGES = {
   "quickDm.loadingStatus": "Direktnachrichten werden geladen",
   "quickDm.chatLoadError": "Diese Konversation konnte nicht geladen werden.",
   ...DE_DE_QR_SCANNER_MESSAGES,
+  ...DE_DE_CAPACITOR_CONNECT_MESSAGES,
   ...DE_DE_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Datei-Upload-Bereich für den Wave-Chat",
+  "waves.chat.guidelinesDialog.title": "Wave-Richtlinien",
+  "waves.chat.guidelinesDialog.description":
+    "Sieh dir die Richtlinien dieser Wave an, bevor du deine erste Nachricht sendest.",
+  "waves.chat.guidelinesDialog.guidelinesLabel": "Richtlinien",
+  "waves.chat.guidelinesDialog.actionHint":
+    "Mit „Zustimmen“ wird deine Nachricht gesendet. Mit „Ablehnen“ bleibt sie als Entwurf erhalten.",
+  "waves.chat.guidelinesDialog.agree": "Zustimmen",
+  "waves.chat.guidelinesDialog.decline": "Ablehnen",
+  "waves.chat.guidelinesDialog.loadErrorTitle":
+    "Wave-Richtlinien konnten nicht geladen werden.",
+  "waves.chat.guidelinesDialog.loadErrorDescription":
+    "Versuche es erneut, bevor du deine Nachricht sendest.",
+  ...stormComposerDeMessages,
   "waves.loadingStatus": "Waves werden geladen",
+  "waves.gifPicker.open": "GIF hinzufügen",
   "waves.gifPicker.dialogTitle": "GIF-Suche",
+  "waves.gifPicker.searchPlaceholder": "GIFs suchen",
+  "waves.gifPicker.noResults": "Keine GIFs gefunden.",
+  "waves.gifPicker.poweredBy": "Bereitgestellt von {brandName}",
+  "waves.gifPicker.poweredByPrefix": "Bereitgestellt von",
   "waves.gifPicker.status.checking": "GIF-Suche wird geprueft...",
   "waves.gifPicker.status.ready": "GIF-Suche ist bereit.",
   "waves.gifPicker.unavailable.title":
@@ -371,6 +629,383 @@ export const DE_DE_MESSAGES = {
   "waves.gifPicker.unavailable.hint":
     "Du kannst stattdessen eine GIF-Datei hochladen.",
   "common.close": "Schliessen",
+  "waves.create.dialog.subwaveOfTitle":
+    "Subwave von „{parentWaveName}“ erstellen",
+  "waves.create.overview.subwaveName": "Subwave-Name",
+  "waves.create.overview.subwavePicture": "Subwave-Profilbild",
+  "waves.create.overview.subwaveType": "Subwave-Typ",
+  "waves.create.overview.type": "Wave-Typ",
+  "waves.create.overview.subwaveTypeRequired":
+    "Bitte wähle einen Subwave-Typ aus, um fortzufahren.",
+  "waves.create.overview.typeRequired":
+    "Bitte wähle einen Wave-Typ aus, um fortzufahren.",
+  "waves.create.outcomes.showOutcomes": "Menübereich Ergebnisse anzeigen",
+  "waves.create.outcomes.showOutcomesDescription":
+    "Zeigt den Tab Ergebnisse und die Belohnungsdetails auf Ranglisten- und Gewinnerkarten. Belohnungen gelten auch dann, wenn sie ausgeblendet sind.",
+  "waves.create.rules.title": "Richtlinien",
+  "waves.create.rules.guidelinesFieldLabel": "Chat-Richtlinien",
+  "waves.create.rules.guidelinesDescription":
+    "Diese Richtlinien werden Nutzern angezeigt, wenn sie ihre erste Chatnachricht senden.",
+  "waves.create.rules.guidelinesPlaceholder": "Chat-Richtlinien hinzufügen...",
+  "waves.create.rules.acceptanceTitle": "Regeln, denen zugestimmt werden muss",
+  "waves.create.rules.acceptanceDescription":
+    "Teilnehmende müssen diesen Regeln zustimmen und sie vor dem Einreichen mit ihrer Wallet signieren.",
+  "waves.create.rules.acceptancePlaceholder":
+    "Gib die Regeln ein, denen Teilnehmende vor dem Einreichen zustimmen müssen...",
+  "waves.create.rules.acceptanceHelper":
+    "Leer lassen, wenn keine Regeln eine Signatur erfordern.",
+  "waves.create.rules.acceptanceCharacterCount": "Zeichen: {count}",
+  "waves.create.review.title": "Übersicht",
+  "waves.create.review.description":
+    "Prüfe deine Wave vor dem Erstellen. Über Zurück oder die abgeschlossenen Schritte kannst du Änderungen vornehmen.",
+  "waves.create.review.submit": "Bestätigen und erstellen",
+  "waves.create.review.uploadsPending":
+    "Warte, bis die Bilder vollständig hochgeladen sind.",
+  "waves.create.review.setup": "Einrichtung",
+  "waves.create.review.name": "Name",
+  "waves.create.review.parent": "Übergeordnete Wave",
+  "waves.create.review.picture": "Wave-Profilbild",
+  "waves.create.review.manual": "Manuell",
+  "waves.create.review.outcomeType": "Ergebnistyp",
+  "waves.create.review.reward": "Belohnung",
+  "waves.create.review.category": "Kategorie",
+  "waves.create.review.total": "Gesamt",
+  "waves.create.review.winner": "Gewinner {position}",
+  "waves.create.review.perApprovedDrop": "Pro genehmigtem Drop",
+  "waves.create.review.outcome": "Ergebnis {number}",
+  "waves.create.dialog.subwaveTitle": "Subwave erstellen",
+  "waves.create.dialog.waveTitle": "Wave erstellen",
+  "waves.create.actions.cancel": "Abbrechen",
+  "waves.create.actions.backToCriteria": "Zurück zu den Kriterien",
+  "waves.create.actions.complete": "Abschließen",
+  "waves.create.actions.next": "Weiter",
+  "waves.create.actions.previous": "Zurück",
+  "waves.create.actions.save": "Speichern",
+  "waves.create.advanced.title": "Erweiterte Einstellungen",
+  "waves.create.advanced.customized": "Angepasst",
+  "waves.create.advanced.needsAttention": "Prüfen",
+  "waves.create.advanced.errorSummary":
+    "Prüfe die markierten Einstellungen, bevor du fortfährst.",
+  "waves.create.overview.title": "Wave erstellen",
+  "waves.create.overview.picture": "Wave-Bild",
+  "waves.create.overview.advancedTitle": "Darstellung und Bezeichnungen",
+  "waves.create.overview.displaySettings": "Anzeigeeinstellungen",
+  "waves.create.groups.title": "Zugriff",
+  "waves.create.groups.description":
+    "Lege fest, wer auf diese Wave zugreifen, teilnehmen und sie verwalten kann.",
+  "waves.create.groups.viewGroupName": "Wer auf diese Wave zugreifen kann",
+  "waves.create.groups.accessHelper":
+    "Standardmäßig können alle Personen mit Zugriff teilnehmen. Nur du kannst die Wave verwalten.",
+  "waves.create.groups.customizePermissions": "Weitere Berechtigungen anpassen",
+  "waves.create.groups.adminGroupName": "Administratoren",
+  "waves.create.groups.currentGroup": "Vor der Bearbeitung",
+  "waves.create.groups.currentGroupWithName": "Aktuelle Gruppe: {name}",
+  "waves.create.groups.dialog.addTitle": "Gruppe hinzufügen",
+  "waves.create.groups.dialog.changeTitle": "Gruppe ändern",
+  "waves.create.groups.dialog.addDescription":
+    "Erstelle eine neue Gruppe oder wähle eine vorhandene aus.",
+  "waves.create.groups.dialog.changeDescription":
+    "Erstelle eine neue Gruppe oder wähle eine andere vorhandene aus.",
+  "waves.create.groups.identities": "Identitäten",
+  "waves.create.groups.hideCriteriaAndMembers":
+    "Kriterien und Mitglieder ausblenden",
+  "waves.create.groups.hideCriteriaAndMembersTooltip":
+    "Die Kriterien und die Mitgliederliste sind für Mitglieder dieser Gruppe sichtbar, für alle anderen jedoch ausgeblendet.",
+  "waves.create.groups.hideCriteriaAndMembersInfoLabel":
+    "Informationen zur Sichtbarkeit von Kriterien und Mitgliedern",
+  "waves.create.groups.editAccess.title": "Zugriff für {groupLabel} bearbeiten",
+  "waves.create.groups.editAccess.triggerLabel":
+    "Zugriff für {groupLabel} bearbeiten",
+  "waves.create.groups.editAccess.chatLabel": "Chat",
+  "waves.create.groups.editAccess.description":
+    "Die aktuellen Kriterien sind vorausgefüllt. Beim Speichern wird eine neue Gruppe erstellt und nur der Zugriff für {groupLabel} geändert.",
+  "waves.create.groups.editAccess.loading":
+    "Aktuelle Kriterien werden geladen…",
+  "waves.create.groups.editAccess.loadErrorTitle":
+    "Die aktuellen Kriterien konnten nicht geladen werden.",
+  "waves.create.groups.editAccess.loadErrorDescription":
+    "Es wurde nichts geändert. Versuche erneut, die Gruppe zu laden.",
+  "waves.create.groups.editAccess.retry": "Erneut versuchen",
+  "waves.create.groups.editAccess.makePublic": "Wave öffentlich machen",
+  "waves.create.groups.editAccess.makePublicDescription":
+    "Entferne die Sichtbarkeitsbeschränkung, damit alle auf diese Wave zugreifen können.",
+  "waves.create.groups.editAccess.useVisibility":
+    "Sichtbarkeitskriterien verwenden",
+  "waves.create.groups.editAccess.useVisibilityDescription":
+    "Lege für {groupLabel} dieselben Zugriffskriterien wie für die Sichtbarkeit fest.",
+  "waves.create.groups.editAccess.useVisibilityPublicDescription":
+    "Die Sichtbarkeit ist öffentlich. Mache auch den Zugriff für {groupLabel} öffentlich.",
+  "waves.create.groups.editAccess.makePublicConfirmTitle":
+    "Wave öffentlich machen?",
+  "waves.create.groups.editAccess.makePublicConfirmMessage":
+    "Alle können diese Wave finden und ansehen. Nur der Sichtbarkeitszugriff wird geändert.",
+  "waves.create.groups.editAccess.useVisibilityConfirmTitle":
+    "Sichtbarkeitskriterien verwenden?",
+  "waves.create.groups.editAccess.useVisibilityConfirmMessage":
+    "Der Zugriff für {groupLabel} verwendet dieselbe Gruppe wie die Sichtbarkeit. Nur diese Zugriffseinstellung wird geändert.",
+  "waves.create.groups.editAccess.useVisibilityPublicConfirmMessage":
+    "Die Sichtbarkeit ist öffentlich, daher wird auch der Zugriff für {groupLabel} öffentlich. Nur diese Zugriffseinstellung wird geändert.",
+  "waves.create.groups.editAccess.confirmMakePublic": "Öffentlich machen",
+  "waves.create.groups.editAccess.confirmUseVisibility":
+    "Sichtbarkeitskriterien verwenden",
+  "waves.create.groups.actions.editCriteria": "Kriterien bearbeiten",
+  "waves.create.groups.actions.edit": "Bearbeiten",
+  "waves.create.groups.actions.matchWaveAccess": "An Wave-Zugriff anpassen",
+  "waves.create.groups.draft.saveChanges": "Änderungen speichern",
+  "waves.create.groups.draft.afterEditing": "Nach der Bearbeitung",
+  "waves.create.groups.rules.configured": "Konfiguriert",
+  "waves.create.groups.inlineIdentities.modeLabel":
+    "Behandlung von Identitäten",
+  "waves.create.groups.inlineIdentities.included.label": "Eingeschlossen",
+  "waves.create.groups.inlineIdentities.included.searchLabel":
+    "Identität zum Einschließen suchen",
+  "waves.create.groups.inlineIdentities.included.searchPlaceholder":
+    "Identitäten zum Einschließen suchen...",
+  "waves.create.groups.inlineIdentities.included.emptyHelper":
+    "Keine Identitäten sind ausdrücklich eingeschlossen.",
+  "waves.create.groups.inlineIdentities.excluded.label": "Ausgeschlossen",
+  "waves.create.groups.inlineIdentities.excluded.searchLabel":
+    "Identität zum Ausschließen suchen",
+  "waves.create.groups.inlineIdentities.excluded.searchPlaceholder":
+    "Identitäten zum Ausschließen suchen...",
+  "waves.create.groups.inlineIdentities.excluded.emptyHelper":
+    "Keine Identitäten sind ausdrücklich ausgeschlossen.",
+  "waves.create.groups.inlineIdentities.includeMe": "Mich einschließen",
+  "waves.create.groups.inlineIdentities.sources.emma.title": "EMMA",
+  "waves.create.groups.inlineIdentities.sources.emma.description":
+    "Füge alle Wallets aus einer deiner EMMA-Allowlists hinzu.",
+  "waves.create.groups.inlineIdentities.sources.emma.searchLabel":
+    "Allowlists durchsuchen",
+  "waves.create.groups.inlineIdentities.sources.emma.searchLoading":
+    "Allowlists werden geladen...",
+  "waves.create.groups.inlineIdentities.sources.emma.searchEmpty":
+    "Keine Allowlists gefunden",
+  "waves.create.groups.inlineIdentities.sources.emma.empty":
+    "Keine Allowlist hinzugefügt.",
+  "waves.create.groups.inlineIdentities.sources.emma.loading":
+    "Allowlist-Identitäten werden hinzugefügt...",
+  "waves.create.groups.inlineIdentities.sources.emma.load": "Allowlist laden",
+  "waves.create.groups.inlineIdentities.sources.emma.error":
+    "Diese Allowlist konnte nicht geladen werden. Versuche es erneut.",
+  "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired":
+    "Verbinde deine Wallet, um diese Allowlist zu laden.",
+  "waves.create.groups.inlineIdentities.sources.emma.remove":
+    "EMMA-Allowlist entfernen",
+  "waves.create.groups.inlineIdentities.sources.csv.title": "CSV-Datei",
+  "waves.create.groups.inlineIdentities.sources.csv.description":
+    "Importiere Ethereum-Wallets aus einer CSV-Datei.",
+  "waves.create.groups.inlineIdentities.sources.csv.dropLabel":
+    "CSV-Datei hier ablegen oder Datei auswählen",
+  "waves.create.groups.inlineIdentities.sources.csv.includeInputLabel":
+    "CSV-Datei mit einzuschließenden Identitäten auswählen",
+  "waves.create.groups.inlineIdentities.sources.csv.excludeInputLabel":
+    "CSV-Datei mit auszuschließenden Identitäten auswählen",
+  "waves.create.groups.inlineIdentities.sources.csv.invalidFile":
+    "Wähle eine CSV-Datei aus.",
+  "waves.create.groups.inlineIdentities.sources.csv.readError":
+    "Diese Datei konnte nicht gelesen werden. Versuche eine andere CSV-Datei.",
+  "waves.create.groups.inlineIdentities.sources.csv.noWallets":
+    "Es wurden keine gültigen Ethereum-Wallet-Adressen gefunden.",
+  "waves.create.groups.inlineIdentities.sources.csv.empty":
+    "Keine CSV-Datei hinzugefügt.",
+  "waves.create.groups.inlineIdentities.sources.csv.remove":
+    "CSV-Datei entfernen",
+  "waves.create.groups.inlineIdentities.sources.count.one":
+    "{count} Identität hinzugefügt",
+  "waves.create.groups.inlineIdentities.sources.count.other":
+    "{count} Identitäten hinzugefügt",
+  "waves.create.groups.inlineIdentities.sources.total.included.one":
+    "{count} eindeutige Identität eingeschlossen",
+  "waves.create.groups.inlineIdentities.sources.total.included.other":
+    "{count} eindeutige Identitäten eingeschlossen",
+  "waves.create.groups.inlineIdentities.sources.total.excluded.one":
+    "{count} eindeutige Identität ausgeschlossen",
+  "waves.create.groups.inlineIdentities.sources.total.excluded.other":
+    "{count} eindeutige Identitäten ausgeschlossen",
+  "waves.create.groups.inlineIdentities.sources.includeLimit":
+    "Eine Gruppe kann höchstens {limit} Identitäten einschließen.",
+  "waves.create.groups.inlineIdentities.sources.excludeLimit":
+    "Eine Gruppe kann höchstens {limit} Identitäten ausschließen.",
+  "waves.create.groups.inlineIdentities.sources.retry": RETRY_LABEL,
+  "waves.create.groups.members.currentCount.one": "{count} Benutzer",
+  "waves.create.groups.members.currentCount.other": "{count} Benutzer",
+  "waves.create.groups.members.countLoading":
+    "Aktuelle Zielgruppe wird geprüft…",
+  "waves.create.groups.members.countUnavailable":
+    "Aktuelle Zielgruppe nicht verfügbar",
+  "waves.create.groups.members.view": "Mitglieder anzeigen",
+  "waves.create.groups.members.previewDraft": "Treffer ansehen",
+  "waves.create.groups.members.dialogTitle": "{role}: {group}",
+  "waves.create.groups.members.dynamicDescription":
+    "Diese Live-Vorschau basiert auf aktuellen Profil-, Reputations- und Besitzdaten. Die Mitgliedschaft kann sich ändern.",
+  "waves.create.groups.members.criteriaSummary":
+    "Warum diese Identitäten berechtigt sind",
+  "waves.create.groups.members.criteriaUnavailable":
+    "Die Gruppenkriterien sind nicht verfügbar. Die aktuellen Mitglieder können unten weiterhin angezeigt werden.",
+  "waves.create.groups.members.searchLabel": "Identität suchen",
+  "waves.create.groups.members.searchPlaceholder":
+    "Nach Handle oder Wallet suchen",
+  "waves.create.groups.members.clearSearch": "Identitätssuche leeren",
+  "waves.create.groups.members.loadingStatus":
+    "Aktuelle Mitglieder werden geladen",
+  "waves.create.groups.members.empty":
+    "Derzeit entspricht keine Identität dieser Gruppe.",
+  "waves.create.groups.members.searchEmpty":
+    "Keine passenden Identitäten gefunden.",
+  "waves.create.groups.members.errorTitle":
+    "Aktuelle Mitglieder konnten nicht geladen werden.",
+  "waves.create.groups.members.errorDescription":
+    "Prüfe deine Verbindung und versuche es erneut.",
+  "waves.create.groups.members.retry": RETRY_LABEL,
+  "waves.create.groups.members.listLabel": "Aktuelle Gruppenmitglieder",
+  "waves.create.groups.members.openProfile":
+    "Profil von {identity} in einem neuen Tab öffnen",
+  "waves.create.groups.members.criteria.metric.tdh": "TDH",
+  "waves.create.groups.members.criteria.metric.xtdh": "xTDH",
+  "waves.create.groups.members.criteria.metric.tdhAndXtdh": "TDH + xTDH",
+  "waves.create.groups.members.criteria.metric.rep": "REP",
+  "waves.create.groups.members.criteria.metric.nic": "NIC",
+  "waves.create.groups.members.criteria.metric.level": "Stufe",
+  "waves.create.groups.members.criteria.range.atMost":
+    "{metric} höchstens {max}",
+  "waves.create.groups.members.criteria.range.atLeast":
+    "{metric} mindestens {min}",
+  "waves.create.groups.members.criteria.range.between":
+    "{metric} zwischen {min} und {max}",
+  "waves.create.groups.members.criteria.identityRange.atMost":
+    "{metric} {direction} {identity} höchstens {max}",
+  "waves.create.groups.members.criteria.identityRange.atLeast":
+    "{metric} {direction} {identity} mindestens {min}",
+  "waves.create.groups.members.criteria.identityRange.between":
+    "{metric} {direction} {identity} zwischen {min} und {max}",
+  "waves.create.groups.members.criteria.identity":
+    "{metric} {direction} {identity}",
+  "waves.create.groups.members.criteria.categoryRange.atMost":
+    "{metric} in {category} höchstens {max}",
+  "waves.create.groups.members.criteria.categoryRange.atLeast":
+    "{metric} in {category} mindestens {min}",
+  "waves.create.groups.members.criteria.categoryRange.between":
+    "{metric} in {category} zwischen {min} und {max}",
+  "waves.create.groups.members.criteria.category": "{metric} in {category}",
+  "waves.create.groups.members.criteria.categoryIdentityRange.atMost":
+    "{metric} in {category} {direction} {identity} höchstens {max}",
+  "waves.create.groups.members.criteria.categoryIdentityRange.atLeast":
+    "{metric} in {category} {direction} {identity} mindestens {min}",
+  "waves.create.groups.members.criteria.categoryIdentityRange.between":
+    "{metric} in {category} {direction} {identity} zwischen {min} und {max}",
+  "waves.create.groups.members.criteria.categoryIdentity":
+    "{metric} in {category} {direction} {identity}",
+  "waves.create.groups.members.criteria.from": "von",
+  "waves.create.groups.members.criteria.to": "an",
+  "waves.create.groups.members.criteria.included.one":
+    "{count} ausdrücklich eingeschlossener Benutzer",
+  "waves.create.groups.members.criteria.included.other":
+    "{count} ausdrücklich eingeschlossene Benutzer",
+  "waves.create.groups.members.criteria.excluded.one":
+    "{count} ausdrücklich ausgeschlossener Benutzer",
+  "waves.create.groups.members.criteria.excluded.other":
+    "{count} ausdrücklich ausgeschlossene Benutzer",
+  "waves.create.groups.members.criteria.grant": "xTDH-Zuschuss {grantId}",
+  "waves.create.groups.members.criteria.grant.collection":
+    "xTDH-Zuschuss für {collectionName}",
+  "waves.create.groups.members.criteria.grant.selected":
+    "Ausgewählter xTDH-Zuschuss",
+  "waves.create.groups.xtdhGrant.change": "Zuschuss ändern",
+  "waves.create.groups.xtdhGrant.cancelChange": "Änderung abbrechen",
+  "waves.create.groups.xtdhGrant.remove": "Zuschuss entfernen",
+  "waves.create.groups.validation.checking": "Gruppenzugriff wird geprüft…",
+  "waves.create.groups.validation.unavailableTitle":
+    "Der Gruppenzugriff konnte nicht geprüft werden.",
+  "waves.create.groups.validation.unavailable":
+    "Der Gruppenzugriff konnte nicht geprüft werden. Versuche es erneut, bevor du fortfährst.",
+  "waves.create.groups.validation.outsideView":
+    "Die Gruppe „{groupName}“ enthält Personen, die nicht in „{viewGroupName}“ sind.",
+  "waves.create.groups.validation.invalidTitle":
+    "Einige Zugriffsgruppen müssen angepasst werden.",
+  "waves.create.groups.validation.invalidDescription":
+    "Alle Mitglieder der Einreichungs-, Abstimmungs-, Chat- und Admin-Gruppen müssen auch der Ansichtsgruppe angehören.",
+  "waves.create.dates.title": "Zeitplan",
+  "waves.create.dates.description":
+    "Prüfe, wann diese Wave startet, die Abstimmung beginnt und Gewinner bekannt gegeben werden.",
+  "waves.create.dates.approve.noEndSummary": "Startet {start}. Kein Enddatum.",
+  "waves.create.dates.approve.endSummary": "Startet {start}. Endet {end}.",
+  "waves.create.dates.approve.endInfoLabel": "Informationen zum Wave-Ende",
+  "waves.create.dates.approve.advancedSummary": "Wave-Ende",
+  "waves.create.dates.rank.ongoingSummary":
+    "Einreichungen starten {submission}. Die Abstimmung startet {voting}. Das Ranking bleibt offen.",
+  "waves.create.dates.rank.scheduledSummary":
+    "Einreichungen starten {submission}. Die Abstimmung startet {voting}. Erste Gewinner: {announcement}.",
+  "waves.create.dates.rank.advancedSummary": "Gewinnerzeitplan",
+  "waves.create.drops.requirementsTitle": "Einreichungsanforderungen",
+  "waves.create.rules.advancedSummary": "Wave-Richtlinien und Zustimmung",
+  "waves.create.rules.chatAdvancedSummary": "Wave-Richtlinien",
+  "waves.create.rules.guidelinesSettingsLabel": "Richtlinien",
+  "waves.create.rules.guidelinesSettingsEditLabel": "Richtlinien bearbeiten",
+  "waves.create.rules.guidelinesSettingsAdded": "Hinzugefügt",
+  "waves.create.rules.guidelinesSettingsNone": "Keine",
+  "waves.create.rules.guidelinesAuthError":
+    "Authentifizierung fehlgeschlagen. Verbinde deine Wallet erneut und versuche es noch einmal.",
+  "waves.create.rules.guidelinesSaveError":
+    "Diese Richtlinien konnten nicht gespeichert werden. Versuche es noch einmal.",
+  "waves.create.rules.guidelinesSaveErrorTitle":
+    "Diese Richtlinien konnten nicht gespeichert werden.",
+  "waves.create.rules.guidelinesSaveErrorDescription":
+    "Versuche es noch einmal.",
+  "waves.create.voting.rankAdvancedSummary": "Abstimmungslimits und -verhalten",
+  "waves.create.voting.approveAdvancedSummary":
+    "Abstimmungslimits, -verhalten und -zeitplan",
+  "waves.create.outcomes.rankAdvancedSummary": "Sichtbarkeit der Ergebnisse",
+  "waves.create.outcomes.approveAdvancedSummary": "Gewinnerlimits",
+  "waves.create.drops.maxSimultaneousSubmissions.label":
+    "Maximale gleichzeitige Einreichungen",
+  "waves.create.drops.maxSimultaneousSubmissions.description":
+    "Maximale Anzahl gleichzeitiger Einreichungen pro Teilnehmer. Optional. Leer lassen für unbegrenzt.",
+  "waves.proposalCard.contextLabel": "Vorschlag",
+  "waves.proposalCard.readFull": "Vollständig lesen",
+  "waves.proposalCard.readFullNamed": "Vollständig lesen: {title}",
+  "waves.proposalCard.untitledProposal": "Unbenannter Vorschlag",
+  "waves.proposalCard.previewAlt": "Medienvorschau für {title}",
+  "waves.proposalCard.part.one": "{count} Teil",
+  "waves.proposalCard.part.other": "{count} Teile",
+  "waves.proposalCard.media.one": "{count} Medienelement",
+  "waves.proposalCard.media.other": "{count} Medienelemente",
+  "waves.proposalCard.attachment.one": "{count} Anhang",
+  "waves.proposalCard.attachment.other": "{count} Anhänge",
+  "waves.proposalCard.appearanceLabel": "Darstellung der Vorschlagskarte",
+  "waves.proposalCard.mode.standard.label": "Vollständiger Vorschlag",
+  "waves.proposalCard.mode.standard.description":
+    "Originalinhalt direkt im Feed anzeigen.",
+  "waves.proposalCard.mode.custom.label": "Zusammenfassungskarte",
+  "waves.proposalCard.mode.custom.description":
+    "Titel, gekürzten Text und optional ein Bild anzeigen.",
+  "waves.proposalCard.excerptLabel": "Limit der Textvorschau",
+  "waves.proposalCard.excerptInputAriaLabel":
+    "Maximale Zeichenanzahl der Vorschau",
+  "waves.proposalCard.characters": "Zeichen",
+  "waves.proposalCard.excerptRangeError":
+    "Gib eine ganze Zahl von {min} bis {max} ein.",
+  "waves.proposalCard.mediaLabel": "Bild auf der Zusammenfassungskarte",
+  "waves.proposalCard.settings.editLabel":
+    "Einstellungen der Vorschlagskarte bearbeiten",
+  "waves.proposalCard.settings.layoutLabel": "Vorschlagslayout",
+  "waves.proposalCard.settings.rowLabel": "Vorschlagskarten",
+  "waves.proposalCard.settings.toastAuthFailed":
+    "Authentifizierung fehlgeschlagen. Verbinde deine Wallet erneut und versuche es noch einmal.",
+  "waves.proposalCard.settings.toastSaveFailedTitle":
+    "Diese Einstellungen der Vorschlagskarte konnten nicht gespeichert werden.",
+  "waves.proposalCard.settings.toastRetry": "Bitte versuche es erneut.",
+  "waves.proposalCard.tabLabelsLabel": "Tab-Bezeichnungen",
+  "waves.proposalCard.tabLabelsDescription":
+    "Namen, die in den Tabs dieser Wave angezeigt werden.",
+  "waves.proposalCard.approvalsTabLabel": "Bezeichnung des Vorschlags-Tabs",
+  "waves.proposalCard.approvedTabLabel": "Bezeichnung des Genehmigt-Tabs",
+  "waves.proposalCard.tabLabels.errorTooLong":
+    "Bezeichnungen dürfen höchstens {max} Zeichen lang sein.",
+  "waves.proposalCard.tabLabels.errorDuplicate":
+    "Verwende zwei unterschiedliche Tab-Bezeichnungen.",
+  "waves.proposalCard.tabLabels.errorReserved":
+    "Bezeichnungen dürfen nicht mit vorhandenen Tabs übereinstimmen.",
+  ...DE_DE_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} in dieser Runde übrig",
   "memes.quickVote.unrated": "{count} unbewertet",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",
@@ -379,6 +1014,7 @@ export const DE_DE_MESSAGES = {
   "memes.waveFooter.quickVote.open": "Schnellvoting öffnen",
   "memes.waveFooter.uncastPower.ariaLabel":
     "Nicht vergebene Power, {power} {votingLabel} übrig, {leftThisRound}, {unrated}",
+  "memes.waveFooter.uncastPower.compactLeft": "{count} übrig",
   "memes.waveFooter.uncastPower.title": "Nicht vergebene Power",
   "memes.waveFooter.uncastPower.visibleValue": "{power} {votingLabel}",
   "memes.waveFooter.uncastPower.votes": "Stimmen",
@@ -386,8 +1022,132 @@ export const DE_DE_MESSAGES = {
   ...DE_DE_DROP_REACTION_MESSAGES,
   "waves.mobile.profileFeed.title": "Profile-Waves-Feed",
   "waves.mobile.profileFeed.subtitle": "Ausgewählte Drops aus Profile-Waves",
+  "waves.header.postLabel.inProgress": "Beitrag wird veröffentlicht",
+  "waves.profileFeed.title": "Neueste Beiträge aus Profile Waves",
+  "waves.profileFeed.description":
+    "Entdecke, was die Community in Profile Waves teilt.",
+  "waves.profileFeed.errorTitle": "Profilbeiträge konnten nicht geladen werden",
+  "waves.profileFeed.errorDescription":
+    "Aktualisiere diese Ansicht, um es erneut zu versuchen.",
+  "waves.profileFeed.emptyTitle": "Noch keine Profilbeiträge",
+  "waves.profileFeed.emptyDescription":
+    "Neue Beiträge aus den Profile Waves der Mitglieder erscheinen hier.",
+  "waves.leaderboard.listLabel": "Leaderboard-Drops",
+  "waves.leaderboard.loadingEarlier": "Frühere Drops werden geladen",
+  "waves.leaderboard.previousLoadError":
+    "Frühere Drops konnten nicht geladen werden. Wähle „Erneut versuchen“, um den Ladevorgang zu wiederholen.",
+  "waves.leaderboard.retryEarlier": "Frühere Drops erneut laden",
+  "waves.leaderboard.loadingMore": "Weitere Drops werden geladen",
+  "waves.leaderboard.nextLoadError":
+    "Weitere Drops konnten nicht geladen werden. Wähle „Erneut versuchen“, um den Ladevorgang zu wiederholen.",
+  "waves.leaderboard.retryMore": "Weitere Drops erneut laden",
+  "waves.leaderboard.loadMore": "Weitere Drops laden",
+  "waves.leaderboard.loadingMoreButton": "Wird geladen…",
+  "waves.leaderboard.grid.untitled": "Unbenannter Drop",
+  "waves.leaderboard.grid.readFull": "Vollständig lesen",
+  "waves.leaderboard.grid.open": "Öffnen",
+  "waves.leaderboard.grid.openNamed": "{title} öffnen",
+  "waves.leaderboard.grid.authorProfile": "Profil von {author} ansehen",
+  "waves.leaderboard.grid.voters.one": "{count} abstimmende Person",
+  "waves.leaderboard.grid.voters.other": "{count} abstimmende Personen",
+  "waves.leaderboard.podium.place.first": "1.",
+  "waves.leaderboard.podium.place.second": "2.",
+  "waves.leaderboard.podium.place.third": "3.",
+  "waves.leaderboard.podium.open.first": "1. Platz öffnen: {name}",
+  "waves.leaderboard.podium.open.second": "2. Platz öffnen: {name}",
+  "waves.leaderboard.podium.open.third": "3. Platz öffnen: {name}",
+  "waves.leaderboard.podium.avatar": "Avatar von {name}",
+  "waves.leaderboard.podium.selfNominated": "selbst nominiert",
+  "waves.leaderboard.podium.nominatedBy": "nominiert von {nominator}",
+  "waves.leaderboard.podium.outcome": "Ergebnis",
+  "waves.leaderboard.podium.empty.title": "Keine Gewinner zum Anzeigen",
+  "waves.leaderboard.podium.empty.description":
+    "Diese Wave endete ohne Einreichungen",
+  "waves.voteDetails.title": "Stimmen",
+  "waves.voteDetails.trigger.one":
+    "Abstimmende und Protokoll für {count} Person anzeigen",
+  "waves.voteDetails.trigger.other":
+    "Abstimmende und Protokoll für {count} Personen anzeigen",
+  "waves.leaderboard.grid.you": "Du",
+  "waves.leaderboard.grid.votesNow": "Stimmen jetzt",
+  "waves.leaderboard.grid.status.approved": "Genehmigt",
+  "waves.leaderboard.grid.status.approvingIn": "Genehmigung in {time}",
+  "waves.leaderboard.grid.status.reachedThreshold": "Schwellenwert erreicht",
+  "waves.leaderboard.grid.status.closed": "Geschlossen",
+  "waves.leaderboard.grid.status.needs": "Benötigt {amount}",
+  "waves.leaderboard.grid.voteSummary.approval":
+    "{reached} von {required} {unit} erreicht. Status: {status}.",
+  "waves.leaderboard.grid.voteSummary.approvalWithRealtime":
+    "{reached} von {required} {unit} erreicht. Stimmen jetzt: {votesNow} {unit}. Status: {status}.",
+  "waves.leaderboard.grid.voteSummary.standard":
+    "Aktueller Stand: {current} {unit}. Prognose: {projected} {unit}.",
+  "waves.leaderboard.timeline.toggle":
+    "Entscheidungszeitplan ein- oder ausblenden",
+  "waves.leaderboard.timeline.decisionTimeline": "Entscheidungszeitplan",
+  "waves.leaderboard.timeline.announcementHistory": "Ankündigungsverlauf",
+  "waves.leaderboard.timeline.paused": "Pausiert",
+  "waves.leaderboard.timeline.nextDecisionAfter":
+    "Nächste Entscheidung nach dem {date}",
+  "waves.leaderboard.timeline.noDecisionScheduled":
+    "Keine Entscheidung geplant",
+  "waves.leaderboard.timeline.noUpcomingEvents":
+    "Keine bevorstehenden Ereignisse",
+  "waves.leaderboard.timeline.nextWinner": "Nächster Gewinner",
+  "waves.leaderboard.timeline.nextWinnerIn": "Nächster Gewinner in {countdown}",
+  "waves.leaderboard.timeline.unit.day.one": "{count} Tag",
+  "waves.leaderboard.timeline.unit.day.other": "{count} Tage",
+  "waves.leaderboard.timeline.unit.hour.one": "{count} Stunde",
+  "waves.leaderboard.timeline.unit.hour.other": "{count} Stunden",
+  "waves.leaderboard.timeline.unit.minute.one": "{count} Minute",
+  "waves.leaderboard.timeline.unit.minute.other": "{count} Minuten",
+  "waves.leaderboard.timeline.unit.second.one": "{count} Sekunde",
+  "waves.leaderboard.timeline.unit.second.other": "{count} Sekunden",
+  "waves.leaderboard.timeline.status.next": "Als Nächstes",
+  "waves.leaderboard.timeline.status.done": "Erledigt",
+  "waves.leaderboard.timeline.status.completed": "Abgeschlossen",
+  "waves.poll.actions.viewResults": "Ergebnisse anzeigen",
+  "waves.poll.actions.vote": "Abstimmen",
+  "waves.poll.actions.changeVote": "Stimme ändern",
+  "waves.poll.status.voted": "Abgestimmt",
+  "waves.poll.status.updated": "Aktualisiert",
+  "waves.composer.placeholder.createDrop": "Drop erstellen",
+  "waves.composer.placeholder.writeChatMessage": "Chatnachricht schreiben",
+  "waves.composer.placeholder.dropReply": "Antwort als Drop verfassen",
+  "waves.composer.placeholder.postReply": "Antwort posten",
+  "waves.composer.placeholder.quoteDrop": "Drop zitieren",
+  "waves.composer.placeholder.postQuote": "Zitat posten",
+  "waves.poll.composer.title": "Umfrage erstellen",
+  "waves.poll.composer.questionPlaceholder": "Umfragefrage stellen",
+  "waves.poll.composer.questionRequired": "Füge eine Frage zur Umfrage hinzu.",
+  "waves.poll.composer.mode.groupLabel": "Antworttyp der Umfrage",
+  "waves.poll.composer.mode.single": "Einfach",
+  "waves.poll.composer.mode.multiple": "Mehrfach",
+  "waves.poll.composer.mode.singleDescription":
+    "Teilnehmende können eine Option auswählen.",
+  "waves.poll.composer.mode.multipleDescription":
+    "Teilnehmende können mehrere Optionen auswählen.",
+  "waves.poll.composer.optionLabel": "Umfrageoption {number}",
+  "waves.poll.composer.optionPlaceholder": "Option {number}",
+  "waves.poll.composer.removeOption": "Option {number} entfernen",
+  "waves.poll.composer.add": "Umfrage hinzufügen",
+  "waves.poll.composer.addOption": "Option hinzufügen",
+  "waves.poll.composer.remove": "Umfrage entfernen",
+  "waves.poll.composer.closingTime": "Endzeit",
+  "waves.poll.composer.onlyDroppersCanRespond":
+    "Nur Personen mit Chatberechtigung können antworten",
+  "waves.poll.composer.anonymous": "Anonyme Umfrage",
+  "waves.poll.composer.validation.minimumOptions":
+    "Gib mindestens {count} Optionen ein.",
+  "waves.poll.composer.validation.optionLength":
+    "Optionen dürfen höchstens {max} Zeichen lang sein.",
+  "waves.poll.composer.validation.uniqueOptions":
+    "Umfrageoptionen müssen eindeutig sein.",
+  "waves.poll.composer.validation.futureClosingTime":
+    "Wähle eine Endzeit in der Zukunft.",
   "theMemes.documentTitle": "The Memes | Sammlungen",
   "theMemes.description.collections": "Sammlungen",
+  "theMemes.detail.live.artwork.mintDateLabel": "Mint-Datum:",
+  ...DE_DE_THE_MEMES_COLLECTORS_MESSAGES,
   "theMemes.sorting.regionLabel": "Meme-Sortierung",
   "theMemes.sorting.sortBy": "Sortieren nach",
   "theMemes.sorting.directionLegend": "Sortierrichtung",
@@ -431,4 +1191,36 @@ export const DE_DE_MESSAGES = {
   "theMemes.volume.7Days": "7 Tage",
   "theMemes.volume.30Days": "30 Tage",
   "theMemes.volume.allTime": "Gesamt",
+  "home.mintAllowlist.label": "Deine Zuteilung",
+  "home.mintAllowlist.allocationsAriaLabel":
+    "Mint-Zuteilungen für die verbundene Wallet",
+  "home.mintAllowlist.connectWallet":
+    "Verbinde deine Wallet, um Details anzuzeigen.",
+  "home.mintAllowlist.checking": "Wird geprüft…",
+  "home.mintAllowlist.notPublished":
+    "Verfügbar, sobald die Verteilung veröffentlicht wurde.",
+  "home.mintAllowlist.notFound": "Keine für diese Wallet.",
+  "home.mintAllowlist.unavailable": "Vorübergehend nicht verfügbar.",
+  "home.mintAllowlist.phase.phase0": "Phase 0",
+  "home.mintAllowlist.phase.phase1": "Phase 1",
+  "home.mintAllowlist.phase.phase2": "Phase 2",
+  "home.mintAllowlist.phase.public": "Öffentlich",
+  "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}x Airdrop",
+  "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}x Allowlist",
+  "home.mintAllowlist.pill.mixed":
+    "{phase} · {airdrop}x Airdrop · {allowlist}x Allowlist",
+  "profilePreferences.notifications.heading": "Benachrichtigungen",
+  "profilePreferences.notifications.ALL.label": "Alle",
+  "notifications.filter.ariaLabel": "Benachrichtigungen filtern: {selection}",
+  "notifications.filter.selected": "{count} ausgewählt",
+  "notifications.filter.sheetTitle": "Benachrichtigungen filtern",
+  "notifications.status.unread": "Ungelesen",
+  "notifications.preview.expand": "Vollständigen Drop anzeigen",
+  "notifications.filter.option.mentions": "Erwähnungen",
+  "notifications.filter.option.replies": "Antworten",
+  "notifications.filter.option.identity": "Identität",
+  "notifications.filter.option.reactions": "Reaktionen",
+  "notifications.filter.option.invites": "Einladungen",
+  "notifications.filter.option.subscriptions": "Abonnements",
+  ...DE_DE_TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

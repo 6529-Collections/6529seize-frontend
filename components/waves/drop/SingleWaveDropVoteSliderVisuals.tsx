@@ -165,18 +165,22 @@ export const SliderScaleLabels: FC<SliderScaleLabelsProps> = ({
 
   return (
     <div className="tw-pointer-events-none tw-absolute tw-left-0 tw-right-0 tw-top-6 tw-flex tw-h-4 tw-items-center tw-justify-between tw-text-[10px] tw-font-medium">
-      <span className={visualState.minLabelClasses}>
+      <span
+        className={`tw-max-w-[42%] tw-truncate tw-tabular-nums ${visualState.minLabelClasses}`}
+      >
         {formatNumberWithCommas(minValue)}
       </span>
       {showZeroScaleMarker && (
         <span
-          className="tw-absolute -tw-translate-x-1/2 tw-text-iron-500"
+          className="tw-absolute -tw-translate-x-1/2 tw-text-iron-400"
           style={{ left: `${progressOriginPercentage}%` }}
         >
           0
         </span>
       )}
-      <span className={visualState.maxLabelClasses}>
+      <span
+        className={`tw-max-w-[42%] tw-truncate tw-tabular-nums ${visualState.maxLabelClasses}`}
+      >
         {visualState.maxLabelPrefix}
         {formatNumberWithCommas(maxValue)}
       </span>

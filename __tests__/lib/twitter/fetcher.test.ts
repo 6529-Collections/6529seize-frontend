@@ -82,6 +82,93 @@ describe("fetchTweetPreview", () => {
     expect(endpoint?.searchParams.get("token")).toBeTruthy();
   });
 
+  it("parses canonical X Article metadata and removes its redirect URL", async () => {
+    const response = {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        __typename: "Tweet",
+        id_str: "2081708447628959923",
+        text: "https://t.co/DQJw6K0lUm",
+        created_at: "2026-07-27T11:49:04.000Z",
+        user: {
+          name: "Intrepid",
+          screen_name: "intrepid_p",
+        },
+        entities: {
+          urls: [
+            {
+              url: "https://t.co/DQJw6K0lUm",
+              expanded_url: "http://x.com/i/article/2081571498809298944",
+            },
+          ],
+        },
+        article: {
+          rest_id: "2081571498809298944",
+          title: "Intrepid Ocean - Season Two",
+          preview_text:
+            "The Intrepid Ocean has taken me through twenty-four countries and territories over four years.",
+          cover_media: {
+            media_info: {
+              original_img_url:
+                "https://pbs.twimg.com/media/HOM6eO9asAAiZJi.jpg",
+            },
+          },
+        },
+      }),
+    };
+    const fetchImpl = jest.fn().mockResolvedValueOnce(response);
+
+    const preview = await fetchTweetPreview(
+      "https://x.com/intrepid_p/status/2081708447628959923",
+      { fetchImpl }
+    );
+
+    expect(preview.text).toBeUndefined();
+    expect(preview).toMatchObject({
+      article: {
+        url: "https://x.com/i/article/2081571498809298944",
+        title: "Intrepid Ocean - Season Two",
+        previewText:
+          "The Intrepid Ocean has taken me through twenty-four countries and territories over four years.",
+        coverImageUrl: "https://pbs.twimg.com/media/HOM6eO9asAAiZJi.jpg",
+      },
+    });
+  });
+
+  it("preserves ordinary post text containing a t.co link", async () => {
+    const response = {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        __typename: "Tweet",
+        id_str: "2081708447628959924",
+        text: "Read this link https://t.co/ordinary",
+        user: {
+          name: "Intrepid",
+          screen_name: "intrepid_p",
+        },
+        entities: {
+          urls: [
+            {
+              url: "https://t.co/ordinary",
+              expanded_url: "https://example.com/story",
+            },
+          ],
+        },
+      }),
+    };
+    const fetchImpl = jest.fn().mockResolvedValueOnce(response);
+
+    const preview = await fetchTweetPreview(
+      "https://x.com/intrepid_p/status/2081708447628959924",
+      { fetchImpl }
+    );
+
+    expect(preview.text).toBe("Read this link https://t.co/ordinary");
+    expect(preview.article).toBeUndefined();
+  });
+
   it("does not treat arbitrary hosts containing twimg.com as Twitter media", async () => {
     const response = {
       ok: true,

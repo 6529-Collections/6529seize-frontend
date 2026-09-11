@@ -1,29 +1,32 @@
 // @ts-nocheck
-import { render, waitFor } from '@testing-library/react';
-import React from 'react';
-import NextGenArtists from '@/components/nextGen/collections/NextGenArtists';
-import { fetchUrl } from '@/services/6529api';
+import { render, screen, waitFor } from "@testing-library/react";
+import React from "react";
+import NextGenArtists from "@/components/nextGen/collections/NextGenArtists";
+import { fetchUrl } from "@/services/6529api";
 
-jest.mock('@/services/6529api', () => ({ fetchUrl: jest.fn() }));
+jest.mock("@/services/6529api", () => ({ fetchUrl: jest.fn() }));
 
 const MockArtist = jest.fn((props: any) => <div data-testid="artist" />);
-jest.mock('@/components/nextGen/collections/collectionParts/NextGenCollectionArtist', () => ({
-  __esModule: true,
-  // @ts-ignore
-  default: (props: any) => MockArtist(props),
-}));
+jest.mock(
+  "@/components/nextGen/collections/collectionParts/NextGenCollectionArtist",
+  () => ({
+    __esModule: true,
+    // @ts-ignore
+    default: (props: any) => MockArtist(props),
+  })
+);
 
-describe('NextGenArtists', () => {
+describe("NextGenArtists", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('fetches collections and groups by artist', async () => {
+  it("fetches collections and groups by artist", async () => {
     (fetchUrl as jest.Mock).mockResolvedValue({
       data: [
-        { id: 1, artist_address: '0xa', artist: 'A' },
-        { id: 2, artist_address: '0xa', artist: 'A' },
-        { id: 3, artist_address: '0xb', artist: 'B' },
+        { id: 1, artist_address: "0xa", artist: "A" },
+        { id: 2, artist_address: "0xa", artist: "A" },
+        { id: 3, artist_address: "0xb", artist: "B" },
       ],
     });
 
@@ -48,5 +51,16 @@ describe('NextGenArtists', () => {
         link_collections: [expect.objectContaining({ id: 3 })],
       })
     );
+  });
+
+  it("shows an error instead of an empty result when loading fails", async () => {
+    (fetchUrl as jest.Mock).mockRejectedValue(new Error("offline"));
+
+    render(<NextGenArtists />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Unable to load artists"
+    );
+    expect(screen.queryByText("No artists found")).not.toBeInTheDocument();
   });
 });

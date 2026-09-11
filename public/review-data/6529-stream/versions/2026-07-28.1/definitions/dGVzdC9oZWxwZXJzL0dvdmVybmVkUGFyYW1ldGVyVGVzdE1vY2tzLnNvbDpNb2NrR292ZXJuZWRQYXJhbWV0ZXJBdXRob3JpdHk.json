@@ -1,0 +1,934 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:0x546ea281",
+          "declaringDefinitionId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority",
+          "inherited": false,
+          "inputs": [],
+          "name": "currentAction",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x546ea281",
+          "signature": "currentAction()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:0x8d96760d",
+          "declaringDefinitionId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamGovernedParameterAuthority",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x8d96760d",
+          "signature": "isStreamGovernedParameterAuthority()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:0x48bc330c",
+          "declaringDefinitionId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "executing",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "setCurrentAction",
+          "outputs": [],
+          "selector": "0x48bc330c",
+          "signature": "setCurrentAction(bool,bytes32,uint8,bytes32,bytes32,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:0xe157322b",
+          "declaringDefinitionId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "enum MockGovernedParameterAuthority.MarkerResponseMode",
+              "name": "responseMode",
+              "type": "uint8"
+            }
+          ],
+          "name": "setMarkerResponseMode",
+          "outputs": [],
+          "selector": "0xe157322b",
+          "signature": "setMarkerResponseMode(uint8)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:0x4685f940",
+          "declaringDefinitionId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "enum MockGovernedParameterAuthority.ResponseMode",
+              "name": "responseMode",
+              "type": "uint8"
+            }
+          ],
+          "name": "setResponseMode",
+          "outputs": [],
+          "selector": "0x4685f940",
+          "signature": "setResponseMode(uint8)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [
+        {
+          "memberDetails": [
+            {
+              "index": 0,
+              "name": "Canonical",
+              "range": {
+                "byteLength": 9,
+                "byteStart": 317,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L9",
+                "lineEnd": 9,
+                "lineStart": 9,
+                "snippetSha256": "sha256:782621d03699b3741c7977a212b58f042e8bf0120a560e33307698c566e24e89",
+                "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+              }
+            },
+            {
+              "index": 1,
+              "name": "Reverting",
+              "range": {
+                "byteLength": 9,
+                "byteStart": 336,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L10",
+                "lineEnd": 10,
+                "lineStart": 10,
+                "snippetSha256": "sha256:f2441a6cee5943ea6d9b1fa932371ebbea5b4622aab21638ef4d0a37b209249e",
+                "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Short",
+              "range": {
+                "byteLength": 5,
+                "byteStart": 355,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L11",
+                "lineEnd": 11,
+                "lineStart": 11,
+                "snippetSha256": "sha256:f5d61ead3eefbf5c0bfff31493eaa7af16b17479511bcf8ba4f73d4fc1e05f26",
+                "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Oversized",
+              "range": {
+                "byteLength": 9,
+                "byteStart": 370,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L12",
+                "lineEnd": 12,
+                "lineStart": 12,
+                "snippetSha256": "sha256:e7537d87c4ab5ed94586a4e0d684f8f3d0cc4145d86968889184bc8532f2f002",
+                "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+              }
+            },
+            {
+              "index": 4,
+              "name": "NonCanonical",
+              "range": {
+                "byteLength": 12,
+                "byteStart": 389,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L13",
+                "lineEnd": 13,
+                "lineStart": 13,
+                "snippetSha256": "sha256:49b5a3467b1d38e7b64a02b8d0342b6e8ae81e3c23d08e691af7174ab64a581f",
+                "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+              }
+            },
+            {
+              "index": 5,
+              "name": "GasHeavy",
+              "range": {
+                "byteLength": 8,
+                "byteStart": 411,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L14",
+                "lineEnd": 14,
+                "lineStart": 14,
+                "snippetSha256": "sha256:59e703e20042b08e08edfef6093e232905c193b5541e83b8fbb0d4e66aa1952d",
+                "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+              }
+            }
+          ],
+          "members": [
+            "Canonical",
+            "Reverting",
+            "Short",
+            "Oversized",
+            "NonCanonical",
+            "GasHeavy"
+          ],
+          "name": "MarkerResponseMode",
+          "natspec": "",
+          "range": {
+            "byteLength": 142,
+            "byteStart": 283,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L8-L15",
+            "lineEnd": 15,
+            "lineStart": 8,
+            "snippetSha256": "sha256:229fa14b411068b76b4255da77cb1e0d6d97acbaa8a2edb00ee618db34e6afa1",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          }
+        },
+        {
+          "memberDetails": [
+            {
+              "index": 0,
+              "name": "Canonical",
+              "range": {
+                "byteLength": 9,
+                "byteStart": 459,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L18",
+                "lineEnd": 18,
+                "lineStart": 18,
+                "snippetSha256": "sha256:782621d03699b3741c7977a212b58f042e8bf0120a560e33307698c566e24e89",
+                "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+              }
+            },
+            {
+              "index": 1,
+              "name": "Reverting",
+              "range": {
+                "byteLength": 9,
+                "byteStart": 478,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L19",
+                "lineEnd": 19,
+                "lineStart": 19,
+                "snippetSha256": "sha256:f2441a6cee5943ea6d9b1fa932371ebbea5b4622aab21638ef4d0a37b209249e",
+                "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Short",
+              "range": {
+                "byteLength": 5,
+                "byteStart": 497,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L20",
+                "lineEnd": 20,
+                "lineStart": 20,
+                "snippetSha256": "sha256:f5d61ead3eefbf5c0bfff31493eaa7af16b17479511bcf8ba4f73d4fc1e05f26",
+                "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Oversized",
+              "range": {
+                "byteLength": 9,
+                "byteStart": 512,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L21",
+                "lineEnd": 21,
+                "lineStart": 21,
+                "snippetSha256": "sha256:e7537d87c4ab5ed94586a4e0d684f8f3d0cc4145d86968889184bc8532f2f002",
+                "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+              }
+            },
+            {
+              "index": 4,
+              "name": "NonCanonicalExecuting",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 531,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L22",
+                "lineEnd": 22,
+                "lineStart": 22,
+                "snippetSha256": "sha256:d83200fd42cd7d9254a3764999273d5553d7bfa8ef50e1754176e3e36008f5b0",
+                "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+              }
+            },
+            {
+              "index": 5,
+              "name": "NonCanonicalActionClass",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 562,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L23",
+                "lineEnd": 23,
+                "lineStart": 23,
+                "snippetSha256": "sha256:6137d731d484776d63f068c7adfaf976613736ae34fd00e5c580b5bb06697c39",
+                "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+              }
+            },
+            {
+              "index": 6,
+              "name": "GasHeavy",
+              "range": {
+                "byteLength": 8,
+                "byteStart": 595,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L24",
+                "lineEnd": 24,
+                "lineStart": 24,
+                "snippetSha256": "sha256:59e703e20042b08e08edfef6093e232905c193b5541e83b8fbb0d4e66aa1952d",
+                "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+              }
+            }
+          ],
+          "members": [
+            "Canonical",
+            "Reverting",
+            "Short",
+            "Oversized",
+            "NonCanonicalExecuting",
+            "NonCanonicalActionClass",
+            "GasHeavy"
+          ],
+          "name": "ResponseMode",
+          "natspec": "",
+          "range": {
+            "byteLength": 178,
+            "byteStart": 431,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L17-L25",
+            "lineEnd": 25,
+            "lineStart": 17,
+            "snippetSha256": "sha256:1e3dd7818d80a4432ba0657a2dd20e0664d6e6ed823991516c42388e61de9564",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          }
+        }
+      ],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(bool)",
+          "functionKind": "constructor",
+          "id": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:constructor(bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "validMarker",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0dvdmVybmVkUGFyYW1ldGVyVGVzdE1vY2tzLnNvbDpNb2NrR292ZXJuZWRQYXJhbWV0ZXJBdXRob3JpdHkjZnVuY3Rpb246Y29uc3RydWN0b3IoYm9vbCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 73,
+            "byteStart": 943,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L37-L39",
+            "lineEnd": 39,
+            "lineStart": 37,
+            "snippetSha256": "sha256:6a66a6d1e41f6109aaa40571c8287a168b3f7afa7e1f3c664cec14f2df72a127",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "isStreamGovernedParameterAuthority()",
+          "displaySignature": "isStreamGovernedParameterAuthority()",
+          "functionKind": "function",
+          "id": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:0x8d96760d",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL0dvdmVybmVkUGFyYW1ldGVyVGVzdE1vY2tzLnNvbDpNb2NrR292ZXJuZWRQYXJhbWV0ZXJBdXRob3JpdHkjZnVuY3Rpb246MHg4ZDk2NzYwZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamGovernedParameterAuthority",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 999,
+            "byteStart": 1022,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L41-L61",
+            "lineEnd": 61,
+            "lineStart": 41,
+            "snippetSha256": "sha256:c6cf5fc3a4b43bef56af281c84e7db0ea6c6711b9cab797d1757061c56b9d68a",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          },
+          "selector": "0x8d96760d",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setMarkerResponseMode(uint8)",
+          "displaySignature": "setMarkerResponseMode(MarkerResponseMode)",
+          "functionKind": "function",
+          "id": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:0xe157322b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "responseMode",
+              "type": "MarkerResponseMode"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0dvdmVybmVkUGFyYW1ldGVyVGVzdE1vY2tzLnNvbDpNb2NrR292ZXJuZWRQYXJhbWV0ZXJBdXRob3JpdHkjZnVuY3Rpb246MHhlMTU3MzIyYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setMarkerResponseMode",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 124,
+            "byteStart": 2027,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L63-L65",
+            "lineEnd": 65,
+            "lineStart": 63,
+            "snippetSha256": "sha256:cff9307acfeb7c8a12fc9b8fb0c1e003a384b08fa59f03c50f7db8a8f43aa1a1",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          },
+          "selector": "0xe157322b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setCurrentAction(bool,bytes32,uint8,bytes32,bytes32,bytes32)",
+          "displaySignature": "setCurrentAction(bool,bytes32,uint8,bytes32,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:0x48bc330c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "executing",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0dvdmVybmVkUGFyYW1ldGVyVGVzdE1vY2tzLnNvbDpNb2NrR292ZXJuZWRQYXJhbWV0ZXJBdXRob3JpdHkjZnVuY3Rpb246MHg0OGJjMzMwYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setCurrentAction",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 418,
+            "byteStart": 2157,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L67-L81",
+            "lineEnd": 81,
+            "lineStart": 67,
+            "snippetSha256": "sha256:03c647b49837c1d4e3481727e2dc7412037e1ce171a08c565a1508571fd780a5",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          },
+          "selector": "0x48bc330c",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setResponseMode(uint8)",
+          "displaySignature": "setResponseMode(ResponseMode)",
+          "functionKind": "function",
+          "id": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:0x4685f940",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "responseMode",
+              "type": "ResponseMode"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0dvdmVybmVkUGFyYW1ldGVyVGVzdE1vY2tzLnNvbDpNb2NrR292ZXJuZWRQYXJhbWV0ZXJBdXRob3JpdHkjZnVuY3Rpb246MHg0Njg1Zjk0MA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setResponseMode",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 106,
+            "byteStart": 2581,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L83-L85",
+            "lineEnd": 85,
+            "lineStart": 83,
+            "snippetSha256": "sha256:06b3bc82516bfc3a3a9fd8ed2904dbc6653ad35a3bb58a66e35fb422f4007ecf",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          },
+          "selector": "0x4685f940",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "currentAction()",
+          "displaySignature": "currentAction()",
+          "functionKind": "function",
+          "id": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:0x546ea281",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL0dvdmVybmVkUGFyYW1ldGVyVGVzdE1vY2tzLnNvbDpNb2NrR292ZXJuZWRQYXJhbWV0ZXJBdXRob3JpdHkjZnVuY3Rpb246MHg1NDZlYTI4MQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "currentAction",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 1630,
+            "byteStart": 2693,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L87-L123",
+            "lineEnd": 123,
+            "lineStart": 87,
+            "snippetSha256": "sha256:0dad075c896199d3a9a67ab841c3bfd1fc885e323549ec8b66dc068d4333d5e4",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          },
+          "selector": "0x546ea281",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "_validMarker",
+          "natspec": "",
+          "range": {
+            "byteLength": 35,
+            "byteStart": 615,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:1c7ceec15b88ee3de24d5233965d09aa43a1bf779dd030dd50aeffec7c581edb",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          },
+          "selector": null,
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_executing",
+          "natspec": "",
+          "range": {
+            "byteLength": 23,
+            "byteStart": 656,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:d8e6590eb783a45fbff25d22ba57752d9a1d0cdbd1a13e57fd12a36febd05186",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          },
+          "selector": null,
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_actionId",
+          "natspec": "",
+          "range": {
+            "byteLength": 25,
+            "byteStart": 685,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:f38ff26b6c9c7a0fa30126cc961a2ccf2cfacff63dd064cf46b4a5355df78923",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_actionClass",
+          "natspec": "",
+          "range": {
+            "byteLength": 26,
+            "byteStart": 716,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:42d20d893eeafeaf43aece942f5390db6ef8a7ace83acf5d5b373818d3b3fc4c",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_scopeHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 26,
+            "byteStart": 748,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:d4517532007473e07ffd80a74b1ba557a350663364a5652f8682277c125dea2c",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_oldValueHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 29,
+            "byteStart": 780,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:e907dc63e197f8b3e49a680dc6c38cc4ae3341923cee4d9b1c289030e4f6c05d",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_newValueHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 29,
+            "byteStart": 815,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L33",
+            "lineEnd": 33,
+            "lineStart": 33,
+            "snippetSha256": "sha256:56c69387e6339d96a9f081bebc99120262136e15c0ca32777d556fd722a71d7f",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_markerResponseMode",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 850,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:1bb0e67a5a74a1f5d1230d77013236c19d9b13daa2290a13a04827ea657394ce",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          },
+          "selector": null,
+          "type": "MarkerResponseMode",
+          "typeString": "enum MockGovernedParameterAuthority.MarkerResponseMode",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_responseMode",
+          "natspec": "",
+          "range": {
+            "byteLength": 34,
+            "byteStart": 902,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:2fe8a4e2fa610552930e3448412c007dc9bd74a69fa0bb88adb775bca6f19c78",
+            "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+          },
+          "selector": null,
+          "type": "ResponseMode",
+          "typeString": "enum MockGovernedParameterAuthority.ResponseMode",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IStreamGovernedParameterAuthority.sol:IStreamGovernedParameterAuthority",
+        "name": "IStreamGovernedParameterAuthority"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL0dvdmVybmVkUGFyYW1ldGVyVGVzdE1vY2tzLnNvbDpNb2NrR292ZXJuZWRQYXJhbWV0ZXJBdXRob3JpdHk",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority",
+      "smart-contracts/IStreamGovernedParameterAuthority.sol:IStreamGovernedParameterAuthority"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MockGovernedParameterAuthority",
+    "natspec": "@notice Governance-V2 context stand-in with adversarial ABI modes.",
+    "range": {
+      "byteLength": 4125,
+      "byteStart": 200,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/GovernedParameterTestMocks.sol#L7-L124",
+      "lineEnd": 124,
+      "lineStart": 7,
+      "snippetSha256": "sha256:b9c3920513f0400f69330c39f0220992863d828615f67d9e096c0e73c0902cea",
+      "sourceSha256": "sha256:f95df3bbacf8b108645c727c9650f779cfdad26c9578d49f4e90f21bdd4271d8"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/GovernedParameterTestMocks.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 6
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 6
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:0x4685f940",
+      "definitionId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:0x48bc330c",
+      "definitionId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:0x546ea281",
+      "definitionId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:0x8d96760d",
+      "definitionId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:0xe157322b",
+      "definitionId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority#function:constructor(bool)",
+      "definitionId": "test/helpers/GovernedParameterTestMocks.sol:MockGovernedParameterAuthority",
+      "severity": "advisory"
+    }
+  ]
+}

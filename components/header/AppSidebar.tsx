@@ -6,12 +6,14 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
+import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   DROP_FORGE_PATH,
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
+import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useSidebarSections } from "@/hooks/useSidebarSections";
 import type { SidebarSection } from "@/components/navigation/navTypes";
@@ -20,6 +22,8 @@ import { t } from "@/i18n/messages";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
 import DropForgeIcon from "../common/icons/DropForgeIcon";
+import Join6529Icon from "../common/icons/Join6529Icon";
+import WatchTowerIcon from "../common/icons/WatchTowerIcon";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
 import AppUserConnect from "./AppUserConnect";
@@ -64,6 +68,10 @@ export default function AppSidebar({
 }) {
   const { appWalletsSupported } = useAppWallets();
   const { canAccessLanding: showDropForge } = useDropForgePermissions();
+  const moderatorAccess = useContentModeratorAccess();
+  const showModeration = moderatorAccess.data?.moderator === true;
+  const hasOpenModerationReports =
+    moderatorAccess.data?.has_open_reports === true;
   const capacitor = useCapacitor();
   const cookieConsent = useOptionalCookieConsent();
   const sections = useSidebarSections(
@@ -85,14 +93,38 @@ export default function AppSidebar({
 
     return [
       sectionMap.get("nfts"),
+      {
+        label: t(DEFAULT_LOCALE, "navigation.primary.museum"),
+        path: "/museum/network",
+        icon: BuildingLibraryIcon,
+      },
       sectionMap.get("waves"),
       {
         label: t(DEFAULT_LOCALE, "navigation.primary.dms"),
         path: "/messages",
         icon: ChatBubbleIcon,
       },
+      {
+        label: t(DEFAULT_LOCALE, "navigation.primary.join6529"),
+        path: "/join-6529",
+        icon: Join6529Icon,
+      },
       sectionMap.get("about"),
       ...(showDropForge ? [dropForgeItem] : []),
+      ...(showModeration
+        ? [
+            {
+              label: t(DEFAULT_LOCALE, "contentModeration.moderator.menu"),
+              path: "/content-moderation",
+              icon: WatchTowerIcon,
+              hasIndicator: hasOpenModerationReports,
+              indicatorLabel: t(
+                DEFAULT_LOCALE,
+                "contentModeration.moderator.openReportsIndicator"
+              ),
+            },
+          ]
+        : []),
     ].flatMap((item): SidebarMenu => {
       if (item === undefined) {
         return [];
@@ -104,7 +136,7 @@ export default function AppSidebar({
 
       return [item];
     });
-  }, [sections, showDropForge]);
+  }, [hasOpenModerationReports, sections, showDropForge, showModeration]);
 
   // Close on right-to-left swipe
   useEffect(() => {

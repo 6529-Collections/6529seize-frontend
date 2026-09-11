@@ -9,6 +9,7 @@ describe("CreateWaveDropsType", () => {
       <CreateWaveDropsType
         isChecked={false}
         type={ExtendedWaveParticipationRequirement.IMAGE}
+        label="Image"
         onRequiredTypeChange={onChange}
       />
     );
@@ -23,6 +24,7 @@ describe("CreateWaveDropsType", () => {
       <CreateWaveDropsType
         isChecked={true}
         type={ExtendedWaveParticipationRequirement.AUDIO}
+        label="Audio"
         onRequiredTypeChange={() => {}}
       />
     );

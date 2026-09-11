@@ -1,0 +1,520 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x0d102081",
+          "declaringDefinitionId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testEightFunctionIdentitySurface",
+          "outputs": [],
+          "selector": "0x0d102081",
+          "signature": "testEightFunctionIdentitySurface()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x131c5682",
+          "declaringDefinitionId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFirstGenerationModuleSupersedesZero",
+          "outputs": [],
+          "selector": "0x131c5682",
+          "signature": "testFirstGenerationModuleSupersedesZero()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x5ded3010",
+          "declaringDefinitionId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testInterfaceIdIsXorOfEightSelectors",
+          "outputs": [],
+          "selector": "0x5ded3010",
+          "signature": "testInterfaceIdIsXorOfEightSelectors()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x9ec67dcc",
+          "declaringDefinitionId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testModuleCodeHashIsLiveExtcodehash",
+          "outputs": [],
+          "selector": "0x9ec67dcc",
+          "signature": "testModuleCodeHashIsLiveExtcodehash()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x3820b4ed",
+          "declaringDefinitionId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSupportsIStreamModuleInterface",
+          "outputs": [],
+          "selector": "0x3820b4ed",
+          "signature": "testSupportsIStreamModuleInterface()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVJZGVudGl0eS50LnNvbDpTdHJlYW1Nb2R1bGVJZGVudGl0eVRlc3QjZnVuY3Rpb246MHgwYTkyNTRlNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 340,
+            "byteStart": 1691,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L51-L58",
+            "lineEnd": 58,
+            "lineStart": 51,
+            "snippetSha256": "sha256:74df1ed4334c5a46706c6997c5f55eb9a58066a66bbdc35b83c0a605a314dcab",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testEightFunctionIdentitySurface()",
+          "displaySignature": "testEightFunctionIdentitySurface()",
+          "functionKind": "function",
+          "id": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x0d102081",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVJZGVudGl0eS50LnNvbDpTdHJlYW1Nb2R1bGVJZGVudGl0eVRlc3QjZnVuY3Rpb246MHgwZDEwMjA4MQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testEightFunctionIdentitySurface",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1204,
+            "byteStart": 2037,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L60-L77",
+            "lineEnd": 77,
+            "lineStart": 60,
+            "snippetSha256": "sha256:cad1037541e5cf12e1039c584b6afc584863e04558164c79a747dd662a56af9b",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": "0x0d102081",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFirstGenerationModuleSupersedesZero()",
+          "displaySignature": "testFirstGenerationModuleSupersedesZero()",
+          "functionKind": "function",
+          "id": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x131c5682",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVJZGVudGl0eS50LnNvbDpTdHJlYW1Nb2R1bGVJZGVudGl0eVRlc3QjZnVuY3Rpb246MHgxMzFjNTY4Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFirstGenerationModuleSupersedesZero",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 188,
+            "byteStart": 3247,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L79-L82",
+            "lineEnd": 82,
+            "lineStart": 79,
+            "snippetSha256": "sha256:1fb33621f54bd5c2eeafedc57ec4ab4892b822ae935c2f0d88c4054a3cf8f5d1",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": "0x131c5682",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testModuleCodeHashIsLiveExtcodehash()",
+          "displaySignature": "testModuleCodeHashIsLiveExtcodehash()",
+          "functionKind": "function",
+          "id": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x9ec67dcc",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVJZGVudGl0eS50LnNvbDpTdHJlYW1Nb2R1bGVJZGVudGl0eVRlc3QjZnVuY3Rpb246MHg5ZWM2N2RjYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testModuleCodeHashIsLiveExtcodehash",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 753,
+            "byteStart": 3441,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L84-L95",
+            "lineEnd": 95,
+            "lineStart": 84,
+            "snippetSha256": "sha256:51c2d1b51c42655ee02320ab5725ae9cbd43a304bec2c4b417bc56f62a1cee76",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": "0x9ec67dcc",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSupportsIStreamModuleInterface()",
+          "displaySignature": "testSupportsIStreamModuleInterface()",
+          "functionKind": "function",
+          "id": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x3820b4ed",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVJZGVudGl0eS50LnNvbDpTdHJlYW1Nb2R1bGVJZGVudGl0eVRlc3QjZnVuY3Rpb246MHgzODIwYjRlZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSupportsIStreamModuleInterface",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 366,
+            "byteStart": 4200,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L97-L102",
+            "lineEnd": 102,
+            "lineStart": 97,
+            "snippetSha256": "sha256:18987fc3ea8599a04a21e22e2a2e3ed3b5dab3ad0b81290bd3eb9010547366f9",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": "0x3820b4ed",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testInterfaceIdIsXorOfEightSelectors()",
+          "displaySignature": "testInterfaceIdIsXorOfEightSelectors()",
+          "functionKind": "function",
+          "id": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x5ded3010",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVJZGVudGl0eS50LnNvbDpTdHJlYW1Nb2R1bGVJZGVudGl0eVRlc3QjZnVuY3Rpb246MHg1ZGVkMzAxMA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testInterfaceIdIsXorOfEightSelectors",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 674,
+            "byteStart": 4572,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L104-L115",
+            "lineEnd": 115,
+            "lineStart": 104,
+            "snippetSha256": "sha256:0a10d2c968fdd92522074cf3a33dc37d1a746baa2d89bcf995b738ceceacc379",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": "0x5ded3010",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SCHEMA_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 70,
+            "byteStart": 1273,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L43",
+            "lineEnd": 43,
+            "lineStart": 43,
+            "snippetSha256": "sha256:dd588fe2decf4e16b1a81b1e324f46c66bc46c82fe699841bca7e4b76955202f",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 31,
+            "byteStart": 1312,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L43",
+            "lineEnd": 43,
+            "lineStart": 43,
+            "snippetSha256": "sha256:d7a284fe31d25a06a4fa86e241bf0aa85f3fa13dee9ee51ef7a410d43776a57c",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "valueSource": "keccak256(\"test-module-schema\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "DEPLOYMENT_MANIFEST_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 89,
+            "byteStart": 1349,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L44",
+            "lineEnd": 44,
+            "lineStart": 44,
+            "snippetSha256": "sha256:68f04de3d1c781fe2c4a984fd3f58ce09936acb8da4dda88b97cf4d19f669470",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 37,
+            "byteStart": 1401,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L44",
+            "lineEnd": 44,
+            "lineStart": 44,
+            "snippetSha256": "sha256:ceec65047a1e281bb2146bf747d5091419ea019ca77c1c79f4d1b5d5e6c77481",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "valueSource": "keccak256(\"test-deployment-manifest\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MANIFEST_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 74,
+            "byteStart": 1444,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L45",
+            "lineEnd": 45,
+            "lineStart": 45,
+            "snippetSha256": "sha256:fd77bb6037c08d711fe73b1d3e27472fea004cc5c7328eeb9531331fe106cd08",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 33,
+            "byteStart": 1485,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L45",
+            "lineEnd": 45,
+            "lineStart": 45,
+            "snippetSha256": "sha256:bdac47f382835c485632fcb0e1d106f4644296708a315a11f7b87272cc0b9b70",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "valueSource": "keccak256(\"test-module-manifest\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MANIFEST_URI",
+          "natspec": "",
+          "range": {
+            "byteLength": 68,
+            "byteStart": 1524,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L46",
+            "lineEnd": 46,
+            "lineStart": 46,
+            "snippetSha256": "sha256:fbee739656954567beeda13cdd0d56276f79b5867127f306e756825acbee29b7",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": null,
+          "type": "string",
+          "typeString": "string",
+          "valueRange": {
+            "byteLength": 29,
+            "byteStart": 1563,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L46",
+            "lineEnd": 46,
+            "lineStart": 46,
+            "snippetSha256": "sha256:77338079007f9a0a5c3f44a054f8d1a63171cfbcf1ef720d3e5f0e3945d87448",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "valueSource": "\"ipfs://test-module-manifest\"",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "predecessor",
+          "natspec": "",
+          "range": {
+            "byteLength": 38,
+            "byteStart": 1599,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L48",
+            "lineEnd": 48,
+            "lineStart": 48,
+            "snippetSha256": "sha256:9f3c51265c7f15a4f4ba2d6a160350ac477292642af9f6d3ad7245f85ef3a6a6",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": null,
+          "type": "IdentityTestModule",
+          "typeString": "contract IdentityTestModule",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "moduleContract",
+          "natspec": "",
+          "range": {
+            "byteLength": 41,
+            "byteStart": 1643,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L49",
+            "lineEnd": 49,
+            "lineStart": 49,
+            "snippetSha256": "sha256:e9bd1267368024b75adbb1f795443ae24e4fbdb94caf8fe19877650ae6512f8b",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": null,
+          "type": "IdentityTestModule",
+          "typeString": "contract IdentityTestModule",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Nb2R1bGVJZGVudGl0eS50LnNvbDpTdHJlYW1Nb2R1bGVJZGVudGl0eVRlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamModuleIdentityTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 4210,
+      "byteStart": 1038,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L36-L116",
+      "lineEnd": 116,
+      "lineStart": 36,
+      "snippetSha256": "sha256:27c0e6fa822fd33bba6c7721affe6a6a08e7c771825b7344197ceb7e77231be4",
+      "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamModuleIdentity.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 7
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 7
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x0a9254e4",
+      "definitionId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x0d102081",
+      "definitionId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x131c5682",
+      "definitionId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x3820b4ed",
+      "definitionId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x5ded3010",
+      "definitionId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest#function:0x9ec67dcc",
+      "definitionId": "test/StreamModuleIdentity.t.sol:StreamModuleIdentityTest",
+      "severity": "advisory"
+    }
+  ]
+}

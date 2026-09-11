@@ -30,6 +30,9 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 }));
 
 let mockCanAccessDropForge = false;
+let mockModeratorAccess = {
+  data: { moderator: false, has_open_reports: false },
+};
 jest.mock("@/hooks/useDropForgePermissions", () => ({
   useDropForgePermissions: () => ({
     canAccessLanding: mockCanAccessDropForge,
@@ -40,12 +43,37 @@ jest.mock("@/hooks/useUnreadIndicator", () => ({
   useUnreadIndicator: () => ({ hasUnread: false }),
 }));
 
+jest.mock("@/hooks/content-moderation/useContentModeratorAccess", () => ({
+  useContentModeratorAccess: () => mockModeratorAccess,
+}));
+
 const mockUsePathname = usePathname as jest.Mock;
+
+function expectDocumentOrder(elements: HTMLElement[]) {
+  for (let index = 0; index < elements.length - 1; index += 1) {
+    const current = elements[index];
+    const next = elements[index + 1];
+
+    if (current === undefined || next === undefined) {
+      throw new Error("Missing sidebar navigation item");
+    }
+
+    const currentRow = current.closest("li");
+    const nextRow = next.closest("li");
+
+    expect(currentRow).not.toBeNull();
+    expect(nextRow).not.toBeNull();
+    expect(currentRow?.nextElementSibling).toBe(nextRow);
+  }
+}
 
 describe("WebSidebarNav", () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue("/waves");
     mockCanAccessDropForge = false;
+    mockModeratorAccess = {
+      data: { moderator: false, has_open_reports: false },
+    };
   });
 
   it("renders Waves as a direct /waves link instead of an expandable trigger", () => {
@@ -57,6 +85,22 @@ describe("WebSidebarNav", () => {
     );
     expect(screen.queryByRole("button", { name: "Waves" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Discover Waves" })).toBeNull();
+  });
+
+  it("keeps art destinations together and Waves adjacent to DMs", () => {
+    mockCanAccessDropForge = true;
+
+    render(<WebSidebarNav isCollapsed={false} />);
+
+    expectDocumentOrder([
+      screen.getByRole("button", { name: "NFTs" }),
+      screen.getByRole("link", { name: "Museum" }),
+      screen.getByRole("link", { name: "Waves" }),
+      screen.getByRole("link", { name: "DMs" }),
+      screen.getByRole("link", { name: "Join 6529" }),
+      screen.getByRole("button", { name: "About" }),
+      screen.getByRole("link", { name: "Drop Forge" }),
+    ]);
   });
 
   it("keeps Waves active for nested wave routes", () => {
@@ -112,5 +156,33 @@ describe("WebSidebarNav", () => {
       "aria-current",
       "page"
     );
+  });
+
+  it("shows WatchTower with an accessible open-report indicator", () => {
+    mockModeratorAccess = {
+      data: { moderator: true, has_open_reports: true },
+    };
+
+    render(<WebSidebarNav isCollapsed={false} />);
+
+    expect(
+      screen.getByRole("link", {
+        name: "WatchTower: Open reports need review",
+      })
+    ).toHaveAttribute("href", "/content-moderation");
+  });
+
+  it("places WatchTower after Drop Forge when both are available", () => {
+    mockCanAccessDropForge = true;
+    mockModeratorAccess = {
+      data: { moderator: true, has_open_reports: false },
+    };
+
+    render(<WebSidebarNav isCollapsed={false} />);
+
+    expectDocumentOrder([
+      screen.getByRole("link", { name: "Drop Forge" }),
+      screen.getByRole("link", { name: "WatchTower" }),
+    ]);
   });
 });

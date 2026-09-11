@@ -1,0 +1,417 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/Ownable.sol:Ownable#event:OwnershipTransferred(address,address)",
+          "declaringDefinitionId": "smart-contracts/Ownable.sol:Ownable",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "signature": "OwnershipTransferred(address,address)",
+          "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/Ownable.sol:Ownable#function:0x8da5cb5b",
+          "declaringDefinitionId": "smart-contracts/Ownable.sol:Ownable",
+          "inherited": false,
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x8da5cb5b",
+          "signature": "owner()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/Ownable.sol:Ownable#function:0x715018a6",
+          "declaringDefinitionId": "smart-contracts/Ownable.sol:Ownable",
+          "inherited": false,
+          "inputs": [],
+          "name": "renounceOwnership",
+          "outputs": [],
+          "selector": "0x715018a6",
+          "signature": "renounceOwnership()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/Ownable.sol:Ownable#function:0xf2fde38b",
+          "declaringDefinitionId": "smart-contracts/Ownable.sol:Ownable",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "transferOwnership",
+          "outputs": [],
+          "selector": "0xf2fde38b",
+          "signature": "transferOwnership(address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": true,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 23982,
+          "canonicalSignature": "OwnershipTransferred(address,address)",
+          "displaySignature": "OwnershipTransferred(address,address)",
+          "id": "smart-contracts/Ownable.sol:Ownable#event:OwnershipTransferred(address,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL093bmFibGUuc29sOk93bmFibGUjZXZlbnQ6T3duZXJzaGlwVHJhbnNmZXJyZWQoYWRkcmVzcyxhZGRyZXNzKQ",
+          "kind": "event",
+          "name": "OwnershipTransferred",
+          "natspec": "",
+          "range": {
+            "byteLength": 84,
+            "byteStart": 720,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:5d249fb7c98f7f27a2f564462cd73da0775a932df964bb1201c8fc01b08c0696",
+            "sourceSha256": "sha256:4198ce23fb3d567f1c00ccb329c524918cd2f938884a42bdce29f1bede4ee5c4"
+          },
+          "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor()",
+          "functionKind": "constructor",
+          "id": "smart-contracts/Ownable.sol:Ownable#function:constructor()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL093bmFibGUuc29sOk93bmFibGUjZnVuY3Rpb246Y29uc3RydWN0b3IoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "@dev Initializes the contract setting the deployer as the initial owner.",
+          "outputs": [],
+          "range": {
+            "byteLength": 63,
+            "byteStart": 906,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L29-L31",
+            "lineEnd": 31,
+            "lineStart": 29,
+            "snippetSha256": "sha256:957df14ec51e8bd6674bd523ae6a6e315c3cc261a455caabffca8b8726860122",
+            "sourceSha256": "sha256:4198ce23fb3d567f1c00ccb329c524918cd2f938884a42bdce29f1bede4ee5c4"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": "owner()",
+          "displaySignature": "owner()",
+          "functionKind": "function",
+          "id": "smart-contracts/Ownable.sol:Ownable#function:0x8da5cb5b",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL093bmFibGUuc29sOk93bmFibGUjZnVuY3Rpb246MHg4ZGE1Y2I1Yg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "owner",
+          "natspec": "@dev Returns the address of the current owner.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 85,
+            "byteStart": 1195,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L44-L46",
+            "lineEnd": 46,
+            "lineStart": 44,
+            "snippetSha256": "sha256:6cd16f069545b8f2ce8d658f6ec62e9f9f1a60a836c28fbbdad60350059f77a9",
+            "sourceSha256": "sha256:4198ce23fb3d567f1c00ccb329c524918cd2f938884a42bdce29f1bede4ee5c4"
+          },
+          "selector": "0x8da5cb5b",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_checkOwner()",
+          "functionKind": "function",
+          "id": "smart-contracts/Ownable.sol:Ownable#function:_checkOwner()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL093bmFibGUuc29sOk93bmFibGUjZnVuY3Rpb246X2NoZWNrT3duZXIoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_checkOwner",
+          "natspec": "@dev Throws if the sender is not the owner.",
+          "outputs": [],
+          "range": {
+            "byteLength": 130,
+            "byteStart": 1353,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L51-L53",
+            "lineEnd": 53,
+            "lineStart": 51,
+            "snippetSha256": "sha256:7aeca32f6f01bdb0ed9b0d1826c8c380cd47454064dc6946ff16df5ee380be97",
+            "sourceSha256": "sha256:4198ce23fb3d567f1c00ccb329c524918cd2f938884a42bdce29f1bede4ee5c4"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": "renounceOwnership()",
+          "displaySignature": "renounceOwnership()",
+          "functionKind": "function",
+          "id": "smart-contracts/Ownable.sol:Ownable#function:0x715018a6",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL093bmFibGUuc29sOk93bmFibGUjZnVuY3Rpb246MHg3MTUwMThhNg",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "renounceOwnership",
+          "natspec": "@dev Leaves the contract without owner. It will not be possible to call\n `onlyOwner` functions. Can only be called by the current owner.\n NOTE: Renouncing ownership will leave the contract without an owner,\n thereby disabling any functionality that is only available to the owner.",
+          "outputs": [],
+          "range": {
+            "byteLength": 101,
+            "byteStart": 1818,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L62-L64",
+            "lineEnd": 64,
+            "lineStart": 62,
+            "snippetSha256": "sha256:50b7131bb07c9fa6fa407737ac9f9ca9c46456b9f4e3ce0809d59b4973557b76",
+            "sourceSha256": "sha256:4198ce23fb3d567f1c00ccb329c524918cd2f938884a42bdce29f1bede4ee5c4"
+          },
+          "selector": "0x715018a6",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "transferOwnership(address)",
+          "displaySignature": "transferOwnership(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/Ownable.sol:Ownable#function:0xf2fde38b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL093bmFibGUuc29sOk93bmFibGUjZnVuY3Rpb246MHhmMmZkZTM4Yg",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "transferOwnership",
+          "natspec": "@dev Transfers ownership of the contract to a new account (`newOwner`).\n Can only be called by the current owner.",
+          "outputs": [],
+          "range": {
+            "byteLength": 198,
+            "byteStart": 2068,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L70-L73",
+            "lineEnd": 73,
+            "lineStart": 70,
+            "snippetSha256": "sha256:058af558cb288763a78e2037874bd743b10a5d8fdc49a0a285911474e179cfdf",
+            "sourceSha256": "sha256:4198ce23fb3d567f1c00ccb329c524918cd2f938884a42bdce29f1bede4ee5c4"
+          },
+          "selector": "0xf2fde38b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_transferOwnership(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/Ownable.sol:Ownable#function:_transferOwnership(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL093bmFibGUuc29sOk93bmFibGUjZnVuY3Rpb246X3RyYW5zZmVyT3duZXJzaGlwKGFkZHJlc3Mp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_transferOwnership",
+          "natspec": "@dev Transfers ownership of the contract to a new account (`newOwner`).\n Internal function without access restriction.",
+          "outputs": [],
+          "range": {
+            "byteLength": 187,
+            "byteStart": 2420,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L79-L83",
+            "lineEnd": 83,
+            "lineStart": 79,
+            "snippetSha256": "sha256:ffc71dc1366aaa20ed08a23bb11aa2481dc52fa8a9a716474ad27f85833492a5",
+            "sourceSha256": "sha256:4198ce23fb3d567f1c00ccb329c524918cd2f938884a42bdce29f1bede4ee5c4"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        }
+      ],
+      "modifiers": [
+        {
+          "inputs": [],
+          "name": "onlyOwner",
+          "natspec": "@dev Throws if called by any account other than the owner.",
+          "overrides": [],
+          "range": {
+            "byteLength": 62,
+            "byteStart": 1057,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L36-L39",
+            "lineEnd": 39,
+            "lineStart": 36,
+            "snippetSha256": "sha256:52daaf9a4e12654ba133c4d22d80f6a68ebd382ad6667e4513dbf374c6dcc055",
+            "sourceSha256": "sha256:4198ce23fb3d567f1c00ccb329c524918cd2f938884a42bdce29f1bede4ee5c4"
+          },
+          "virtual": false
+        }
+      ],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_owner",
+          "natspec": "",
+          "range": {
+            "byteLength": 22,
+            "byteStart": 691,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:b6a0bf5f1958d374760eb6f4083566fb5e165c52e64b40c4574f9cd5993be382",
+            "sourceSha256": "sha256:4198ce23fb3d567f1c00ccb329c524918cd2f938884a42bdce29f1bede4ee5c4"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/Ownable.sol:Ownable",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/Context.sol:Context",
+        "name": "Context"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL093bmFibGUuc29sOk93bmFibGU",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/Ownable.sol:Ownable",
+      "smart-contracts/Context.sol:Context"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "Ownable",
+    "natspec": "",
+    "range": {
+      "byteLength": 1961,
+      "byteStart": 648,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Ownable.sol#L21-L84",
+      "lineEnd": 84,
+      "lineStart": 21,
+      "snippetSha256": "sha256:1708e271bb9b03f601d3fded0843efea6fa7b055d3802f0a9ce816f3ed5f8e47",
+      "sourceSha256": "sha256:4198ce23fb3d567f1c00ccb329c524918cd2f938884a42bdce29f1bede4ee5c4"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/Ownable.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/Ownable.sol:Ownable",
+      "severity": "advisory"
+    }
+  ]
+}

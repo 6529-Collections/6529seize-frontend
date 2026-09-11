@@ -1,4 +1,7 @@
-import { validateJwt } from "./jwt-validation.utils";
+import {
+  validateJwt,
+  type SessionRefreshValidationOutcome,
+} from "./jwt-validation.utils";
 import { validateRoleForAuthentication } from "@/utils/role-validation";
 import {
   AuthenticationRoleError,
@@ -29,9 +32,12 @@ interface ImmediateValidationCallbacks {
 }
 
 interface ImmediateValidationResult {
+  isValid: boolean;
   validationCompleted: boolean;
   wasCancelled: boolean;
   shouldShowModal: boolean;
+  authRefreshOutcome: SessionRefreshValidationOutcome;
+  requiresSessionUpgrade?: boolean;
 }
 
 // Helper function to check if address is consistent and operation not cancelled
@@ -45,9 +51,11 @@ const isOperationValid = (
 
 // Helper function to create a cancelled result
 const createCancelledResult = (): ImmediateValidationResult => ({
+  isValid: false,
   validationCompleted: false,
   wasCancelled: true,
   shouldShowModal: false,
+  authRefreshOutcome: "cancelled",
 });
 
 // Helper function to check if error is an authentication role error
@@ -85,11 +93,17 @@ const handleInvalidJwtWhenConnected = async (
 const createValidationResult = (
   validationCompleted: boolean,
   wasCancelled: boolean,
-  shouldShowModal: boolean
+  shouldShowModal: boolean,
+  authRefreshOutcome: SessionRefreshValidationOutcome = "not_attempted",
+  requiresSessionUpgrade?: boolean,
+  isValid: boolean = false
 ): ImmediateValidationResult => ({
+  isValid,
   validationCompleted,
   wasCancelled,
   shouldShowModal,
+  authRefreshOutcome,
+  ...(requiresSessionUpgrade !== undefined ? { requiresSessionUpgrade } : {}),
 });
 
 // Helper function to handle JWT validation results
@@ -97,21 +111,29 @@ const handleJwtValidationResult = async (
   isValid: boolean,
   wasCancelled: boolean,
   requiresSessionUpgrade: boolean | undefined,
+  authRefreshOutcome: SessionRefreshValidationOutcome,
   isConnected: boolean,
   abortSignal: AbortSignal,
   callbacks: ImmediateValidationCallbacks
 ): Promise<ImmediateValidationResult> => {
   if (wasCancelled) {
-    return createValidationResult(true, true, false);
+    return createValidationResult(true, true, false, authRefreshOutcome);
   }
 
   if (isValid) {
-    return createValidationResult(true, false, false);
+    return createValidationResult(
+      true,
+      false,
+      false,
+      authRefreshOutcome,
+      undefined,
+      true
+    );
   }
 
   if (requiresSessionUpgrade) {
     callbacks.onSessionUpgradeRequired?.();
-    return createValidationResult(true, false, true);
+    return createValidationResult(true, false, true, authRefreshOutcome, true);
   }
 
   // Handle invalid JWT
@@ -124,7 +146,7 @@ const handleJwtValidationResult = async (
     handleInvalidJwtWhenDisconnected(callbacks);
   }
 
-  return createValidationResult(true, false, isConnected);
+  return createValidationResult(true, false, isConnected, authRefreshOutcome);
 };
 
 // Helper function to handle validation errors
@@ -152,7 +174,8 @@ const handleValidationError = async (
   return createValidationResult(
     false,
     abortSignal.aborted,
-    isConnected && !abortSignal.aborted
+    isConnected && !abortSignal.aborted,
+    abortSignal.aborted ? "cancelled" : "failed"
   );
 };
 
@@ -167,7 +190,14 @@ export const validateAuthImmediate = async ({
   const isDevLikeEnv = nodeEnv === "development" || nodeEnv === "test";
 
   if (publicEnv.USE_DEV_AUTH === "true" && isDevLikeEnv) {
-    return createValidationResult(true, false, false);
+    return createValidationResult(
+      true,
+      false,
+      false,
+      "not_attempted",
+      undefined,
+      true
+    );
   }
 
   const {
@@ -186,8 +216,8 @@ export const validateAuthImmediate = async ({
       return createCancelledResult();
     }
 
-    const { isValid, wasCancelled, requiresSessionUpgrade } = await validateJwt(
-      {
+    const { isValid, wasCancelled, refreshOutcome, requiresSessionUpgrade } =
+      await validateJwt({
         jwt,
         wallet: currentAddress,
         role: activeProfileProxy
@@ -196,8 +226,7 @@ export const validateAuthImmediate = async ({
         operationId,
         abortSignal,
         activeProfileProxy,
-      }
-    );
+      });
 
     // Post-validation check
     if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {
@@ -208,6 +237,7 @@ export const validateAuthImmediate = async ({
       isValid,
       wasCancelled,
       requiresSessionUpgrade,
+      refreshOutcome ?? "not_attempted",
       isConnected,
       abortSignal,
       callbacks

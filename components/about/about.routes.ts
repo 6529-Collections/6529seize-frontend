@@ -102,8 +102,17 @@ function aboutRouteItem(
   };
 }
 
+const ABOUT_LEGAL_SECTION_NAV_ITEMS = [
+  aboutSectionItem(AboutSection.LICENSE, "license"),
+  aboutSectionItem(AboutSection.TERMS_OF_SERVICE, "termsOfService"),
+  aboutSectionItem(AboutSection.PRIVACY_POLICY, "privacyPolicy"),
+  aboutSectionItem(AboutSection.COOKIE_POLICY, "cookiePolicy"),
+  aboutSectionItem(AboutSection.COPYRIGHT, "copyright"),
+] as const satisfies readonly AboutContentsAboutNavItem[];
+
 const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
   aboutGroup("about6529", [
+    aboutRouteItem("6529-apps", "/about/6529-apps", "apps"),
     aboutSectionItem(AboutSection.FAQ, "faq"),
     aboutSectionItem(AboutSection.ENS, "ens"),
     aboutSectionItem(AboutSection.NAKAMOTO_THRESHOLD, "nakamotoThreshold"),
@@ -117,12 +126,13 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     }),
     aboutSectionItem(AboutSection.MEME_LAB, "memeLab"),
     aboutSectionItem(AboutSection.GRADIENTS, "gradient"),
-    aboutSectionItem(AboutSection.MINTING, "minting"),
+    aboutSectionItem(AboutSection.MINTING, "minting", {
+      requiresVisibleSubscriptions: true,
+    }),
   ]),
   aboutGroup("networkReputation", [
     aboutRouteItem("network-identities", "/network", "networkIdentities"),
     aboutRouteItem("network-activity", "/network/activity", "networkActivity"),
-    aboutRouteItem("network-groups", "/network/groups", "networkGroups"),
     aboutRouteItem("network-tdh", "/network/tdh", "tdh"),
     aboutRouteItem("network-xtdh", "/network/xtdh", "xtdhOverview", {
       descriptionId: "xtdh",
@@ -219,13 +229,7 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
     aboutRouteItem("team-data", "/open-data/team", "teamData"),
     aboutRouteItem("royalties", "/open-data/royalties", "royalties"),
   ]),
-  aboutGroup("legal", [
-    aboutSectionItem(AboutSection.LICENSE, "license"),
-    aboutSectionItem(AboutSection.TERMS_OF_SERVICE, "termsOfService"),
-    aboutSectionItem(AboutSection.PRIVACY_POLICY, "privacyPolicy"),
-    aboutSectionItem(AboutSection.COOKIE_POLICY, "cookiePolicy"),
-    aboutSectionItem(AboutSection.COPYRIGHT, "copyright"),
-  ]),
+  aboutGroup("legal", ABOUT_LEGAL_SECTION_NAV_ITEMS),
 ] as const;
 
 const ABOUT_CONTENTS_NAV_ITEMS = ABOUT_CONTENTS_NAV_GROUPS.flatMap(
@@ -242,6 +246,35 @@ const ABOUT_SECTION_DOCUMENT_TITLE_KEYS = new Map<AboutSection, MessageKey>([
   [AboutSection.GRADIENTS, "about.contents.documentTitles.gradient"],
   [AboutSection.MEMES, "about.contents.documentTitles.memes"],
 ]);
+
+const ABOUT_FEATURE_SECTIONS = new Set<AboutSection>([
+  AboutSection.TECH,
+  AboutSection.DATA_DECENTR,
+  AboutSection.SUBSCRIPTIONS,
+  AboutSection.MEME_LAB,
+  AboutSection.GRADIENTS,
+  AboutSection.MINTING,
+  AboutSection.PRIMARY_ADDRESS,
+  AboutSection.GDRC1,
+  AboutSection.ENS,
+  AboutSection.NAKAMOTO_THRESHOLD,
+  AboutSection.FAQ,
+  AboutSection.APPLY,
+  AboutSection.CONTACT_US,
+  AboutSection.NFT_DELEGATION,
+]);
+
+const ABOUT_LEGAL_SECTIONS = new Set<AboutSection>(
+  ABOUT_LEGAL_SECTION_NAV_ITEMS.map((item) => item.section)
+);
+
+export function isAboutFeatureSection(section: AboutSection): boolean {
+  return ABOUT_FEATURE_SECTIONS.has(section);
+}
+
+export function isAboutLegalSection(section: AboutSection): boolean {
+  return ABOUT_LEGAL_SECTIONS.has(section);
+}
 
 function normalizeVisibilityOptions(
   options: AboutNavVisibilityOptions | boolean
@@ -325,6 +358,10 @@ export function getVisibleAboutNavGroups(
 
   return ABOUT_CONTENTS_NAV_GROUPS.map((group) => ({
     ...group,
+    labelKey:
+      visibilityOptions.hideSubscriptions && group.id === "collectionsMinting"
+        ? ("about.contents.groups.collections" as const)
+        : group.labelKey,
     items: group.items.filter((item) =>
       isAboutNavItemVisible(item, visibilityOptions)
     ),

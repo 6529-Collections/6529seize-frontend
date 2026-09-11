@@ -21,12 +21,15 @@ The editor has two modes:
   - the profile has a handle
   - you are viewing your own profile
   - no active profile proxy context
-- Click the banner edit overlay (`Edit banner`).
+- On smaller and touch-first layouts, use `Edit profile` and choose
+  `Profile cover`.
+- On fine-pointer desktop layouts, use the banner edit overlay.
 
 ## User Journey
 
 1. Open your own profile page.
-2. Click the banner edit overlay to open `Edit profile cover`.
+2. Use the desktop banner edit overlay, or choose `Edit profile` ->
+   `Profile cover` on a smaller layout, to open `Edit profile cover`.
 3. The modal starts in:
    - `Image` mode when the current banner is an image.
    - `Gradient` mode when the current banner is gradient colors.

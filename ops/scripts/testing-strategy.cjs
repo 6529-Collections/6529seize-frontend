@@ -214,6 +214,21 @@ const REVIEWBOT_CONTRACT_FILES = new Set([
   "ops/scripts/testing-strategy.cjs",
   "__tests__/scripts/testing-strategy.test.ts",
 ]);
+// Corpus, committed artifacts, and generators verified by
+// __tests__/scripts/sync-agent-files.test.ts. That suite reads these files
+// with fs, so jest --findRelatedTests cannot trace them through the module
+// graph; the plan must request the suite explicitly whenever they change.
+const AGENT_FILES_SYNC_FILES = new Set([
+  "public/glossary.json",
+  "public/help-index.json",
+  "public/llms.txt",
+  "public/robots.txt",
+  "scripts/sync-agent-files.cjs",
+  "scripts/sync-help-index.cjs",
+  "next-sitemap.config.ts",
+  "__tests__/scripts/sync-agent-files.test.ts",
+]);
+const AGENT_FILES_CORPUS_PREFIX = "ops/help/";
 const SOURCE_CODE_EXTENSIONS = new Set([
   ".js",
   ".jsx",
@@ -253,7 +268,7 @@ const TEXT_SECRET_PATTERNS = [
     // a line naming one of these specific keys.
     name: "named-secret-assignment",
     pattern:
-      /\b(?:ANTHROPIC_API_KEY|OPENROUTER_API_KEY|STAGING_AUTH|STAGING_API_KEY|AWS_SECRET_ACCESS_KEY|AWS_ACCESS_KEY_ID|SENTRY_AUTH_TOKEN|ALCHEMY_API_KEY|SSR_CLIENT_SECRET)\b\s*[:=]\s*['"]?(?!z\.|process\.|publicEnv\.|privateEnv\.|serverEnv\.|import\.|env\.)[A-Za-z0-9_./+=:@-]{8,}/i,
+      /\b(?:ANTHROPIC_API_KEY|OPENROUTER_API_KEY|STAGING_AUTH|STAGING_API_KEY|AWS_SECRET_ACCESS_KEY|AWS_ACCESS_KEY_ID|SENTRY_AUTH_TOKEN|ALCHEMY_API_KEY|SSR_CLIENT_SECRET)\b[ \t]*[:=][ \t]*['"]?(?!z\.|process\.|publicEnv\.|privateEnv\.|serverEnv\.|import\.|env\.)[A-Za-z0-9_./+=:@-]{8,}/i,
   },
   {
     name: "authorization-bearer-token",
@@ -304,6 +319,62 @@ const WORKFLOW_WRITE_PERMISSION_SCOPES = new Set([
   "security-events",
   "statuses",
 ]);
+const TRUSTED_PUBLIC_REVIEW_WORKFLOW_PATH =
+  ".github/workflows/public-review-snapshot-trust.yml";
+const TRUSTED_PUBLIC_REVIEW_WORKFLOW = [
+  "name: Public Review Snapshot Trust",
+  "",
+  "on:",
+  "  pull_request_target:",
+  "    branches:",
+  "      - main",
+  "    types:",
+  "      - opened",
+  "      - synchronize",
+  "      - reopened",
+  "      - ready_for_review",
+  "",
+  "permissions:",
+  "  contents: read",
+  "",
+  "concurrency:",
+  "  group: public-review-snapshot-trust-${{ github.event.pull_request.number }}",
+  "  cancel-in-progress: true",
+  "",
+  "jobs:",
+  "  verify-public-review-snapshot:",
+  "    name: Public review snapshot trust",
+  "    runs-on: ubuntu-24.04",
+  "    timeout-minutes: 20",
+  "    permissions:",
+  "      contents: read",
+  "",
+  "    steps:",
+  "      - name: Materialize trusted base from hardcoded origin",
+  "        env:",
+  "          SNAPSHOT_BASE_SHA: ${{ github.event.pull_request.base.sha }}",
+  "        run: |",
+  "          git init .",
+  "          git remote add origin https://github.com/6529-Collections/6529seize-frontend.git",
+  "          git fetch --no-tags origin refs/heads/main:refs/remotes/origin/main",
+  '          git checkout --detach "$SNAPSHOT_BASE_SHA"',
+  "",
+  "      - name: Install trusted Node.js runtime",
+  "        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0",
+  "        with:",
+  '          node-version: "22.17.1"',
+  "",
+  "      - name: Verify candidate snapshot from Git objects",
+  "        env:",
+  "          SNAPSHOT_PR_NUMBER: ${{ github.event.pull_request.number }}",
+  "          SNAPSHOT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}",
+  "          SNAPSHOT_BASE_SHA: ${{ github.event.pull_request.base.sha }}",
+  "        run: >-",
+  "          node scripts/public-reviews/verify-snapshot-pr.cjs",
+  '          --pr-number "$SNAPSHOT_PR_NUMBER"',
+  '          --head-sha "$SNAPSHOT_HEAD_SHA"',
+  '          --base-sha "$SNAPSHOT_BASE_SHA"',
+].join("\n");
 
 function parseArgs(argv) {
   const args = { _: [] };
@@ -546,6 +617,19 @@ function isReviewbotContractFile(filePath) {
   return REVIEWBOT_CONTRACT_FILES.has(normalizePath(filePath));
 }
 
+function isAgentFilesSyncFile(filePath) {
+  const normalized = normalizePath(filePath);
+  if (AGENT_FILES_SYNC_FILES.has(normalized)) {
+    return true;
+  }
+  // Any corpus file except its docs; new templates or data files under
+  // ops/help/ must keep the committed artifacts in sync too.
+  return (
+    normalized.startsWith(AGENT_FILES_CORPUS_PREFIX) &&
+    !normalized.endsWith(".md")
+  );
+}
+
 function isBuildSensitiveFile(filePath) {
   const normalized = normalizePath(filePath);
   return (
@@ -557,6 +641,9 @@ function isBuildSensitiveFile(filePath) {
     normalized === "openapi.yaml" ||
     normalized.startsWith(".github/workflows/") ||
     normalized.startsWith("generated/") ||
+    normalized.startsWith("config/public-reviews/") ||
+    normalized.startsWith("public/review-data/") ||
+    normalized.startsWith("scripts/public-reviews/") ||
     normalized.startsWith("scripts/build") ||
     normalized.startsWith("scripts/start") ||
     normalized.startsWith("scripts/run-secure") ||
@@ -592,6 +679,7 @@ function createCiPlan(files, options = {}) {
     isPlaywrightOrTestSupportFile
   );
   const hasReviewbotContract = normalizedFiles.some(isReviewbotContractFile);
+  const hasAgentFilesSync = normalizedFiles.some(isAgentFilesSyncFile);
   const hasBuildSensitive = normalizedFiles.some(isBuildSensitiveFile);
   const hasDeletedRuntimeSource = normalizedFiles.some(
     (file) =>
@@ -608,7 +696,8 @@ function createCiPlan(files, options = {}) {
     hasPackageGovernance ||
     hasPlaywrightOrTests ||
     hasRuntimeEvidenceNeed ||
-    hasBuildSensitive;
+    hasBuildSensitive ||
+    hasAgentFilesSync;
 
   return {
     schema_version: CI_PLAN_SCHEMA_VERSION,
@@ -643,6 +732,12 @@ function createCiPlan(files, options = {}) {
           ? "Reviewbot config, manifest schema, or strategy tooling changed and must preserve existing lanes."
           : "No reviewbot contract files changed."
       ),
+      agent_files_sync: check(
+        hasAgentFilesSync,
+        hasAgentFilesSync
+          ? "Help corpus, committed agent artifacts, or their generators changed; committed artifacts must match `6529 run help-index:sync` and `6529 run agent-files:sync` output."
+          : "No help corpus or agent artifact files changed."
+      ),
       install: check(
         needsInstall,
         needsInstall
@@ -664,7 +759,7 @@ function createCiPlan(files, options = {}) {
       test_typecheck: check(
         needsInstall,
         needsInstall
-          ? "Installed PR CI runs Playwright/helper typecheck as the test typecheck baseline."
+          ? "Installed PR CI runs the Jest diagnostic ratchet plus Playwright/helper typechecking."
           : "No installed test typecheck needed for docs-only changes."
       ),
       jest_changed: check(
@@ -694,9 +789,11 @@ function createCiPlan(files, options = {}) {
     },
     security: {
       secrets_allowed: false,
-      token_permissions: "contents:read",
-      fork_pr_policy:
-        "No repository secrets, deployment credentials, staging credentials, or artifact-store writes are used by this pull_request workflow.",
+      token_permissions:
+        "contents:read; packages:read only in same-repository frozen-install jobs",
+      fork_pr_policy: options.untrustedPr
+        ? "Package-authenticated install jobs do not execute for fork PRs; the installed-check aggregate fails closed."
+        : "Read-only package authentication is scoped to frozen-install steps in same-repository jobs.",
     },
   };
 }
@@ -746,6 +843,7 @@ function lineNumbersForPattern(text, pattern) {
 }
 
 function findNpmAuthTokenLines(text) {
+  const runtimeTokenPlaceholder = "${NODE_AUTH_TOKEN}";
   const lineNumbers = [];
   text.split(/\r\n|\r|\n/).forEach((line, index) => {
     const trimmed = line.trimStart();
@@ -759,7 +857,10 @@ function findNpmAuthTokenLines(text) {
     if (!afterMarker.startsWith("=")) {
       return;
     }
-    const tokenValue = afterMarker.slice(1).trimStart();
+    const tokenValue = afterMarker.slice(1).trim();
+    if (tokenValue === runtimeTokenPlaceholder) {
+      return;
+    }
     if (tokenValue.length >= 8) {
       lineNumbers.push(index + 1);
     }
@@ -822,8 +923,18 @@ function workflowSecurityFindingsForText(text, filePath) {
     workflowLines,
     "pull_request"
   );
+  const hasPullRequestTargetTrigger = workflowHasTrigger(
+    workflowLines,
+    "pull_request_target"
+  );
+  const hasUntrustedPrTrigger =
+    hasPullRequestTrigger || hasPullRequestTargetTrigger;
+  const isExactTrustedPublicReviewWorkflow =
+    displayPath(filePath) === TRUSTED_PUBLIC_REVIEW_WORKFLOW_PATH &&
+    text.replace(/\r\n?|\n/g, "\n").trimEnd() ===
+      TRUSTED_PUBLIC_REVIEW_WORKFLOW;
 
-  if (workflowHasTrigger(workflowLines, "pull_request_target")) {
+  if (hasPullRequestTargetTrigger && !isExactTrustedPublicReviewWorkflow) {
     findings.push({
       file: displayPath(filePath),
       pattern: "pull_request_target",
@@ -832,17 +943,17 @@ function workflowSecurityFindingsForText(text, filePath) {
     });
   }
 
-  if (hasPullRequestTrigger && workflowReferencesSecrets(text)) {
+  if (hasUntrustedPrTrigger && workflowReferencesSecrets(text)) {
     findings.push({
       file: displayPath(filePath),
       pattern: "pull_request-secrets",
       reason:
-        "pull_request workflows must not reference repository secrets or deployment credentials.",
+        "PR-triggered workflows must not reference repository secrets or deployment credentials.",
     });
   }
 
   if (
-    hasPullRequestTrigger &&
+    hasUntrustedPrTrigger &&
     workflowLines.some(
       (line) => line.toLowerCase() === "permissions: write-all"
     )
@@ -855,7 +966,7 @@ function workflowSecurityFindingsForText(text, filePath) {
   }
 
   if (
-    hasPullRequestTrigger &&
+    hasUntrustedPrTrigger &&
     workflowLines.some(isWorkflowWritePermissionLine)
   ) {
     findings.push({
@@ -871,14 +982,29 @@ function workflowSecurityFindingsForText(text, filePath) {
 
 function workflowHasTrigger(lines, trigger) {
   return lines.some((line) => {
-    if (line === `${trigger}:` || line === `- ${trigger}`) {
+    const separatorIndex = line.indexOf(":");
+    if (
+      line === `- ${trigger}` ||
+      (separatorIndex !== -1 &&
+        stripBoundaryQuotes(line.slice(0, separatorIndex).trim()) === trigger)
+    ) {
       return true;
     }
     if (!line.startsWith("on:")) {
       return false;
     }
     const triggerValue = line.slice("on:".length).trim();
-    if (triggerValue === trigger) {
+    if (stripBoundaryQuotes(triggerValue) === trigger) {
+      return true;
+    }
+    if (
+      triggerValue.startsWith("{") &&
+      triggerValue.endsWith("}") &&
+      triggerValue
+        .replaceAll('"', "")
+        .replaceAll("'", "")
+        .includes(`${trigger}:`)
+    ) {
       return true;
     }
     if (!triggerValue.startsWith("[") || !triggerValue.endsWith("]")) {

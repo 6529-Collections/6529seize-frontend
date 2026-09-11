@@ -90,8 +90,7 @@ const stripDestinationWrappers = (destination: string): string => {
   return trimmed;
 };
 
-const trimBareUrl = (url: string): string =>
-  url.replace(/[),.;!?]+$/u, "");
+const trimBareUrl = (url: string): string => url.replace(/[),.;!?]+$/u, "");
 
 const getBareUrlMatchKey = (
   content: string,
@@ -319,14 +318,6 @@ const isInsideMarkdownLink = (
 ): boolean =>
   matches.some((match) => index >= match.start && index < match.end);
 
-const isBareDirectImageMarkdownLink = (match: MarkdownLinkMatch): boolean => {
-  if (match.image || match.label.trim() !== match.destination.trim()) {
-    return false;
-  }
-
-  return isDirectImageUrl(match.destination, parseUrl(match.destination));
-};
-
 export const getDropImageGalleryItemId = (
   source: DropImageGallerySource,
   key: number | string,
@@ -337,9 +328,7 @@ export const getDropImageGalleryBodyItemKey = (
   key: number | string,
   bodyGalleryKeyPrefix?: string | undefined
 ): number | string =>
-  bodyGalleryKeyPrefix
-    ? `${bodyGalleryKeyPrefix}:${String(key)}`
-    : key;
+  bodyGalleryKeyPrefix ? `${bodyGalleryKeyPrefix}:${String(key)}` : key;
 
 const getBodyImageSources = (
   content: string | null
@@ -403,11 +392,7 @@ const getBodyImageSources = (
   }
 
   const markdownImageSources = markdownMatches
-    .filter(
-      (match) =>
-        (match.image && isSafeMarkdownImageSrc(match.destination)) ||
-        isBareDirectImageMarkdownLink(match)
-    )
+    .filter((match) => match.image && isSafeMarkdownImageSrc(match.destination))
     .map((match) => ({ key: match.start, src: match.destination }));
   const referenceImageSources = referenceImageMatches
     .map((match): DropImageGalleryBodyImage | null => {
@@ -419,31 +404,11 @@ const getBodyImageSources = (
       return { key: match.start, src: definition.destination };
     })
     .filter((image): image is DropImageGalleryBodyImage => image !== null);
-  const referenceLinkImageSources = referenceLinkMatches
-    .map((match): DropImageGalleryBodyImage | null => {
-      const definition = referenceDefinitionMap.get(match.referenceLabel);
-      if (
-        !definition ||
-        match.label.trim() !== definition.destination.trim() ||
-        !isDirectImageUrl(
-          definition.destination,
-          parseUrl(definition.destination)
-        )
-      ) {
-        return null;
-      }
-
-      return { key: match.start, src: definition.destination };
-    })
-    .filter((image): image is DropImageGalleryBodyImage => image !== null);
-
   return [
     ...markdownImageSources,
     ...referenceImageSources,
-    ...referenceLinkImageSources,
     ...bareImageSources,
-  ]
-    .sort((left, right) => left.key - right.key);
+  ].sort((left, right) => left.key - right.key);
 };
 
 const createGalleryItem = (

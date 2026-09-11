@@ -41,17 +41,23 @@ const webServerCommand =
 const forceWebServer =
   process.env["PLAYWRIGHT_FORCE_WEB_SERVER"] === "1" ||
   process.env["PLAYWRIGHT_FORCE_WEB_SERVER"] === "true";
+const outputDir =
+  process.env["PLAYWRIGHT_OUTPUT_DIR"] || "test-results/playwright";
+const htmlReportDir =
+  process.env["PLAYWRIGHT_HTML_REPORT_DIR"] || "playwright-report";
 
 const config = defineConfig({
   testDir: "./tests",
   testMatch: /.*\.spec\.ts/,
-  outputDir: "test-results/playwright",
+  outputDir,
   timeout: Number(process.env["PLAYWRIGHT_TEST_TIMEOUT_MS"] || 60000),
   fullyParallel: true,
   forbidOnly: !!process.env["CI"],
   retries: process.env["CI"] ? 2 : 0,
   ...(process.env["CI"] && { workers: 1 }),
-  reporter: process.env["CI"] ? [["list"], ["html"]] : "html",
+  reporter: process.env["CI"]
+    ? [["list"], ["html", { outputFolder: htmlReportDir }]]
+    : [["html", { outputFolder: htmlReportDir }]],
   use: {
     baseURL,
     trace: isRemoteReadonlyBaseURL ? "off" : "on-first-retry",

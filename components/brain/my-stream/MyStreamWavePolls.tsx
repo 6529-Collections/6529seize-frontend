@@ -18,6 +18,7 @@ import type {
 } from "@/services/api/wave-drops-v2-api";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { useLayout } from "./layout/LayoutContext";
+import Button from "@/components/utils/button/Button";
 
 interface MyStreamWavePollsProps {
   readonly wave: ApiWave;
@@ -191,13 +192,9 @@ const MyStreamWavePolls: React.FC<MyStreamWavePollsProps> = ({
         <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
           Unable to load polls.
         </p>
-        <button
-          type="button"
-          onClick={handleRetry}
-          className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-500 tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-iron-300 desktop-hover:hover:tw-bg-iron-800"
-        >
+        <Button onClick={handleRetry} variant="tertiary" size="sm">
           Try again
-        </button>
+        </Button>
       </div>
     );
   } else if (isFetching && drops.length === 0) {

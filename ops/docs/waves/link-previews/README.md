@@ -37,7 +37,7 @@ suppress those controls.
 - [Wave Drop Twitter/X Link Previews](feature-twitter-link-previews.md):
   tweet-specific cards, compact/expand behavior, and fallback states.
 - [Wave Drop Social Platform Previews](feature-social-platform-previews.md):
-  TikTok, Farcaster/Warpcast, and Tenor GIF previews.
+  TikTok, Farcaster/Warpcast, Tenor GIF previews, and GIPHY GIF previews.
 - [Wave Drop Knowledge and Workspace Previews](feature-knowledge-and-workspace-previews.md):
   Google Workspace and Wikimedia previews.
 - [Wave Drop 6529 Collection Previews](feature-6529-collection-previews.md):

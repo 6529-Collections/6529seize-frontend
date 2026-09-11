@@ -5,6 +5,7 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
+import Button from "@/components/utils/button/Button";
 import type { ApiRepContributor } from "@/generated/models/ApiRepContributor";
 import type { ApiRepContributorsPage } from "@/generated/models/ApiRepContributorsPage";
 import type { ApiRatingWithProfileInfoAndLevel } from "@/generated/models/ApiRatingWithProfileInfoAndLevel";
@@ -160,7 +161,7 @@ function RepContributorRow({
             )}
           </div>
         )}
-        <p className="tw-mb-0 tw-whitespace-nowrap tw-text-left tw-text-sm tw-font-medium tw-text-white">
+        <p className="tw-mb-0 tw-mt-0 tw-whitespace-nowrap tw-text-left tw-text-sm tw-font-medium tw-text-white">
           {contributor.display}
         </p>
       </div>
@@ -304,10 +305,13 @@ export default function RepContributorsDialog({
       tall
       fixedHeight
       tabletModal
-      maxWidthClass="md:tw-max-w-xl md:[&_h2]:tw-mt-2"
+      noPadding
+      maxWidthClass="md:tw-max-w-xl"
       showScrollbar
+      showHeaderCloseButton
+      headerClassName="tw-pb-2 tw-pt-4"
     >
-      <div className="tw-px-4 sm:tw-px-6">
+      <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
         <div className="tw-mb-4 tw-mt-2 tw-flex tw-items-center tw-justify-between tw-gap-3">
           <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
             {formatNumberWithCommas(contributorCount)} {contributorLabel}
@@ -325,13 +329,14 @@ export default function RepContributorsDialog({
             <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
               {errorMessage}
             </p>
-            <button
-              type="button"
+            <Button
+              variant="tertiary"
+              size="sm"
               onClick={refetchContributors}
-              className="tw-mt-3 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-white/15 hover:tw-bg-white/[0.06]"
+              className="tw-mt-3"
             >
               Retry
-            </button>
+            </Button>
           </div>
         )}
 

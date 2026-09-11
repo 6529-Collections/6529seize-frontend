@@ -1,5 +1,6 @@
 import type { BuildPhasesPhase } from "@/components/distribution-plan-tool/build-phases/BuildPhases";
 import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { Tooltip } from "react-tooltip";
 import type { FinalizeSnapshotRow } from "./FinalizeSnapshotsTable";
 import FinalizeSnapshotsTableExcludedComponentsTooltip from "./FinalizeSnapshotsTableExcludedComponentsTooltip";
@@ -40,9 +41,7 @@ export default function FinalizeSnapshotsTableRow({
             place="top"
             positionStrategy="fixed"
             style={{
-              backgroundColor: "#1F2937",
-              color: "white",
-              padding: "4px 8px",
+              ...TOOLTIP_STYLES,
               maxWidth: "min(420px, calc(100vw - 32px))",
               whiteSpace: "normal",
               overflowWrap: "anywhere",
@@ -81,9 +80,7 @@ export default function FinalizeSnapshotsTableRow({
               id={`excluded-snapshots-${row.groupSnapshotId}`}
               place="top"
               style={{
-                backgroundColor: "#1F2937",
-                color: "white",
-                padding: "4px 8px",
+                ...TOOLTIP_STYLES,
                 maxWidth: "500px",
               }}
             >
@@ -117,9 +114,7 @@ export default function FinalizeSnapshotsTableRow({
               id={`excluded-components-${row.groupSnapshotId}`}
               place="top"
               style={{
-                backgroundColor: "#1F2937",
-                color: "white",
-                padding: "4px 8px",
+                ...TOOLTIP_STYLES,
                 maxWidth: "500px",
               }}
             >

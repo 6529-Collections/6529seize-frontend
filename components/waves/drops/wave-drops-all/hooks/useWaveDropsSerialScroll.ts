@@ -14,7 +14,8 @@ type WaveMessagesResult = VirtualizedWaveDropsResult["waveMessages"];
 type FetchNextPage = VirtualizedWaveDropsResult["fetchNextPage"];
 type WaitAndRevealDrop = VirtualizedWaveDropsResult["waitAndRevealDrop"];
 
-const SCROLL_OPERATION_TIMEOUT = 10000;
+const SCROLL_OPERATION_TIMEOUT = 30000;
+const TARGET_RENDER_TIMEOUT = 15000;
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
@@ -93,7 +94,6 @@ interface UseWaveDropsSerialScrollParams {
   readonly dropId: string | null;
   readonly initialDrop: number | null;
   readonly waveMessages: WaveMessagesResult;
-  readonly renderedWaveMessages: WaveMessagesResult;
   readonly fetchNextPage: FetchNextPage;
   readonly waitAndRevealDrop: WaitAndRevealDrop;
   readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
@@ -106,54 +106,13 @@ interface UseWaveDropsSerialScrollResult {
   readonly queueSerialTarget: (serialNo: number) => void;
   readonly targetDropRef: RefObject<HTMLDivElement | null>;
   readonly isScrolling: boolean;
-  readonly scrollBaselineSerials: ReadonlySet<number> | null;
-  readonly frozenAutoCollapseSerials: ReadonlySet<number>;
 }
-
-const buildSerialSet = (
-  waveMessages: WaveMessagesResult | null | undefined
-): ReadonlySet<number> | null => {
-  const drops = waveMessages?.drops;
-  if (!drops || drops.length === 0) {
-    return null;
-  }
-  const serials = drops
-    .map((drop) => drop.serial_no)
-    .filter((serialNo): serialNo is number => typeof serialNo === "number");
-  return serials.length > 0 ? new Set(serials) : null;
-};
-
-const buildAutoCollapseSerials = (
-  baseline: ReadonlySet<number> | null,
-  waveMessages: WaveMessagesResult | null | undefined,
-  frozen: ReadonlySet<number>
-): ReadonlySet<number> => {
-  if (!baseline) {
-    return frozen;
-  }
-  const drops = waveMessages?.drops;
-  if (!drops || drops.length === 0) {
-    return frozen;
-  }
-  const next = new Set(frozen);
-  for (const drop of drops) {
-    const serialNo = drop.serial_no;
-    if (typeof serialNo !== "number") {
-      continue;
-    }
-    if (!baseline.has(serialNo) && !next.has(serialNo)) {
-      next.add(serialNo);
-    }
-  }
-  return next;
-};
 
 export const useWaveDropsSerialScroll = ({
   waveId,
   dropId,
   initialDrop,
   waveMessages,
-  renderedWaveMessages,
   fetchNextPage,
   waitAndRevealDrop,
   scrollContainerRef,
@@ -161,11 +120,6 @@ export const useWaveDropsSerialScroll = ({
   scrollToVisualBottom,
 }: UseWaveDropsSerialScrollParams): UseWaveDropsSerialScrollResult => {
   const [serialTarget, setSerialTarget] = useState<number | null>(initialDrop);
-  const [scrollBaselineSerials, setScrollBaselineSerials] =
-    useState<ReadonlySet<number> | null>(null);
-  const [frozenAutoCollapseSerials, setFrozenAutoCollapseSerials] = useState<
-    ReadonlySet<number>
-  >(() => new Set());
 
   const targetDropRef = useRef<HTMLDivElement | null>(null);
 
@@ -173,10 +127,8 @@ export const useWaveDropsSerialScroll = ({
   const scrollOperationAbortController = useRef<AbortController | null>(null);
   const scrollOperationLockRef = useRef(false);
   const activeScrollTargetRef = useRef<number | null>(null);
-  const scrollBaselineRef = useRef<ReadonlySet<number> | null>(null);
 
   const latestWaveMessagesRef = useRef(waveMessages);
-  const latestRenderedWaveMessagesRef = useRef(renderedWaveMessages);
   const smallestSerialNo = useRef<number | null>(null);
   const lastScrolledToSerialRef = useRef<number | null>(null);
   const lastAutoPinnedNewestDropKeyRef = useRef<string | null>(null);
@@ -191,20 +143,6 @@ export const useWaveDropsSerialScroll = ({
     if (lastScrolledToSerialRef.current === targetSerialNo) {
       lastScrolledToSerialRef.current = null;
     }
-  }, []);
-
-  const finalizeScrollBaseline = useCallback(() => {
-    const baseline = scrollBaselineRef.current;
-    if (!baseline) {
-      setScrollBaselineSerials(null);
-      return;
-    }
-    const currentMessages = latestRenderedWaveMessagesRef.current;
-    setFrozenAutoCollapseSerials((current) =>
-      buildAutoCollapseSerials(baseline, currentMessages, current)
-    );
-    scrollBaselineRef.current = null;
-    setScrollBaselineSerials(null);
   }, []);
 
   useEffect(() => {
@@ -224,7 +162,6 @@ export const useWaveDropsSerialScroll = ({
         activeScrollTargetRef.current = null;
       }
       scrollOperationLockRef.current = false;
-      finalizeScrollBaseline();
       setIsScrolling(false);
       if (scrollOperationAbortController.current) {
         scrollOperationAbortController.current.abort();
@@ -235,7 +172,7 @@ export const useWaveDropsSerialScroll = ({
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [isScrolling, finalizeScrollBaseline, clearSerialTargetIfCurrent]);
+  }, [isScrolling, clearSerialTargetIfCurrent]);
 
   useEffect(() => {
     return () => {
@@ -260,10 +197,6 @@ export const useWaveDropsSerialScroll = ({
       smallestSerialNo.current = null;
     }
   }, [waveMessages]);
-
-  useEffect(() => {
-    latestRenderedWaveMessagesRef.current = renderedWaveMessages;
-  }, [renderedWaveMessages]);
 
   useEffect(() => {
     const currentMessages = latestWaveMessagesRef.current;
@@ -295,9 +228,22 @@ export const useWaveDropsSerialScroll = ({
   }, [waveMessages, shouldPinToBottom, scrollToVisualBottom, init]);
 
   const scrollToSerialNo = useCallback(
-    (behavior: ScrollBehavior) => {
-      const target = targetDropRef.current;
+    (behavior: ScrollBehavior, targetSerialNo?: number) => {
       const container = scrollContainerRef.current;
+      const resolveTarget = (targetContainer: HTMLDivElement | null) => {
+        if (targetSerialNo === undefined) {
+          return targetDropRef.current;
+        }
+
+        const matchingTarget =
+          targetContainer?.ownerDocument.getElementById(
+            `drop-${targetSerialNo}`
+          ) ?? null;
+        return matchingTarget && targetContainer?.contains(matchingTarget)
+          ? (matchingTarget as HTMLDivElement)
+          : targetDropRef.current;
+      };
+      const target = resolveTarget(container);
 
       if (target && container) {
         scrollElementIntoContainerCenter({
@@ -307,8 +253,8 @@ export const useWaveDropsSerialScroll = ({
         });
 
         setTimeout(() => {
-          const retryTarget = targetDropRef.current;
           const retryContainer = scrollContainerRef.current;
+          const retryTarget = resolveTarget(retryContainer);
           const isInContainer =
             retryTarget &&
             retryContainer &&
@@ -325,8 +271,8 @@ export const useWaveDropsSerialScroll = ({
             });
 
             setTimeout(() => {
-              const finalTarget = targetDropRef.current;
               const finalContainer = scrollContainerRef.current;
+              const finalTarget = resolveTarget(finalContainer);
               const stillInContainer =
                 finalTarget &&
                 finalContainer &&
@@ -353,20 +299,30 @@ export const useWaveDropsSerialScroll = ({
   );
 
   const smoothScrollWithRetries = useCallback(
-    async (maxWaitTimeMs: number = 3000, pollIntervalMs: number = 100) => {
+    async (
+      targetSerialNo: number,
+      signal: AbortSignal,
+      maxWaitTimeMs: number = TARGET_RENDER_TIMEOUT,
+      pollIntervalMs: number = 100
+    ) => {
       const startTime = Date.now();
-      while (Date.now() - startTime < maxWaitTimeMs) {
-        if (targetDropRef.current) {
-          return scrollToSerialNo("smooth");
+      while (!signal.aborted && Date.now() - startTime < maxWaitTimeMs) {
+        if (scrollToSerialNo("smooth", targetSerialNo)) {
+          return true;
         }
+
+        // The local, idempotent reveal must rerun as placeholder batches shift the index.
+        await waitAndRevealDrop(targetSerialNo, pollIntervalMs, pollIntervalMs);
         await delay(pollIntervalMs);
       }
-      console.warn(
-        `smoothScrollWithRetries: Timed out after ${maxWaitTimeMs}ms waiting for targetDropRef to be set.`
-      );
+      if (!signal.aborted) {
+        console.warn(
+          `smoothScrollWithRetries: Timed out after ${maxWaitTimeMs}ms waiting for targetDropRef to be set.`
+        );
+      }
       return false;
     },
-    [scrollToSerialNo]
+    [scrollToSerialNo, waitAndRevealDrop]
   );
 
   const fetchAndScrollToDrop = useCallback(async () => {
@@ -374,12 +330,6 @@ export const useWaveDropsSerialScroll = ({
       return;
     }
     const activeSerialTarget = serialTarget;
-
-    const baselineSerials = buildSerialSet(
-      latestRenderedWaveMessagesRef.current
-    );
-    scrollBaselineRef.current = baselineSerials;
-    setScrollBaselineSerials(baselineSerials);
 
     scrollOperationLockRef.current = true;
     activeScrollTargetRef.current = activeSerialTarget;
@@ -395,7 +345,6 @@ export const useWaveDropsSerialScroll = ({
     let didSucceed = false;
     try {
       if (signal.aborted) {
-        finalizeScrollBaseline();
         scrollOperationLockRef.current = false;
         setIsScrolling(false);
         return;
@@ -411,7 +360,6 @@ export const useWaveDropsSerialScroll = ({
       );
 
       if (signal.aborted) {
-        finalizeScrollBaseline();
         scrollOperationLockRef.current = false;
         setIsScrolling(false);
         return;
@@ -420,7 +368,6 @@ export const useWaveDropsSerialScroll = ({
       const didReveal = await waitAndRevealDrop(activeSerialTarget);
 
       if (signal.aborted) {
-        finalizeScrollBaseline();
         scrollOperationLockRef.current = false;
         setIsScrolling(false);
         return;
@@ -430,7 +377,7 @@ export const useWaveDropsSerialScroll = ({
         return;
       }
 
-      const success = await smoothScrollWithRetries();
+      const success = await smoothScrollWithRetries(activeSerialTarget, signal);
       didSucceed = success;
 
       if (!signal.aborted) {
@@ -458,7 +405,6 @@ export const useWaveDropsSerialScroll = ({
         activeScrollTargetRef.current = null;
       }
       scrollOperationLockRef.current = false;
-      finalizeScrollBaseline();
       setIsScrolling(false);
     }
   }, [
@@ -469,7 +415,6 @@ export const useWaveDropsSerialScroll = ({
     dropId,
     waitAndRevealDrop,
     smoothScrollWithRetries,
-    finalizeScrollBaseline,
     clearSerialTargetIfCurrent,
   ]);
 
@@ -521,7 +466,5 @@ export const useWaveDropsSerialScroll = ({
     queueSerialTarget,
     targetDropRef,
     isScrolling,
-    scrollBaselineSerials,
-    frozenAutoCollapseSerials,
   };
 };

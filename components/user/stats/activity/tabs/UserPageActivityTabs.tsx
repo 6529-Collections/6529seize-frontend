@@ -60,7 +60,7 @@ export default function UserPageActivityTabs({
     <div
       role="tablist"
       aria-label={t(locale, "user.collected.stats.activityTabs.listLabel")}
-      className="tw-flex tw-w-full tw-overflow-hidden tw-rounded-lg sm:tw-inline-flex sm:tw-w-auto"
+      className="tw-flex tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.02] tw-p-1 sm:tw-inline-flex sm:tw-w-auto"
     >
       {USER_PAGE_ACTIVITY_TABS.map((tab) => (
         <UserPageActivityTab

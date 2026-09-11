@@ -1,12 +1,23 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { getAccount } from "@wagmi/core";
 import React from "react";
 import Auth, { AuthContext, useAuth } from "@/components/auth/Auth";
+import type { RequestAuthOptions } from "@/components/auth/authTypes";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { mockTitleContextModule } from "@/__tests__/utils/titleTestUtils";
+import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import type * as AuthUtilsModule from "@/services/auth/auth.utils";
 import type * as SessionV2Module from "@/services/auth/session-v2.utils";
+import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
+import { publicEnv } from "@/config/env";
 
 const mockQueryClient = {
   getQueryData: jest.fn(),
@@ -14,6 +25,21 @@ const mockQueryClient = {
 const mockRouterReplace = jest.fn();
 const mockRouterPush = jest.fn();
 const mockUsePathname = jest.fn(() => "/");
+const mockTrackAuthSessionRefreshProductImpact = jest.fn();
+const mockTrackAuthSessionRefreshSucceeded = jest.fn();
+const mockResetAuthSessionRefreshProductImpactDedupe = jest.fn();
+const mockTrackAuthValidationCancelled = jest.fn();
+const mockTrackAuthImpactEvent = jest.fn();
+const TEST_SESSION_VALUE = "session-access-token";
+const TEST_SECOND_SESSION_VALUE = "session-access-token-2";
+const TEST_REJECTED_SESSION_VALUE = "rejected-session-value";
+const TEST_REPLACEMENT_SESSION_VALUE = "replacement-session-value";
+const ORIGINAL_USE_DEV_AUTH = publicEnv.USE_DEV_AUTH;
+let mockActiveChainId: number | undefined = 1;
+let mockWagmiIsConnected = true;
+const mockWagmiConfig = {
+  chains: [{ id: 1 }],
+};
 
 type ReactQueryWrapperContextValue = React.ContextType<
   typeof ReactQueryWrapperContext
@@ -69,6 +95,11 @@ jest.mock("@/services/api/common-api", () => ({
   ),
 }));
 
+jest.mock("@/services/analytics/mixpanel", () => ({
+  trackAuthImpactEvent: (...args: unknown[]) =>
+    mockTrackAuthImpactEvent(...args),
+}));
+
 jest.mock("@/services/auth/auth.utils", () => ({
   canStoreAnotherWalletAccount: jest.fn(() => true),
   getWalletAddress: jest.fn(() => null),
@@ -87,6 +118,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
         )
       )
   ),
+  invalidateAuthSessionForAddress: jest.fn(async () => true),
   removeAuthJwt: jest.fn(),
   setActiveWalletAccount: jest.fn(() => true),
   setAuthJwt: jest.fn(),
@@ -117,6 +149,21 @@ jest.mock("@reown/appkit/react", () => ({
   useAppKit: jest.fn(() => ({
     open: jest.fn(),
   })),
+}));
+
+jest.mock("@wagmi/core", () => ({
+  getAccount: jest.fn(() => ({
+    chainId: mockActiveChainId,
+    isConnected: mockWagmiIsConnected,
+  })),
+}));
+
+jest.mock("wagmi", () => ({
+  useAccount: jest.fn(() => ({
+    chainId: mockActiveChainId,
+    isConnected: mockWagmiIsConnected,
+  })),
+  useConfig: jest.fn(() => mockWagmiConfig),
 }));
 
 const mockSignMessage = jest.fn();
@@ -150,7 +197,28 @@ jest.mock("next/navigation", () => ({
 }));
 
 jest.mock("@/services/auth/immediate-validation.utils", () => ({
-  validateAuthImmediate: jest.fn(async () => ({ wasCancelled: false })),
+  validateAuthImmediate: jest.fn(async () => ({
+    isValid: true,
+    validationCompleted: true,
+    authRefreshOutcome: "not_attempted",
+    wasCancelled: false,
+    shouldShowModal: false,
+  })),
+}));
+
+jest.mock("@/services/analytics/productImpactTelemetry", () => ({
+  resetAuthSessionRefreshProductImpactDedupe: (
+    ...args: Parameters<typeof mockResetAuthSessionRefreshProductImpactDedupe>
+  ) => mockResetAuthSessionRefreshProductImpactDedupe(...args),
+  trackAuthSessionRefreshProductImpact: (
+    ...args: Parameters<typeof mockTrackAuthSessionRefreshProductImpact>
+  ) => mockTrackAuthSessionRefreshProductImpact(...args),
+  trackAuthSessionRefreshSucceeded: (
+    ...args: Parameters<typeof mockTrackAuthSessionRefreshSucceeded>
+  ) => mockTrackAuthSessionRefreshSucceeded(...args),
+  trackAuthValidationCancelled: (
+    ...args: Parameters<typeof mockTrackAuthValidationCancelled>
+  ) => mockTrackAuthValidationCancelled(...args),
 }));
 
 jest.mock("@/utils/error-sanitizer", () => ({
@@ -255,17 +323,6 @@ const enableAuthMigrationDeadline = (deadline = "2999-01-01T00:00:00.000Z") => {
   };
 };
 
-function createDeferredPromise<T>(): {
-  readonly promise: Promise<T>;
-  readonly resolve: (value: T) => void;
-} {
-  let resolvePromise!: (value: T) => void;
-  const promise = new Promise<T>((resolve) => {
-    resolvePromise = resolve;
-  });
-  return { promise, resolve: resolvePromise };
-}
-
 // Test helper components
 function ShowWaves() {
   const { showWaves } = useAuth();
@@ -291,6 +348,32 @@ function RequestAuthButton() {
     <button onClick={() => requestAuth()} data-testid="req">
       req
     </button>
+  );
+}
+
+function RequestAuthResultButton({
+  options,
+}: {
+  readonly options?: RequestAuthOptions;
+}) {
+  const { requestAuth } = useAuth();
+  const [result, setResult] = React.useState("pending");
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() =>
+          void requestAuth(options).then(({ success }) => {
+            setResult(String(success));
+          })
+        }
+        data-testid="request-auth-result"
+      >
+        request auth
+      </button>
+      <span data-testid="request-auth-success">{result}</span>
+    </>
   );
 }
 
@@ -344,6 +427,8 @@ describe("Auth component", () => {
     walletAddress = "0x1";
     connectionState = "connected";
     canSignActiveWallet = true;
+    mockActiveChainId = 1;
+    mockWagmiIsConnected = true;
     mockIsSigningPending = false;
     connectedAccountsOverride = null;
     mockAuthSettings = {
@@ -369,6 +454,7 @@ describe("Auth component", () => {
     const mockSetActiveWalletAccount =
       authUtils.setActiveWalletAccount as jest.MockedFunction<any>;
     mockSeizeConnect.mockReset();
+    mockTrackAuthImpactEvent.mockReset();
     mockGetAuthJwt.mockReturnValue(null);
     mockGetWalletAddress.mockReturnValue(null);
     mockHasActiveSessionV2Auth.mockReturnValue(false);
@@ -400,7 +486,9 @@ describe("Auth component", () => {
       require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
     immediateValidation.mockReset();
     immediateValidation.mockResolvedValue({
+      isValid: true,
       validationCompleted: true,
+      authRefreshOutcome: "not_attempted",
       wasCancelled: false,
       shouldShowModal: false,
     });
@@ -443,6 +531,7 @@ describe("Auth component", () => {
   });
 
   afterEach(() => {
+    publicEnv.USE_DEV_AUTH = ORIGINAL_USE_DEV_AUTH;
     jest.restoreAllMocks();
   });
 
@@ -514,6 +603,469 @@ describe("Auth component", () => {
       expect(toast).toHaveBeenCalled();
     });
 
+    it("allows explicit auth requests in development dev-auth mode", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      walletAddress = validAddress;
+      publicEnv.USE_DEV_AUTH = "true";
+
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        const [result, setResult] = React.useState("pending");
+
+        return (
+          <>
+            <button
+              type="button"
+              onClick={() =>
+                void requestAuth().then(({ success }) => {
+                  setResult(String(success));
+                })
+              }
+            >
+              auth with dev mode
+            </button>
+            <span>{result}</span>
+          </>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "auth with dev mode" })
+      );
+
+      await waitFor(() => expect(screen.getByText("true")).toBeInTheDocument());
+      expect(mockValidateJwt).not.toHaveBeenCalled();
+      expect(mockSignMessage).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      {
+        chainId: undefined,
+        chainState: "unknown",
+        canSign: false,
+        wagmiConnected: false,
+      },
+      {
+        chainId: 137,
+        chainState: "unsupported",
+        canSign: true,
+        wagmiConnected: true,
+      },
+    ])(
+      "allows an authorized session request when the active chain is $chainState",
+      async ({ chainId, canSign, wagmiConnected }) => {
+        const validAddress = "0x1111111111111111111111111111111111111111";
+        walletAddress = validAddress;
+        canSignActiveWallet = canSign;
+        mockActiveChainId = chainId;
+        mockWagmiIsConnected = wagmiConnected;
+        const authUtils = require("@/services/auth/auth.utils");
+        const sessionV2 = require("@/services/auth/session-v2.utils");
+        const mockValidateJwt =
+          require("@/services/auth/jwt-validation.utils").validateJwt;
+        authUtils.getAuthJwt.mockReturnValue("valid-jwt");
+        if (!canSign) {
+          sessionV2.getSessionClientType.mockReturnValue("native");
+        }
+
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={{ invalidateAll: jest.fn() } as any}
+          >
+            <Auth>
+              <RequestAuthResultButton />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+
+        await userEvent.click(screen.getByTestId("request-auth-result"));
+
+        await waitFor(() => {
+          expect(screen.getByTestId("request-auth-success")).toHaveTextContent(
+            "true"
+          );
+        });
+        expect(mockValidateJwt).toHaveBeenCalledWith(
+          expect.objectContaining({
+            jwt: "valid-jwt",
+            wallet: validAddress,
+          })
+        );
+        expect(sessionV2.getSessionNonce).not.toHaveBeenCalled();
+        expect(mockSignMessage).not.toHaveBeenCalled();
+        expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
+        expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+        expect(mockSeizeDisconnectAndLogout).not.toHaveBeenCalled();
+        expect(require("react-toastify").toast).not.toHaveBeenCalled();
+      }
+    );
+
+    it("accepts a refreshed native session for composer preflight without a signer or active chain", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      canSignActiveWallet = false;
+      mockActiveChainId = undefined;
+      mockWagmiIsConnected = false;
+      const authUtils = jest.requireMock<typeof AuthUtilsModule>(
+        "@/services/auth/auth.utils"
+      );
+      const sessionV2 = jest.requireMock<typeof SessionV2Module>(
+        "@/services/auth/session-v2.utils"
+      );
+      const { validateJwt } = jest.requireMock<
+        typeof import("@/services/auth/jwt-validation.utils")
+      >("@/services/auth/jwt-validation.utils");
+      jest.mocked(authUtils.getWalletAddress).mockReturnValue(validAddress);
+      jest
+        .mocked(authUtils.getAuthJwt)
+        .mockReturnValue(TEST_REJECTED_SESSION_VALUE);
+      jest.mocked(sessionV2.getSessionClientType).mockReturnValue("native");
+      jest.mocked(validateJwt).mockImplementationOnce(async (params) => {
+        expect(params.shouldPersistRefreshedSession?.()).toBe(true);
+        jest
+          .mocked(authUtils.getAuthJwt)
+          .mockReturnValue(TEST_REPLACEMENT_SESSION_VALUE);
+        return {
+          isValid: true,
+          wasCancelled: false,
+          refreshOutcome: "success",
+        };
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={createReactQueryWrapperContextValue()}
+        >
+          <Auth>
+            <RequestAuthResultButton />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+      await userEvent.click(screen.getByTestId("request-auth-result"));
+
+      await waitFor(() =>
+        expect(screen.getByTestId("request-auth-success")).toHaveTextContent(
+          "true"
+        )
+      );
+      expect(authUtils.getAuthJwt()).toBe(TEST_REPLACEMENT_SESSION_VALUE);
+      expect(authUtils.invalidateAuthSessionForAddress).not.toHaveBeenCalled();
+      expect(sessionV2.getSessionNonce).not.toHaveBeenCalled();
+      expect(mockSignMessage).not.toHaveBeenCalled();
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+      expect(require("react-toastify").toast).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      { chainId: undefined, chainState: "unknown" },
+      { chainId: 137, chainState: "unsupported" },
+    ])(
+      "does not begin authorized-session reauthentication when the active chain is $chainState",
+      async ({ chainId }) => {
+        const validAddress = "0x1111111111111111111111111111111111111111";
+        walletAddress = validAddress;
+        mockActiveChainId = chainId;
+        mockWagmiIsConnected = chainId !== undefined;
+        const authUtils = require("@/services/auth/auth.utils");
+        const sessionV2 = require("@/services/auth/session-v2.utils");
+        const mockValidateJwt =
+          require("@/services/auth/jwt-validation.utils").validateJwt;
+        authUtils.getAuthJwt.mockReturnValue("expired-jwt");
+        mockValidateJwt.mockResolvedValue({
+          isValid: false,
+          wasCancelled: false,
+        });
+
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={{ invalidateAll: jest.fn() } as any}
+          >
+            <Auth>
+              <RequestAuthResultButton />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+
+        await userEvent.click(screen.getByTestId("request-auth-result"));
+
+        await waitFor(() => {
+          expect(screen.getByTestId("request-auth-success")).toHaveTextContent(
+            "false"
+          );
+        });
+        expect(mockValidateJwt).toHaveBeenCalled();
+        expect(authUtils.removeAuthJwt).not.toHaveBeenCalled();
+        expect(sessionV2.getSessionNonce).not.toHaveBeenCalled();
+        expect(mockSignMessage).not.toHaveBeenCalled();
+        expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+      }
+    );
+
+    it("force-validates an authorized session after the server rejects it", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const authUtils =
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
+        typeof authUtils.getAuthJwt
+      >;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<
+          typeof authUtils.getWalletAddress
+        >;
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      mockGetAuthJwt.mockReturnValue(TEST_REJECTED_SESSION_VALUE);
+      mockGetWalletAddress.mockReturnValue(validAddress);
+      const rejectedAuthStateFingerprint = getAuthStateFingerprint({
+        walletAddress: validAddress,
+        jwt: TEST_REJECTED_SESSION_VALUE,
+      });
+      const user = userEvent.setup();
+
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        return (
+          <button
+            type="button"
+            onClick={() =>
+              void requestAuth({
+                serverRejected: true,
+                expectedAuthStateFingerprint: rejectedAuthStateFingerprint,
+              })
+            }
+          >
+            recover auth
+          </button>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await user.click(screen.getByRole("button", { name: "recover auth" }));
+
+      await waitFor(() => {
+        expect(mockValidateJwt).toHaveBeenCalledWith(
+          expect.objectContaining({
+            jwt: TEST_REJECTED_SESSION_VALUE,
+            wallet: validAddress,
+            serverRejected: true,
+            shouldPersistRefreshedSession: expect.any(Function),
+          })
+        );
+      });
+    });
+
+    it.each([
+      { profileState: "connected", hasSigner: true },
+      { profileState: "saved native", hasSigner: false },
+    ])(
+      "cancels deferred server-rejected recovery for a $profileState profile after the token changes",
+      async ({ hasSigner }) => {
+        const validAddress = "0x1111111111111111111111111111111111111111";
+        walletAddress = validAddress;
+        canSignActiveWallet = hasSigner;
+        mockActiveChainId = hasSigner ? 1 : undefined;
+        mockWagmiIsConnected = hasSigner;
+        const authUtils =
+          require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+        const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
+          typeof authUtils.getAuthJwt
+        >;
+        const mockGetWalletAddress =
+          authUtils.getWalletAddress as jest.MockedFunction<
+            typeof authUtils.getWalletAddress
+          >;
+        const mockRemoveAuthJwt =
+          authUtils.removeAuthJwt as jest.MockedFunction<
+            typeof authUtils.removeAuthJwt
+          >;
+        const mockValidateJwt =
+          require("@/services/auth/jwt-validation.utils").validateJwt;
+        const sessionV2 = require("@/services/auth/session-v2.utils");
+        if (!hasSigner) {
+          sessionV2.getSessionClientType.mockReturnValue("native");
+        }
+        const validation = createDeferredPromise<{
+          readonly isValid: boolean;
+          readonly wasCancelled: boolean;
+          readonly refreshOutcome: "empty";
+        }>();
+        let shouldPersistRefreshedSession: (() => boolean) | undefined;
+        let requestResult: Promise<{ success: boolean }> | undefined;
+
+        mockGetAuthJwt.mockReturnValue(TEST_REJECTED_SESSION_VALUE);
+        mockGetWalletAddress.mockReturnValue(validAddress);
+        const rejectedAuthStateFingerprint = getAuthStateFingerprint({
+          walletAddress: validAddress,
+          jwt: TEST_REJECTED_SESSION_VALUE,
+        });
+        mockValidateJwt.mockImplementationOnce(
+          (params: { shouldPersistRefreshedSession?: () => boolean }) => {
+            shouldPersistRefreshedSession =
+              params.shouldPersistRefreshedSession;
+            return validation.promise;
+          }
+        );
+
+        const Child = () => {
+          const { requestAuth } = React.useContext(AuthContext);
+          return (
+            <button
+              type="button"
+              onClick={() => {
+                requestResult = requestAuth({
+                  serverRejected: true,
+                  expectedAuthStateFingerprint: rejectedAuthStateFingerprint,
+                });
+              }}
+            >
+              recover auth
+            </button>
+          );
+        };
+
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={{ invalidateAll: jest.fn() } as any}
+          >
+            <Auth>
+              <Child />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+
+        fireEvent.click(screen.getByRole("button", { name: "recover auth" }));
+        await waitFor(() => expect(mockValidateJwt).toHaveBeenCalled());
+        expect(shouldPersistRefreshedSession?.()).toBe(true);
+
+        mockGetAuthJwt.mockReturnValue(TEST_REPLACEMENT_SESSION_VALUE);
+        expect(shouldPersistRefreshedSession?.()).toBe(false);
+
+        validation.resolve({
+          isValid: false,
+          wasCancelled: false,
+          refreshOutcome: "empty",
+        });
+        await act(async () => {
+          await requestResult;
+        });
+
+        expect(mockRemoveAuthJwt).not.toHaveBeenCalled();
+        expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
+        expect(sessionV2.persistSessionResponse).not.toHaveBeenCalled();
+        expect(require("react-toastify").toast).not.toHaveBeenCalled();
+      }
+    );
+
+    it("cancels server-rejected sign-in if auth changes during persistence", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const authUtils =
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
+        typeof authUtils.getAuthJwt
+      >;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<
+          typeof authUtils.getWalletAddress
+        >;
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const sessionResponse = {
+        client_type: "native",
+        address: validAddress,
+        role: null,
+        access_token: TEST_SESSION_VALUE,
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+        native_refresh_token: "native-refresh-token",
+        refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+      };
+      let requestResult: Promise<{ success: boolean }> | undefined;
+
+      mockGetAuthJwt.mockReturnValue(TEST_REJECTED_SESSION_VALUE);
+      mockGetWalletAddress.mockReturnValue(validAddress);
+      const rejectedAuthStateFingerprint = getAuthStateFingerprint({
+        walletAddress: validAddress,
+        jwt: TEST_REJECTED_SESSION_VALUE,
+      });
+      mockValidateJwt.mockResolvedValue({
+        isValid: false,
+        wasCancelled: false,
+      });
+      sessionV2.loginWithSessionV2.mockResolvedValue(sessionResponse);
+      sessionV2.persistSessionResponse.mockImplementationOnce(
+        async (
+          _response: unknown,
+          options?: { readonly shouldPersist?: () => boolean }
+        ) => {
+          expect(options?.shouldPersist?.()).toBe(true);
+          mockGetAuthJwt.mockReturnValue(TEST_REPLACEMENT_SESSION_VALUE);
+          expect(options?.shouldPersist?.()).toBe(false);
+          throw new Error("stale session persistence");
+        }
+      );
+
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        return (
+          <button
+            type="button"
+            onClick={() => {
+              requestResult = requestAuth({
+                serverRejected: true,
+                expectedAuthStateFingerprint: rejectedAuthStateFingerprint,
+              });
+            }}
+          >
+            recover auth
+          </button>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "recover auth" }));
+      await waitFor(() =>
+        expect(sessionV2.persistSessionResponse).toHaveBeenCalled()
+      );
+      await expect(requestResult).resolves.toEqual({ success: false });
+      expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
+        sessionResponse,
+        { shouldPersist: expect.any(Function) }
+      );
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+    });
+
     it("allows valid legacy auth before the session-v2 deadline without forcing the upgrade modal", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
@@ -573,14 +1125,16 @@ describe("Auth component", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("reauthenticates invalid legacy auth during the session-v2 grace window", async () => {
+    it("replaces an expired legacy session during an explicit authenticated action", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
-      enableAuthMigrationDeadline();
-      const authUtils = require("@/services/auth/auth.utils");
-      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
-      const mockRemoveAuthJwt =
-        authUtils.removeAuthJwt as jest.MockedFunction<any>;
+      enableAuthMigrationDeadline("2000-01-01T00:00:00.000Z");
+      const authUtils =
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+      const mockGetAuthJwt = jest.mocked(authUtils.getAuthJwt);
+      const mockInvalidateAuthSession = jest.mocked(
+        authUtils.invalidateAuthSessionForAddress
+      );
       const mockValidateJwt =
         require("@/services/auth/jwt-validation.utils").validateJwt;
       const sessionV2 = require("@/services/auth/session-v2.utils");
@@ -588,7 +1142,217 @@ describe("Auth component", () => {
         client_type: "web",
         address: validAddress,
         role: null,
-        access_token: "session-access-token",
+        access_token: TEST_SESSION_VALUE,
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      };
+      let currentJwt: string | null = "expired-legacy-jwt";
+      mockGetAuthJwt.mockImplementation(() => currentJwt);
+      mockInvalidateAuthSession.mockImplementation(async () => {
+        currentJwt = null;
+        return true;
+      });
+      mockValidateJwt.mockResolvedValue({
+        isValid: false,
+        wasCancelled: false,
+        requiresSessionUpgrade: true,
+      });
+      sessionV2.loginWithSessionV2.mockResolvedValue(sessionResponse);
+      sessionV2.persistSessionResponse.mockImplementation(async () => {
+        currentJwt = TEST_SESSION_VALUE;
+        return true;
+      });
+
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        const [result, setResult] = React.useState("pending");
+        return (
+          <>
+            <button
+              type="button"
+              onClick={() => {
+                void requestAuth().then(({ success }) => {
+                  setResult(String(success));
+                });
+              }}
+              data-testid="expired-upgrade-action"
+            >
+              auth
+            </button>
+            <span data-testid="expired-upgrade-action-result">{result}</span>
+          </>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await userEvent.click(screen.getByTestId("expired-upgrade-action"));
+
+      await waitFor(() =>
+        expect(
+          screen.getByTestId("expired-upgrade-action-result")
+        ).toHaveTextContent("true")
+      );
+      expect(mockInvalidateAuthSession).toHaveBeenCalledWith(validAddress);
+      expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
+        signerAddress: validAddress,
+      });
+      expect(mockSignMessage).toHaveBeenCalledWith("sign this message exactly");
+      expect(sessionV2.loginWithSessionV2).toHaveBeenCalledWith({
+        serverSignature: "server-signature",
+        clientSignature: "0xsignature",
+        signerAddress: validAddress,
+        role: null,
+      });
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      {
+        chainId: undefined,
+        chainState: "unknown",
+        canSign: false,
+        wagmiConnected: false,
+      },
+      {
+        chainId: 137,
+        chainState: "unsupported",
+        canSign: true,
+        wagmiConnected: true,
+      },
+    ])(
+      "keeps an expired legacy session intact when the active chain is $chainState",
+      async ({ chainId, canSign, wagmiConnected }) => {
+        const validAddress = "0x1111111111111111111111111111111111111111";
+        walletAddress = validAddress;
+        canSignActiveWallet = canSign;
+        mockActiveChainId = chainId;
+        mockWagmiIsConnected = wagmiConnected;
+        enableAuthMigrationDeadline("2000-01-01T00:00:00.000Z");
+        const authUtils =
+          require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+        const mockInvalidateAuthSession = jest.mocked(
+          authUtils.invalidateAuthSessionForAddress
+        );
+        const mockGetAuthJwt = jest.mocked(authUtils.getAuthJwt);
+        const mockValidateJwt =
+          require("@/services/auth/jwt-validation.utils").validateJwt;
+        const sessionV2 = require("@/services/auth/session-v2.utils");
+        mockGetAuthJwt.mockReturnValue("expired-legacy-jwt");
+        mockValidateJwt.mockResolvedValue({
+          isValid: false,
+          wasCancelled: false,
+          requiresSessionUpgrade: true,
+        });
+
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={{ invalidateAll: jest.fn() } as any}
+          >
+            <Auth>
+              <RequestAuthResultButton />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+
+        await userEvent.click(screen.getByTestId("request-auth-result"));
+
+        await waitFor(() => {
+          expect(screen.getByTestId("request-auth-success")).toHaveTextContent(
+            "false"
+          );
+        });
+        expect(mockValidateJwt).toHaveBeenCalled();
+        expect(mockInvalidateAuthSession).not.toHaveBeenCalled();
+        expect(sessionV2.getSessionNonce).not.toHaveBeenCalled();
+        expect(mockSignMessage).not.toHaveBeenCalled();
+        expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+        if (!canSign) {
+          expect(require("react-toastify").toast).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({ type: "error" })
+          );
+        }
+      }
+    );
+
+    it("fails an explicit action visibly when session validation throws", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      const toast = require("react-toastify").toast;
+      mockValidateJwt.mockRejectedValue(new Error("validation unavailable"));
+
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        const [result, setResult] = React.useState("pending");
+        return (
+          <>
+            <button
+              type="button"
+              onClick={() => {
+                void requestAuth().then(({ success }) => {
+                  setResult(String(success));
+                });
+              }}
+            >
+              auth with validation failure
+            </button>
+            <span>{result}</span>
+          </>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "auth with validation failure" })
+      );
+
+      await waitFor(() => expect(screen.getByText("false")).toBeVisible());
+      expect(toast).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ type: "error" })
+      );
+      expect(mockSignMessage).not.toHaveBeenCalled();
+    });
+
+    it("reauthenticates invalid legacy auth during the session-v2 grace window", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      enableAuthMigrationDeadline();
+      const authUtils = require("@/services/auth/auth.utils");
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
+        typeof authUtils.getAuthJwt
+      >;
+      const mockInvalidateAuthSession =
+        authUtils.invalidateAuthSessionForAddress as jest.MockedFunction<
+          typeof authUtils.invalidateAuthSessionForAddress
+        >;
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const sessionResponse = {
+        client_type: "web",
+        address: validAddress,
+        role: null,
+        access_token: TEST_SESSION_VALUE,
         access_token_expires_at: "2026-06-10T00:00:00.000Z",
       };
       mockGetAuthJwt.mockReturnValue("expired-legacy-jwt");
@@ -643,7 +1407,7 @@ describe("Auth component", () => {
           role: null,
         })
       );
-      expect(mockRemoveAuthJwt).toHaveBeenCalled();
+      expect(mockInvalidateAuthSession).toHaveBeenCalledWith(validAddress);
       expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
         signerAddress: validAddress,
       });
@@ -657,12 +1421,142 @@ describe("Auth component", () => {
         })
       );
       expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
-        sessionResponse
+        sessionResponse,
+        { shouldPersist: expect.any(Function) }
       );
       expect(
         screen.queryByText("Upgrade Authentication")
       ).not.toBeInTheDocument();
     });
+
+    it("asks for an explicit reconnect when an expired profile session has no signer", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      canSignActiveWallet = false;
+      enableAuthMigrationDeadline();
+      const authUtils = require("@/services/auth/auth.utils");
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const mockInvalidateAuthSession =
+        authUtils.invalidateAuthSessionForAddress as jest.MockedFunction<any>;
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      const { toast } = require("react-toastify");
+      mockGetAuthJwt.mockReturnValue("expired-legacy-jwt");
+      mockValidateJwt.mockResolvedValue({
+        isValid: false,
+        wasCancelled: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <RequestAuthButton />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await userEvent.click(screen.getByTestId("req"));
+
+      await waitFor(() =>
+        expect(toast).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ type: "error" })
+        )
+      );
+      const renderedToast = toast.mock.calls.at(-1)?.[0];
+      render(renderedToast);
+      expect(
+        screen.getByText("Reconnect the wallet for this profile and try again.")
+      ).toBeVisible();
+      expect(mockInvalidateAuthSession).not.toHaveBeenCalled();
+      expect(mockSignMessage).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      { action: "composer preflight", serverRejected: false },
+      { action: "reaction recovery", serverRejected: true },
+    ])(
+      "asks to reconnect a saved native profile without a signer or chain during $action",
+      async ({ serverRejected }) => {
+        const validAddress = "0x1111111111111111111111111111111111111111";
+        walletAddress = validAddress;
+        canSignActiveWallet = false;
+        mockActiveChainId = undefined;
+        mockWagmiIsConnected = false;
+        const authUtils = jest.requireMock<typeof AuthUtilsModule>(
+          "@/services/auth/auth.utils"
+        );
+        const sessionV2 = jest.requireMock<typeof SessionV2Module>(
+          "@/services/auth/session-v2.utils"
+        );
+        const { validateJwt } = jest.requireMock<
+          typeof import("@/services/auth/jwt-validation.utils")
+        >("@/services/auth/jwt-validation.utils");
+        const { toast } =
+          jest.requireMock<typeof import("react-toastify")>("react-toastify");
+        jest.mocked(authUtils.getAuthJwt).mockReturnValue("expired-native-jwt");
+        jest.mocked(authUtils.getWalletAddress).mockReturnValue(validAddress);
+        jest.mocked(sessionV2.getSessionClientType).mockReturnValue("native");
+        jest.mocked(validateJwt).mockResolvedValue({
+          isValid: false,
+          wasCancelled: false,
+          refreshOutcome: "empty",
+        });
+        const expectedAuthStateFingerprint = getAuthStateFingerprint({
+          walletAddress: validAddress,
+          jwt: "expired-native-jwt",
+        });
+
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={createReactQueryWrapperContextValue()}
+          >
+            <Auth>
+              <RequestAuthResultButton
+                options={{ serverRejected, expectedAuthStateFingerprint }}
+              />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+        await userEvent.click(screen.getByTestId("request-auth-result"));
+
+        await waitFor(() =>
+          expect(screen.getByTestId("request-auth-success")).toHaveTextContent(
+            "false"
+          )
+        );
+        expect(validateJwt).toHaveBeenCalledWith(
+          expect.objectContaining({
+            jwt: "expired-native-jwt",
+            wallet: validAddress,
+            serverRejected,
+          })
+        );
+        expect(toast).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ type: "error" })
+        );
+        const renderedToast = jest.mocked(toast).mock.calls.at(-1)?.[0];
+        if (!React.isValidElement(renderedToast)) {
+          throw new Error("Expected a rendered reconnect toast");
+        }
+        render(renderedToast);
+        expect(
+          screen.getByText(
+            "Reconnect the wallet for this profile and try again."
+          )
+        ).toBeVisible();
+        expect(
+          authUtils.invalidateAuthSessionForAddress
+        ).not.toHaveBeenCalled();
+        expect(authUtils.removeAuthJwt).not.toHaveBeenCalled();
+        expect(sessionV2.getSessionNonce).not.toHaveBeenCalled();
+        expect(mockSignMessage).not.toHaveBeenCalled();
+        expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+      }
+    );
 
     it("uses session nonce signable_message for web sign-in", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
@@ -677,7 +1571,7 @@ describe("Auth component", () => {
         client_type: "web",
         address: validAddress,
         role: null,
-        access_token: "session-access-token",
+        access_token: TEST_SESSION_VALUE,
         access_token_expires_at: "2026-06-10T00:00:00.000Z",
       };
       sessionV2.loginWithSessionV2.mockResolvedValue(sessionResponse);
@@ -711,7 +1605,8 @@ describe("Auth component", () => {
         })
       );
       expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
-        sessionResponse
+        sessionResponse,
+        { shouldPersist: expect.any(Function) }
       );
       expect(mockCommonApiPost).not.toHaveBeenCalled();
     });
@@ -729,7 +1624,7 @@ describe("Auth component", () => {
         client_type: "native",
         address: validAddress,
         role: null,
-        access_token: "session-access-token",
+        access_token: TEST_SESSION_VALUE,
         access_token_expires_at: "2026-06-10T00:00:00.000Z",
         native_refresh_token: "native-refresh-token",
         refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
@@ -768,6 +1663,113 @@ describe("Auth component", () => {
       expect(mockCommonApiPost).not.toHaveBeenCalled();
     });
 
+    it("shows one toast when wallet signing already reported the failure", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      connectedAccountsOverride = [];
+      const { ConnectionMismatchError } = require("@/hooks/useSecureSign");
+      const toast = require("react-toastify").toast;
+      mockSignMessage.mockResolvedValueOnce({
+        signature: null,
+        userRejected: false,
+        error: new ConnectionMismatchError(validAddress),
+      });
+      const user = userEvent.setup();
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <RequestAuthButton />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await user.click(screen.getByTestId("req"));
+
+      await waitFor(() => {
+        expect(toast).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it("times out manual authorized-wallet validation instead of hanging signing state", async () => {
+      jest.useFakeTimers();
+      try {
+        const validAddress = "0x1111111111111111111111111111111111111111";
+        walletAddress = validAddress;
+        const toast = require("react-toastify").toast;
+        const mockValidateJwt =
+          require("@/services/auth/jwt-validation.utils").validateJwt;
+        mockValidateJwt.mockImplementation(
+          ({
+            abortSignal,
+          }: {
+            readonly abortSignal: AbortSignal;
+          }): Promise<{ isValid: boolean; wasCancelled: boolean }> =>
+            new Promise((resolve) => {
+              abortSignal.addEventListener(
+                "abort",
+                () => {
+                  resolve({ isValid: false, wasCancelled: true });
+                },
+                { once: true }
+              );
+            })
+        );
+
+        const Child = () => {
+          const { requestAuth } = React.useContext(AuthContext);
+          const [result, setResult] = React.useState("pending");
+
+          return (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  void requestAuth().then(({ success }) => {
+                    setResult(String(success));
+                  });
+                }}
+                data-testid="timed-auth"
+              >
+                auth
+              </button>
+              <span data-testid="timed-auth-result">{result}</span>
+            </>
+          );
+        };
+
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={{ invalidateAll: jest.fn() } as any}
+          >
+            <Auth>
+              <Child />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+
+        fireEvent.click(screen.getByTestId("timed-auth"));
+
+        await waitFor(() => {
+          expect(mockValidateJwt).toHaveBeenCalled();
+        });
+
+        await act(async () => {
+          jest.advanceTimersByTime(30_000);
+          await Promise.resolve();
+        });
+
+        expect(screen.getByTestId("timed-auth-result")).toHaveTextContent(
+          "false"
+        );
+        expect(toast).toHaveBeenCalledTimes(1);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
     it("allows adding a second web account when below the connected profile limit", async () => {
       const existingAddress = "0x1111111111111111111111111111111111111111";
       const nextAddress = "0x2222222222222222222222222222222222222222";
@@ -788,7 +1790,7 @@ describe("Auth component", () => {
         client_type: "web",
         address: nextAddress,
         role: null,
-        access_token: "session-access-token-2",
+        access_token: TEST_SECOND_SESSION_VALUE,
         access_token_expires_at: "2026-06-10T00:00:00.000Z",
       };
       sessionV2.loginWithSessionV2.mockResolvedValue(sessionResponse);
@@ -821,7 +1823,8 @@ describe("Auth component", () => {
         })
       );
       expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
-        sessionResponse
+        sessionResponse,
+        { shouldPersist: expect.any(Function) }
       );
       expect(mockCommonApiPost).not.toHaveBeenCalled();
     });
@@ -1064,7 +2067,9 @@ describe("Auth component", () => {
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
         callbacks.onShowSignModal(true);
         return {
+          isValid: false,
           validationCompleted: true,
+          authRefreshOutcome: "empty",
           wasCancelled: false,
           shouldShowModal: true,
         };
@@ -1085,6 +2090,187 @@ describe("Auth component", () => {
           screen.getByText("Sign Authentication Request")
         ).toBeInTheDocument();
       });
+    });
+
+    it("tracks successful auth session refresh without product failure", async () => {
+      mockGetAuthJwt.mockReturnValue("stale-jwt-token");
+      mockValidateAuthImmediate.mockResolvedValue({
+        isValid: true,
+        validationCompleted: true,
+        authRefreshOutcome: "success",
+        wasCancelled: false,
+        shouldShowModal: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockTrackAuthSessionRefreshSucceeded).toHaveBeenCalledWith({
+          clientType: "web",
+          hadLocalJwt: true,
+          refreshOutcome: "success",
+        });
+      });
+      expect(mockTrackAuthSessionRefreshProductImpact).not.toHaveBeenCalled();
+      expect(
+        mockResetAuthSessionRefreshProductImpactDedupe
+      ).toHaveBeenCalledWith(expect.any(String));
+    });
+
+    it("treats an empty local jwt as absent in auth validation telemetry", async () => {
+      mockGetAuthJwt.mockReturnValue("");
+      mockValidateAuthImmediate.mockResolvedValue({
+        isValid: true,
+        validationCompleted: true,
+        authRefreshOutcome: "success",
+        wasCancelled: false,
+        shouldShowModal: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockTrackAuthSessionRefreshSucceeded).toHaveBeenCalledWith({
+          clientType: "web",
+          hadLocalJwt: false,
+          refreshOutcome: "success",
+        });
+      });
+    });
+
+    it("tracks re-auth product impact after refresh returns no session", async () => {
+      mockGetAuthJwt.mockReturnValue("expired-jwt-token");
+      mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
+        callbacks.onShowSignModal(true);
+        return {
+          isValid: false,
+          validationCompleted: true,
+          authRefreshOutcome: "empty",
+          wasCancelled: false,
+          shouldShowModal: true,
+        };
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockTrackAuthSessionRefreshProductImpact).toHaveBeenCalledWith({
+          clientType: "web",
+          dedupeScope: expect.any(String),
+          hadLocalJwt: true,
+          outcome: "reauth_required",
+          refreshOutcome: "empty",
+          requiresReauth: true,
+        });
+      });
+    });
+
+    it("tracks cancelled auth validation as non-failure", async () => {
+      mockGetAuthJwt.mockReturnValue("stale-jwt-token");
+      mockValidateAuthImmediate.mockResolvedValue({
+        isValid: false,
+        validationCompleted: true,
+        authRefreshOutcome: "cancelled",
+        wasCancelled: true,
+        shouldShowModal: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockTrackAuthValidationCancelled).toHaveBeenCalledWith({
+          clientType: "web",
+          hadLocalJwt: true,
+          refreshOutcome: "cancelled",
+        });
+      });
+      expect(mockTrackAuthSessionRefreshProductImpact).not.toHaveBeenCalled();
+    });
+
+    it("tracks cancelled auth validation after stale operation cleanup", async () => {
+      mockGetAuthJwt.mockReturnValue("stale-jwt-token");
+      const validation = createDeferredPromise<{
+        readonly isValid: boolean;
+        readonly validationCompleted: boolean;
+        readonly authRefreshOutcome: "cancelled";
+        readonly wasCancelled: boolean;
+        readonly shouldShowModal: boolean;
+      }>();
+      let validationSignal: AbortSignal | undefined;
+
+      mockValidateAuthImmediate.mockImplementationOnce(async ({ params }) => {
+        validationSignal = params.abortSignal;
+        return validation.promise;
+      });
+
+      const { unmount } = render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalled();
+      });
+
+      unmount();
+      expect(validationSignal?.aborted).toBe(true);
+
+      await act(async () => {
+        validation.resolve({
+          isValid: false,
+          validationCompleted: false,
+          authRefreshOutcome: "cancelled",
+          wasCancelled: true,
+          shouldShowModal: false,
+        });
+        await validation.promise;
+      });
+
+      await waitFor(() => {
+        expect(mockTrackAuthValidationCancelled).toHaveBeenCalledWith({
+          clientType: "web",
+          hadLocalJwt: true,
+          refreshOutcome: "cancelled",
+        });
+      });
+      expect(mockTrackAuthSessionRefreshProductImpact).not.toHaveBeenCalled();
     });
 
     it("should not trigger validation during connecting state", async () => {
@@ -1485,7 +2671,7 @@ describe("Auth component", () => {
   });
 
   describe("Modal Behavior", () => {
-    it("should show modal when sign modal state is true and connected", async () => {
+    const requireAuthenticationPrompt = () => {
       const mockValidateAuthImmediate =
         require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
@@ -1496,16 +2682,25 @@ describe("Auth component", () => {
           shouldShowModal: true,
         };
       });
+      return mockValidateAuthImmediate;
+    };
 
-      render(
-        <ReactQueryWrapperContext.Provider
-          value={{ invalidateAll: jest.fn() } as any}
-        >
-          <Auth>
-            <div data-testid="auth-component">Auth Component</div>
-          </Auth>
-        </ReactQueryWrapperContext.Provider>
-      );
+    const getAuthModalHarnessElement = () => (
+      <ReactQueryWrapperContext.Provider
+        value={{ invalidateAll: jest.fn() } as any}
+      >
+        <Auth>
+          <div data-testid="auth-component">Auth Component</div>
+        </Auth>
+      </ReactQueryWrapperContext.Provider>
+    );
+    const renderAuthModalHarness = () => render(getAuthModalHarnessElement());
+
+    it("keeps supported-chain authentication behavior unchanged", async () => {
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      connectedAccountsOverride = [];
+      requireAuthenticationPrompt();
+      renderAuthModalHarness();
 
       await waitFor(() => {
         expect(
@@ -1521,9 +2716,634 @@ describe("Auth component", () => {
       ).toBeInTheDocument();
       expect(screen.getByText("Cancel")).toBeInTheDocument();
       expect(screen.getByText("Sign")).toBeInTheDocument();
+
+      await userEvent.click(screen.getByText("Sign"));
+      await waitFor(() => {
+        expect(mockSignMessage).toHaveBeenCalledWith(
+          "sign this message exactly"
+        );
+      });
     });
 
-    it("should handle modal cancel button", async () => {
+    it.each([
+      { chainId: undefined, chainState: "unknown" },
+      { chainId: 137, chainState: "unsupported" },
+    ])(
+      "suppresses the authentication modal when the active chain is $chainState",
+      async ({ chainId }) => {
+        mockActiveChainId = chainId;
+        const mockValidateAuthImmediate = requireAuthenticationPrompt();
+        renderAuthModalHarness();
+
+        await waitFor(() => {
+          expect(mockValidateAuthImmediate).toHaveBeenCalled();
+        });
+        expect(
+          screen.queryByText("Sign Authentication Request")
+        ).not.toBeInTheDocument();
+        expect(mockSignMessage).not.toHaveBeenCalled();
+        expect(
+          require("@/services/auth/session-v2.utils").getSessionNonce
+        ).not.toHaveBeenCalled();
+      }
+    );
+
+    it("opens the pending authentication modal after switching to a supported chain", async () => {
+      mockActiveChainId = 137;
+      const mockValidateAuthImmediate = requireAuthenticationPrompt();
+      const view = renderAuthModalHarness();
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalled();
+      });
+      expect(
+        screen.queryByText("Sign Authentication Request")
+      ).not.toBeInTheDocument();
+
+      mockActiveChainId = 1;
+      view.rerender(getAuthModalHarnessElement());
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Sign Authentication Request")
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("hides the modal without disconnecting after switching away", async () => {
+      requireAuthenticationPrompt();
+      const view = renderAuthModalHarness();
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Sign Authentication Request")
+        ).toBeInTheDocument();
+      });
+
+      mockActiveChainId = 137;
+      view.rerender(getAuthModalHarnessElement());
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText("Sign Authentication Request")
+        ).not.toBeInTheDocument();
+      });
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+      expect(mockSeizeDisconnectAndLogout).not.toHaveBeenCalled();
+    });
+
+    it("does not begin signing if the chain becomes unsupported during authentication", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      connectedAccountsOverride = [];
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const nonce = createDeferredPromise<{
+        readonly signable_message: string;
+        readonly server_signature: string;
+      }>();
+      sessionV2.getSessionNonce.mockReturnValueOnce(nonce.promise);
+
+      let requestResult: Promise<{ success: boolean }> | undefined;
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        return (
+          <button
+            type="button"
+            onClick={() => {
+              requestResult = requestAuth();
+            }}
+          >
+            authenticate
+          </button>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "authenticate" }));
+      await waitFor(() => {
+        expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
+          signerAddress: validAddress,
+        });
+      });
+
+      mockActiveChainId = 137;
+      nonce.resolve({
+        signable_message: "sign this message exactly",
+        server_signature: "server-signature",
+      });
+
+      await expect(requestResult).resolves.toEqual({ success: false });
+      expect(getAccount).toHaveBeenCalledWith(mockWagmiConfig);
+      expect(mockSignMessage).not.toHaveBeenCalled();
+      expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+    });
+
+    it("stops a profile switch with feedback if the chain becomes unsupported", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const authUtils = require("@/services/auth/auth.utils");
+      const removal = createDeferredPromise<void>();
+      authUtils.removeAuthJwt.mockReturnValueOnce(removal.promise);
+      const { toast } = require("react-toastify");
+
+      const Child = () => {
+        const { setActiveProfileProxy } = React.useContext(AuthContext);
+        return (
+          <button
+            type="button"
+            onClick={() =>
+              void setActiveProfileProxy({
+                id: "proxy-1",
+                created_by: { id: "role-1" },
+              } as any)
+            }
+          >
+            switch profile
+          </button>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "switch profile" }));
+      await waitFor(() => {
+        expect(authUtils.removeAuthJwt).toHaveBeenCalled();
+      });
+
+      mockActiveChainId = 137;
+      removal.resolve();
+
+      await waitFor(() => {
+        expect(toast).toHaveBeenCalled();
+      });
+      expect(
+        require("@/services/auth/session-v2.utils").getSessionNonce
+      ).not.toHaveBeenCalled();
+      expect(mockSignMessage).not.toHaveBeenCalled();
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+    });
+
+    it("does not start a signing session upgrade on an unsupported chain", async () => {
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      mockActiveChainId = 137;
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      fireEvent.click(screen.getByTestId("request-session-upgrade"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("session-upgrade-result")).toHaveTextContent(
+          "false"
+        );
+      });
+      expect(
+        screen.queryByText("Upgrade Authentication")
+      ).not.toBeInTheDocument();
+      expect(
+        require("@/services/auth/session-v2.utils").getSessionNonce
+      ).not.toHaveBeenCalled();
+      expect(mockSignMessage).not.toHaveBeenCalled();
+    });
+
+    it("does not continue a session upgrade if the chain becomes unsupported", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const nonce = createDeferredPromise<{
+        readonly signable_message: string;
+        readonly server_signature: string;
+      }>();
+      sessionV2.getSessionNonce.mockReturnValueOnce(nonce.promise);
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      fireEvent.click(screen.getByTestId("request-session-upgrade"));
+      await waitFor(() => {
+        expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
+          signerAddress: validAddress,
+        });
+      });
+
+      mockActiveChainId = 137;
+      nonce.resolve({
+        signable_message: "sign this message exactly",
+        server_signature: "server-signature",
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId("session-upgrade-result")).toHaveTextContent(
+          "false"
+        );
+      });
+      expect(mockSignMessage).not.toHaveBeenCalled();
+      expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+    });
+
+    it("tracks a connected reauth prompt once for a visible auth incident", async () => {
+      mockUsePathname.mockReturnValue("/waves/wave-1");
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
+        callbacks.onShowSignModal(true);
+        return {
+          validationCompleted: true,
+          wasCancelled: false,
+          shouldShowModal: true,
+        };
+      });
+
+      const { rerender } = render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByText("Sign Authentication Request")
+        ).toBeInTheDocument();
+      });
+
+      const reauthPromptCalls = mockTrackAuthImpactEvent.mock.calls.filter(
+        ([eventName]) => eventName === "Auth Reauth Prompt Shown"
+      );
+      expect(reauthPromptCalls).toHaveLength(1);
+      expect(reauthPromptCalls[0]?.[1]).toEqual({
+        auth_state_after: "reauth_prompt",
+        auth_state_before: "authenticated",
+        client_type: "web",
+        page_group: "waves",
+        product_failure: true,
+        reason: "auth_validation_failed",
+        route_pattern: "/waves/:waveId",
+        was_connected_wallet: true,
+      });
+
+      const validationFailureCalls = mockTrackAuthImpactEvent.mock.calls.filter(
+        ([eventName]) => eventName === "Auth Validation Failed While Connected"
+      );
+      expect(validationFailureCalls).toHaveLength(1);
+      expect(validationFailureCalls[0]?.[1]).toEqual({
+        auth_state_after: "auth_validation_failed",
+        auth_state_before: "authenticated",
+        client_type: "web",
+        page_group: "waves",
+        product_failure: true,
+        reason: "auth_validation_failed",
+        route_pattern: "/waves/:waveId",
+        was_connected_wallet: true,
+      });
+
+      rerender(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      expect(
+        mockTrackAuthImpactEvent.mock.calls.filter(
+          ([eventName]) => eventName === "Auth Reauth Prompt Shown"
+        )
+      ).toHaveLength(1);
+      expect(
+        mockTrackAuthImpactEvent.mock.calls.filter(
+          ([eventName]) =>
+            eventName === "Auth Validation Failed While Connected"
+        )
+      ).toHaveLength(1);
+    });
+
+    it("tracks a session upgrade prompt once when it becomes visible", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      enableAuthMigrationDeadline();
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
+        callbacks.onSessionUpgradeRequired();
+        return {
+          validationCompleted: true,
+          wasCancelled: false,
+          shouldShowModal: true,
+        };
+      });
+
+      const { rerender } = render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("Upgrade Authentication")).toBeInTheDocument();
+      });
+
+      const upgradePromptCalls = mockTrackAuthImpactEvent.mock.calls.filter(
+        ([eventName]) => eventName === "Auth Session Upgrade Prompt Shown"
+      );
+      expect(upgradePromptCalls).toHaveLength(1);
+      expect(upgradePromptCalls[0]?.[1]).toEqual({
+        auth_state_after: "session_upgrade_prompt",
+        auth_state_before: "session_upgrade_required",
+        client_type: "web",
+        page_group: "home",
+        product_failure: true,
+        reason: "session_upgrade_required",
+        route_pattern: "/",
+        was_connected_wallet: true,
+      });
+      expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        window.dispatchEvent(new Event("6529-wallet-accounts-updated"));
+      });
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(1);
+      });
+
+      const mockGetAuthJwt = require("@/services/auth/auth.utils")
+        .getAuthJwt as jest.MockedFunction<any>;
+      mockGetAuthJwt.mockReturnValue("reauthenticated-jwt");
+      act(() => {
+        window.dispatchEvent(new Event("6529-auth-token-changed"));
+      });
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(2);
+      });
+
+      rerender(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      expect(
+        mockTrackAuthImpactEvent.mock.calls.filter(
+          ([eventName]) => eventName === "Auth Session Upgrade Prompt Shown"
+        )
+      ).toHaveLength(1);
+    });
+
+    it("revalidates a terminal auth scope after another session recovers", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      enableAuthMigrationDeadline();
+      const mockGetAuthJwt = require("@/services/auth/auth.utils")
+        .getAuthJwt as jest.MockedFunction<any>;
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      let currentJwt = "session-a-jwt";
+      mockGetAuthJwt.mockImplementation(() => currentJwt);
+      const requireSessionUpgrade = async ({ callbacks }: any) => {
+        callbacks.onSessionUpgradeRequired();
+        return {
+          isValid: false,
+          validationCompleted: true,
+          authRefreshOutcome: "empty",
+          requiresSessionUpgrade: true,
+          wasCancelled: false,
+          shouldShowModal: true,
+        };
+      };
+      mockValidateAuthImmediate
+        .mockImplementationOnce(requireSessionUpgrade)
+        .mockResolvedValueOnce({
+          isValid: true,
+          validationCompleted: true,
+          authRefreshOutcome: "not_attempted",
+          wasCancelled: false,
+          shouldShowModal: false,
+        })
+        .mockImplementationOnce(requireSessionUpgrade);
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockTrackAuthSessionRefreshProductImpact).toHaveBeenCalledTimes(
+          1
+        );
+      });
+      const firstTerminalScope =
+        mockTrackAuthSessionRefreshProductImpact.mock.calls[0]?.[0].dedupeScope;
+      expect(firstTerminalScope).toEqual(expect.any(String));
+
+      currentJwt = "session-b-jwt";
+      act(() => {
+        window.dispatchEvent(new Event("6529-auth-token-changed"));
+      });
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(2);
+      });
+      expect(
+        mockResetAuthSessionRefreshProductImpactDedupe
+      ).toHaveBeenCalledWith(firstTerminalScope);
+
+      currentJwt = "session-a-jwt";
+      act(() => {
+        window.dispatchEvent(new Event("6529-auth-token-changed"));
+      });
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(3);
+      });
+      expect(mockTrackAuthSessionRefreshProductImpact).toHaveBeenCalledTimes(2);
+    });
+
+    it("retries validation after session invalidation fails", async () => {
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      const authUtils = require("@/services/auth/auth.utils");
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const mockInvalidateAuthSession =
+        authUtils.invalidateAuthSessionForAddress as jest.MockedFunction<any>;
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      mockGetAuthJwt.mockReturnValue("invalid-jwt");
+      mockInvalidateAuthSession.mockRejectedValueOnce(
+        new Error("storage failure")
+      );
+      mockValidateAuthImmediate
+        .mockImplementationOnce(async ({ callbacks }) => {
+          try {
+            await callbacks.onRemoveJwt();
+          } catch {
+            return {
+              isValid: false,
+              validationCompleted: true,
+              authRefreshOutcome: "failed",
+              wasCancelled: false,
+              shouldShowModal: true,
+            };
+          }
+          throw new Error("Expected session invalidation to fail");
+        })
+        .mockResolvedValueOnce({
+          isValid: true,
+          validationCompleted: true,
+          authRefreshOutcome: "not_attempted",
+          wasCancelled: false,
+          shouldShowModal: false,
+        });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(1);
+      });
+
+      act(() => {
+        window.dispatchEvent(new Event("6529-wallet-accounts-updated"));
+      });
+
+      await waitFor(() => {
+        expect(mockValidateAuthImmediate).toHaveBeenCalledTimes(2);
+      });
+      expect(mockInvalidateAuthSession).toHaveBeenCalledTimes(1);
+    });
+
+    it("tracks forced logout when the session upgrade deadline has expired", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      enableAuthMigrationDeadline("2000-01-01T00:00:00.000Z");
+      const mockInvalidateAuthSession = require("@/services/auth/auth.utils")
+        .invalidateAuthSessionForAddress as jest.MockedFunction<any>;
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId("request-session-upgrade"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("session-upgrade-result")).toHaveTextContent(
+          "false"
+        );
+      });
+      expect(mockInvalidateAuthSession).toHaveBeenCalledWith(validAddress);
+      expect(mockTrackAuthImpactEvent).toHaveBeenCalledWith(
+        "Auth Forced Logout",
+        {
+          auth_state_after: "logged_out",
+          auth_state_before: "authenticated",
+          client_type: "web",
+          page_group: "home",
+          product_failure: true,
+          reason: "session_upgrade_deadline_expired",
+          route_pattern: "/",
+          was_connected_wallet: true,
+        }
+      );
+    });
+
+    it("expires a later session-upgrade cycle for the same wallet", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      enableAuthMigrationDeadline("2000-01-01T00:00:00.000Z");
+      const mockInvalidateAuthSession = require("@/services/auth/auth.utils")
+        .invalidateAuthSessionForAddress as jest.MockedFunction<any>;
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId("request-session-upgrade"));
+
+      await waitFor(() => {
+        expect(mockInvalidateAuthSession).toHaveBeenCalledTimes(1);
+      });
+
+      mockInvalidateAuthSession.mockClear();
+      await user.click(screen.getByTestId("request-session-upgrade"));
+
+      await waitFor(() => {
+        expect(mockInvalidateAuthSession).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it("keeps supported-chain modal cancellation behavior unchanged", async () => {
       const mockValidateAuthImmediate =
         require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
       const mockSeizeDisconnectAndLogout =
@@ -1565,8 +3385,8 @@ describe("Auth component", () => {
       walletAddress = validAddress;
       const mockValidateAuthImmediate =
         require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
-      const mockRemoveAuthJwt = require("@/services/auth/auth.utils")
-        .removeAuthJwt as jest.MockedFunction<any>;
+      const mockInvalidateAuthSession = require("@/services/auth/auth.utils")
+        .invalidateAuthSessionForAddress as jest.MockedFunction<any>;
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
         callbacks.onSessionUpgradeRequired();
         return {
@@ -1596,7 +3416,7 @@ describe("Auth component", () => {
       expect(
         screen.queryByText("Upgrade Authentication")
       ).not.toBeInTheDocument();
-      expect(mockRemoveAuthJwt).not.toHaveBeenCalled();
+      expect(mockInvalidateAuthSession).not.toHaveBeenCalled();
     });
 
     it("does not rotate a connected local v2 web session during immediate validation", async () => {
@@ -1714,6 +3534,52 @@ describe("Auth component", () => {
       expect(verifiedAddresses).not.toContain(liveProviderAddress);
     });
 
+    it("repairs stale local v2 metadata during explicit web-session verification", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const authUtils = require("@/services/auth/auth.utils");
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const mockValidateAuthImmediate =
+        require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<any>;
+      const mockHasActiveSessionV2Auth =
+        authUtils.hasActiveSessionV2Auth as jest.MockedFunction<any>;
+      mockGetAuthJwt.mockReturnValue("v2-jwt");
+      mockGetWalletAddress.mockReturnValue(validAddress);
+      mockHasActiveSessionV2Auth.mockReturnValue(false);
+      sessionV2.verifyActiveSessionV2WebSession.mockResolvedValue(true);
+      mockValidateAuthImmediate.mockResolvedValue({
+        validationCompleted: true,
+        wasCancelled: false,
+        shouldShowModal: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={createReactQueryWrapperContextValue()}
+        >
+          <Auth>
+            <SessionUpgradeProbe />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId("verify-session"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("session-verify-result")).toHaveTextContent(
+          "true"
+        );
+      });
+      expect(sessionV2.verifyActiveSessionV2WebSession).toHaveBeenCalledWith({
+        address: validAddress,
+        abortSignal: undefined,
+      });
+    });
+
     it("does not change session upgrade state when context web-session verification errors", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
@@ -1773,6 +3639,8 @@ describe("Auth component", () => {
       walletAddress = null;
       connectionState = "disconnected";
       canSignActiveWallet = false;
+      mockActiveChainId = undefined;
+      mockWagmiIsConnected = false;
       const authUtils = require("@/services/auth/auth.utils");
       const sessionV2 = require("@/services/auth/session-v2.utils");
       const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<any>;
@@ -1912,10 +3780,10 @@ describe("Auth component", () => {
         client_type: "web",
         address: validAddress,
         role: null,
-        access_token: "session-access-token",
+        access_token: TEST_SESSION_VALUE,
         access_token_expires_at: "2026-06-10T00:00:00.000Z",
       };
-      mockGetAuthJwt.mockReturnValue("session-access-token");
+      mockGetAuthJwt.mockReturnValue(TEST_SESSION_VALUE);
       mockValidateJwt.mockResolvedValue({
         isValid: false,
         wasCancelled: false,
@@ -1950,7 +3818,8 @@ describe("Auth component", () => {
 
       await waitFor(() => {
         expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
-          sessionResponse
+          sessionResponse,
+          { shouldPersist: expect.any(Function) }
         );
       });
       await waitFor(() => {
@@ -2133,13 +4002,21 @@ describe("Auth component", () => {
       expect(screen.getByText("Remind me later")).toBeInTheDocument();
       expect(screen.queryByText("Sign")).not.toBeInTheDocument();
 
+      mockSeizeConnect.mockImplementationOnce(() => {
+        expect(
+          screen.queryByText("Upgrade Authentication")
+        ).not.toBeInTheDocument();
+      });
+
       const user = userEvent.setup();
       await user.click(screen.getByText("Connect"));
 
       await waitFor(() => {
         expect(mockSeizeDisconnect).toHaveBeenCalled();
       });
-      expect(mockSeizeConnect).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockSeizeConnect).toHaveBeenCalled();
+      });
       expect(mockSeizeDisconnect.mock.invocationCallOrder[0]).toBeLessThan(
         mockSeizeConnect.mock.invocationCallOrder[0]
       );
@@ -2407,15 +4284,15 @@ describe("Auth component", () => {
       });
     });
 
-    it("clears auth when the configured migration deadline has expired", async () => {
+    it("invalidates the session when the configured migration deadline has expired", async () => {
       const now = Date.UTC(2026, 5, 17, 12, 0, 0);
       jest.spyOn(Date, "now").mockReturnValue(now);
       enableAuthMigrationDeadline(new Date(now - 1).toISOString());
       walletAddress = "0x1111111111111111111111111111111111111111";
       const mockValidateAuthImmediate =
         require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
-      const mockRemoveAuthJwt = require("@/services/auth/auth.utils")
-        .removeAuthJwt as jest.MockedFunction<any>;
+      const mockInvalidateAuthSession = require("@/services/auth/auth.utils")
+        .invalidateAuthSessionForAddress as jest.MockedFunction<any>;
       const invalidateAll = jest.fn();
       mockValidateAuthImmediate.mockImplementation(async ({ callbacks }) => {
         callbacks.onSessionUpgradeRequired();
@@ -2435,7 +4312,7 @@ describe("Auth component", () => {
       );
 
       await waitFor(() => {
-        expect(mockRemoveAuthJwt).toHaveBeenCalled();
+        expect(mockInvalidateAuthSession).toHaveBeenCalledWith(walletAddress);
       });
       expect(invalidateAll).toHaveBeenCalled();
       expect(

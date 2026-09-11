@@ -9,6 +9,7 @@ import type { ApiRepCategoriesPage } from "@/generated/models/ApiRepCategoriesPa
 import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import { commonApiFetch } from "@/services/api/common-api";
 import { AuthContext } from "@/components/auth/Auth";
+import Button from "@/components/utils/button/Button";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import GlobalRepCategoryDialog from "@/components/rep/categories/GlobalRepCategoryDialog";
@@ -361,10 +362,10 @@ export default function UserPageRep({
           <div className="tw-min-w-0 tw-self-start">
             <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#08090b]">
               <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-emerald-500/[0.05] tw-via-transparent tw-to-transparent" />
-              <div className="tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-emerald-400/25 tw-to-transparent" />
-              <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-emerald-400/40 tw-to-transparent" />
-              <div className="tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-emerald-400/20 tw-to-transparent" />
-              <div className="tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-emerald-400/20 tw-to-transparent" />
+              <div className="tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-emerald-400/15 tw-to-transparent" />
+              <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-emerald-400/20 tw-to-transparent" />
+              <div className="tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-emerald-400/10 tw-to-transparent" />
+              <div className="tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-emerald-400/10 tw-to-transparent" />
               <div className="tw-relative tw-z-10">
                 <UserPageIdentityHeader
                   profile={profile}
@@ -414,10 +415,12 @@ export default function UserPageRep({
         title="Rate NIC"
         isOpen={isNicRateOpen}
         onClose={() => setIsNicRateOpen(false)}
+        noPadding
         tabletModal
         maxWidthClass="md:tw-max-w-md"
+        headerClassName="tw-pb-6 tw-pt-4"
       >
-        <div className="tw-px-4 sm:tw-px-6">
+        <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
           <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
             <UserPageIdentityHeaderCICRate
               profile={profile}
@@ -426,13 +429,14 @@ export default function UserPageRep({
             />
           </UserPageRateWrapper>
           <div className="tw-mt-3">
-            <button
+            <Button
+              variant="secondary"
+              size="lg"
+              fullWidth
               onClick={() => setIsNicRateOpen(false)}
-              type="button"
-              className="tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       </MobileWrapperDialog>

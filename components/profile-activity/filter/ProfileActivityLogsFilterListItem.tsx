@@ -2,7 +2,6 @@
 
 import { PROFILE_ACTIVITY_TYPE_TO_TEXT } from "@/entities/IProfile";
 import type { ProfileActivityLogType } from "@/types/enums";
-import { useEffect, useState } from "react";
 import ProfileActivityLogsIcon from "../icons/ProfileActivityLogsIcon";
 
 export default function ProfileActivityLogsFilterListItem({
@@ -14,33 +13,39 @@ export default function ProfileActivityLogsFilterListItem({
   readonly selectedItems: ProfileActivityLogType[];
   readonly setSelected: (selected: ProfileActivityLogType) => void;
 }) {
-  const [isSelected, setIsSelected] = useState(
-    selectedItems.includes(itemType)
-  );
-
-  useEffect(() => {
-    setIsSelected(selectedItems.includes(itemType));
-  }, [selectedItems]);
+  const isSelected = selectedItems.includes(itemType);
 
   return (
     <li>
       <button
-        className="tw-group tw-relative tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-rounded-lg tw-border-none tw-bg-transparent tw-py-2.5 tw-pl-3 tw-pr-9 tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700"
+        type="button"
+        aria-pressed={isSelected}
+        className={`tw-group tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-3 tw-rounded-lg tw-border-none tw-px-2.5 tw-py-2 tw-text-left tw-transition-colors tw-duration-150 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${
+          isSelected
+            ? "tw-bg-white/[0.06] tw-text-iron-50 desktop-hover:hover:tw-bg-white/[0.09]"
+            : "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-100"
+        }`}
         onClick={() => setSelected(itemType)}
       >
-        <div className="tw-flex tw-w-full tw-items-center tw-space-x-3 tw-pr-4">
+        <span className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-white/[0.04] tw-ring-1 tw-ring-inset tw-ring-white/[0.06]">
           <ProfileActivityLogsIcon logType={itemType} />
-          <span className="tw-block tw-truncate tw-font-normal">
-            {PROFILE_ACTIVITY_TYPE_TO_TEXT[itemType]}
-          </span>
-        </div>
-        {isSelected && (
-          <span className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4 tw-text-iron-50">
+        </span>
+        <span className="tw-min-w-0 tw-flex-1 tw-truncate tw-text-sm tw-font-medium">
+          {PROFILE_ACTIVITY_TYPE_TO_TEXT[itemType]}
+        </span>
+        <span
+          className={`tw-inline-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none ${
+            isSelected
+              ? "tw-bg-primary-500/15 tw-text-primary-300 tw-ring-primary-400/30"
+              : "tw-bg-transparent tw-text-transparent tw-ring-white/10"
+          }`}
+          aria-hidden="true"
+        >
+          {isSelected && (
             <svg
-              className="tw-h-4 tw-w-4 tw-text-primary-400"
+              className="tw-h-3.5 tw-w-3.5"
               viewBox="0 0 20 20"
               fill="currentColor"
-              aria-hidden="true"
             >
               <path
                 fillRule="evenodd"
@@ -48,8 +53,8 @@ export default function ProfileActivityLogsFilterListItem({
                 clipRule="evenodd"
               />
             </svg>
-          </span>
-        )}
+          )}
+        </span>
       </button>
     </li>
   );

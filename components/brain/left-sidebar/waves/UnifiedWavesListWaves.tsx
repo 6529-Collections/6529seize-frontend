@@ -28,6 +28,9 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { useLoadActiveSidebarParentSubwaves } from "@/hooks/useLoadActiveSidebarParentSubwaves";
+import { useLoadPersistedExpandedSubwaves } from "@/hooks/useLoadPersistedExpandedSubwaves";
+import { useActiveSubwaveParentHint } from "@/hooks/useActiveSubwaveParentHint";
+import { useRevealActiveSidebarWave } from "@/hooks/useRevealActiveSidebarWave";
 import { getWaveHomeRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
@@ -42,6 +45,7 @@ import {
 import {
   groupSidebarWavesForView,
   isValidSidebarWave,
+  prioritizeActiveWaveContainer,
   validateSidebarWaveDetailed,
 } from "./sidebarWaveListUtils";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -58,6 +62,19 @@ const SUBWAVE_TOGGLE_ROW_HEIGHT = 38 as const;
 const COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT = 42 as const;
 const VIRTUALIZATION_OVERSCAN = 5 as const; // Number of extra items to render outside viewport
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
+
+const APP_SECTION_DIVIDER_STYLES = {
+  colorClass: "tw-border-iron-800",
+  firstSpacingClass: "tw-my-3",
+} as const;
+
+const DESKTOP_SECTION_DIVIDER_STYLES = {
+  colorClass: "tw-border-iron-700",
+  firstSpacingClass: "tw-mb-1 tw-mt-2",
+} as const;
+
+const getSectionDividerStyles = (isApp: boolean) =>
+  isApp ? APP_SECTION_DIVIDER_STYLES : DESKTOP_SECTION_DIVIDER_STYLES;
 
 // Common styles for positioned elements
 const listContainerStyle = {
@@ -175,18 +192,29 @@ const UnifiedWavesListWaves = forwardRef<
       set: setActiveWave,
     } = activeWave;
     const { isApp, hasTouchScreen } = useDeviceInfo();
+    const {
+      colorClass: sectionDividerColorClass,
+      firstSpacingClass: firstSectionDividerSpacingClass,
+    } = getSectionDividerStyles(isApp);
     const prefetchWaveData = usePrefetchWaveData();
+    // Persisted-hint fallback so the active subwave expands/highlights
+    // immediately after a cold reload (see useActiveSubwaveParentHint).
+    const effectiveActiveParentWaveId = useActiveSubwaveParentHint(
+      activeWaveId,
+      activeParentWaveId
+    );
     const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
       waves,
       activeWaveId: activeWave.id,
-      activeParentWaveId: activeWave.parentWaveId,
+      activeParentWaveId: effectiveActiveParentWaveId,
       loadingSubwaveParentIds: streamWaves.loadingSubwaveParentIds,
       onParentExpand: streamWaves.loadSubwavesForParent,
     });
     useLoadActiveSidebarParentSubwaves({
-      activeParentWaveId,
+      activeParentWaveId: effectiveActiveParentWaveId,
       waves,
     });
+    useLoadPersistedExpandedSubwaves({ waves });
 
     const { announcementWaves, highlyRatedWaves, pinnedWaves, allWaves } =
       useMemo(
@@ -214,7 +242,16 @@ const UnifiedWavesListWaves = forwardRef<
       () => getRows(pinnedWaves),
       [pinnedWaves, getRows]
     );
-    const allRows = useMemo(() => getRows(allWaves), [allWaves, getRows]);
+    const allRows = useMemo(
+      () =>
+        getRows(
+          prioritizeActiveWaveContainer(
+            allWaves,
+            isDirectMessage ? null : effectiveActiveParentWaveId
+          )
+        ),
+      [allWaves, effectiveActiveParentWaveId, getRows, isDirectMessage]
+    );
     const animatedAnnouncementRows =
       useAnimatedSidebarWaveRows(announcementRows);
     const animatedHighlyRatedRows = useAnimatedSidebarWaveRows(highlyRatedRows);
@@ -357,11 +394,28 @@ const UnifiedWavesListWaves = forwardRef<
       rowHeight: getSidebarRowHeight,
       overscan: VIRTUALIZATION_OVERSCAN,
     });
+    const revealStaticRows = useMemo(
+      () => [
+        animatedAnnouncementRows,
+        animatedHighlyRatedRows,
+        animatedPinnedRows,
+      ],
+      [animatedAnnouncementRows, animatedHighlyRatedRows, animatedPinnedRows]
+    );
+    useRevealActiveSidebarWave({
+      activeParentWaveId: effectiveActiveParentWaveId,
+      activeWaveId,
+      scrollContainerRef,
+      scrollToVirtualIndex: virtual.scrollToIndex,
+      staticRows: revealStaticRows,
+      virtualRows: virtualizedRows,
+    });
 
     const renderWaveRow = (
       row: AnimatedSidebarWaveTreeRow,
       showPin: boolean,
-      parentsWithVisibleSubwaves: ReadonlySet<string>
+      parentsWithVisibleSubwaves: ReadonlySet<string>,
+      isAnnouncement = false
     ) => {
       const showConnectedSubwaves = parentsWithVisibleSubwaves.has(row.wave.id);
 
@@ -382,6 +436,7 @@ const UnifiedWavesListWaves = forwardRef<
 
       return (
         <BrainLeftSidebarWave
+          isAnnouncement={isAnnouncement}
           wave={row.wave}
           onHover={onHover}
           showPin={showPin && row.depth === 0}
@@ -429,7 +484,8 @@ const UnifiedWavesListWaves = forwardRef<
               renderWaveRow(
                 row,
                 !hidePin && row.wave.isPinned,
-                announcementParentsWithVisibleSubwaves
+                announcementParentsWithVisibleSubwaves,
+                true
               )
             }
             rows={animatedAnnouncementRows}
@@ -441,7 +497,9 @@ const UnifiedWavesListWaves = forwardRef<
           (highlyRatedRows.length > 0 ||
             pinnedRows.length > 0 ||
             shouldShowBottomHeader) && (
-            <div className="tw-mb-1 tw-mt-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+            <div
+              className={`${firstSectionDividerSpacingClass} tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid ${sectionDividerColorClass}`}
+            />
           )}
 
         {highlyRatedRows.length > 0 && (
@@ -455,6 +513,7 @@ const UnifiedWavesListWaves = forwardRef<
                 />
                 <HighlyRatedWavesToggle
                   isTouchPreview={hasTouchScreen}
+                  compactTouchPadding={isApp}
                   paddingClassName="tw-px-4"
                   previewItems={highlyRatedPreviewItems}
                 />
@@ -491,7 +550,9 @@ const UnifiedWavesListWaves = forwardRef<
         {!hideHeaders &&
           highlyRatedRows.length > 0 &&
           (pinnedRows.length > 0 || shouldShowBottomHeader) && (
-            <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+            <div
+              className={`tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid ${sectionDividerColorClass}`}
+            />
           )}
 
         {/* Conditionally show pinned section */}
@@ -520,7 +581,9 @@ const UnifiedWavesListWaves = forwardRef<
         )}
 
         {!hideHeaders && pinnedRows.length > 0 && shouldShowBottomHeader && (
-          <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+          <div
+            className={`tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid ${sectionDividerColorClass}`}
+          />
         )}
 
         {shouldShowBottomHeader && (

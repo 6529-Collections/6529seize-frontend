@@ -12,7 +12,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import HoverCard from "@/components/utils/tooltip/HoverCard";
+import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
@@ -21,6 +21,7 @@ import type { ApprovalWaveCloseStatus } from "@/helpers/waves/approve-wave.helpe
 import { getApprovalWindowEndTime } from "@/helpers/waves/approve-wave.helpers";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import Button from "@/components/utils/button/Button";
 
 interface WaveApprovalStatusBarProps {
   readonly approvedCount: number | null;
@@ -116,17 +117,17 @@ const ApprovalStatusItem: FC<ApprovalStatusItemProps> = ({
   withSeparator = false,
 }) => (
   <div
-    className={`tw-flex tw-min-w-0 tw-items-baseline tw-gap-1.5 tw-text-left tw-leading-5 ${
+    className={`tw-flex tw-w-full tw-min-w-0 tw-items-baseline tw-justify-between tw-gap-4 tw-text-left tw-text-xs tw-leading-5 md:tw-w-auto md:tw-justify-start md:tw-gap-1.5 ${
       withSeparator
         ? "md:tw-border-0 md:tw-border-l md:tw-border-solid md:tw-border-iron-700 md:tw-pl-3"
         : ""
     }`}
   >
-    <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-500">
+    <span className="tw-shrink-0 tw-whitespace-nowrap tw-font-medium tw-text-iron-500">
       {label}
     </span>{" "}
     <span
-      className={`tw-min-w-0 tw-text-sm tw-font-semibold ${valueClassName}`}
+      className={`tw-min-w-0 tw-text-right tw-font-semibold md:tw-text-left ${valueClassName}`}
     >
       {value}
     </span>
@@ -483,7 +484,7 @@ export default function WaveApprovalStatusBar({
   retryApprovalStatus = null,
   wave,
 }: WaveApprovalStatusBarProps) {
-  const { hasTouchScreen } = useDeviceInfo();
+  const { hasTouchScreen, isMobileDevice } = useDeviceInfo();
   const isClientHydrated = useSyncExternalStore(
     subscribeToClientRender,
     getClientRenderSnapshot,
@@ -576,7 +577,7 @@ export default function WaveApprovalStatusBar({
       thresholdLabel={thresholdLabel}
     />
   );
-  const useMobileHelp = isClientHydrated && hasTouchScreen;
+  const useMobileHelp = isClientHydrated && hasTouchScreen && isMobileDevice;
   const approvalRulesButton = useMobileHelp ? (
     <ApprovalRulesButton
       aria-controls={isHelpOpen ? approvalRulesHelpId : undefined}
@@ -585,16 +586,15 @@ export default function WaveApprovalStatusBar({
       onClick={() => setIsHelpOpen(true)}
     />
   ) : (
-    <HoverCard
+    <CustomTooltip
       content={approvalRulesHelp}
-      ariaLabel={APPROVAL_RULES_TITLE}
       placement="left"
       delayShow={300}
       delayHide={0}
       offset={8}
     >
-      <ApprovalRulesButton aria-haspopup="dialog" />
-    </HoverCard>
+      <ApprovalRulesButton />
+    </CustomTooltip>
   );
 
   return (
@@ -604,7 +604,7 @@ export default function WaveApprovalStatusBar({
         aria-label="Approval status"
         className="tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2"
       >
-        <div className="tw-grid tw-grid-cols-2 tw-items-center tw-gap-x-3 tw-gap-y-1 md:tw-flex md:tw-flex-wrap md:tw-gap-x-3">
+        <div className="tw-flex tw-flex-col tw-gap-y-1 md:tw-flex-row md:tw-flex-wrap md:tw-items-center md:tw-gap-x-3 md:tw-gap-y-1">
           <ApprovalStatusItem
             label="Credit needed"
             value={thresholdValueLabel}
@@ -639,13 +639,9 @@ export default function WaveApprovalStatusBar({
               {errorMessage}
             </p>
             {retryError && (
-              <button
-                type="button"
-                onClick={retryError}
-                className="tw-inline-flex tw-w-fit tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-iron-300 desktop-hover:hover:tw-border-iron-400 desktop-hover:hover:tw-bg-iron-800"
-              >
+              <Button onClick={retryError} variant="tertiary" size="xs">
                 Try again
-              </button>
+              </Button>
             )}
           </div>
         )}

@@ -3,6 +3,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ChatRestriction, useDropPrivileges } from "@/hooks/useDropPriviledges";
+import { usePublicProfileModerationStatus } from "@/hooks/content-moderation/usePublicProfileModerationStatus";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect } from "react";
@@ -22,6 +23,7 @@ export { DropMode } from "./dropComposer.types";
 interface PrivilegedDropCreatorProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
+  readonly onReplyTargetUnavailable?: (() => void) | undefined;
   readonly onDropAddedToQueue: () => void;
   readonly onAllDropsAdded?: (() => void) | undefined;
   readonly onServerDropCreated?:
@@ -47,11 +49,33 @@ interface PrivilegedDropCreatorProps {
   readonly termsSignatureFlowEnabled?: boolean | undefined;
   readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
   readonly forceStandardDropComposer?: boolean | undefined;
+  readonly focusOnInitialActiveDrop?: boolean | undefined;
+  readonly initialMarkdown?: string | null | undefined;
+  readonly initialMarkdownKey?: string | null | undefined;
+}
+
+function getProfileModerationPlaceholder({
+  profileId,
+  isLoading,
+  isSuspended,
+}: {
+  readonly profileId: string | null | undefined;
+  readonly isLoading: boolean;
+  readonly isSuspended: boolean;
+}) {
+  if (profileId !== undefined && profileId !== null && isLoading) {
+    return <DropPlaceholder type="profile-check" />;
+  }
+  if (isSuspended) {
+    return <DropPlaceholder type="suspended" />;
+  }
+  return null;
 }
 
 export default function PrivilegedDropCreator({
   activeDrop,
   onCancelReplyQuote,
+  onReplyTargetUnavailable,
   wave,
   dropId,
   fixedDropMode,
@@ -69,11 +93,17 @@ export default function PrivilegedDropCreator({
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
   forceStandardDropComposer = false,
+  focusOnInitialActiveDrop = false,
+  initialMarkdown = null,
+  initialMarkdownKey = null,
 }: PrivilegedDropCreatorProps) {
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy, fetchingProfile } = useAuth();
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const { updateEligibility } = useWaveEligibility();
+  const moderationProfileId = connectedProfile?.id;
+  const profileModerationStatus =
+    usePublicProfileModerationStatus(moderationProfileId);
   const refreshWaveAfterSlowModeExpires = useCallback(() => {
     queryClient
       .invalidateQueries({
@@ -125,7 +155,16 @@ export default function PrivilegedDropCreator({
   }, [chatRestriction, updateEligibility, wave.id]);
 
   if (isProfileLoadingForWallet) {
-    return null;
+    return <DropPlaceholder type="profile-check" />;
+  }
+
+  const profileModerationPlaceholder = getProfileModerationPlaceholder({
+    profileId: moderationProfileId,
+    isLoading: profileModerationStatus.isLoading,
+    isSuspended: profileModerationStatus.isSuspended,
+  });
+  if (profileModerationPlaceholder !== null) {
+    return profileModerationPlaceholder;
   }
 
   if (submissionRestriction !== null && blockingChatRestriction !== null) {
@@ -166,6 +205,7 @@ export default function PrivilegedDropCreator({
     <CreateDrop
       activeDrop={activeDrop}
       onCancelReplyQuote={onCancelReplyQuote}
+      onReplyTargetUnavailable={onReplyTargetUnavailable}
       onAllDropsAdded={onAllDropsAdded}
       onServerDropCreated={onServerDropCreated}
       onExitFixedDropMode={onExitFixedDropMode}
@@ -187,6 +227,9 @@ export default function PrivilegedDropCreator({
       termsSignatureFlowEnabled={termsSignatureFlowEnabled}
       identityPickerPlacement={identityPickerPlacement}
       forceStandardDropComposer={forceStandardDropComposer}
+      focusOnInitialActiveDrop={focusOnInitialActiveDrop}
+      initialMarkdown={initialMarkdown}
+      initialMarkdownKey={initialMarkdownKey}
     />
   );
 }

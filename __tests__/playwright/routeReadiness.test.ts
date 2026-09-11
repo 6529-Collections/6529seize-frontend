@@ -12,13 +12,18 @@ function mockResponse(status: number) {
   return { status: () => status } as Response;
 }
 
-function mockPageWithResponses(responses: Array<Response | null>) {
+function mockPageWithResponses(
+  responses: Array<Response | null>,
+  titles: string[] = []
+) {
   const goto = jest.fn(async () => responses.shift() ?? null);
+  const title = jest.fn(async () => titles.shift() ?? "Ready");
   const waitForTimeout = jest.fn(async () => undefined);
 
   return {
     goto,
-    page: { goto, waitForTimeout } as unknown as Page,
+    page: { goto, title, waitForTimeout } as unknown as Page,
+    title,
     waitForTimeout,
   };
 }
@@ -84,5 +89,49 @@ describe("Playwright route readiness navigation", () => {
     ).resolves.toBeNull();
     expect(goto).toHaveBeenCalledTimes(2);
     expect(waitForTimeout).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(["6529 Error", "404 | PAGE NOT FOUND"])(
+    "retries once after the app renders the transient %s document",
+    async (transientTitle) => {
+      const response = mockResponse(200);
+      const { goto, page, title, waitForTimeout } = mockPageWithResponses(
+        [mockResponse(200), response],
+        [transientTitle, "NextGen"]
+      );
+
+      await expect(
+        gotoDocumentWithTransientRetry(page, "/nextgen")
+      ).resolves.toBe(response);
+      expect(goto).toHaveBeenCalledTimes(2);
+      expect(title).toHaveBeenCalledTimes(2);
+      expect(waitForTimeout).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it("throws when the app renders a soft failure after the retry", async () => {
+    const { page } = mockPageWithResponses(
+      [mockResponse(200), mockResponse(200)],
+      ["404 | PAGE NOT FOUND", "404 | PAGE NOT FOUND"]
+    );
+
+    await expect(
+      gotoDocumentWithTransientRetry(page, "/nextgen/collection/pebbles/art")
+    ).rejects.toThrow(
+      "Document navigation to /nextgen/collection/pebbles/art remained on the application 404 page after retry."
+    );
+  });
+
+  it("reports a persistent application error shell clearly", async () => {
+    const { page } = mockPageWithResponses(
+      [mockResponse(200), mockResponse(200)],
+      ["6529 Error", "6529 Error"]
+    );
+
+    await expect(
+      gotoDocumentWithTransientRetry(page, "/nextgen")
+    ).rejects.toThrow(
+      "Document navigation to /nextgen remained on the application error shell after retry."
+    );
   });
 });

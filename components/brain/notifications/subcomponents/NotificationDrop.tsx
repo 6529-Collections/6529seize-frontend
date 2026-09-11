@@ -37,20 +37,22 @@ export default function NotificationDrop({
   const extendedDrop = convertApiDropToExtendedDrop(drop);
 
   return (
-    <Drop
-      drop={extendedDrop}
-      previousDrop={null}
-      nextDrop={null}
-      showWaveInfo={true}
-      showReplyAndQuote={true}
-      activeDrop={activeDrop}
-      location={DropLocation.MY_STREAM}
-      dropViewDropId={null}
-      onReply={onReply}
-      onReplyClick={onReplyClick}
-      onQuoteClick={onQuoteClick}
-      onDropContentClick={onDropContentClick}
-      wrapContentOnly={wrapDropContentInCompact}
-    />
+    <div className="tw-w-full tw-min-w-0">
+      <Drop
+        drop={extendedDrop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={true}
+        showReplyAndQuote={true}
+        activeDrop={activeDrop}
+        location={DropLocation.MY_STREAM}
+        dropViewDropId={null}
+        onReply={onReply}
+        onReplyClick={onReplyClick}
+        onQuoteClick={onQuoteClick}
+        onDropContentClick={onDropContentClick}
+        wrapContentOnly={wrapDropContentInCompact}
+      />
+    </div>
   );
 }

@@ -21,6 +21,10 @@ rolls back if the request fails.
 ## Entry Points
 
 - Use quick-react buttons in the action bar/menu.
+- On desktop, hover an action or reach it with keyboard focus to read its label
+  beside the control. Labels stay within the viewport in notifications, My
+  Stream, profiles, and wave threads. Moving away, scrolling, resizing, pressing
+  Escape, or clicking dismisses them. Touch uses the drop action menu.
 - Use `Add Reaction` / `Update Reaction` to open the emoji picker.
 - Click or tap a reaction chip to toggle that same reaction.
 - Open reaction details from:
@@ -47,12 +51,19 @@ rolls back if the request fails.
 - Quick-react options come from local emoji history. If history is empty, quick
   react falls back to `:+1:`.
 - Touch move inside the mobile emoji picker stays inside the picker dialog.
+- Reactions added or removed by other people appear live while the wave or
+  direct-message thread is open.
+- Viewers can react even when a wave's chat group does not permit them to post.
 - Repeated clap taps in a short burst are merged into one rating request.
 - Rating values are clamped to each drop's allowed min/max range.
 
 ## Edge Cases
 
 - Temporary drops (`temp-*`) cannot be reacted to and do not show rating actions.
+- Reaction controls are disabled while a proxy profile is active.
+- Reaction controls are disabled only when chatting and reacting are disabled
+  for the entire wave. A chat-group restriction alone does not disable
+  reactions for viewers.
 - Light placeholder drops do not render reaction or rating controls.
 - Chat drops do not show clap rating controls.
 - Memes-wave participatory drops hide clap rating controls.
@@ -64,10 +75,22 @@ rolls back if the request fails.
 
 ## Failure and Recovery
 
-- If add/remove reaction fails, optimistic reaction state rolls back and users
-  can retry immediately.
+- If add/remove reaction receives a failure response, optimistic reaction state
+  rolls back and the app refreshes the canonical drop state.
+- If the API rejects the current session, the app starts one authentication
+  recovery attempt for that session and temporarily disables reaction actions.
+  The failed reaction is not automatically replayed; retry after authentication
+  succeeds.
+- If a reaction request times out, the app briefly checks the saved state. A
+  saved reaction that matches your latest choice stays in
+  place without an error or rollback. The app does not automatically retry the
+  write.
+- If the app cannot confirm your choice, it shows the latest state it could read
+  and asks you to refresh and check before trying again. The original request may
+  still have changed your reaction; repeating the same choice can undo that change.
 - If rating submit fails, optimistic rating state rolls back and users can retry.
-- Failures surface as toast errors while users stay in the same thread.
+- Failures surface as toast errors; an unconfirmed timeout shows a warning.
+  Users stay in the same thread.
 
 ## Limitations / Notes
 
@@ -80,6 +103,12 @@ rolls back if the request fails.
   to vote).
 - If rating is visible but the viewer has no available credit, clap stays visible
   in a disabled state with a tooltip.
+
+### Localization fallback debt
+
+- Drop action labels use the existing English copy across supported locales.
+  The frontend i18n backlog owns moving these labels and their accessible names
+  into a shared message family; tooltip placement does not add new copy.
 
 ## Related Pages
 

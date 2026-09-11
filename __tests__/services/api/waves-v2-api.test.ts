@@ -10,6 +10,7 @@ import {
   fetchWaveSubwavesPage,
   searchWavesByName,
 } from "@/services/api/waves-v2-api";
+import { replaceWaveMetadata } from "@/services/api/wave-metadata-replacement";
 import {
   commonApiDelete,
   commonApiFetch,
@@ -56,6 +57,7 @@ describe("waves-v2-api", () => {
           context_profile_context: {
             first_unread_drop_serial_no: 7,
             unread_drops: 2,
+            subwave_unread_drops: 8,
             followed_subwaves_count: 3,
             latest_followed_subwave_activity_timestamp: 999,
             hidden_followed_subwave_unread_drops: 4,
@@ -95,7 +97,7 @@ describe("waves-v2-api", () => {
           firstUnreadDropSerialNo: 7,
           followedSubwavesCount: 3,
           latestFollowedSubwaveDropTimestamp: 999,
-          unreadFollowedSubwaveDrops: 4,
+          unreadSubwaveDrops: 8,
           firstUnreadFollowedSubwaveDropSerialNo: 12,
           subscribed: true,
         },
@@ -251,6 +253,7 @@ describe("waves-v2-api", () => {
           {
             id: "legacy-wave",
             name: "Legacy Wave",
+            author: { handle: "legacy-author", primary_address: "0x1" },
             created_at: 100,
             picture: null,
             contributors_overview: [],
@@ -290,6 +293,7 @@ describe("waves-v2-api", () => {
     expect(result[0]).toMatchObject({
       id: "legacy-wave",
       name: "Legacy Wave",
+      creator: { handle: "legacy-author", primary_address: "0x1" },
     });
   });
 
@@ -340,6 +344,36 @@ describe("waves-v2-api", () => {
 
     expect(commonApiDeleteMock).toHaveBeenCalledWith({
       endpoint: "v2/waves/wave-1/metadata/7",
+      headers: undefined,
+    });
+  });
+
+  it("restores completed metadata deletes when a later delete fails", async () => {
+    const writeError = new Error("delete failed");
+    commonApiDeleteMock
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(writeError);
+    commonApiPostMock.mockResolvedValue({
+      id: 3,
+      data_key: "key",
+      data_value: "first",
+    });
+
+    await expect(
+      replaceWaveMetadata({
+        waveId: "wave-1",
+        metadata: [
+          { id: 1, data_key: "key", data_value: "first" },
+          { id: 2, data_key: "key", data_value: "second" },
+        ],
+        create: [{ data_key: "key", data_value: "replacement" }],
+        deleteIds: [1, 2],
+      })
+    ).rejects.toBe(writeError);
+
+    expect(commonApiPostMock).toHaveBeenCalledWith({
+      endpoint: "v2/waves/wave-1/metadata",
+      body: { data_key: "key", data_value: "first" },
       headers: undefined,
     });
   });

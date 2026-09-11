@@ -15,6 +15,7 @@ import {
   InvalidRoleStateError,
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { trackAuthImpactEvent } from "@/services/analytics/mixpanel";
 
 interface JwtPayload {
   id: string;
@@ -31,11 +32,23 @@ interface ValidateJwtParams {
   operationId: string;
   abortSignal: AbortSignal;
   activeProfileProxy?: ApiProfileProxy | null | undefined;
+  serverRejected?: boolean | undefined;
+  shouldPersistRefreshedSession?: (() => boolean) | undefined;
 }
+
+export type SessionRefreshValidationOutcome =
+  | "cancelled"
+  | "empty"
+  | "failed"
+  | "local_valid_after_failure"
+  | "missing_wallet"
+  | "not_attempted"
+  | "success";
 
 interface ValidateJwtResult {
   isValid: boolean;
   wasCancelled: boolean;
+  refreshOutcome?: SessionRefreshValidationOutcome;
   requiresSessionUpgrade?: boolean;
 }
 
@@ -46,23 +59,48 @@ type RefreshedSession = NonNullable<
 const INVALID_JWT_RESULT: ValidateJwtResult = {
   isValid: false,
   wasCancelled: false,
+  refreshOutcome: "not_attempted",
 };
 
 const CANCELLED_JWT_RESULT: ValidateJwtResult = {
   isValid: false,
   wasCancelled: true,
+  refreshOutcome: "cancelled",
 };
 
 const VALID_JWT_RESULT: ValidateJwtResult = {
   isValid: true,
   wasCancelled: false,
+  refreshOutcome: "not_attempted",
 };
 
 const SESSION_UPGRADE_REQUIRED_RESULT: ValidateJwtResult = {
   isValid: false,
   wasCancelled: false,
+  refreshOutcome: "failed",
   requiresSessionUpgrade: true,
 };
+
+const createInvalidJwtResult = (
+  refreshOutcome: SessionRefreshValidationOutcome
+): ValidateJwtResult => ({
+  ...INVALID_JWT_RESULT,
+  refreshOutcome,
+});
+
+const createValidJwtResult = (
+  refreshOutcome: SessionRefreshValidationOutcome
+): ValidateJwtResult => ({
+  ...VALID_JWT_RESULT,
+  refreshOutcome,
+});
+
+const createSessionUpgradeRequiredResult = (
+  refreshOutcome: SessionRefreshValidationOutcome
+): ValidateJwtResult => ({
+  ...SESSION_UPGRADE_REQUIRED_RESULT,
+  refreshOutcome,
+});
 
 export const getRole = (jwt: string | null): string | null => {
   if (!jwt) return null;
@@ -87,6 +125,19 @@ const doJWTValidation = ({
     decodedJwt.exp > Date.now() / 1000
   );
 };
+
+const canUseLocallyValidatedSession = ({
+  hasValidLocalJwt,
+  serverRejected,
+  wallet,
+}: {
+  readonly hasValidLocalJwt: boolean;
+  readonly serverRejected: boolean;
+  readonly wallet: string;
+}): boolean =>
+  !serverRejected &&
+  hasValidLocalJwt &&
+  hasActiveSessionV2Auth({ address: wallet });
 
 const validateJwtInputs = (wallet: string, operationId: string): void => {
   if (!wallet || typeof wallet !== "string") {
@@ -142,6 +193,9 @@ const isAbortError = (error: unknown): boolean =>
   "name" in error &&
   error.name === "AbortError";
 
+const isAbortSignalAborted = (abortSignal: AbortSignal): boolean =>
+  abortSignal.aborted;
+
 const assertRefreshedSessionMatchesWallet = (
   refreshedSession: RefreshedSession,
   wallet: string
@@ -157,10 +211,12 @@ const persistValidatedRefreshedSession = async ({
   refreshedSession,
   role,
   activeProfileProxy,
+  shouldPersistRefreshedSession,
 }: {
   refreshedSession: RefreshedSession;
   role: string | null;
   activeProfileProxy?: ApiProfileProxy | null | undefined;
+  shouldPersistRefreshedSession?: (() => boolean) | undefined;
 }): Promise<void> => {
   const walletRole = getWalletRole();
   const freshTokenRole = getRole(refreshedSession.access_token);
@@ -182,7 +238,9 @@ const persistValidatedRefreshedSession = async ({
     });
   }
 
-  const didPersist = await persistSessionResponse(refreshedSession);
+  const didPersist = await persistSessionResponse(refreshedSession, {
+    shouldPersist: shouldPersistRefreshedSession,
+  });
   if (!didPersist) {
     throw new Error("Failed to persist refreshed session");
   }
@@ -195,11 +253,15 @@ const handleTokenRefresh = async ({
   role,
   abortSignal,
   activeProfileProxy,
+  trackRecovery,
+  shouldPersistRefreshedSession,
 }: {
   wallet: string;
   role: string | null;
   abortSignal: AbortSignal;
   activeProfileProxy?: ApiProfileProxy | null | undefined;
+  trackRecovery: boolean;
+  shouldPersistRefreshedSession?: (() => boolean) | undefined;
 }): Promise<ValidateJwtResult> => {
   // Check for cancellation before proceeding
   if (abortSignal.aborted) {
@@ -208,7 +270,7 @@ const handleTokenRefresh = async ({
 
   try {
     if (!wallet) {
-      return INVALID_JWT_RESULT;
+      return createInvalidJwtResult("missing_wallet");
     }
 
     const refreshedSession = await refreshSessionV2({
@@ -217,10 +279,13 @@ const handleTokenRefresh = async ({
     });
 
     if (!refreshedSession) {
-      return INVALID_JWT_RESULT;
+      return createInvalidJwtResult("empty");
     }
 
-    if (abortSignal.aborted) {
+    if (
+      isAbortSignalAborted(abortSignal) ||
+      shouldPersistRefreshedSession?.() === false
+    ) {
       return CANCELLED_JWT_RESULT;
     }
 
@@ -229,9 +294,22 @@ const handleTokenRefresh = async ({
       refreshedSession,
       role,
       activeProfileProxy,
+      shouldPersistRefreshedSession,
     });
+    if (trackRecovery) {
+      trackAuthImpactEvent("Auth Session Refresh Recovered", {
+        auth_state_after: "authenticated",
+        auth_state_before: "refresh_needed",
+        client_type: refreshedSession.client_type,
+        endpoint_family: "auth_session_refresh",
+        product_failure: false,
+        reason: "session_refresh",
+        refresh_outcome: "success",
+        status_bucket: "2xx",
+      });
+    }
 
-    return VALID_JWT_RESULT;
+    return createValidJwtResult("success");
   } catch (error: unknown) {
     // Handle cancellation errors
     if (error instanceof TokenRefreshCancelledError || isAbortError(error)) {
@@ -249,6 +327,8 @@ export const validateJwt = async ({
   operationId,
   abortSignal,
   activeProfileProxy,
+  serverRejected = false,
+  shouldPersistRefreshedSession,
 }: ValidateJwtParams): Promise<ValidateJwtResult> => {
   // Input validation - fail fast on invalid parameters
   validateJwtInputs(wallet, operationId);
@@ -260,7 +340,13 @@ export const validateJwt = async ({
 
   const hasValidLocalJwt = doJWTValidation({ jwt, wallet, role });
 
-  if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
+  if (
+    canUseLocallyValidatedSession({
+      hasValidLocalJwt,
+      serverRejected,
+      wallet,
+    })
+  ) {
     return VALID_JWT_RESULT;
   }
 
@@ -271,13 +357,18 @@ export const validateJwt = async ({
       role,
       abortSignal,
       activeProfileProxy,
+      trackRecovery: !hasValidLocalJwt,
+      shouldPersistRefreshedSession,
     });
   } catch (error: unknown) {
+    if (serverRejected) {
+      return createInvalidJwtResult("failed");
+    }
     if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
-      return VALID_JWT_RESULT;
+      return createValidJwtResult("local_valid_after_failure");
     }
     if (hasValidLocalJwt) {
-      return SESSION_UPGRADE_REQUIRED_RESULT;
+      return createSessionUpgradeRequiredResult("failed");
     }
     throw error;
   }
@@ -286,13 +377,19 @@ export const validateJwt = async ({
     return refreshedResult;
   }
 
+  const refreshOutcome = refreshedResult.refreshOutcome ?? "not_attempted";
+
+  if (serverRejected) {
+    return createInvalidJwtResult(refreshOutcome);
+  }
+
   if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
-    return VALID_JWT_RESULT;
+    return createValidJwtResult("local_valid_after_failure");
   }
 
   if (hasValidLocalJwt) {
-    return SESSION_UPGRADE_REQUIRED_RESULT;
+    return createSessionUpgradeRequiredResult(refreshOutcome);
   }
 
-  return INVALID_JWT_RESULT;
+  return createInvalidJwtResult(refreshOutcome);
 };

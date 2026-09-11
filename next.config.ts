@@ -10,7 +10,9 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 
 import { NextConfig } from "next";
+import { getProductionAssetPrefix } from "@/config/assetPrefix";
 import { computeVersionFromEnvOrGit, logOnceConfig } from "@/config/version";
+import { SENTRY_BUILD_OWNERSHIP_OPTIONS } from "@/config/sentryThirdPartyFiltering";
 import {
   loadAssetsFlagAtRuntime,
   resolveAssetsFlagFromEnv,
@@ -33,10 +35,11 @@ function getAssetPrefix(assetsFromS3: boolean, version: string): string {
   if (!assetsFromS3) {
     return "";
   }
-  return `https://dnclu2fna0b2b.cloudfront.net/web_build/${version}`;
+  return getProductionAssetPrefix(version);
 }
 
 const standaloneOutput = { output: "standalone" as const };
+// PR CI treats this config as build-sensitive so v2 can package the exact merge tree.
 const nextConfigFactory = (phase: string): NextConfig => {
   const mode = process.env.NODE_ENV;
   logOnceConfig("NODE_ENV", mode);
@@ -67,16 +70,33 @@ const nextConfigFactory = (phase: string): NextConfig => {
 
     // Compose config
     const assetPrefix = getAssetPrefix(ASSETS_FROM_S3, VERSION);
+    const developmentDistDir =
+      phase === PHASE_DEVELOPMENT_SERVER
+        ? process.env["NEXT_DEV_DIST_DIR"]?.trim()
+        : undefined;
+
+    // Dev-only: hosts (e.g. a LAN IP for phone testing) allowed to load
+    // /_next/* dev assets; without this Next 403s them and pages render as
+    // an unhydrated black shell on other devices.
+    const allowedDevOrigins = process.env["ALLOWED_DEV_ORIGINS"]
+      ?.split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean);
 
     return {
       ...sharedConfig(publicEnv, assetPrefix),
       ...standaloneOutput,
+      ...(phase === PHASE_DEVELOPMENT_SERVER && allowedDevOrigins?.length
+        ? { allowedDevOrigins }
+        : {}),
+      ...(developmentDistDir ? { distDir: developmentDistDir } : {}),
       env: {
         PUBLIC_RUNTIME: JSON.stringify(publicEnv),
         API_ENDPOINT: publicEnv.API_ENDPOINT,
         ALLOWLIST_API_ENDPOINT: publicEnv.ALLOWLIST_API_ENDPOINT,
         BASE_ENDPOINT: publicEnv.BASE_ENDPOINT,
         VERSION,
+        VERSION_BUILD_TIMESTAMP: publicEnv.VERSION_BUILD_TIMESTAMP,
         ASSETS_FROM_S3: String(ASSETS_FROM_S3),
         NEXTGEN_CHAIN_ID:
           publicEnv.NEXTGEN_CHAIN_ID === undefined
@@ -88,7 +108,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
         IPFS_GATEWAY_ENDPOINT: publicEnv.IPFS_GATEWAY_ENDPOINT,
         MEDIA_RESOLVER_ENDPOINT: publicEnv.MEDIA_RESOLVER_ENDPOINT,
         IPFS_MFS_PATH: publicEnv.IPFS_MFS_PATH,
-        TENOR_API_KEY: publicEnv.TENOR_API_KEY,
+        GIPHY_API_KEY: publicEnv.GIPHY_API_KEY,
         WS_ENDPOINT: publicEnv.WS_ENDPOINT,
         DEV_MODE_MEMES_WAVE_ID: publicEnv.DEV_MODE_MEMES_WAVE_ID,
         DEV_MODE_CURATION_WAVE_ID: publicEnv.DEV_MODE_CURATION_WAVE_ID,
@@ -101,6 +121,7 @@ const nextConfigFactory = (phase: string): NextConfig => {
         AWS_RUM_REGION: publicEnv.AWS_RUM_REGION,
         AWS_RUM_SAMPLE_RATE: publicEnv.AWS_RUM_SAMPLE_RATE,
         ENABLE_SECURITY_LOGGING: publicEnv.ENABLE_SECURITY_LOGGING,
+        ANNOUNCED_VERSION_ENDPOINT: publicEnv.ANNOUNCED_VERSION_ENDPOINT,
         DROP_FORGE_TESTNET:
           publicEnv.DROP_FORGE_TESTNET === undefined
             ? undefined
@@ -137,6 +158,8 @@ const nextConfigFactory = (phase: string): NextConfig => {
 };
 
 const sentryWrappedConfig = withSentryConfig(nextConfigFactory, {
+  ...SENTRY_BUILD_OWNERSHIP_OPTIONS,
+
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 

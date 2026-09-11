@@ -1,6 +1,4 @@
-import type {
-  NFTLite,
-} from "@/components/user/settings/UserSettingsImgSelectMeme";
+import type { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
 import UserSettingsImgSelectMeme from "@/components/user/settings/UserSettingsImgSelectMeme";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -35,10 +33,14 @@ describe("UserSettingsImgSelectMeme", () => {
     const onMeme = jest.fn();
     render(<UserSettingsImgSelectMeme memes={memes} onMeme={onMeme} />);
     const input = screen.getByPlaceholderText("Search");
+    expect(input).not.toHaveAttribute("aria-controls");
     await userEvent.click(input);
+    expect(input).toHaveAttribute("aria-controls", "meme-search-results");
+    expect(document.getElementById("meme-search-results")).toBeInTheDocument();
     await userEvent.type(input, "Second");
     const option = await screen.findByText("#2 Second");
     await userEvent.click(option);
     expect(onMeme).toHaveBeenCalledWith(memes[1]);
+    expect(input).not.toHaveAttribute("aria-controls");
   });
 });

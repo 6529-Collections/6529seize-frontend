@@ -1,45 +1,45 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import GroupCardHeader from '@/components/groups/page/list/card/GroupCardHeader';
-import { AuthContext } from '@/components/auth/Auth';
-
-jest.mock('@/components/groups/page/list/card/actions/GroupCardEditActions', () => () => <div data-testid="edit" />);
-jest.mock('@/helpers/Helpers', () => ({ getTimeAgo: jest.fn(() => '1d') }));
-jest.mock('@/helpers/image.helpers', () => ({ getScaledImageUri: (u: string) => u + '?s', ImageScale: { W_AUTO_H_50: 'scale' } }));
+import { fireEvent, render, screen } from "@testing-library/react";
+import GroupCardHeader from "@/components/groups/page/list/card/GroupCardHeader";
 
 const baseGroup: any = {
-  created_by: { handle: 'alice', pfp: 'pic.png' },
-  created_at: '2023-01-01',
+  id: "group-1",
+  name: "Collectors",
+  created_by: { handle: "alice", pfp: "pic.png" },
+  created_at: "2023-01-01",
 };
 
-function renderComp(opts: { handle?: string | null | undefined; activeProxy?: boolean | undefined; group?: any | undefined } = {}) {
-  const { handle = null, activeProxy = false, group = baseGroup } = opts;
+function renderComp(
+  opts: {
+    group?: any | undefined;
+  } = {}
+) {
+  const group = "group" in opts ? opts.group : baseGroup;
   return render(
-    <AuthContext.Provider value={{ connectedProfile: handle ? { handle } : null, activeProfileProxy: activeProxy } as any}>
-      <GroupCardHeader group={group} onEditClick={jest.fn()} userPlaceholder="u" />
-    </AuthContext.Provider>
+    <GroupCardHeader group={group} titlePlaceholder="Loading group" />
   );
 }
 
-test('shows profile image and link', () => {
+test("keeps the title as a native group link without a second tab stop", () => {
   renderComp();
-  const img = screen.getByRole('img');
-  expect(img).toHaveAttribute('src', 'pic.png?s');
-  expect(screen.getByRole('link')).toHaveAttribute('href', '/alice');
-  expect(screen.getByText(/1d/i)).toBeInTheDocument();
+  const title = screen.getByRole("link", { name: "Collectors" });
+
+  expect(title).toHaveAttribute("href", "/network?page=1&group=group-1");
+  expect(title).toHaveAttribute("tabindex", "-1");
+  expect(fireEvent.click(title, { ctrlKey: true })).toBe(true);
+  expect(fireEvent.click(title, { metaKey: true })).toBe(true);
+  expect(
+    title.dispatchEvent(
+      new MouseEvent("auxclick", {
+        bubbles: true,
+        cancelable: true,
+        button: 1,
+      })
+    )
+  ).toBe(true);
 });
 
-test('renders placeholder when no image', () => {
-  renderComp({ group: { created_by: { handle: 'bob' }, created_at: '2023' } });
-  expect(screen.queryByRole('img')).toBeNull();
-});
+test("renders the title placeholder while loading", () => {
+  renderComp({ group: undefined });
 
-test('shows edit actions when connected and not proxied', () => {
-  renderComp({ handle: 'me' });
-  expect(screen.getByTestId('edit')).toBeInTheDocument();
-});
-
-test('hides edit actions when proxy active', () => {
-  renderComp({ handle: 'me', activeProxy: true });
-  expect(screen.queryByTestId('edit')).toBeNull();
+  expect(screen.getByText("Loading group")).toBeInTheDocument();
 });

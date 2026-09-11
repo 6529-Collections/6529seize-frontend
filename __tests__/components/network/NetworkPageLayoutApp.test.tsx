@@ -21,6 +21,6 @@ describe("NetworkPageLayoutApp", () => {
     );
 
     const main = container.querySelector("main");
-    expect(main).toHaveClass("tw-bg-iron-950");
+    expect(main).toHaveClass("tw-bg-[#0D0D0F]");
   });
 });

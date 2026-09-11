@@ -223,6 +223,27 @@ describe("DefaultWinnerDrop", () => {
     );
   });
 
+  it("forwards proposal cards through the existing winner shell", () => {
+    renderWithEmojiProvider(
+      <DefaultWinnerDrop
+        drop={drop}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        dropViewDropId={null}
+        location={0 as any}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+        contentPresentation="proposalCard"
+      />
+    );
+
+    expect(mockWaveDropContent).toHaveBeenLastCalledWith(
+      expect.objectContaining({ contentPresentation: "proposalCard" })
+    );
+  });
+
   it("opens mobile menu on wide touch-only viewports without hover", async () => {
     mockUseHasTouchInput.mockReturnValue(true);
     mockUseIsTouchDevice.mockReturnValue(true);

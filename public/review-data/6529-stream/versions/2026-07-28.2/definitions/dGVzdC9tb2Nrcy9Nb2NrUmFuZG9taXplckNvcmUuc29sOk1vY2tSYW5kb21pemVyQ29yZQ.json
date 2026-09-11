@@ -1,0 +1,955 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#error:0x66730310",
+          "declaringDefinitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+          "inherited": false,
+          "inputs": [],
+          "name": "MockTokenHashRejected",
+          "selector": "0x66730310",
+          "signature": "MockTokenHashRejected()"
+        }
+      ],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x3a87d454",
+          "declaringDefinitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "isTokenBurned",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x3a87d454",
+          "signature": "isTokenBurned(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x4ab6897c",
+          "declaringDefinitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveTokenHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x4ab6897c",
+          "signature": "retrieveTokenHash(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0xd2e14767",
+          "declaringDefinitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "randomizer",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "epoch",
+              "type": "uint256"
+            }
+          ],
+          "name": "setRandomizer",
+          "outputs": [],
+          "selector": "0xd2e14767",
+          "signature": "setRandomizer(uint256,address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0xebe88ab1",
+          "declaringDefinitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "status",
+              "type": "bool"
+            }
+          ],
+          "name": "setRejectTokenHash",
+          "outputs": [],
+          "selector": "0xebe88ab1",
+          "signature": "setRejectTokenHash(bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x85b87c8a",
+          "declaringDefinitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "status",
+              "type": "bool"
+            }
+          ],
+          "name": "setTokenBurned",
+          "outputs": [],
+          "selector": "0x85b87c8a",
+          "signature": "setTokenBurned(uint256,bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x3c489987",
+          "declaringDefinitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "setTokenCollection",
+          "outputs": [],
+          "selector": "0x3c489987",
+          "signature": "setTokenCollection(uint256,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x9cac0f1f",
+          "declaringDefinitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "tokenHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "setTokenHash",
+          "outputs": [],
+          "selector": "0x9cac0f1f",
+          "signature": "setTokenHash(uint256,uint256,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0xfa92668a",
+          "declaringDefinitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "viewColIDforTokenID",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xfa92668a",
+          "signature": "viewColIDforTokenID(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x63f06da4",
+          "declaringDefinitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "viewCollectionRandomizerContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x63f06da4",
+          "signature": "viewCollectionRandomizerContract(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0xd2af7046",
+          "declaringDefinitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "viewRandomizerEpoch",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xd2af7046",
+          "signature": "viewRandomizerEpoch(uint256)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [
+        {
+          "astId": 315928,
+          "canonicalSignature": "MockTokenHashRejected()",
+          "displaySignature": "MockTokenHashRejected()",
+          "id": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#error:0x66730310",
+          "inputs": [],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplckNvcmUuc29sOk1vY2tSYW5kb21pemVyQ29yZSNlcnJvcjoweDY2NzMwMzEw",
+          "kind": "error",
+          "name": "MockTokenHashRejected",
+          "natspec": "",
+          "range": {
+            "byteLength": 30,
+            "byteStart": 92,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L5",
+            "lineEnd": 5,
+            "lineStart": 5,
+            "snippetSha256": "sha256:d9014ff517d531aa21b6928b71a9fe6076721faaf21bd986ab9f5dc07cc1b887",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": "0x66730310"
+        }
+      ],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setRandomizer(uint256,address,uint256)",
+          "displaySignature": "setRandomizer(uint256,address,uint256)",
+          "functionKind": "function",
+          "id": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0xd2e14767",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "randomizer",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "epoch",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplckNvcmUuc29sOk1vY2tSYW5kb21pemVyQ29yZSNmdW5jdGlvbjoweGQyZTE0NzY3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setRandomizer",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 200,
+            "byteStart": 444,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L14-L17",
+            "lineEnd": 17,
+            "lineStart": 14,
+            "snippetSha256": "sha256:e6f68de2be8ad8a9450d17cd577873cf9c3e80fe9b1e4b7628837662f440c06f",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": "0xd2e14767",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setTokenCollection(uint256,uint256)",
+          "displaySignature": "setTokenCollection(uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x3c489987",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplckNvcmUuc29sOk1vY2tSYW5kb21pemVyQ29yZSNmdW5jdGlvbjoweDNjNDg5OTg3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setTokenCollection",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 133,
+            "byteStart": 650,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L19-L21",
+            "lineEnd": 21,
+            "lineStart": 19,
+            "snippetSha256": "sha256:fe6fcafb7fa0d5ba14954a95b668d546dae91b3e85f6a192550bff0fe6422faa",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": "0x3c489987",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setRejectTokenHash(bool)",
+          "displaySignature": "setRejectTokenHash(bool)",
+          "functionKind": "function",
+          "id": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0xebe88ab1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "status",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplckNvcmUuc29sOk1vY2tSYW5kb21pemVyQ29yZSNmdW5jdGlvbjoweGViZTg4YWIx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setRejectTokenHash",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 91,
+            "byteStart": 789,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L23-L25",
+            "lineEnd": 25,
+            "lineStart": 23,
+            "snippetSha256": "sha256:2fbe79c1a882d47517a08783e86c052552e16d5ac4c04a43cabb9c97e651e19d",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": "0xebe88ab1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setTokenBurned(uint256,bool)",
+          "displaySignature": "setTokenBurned(uint256,bool)",
+          "functionKind": "function",
+          "id": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x85b87c8a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "status",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplckNvcmUuc29sOk1vY2tSYW5kb21pemVyQ29yZSNmdW5jdGlvbjoweDg1Yjg3Yzhh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setTokenBurned",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 110,
+            "byteStart": 886,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L27-L29",
+            "lineEnd": 29,
+            "lineStart": 27,
+            "snippetSha256": "sha256:6d9ee581e80e0d7773aaab9638202bac5cdf77ea2d89540e6d2d78b9f3506b6c",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": "0x85b87c8a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setTokenHash(uint256,uint256,bytes32)",
+          "displaySignature": "setTokenHash(uint256,uint256,bytes32)",
+          "functionKind": "function",
+          "id": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x9cac0f1f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplckNvcmUuc29sOk1vY2tSYW5kb21pemVyQ29yZSNmdW5jdGlvbjoweDljYWMwZjFm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setTokenHash",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 342,
+            "byteStart": 1002,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L31-L38",
+            "lineEnd": 38,
+            "lineStart": 31,
+            "snippetSha256": "sha256:a235e0ae54e85fcc67c5435bcac7ae6521f476fd42ba0df7201bbf09a9ef0397",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": "0x9cac0f1f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveTokenHash(uint256)",
+          "displaySignature": "retrieveTokenHash(uint256)",
+          "functionKind": "function",
+          "id": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x4ab6897c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplckNvcmUuc29sOk1vY2tSYW5kb21pemVyQ29yZSNmdW5jdGlvbjoweDRhYjY4OTdj",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveTokenHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 120,
+            "byteStart": 1350,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L40-L42",
+            "lineEnd": 42,
+            "lineStart": 40,
+            "snippetSha256": "sha256:d764ffb50e59d525a7adc590ca89d2aa44da468bca9c3a55a8faf5dfd261823b",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": "0x4ab6897c",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isTokenBurned(uint256)",
+          "displaySignature": "isTokenBurned(uint256)",
+          "functionKind": "function",
+          "id": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x3a87d454",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplckNvcmUuc29sOk1vY2tSYW5kb21pemVyQ29yZSNmdW5jdGlvbjoweDNhODdkNDU0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isTokenBurned",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 114,
+            "byteStart": 1476,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L44-L46",
+            "lineEnd": 46,
+            "lineStart": 44,
+            "snippetSha256": "sha256:6ea3fb58ce953a0c7516877a49d90f7ec76c52f00af71b0c38d23c36bf41b923",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": "0x3a87d454",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "viewColIDforTokenID(uint256)",
+          "displaySignature": "viewColIDforTokenID(uint256)",
+          "functionKind": "function",
+          "id": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0xfa92668a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplckNvcmUuc29sOk1vY2tSYW5kb21pemVyQ29yZSNmdW5jdGlvbjoweGZhOTI2Njhh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "viewColIDforTokenID",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 127,
+            "byteStart": 1596,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L48-L50",
+            "lineEnd": 50,
+            "lineStart": 48,
+            "snippetSha256": "sha256:8af9d28a44200951161b46b7067af328cdadd5bbfb2f69f1d98fa993aedfd625",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": "0xfa92668a",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "viewCollectionRandomizerContract(uint256)",
+          "displaySignature": "viewCollectionRandomizerContract(uint256)",
+          "functionKind": "function",
+          "id": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x63f06da4",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplckNvcmUuc29sOk1vY2tSYW5kb21pemVyQ29yZSNmdW5jdGlvbjoweDYzZjA2ZGE0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "viewCollectionRandomizerContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 181,
+            "byteStart": 1729,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L52-L58",
+            "lineEnd": 58,
+            "lineStart": 52,
+            "snippetSha256": "sha256:e99c8b193a128d622b7ba94c7d69f99f5bdc3916000f7c49f176b60269a6a2b1",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": "0x63f06da4",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "viewRandomizerEpoch(uint256)",
+          "displaySignature": "viewRandomizerEpoch(uint256)",
+          "functionKind": "function",
+          "id": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0xd2af7046",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplckNvcmUuc29sOk1vY2tSYW5kb21pemVyQ29yZSNmdW5jdGlvbjoweGQyYWY3MDQ2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "viewRandomizerEpoch",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 137,
+            "byteStart": 1916,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L60-L62",
+            "lineEnd": 62,
+            "lineStart": 60,
+            "snippetSha256": "sha256:14059c5f00e2aa02e07d55023f1d6e87faa0e35dc0bd8fc9ea86845d9aa84eb2",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": "0xd2af7046",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "randomizerEpochs",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 128,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L7",
+            "lineEnd": 7,
+            "lineStart": 7,
+            "snippetSha256": "sha256:5a3a3c76ac5a9ceb10e750247bb7b030b9016bffadd0473d09539de57b716b0f",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => uint256)",
+          "typeString": "mapping(uint256 => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "randomizerContracts",
+          "natspec": "",
+          "range": {
+            "byteLength": 55,
+            "byteStart": 186,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:aceecb505f72bb1c2facebe973bb3b5ea8c140077b5c2417e2253f086ab0b208",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => address)",
+          "typeString": "mapping(uint256 => address)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "tokenCollections",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 247,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:c88dbd577b1ab427a817c20d7e6938f4d356b609685c6c3372680e5c3dcdabb4",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => uint256)",
+          "typeString": "mapping(uint256 => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "tokenHashes",
+          "natspec": "",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 305,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L10",
+            "lineEnd": 10,
+            "lineStart": 10,
+            "snippetSha256": "sha256:0a49104e45d9b64f2670a15756fdd1310409c1763cae00774e221020a0f799f2",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => bytes32)",
+          "typeString": "mapping(uint256 => bytes32)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "burnedTokens",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 358,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:912cf951cb5af92fa50562de7cefcc4951eaf3228a087f20e5eb760e22000b2f",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => bool)",
+          "typeString": "mapping(uint256 => bool)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "rejectTokenHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 28,
+            "byteStart": 409,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:add1af9851ea842a01c81380603a5c0d0e2c7377e2ce9c02e34a402231a299ba",
+            "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+          },
+          "selector": null,
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplckNvcmUuc29sOk1vY2tSYW5kb21pemVyQ29yZQ",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/mocks/MockRandomizerCore.sol:MockRandomizerCore"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MockRandomizerCore",
+    "natspec": "",
+    "range": {
+      "byteLength": 1997,
+      "byteStart": 58,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizerCore.sol#L4-L63",
+      "lineEnd": 63,
+      "lineStart": 4,
+      "snippetSha256": "sha256:35b16df440d542390b34295f43b006f2d07038fb60eaea4d1caa6dd248a4be0a",
+      "sourceSha256": "sha256:e5dc05752ee55e2225c0d36d66c64688a80d9a1e4839b5be0bc378038992d88c"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/mocks/MockRandomizerCore.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 11
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 10
+    },
+    "totalCount": 11
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x3a87d454",
+      "definitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x3c489987",
+      "definitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x4ab6897c",
+      "definitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x63f06da4",
+      "definitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x85b87c8a",
+      "definitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0x9cac0f1f",
+      "definitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0xd2af7046",
+      "definitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0xd2e14767",
+      "definitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0xebe88ab1",
+      "definitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore#function:0xfa92668a",
+      "definitionId": "test/mocks/MockRandomizerCore.sol:MockRandomizerCore",
+      "severity": "advisory"
+    }
+  ]
+}

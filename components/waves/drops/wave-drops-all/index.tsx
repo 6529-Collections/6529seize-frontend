@@ -36,6 +36,7 @@ import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
 const EMPTY_DROPS: Drop[] = [];
 const DEFAULT_VIRTUALIZED_DROPS_PAGE_SIZE = 50;
 const MOBILE_ALL_DROPS_VIRTUALIZED_PAGE_SIZE = 25;
+const DIRECT_MESSAGE_VIRTUAL_SCROLL_ROOT_MARGIN = "1200px 0px";
 
 const getVirtualizedDropsPageSize = (isMobileAllDropsView: boolean): number =>
   isMobileAllDropsView
@@ -102,6 +103,9 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const [boostedDropsDisplayPreference] = useBoostedDropsDisplayPreference();
   const shouldRenderInsertedBoostedDrops =
     boostedDropsDisplayPreference !== "hidden";
+  const virtualScrollRootMargin = isWaveDirectMessage(waveId, wave)
+    ? DIRECT_MESSAGE_VIRTUAL_SCROLL_ROOT_MARGIN
+    : undefined;
 
   const scrollBehavior = useScrollBehavior();
   const {
@@ -118,6 +122,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   useWaveDropsNotificationRead({
     waveId,
     enabled: Boolean(connectedProfile?.handle),
+    isDirectMessage: isWaveDirectMessage(waveId, wave),
     removeWaveDeliveredNotifications,
   });
 
@@ -189,54 +194,18 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       ? boostedDrops
       : undefined;
 
-  const {
-    serialTarget,
-    queueSerialTarget,
-    targetDropRef,
-    isScrolling,
-    scrollBaselineSerials,
-    frozenAutoCollapseSerials,
-  } = useWaveDropsSerialScroll({
-    waveId,
-    dropId,
-    initialDrop,
-    waveMessages,
-    renderedWaveMessages,
-    fetchNextPage,
-    waitAndRevealDrop,
-    scrollContainerRef,
-    shouldPinToBottom,
-    scrollToVisualBottom,
-  });
-
-  const autoCollapseSerials = useMemo(() => {
-    if (!isScrolling || !scrollBaselineSerials) {
-      return frozenAutoCollapseSerials;
-    }
-
-    const drops = renderedWaveMessages?.drops;
-    if (!drops || drops.length === 0) {
-      return frozenAutoCollapseSerials;
-    }
-
-    const next = new Set(frozenAutoCollapseSerials);
-    for (const drop of drops) {
-      const serialNo = drop.serial_no;
-      if (typeof serialNo !== "number") {
-        continue;
-      }
-      if (!scrollBaselineSerials.has(serialNo) && !next.has(serialNo)) {
-        next.add(serialNo);
-      }
-    }
-
-    return next;
-  }, [
-    isScrolling,
-    scrollBaselineSerials,
-    renderedWaveMessages?.drops,
-    frozenAutoCollapseSerials,
-  ]);
+  const { serialTarget, queueSerialTarget, targetDropRef, isScrolling } =
+    useWaveDropsSerialScroll({
+      waveId,
+      dropId,
+      initialDrop,
+      waveMessages,
+      fetchNextPage,
+      waitAndRevealDrop,
+      scrollContainerRef,
+      shouldPinToBottom,
+      scrollToVisualBottom,
+    });
 
   const waveChatScroll = useWaveChatScrollOptional();
   useEffect(() => {
@@ -339,8 +308,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         onBoostedDropClick={queueSerialTarget}
         onScrollToUnread={queueSerialTarget}
         unreadCount={unreadCount}
-        autoCollapseSerials={autoCollapseSerials}
         suspendLightDropHydration={isScrolling || serialTarget !== null}
+        virtualScrollRootMargin={virtualScrollRootMargin}
         winningThreshold={winningThreshold}
         winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}

@@ -1,6 +1,7 @@
 "use client";
 
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
+import { MainStageMemeCardPill } from "@/components/memes/drops/MainStageMemeCardLink";
 import Link from "next/link";
 import ArtistPill from "./ArtistPill";
 
@@ -26,28 +27,28 @@ export default function NowMintingHeader({
 
   return (
     <div className="tw-flex tw-flex-col">
+      <div className="tw-flex tw-min-h-5 tw-flex-wrap tw-items-center">
+        <MainStageMemeCardPill memeCardId={cardNumber} variant="subtle" />
+      </div>
       <Link
         href={`/the-memes/${cardNumber}`}
-        className="tw-text-xl tw-font-semibold tw-leading-tight tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl"
+        className="tw-mt-3 tw-text-xl tw-font-semibold tw-leading-[1.08] tw-tracking-[-0.02em] tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-200 sm:tw-text-2xl sm:tw-leading-[1.08] md:tw-text-3xl md:tw-leading-[1.08]"
       >
         {title}
       </Link>
 
-      <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+      <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
         {mediaMimeType && (
           <MediaTypeBadge
             mimeType={mediaMimeType}
             dropId={`home-now-minting-${cardNumber}`}
             size="sm"
-            iconClassName="tw-size-[26px]"
           />
         )}
-        <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-[0.08em] tw-text-iron-400 tw-backdrop-blur-sm">
-          Card #{cardNumber}
-        </span>
         {artistHandles.length > 0 ? (
           artistHandles.map((handle) => (
             <ArtistPill
+              appearance="minimal"
               key={handle}
               label={handle}
               href={`/${handle}`}
@@ -55,7 +56,7 @@ export default function NowMintingHeader({
             />
           ))
         ) : (
-          <ArtistPill label={artistName} />
+          <ArtistPill appearance="minimal" label={artistName} />
         )}
       </div>
     </div>

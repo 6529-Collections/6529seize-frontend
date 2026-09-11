@@ -4,12 +4,17 @@ import {
   getNftSocialCardImagePath,
 } from "@/components/providers/metadata";
 import { NEXTGEN_CONTRACT } from "@/constants/constants";
+import {
+  getProfileCollectedReturnContext,
+  PROFILE_COLLECTED_RETURN_PARAM,
+} from "@/helpers/profile-collected-navigation";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildNextgenTokenPageJsonLd } from "@/lib/structured-data/nextgen";
 import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getNextgenTitle } from "../../../title-utils";
 import NextGenTokenPageClient from "./NextGenTokenPageClient";
 import { fetchTokenData, getContentView } from "./page-utils";
 
@@ -53,8 +58,7 @@ export async function generateMetadata({
   const displayId = data.token?.normalised_id;
   const baseTitle =
     data.token?.name ?? `${data.collection.name} - #${data.tokenId}`;
-  const title =
-    viewDisplay.length > 0 ? `${baseTitle} | ${viewDisplay}` : baseTitle;
+  const title = getNextgenTitle(viewDisplay, baseTitle);
   return getAppMetadata(
     getLargeSocialCardMetadata({
       title,
@@ -84,10 +88,19 @@ export async function generateMetadata({
 
 export default async function NextGenTokenPage({
   params,
+  searchParams,
 }: {
   readonly params: Promise<{ token: string; view?: string[] | undefined }>;
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { token, view } = await params;
+  const resolvedSearchParams = await searchParams;
+  const rawReturnTo = resolvedSearchParams[PROFILE_COLLECTED_RETURN_PARAM];
+  const returnToValue = Array.isArray(rawReturnTo)
+    ? rawReturnTo[0]
+    : rawReturnTo;
+  const returnTo =
+    getProfileCollectedReturnContext(returnToValue)?.href ?? null;
   const headers = await getAppCommonHeaders();
   const data = await fetchTokenData(token, headers);
   if (!data) {
@@ -115,6 +128,7 @@ export default async function NextGenTokenPage({
         tokenCount={data.tokenCount}
         collection={data.collection}
         view={resolvedView}
+        returnTo={returnTo}
       />
     </>
   );

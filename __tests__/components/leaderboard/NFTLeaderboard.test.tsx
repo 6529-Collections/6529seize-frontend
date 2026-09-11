@@ -15,33 +15,47 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-describe('fetchNftTdhResults', () => {
-  it('fetches results and maps cic_type', async () => {
-    (commonApiFetch as jest.Mock).mockResolvedValue({ count:1, page:1, next:null, data:[{ cic_score: 5 }] });
-    (cicToType as jest.Mock).mockReturnValue('TYPE');
+describe("fetchNftTdhResults", () => {
+  it("fetches results and maps cic_type", async () => {
+    (commonApiFetch as jest.Mock).mockResolvedValue({
+      count: 1,
+      page: 1,
+      next: null,
+      data: [{ cic_score: 5 }],
+    });
+    (cicToType as jest.Mock).mockReturnValue("TYPE");
 
-    const res = await fetchNftTdhResults('c', 1, '', 2, 'balance', 'DESC');
+    const res = await fetchNftTdhResults({
+      contract: "c",
+      nftId: 1,
+      walletFilter: "",
+      page: 2,
+      sort: "balance",
+      sortDirection: "DESC",
+    });
 
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: `tdh/nft/c/1?&page_size=${PAGE_SIZE}&page=2&sort=balance&sort_direction=DESC`,
     });
-    expect(res.data[0].cic_type).toBe('TYPE');
+    expect(res.data[0].cic_type).toBe("TYPE");
   });
 });
 
-describe('setScrollPosition', () => {
-  it('scrolls to leaderboard when scrolled down', () => {
-    const div = document.createElement('div');
-    div.id = 'nft-leaderboard';
-    Object.defineProperty(div, 'offsetTop', { value: 50 });
+describe("setScrollPosition", () => {
+  it("scrolls to leaderboard when scrolled down", () => {
+    const div = document.createElement("div");
+    div.id = "nft-leaderboard";
+    Object.defineProperty(div, "offsetTop", { value: 50 });
     document.body.appendChild(div);
-    const scrollTo = jest.spyOn(window, 'scrollTo').mockImplementation(() => {});
-    Object.defineProperty(window, 'scrollY', { value: 10, writable: true });
+    const scrollTo = jest
+      .spyOn(window, "scrollTo")
+      .mockImplementation(() => {});
+    Object.defineProperty(window, "scrollY", { value: 10, writable: true });
 
     setScrollPosition();
 
-    expect(scrollTo).toHaveBeenCalledWith({ top: 50, behavior: 'smooth' });
+    expect(scrollTo).toHaveBeenCalledWith({ top: 50, behavior: "smooth" });
     scrollTo.mockRestore();
-    document.body.innerHTML = '';
+    document.body.innerHTML = "";
   });
 });

@@ -1,48 +1,60 @@
-# Wave Creation Dates and Timeline
+# Wave Creation Schedule
 
 ## Overview
 
-The `Dates` step sets timing for `Rank` and `Approve` waves.
+The `Schedule` step sets timing for `Rank` and `Approve` waves.
 `Rank` waves set submission, voting, and winner announcement timing.
 `Approve` waves set when the wave opens and an optional end date.
 
-If recurring announcements are enabled, this step can also set an optional
-`Wave End Date`.
+The default view keeps the schedule decisions needed for the selected wave type
+visible. Less common schedule expansion and optional end controls are grouped
+in expandable sections named for those controls.
 
 ## Location in the Site
 
 - Full-page create route: `/waves/create`
 - Create-wave modal flows that reuse the same step sequence
-- Step label: `Dates`
+- Step label: `Schedule`
 - User-reachable in `Rank` and `Approve` wave creation
 
 ## Entry Points
 
 - Start a `Rank` or `Approve` create flow and continue
-  `Overview -> Groups -> Dates`.
-- Use `Back` from `Drops`, `Rules`, `Voting`, `Outcomes`, or `Description`.
-- On large screens, use the step rail to return to `Dates` after you have
+  `Setup -> Access -> Schedule`.
+- Use `Back` from `Drops`, `Guidelines`, `Voting`, `Outcomes`, or `Description`.
+- On large screens, use the step rail to return to `Schedule` after you have
   moved past it.
 
 ## User Journey
 
-For `Rank` waves:
+For scheduled `Rank` waves:
 
-1. Set `Drops Submission Opens`.
-2. Set `Drops Voting Begins` (must be at or after submission start).
+1. Set `Submissions Open`.
+2. Set `Voting Opens` (must be at or after submission start).
 3. Set `First Winners Announcement` date and time (must be at or after voting
    start).
-4. Add optional `Additional Announcements` as intervals (`Hours`, `Days`, or
-   `Weeks`).
-5. Optional: enable `Repeating Announcement Cycles` after at least one
-   additional interval exists.
-6. If recurring is enabled, optionally set `Wave End Date`.
-7. Continue to `Drops`.
+4. To extend the schedule, open `Winner schedule` and add optional
+   `Additional Announcements` as intervals (`Hours`, `Days`, or `Weeks`).
+5. In that section, optionally enable `Repeating Announcement Cycles`
+   after at least one additional interval exists.
+6. If recurring is enabled, optionally set `Wave End Date` in the same
+   disclosure.
+7. Collapse the section if desired; all entered values remain in the
+   draft.
+8. Continue to `Drops`.
+
+For `Perpetual Ranking` waves:
+
+1. Set `Submissions Open`.
+2. Set `Voting Opens`.
+3. Continue to `Drops`. There are no winner announcements or end date. No
+   optional-settings section is shown, including an empty one.
 
 For `Approve` waves:
 
-1. Set `Wave Starts`.
-2. Optionally set `Wave End`.
+1. Set `Wave Start` in the visible calendar.
+2. To limit the duration, open `Wave end` and optionally set
+   `Wave End`.
 3. Continue to `Drops`.
 
 ## Common Scenarios
@@ -54,13 +66,13 @@ For `Approve` waves:
   set an optional end date and time.
 - Mid-flow adjustment: return from later steps and revise dates before final
   submit.
+- Open-ended approval: leave `Wave End` blank. The Outcomes step explains when
+  the wave will otherwise run indefinitely.
 
 ## Edge Cases
 
-- `Drops Submission Opens` cannot be set in the past; past picks are pushed to
+- `Submissions Open` cannot be set in the past; past picks are pushed to
   current time.
-- On first interaction with `Winners Announcements`, `Wave Timeline` can
-  auto-collapse once.
 - If voting start moves forward, first winners announcement can auto-shift so
   it stays at or after voting start.
 - `Wave End Date` appears only when recurring is on and at least one additional
@@ -72,6 +84,9 @@ For `Approve` waves:
 
 ## Failure and Recovery
 
+- An error in an optional wave end automatically opens `Wave end`,
+  marks it `Needs attention`, and exposes the invalid date control.
+- Errors in visible schedule controls remain visible in their schedule card.
 - If `Next` does not advance, verify:
   - submission start <= voting start
   - first announcement is not before voting start
@@ -85,20 +100,21 @@ For `Approve` waves:
 
 ## Limitations / Notes
 
-- `Chat` waves skip `Dates`.
+- `Chat` waves skip `Schedule`.
+- `Perpetual Ranking` has no winner announcements, outcomes, or end date.
 - Additional announcements are interval-based; there is no standalone timestamp
   list.
-- Create-step state is local to the active create session; closing the create
-  modal/page resets draft values.
+- Saved create-wave drafts preserve date values for later recovery on the same
+  device.
 
 ## Related Pages
 
 - [Wave Creation Index](README.md)
 - [Waves Index](../README.md)
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
-- [Wave Creation Overview Step](feature-overview-step.md)
+- [Wave Creation Setup Step](feature-overview-step.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
 - [Wave Creation Drop Settings](feature-drops-step.md)
-- [Wave Creation Rules Step](feature-rules-step.md)
+- [Wave Creation Guidelines Step](feature-rules-step.md)
 - [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)
 - [Docs Home](../../README.md)

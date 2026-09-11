@@ -7,6 +7,7 @@ This is the canonical owner for Waves and Messages list-row metadata.
 - row name labels and tooltip rules
 - `Last drop` visibility, timestamp source, and refresh behavior
 - live unread/new-drop behavior that updates row badges and divider jumps
+- aggregate unread badges on parent rows with subwaves
 
 Legacy tooltip-only links should resolve here.
 
@@ -67,6 +68,18 @@ Timestamp source and precedence:
 - Muted rows ignore live websocket timestamp/unread updates, but later list
   refreshes can still update `Last drop`.
 
+### Parent Subwave Unread Count
+
+- A parent row with subwaves can show a `new` badge beside the expand/collapse
+  control.
+- The badge totals unread drops across all visible, unmuted subwaves where read
+  state is available. Joining or following a subwave is not required.
+- The total excludes your own drops and drops from muted profiles.
+- Muting the parent hides the aggregate. Muting an individual subwave removes
+  that subwave's unread contribution.
+- The initial value comes from the wave list. Once subwave rows are loaded,
+  newer unread activity in those rows can increase the total.
+
 ## Sorting and Section Behavior
 
 1. Non-muted rows sort above muted rows.
@@ -82,6 +95,8 @@ Timestamp source and precedence:
 - If websocket delivery pauses, current labels remain until live updates or a
   list refresh.
 - Reconnect/refetch can refresh stale timestamps.
+- A subwave with no established read state has no historical unread baseline,
+  so its older drops are not added to the parent badge.
 - If no timestamp is returned after refresh, `Last drop` remains hidden.
 - Resizing can change truncation and tooltip eligibility in expanded rows.
 - Active-row highlight and unread badges do not block web hover tooltips.

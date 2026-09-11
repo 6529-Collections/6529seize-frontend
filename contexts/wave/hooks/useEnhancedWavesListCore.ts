@@ -8,6 +8,7 @@ import type { SidebarWave, SidebarWaveContributor } from "@/types/waves.types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MinimalWaveNewDropsCount } from "./useNewDropCounter";
 import useNewDropCounter, { getNewestTimestamp } from "./useNewDropCounter";
+import type { ApiDmUnreadConversationState } from "@/generated/models/ApiDmUnreadConversationState";
 
 const UNREAD_CLEAR_DELAY_MS = 1000;
 
@@ -27,13 +28,14 @@ export interface MinimalWave {
   hasSubwaves: boolean;
   followedSubwavesCount: number;
   latestFollowedSubwaveDropTimestamp: number | null;
-  unreadFollowedSubwaveDrops: number;
+  unreadSubwaveDrops: number;
   unreadDropsCount: number;
   latestReadTimestamp: number;
   firstUnreadDropSerialNo: number | null;
   firstUnreadFollowedSubwaveDropSerialNo: number | null;
   waveRep: ApiWaveRepSummary | null;
   waveScore: ApiWaveScore | null;
+  isInAllWaves?: boolean;
   sidebarSection: SidebarDiscoverySection | null;
   sidebarActivityTimestamp: number | null;
   isFollowedSubwaveContainer: boolean;
@@ -42,6 +44,7 @@ export interface MinimalWave {
 type EnhancedSidebarWave = SidebarWave & {
   readonly isPinned?: boolean;
   readonly isOfficial?: boolean;
+  readonly isInAllWaves?: boolean;
   readonly sidebarSection?: SidebarDiscoverySection;
 };
 
@@ -67,6 +70,9 @@ interface UseEnhancedWavesListCoreOptions {
   unknownWaveRefetchCooldownMs?: number | undefined;
   preserveBackendWaveOrder?: boolean | undefined;
   sortMutedLast?: boolean | undefined;
+  canonicalUnreadByWaveId?:
+    | Readonly<Record<string, ApiDmUnreadConversationState>>
+    | undefined;
 }
 
 const DEFAULT_OPTIONS: UseEnhancedWavesListCoreOptions = {
@@ -80,6 +86,7 @@ function useEnhancedWavesListCore(
   options: UseEnhancedWavesListCoreOptions = DEFAULT_OPTIONS
 ) {
   const isEnabled = options.enabled !== false;
+  const usesCanonicalUnread = options.canonicalUnreadByWaveId !== undefined;
   const {
     addPinnedWave: addPinnedWaveFromData,
     fetchNextPage: fetchNextPageFromData,
@@ -95,7 +102,7 @@ function useEnhancedWavesListCore(
   } = wavesData;
   const { newDropsCounts, resetAllWavesNewDropsCount, resetWaveNewDropsCount } =
     useNewDropCounter(activeWaveId, waves, refetchAllWavesFromData, {
-      enabled: isEnabled,
+      enabled: isEnabled && !usesCanonicalUnread,
       otherListWaveIds: options.otherListWaveIds,
       unknownWaveRefetchCooldownMs: options.unknownWaveRefetchCooldownMs,
     });
@@ -110,7 +117,7 @@ function useEnhancedWavesListCore(
 
   const resetWaveUnreadCount = useCallback(
     (waveId: string) => {
-      if (!isEnabled) {
+      if (!isEnabled || usesCanonicalUnread) {
         return;
       }
 
@@ -125,12 +132,12 @@ function useEnhancedWavesListCore(
         return rest;
       });
     },
-    [isEnabled]
+    [isEnabled, usesCanonicalUnread]
   );
 
   const restoreWaveUnreadCount = useCallback(
     (waveId: string, count?: number) => {
-      if (!isEnabled) {
+      if (!isEnabled || usesCanonicalUnread) {
         return;
       }
 
@@ -147,19 +154,27 @@ function useEnhancedWavesListCore(
         }));
       }
     },
-    [isEnabled]
+    [isEnabled, usesCanonicalUnread]
   );
 
   const markWaveRead = useCallback(
     (waveId: string) => {
+      if (!isEnabled || usesCanonicalUnread) {
+        return;
+      }
       resetWaveNewDropsCount(waveId);
       resetWaveUnreadCount(waveId);
     },
-    [resetWaveNewDropsCount, resetWaveUnreadCount]
+    [
+      isEnabled,
+      resetWaveNewDropsCount,
+      resetWaveUnreadCount,
+      usesCanonicalUnread,
+    ]
   );
 
   useEffect(() => {
-    if (!isEnabled || !activeWaveId) return;
+    if (!isEnabled || usesCanonicalUnread || !activeWaveId) return;
     setForcedUnreadCounts((prev) => {
       if (!(activeWaveId in prev)) return prev;
       const { [activeWaveId]: _, ...rest } = prev;
@@ -169,10 +184,11 @@ function useEnhancedWavesListCore(
       resetWaveUnreadCount(activeWaveId);
     }, UNREAD_CLEAR_DELAY_MS);
     return () => clearTimeout(timeout);
-  }, [activeWaveId, isEnabled, resetWaveUnreadCount]);
+  }, [activeWaveId, isEnabled, resetWaveUnreadCount, usesCanonicalUnread]);
 
   const mapWave = useCallback(
     (wave: EnhancedSidebarWave): MinimalWave => {
+      const canonicalUnread = options.canonicalUnreadByWaveId?.[wave.id];
       const wsData = newDropsCounts[wave.id];
       const wsDropCount = wsData?.count ?? 0;
       const hasNewWsDrops = wsDropCount > 0;
@@ -185,9 +201,11 @@ function useEnhancedWavesListCore(
         wave.latestFollowedSubwaveDropTimestamp ?? null
       );
       const newDrops = {
-        count: wsDropCount,
+        count: usesCanonicalUnread ? 0 : wsDropCount,
         latestDropTimestamp: directLatestDropTimestamp,
-        firstUnreadSerialNo: wsData?.firstUnreadSerialNo ?? null,
+        firstUnreadSerialNo: usesCanonicalUnread
+          ? (canonicalUnread?.first_unread_drop_serial_no ?? null)
+          : (wsData?.firstUnreadSerialNo ?? null),
       };
       const isWsDataCoveredByApi =
         hasNewWsDrops &&
@@ -200,8 +218,9 @@ function useEnhancedWavesListCore(
       const apiFirstUnread = wave.firstUnreadDropSerialNo ?? null;
       const wsFirstUnread = wsData?.firstUnreadSerialNo ?? null;
       const wasCleared = clearedUnreadWaveIds.has(wave.id);
-      let firstUnreadDropSerialNo: number | null = null;
-      if (!isCleared) {
+      let firstUnreadDropSerialNo: number | null =
+        canonicalUnread?.first_unread_drop_serial_no ?? null;
+      if (!usesCanonicalUnread && !isCleared) {
         if (wasCleared && hasNewWsDrops) {
           firstUnreadDropSerialNo = wsFirstUnread;
         } else if (apiFirstUnread !== null && wsFirstUnread !== null) {
@@ -212,7 +231,9 @@ function useEnhancedWavesListCore(
       }
 
       let unreadDropsCount: number;
-      if (isCleared) {
+      if (usesCanonicalUnread) {
+        unreadDropsCount = canonicalUnread?.unread_count ?? 0;
+      } else if (isCleared) {
         unreadDropsCount = 0;
       } else if (forcedCount !== undefined) {
         unreadDropsCount = forcedCount + wsDropCount;
@@ -247,7 +268,7 @@ function useEnhancedWavesListCore(
         followedSubwavesCount: wave.followedSubwavesCount,
         latestFollowedSubwaveDropTimestamp:
           wave.latestFollowedSubwaveDropTimestamp,
-        unreadFollowedSubwaveDrops: wave.unreadFollowedSubwaveDrops,
+        unreadSubwaveDrops: wave.unreadSubwaveDrops,
         unreadDropsCount,
         latestReadTimestamp: wave.latestReadTimestamp,
         firstUnreadDropSerialNo,
@@ -255,6 +276,8 @@ function useEnhancedWavesListCore(
           wave.firstUnreadFollowedSubwaveDropSerialNo,
         waveRep: wave.waveRep,
         waveScore: wave.waveScore,
+        isInAllWaves:
+          wave.isInAllWaves ?? wave.sidebarSection !== "highly-rated",
         sidebarSection: wave.sidebarSection ?? null,
         sidebarActivityTimestamp,
         // Directly-followed waves remain normal following rows; this flag is
@@ -270,6 +293,8 @@ function useEnhancedWavesListCore(
       clearedUnreadWaveIds,
       forcedUnreadCounts,
       options.supportsPinning,
+      options.canonicalUnreadByWaveId,
+      usesCanonicalUnread,
     ]
   );
 

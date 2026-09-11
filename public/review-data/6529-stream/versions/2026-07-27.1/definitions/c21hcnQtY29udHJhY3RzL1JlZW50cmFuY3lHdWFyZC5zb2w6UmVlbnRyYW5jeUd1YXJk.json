@@ -1,0 +1,312 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard#error:0x3ee5aeb5",
+          "declaringDefinitionId": "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard",
+          "inherited": false,
+          "inputs": [],
+          "name": "ReentrancyGuardReentrantCall",
+          "selector": "0x3ee5aeb5",
+          "signature": "ReentrancyGuardReentrantCall()"
+        }
+      ],
+      "events": [],
+      "functions": []
+    },
+    "abstract": true,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [],
+      "errors": [
+        {
+          "astId": 25239,
+          "canonicalSignature": "ReentrancyGuardReentrantCall()",
+          "displaySignature": "ReentrancyGuardReentrantCall()",
+          "id": "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard#error:0x3ee5aeb5",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1JlZW50cmFuY3lHdWFyZC5zb2w6UmVlbnRyYW5jeUd1YXJkI2Vycm9yOjB4M2VlNWFlYjU",
+          "kind": "error",
+          "name": "ReentrancyGuardReentrantCall",
+          "natspec": "@dev Unauthorized reentrant call.",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 1850,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ReentrancyGuard.sol#L42",
+            "lineEnd": 42,
+            "lineStart": 42,
+            "snippetSha256": "sha256:e8935c582d8e7da5b9de28c3313e4fa78ad98d71b259981311f2c2170b96a1c4",
+            "sourceSha256": "sha256:af46f292f4ae8e5a4d67af3950290bef491b4e556f8cd18ce081b864f367a48b"
+          },
+          "selector": "0x3ee5aeb5"
+        }
+      ],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor()",
+          "functionKind": "constructor",
+          "id": "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard#function:constructor()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1JlZW50cmFuY3lHdWFyZC5zb2w6UmVlbnRyYW5jeUd1YXJkI2Z1bmN0aW9uOmNvbnN0cnVjdG9yKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 52,
+            "byteStart": 1893,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ReentrancyGuard.sol#L44-L46",
+            "lineEnd": 46,
+            "lineStart": 44,
+            "snippetSha256": "sha256:d35932f8aba15abe7b6f8e8c7157b0c3285924ddb5facbc7494085541fab86a2",
+            "sourceSha256": "sha256:af46f292f4ae8e5a4d67af3950290bef491b4e556f8cd18ce081b864f367a48b"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_nonReentrantBefore()",
+          "functionKind": "function",
+          "id": "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard#function:_nonReentrantBefore()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1JlZW50cmFuY3lHdWFyZC5zb2w6UmVlbnRyYW5jeUd1YXJkI2Z1bmN0aW9uOl9ub25SZWVudHJhbnRCZWZvcmUoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_nonReentrantBefore",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 307,
+            "byteStart": 2431,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ReentrancyGuard.sol#L61-L69",
+            "lineEnd": 69,
+            "lineStart": 61,
+            "snippetSha256": "sha256:a5e2dc16b881d29f972a5e2fa4f7a8bc8af73371267a8af9c8ff7c76448f37ac",
+            "sourceSha256": "sha256:af46f292f4ae8e5a4d67af3950290bef491b4e556f8cd18ce081b864f367a48b"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_nonReentrantAfter()",
+          "functionKind": "function",
+          "id": "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard#function:_nonReentrantAfter()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1JlZW50cmFuY3lHdWFyZC5zb2w6UmVlbnRyYW5jeUd1YXJkI2Z1bmN0aW9uOl9ub25SZWVudHJhbnRBZnRlcigp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_nonReentrantAfter",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 208,
+            "byteStart": 2744,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ReentrancyGuard.sol#L71-L75",
+            "lineEnd": 75,
+            "lineStart": 71,
+            "snippetSha256": "sha256:61fd87608f544e49c2942b998e42152ea9b1b07b1dc96af75bb23432e5dfd8a9",
+            "sourceSha256": "sha256:af46f292f4ae8e5a4d67af3950290bef491b4e556f8cd18ce081b864f367a48b"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_reentrancyGuardEntered()",
+          "functionKind": "function",
+          "id": "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard#function:_reentrancyGuardEntered()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1JlZW50cmFuY3lHdWFyZC5zb2w6UmVlbnRyYW5jeUd1YXJkI2Z1bmN0aW9uOl9yZWVudHJhbmN5R3VhcmRFbnRlcmVkKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_reentrancyGuardEntered",
+          "natspec": "@dev Returns true if the reentrancy guard is currently set to \"entered\", which indicates there is a\n `nonReentrant` function in the call stack.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 106,
+            "byteStart": 3131,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ReentrancyGuard.sol#L81-L83",
+            "lineEnd": 83,
+            "lineStart": 81,
+            "snippetSha256": "sha256:083071a41ec6d585eb4cc95153929bd2fdfe6d08887edfcdff51e26e0e13b559",
+            "sourceSha256": "sha256:af46f292f4ae8e5a4d67af3950290bef491b4e556f8cd18ce081b864f367a48b"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        }
+      ],
+      "modifiers": [
+        {
+          "inputs": [],
+          "name": "nonReentrant",
+          "natspec": "@dev Prevents a contract from calling itself, directly or indirectly.\n Calling a `nonReentrant` function from another `nonReentrant`\n function is not supported. It is possible to prevent this from happening\n by making the `nonReentrant` function external, and making it call a\n `private` function that does the actual work.",
+          "overrides": [],
+          "range": {
+            "byteLength": 103,
+            "byteStart": 2322,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ReentrancyGuard.sol#L55-L59",
+            "lineEnd": 59,
+            "lineStart": 55,
+            "snippetSha256": "sha256:047230b833ac1e7dbbe3349a16c45c3740e37acfc539914ff7af0b3771f98a4e",
+            "sourceSha256": "sha256:af46f292f4ae8e5a4d67af3950290bef491b4e556f8cd18ce081b864f367a48b"
+          },
+          "virtual": false
+        }
+      ],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "NOT_ENTERED",
+          "natspec": "",
+          "range": {
+            "byteLength": 40,
+            "byteStart": 1674,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ReentrancyGuard.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:ba00b88b5d75811b707ff7d56205cad29d17e5fc3b307d6109f186a1e2113e9a",
+            "sourceSha256": "sha256:af46f292f4ae8e5a4d67af3950290bef491b4e556f8cd18ce081b864f367a48b"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1713,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ReentrancyGuard.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:af46f292f4ae8e5a4d67af3950290bef491b4e556f8cd18ce081b864f367a48b"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ENTERED",
+          "natspec": "",
+          "range": {
+            "byteLength": 36,
+            "byteStart": 1720,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ReentrancyGuard.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:09766d4b1662ae12ad9bc77b0dbac39e726523d344062caa0e561dc48685b17a",
+            "sourceSha256": "sha256:af46f292f4ae8e5a4d67af3950290bef491b4e556f8cd18ce081b864f367a48b"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1755,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ReentrancyGuard.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:af46f292f4ae8e5a4d67af3950290bef491b4e556f8cd18ce081b864f367a48b"
+          },
+          "valueSource": "2",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_status",
+          "natspec": "",
+          "range": {
+            "byteLength": 23,
+            "byteStart": 1763,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ReentrancyGuard.sol#L37",
+            "lineEnd": 37,
+            "lineStart": 37,
+            "snippetSha256": "sha256:e71bb2c0cf20b1624ea337537c161965044a0f1f8cb1ef7218cdda30837f460e",
+            "sourceSha256": "sha256:af46f292f4ae8e5a4d67af3950290bef491b4e556f8cd18ce081b864f367a48b"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1JlZW50cmFuY3lHdWFyZC5zb2w6UmVlbnRyYW5jeUd1YXJk",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/ReentrancyGuard.sol:ReentrancyGuard"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ReentrancyGuard",
+    "natspec": "@dev Contract module that helps prevent reentrant calls to a function.\n Inheriting from `ReentrancyGuard` will make the {nonReentrant} modifier\n available, which can be applied to functions to make sure there are no nested\n (reentrant) calls to them.\n Note that because there is a single `nonReentrant` guard, functions marked as\n `nonReentrant` may not call one another. This can be worked around by making\n those functions `private`, and then adding `external` `nonReentrant` entry\n points to them.\n TIP: If you would like to learn more about reentrancy and alternative ways\n to protect against it, check out our blog post\n https://blog.openzeppelin.com/reentrancy-after-istanbul/[Reentrancy After Istanbul].",
+    "range": {
+      "byteLength": 2353,
+      "byteStart": 886,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ReentrancyGuard.sol#L22-L84",
+      "lineEnd": 84,
+      "lineStart": 22,
+      "snippetSha256": "sha256:2f6e99002cbade3325e9aa1d157f13c39ca426b07fad9dd08bdb0d50fdee18c8",
+      "sourceSha256": "sha256:af46f292f4ae8e5a4d67af3950290bef491b4e556f8cd18ce081b864f367a48b"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/ReentrancyGuard.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

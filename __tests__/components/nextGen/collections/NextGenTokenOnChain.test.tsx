@@ -1,5 +1,5 @@
 import NextGenTokenOnChain from "@/components/nextGen/collections/NextGenTokenOnChain";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 
 // Mock Next.js Image component
 jest.mock("next/image", () => ({
@@ -29,6 +29,9 @@ jest.mock("react-tooltip", () => ({
   Tooltip: ({ children, id }: any) => (
     <div data-testid={`tooltip-${id}`}>{children}</div>
   ),
+}));
+jest.mock("next/navigation", () => ({
+  usePathname: () => "/nextgen/token/10000000001",
 }));
 
 // Mock hooks
@@ -107,8 +110,13 @@ describe("NextGenTokenOnChain", () => {
     mockUseReadContract.mockReturnValue({ data: null });
     mockUseEnsName.mockReturnValue({ data: null });
     (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve({ image: "https://example.com/image.png" }),
     });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("shows token not found when data is undefined", () => {
@@ -117,7 +125,7 @@ describe("NextGenTokenOnChain", () => {
 
     render(<NextGenTokenOnChain {...baseProps} />);
 
-    expect(screen.getByText("Token Not Found")).toBeInTheDocument();
+    expect(screen.getByText("Token not found")).toBeInTheDocument();
   });
 
   it("shows token not found when token data is null", () => {
@@ -125,7 +133,7 @@ describe("NextGenTokenOnChain", () => {
 
     render(<NextGenTokenOnChain {...baseProps} />);
 
-    expect(screen.getByText("Token Not Found")).toBeInTheDocument();
+    expect(screen.getByText("Token not found")).toBeInTheDocument();
   });
 
   it("renders token information when data is available", async () => {
@@ -144,11 +152,12 @@ describe("NextGenTokenOnChain", () => {
 
     render(<NextGenTokenOnChain {...baseProps} />);
 
-    await waitFor(() => {
-      expect(screen.getByText("Test Collection #1")).toBeInTheDocument();
-    });
+    await waitFor(() => expect(screen.getByText("About")).toBeInTheDocument());
 
-    expect(screen.getByText("About")).toBeInTheDocument();
+    expect(screen.getByText("Test Collection #1")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Back to collection art" })
+    ).toHaveAttribute("href", "/nextgen/collection/test-collection/art");
     expect(screen.getByText("#10000000001")).toBeInTheDocument();
     expect(screen.getByText("Test Collection")).toBeInTheDocument();
     expect(screen.getByText("Test Artist")).toBeInTheDocument();
@@ -181,7 +190,7 @@ describe("NextGenTokenOnChain", () => {
     render(<NextGenTokenOnChain {...baseProps} />);
 
     await waitFor(() => {
-      expect(screen.getByText("On-Chain")).toBeInTheDocument();
+      expect(screen.getByText("On-chain")).toBeInTheDocument();
     });
   });
 
@@ -203,7 +212,7 @@ describe("NextGenTokenOnChain", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Off-Chain")).toBeInTheDocument();
+      expect(screen.getByText("Off-chain")).toBeInTheDocument();
     });
   });
 
@@ -253,13 +262,17 @@ describe("NextGenTokenOnChain", () => {
     });
 
     (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve({ image: imageUrl }),
     });
 
     render(<NextGenTokenOnChain {...baseProps} />);
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(metadataUrl);
+      expect(global.fetch).toHaveBeenCalledWith(
+        metadataUrl,
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
     });
 
     await waitFor(() => {
@@ -269,6 +282,84 @@ describe("NextGenTokenOnChain", () => {
       );
       expect(tokenImage).toHaveAttribute("src", imageUrl);
     });
+  });
+
+  it("rejects whitespace-only metadata image URLs", async () => {
+    mockUseReadContract.mockImplementation(({ functionName }) => {
+      if (functionName === "tokenURI") {
+        return { data: "https://example.com/metadata.json" };
+      }
+      return { data: null };
+    });
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ image: "   " }),
+    });
+
+    render(<NextGenTokenOnChain {...baseProps} />);
+
+    expect(await screen.findByText("Token not found")).toBeInTheDocument();
+  });
+
+  it("rejects non-successful metadata responses without parsing the body", async () => {
+    mockUseReadContract.mockImplementation(({ functionName }) => {
+      if (functionName === "tokenURI") {
+        return { data: "https://example.com/missing.json" };
+      }
+      return { data: null };
+    });
+    const json = jest.fn();
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 404,
+      json,
+    });
+
+    render(<NextGenTokenOnChain {...baseProps} />);
+
+    expect(await screen.findByText("Token not found")).toBeInTheDocument();
+    expect(json).not.toHaveBeenCalled();
+  });
+
+  it("stops loading when the metadata request times out", async () => {
+    jest.useFakeTimers();
+    mockUseReadContract.mockImplementation(({ functionName }) => {
+      if (functionName === "tokenURI") {
+        return { data: "https://example.com/metadata.json" };
+      }
+      return { data: null };
+    });
+    (globalThis.fetch as jest.Mock).mockImplementation(
+      (_url: string, options: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          options.signal?.addEventListener("abort", () => {
+            reject(new DOMException("Aborted", "AbortError"));
+          });
+        })
+    );
+
+    render(<NextGenTokenOnChain {...baseProps} />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(10_000);
+      await Promise.resolve();
+    });
+
+    expect(screen.getByText("Token not found")).toBeInTheDocument();
+  });
+
+  it("shows an owner placeholder until ownerOf resolves", async () => {
+    mockUseReadContract.mockImplementation(({ functionName }) => {
+      if (functionName === "tokenURI") {
+        return { data: "https://example.com/metadata.json" };
+      }
+      return { data: undefined, isLoading: true };
+    });
+
+    render(<NextGenTokenOnChain {...baseProps} />);
+
+    expect(await screen.findByText("Fetching owner…")).toBeInTheDocument();
+    expect(screen.queryByTestId("address")).not.toBeInTheDocument();
   });
 
   it("shows external link icon for metadata", async () => {

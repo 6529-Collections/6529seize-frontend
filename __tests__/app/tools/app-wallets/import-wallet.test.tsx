@@ -2,8 +2,11 @@ import Page, {
   generateMetadata,
 } from "@/app/tools/app-wallets/import-wallet/page";
 import { AuthContext } from "@/components/auth/Auth";
+import { publicEnv } from "@/config/env";
 import { render } from "@testing-library/react";
 import React from "react";
+
+const domain = new URL(publicEnv.BASE_ENDPOINT).hostname;
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="import" />);
 jest.mock("@/components/app-wallets/AppWalletImport", () => () => (
@@ -45,6 +48,6 @@ describe("Import App Wallet Page", () => {
   it("exposes metadata", async () => {
     const metadata = await generateMetadata();
     expect(metadata.title).toEqual("Import App Wallet | Tools");
-    expect(metadata.description).toEqual("Tools | 6529.io");
+    expect(metadata.description).toEqual(`Tools | ${domain}`);
   });
 });

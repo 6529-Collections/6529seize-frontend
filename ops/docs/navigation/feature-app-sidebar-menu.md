@@ -6,6 +6,8 @@ In app layout, the top-left menu/avatar button opens a left drawer for
 primary navigation concepts, grouped secondary routes, and account actions.
 Connected account surfaces in this drawer can show unread notification
 indicators (dot/count badges) to help account switching.
+The standalone `Museum` row appears immediately after `NFTs`, keeping the
+art destinations together while leaving `Waves` adjacent to `DMs`.
 When the connected wallet can access Drop Forge, the drawer lists it as a
 standalone row after `About`.
 
@@ -13,7 +15,8 @@ standalone row after `About`.
 
 - App routes rendered with `AppLayout`, when header left control is menu/avatar
   (not `Back`).
-- Primary rows/groups: `NFTs`, `Waves`, `DMs`, and `About`.
+- Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529`, and
+  `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
 - Drawer header: connected profile avatar shortcut to
@@ -26,7 +29,8 @@ standalone row after `About`.
 ## Entry Points
 
 - Open an app-layout route where the top-left control is menu/avatar.
-- Tap the menu/avatar button.
+- Tap the menu/avatar button once to open the drawer. With multiple connected
+  profiles, double-tap within 400 ms to switch to the next profile.
 - Choose a direct row, the connected avatar shortcut, or a grouped route.
 - Close with close button, backdrop tap, right-to-left swipe, or route
   selection.
@@ -41,12 +45,15 @@ standalone row after `About`.
    - disconnected: `6529` logo linking to `/`
 4. Drawer body shows direct rows plus grouped sections:
    - `NFTs`
+   - `Museum`
    - `Waves`
    - `DMs`
+   - `Join 6529`
    - `About`
 5. Tap the connected profile avatar to open your own profile route
-   (`/{normalized-handle}` with `/{walletAddress}` fallback), tap `DMs` for
-   `/messages`, use the standalone `Drop Forge` row when present, or expand
+   (`/{normalized-handle}` with `/{walletAddress}` fallback), tap `Museum` for
+   `/museum/network`, tap `DMs` for `/messages`, tap `Join 6529` for
+   `/join-6529`, use the standalone `Drop Forge` row when present, or expand
    grouped sections for nested routes. About opens to group headings first,
    then each group expands to its links.
 6. Drawer closes and route navigation runs.
@@ -58,10 +65,17 @@ standalone row after `About`.
 - Open `NFTs`:
   `/the-memes`, `/6529-gradient`, `/nextgen`, `/meme-lab`, `/rememes`,
   `/nft-activity`, `/meme-calendar`.
+- On local development and shared staging, `NFTs` also includes
+  `6529 Stream — Review` after `ReMemes`. It opens
+  `/reviews/6529-stream` and is absent on production.
 - Open `Waves`:
   `/waves` and `Discover Waves` at `/discover`.
+- Open `Museum`:
+  `/museum/network`.
+- Open `Join 6529`:
+  `/join-6529`.
 - Open `About > Network & Reputation`:
-  `/network`, `/network/activity`, `/network/groups`, `/network/tdh`,
+  `/network`, `/network/activity`, `/network/tdh`,
   `/network/xtdh` (`xTDH Overview`), `/xtdh` (`xTDH Allocations Dashboard`),
   `/network/wave-score`, `/rep/categories`, `/network/health`,
   `/network/definitions`, `/network/levels`, `/network/health/network-tdh`,
@@ -105,8 +119,8 @@ standalone row after `About`.
   connected wallet can access the landing route.
 - Profile avatar shortcut is unavailable when disconnected because the header
   shows the `6529` home link instead.
-- `NFTs`, `Waves`, and `About` are collapsible; About group headers are nested
-  disclosure controls, not links.
+- `NFTs`, `Waves`, and `About` are collapsible; `Museum` is a direct row. About
+  group headers are nested disclosure controls, not links.
 - `App Wallets` appears inside `About > Delegation & Wallets` only when
   app-wallet support is available.
 - `Scan QR Code` appears only when running in Capacitor with scanner support.
@@ -121,6 +135,12 @@ standalone row after `About`.
 
 - If drawer state looks stuck, close with backdrop/icon/swipe and reopen.
 - If route change does not apply, reopen the drawer and select the route again.
+- Selecting another connected profile closes the drawer after the switch. If
+  the switch fails, the drawer remains open and shows error feedback.
+- Selecting the account `+` closes the drawer before the wallet connection
+  flow appears; while that flow is open, the control is disabled with busy
+  feedback. If the flow cannot open, the drawer remains open and shows error
+  feedback.
 - If profile access is missing, connect wallet first or use the header avatar
   once a connected profile is available.
 - If `Drop Forge` is missing, verify the connected wallet can access the
@@ -138,8 +158,10 @@ standalone row after `About`.
 ## Limitations / Notes
 
 - App-sidebar behavior is app-layout only.
-- Bottom navigation and this drawer expose the same primary product concepts;
-  profile/account actions stay in account surfaces.
+- The Stream review entry uses the same environment gate as its routes and is
+  never enabled by wallet state alone.
+- `Museum` is available from the app drawer rather than as a bottom-navigation
+  tab; profile/account actions stay in account surfaces.
 - Search stays in the header search control, not in this drawer.
 - Session/proxy details are owned by
   [Wallet and Account Controls](feature-wallet-account-controls.md).

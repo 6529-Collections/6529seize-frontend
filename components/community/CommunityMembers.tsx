@@ -1,11 +1,20 @@
 "use client";
 
 import type { CommunityMembersQuery } from "@/app/network/page";
+import { useAuth } from "@/components/auth/Auth";
+import { NETWORK_PAGE_TITLE_CLASSES } from "@/components/network/networkPageLayoutClasses";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
+import { useActiveGroup } from "@/contexts/ActiveGroupContext";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 import { SortDirection } from "@/entities/ISort";
 import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
 import type { Page } from "@/helpers/Types";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -14,18 +23,14 @@ import CommunityMembersMobileSortContent from "./members-table/CommunityMembersM
 import CommunityMembersTable from "./members-table/CommunityMembersTable";
 import CommunityMembersTableSkeleton from "./members-table/CommunityMembersTableSkeleton";
 
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
-import { useActiveGroup } from "@/contexts/ActiveGroupContext";
-import { useSetTitle } from "@/contexts/TitleContext";
-import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 import {
   BarsArrowDownIcon,
   ChevronRightIcon,
   FunnelIcon,
 } from "@heroicons/react/24/outline";
-import GroupsSidebar from "../groups/sidebar/GroupsSidebar";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
+import CommunityMembersGroupDetails from "./CommunityMembersGroupDetails";
+import CommunityMembersGroupFilter from "./CommunityMembersGroupFilter";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;
@@ -38,6 +43,9 @@ const SEARCH_PARAMS_FIELDS = {
   sortDirection: "sort-direction",
   group: "group",
 } as const;
+
+const NETWORK_DIALOG_HEADER_CLASS_NAME =
+  "tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-3.5 tw-pt-4";
 
 function NetworkHeaderActionButton({
   active = false,
@@ -57,7 +65,7 @@ function NetworkHeaderActionButton({
   readonly onClick: () => void;
 }) {
   const buttonClassName = [
-    "tw-group tw-relative tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-text-sm tw-font-semibold tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/40 sm:tw-text-xs",
+    "tw-group tw-relative tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-text-xs tw-font-semibold tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/40",
     compact
       ? "tw-h-9 tw-w-9 tw-px-0 sm:tw-h-8 sm:tw-w-8"
       : "tw-h-9 tw-min-w-9 tw-px-2.5 sm:tw-h-8 sm:tw-min-w-8 sm:tw-px-2",
@@ -88,6 +96,8 @@ function NetworkHeaderActionButton({
 
 export default function CommunityMembers() {
   useSetTitle("Network");
+  const locale = useBrowserLocale();
+  const { activeProfileProxy, connectedProfile, isAuthenticated } = useAuth();
 
   const defaultSortBy = ApiCommunityMembersSortOption.Level;
   const defaultSortDirection = SortDirection.DESC;
@@ -98,7 +108,25 @@ export default function CommunityMembers() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const { activeGroupId } = useActiveGroup();
+  const { activeGroupId, setActiveGroupId } = useActiveGroup();
+  const viewerIdentityKey = useMemo(() => {
+    const connectedIdentityKey =
+      connectedProfile?.id ?? connectedProfile?.handle;
+    if (!isAuthenticated || !connectedIdentityKey) {
+      return null;
+    }
+
+    if (activeProfileProxy?.id) {
+      return `proxy:${connectedIdentityKey}:${activeProfileProxy.id}`;
+    }
+
+    return `profile:${connectedIdentityKey}`;
+  }, [
+    activeProfileProxy,
+    connectedProfile?.handle,
+    connectedProfile?.id,
+    isAuthenticated,
+  ]);
 
   const convertSortBy = useCallback(
     (sort: string | null): ApiCommunityMembersSortOption => {
@@ -198,6 +226,7 @@ export default function CommunityMembers() {
   useDebounce(() => setDebouncedParams(params), 200, [params]);
 
   const {
+    isError: isMembersError,
     isLoading,
     isFetching,
     data: members,
@@ -210,6 +239,7 @@ export default function CommunityMembers() {
         sort: debouncedParams.sort,
         sortDirection: debouncedParams.sort_direction,
         groupId: debouncedParams.group_id,
+        viewerIdentityKey,
       },
     ],
     queryFn: async () =>
@@ -220,7 +250,18 @@ export default function CommunityMembers() {
         endpoint: `community-members/top`,
         params: debouncedParams,
       }),
-    placeholderData: keepPreviousData,
+    placeholderData: (previousData, previousQuery) => {
+      const previousScope = previousQuery?.queryKey[1] as
+        | {
+            readonly groupId?: unknown;
+            readonly viewerIdentityKey?: unknown;
+          }
+        | undefined;
+      return previousScope?.groupId === debouncedParams.group_id &&
+        previousScope?.viewerIdentityKey === viewerIdentityKey
+        ? previousData
+        : undefined;
+    },
   });
 
   const updateFields = useCallback(
@@ -314,10 +355,6 @@ export default function CommunityMembers() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [mobileSortOpen, setMobileSortOpen] = useState(false);
 
-  useEffect(() => {
-    setMobileFilterOpen(false);
-  }, [activeGroupId]);
-
   const hasCustomSort =
     params.sort !== defaultSortBy ||
     params.sort_direction !== defaultSortDirection;
@@ -326,12 +363,18 @@ export default function CommunityMembers() {
     !hasMemberContent && (isLoading || isFetching || !members);
 
   let membersContent: ReactNode = null;
-  if (showMembersSkeleton) {
+  if (isMembersError && debouncedParams.group_id) {
+    membersContent = (
+      <output className="tw-m-0 tw-block tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-3 tw-text-sm tw-leading-5 tw-text-iron-400">
+        {t(locale, "network.groupInspection.membersUnavailable")}
+      </output>
+    );
+  } else if (showMembersSkeleton) {
     membersContent = <CommunityMembersTableSkeleton />;
   } else if (members) {
     membersContent = (
       <>
-        <div className="tw-rounded-lg tw-bg-iron-950 tw-shadow sm:tw-divide-y sm:tw-divide-solid sm:tw-divide-iron-800 sm:tw-overflow-auto sm:tw-border sm:tw-border-solid sm:tw-border-iron-700">
+        <div className="sm:tw-max-w-full sm:tw-overflow-x-auto sm:tw-overscroll-x-contain">
           <CommunityMembersTable
             members={members.data}
             activeSort={params.sort}
@@ -360,10 +403,10 @@ export default function CommunityMembers() {
     <div>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
         <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
-          <h1 className="tw-mb-0 tw-flex-shrink-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+          <h1 className={`${NETWORK_PAGE_TITLE_CLASSES} tw-flex-shrink-0`}>
             Network
           </h1>
-          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-rounded-xl tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
+          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-rounded-lg tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
             <NetworkHeaderActionButton
               active={!!activeGroupId}
               compact
@@ -389,7 +432,7 @@ export default function CommunityMembers() {
           </div>
         </div>
         <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center">
-          <div className="tw-flex tw-items-center tw-rounded-xl tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
+          <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
             <NetworkHeaderActionButton
               label="Open Nerd view"
               onClick={goToNerd}
@@ -400,25 +443,43 @@ export default function CommunityMembers() {
           </div>
         </div>
       </div>
+      {activeGroupId && (
+        <>
+          <CommunityMembersGroupDetails
+            groupId={activeGroupId}
+            onClose={() => setActiveGroupId(null)}
+            viewerIdentityKey={viewerIdentityKey}
+          />
+          <h2 className="tw-mb-0 tw-mt-5 !tw-text-lg !tw-font-semibold !tw-leading-6 !tw-text-iron-50">
+            {t(locale, "network.groupInspection.membersTitle")}
+          </h2>
+        </>
+      )}
       <div className="tailwind-scope tw-mt-2 tw-flow-root lg:tw-mt-3">
         {membersContent}
       </div>
 
       <MobileWrapperDialog
-        title="Groups"
+        title={t(locale, "network.groupFilter.title")}
         isOpen={mobileFilterOpen}
         onClose={() => setMobileFilterOpen(false)}
         tall
         fixedHeight
         noPadding
-        showDragHandle
+        enableDragToClose
         showHeaderCloseButton
         surfaceClassName="tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60"
         titleClassName="tw-text-base !tw-font-bold !tw-text-white tw-tracking-tight"
-        headerClassName="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-3.5"
+        headerClassName={NETWORK_DIALOG_HEADER_CLASS_NAME}
         headerCloseButtonClassName="-tw-mt-1"
       >
-        <GroupsSidebar variant="mobile-sheet" />
+        <CommunityMembersGroupFilter
+          activeGroupId={activeGroupId}
+          onGroupChange={(group) => {
+            setActiveGroupId(group?.id ?? null);
+            setMobileFilterOpen(false);
+          }}
+        />
       </MobileWrapperDialog>
 
       <MobileWrapperDialog
@@ -426,11 +487,11 @@ export default function CommunityMembers() {
         isOpen={mobileSortOpen}
         onClose={() => setMobileSortOpen(false)}
         noPadding
-        showDragHandle
+        enableDragToClose
         showHeaderCloseButton
         surfaceClassName="tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60"
         titleClassName="tw-text-base !tw-font-bold !tw-text-white tw-tracking-tight"
-        headerClassName="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-3.5"
+        headerClassName={NETWORK_DIALOG_HEADER_CLASS_NAME}
         headerCloseButtonClassName="-tw-mt-1"
       >
         <CommunityMembersMobileSortContent

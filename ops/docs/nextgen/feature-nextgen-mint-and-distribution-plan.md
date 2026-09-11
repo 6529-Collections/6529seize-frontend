@@ -45,6 +45,12 @@ Use these collection routes to mint and review distribution data:
 
 ## Route Behavior
 
+- On native iOS when the detected country is not `US` or is unknown, `MINT`
+  and `BURN TO MINT` actions are hidden. Direct mint links return to the
+  collection page without showing mint controls. Countdown information and
+  distribution data remain available. US iOS, web, and Android keep their
+  existing mint behavior.
+
 - Public phase `LIVE` always uses the standard mint widget.
 - Outside public phase `LIVE`, mint widget type comes from merkle config.
 - Missing merkle data on mint route shows `Allowlist Not Found`.
@@ -74,7 +80,8 @@ Use these collection routes to mint and review distribution data:
 - Burn flow can have `0 available` tokens after ownership/range/prefix filters.
 - Burn flow `Mint To` is fixed to the selected burn address.
 - Burn flow shows `Burn Not Active` when burn status is disabled.
-- Distribution-plan table has no dedicated empty/error message row.
+- Distribution-plan table shows a loading row while allowlist data is being
+  fetched and a no-match row when the selected filters return no entries.
 
 ## Failure and Recovery
 

@@ -4,9 +4,12 @@ on:
   push:
     branches:
       - 1a-staging
+    paths-ignore:
+      - "ops/**"
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
@@ -15,14 +18,183 @@ concurrency:
 
 env:
   AWS_REGION: ${{ vars.STAGING_AWS_REGION || 'eu-west-1' }}
+  ARTIFACT_BUCKET: ${{ vars.STAGING_ARTIFACT_BUCKET || 'seize-web' }}
+  ARTIFACT_BUCKET_REGION: ${{ vars.STAGING_ARTIFACT_BUCKET_REGION || 'us-east-1' }}
   STAGING_BRANCH: "1a-staging"
   STAGING_REPO_DIR: ${{ vars.STAGING_REPO_DIR || '/home/ubuntu/6529seize-frontend' }}
   STAGING_RUN_AS: ${{ vars.STAGING_RUN_AS || 'ubuntu' }}
 
 jobs:
+  build-staging-artifact:
+    name: Build exact staging artifact
+    runs-on: ${{ vars.STAGING_BUILD_RUNNER || vars.CI_BUILD_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      NODE_ENV: production
+      VERSION: ${{ github.sha }}
+      MOBILE_APP_SCHEME: mobileStaging6529
+      CORE_SCHEME: core6529
+      IPFS_API_ENDPOINT: https://api-ipfs.6529.io
+      IPFS_GATEWAY_ENDPOINT: https://ipfs.6529.io
+      GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY }}
+      API_ENDPOINT: ${{ vars.STAGING_API_ENDPOINT || 'https://api.staging.6529.io' }}
+      WS_ENDPOINT: ${{ vars.STAGING_WS_ENDPOINT || 'wss://ws.staging.6529.io' }}
+      ALLOWLIST_API_ENDPOINT: ${{ vars.STAGING_ALLOWLIST_API_ENDPOINT || 'https://allowlist-api.staging.6529.io' }}
+      BASE_ENDPOINT: https://staging.6529.io
+      NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}
+      ASSETS_FROM_S3: "false"
+
+    steps:
+      # No deployment credentials are available while candidate code builds.
+      - name: Require the canonical staging branch
+        run: test "$GITHUB_REF" = refs/heads/1a-staging
+
+      - name: Checkout exact staging SHA
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact staging SHA
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+
+      - name: Install Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "22.17.1"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+
+      - name: Restore pnpm store
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node22-pnpm-
+
+      - name: Use cached pnpm store
+        run: echo "npm_config_store_dir=$HOME/.pnpm-store" >> "$GITHUB_ENV"
+
+      - name: Install Socket Firewall
+        id: socket-firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Install frozen dependencies
+        env:
+          SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 ci
+
+      - name: Generate source-stable environment schema
+        run: ./bin/6529 run build:env-schema
+
+      - name: Restore Next.js build cache
+        id: nextjs-build-cache
+        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-node22-staging-nextjs-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'next.config.ts', 'tsconfig*.json', 'postcss.config.*', 'tailwind.config.*') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-node22-staging-nextjs-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'next.config.ts', 'tsconfig*.json', 'postcss.config.*', 'tailwind.config.*') }}-
+            ${{ runner.os }}-node22-staging-nextjs-
+
+      - name: Build and package exact staging bytes
+        run: |
+          set -euo pipefail
+          export VERSION_BUILD_TIMESTAMP="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          ./bin/6529 run help-index:sync
+          ./bin/6529 run agent-files:sync
+          rm -rf staging-artifact .staging-bundle
+          ./bin/6529 run base-build
+
+          mkdir -p staging-artifact .staging-bundle/.next
+          test -f .next/standalone/server.js
+          cp -r .next/standalone/. .staging-bundle/
+          cp -r .next/static .staging-bundle/.next/
+          cp -r Procfile .ebextensions .staging-bundle/
+          if [ -d .platform ]; then cp -r .platform .staging-bundle/; fi
+          find .staging-bundle -xtype l -delete
+          for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
+            if [ -f ".next/$file" ]; then
+              cp ".next/$file" ".staging-bundle/.next/$file"
+            fi
+          done
+          node scripts/package-public-review-artifacts.cjs prepare \
+            --profile staging \
+            --bundle-root .staging-bundle
+          (cd .staging-bundle && zip -qry ../staging-artifact/package.zip .)
+
+          zip_listing="$(mktemp)"
+          zip_extract="$(mktemp -d)"
+          trap 'rm -f "$zip_listing"; rm -rf "$zip_extract"' EXIT
+          unzip -Z1 staging-artifact/package.zip > "$zip_listing"
+          node scripts/package-public-review-artifacts.cjs assert-listing \
+            --profile staging \
+            --bundle-root .staging-bundle \
+            --listing-file "$zip_listing"
+          unzip -q staging-artifact/package.zip -d "$zip_extract"
+          node scripts/package-public-review-artifacts.cjs assert-zip \
+            --profile staging \
+            --bundle-root .staging-bundle \
+            --listing-file "$zip_listing" \
+            --extracted-root "$zip_extract"
+
+          package_digest="$(sha256sum staging-artifact/package.zip | cut -d' ' -f1)"
+          jq -n \
+            --arg source_sha "$GITHUB_SHA" \
+            --arg package_digest "$package_digest" \
+            '{schema_version:1,artifact_contract:"staging-deployment-v1",repository:"frontend",source_sha:$source_sha,environment:"staging",package_sha256:$package_digest}' \
+            > staging-artifact/manifest.json
+          node ops/scripts/artifact-portability.cjs inventory \
+            --manifest staging-artifact/manifest.json \
+            --package staging-artifact/package.zip \
+            --extracted-root "$zip_extract" \
+            --runtime-config "$zip_extract/.next/PUBLIC_RUNTIME.json" \
+            --assets-flag "$zip_extract/.next/ASSETS_FROM_S3" \
+            --source-root . \
+            --content-roots "public,content/public-reviews,config/public-reviews,public/review-data" \
+            --environment staging \
+            --node-version "$(node --version)" \
+            --pnpm-version "$(pnpm --version)" \
+            --output staging-artifact/artifact-portability.json
+          (cd staging-artifact && sha256sum manifest.json artifact-portability.json package.zip > SHA256SUMS)
+          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/help-index.json public/glossary.json public/llms.txt)"
+          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"
+
+      - name: Save Next.js build cache
+        if: steps.nextjs-build-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          key: ${{ steps.nextjs-build-cache.outputs.cache-primary-key }}
+
+      - name: Upload exact staging artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: staging-frontend-${{ github.run_id }}
+          path: staging-artifact
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+
   deploy-staging:
+    name: Deploy exact staging artifact
+    needs: build-staging-artifact
     runs-on: ubuntu-latest
     timeout-minutes: 75
+    environment:
+      name: staging
+      url: https://staging.6529.io
     permissions:
       contents: read
       deployments: write
@@ -31,75 +203,55 @@ jobs:
       - name: Checkout staging branch
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          ref: ${{ env.STAGING_BRANCH }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Resolve expected commit
         id: expected-commit
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Resolve production candidate
-        id: production-candidate
-        run: |
-          set -euo pipefail
+      - name: Download exact staging artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: staging-frontend-${{ github.run_id }}
+          path: staging-artifact
 
-          git fetch --no-tags origin main
-          main_sha="$(git rev-parse origin/main)"
-          if git merge-base --is-ancestor "$main_sha" "${{ steps.expected-commit.outputs.sha }}"; then
-            echo "sha=$main_sha" >> "$GITHUB_OUTPUT"
-            echo "eligible=true" >> "$GITHUB_OUTPUT"
-            echo "Staging candidate contains origin/main $main_sha."
-          else
-            echo "sha=" >> "$GITHUB_OUTPUT"
-            echo "eligible=false" >> "$GITHUB_OUTPUT"
-            echo "Staging candidate does not contain origin/main $main_sha; marking manifest as exploratory."
-          fi
-
-      - name: Create deployment bus manifest
-        run: |
-          set -euo pipefail
-
-          node ops/scripts/deployment-bus.cjs create-manifest \
-            --environment staging \
-            --staging-branch "${STAGING_BRANCH}" \
-            --staging-deploy-sha "${{ steps.expected-commit.outputs.sha }}" \
-            --production-candidate-sha "${{ steps.production-candidate.outputs.sha }}" \
-            --production-eligible "${{ steps.production-candidate.outputs.eligible }}" \
-            --required-packs "playwright:core-smoke,playwright:surface-matrix,playwright:wcag-i18n" \
-            --release-captain "github-actions/${{ github.actor }}" \
-            --status queued \
-            --phase queued \
-            --message "Staging deployment queued for ${{ steps.expected-commit.outputs.sha }}" \
-            --workflow-run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --output deployment-bus-manifest.json
-
-      - name: Create GitHub deployment record
-        id: deployment-record
+      - name: Verify exact staging artifact
+        id: staging-artifact
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: ${{ steps.expected-commit.outputs.sha }}
         run: |
           set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          (cd staging-artifact && sha256sum -c SHA256SUMS)
+          jq -e --arg source_sha "$EXPECTED_SHA" '
+            .schema_version == 1 and
+            .artifact_contract == "staging-deployment-v1" and
+            .repository == "frontend" and
+            .source_sha == $source_sha and
+            .environment == "staging" and
+            (.package_sha256 | test("^[a-f0-9]{64}$"))
+          ' staging-artifact/manifest.json >/dev/null
+          package_digest="$(sha256sum staging-artifact/package.zip | cut -d' ' -f1)"
+          test "$package_digest" = "$(jq -r '.package_sha256' staging-artifact/manifest.json)"
+          jq -e --arg source_sha "$EXPECTED_SHA" --arg package_sha256 "$package_digest" '
+            .schema_version == "artifact-portability.v1" and
+            .contract == "artifact-portability-v1" and
+            .environment == "staging" and
+            .source.git_sha == $source_sha and
+            .digests.package_sha256 == $package_sha256 and
+            .portability.status == "NOT_PORTABLE" and
+            .portability.portable == false and
+            .portability.reuse_authorized == false and
+            .portability.promotion_authorized == false
+          ' staging-artifact/artifact-portability.json >/dev/null
+          echo "package-digest=$package_digest" >> "$GITHUB_OUTPUT"
 
-          deployment_id="$(node ops/scripts/deployment-bus.cjs github-create-deployment \
-            --file deployment-bus-manifest.json \
-            --ref "${{ steps.expected-commit.outputs.sha }}" \
-            --environment staging \
-            --task deploy:staging \
-            --description "Staging deployment bus ${{ steps.expected-commit.outputs.sha }}")"
-          echo "deployment_id=$deployment_id" >> "$GITHUB_OUTPUT"
-
-      - name: Mark staging deployment queued
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      - name: Get commit details
         run: |
-          set -euo pipefail
-
-          node ops/scripts/deployment-bus.cjs github-create-status \
-            --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
-            --state queued \
-            --description "Staging deployment bus queued" \
-            --environment-url "https://staging.6529.io" \
-            --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          printf 'COMMIT_SHA=%s\n' "${{ steps.expected-commit.outputs.sha }}" >> "$GITHUB_ENV"
+          printf 'COMMIT_MESSAGE=%s\n' "$(git show -s --format=%s "${{ steps.expected-commit.outputs.sha }}")" >> "$GITHUB_ENV"
 
       - name: Validate staging configuration
         env:
@@ -141,6 +293,27 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Stage exact artifact for the managed instance
+        id: staged-artifact
+        env:
+          EXPECTED_SHA: ${{ steps.expected-commit.outputs.sha }}
+          PACKAGE_DIGEST: ${{ steps.staging-artifact.outputs.package-digest }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$PACKAGE_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$ARTIFACT_BUCKET_REGION" =~ ^[a-z]{2}(-gov)?-[a-z]+-[1-9][0-9]*$ ]]
+          object_key="staging/${GITHUB_RUN_ID}/${EXPECTED_SHA}.zip"
+          aws s3 cp staging-artifact/package.zip \
+            "s3://${ARTIFACT_BUCKET}/${object_key}" \
+            --region "$ARTIFACT_BUCKET_REGION" \
+            --metadata "sha256=${PACKAGE_DIGEST},source-sha=${EXPECTED_SHA}"
+          url="$(aws s3 presign "s3://${ARTIFACT_BUCKET}/${object_key}" \
+            --region "$ARTIFACT_BUCKET_REGION" \
+            --expires-in 5400)"
+          echo "object-key=$object_key" >> "$GITHUB_OUTPUT"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
       - name: Verify staging instance is online in SSM
         env:
           INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
@@ -171,26 +344,47 @@ jobs:
       - name: Send staging deploy command
         id: send-command
         env:
+          ARTIFACT_URL: ${{ steps.staged-artifact.outputs.url }}
           BRANCH: ${{ env.STAGING_BRANCH }}
+          EXPECTED_DIGEST: ${{ steps.staging-artifact.outputs.package-digest }}
           EXPECTED_SHA: ${{ steps.expected-commit.outputs.sha }}
           INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}
           REPO_DIR: ${{ env.STAGING_REPO_DIR }}
           RUN_AS: ${{ env.STAGING_RUN_AS }}
+          STAGING_SSR_CLIENT_ID: ${{ secrets.STAGING_SSR_CLIENT_ID }}
+          STAGING_SSR_CLIENT_SECRET: ${{ secrets.STAGING_SSR_CLIENT_SECRET }}
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
-          node ops/scripts/deployment-bus.cjs github-create-status \
-            --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
-            --state in_progress \
-            --description "Sending staging SSM deploy command" \
-            --environment-url "https://staging.6529.io" \
-            --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          test -n "$STAGING_SSR_CLIENT_ID"
+          test -n "$STAGING_SSR_CLIENT_SECRET"
+
+          jq -e '
+            type == "object" and
+            has("staging") and
+            (.staging | type == "object") and
+            (.staging["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) and
+            (has("production") | not)
+          ' <<<"$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" >/dev/null
 
           repo_dir_q="$(printf '%q' "$REPO_DIR")"
           run_as_q="$(printf '%q' "$RUN_AS")"
           branch_q="$(printf '%q' "$BRANCH")"
+          artifact_url_q="$(printf '%q' "$ARTIFACT_URL")"
+          expected_digest_q="$(printf '%q' "$EXPECTED_DIGEST")"
           expected_sha_q="$(printf '%q' "$EXPECTED_SHA")"
+          public_review_destinations_b64_q="$(
+            printf '%q' \
+              "$(printf '%s' "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" | base64 -w0)"
+          )"
+          ssr_client_id_b64_q="$(
+            printf '%q' "$(printf '%s' "$STAGING_SSR_CLIENT_ID" | base64 -w0)"
+          )"
+          ssr_client_secret_b64_q="$(
+            printf '%q' "$(printf '%s' "$STAGING_SSR_CLIENT_SECRET" | base64 -w0)"
+          )"
 
           remote_script="$(
             cat <<REMOTE_SCRIPT_VARS
@@ -198,7 +392,12 @@ jobs:
           REPO_DIR=$repo_dir_q
           RUN_AS=$run_as_q
           BRANCH=$branch_q
+          ARTIFACT_URL=$artifact_url_q
+          EXPECTED_DIGEST=$expected_digest_q
           EXPECTED_SHA=$expected_sha_q
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64=$public_review_destinations_b64_q
+          SSR_CLIENT_ID_B64=$ssr_client_id_b64_q
+          SSR_CLIENT_SECRET_B64=$ssr_client_secret_b64_q
           REMOTE_SCRIPT_VARS
             cat <<'REMOTE_SCRIPT_BODY'
 
@@ -214,111 +413,52 @@ jobs:
             exit 1
           fi
 
-          sfw_bin="$(command -v sfw || true)"
-          if [ -n "$sfw_bin" ] && command -v node >/dev/null 2>&1; then
-            sfw_root="$(
-              node - "$sfw_bin" <<'NODE'
-          const fs = require("node:fs");
-          const path = require("node:path");
-
-          let current = fs.realpathSync(process.argv[2]);
-          if (fs.statSync(current).isFile()) {
-            current = path.dirname(current);
-          }
-
-          while (current !== path.dirname(current)) {
-            const packageJson = path.join(current, "package.json");
-            if (fs.existsSync(packageJson)) {
-              try {
-                const manifest = JSON.parse(fs.readFileSync(packageJson, "utf8"));
-                if (manifest.name === "sfw") {
-                  console.log(current);
-                  process.exit(0);
-                }
-              } catch {
-                process.exit(1);
-              }
-            }
-            current = path.dirname(current);
-          }
-
-          process.exit(1);
-          NODE
-              true
-            )"
-
-            if [ -n "$sfw_root" ]; then
-              echo "Preparing Socket Firewall cache at $sfw_root/.sfw-cache"
-              mkdir -p "$sfw_root/.sfw-cache"
-              chown -R "$RUN_AS:$RUN_AS" "$sfw_root/.sfw-cache"
-            else
-              echo "Could not resolve Socket Firewall package root for $sfw_bin; continuing without cache preparation."
+          for required_command in base64 jq; do
+            if ! command -v "$required_command" >/dev/null 2>&1; then
+              echo "Required staging command '$required_command' is unavailable." >&2
+              exit 1
             fi
-          fi
+          done
 
-          deploy_script="$(mktemp /tmp/6529-staging-deploy.XXXXXX.sh)"
-          cleanup() {
-            rm -f "$deploy_script"
+          # SSM runs this wrapper as root, while the checkout and its Git
+          # credentials belong to RUN_AS. Keep every repository operation
+          # under that identity; do not weaken Git's ownership protection with
+          # a root-level safe.directory exception.
+          run_git() {
+            sudo -H -u "$RUN_AS" git -C "$REPO_DIR" "$@"
           }
-          trap cleanup EXIT HUP INT TERM
 
-          cat > "$deploy_script" <<'DEPLOY_SCRIPT'
-          #!/usr/bin/env bash
-          set -euo pipefail
-
-          if [[ "$#" -ne 3 ]]; then
-            echo "Usage: $0 <repo-dir> <branch> <expected-sha>" >&2
-            exit 1
-          fi
-
-          REPO_DIR="$1"
-          BRANCH="$2"
-          EXPECTED_SHA="$3"
-
-          cd "$REPO_DIR"
-
-          echo "Repository: $(pwd)"
-          echo "Deploying branch: $BRANCH"
-          echo "Expected commit: $EXPECTED_SHA"
-
-          git fetch --no-tags origin "$BRANCH"
-          remote_sha="$(git rev-parse FETCH_HEAD)"
+          run_git fetch --no-tags origin "$BRANCH"
+          remote_sha="$(run_git rev-parse FETCH_HEAD)"
           if [[ "$remote_sha" != "$EXPECTED_SHA" ]]; then
             echo "origin $BRANCH is $remote_sha, expected $EXPECTED_SHA." >&2
-            echo "A newer staging push may have superseded this run; refusing to deploy a different commit." >&2
+            echo "A newer staging push superseded this run; refusing to deploy stale bytes." >&2
             exit 1
           fi
-
-          echo "Resetting deploy checkout before switching to $BRANCH"
-          git reset --hard HEAD
-          git clean -fd generated
-
-          git checkout -B "$BRANCH" FETCH_HEAD
-          git config "branch.$BRANCH.remote" origin
-          git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
-          git reset --hard FETCH_HEAD
-
-          SKIP_STAGING_PULL=1 ./bin/6529 staging
-
-          deployed_sha="$(git rev-parse HEAD)"
-          echo "Deployed commit: $deployed_sha"
-          if [[ "$deployed_sha" != "$EXPECTED_SHA" ]]; then
-            echo "Expected $EXPECTED_SHA but deployed $deployed_sha" >&2
-            exit 1
-          fi
-
-          pm2 describe 6529seize >/dev/null
-          pm2 status 6529seize
-          DEPLOY_SCRIPT
-
-          chmod 755 "$deploy_script"
-          sudo -H -u "$RUN_AS" bash "$deploy_script" "$REPO_DIR" "$BRANCH" "$EXPECTED_SHA"
+          run_git reset --hard HEAD
+          run_git clean -fd generated
+          run_git checkout -B "$BRANCH" FETCH_HEAD
+          run_git config "branch.$BRANCH.remote" origin
+          run_git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
+          run_git reset --hard FETCH_HEAD
+          test "$(run_git rev-parse HEAD)" = "$EXPECTED_SHA"
+          cd "$REPO_DIR"
+          bash -n ops/scripts/deploy-staging-artifact.sh
+          ARTIFACT_URL="$ARTIFACT_URL" \
+          EXPECTED_DIGEST="$EXPECTED_DIGEST" \
+          EXPECTED_SHA="$EXPECTED_SHA" \
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64="$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64" \
+          REPO_DIR="$REPO_DIR" \
+          RUN_AS="$RUN_AS" \
+          SSR_CLIENT_ID_B64="$SSR_CLIENT_ID_B64" \
+          SSR_CLIENT_SECRET_B64="$SSR_CLIENT_SECRET_B64" \
+            bash ops/scripts/deploy-staging-artifact.sh
           REMOTE_SCRIPT_BODY
           )"
 
           jq -n \
             --arg command "$remote_script" \
-            '{commands: [$command], executionTimeout: ["3600"]}' \
+            '{commands: [$command], executionTimeout: ["2400"]}' \
             > ssm-parameters.json
 
           command_id="$(
@@ -327,7 +467,7 @@ jobs:
               --document-name "AWS-RunShellScript" \
               --comment "Deploy 6529seize frontend staging ${EXPECTED_SHA}" \
               --parameters file://ssm-parameters.json \
-              --timeout-seconds 3600 \
+              --timeout-seconds 2400 \
               --query "Command.CommandId" \
               --output text
           )"
@@ -339,8 +479,6 @@ jobs:
         env:
           COMMAND_ID: ${{ steps.send-command.outputs.command-id }}
           INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
-          DEPLOYMENT_ID: ${{ steps.deployment-record.outputs.deployment_id }}
-          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
@@ -361,7 +499,7 @@ jobs:
           }
 
           terminal_status=""
-          for attempt in {1..240}; do
+          for attempt in {1..160}; do
             status="$(
               aws ssm get-command-invocation \
                 --command-id "$COMMAND_ID" \
@@ -377,15 +515,6 @@ jobs:
             fi
 
             echo "SSM status: $status"
-            if [ $((attempt % 40)) -eq 0 ]; then
-              node ops/scripts/deployment-bus.cjs github-create-status \
-                --deployment-id "$DEPLOYMENT_ID" \
-                --state in_progress \
-                --description "Staging SSM status after $((attempt * 15 / 60)) minutes: $status" \
-                --environment-url "https://staging.6529.io" \
-                --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" || true
-            fi
-
             case "$status" in
               Success)
                 terminal_status="$status"
@@ -407,6 +536,21 @@ jobs:
             exit 1
           fi
 
+      - name: Remove transient managed-instance artifact
+        if: always() && steps.staged-artifact.outputs.object-key != ''
+        env:
+          OBJECT_KEY: ${{ steps.staged-artifact.outputs.object-key }}
+        run: |
+          if ! aws s3 rm "s3://${ARTIFACT_BUCKET}/${OBJECT_KEY}" \
+            --region "$ARTIFACT_BUCKET_REGION"; then
+            echo "::warning::Failed to remove transient staging artifact s3://${ARTIFACT_BUCKET}/${OBJECT_KEY}"
+            {
+              echo "### Staging artifact cleanup warning"
+              echo
+              echo "The transient object \`s3://${ARTIFACT_BUCKET}/${OBJECT_KEY}\` could not be removed and may require operator cleanup."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Verify staging HTTP version
         env:
           STAGING_AUTH: ${{ secrets.STAGING_AUTH }}
@@ -421,123 +565,69 @@ jobs:
             --timeout-ms 10000 \
             --output deployment-version-evidence.json
 
-          node ops/scripts/deployment-bus.cjs record-post-deploy-watch \
-            --file deployment-bus-manifest.json \
-            --status in_progress \
-            --observed-duration-minutes 0 \
-            --checkpoint http-version-match \
-            --checkpoint-status passed \
-            --evidence "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --notes "GET /api/version matched the staging deploy SHA."
-
-      - name: Upload durable staging version evidence
-        id: durable-version-evidence
-        continue-on-error: true
-        env:
-          DEPLOYMENT_ARTIFACT_S3_PREFIX: ${{ vars.DEPLOYMENT_ARTIFACT_S3_PREFIX || 's3://6529reviewbot-prod-artifacts/frontend-deployment/' }}
-        run: |
-          set -euo pipefail
-
-          node ops/scripts/deployment-bus.cjs upload-validation-artifact \
-            --file deployment-bus-manifest.json \
-            --pack deployment:http-version \
-            --status passed \
-            --source-file deployment-version-evidence.json \
-            --artifact-name deployment-version-evidence.json \
-            --s3-prefix "${DEPLOYMENT_ARTIFACT_S3_PREFIX}" \
-            --retention-policy standard-90-days \
-            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --notes "Durable staging GET /api/version evidence."
-
-      - name: Warn if durable staging evidence upload failed
-        if: steps.durable-version-evidence.outcome == 'failure'
-        run: |
-          echo "::warning::Durable staging version evidence upload failed. The deployment can continue, but release readiness remains incomplete until artifact storage/IAM is fixed and evidence is recorded."
-
-      - name: Mark staging deployment terminal
-        if: always() && steps.deployment-record.outputs.deployment_id != ''
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          JOB_STATUS: ${{ job.status }}
-        run: |
-          set -euo pipefail
-
-          case "$JOB_STATUS" in
-            success)
-              state="success"
-              manifest_status="deploy_verified"
-              description="Staging deployment verified"
-              ;;
-            cancelled)
-              state="error"
-              manifest_status="cancelled"
-              description="Staging deployment cancelled before verification"
-              ;;
-            *)
-              state="failure"
-              manifest_status="failed"
-              description="Staging deployment failed before verification"
-              ;;
-          esac
-
-          node ops/scripts/deployment-bus.cjs heartbeat-manifest \
-            --file deployment-bus-manifest.json \
-            --status "$manifest_status" \
-            --phase terminal \
-            --message "$description"
-
-          node ops/scripts/deployment-bus.cjs github-create-status \
-            --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
-            --state "$state" \
-            --description "$description" \
-            --environment-url "https://staging.6529.io" \
-            --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
-      - name: Record staging post-deploy watch
-        if: always() && hashFiles('deployment-bus-manifest.json') != ''
-        env:
-          JOB_STATUS: ${{ job.status }}
-        run: |
-          set -euo pipefail
-
-          if [ "$JOB_STATUS" = "success" ]; then
-            watch_status="passed"
-            observed_minutes="15"
-            notes="SSM deployment completed and staging deployed SHA verification passed."
-          else
-            watch_status="failed"
-            observed_minutes="0"
-            notes="Staging workflow did not complete deploy verification successfully."
-          fi
-
-          node ops/scripts/deployment-bus.cjs record-post-deploy-watch \
-            --file deployment-bus-manifest.json \
-            --status "$watch_status" \
-            --observed-duration-minutes "$observed_minutes" \
-            --checkpoint staging-deploy-verification \
-            --checkpoint-status "$watch_status" \
-            --evidence "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --notes "$notes"
-
-      - name: Create staging release report
-        if: always()
-        run: |
-          if [ -f deployment-bus-manifest.json ]; then
-            node ops/scripts/deployment-bus.cjs release-report \
-              --file deployment-bus-manifest.json \
-              --output deployment-release-report.md
-          else
-            echo "No deployment-bus-manifest.json was created; skipping release report."
-          fi
-
-      - name: Upload deployment bus manifest
+      - name: Upload exact staging version evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: deployment-bus-staging-${{ steps.expected-commit.outputs.sha || github.run_id }}
-          path: |
-            deployment-bus-manifest.json
-            deployment-release-report.md
-            deployment-version-evidence.json
+          name: staging-version-evidence-${{ steps.expected-commit.outputs.sha || github.run_id }}
+          path: deployment-version-evidence.json
           if-no-files-found: ignore
           retention-days: 30
+
+  notify-staging-outcome:
+    name: Notify staging deployment outcome
+    if: always()
+    needs:
+      - build-staging-artifact
+      - deploy-staging
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out CI wave notifier
+        continue-on-error: true
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          path: .ci-wave-notifier
+          sparse-checkout: scripts/notify-ci-wave.mjs
+          sparse-checkout-cone-mode: false
+
+      - name: Notify CI wave about failure
+        if: >-
+          (needs.build-staging-artifact.result != 'success' ||
+          needs.deploy-staging.result != 'success') &&
+          hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_ALERT_TYPE: deploy
+          CI_PIPELINES_TARGET_ENV: staging
+          CI_PIPELINES_STATUS: failure
+          CI_PIPELINES_TITLE: "WEB deploy failed"
+          CI_PIPELINES_ENVIRONMENT: staging
+          CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ github.sha }}
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
+
+      - name: Notify CI wave about success
+        if: >-
+          needs.build-staging-artifact.result == 'success' &&
+          needs.deploy-staging.result == 'success' &&
+          hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_ALERT_TYPE: deploy
+          CI_PIPELINES_TARGET_ENV: staging
+          CI_PIPELINES_STATUS: success
+          CI_PIPELINES_TITLE: "WEB deploy complete"
+          CI_PIPELINES_ENVIRONMENT: staging
+          CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ github.sha }}
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs

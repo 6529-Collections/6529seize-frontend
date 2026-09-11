@@ -9,11 +9,13 @@ import ParticipationDropVoteDetailsTrigger from "./ParticipationDropVoteDetailsT
 
 interface ParticipationDropRatingsVoterSectionProps extends RatingsSectionProps {
   readonly ratingsData: RatingsData;
+  readonly emphasizeCurrent?: boolean | undefined;
 }
 
 export default function ParticipationDropRatingsVoterSection({
   drop,
   ratingsData,
+  emphasizeCurrent = false,
 }: ParticipationDropRatingsVoterSectionProps) {
   const { hasRaters } = ratingsData;
 
@@ -70,7 +72,10 @@ export default function ParticipationDropRatingsVoterSection({
         </div>
       )}
 
-      <ParticipationDropVoteDetailsTrigger drop={drop} />
+      <ParticipationDropVoteDetailsTrigger
+        drop={drop}
+        density={emphasizeCurrent ? "tight" : undefined}
+      />
     </div>
   );
 }

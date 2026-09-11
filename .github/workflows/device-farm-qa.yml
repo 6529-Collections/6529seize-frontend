@@ -415,7 +415,8 @@ jobs:
     needs: [plan, web-smoke, native-android]
     if: always()
     runs-on: ubuntu-latest
-    permissions: {}
+    permissions:
+      contents: read
     steps:
       - name: Summarize pack results
         env:
@@ -445,3 +446,25 @@ jobs:
           title: "Device Farm Mobile QA: weekly real-device pack failed"
           description: "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           color: 0xff0000
+
+      - name: Checkout notification script
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        continue-on-error: true
+        with:
+          persist-credentials: false
+
+      - name: Notify CI wave about scheduled failure
+        if: failure() && github.event_name == 'schedule'
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_TARGET_ENV: production
+          CI_PIPELINES_STATUS: failure
+          CI_PIPELINES_TITLE: "Device Farm Mobile QA: weekly real-device pack failed"
+          CI_PIPELINES_DESCRIPTION: "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          CI_PIPELINES_ENVIRONMENT: production
+          CI_PIPELINES_SERVICE: device-farm-mobile-qa
+        run: node scripts/notify-ci-wave.mjs

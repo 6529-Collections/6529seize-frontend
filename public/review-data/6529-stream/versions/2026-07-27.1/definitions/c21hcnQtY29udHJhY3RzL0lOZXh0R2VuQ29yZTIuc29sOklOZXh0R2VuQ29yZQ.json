@@ -1,0 +1,149 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/INextGenCore2.sol:INextGenCore#function:0x9a8490f3",
+          "declaringDefinitionId": "smart-contracts/INextGenCore2.sol:INextGenCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "string",
+              "name": "newData",
+              "type": "string"
+            }
+          ],
+          "name": "changeTokenData",
+          "outputs": [],
+          "selector": "0x9a8490f3",
+          "signature": "changeTokenData(uint256,string)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "changeTokenData(uint256,string)",
+          "displaySignature": "changeTokenData(uint256,string)",
+          "functionKind": "function",
+          "id": "smart-contracts/INextGenCore2.sol:INextGenCore#function:0x9a8490f3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "newData",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lOZXh0R2VuQ29yZTIuc29sOklOZXh0R2VuQ29yZSNmdW5jdGlvbjoweDlhODQ5MGYz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "changeTokenData",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 75,
+            "byteStart": 88,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/INextGenCore2.sol#L6",
+            "lineEnd": 6,
+            "lineStart": 6,
+            "snippetSha256": "sha256:b00fcb9a6b605cc51bd4d6610f0528757a1a17d8e4c369ca88b06421b451471e",
+            "sourceSha256": "sha256:a2f1aab5afb85433a42293a36a6ffa804008d0ea220ba02404a68f6138e17da3"
+          },
+          "selector": "0x9a8490f3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/INextGenCore2.sol:INextGenCore",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lOZXh0R2VuQ29yZTIuc29sOklOZXh0R2VuQ29yZQ",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/INextGenCore2.sol:INextGenCore"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "INextGenCore",
+    "natspec": "",
+    "range": {
+      "byteLength": 106,
+      "byteStart": 59,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/INextGenCore2.sol#L5-L7",
+      "lineEnd": 7,
+      "lineStart": 5,
+      "snippetSha256": "sha256:c2e77a78aab987e00a2b9ebead1f5734b4aae4ad9f2973e52623b881ebbfa76c",
+      "sourceSha256": "sha256:a2f1aab5afb85433a42293a36a6ffa804008d0ea220ba02404a68f6138e17da3"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/INextGenCore2.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/INextGenCore2.sol:INextGenCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/INextGenCore2.sol:INextGenCore#function:0x9a8490f3",
+      "definitionId": "smart-contracts/INextGenCore2.sol:INextGenCore",
+      "severity": "advisory"
+    }
+  ]
+}

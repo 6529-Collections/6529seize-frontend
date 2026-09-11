@@ -1,9 +1,6 @@
-import React from "react";
 import { render, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import GroupCard, {
-  GroupCardState,
-} from "@/components/groups/page/list/card/GroupCard";
+import GroupCard from "@/components/groups/page/list/card/GroupCard";
 import { AuthContext } from "@/components/auth/Auth";
 import { useRouter } from "next/navigation";
 
@@ -13,20 +10,9 @@ jest.mock("next/navigation", () => ({
   usePathname: () => "/",
 }));
 
-jest.mock(
-  "@/components/groups/page/list/card/GroupCardView",
-  () => (props: any) =>
-    (
-      <div
-        data-testid="view"
-        onClick={() => props.setState && props.setState(GroupCardState.REP)}
-      />
-    )
-);
-jest.mock(
-  "@/components/groups/page/list/card/vote-all/GroupCardVoteAll",
-  () => (props: any) => <div data-testid={`vote-${props.matter}`} />
-);
+jest.mock("@/components/groups/page/list/card/GroupCardView", () => () => (
+  <div data-testid="view" />
+));
 
 const push = jest.fn();
 (useRouter as jest.Mock).mockReturnValue({ push });
@@ -59,24 +45,27 @@ describe("GroupCard", () => {
   function renderComp(opts: any = {}) {
     return render(
       <AuthContext.Provider
-        value={{ connectedProfile: { handle: "me" } } as any}>
+        value={{ connectedProfile: { handle: "me" } } as any}
+      >
         <GroupCard group={group} {...opts} />
       </AuthContext.Provider>
     );
   }
 
-  it("navigates to community view when idle", () => {
+  it("exposes a native whole-card link when idle", () => {
     const { getByRole } = renderComp();
-    fireEvent.click(getByRole("button"));
-    expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
+    expect(getByRole("link", { name: "Open g" })).toHaveAttribute(
+      "href",
+      `/network?page=1&group=${group.id}`
+    );
   });
 
   it("navigates to community view when pressing Enter", async () => {
     const user = userEvent.setup();
     const { getByRole } = renderComp();
-    const button = getByRole("button");
+    const cardLink = getByRole("link", { name: "Open g" });
 
-    button.focus();
+    cardLink.focus();
     await user.keyboard("{Enter}");
 
     expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
@@ -85,25 +74,26 @@ describe("GroupCard", () => {
   it("navigates to community view when pressing Space", async () => {
     const user = userEvent.setup();
     const { getByRole } = renderComp();
-    const button = getByRole("button");
+    const cardLink = getByRole("link", { name: "Open g" });
 
-    button.focus();
+    cardLink.focus();
     await user.keyboard(" ");
 
     expect(push).toHaveBeenCalledWith(`/network?page=1&group=${group.id}`);
   });
 
-  it("calls setActiveGroupIdVoteAll when view is clicked", () => {
-    const setActive = jest.fn();
-    const { container } = renderComp({
-      activeGroupIdVoteAll: null,
-      setActiveGroupIdVoteAll: setActive,
-    });
+  it("does not activate whole-card navigation for placeholders", () => {
+    const { getByTestId, queryByRole } = render(
+      <AuthContext.Provider value={{ connectedProfile: null } as any}>
+        <GroupCard titlePlaceholder="Loading group" />
+      </AuthContext.Provider>
+    );
 
-    // Click the view to trigger state change
-    fireEvent.click(container.querySelector('[data-testid="view"]')!);
+    fireEvent.click(getByTestId("view"));
 
-    // Should call the callback to notify parent of state change
-    expect(setActive).toHaveBeenCalledWith(group.id);
+    expect(push).not.toHaveBeenCalled();
+    expect(
+      queryByRole("link", { name: "Open Loading group" })
+    ).not.toBeInTheDocument();
   });
 });

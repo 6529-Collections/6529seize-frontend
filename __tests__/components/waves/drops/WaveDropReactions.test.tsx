@@ -4,8 +4,14 @@ import { QueryKey as AppQueryKey } from "@/components/react-query-wrapper/ReactQ
 import { useEmoji } from "@/contexts/EmojiContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import * as commonApi from "@/services/api/common-api";
 import { __resetDropReactionMonitoringForTests } from "@/utils/monitoring/dropReactionMonitoring";
+import { __resetDropReactionAuthRecoveryForTests } from "@/hooks/drops/useDropReactionAuthRecovery";
+import {
+  __resetDropReactionRequestQueueForTests,
+  DropReactionRequestTimeoutError,
+} from "@/helpers/reactions/dropReactionRequestQueue";
 import {
   act,
   fireEvent,
@@ -102,6 +108,16 @@ const mockUseEmoji = useEmoji as jest.Mock;
 const mockUseAuth = useAuth as jest.Mock;
 const { fetchDropByIdBatched } = require("@/services/api/drop-api");
 const setToastMock = jest.fn();
+const mockGetEligibility = jest.fn();
+const mockUpdateEligibility = jest.fn();
+const requestAuthMock = jest.fn(async () => ({ success: true }));
+
+jest.mock("@/contexts/wave/WaveEligibilityContext", () => ({
+  useWaveEligibility: jest.fn(() => ({
+    getEligibility: mockGetEligibility,
+    updateEligibility: mockUpdateEligibility,
+  })),
+}));
 const createStructuredReactionError = ({
   body,
   headers,
@@ -167,7 +183,7 @@ const createEmojiContextValue = (
 
 const createMockDrop = (overrides: Record<string, unknown> = {}) => ({
   id: "test-drop",
-  wave: { id: "test-wave" },
+  wave: { id: "test-wave", authenticated_user_eligible_to_chat: true },
   reactions: [],
   ...overrides,
 });
@@ -191,6 +207,150 @@ const createDeferred = <T,>() => {
 };
 
 describe("WaveDropReactions", () => {
+  it("keeps a stable chip synchronized with externally updated count and selection", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue([
+        {
+          category: "people",
+          emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+        },
+      ])
+    );
+    const drop = createMockDrop({
+      reactions: [
+        {
+          reaction: ":gm:",
+          count: 1,
+          profiles: [{ id: "other", handle: "other" }],
+        },
+      ],
+      context_profile_context: { reaction: null },
+    }) as unknown as ApiDrop;
+    const { rerender } = render(<WaveDropReactions drop={drop} />);
+    const originalButton = screen.getAllByRole("button")[0]!;
+    const updatedReaction = { ...drop.reactions[0]!, count: 3 };
+    rerender(
+      <WaveDropReactions
+        drop={{
+          ...drop,
+          context_profile_context: {
+            ...drop.context_profile_context!,
+            reaction: ":gm:",
+          },
+          reactions: [updatedReaction],
+        }}
+      />
+    );
+    await waitFor(() => expect(originalButton).toHaveTextContent("3"));
+    expect(originalButton).toHaveClass("tw-border-primary-500");
+    expect(screen.getAllByRole("button")[0]).toBe(originalButton);
+    rerender(<WaveDropReactions drop={drop} />);
+    await waitFor(() => expect(originalButton).toHaveTextContent("1"));
+    expect(originalButton).not.toHaveClass("tw-border-primary-500");
+  });
+  it.each([null, ":wave:", ":gm:"])(
+    "reconciles a saved chip reaction after timeout (previous %s)",
+    async (previous) => {
+      mockUseEmoji.mockReturnValue(
+        createEmojiContextValue(
+          [
+            {
+              category: "people",
+              emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+            },
+          ],
+          () => null
+        )
+      );
+      const rollback = jest.fn();
+      getMyStreamMock().mockReturnValue({
+        applyOptimisticDropUpdate: jest.fn(() => ({ rollback })),
+      });
+      const drop = createMockDrop({
+        reactions: [
+          {
+            reaction: ":gm:",
+            profiles: [{ id: "another", handle: "another" }],
+          },
+        ],
+        context_profile_context: { reaction: previous },
+      });
+      const intended = previous === ":gm:" ? null : ":gm:";
+      const request =
+        intended === null
+          ? jest.mocked(commonApi.commonApiDelete)
+          : jest.mocked(commonApi.commonApiPost);
+      request.mockRejectedValueOnce(new DropReactionRequestTimeoutError());
+      (fetchDropByIdBatched as jest.Mock).mockResolvedValue({
+        ...drop,
+        context_profile_context: { reaction: intended },
+        reactions: [
+          { reaction: ":gm:", profiles: [], count: intended === null ? 1 : 2 },
+        ],
+      });
+      render(<WaveDropReactions drop={drop as unknown as ApiDrop} />);
+      const button = screen.getAllByRole("button")[0]!;
+      await act(async () => {
+        fireEvent.click(button);
+      });
+      expect(setToastMock).not.toHaveBeenCalled();
+      expect(rollback).not.toHaveBeenCalled();
+      expect(request).toHaveBeenCalledTimes(1);
+      const reconciledButton = screen.getAllByRole("button")[0]!;
+      expect(reconciledButton).toHaveTextContent(intended === null ? "1" : "2");
+      if (intended === null)
+        expect(reconciledButton).not.toHaveClass("tw-border-primary-500");
+      else expect(reconciledButton).toHaveClass("tw-border-primary-500");
+    }
+  );
+  it.each([true, false])(
+    "keeps failure feedback scoped to the containing drop when its last chip disappears (drop visible: %s)",
+    async (visible) => {
+      mockUseEmoji.mockReturnValue(
+        createEmojiContextValue(
+          [
+            {
+              category: "people",
+              emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+            },
+          ],
+          () => null
+        )
+      );
+      const request = createDeferred<void>();
+      jest
+        .mocked(commonApi.commonApiDelete)
+        .mockReturnValueOnce(request.promise);
+      const rollback = jest.fn();
+      getMyStreamMock().mockReturnValue({
+        applyOptimisticDropUpdate: jest.fn(() => ({ rollback })),
+      });
+      const drop = createMockDrop({
+        context_profile_context: { reaction: ":gm:" },
+        reactions: [
+          {
+            reaction: ":gm:",
+            profiles: [{ id: "profile-1", handle: "alice" }],
+          },
+        ],
+      }) as unknown as ApiDrop;
+      const { rerender, unmount } = render(<WaveDropReactions drop={drop} />);
+      fireEvent.click(screen.getAllByRole("button")[0]!);
+      if (visible)
+        rerender(<WaveDropReactions drop={{ ...drop, reactions: [] }} />);
+      else unmount();
+      await act(async () => {
+        request.reject(new Error("Reaction unavailable"));
+      });
+      expect(rollback).toHaveBeenCalledTimes(1);
+      if (visible)
+        expect(setToastMock).toHaveBeenCalledWith({
+          message: "Reaction unavailable",
+          type: "error",
+        });
+      else expect(setToastMock).not.toHaveBeenCalled();
+    }
+  );
   const getMyStreamMock = () =>
     (
       require("@/contexts/wave/MyStreamContext") as {
@@ -202,11 +362,17 @@ describe("WaveDropReactions", () => {
     // Reset call history without removing default implementations
     jest.clearAllMocks();
     __resetDropReactionMonitoringForTests();
+    __resetDropReactionAuthRecoveryForTests();
+    __resetDropReactionRequestQueueForTests();
+    requestAuthMock.mockResolvedValue({ success: true });
     mockQueryCacheFindAll.mockReset();
     mockQueryCacheFindAll.mockReturnValue([]);
     mockSetQueryData.mockReset();
+    mockGetEligibility.mockReturnValue(null);
     mockUseAuth.mockReturnValue({
       connectedProfile: { id: "profile-1", handle: "alice" },
+      activeProfileProxy: null,
+      requestAuth: requestAuthMock,
       setToast: setToastMock,
     });
     getMyStreamMock().mockReturnValue({
@@ -374,6 +540,7 @@ describe("WaveDropReactions", () => {
       endpoint: "drops/test-drop/reaction",
       body: { reaction: ":gm:" },
       errorMode: "structured",
+      signal: expect.any(AbortSignal),
     });
 
     // Click button again to decrement
@@ -384,6 +551,89 @@ describe("WaveDropReactions", () => {
     expect(commonApi.commonApiDelete).toHaveBeenCalledWith({
       endpoint: "drops/test-drop/reaction",
       errorMode: "structured",
+      signal: expect.any(AbortSignal),
+    });
+  });
+
+  it("disables reaction chips when chat and reactions are disabled for the wave", () => {
+    mockGetEligibility.mockReturnValue({
+      authenticated_user_eligible_to_chat: false,
+      authenticated_user_chat_restriction: ChatRestriction.DISABLED,
+    });
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "test-handle-1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    const button = screen.getByRole("button");
+    expect(button).toBeDisabled();
+    fireEvent.click(button);
+    expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+    expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
+  });
+
+  it("keeps reaction chips enabled when the viewer lacks chat-group permission", async () => {
+    mockGetEligibility.mockReturnValue({
+      authenticated_user_eligible_to_chat: false,
+      authenticated_user_chat_restriction: ChatRestriction.NO_PERMISSION,
+    });
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+    (commonApi.commonApiPost as jest.Mock).mockResolvedValue({
+      id: "test-drop",
+    });
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "test-handle-1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    const button = screen.getByRole("button");
+    expect(button).toBeEnabled();
+    fireEvent.click(button);
+    await waitFor(() => {
+      expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -445,6 +695,7 @@ describe("WaveDropReactions", () => {
       expect(commonApi.commonApiDelete).toHaveBeenCalledWith({
         endpoint: "drops/test-drop/reaction",
         errorMode: "structured",
+        signal: expect.any(AbortSignal),
       });
     });
     expect(mockSetQueryData).toHaveBeenCalledWith(
@@ -514,6 +765,139 @@ describe("WaveDropReactions", () => {
         type: "error",
       });
     });
+    expect(requestAuthMock).not.toHaveBeenCalled();
+  });
+
+  it("marks chat and reactions disabled after the exact backend 403", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError({
+        body: JSON.stringify({
+          error: "Chatting and reacting is not enabled in this wave",
+        }),
+        message: "Chatting and reacting is not enabled in this wave",
+        status: 403,
+      })
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "test-handle-1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button"));
+
+    await waitFor(() => {
+      expect(mockUpdateEligibility).toHaveBeenCalledWith("test-wave", {
+        authenticated_user_eligible_to_chat: false,
+        authenticated_user_chat_restriction: ChatRestriction.DISABLED,
+      });
+    });
+  });
+
+  it("recovers after a raw 401 and sends another reaction only on an explicit retry", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+    const recovery = createDeferred<{ success: boolean }>();
+    requestAuthMock.mockReturnValueOnce(recovery.promise);
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError({
+        body: "Unauthorized",
+        headers: new Headers({ "Content-Type": "application/json" }),
+        message: "Unauthorized",
+        status: 401,
+      })
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "test-handle-1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    const button = screen.getByRole("button");
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(requestAuthMock).toHaveBeenCalledWith({
+        serverRejected: true,
+        expectedAuthStateFingerprint: expect.any(String),
+      });
+      expect(button).toBeDisabled();
+    });
+    expect(setToastMock).toHaveBeenCalledWith({
+      message: "Unauthorized",
+      type: "error",
+    });
+    fireEvent.click(button);
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      recovery.resolve({ success: true });
+      await recovery.promise;
+    });
+
+    await waitFor(() => expect(button).toBeEnabled());
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+    expect(button).toHaveTextContent("1");
+    expect(button).not.toHaveClass("tw-border-primary-500");
+
+    (commonApi.commonApiPost as jest.Mock).mockResolvedValueOnce({});
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(commonApi.commonApiPost).toHaveBeenCalledTimes(2);
+      expect(button).toBeEnabled();
+    });
+    expect(commonApi.commonApiPost).toHaveBeenLastCalledWith({
+      endpoint: "drops/test-drop/reaction",
+      body: { reaction: ":gm:" },
+      errorMode: "structured",
+      signal: expect.any(AbortSignal),
+    });
+    expect(button).toHaveTextContent("2");
+    expect(button).toHaveClass("tw-border-primary-500");
+    expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
+    expect(requestAuthMock).toHaveBeenCalledTimes(1);
+    expect(setToastMock).toHaveBeenCalledTimes(1);
   });
 
   it("shows rate-limit guidance and rolls back chip state after a 429", async () => {
@@ -636,6 +1020,7 @@ describe("WaveDropReactions", () => {
     await waitFor(() => {
       expect(button).toHaveTextContent("1");
     });
+    expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
     expect(firstRollback).not.toHaveBeenCalled();
     expect(secondRollback).not.toHaveBeenCalled();
 
@@ -644,6 +1029,9 @@ describe("WaveDropReactions", () => {
       await Promise.resolve();
     });
 
+    await waitFor(() =>
+      expect(commonApi.commonApiDelete).toHaveBeenCalledTimes(1)
+    );
     expect(button).toHaveTextContent("1");
     expect(setToastMock).not.toHaveBeenCalled();
     expect(firstRollback).not.toHaveBeenCalled();
@@ -841,6 +1229,19 @@ describe("WaveDropReactions", () => {
     expect(
       waveReaction.profiles.some((profile: any) => profile.id === "profile-1")
     ).toBe(true);
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      firstRequest.resolve({});
+      await firstRequest.promise;
+    });
+    await waitFor(() =>
+      expect(commonApi.commonApiPost).toHaveBeenCalledTimes(2)
+    );
+    await act(async () => {
+      secondRequest.resolve({});
+      await secondRequest.promise;
+    });
   });
 
   it("shows the safe status-text message when a chip reaction gets an empty structured response", async () => {
@@ -940,7 +1341,12 @@ describe("WaveDropReactions", () => {
     expect(screen.queryByText("Reactions")).not.toBeInTheDocument();
   });
 
-  it("shows 'and X more' in tooltip when more than 3 profiles", async () => {
+  it("renders reaction pills as non-interactive in proxy mode", () => {
+    mockUseAuth.mockReturnValue({
+      connectedProfile: { id: "profile-1", handle: "alice" },
+      activeProfileProxy: { id: "proxy-1" },
+      setToast: setToastMock,
+    });
     mockUseEmoji.mockReturnValue(
       createEmojiContextValue(
         [
@@ -954,6 +1360,43 @@ describe("WaveDropReactions", () => {
     );
 
     render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "user1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    const button = screen.getByRole("button");
+    expect(button).toBeDisabled();
+
+    fireEvent.click(button);
+
+    expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+    expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
+  });
+
+  it("shows 'and X more' in tooltip when more than 3 profiles", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+
+    const { container } = render(
       <WaveDropReactions
         drop={
           createMockDrop({
@@ -978,8 +1421,10 @@ describe("WaveDropReactions", () => {
     fireEvent.mouseEnter(reactionButton);
 
     await waitFor(() => {
-      const moreButton = screen.queryByText(/and 2 others/);
+      const moreButton = screen.getByText(/and 2 others/);
       expect(moreButton).toBeInTheDocument();
+      expect(moreButton.closest("body")).toBe(document.body);
+      expect(container.contains(moreButton)).toBe(false);
     });
   });
 

@@ -1,0 +1,356 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient#function:0x3f09775e",
+          "declaringDefinitionId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient",
+          "inherited": false,
+          "inputs": [],
+          "name": "reentered",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x3f09775e",
+          "signature": "reentered()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient#function:0x14e1c3f5",
+          "declaringDefinitionId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient",
+          "inherited": false,
+          "inputs": [],
+          "name": "reenteredSucceeded",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x14e1c3f5",
+          "signature": "reenteredSucceeded()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient#function:0xdeaa59df",
+          "declaringDefinitionId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamSplitWallet",
+              "name": "wallet_",
+              "type": "address"
+            }
+          ],
+          "name": "setWallet",
+          "outputs": [],
+          "selector": "0xdeaa59df",
+          "signature": "setWallet(address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "reentered()",
+          "displaySignature": "reentered()",
+          "functionKind": "getter",
+          "id": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient#function:0x3f09775e",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpSZWVudHJhbnRTcGxpdFJlY2lwaWVudCNmdW5jdGlvbjoweDNmMDk3NzVl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "reentered",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 21,
+            "byteStart": 78410,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1742",
+            "lineEnd": 1742,
+            "lineStart": 1742,
+            "snippetSha256": "sha256:ea4a06bbe98b18186c836a056adbf275c2308f709949c2148cc123dfddddb7fb",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": "0x3f09775e",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "reenteredSucceeded()",
+          "displaySignature": "reenteredSucceeded()",
+          "functionKind": "getter",
+          "id": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient#function:0x14e1c3f5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpSZWVudHJhbnRTcGxpdFJlY2lwaWVudCNmdW5jdGlvbjoweDE0ZTFjM2Y1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "reenteredSucceeded",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 30,
+            "byteStart": 78437,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1743",
+            "lineEnd": 1743,
+            "lineStart": 1743,
+            "snippetSha256": "sha256:80e7d73f8b06dfa0cc65865f88d24d5cf911c02a843978bd08006220a1da7509",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": "0x14e1c3f5",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "setWallet(address)",
+          "displaySignature": "setWallet(IStreamSplitWallet)",
+          "functionKind": "function",
+          "id": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient#function:0xdeaa59df",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "wallet_",
+              "type": "IStreamSplitWallet"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpSZWVudHJhbnRTcGxpdFJlY2lwaWVudCNmdW5jdGlvbjoweGRlYWE1OWRm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setWallet",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 89,
+            "byteStart": 78474,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1745-L1747",
+            "lineEnd": 1747,
+            "lineStart": 1745,
+            "snippetSha256": "sha256:6b5f26c065b9f0607b007c088be76f1c6b6b36712e6bce813eaf2dc8d959f78e",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": "0xdeaa59df",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "receive()",
+          "functionKind": "receive",
+          "id": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient#function:receive()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpSZWVudHJhbnRTcGxpdFJlY2lwaWVudCNmdW5jdGlvbjpyZWNlaXZlKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 251,
+            "byteStart": 78569,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1749-L1756",
+            "lineEnd": 1756,
+            "lineStart": 1749,
+            "snippetSha256": "sha256:7ef3e239ede50800494ece845a499a019f5866a32dd2fe9797ad3e372488c76e",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": null,
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "wallet",
+          "natspec": "",
+          "range": {
+            "byteLength": 33,
+            "byteStart": 78371,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1741",
+            "lineEnd": 1741,
+            "lineStart": 1741,
+            "snippetSha256": "sha256:55051af7a2bee5e6ea86d1f9210c05bbf4506df6f67d73f60d532cdd27cf675b",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": null,
+          "type": "IStreamSplitWallet",
+          "typeString": "contract IStreamSplitWallet",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient#function:0x3f09775e",
+          "immutable": false,
+          "name": "reentered",
+          "natspec": "",
+          "range": {
+            "byteLength": 21,
+            "byteStart": 78410,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1742",
+            "lineEnd": 1742,
+            "lineStart": 1742,
+            "snippetSha256": "sha256:ea4a06bbe98b18186c836a056adbf275c2308f709949c2148cc123dfddddb7fb",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": "0x3f09775e",
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient#function:0x14e1c3f5",
+          "immutable": false,
+          "name": "reenteredSucceeded",
+          "natspec": "",
+          "range": {
+            "byteLength": 30,
+            "byteStart": 78437,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1743",
+            "lineEnd": 1743,
+            "lineStart": 1743,
+            "snippetSha256": "sha256:80e7d73f8b06dfa0cc65865f88d24d5cf911c02a843978bd08006220a1da7509",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": "0x14e1c3f5",
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpSZWVudHJhbnRTcGxpdFJlY2lwaWVudA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ReentrantSplitRecipient",
+    "natspec": "",
+    "range": {
+      "byteLength": 490,
+      "byteStart": 78332,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1740-L1757",
+      "lineEnd": 1757,
+      "lineStart": 1740,
+      "snippetSha256": "sha256:be5c086e4f2606296dd736936fe54d0b54a67c4d399cfc2fd4c0171ffbc42cdd",
+      "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamSplitWallet.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 5
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 4
+    },
+    "totalCount": 5
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient#function:0x14e1c3f5",
+      "definitionId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient#function:0x3f09775e",
+      "definitionId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient#function:0xdeaa59df",
+      "definitionId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient#function:receive()",
+      "definitionId": "test/StreamSplitWallet.t.sol:ReentrantSplitRecipient",
+      "severity": "advisory"
+    }
+  ]
+}

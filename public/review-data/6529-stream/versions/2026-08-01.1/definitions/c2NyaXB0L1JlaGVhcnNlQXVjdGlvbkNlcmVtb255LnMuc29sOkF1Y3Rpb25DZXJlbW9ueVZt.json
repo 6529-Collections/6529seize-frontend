@@ -1,0 +1,484 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0xffa18649",
+          "declaringDefinitionId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "privateKey",
+              "type": "uint256"
+            }
+          ],
+          "name": "addr",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xffa18649",
+          "signature": "addr(uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0xc88a5e6d",
+          "declaringDefinitionId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "balance",
+              "type": "uint256"
+            }
+          ],
+          "name": "deal",
+          "outputs": [],
+          "selector": "0xc88a5e6d",
+          "signature": "deal(address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0xe341eaa4",
+          "declaringDefinitionId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "privateKey",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "digest",
+              "type": "bytes32"
+            }
+          ],
+          "name": "sign",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "v",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "r",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "s",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xe341eaa4",
+          "signature": "sign(uint256,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0x7fec2a8d",
+          "declaringDefinitionId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "broadcaster",
+              "type": "address"
+            }
+          ],
+          "name": "startBroadcast",
+          "outputs": [],
+          "selector": "0x7fec2a8d",
+          "signature": "startBroadcast(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0x76eadd36",
+          "declaringDefinitionId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm",
+          "inherited": false,
+          "inputs": [],
+          "name": "stopBroadcast",
+          "outputs": [],
+          "selector": "0x76eadd36",
+          "signature": "stopBroadcast()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0xe5d6bf02",
+          "declaringDefinitionId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
+            }
+          ],
+          "name": "warp",
+          "outputs": [],
+          "selector": "0xe5d6bf02",
+          "signature": "warp(uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "deployment_or_operational_source",
+    "classificationReason": "Declared under the pinned deployment-script source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "addr(uint256)",
+          "displaySignature": "addr(uint256)",
+          "functionKind": "function",
+          "id": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0xffa18649",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "privateKey",
+              "type": "uint256"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlQXVjdGlvbkNlcmVtb255LnMuc29sOkF1Y3Rpb25DZXJlbW9ueVZtI2Z1bmN0aW9uOjB4ZmZhMTg2NDk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "addr",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 61,
+            "byteStart": 358,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseAuctionCeremony.s.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:90592f7a981dd7cf5a212def0eeb231fd721bcbbba8ce127db1b80e2add5bcea",
+            "sourceSha256": "sha256:6678b93ef5b5ea17902c7465cbfea5b15cce4bcb07474e1f18509d6a873579f5"
+          },
+          "selector": "0xffa18649",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "deal(address,uint256)",
+          "displaySignature": "deal(address,uint256)",
+          "functionKind": "function",
+          "id": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0xc88a5e6d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "balance",
+              "type": "uint256"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlQXVjdGlvbkNlcmVtb255LnMuc29sOkF1Y3Rpb25DZXJlbW9ueVZtI2Z1bmN0aW9uOjB4Yzg4YTVlNmQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "deal",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 57,
+            "byteStart": 424,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseAuctionCeremony.s.sol#L13",
+            "lineEnd": 13,
+            "lineStart": 13,
+            "snippetSha256": "sha256:474b9a3f32f31d638580addc11dfaf71e90120a9d6b7c8f5c2e7394c0069dc2c",
+            "sourceSha256": "sha256:6678b93ef5b5ea17902c7465cbfea5b15cce4bcb07474e1f18509d6a873579f5"
+          },
+          "selector": "0xc88a5e6d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "sign(uint256,bytes32)",
+          "displaySignature": "sign(uint256,bytes32)",
+          "functionKind": "function",
+          "id": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0xe341eaa4",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "privateKey",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "digest",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlQXVjdGlvbkNlcmVtb255LnMuc29sOkF1Y3Rpb25DZXJlbW9ueVZtI2Z1bmN0aW9uOjB4ZTM0MWVhYTQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "sign",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "v",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "r",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "s",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 115,
+            "byteStart": 486,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseAuctionCeremony.s.sol#L14-L16",
+            "lineEnd": 16,
+            "lineStart": 14,
+            "snippetSha256": "sha256:93ff16ad639306c175d05a7b466bd61590c04569e564e179347995a448226dc8",
+            "sourceSha256": "sha256:6678b93ef5b5ea17902c7465cbfea5b15cce4bcb07474e1f18509d6a873579f5"
+          },
+          "selector": "0xe341eaa4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "startBroadcast(address)",
+          "displaySignature": "startBroadcast(address)",
+          "functionKind": "function",
+          "id": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0x7fec2a8d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "broadcaster",
+              "type": "address"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlQXVjdGlvbkNlcmVtb255LnMuc29sOkF1Y3Rpb25DZXJlbW9ueVZtI2Z1bmN0aW9uOjB4N2ZlYzJhOGQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "startBroadcast",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 54,
+            "byteStart": 606,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseAuctionCeremony.s.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:b70216c0d1ecd7ba3688da2f3da14931c2ea14d174bfeff5c89dd2c1a116d40b",
+            "sourceSha256": "sha256:6678b93ef5b5ea17902c7465cbfea5b15cce4bcb07474e1f18509d6a873579f5"
+          },
+          "selector": "0x7fec2a8d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "stopBroadcast()",
+          "displaySignature": "stopBroadcast()",
+          "functionKind": "function",
+          "id": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0x76eadd36",
+          "inputs": [],
+          "key": "c2NyaXB0L1JlaGVhcnNlQXVjdGlvbkNlcmVtb255LnMuc29sOkF1Y3Rpb25DZXJlbW9ueVZtI2Z1bmN0aW9uOjB4NzZlYWRkMzY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "stopBroadcast",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 34,
+            "byteStart": 665,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseAuctionCeremony.s.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:18810af604c8419a23308dd4206bdc86582b67243348d5cdc2aaf95eadcfeb83",
+            "sourceSha256": "sha256:6678b93ef5b5ea17902c7465cbfea5b15cce4bcb07474e1f18509d6a873579f5"
+          },
+          "selector": "0x76eadd36",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "warp(uint256)",
+          "displaySignature": "warp(uint256)",
+          "functionKind": "function",
+          "id": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0xe5d6bf02",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "timestamp",
+              "type": "uint256"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlQXVjdGlvbkNlcmVtb255LnMuc29sOkF1Y3Rpb25DZXJlbW9ueVZtI2Z1bmN0aW9uOjB4ZTVkNmJmMDI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "warp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 42,
+            "byteStart": 704,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseAuctionCeremony.s.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:6c1494b309b6e0c18dd2165c8b4c828338ed36400d05b5395937e8271c3e3dbd",
+            "sourceSha256": "sha256:6678b93ef5b5ea17902c7465cbfea5b15cce4bcb07474e1f18509d6a873579f5"
+          },
+          "selector": "0xe5d6bf02",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c2NyaXB0L1JlaGVhcnNlQXVjdGlvbkNlcmVtb255LnMuc29sOkF1Y3Rpb25DZXJlbW9ueVZt",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "AuctionCeremonyVm",
+    "natspec": "",
+    "range": {
+      "byteLength": 424,
+      "byteStart": 324,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseAuctionCeremony.s.sol#L11-L20",
+      "lineEnd": 20,
+      "lineStart": 11,
+      "snippetSha256": "sha256:453064893db56e6b365e63b7a1ba0ae686c5f1b35eed632cbc1a9aa944251a45",
+      "sourceSha256": "sha256:6678b93ef5b5ea17902c7465cbfea5b15cce4bcb07474e1f18509d6a873579f5"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "script",
+    "sourcePath": "script/RehearseAuctionCeremony.s.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 7
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 7
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0x76eadd36",
+      "definitionId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0x7fec2a8d",
+      "definitionId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0xc88a5e6d",
+      "definitionId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0xe341eaa4",
+      "definitionId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0xe5d6bf02",
+      "definitionId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm#function:0xffa18649",
+      "definitionId": "script/RehearseAuctionCeremony.s.sol:AuctionCeremonyVm",
+      "severity": "advisory"
+    }
+  ]
+}

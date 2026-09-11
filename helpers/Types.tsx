@@ -69,17 +69,17 @@ export enum STATEMENT_TYPE {
   THE_LINE = "THE_LINE",
   MANIFOLD = "MANIFOLD",
   TRANSIENT = "TRANSIENT",
+  NINFA = "NINFA",
 }
 
-export const STATEMENT_META: Record<
-  STATEMENT_TYPE,
-  {
-    readonly title: string;
-    readonly inputPlaceholder: string;
-    readonly inputInitialValue: string;
-    readonly canOpenStatement: boolean;
-  }
-> = {
+interface StatementMeta {
+  readonly title: string;
+  readonly inputPlaceholder: string;
+  readonly inputInitialValue: string;
+  readonly canOpenStatement: boolean;
+}
+
+export const STATEMENT_META: Record<STATEMENT_TYPE, StatementMeta> = {
   [STATEMENT_TYPE.X]: {
     title: "X",
     inputPlaceholder: "https://www.x.com/username",
@@ -278,7 +278,17 @@ export const STATEMENT_META: Record<
     inputInitialValue: "https://transient.xyz/",
     canOpenStatement: true,
   },
+  [STATEMENT_TYPE.NINFA]: {
+    title: "Ninfa",
+    inputPlaceholder: "https://ninfa.io/user/@artist",
+    inputInitialValue: "https://ninfa.io/",
+    canOpenStatement: true,
+  },
 };
+
+export const getStatementMeta = (
+  statementType: string
+): StatementMeta | undefined => STATEMENT_META[statementType as STATEMENT_TYPE];
 
 export const SOCIAL_MEDIA_ACCOUNT_STATEMENT_TYPES = [
   STATEMENT_TYPE.X,
@@ -312,6 +322,8 @@ export const NFT_ACCOUNTS_STATEMENT_TYPES = [
   STATEMENT_TYPE.THE_LINE,
   STATEMENT_TYPE.MANIFOLD,
   STATEMENT_TYPE.TRANSIENT,
+  STATEMENT_TYPE.NINFA,
+  STATEMENT_TYPE.LINK,
 ] as const;
 
 export type NFT_ACCOUNTS_STATEMENT_TYPE =
@@ -338,6 +350,7 @@ export enum Period {
 
 export enum WsMessageType {
   DROP_UPDATE = "DROP_UPDATE",
+  DROP_UPDATE_REF = "DROP_UPDATE_REF",
   DROP_DELETE = "DROP_DELETE",
   DROP_RATING_UPDATE = "DROP_RATING_UPDATE",
   DROP_REACTION_UPDATE = "DROP_REACTION_UPDATE",
@@ -345,6 +358,10 @@ export enum WsMessageType {
   MEDIA_LINK_UPDATED = "MEDIA_LINK_UPDATED",
   USER_IS_TYPING = "USER_IS_TYPING",
   SUBSCRIBE_TO_WAVE = "SUBSCRIBE_TO_WAVE",
+  SYNC_NOTIFICATION_IDENTITIES = "SYNC_NOTIFICATION_IDENTITIES",
+  NOTIFICATION_IDENTITIES_SYNCED = "NOTIFICATION_IDENTITIES_SYNCED",
+  IDENTITY_NOTIFICATIONS_CHANGED = "IDENTITY_NOTIFICATIONS_CHANGED",
+  DM_UNREAD_STATE_CHANGED = "DM_UNREAD_STATE_CHANGED",
 }
 
 export const WS_DROP_UPDATE_REASON_POLL_RESPONSE = "POLL_RESPONSE" as const;
@@ -364,6 +381,74 @@ export interface WsDropUpdateMessage {
   type: WsMessageType.DROP_UPDATE;
   data: ApiDrop;
   reason?: WsDropUpdateReason;
+}
+
+/**
+ * Compact reference emitted when a full DROP_UPDATE would exceed the
+ * application WebSocket frame ceiling. It deliberately carries no mutable
+ * drop content; clients must refetch the canonical drop through the feed API.
+ */
+export interface WsDropUpdateRefData {
+  readonly drop_id: string;
+  readonly wave_id: string;
+  readonly author_id: string;
+  readonly serial_no: number;
+  readonly update_type: WsDropUpdateRefUpdateType;
+  readonly reason?: string;
+}
+
+export type WsDropUpdateRefUpdateType =
+  | WsMessageType.DROP_UPDATE
+  | WsMessageType.DROP_RATING_UPDATE
+  | WsMessageType.DROP_REACTION_UPDATE;
+
+export interface WsDropUpdateRefMessage {
+  readonly type: WsMessageType.DROP_UPDATE_REF;
+  readonly data: WsDropUpdateRefData;
+}
+
+const isNonEmptyWebSocketId = (value: unknown): value is string =>
+  typeof value === "string" && value.trim().length > 0;
+
+const isWsDropUpdateRefUpdateType = (
+  value: unknown
+): value is WsDropUpdateRefUpdateType =>
+  value === WsMessageType.DROP_UPDATE ||
+  value === WsMessageType.DROP_RATING_UPDATE ||
+  value === WsMessageType.DROP_REACTION_UPDATE;
+
+/**
+ * Runtime validation for the untrusted compact WebSocket payload.
+ * Number.isSafeInteger also excludes NaN, infinities, fractions, and values
+ * that cannot be represented exactly by the feed cursor.
+ */
+export const isWsDropUpdateRefData = (
+  value: unknown
+): value is WsDropUpdateRefData => {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  const candidate = value as Partial<WsDropUpdateRefData>;
+  return (
+    isNonEmptyWebSocketId(candidate.drop_id) &&
+    isNonEmptyWebSocketId(candidate.wave_id) &&
+    isNonEmptyWebSocketId(candidate.author_id) &&
+    typeof candidate.serial_no === "number" &&
+    Number.isSafeInteger(candidate.serial_no) &&
+    candidate.serial_no >= 0 &&
+    isWsDropUpdateRefUpdateType(candidate.update_type) &&
+    (candidate.reason === undefined || isNonEmptyWebSocketId(candidate.reason))
+  );
+};
+
+export interface WsDropDeleteMessage {
+  type: WsMessageType.DROP_DELETE;
+  data: {
+    readonly drop_id: string;
+    readonly wave_id: string;
+    readonly drop_serial: number;
+  };
 }
 
 export interface WsAttachmentStatusUpdateMessage {

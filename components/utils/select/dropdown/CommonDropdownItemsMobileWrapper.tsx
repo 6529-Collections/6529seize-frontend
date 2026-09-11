@@ -16,6 +16,7 @@ export default function CommonDropdownItemsMobileWrapper({
   setOpen,
   label,
   hideOnDesktopHover = true,
+  compactContent = false,
   zIndexClassName = "tw-z-[1000]",
   onAfterLeave,
   children,
@@ -24,6 +25,7 @@ export default function CommonDropdownItemsMobileWrapper({
   readonly setOpen: (isOpen: boolean) => void;
   readonly label?: string | undefined;
   readonly hideOnDesktopHover?: boolean | undefined;
+  readonly compactContent?: boolean | undefined;
   readonly zIndexClassName?: string | undefined;
   readonly onAfterLeave?: (() => void) | undefined;
   readonly children: ReactNode;
@@ -100,7 +102,7 @@ export default function CommonDropdownItemsMobileWrapper({
                     </div>
                   </TransitionChild>
                   <div
-                    className="tw-flex tw-scroll-py-3 tw-flex-col tw-overflow-y-auto tw-rounded-t-xl tw-bg-iron-950 tw-pt-4"
+                    className={`tw-flex tw-scroll-py-3 tw-flex-col tw-overflow-y-auto tw-rounded-t-xl tw-bg-iron-950 ${compactContent ? "tw-pt-0" : "tw-pt-4"}`}
                     style={{
                       maxHeight: "calc(100vh - 8rem)",
                       paddingBottom: "env(safe-area-inset-bottom,0px)",
@@ -113,7 +115,9 @@ export default function CommonDropdownItemsMobileWrapper({
                         </DialogTitle>
                       </div>
                     )}
-                    <div className="tw-relative tw-mt-3 tw-flex tw-flex-1 tw-flex-col tw-gap-y-6 tw-px-4 sm:tw-px-6">
+                    <div
+                      className={`tw-relative tw-flex tw-flex-1 tw-flex-col tw-gap-y-6 tw-px-4 sm:tw-px-6 ${compactContent && !label ? "tw-mt-0" : "tw-mt-3"}`}
+                    >
                       <ul className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-space-y-3 tw-pl-0">
                         {children}
                       </ul>

@@ -35,7 +35,7 @@ describe('useWaveTopVoters', () => {
     dropId: null,
   };
 
-  const createWrapper = ({ children }: { children: React.ReactNode }) => 
+  const createWrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children);
 
   beforeEach(() => {
@@ -173,7 +173,7 @@ describe('useWaveTopVoters', () => {
       },
     });
 
-    const freshWrapper = ({ children }: { children: React.ReactNode }) => 
+    const freshWrapper = ({ children }: { children: React.ReactNode }) =>
       React.createElement(QueryClientProvider, { client: freshQueryClient }, children);
 
     mockCommonApiFetch.mockReset().mockResolvedValue(mockPageOne);
@@ -313,7 +313,7 @@ describe('useWaveTopVoters', () => {
       },
     });
 
-    const freshWrapper = ({ children }: { children: React.ReactNode }) => 
+    const freshWrapper = ({ children }: { children: React.ReactNode }) =>
       React.createElement(QueryClientProvider, { client: freshQueryClient }, children);
 
     mockCommonApiFetch

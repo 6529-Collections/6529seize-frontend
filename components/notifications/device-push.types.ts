@@ -6,7 +6,7 @@ export interface DevicePushData {
   target_profile_id: string;
   target_profile_handle: string;
   handle?: string;
-  subroute?: "rep" | "identity";
+  subroute?: "rep" | "identity" | "subscriptions";
   wave_id?: string;
   drop_id?: string;
 }

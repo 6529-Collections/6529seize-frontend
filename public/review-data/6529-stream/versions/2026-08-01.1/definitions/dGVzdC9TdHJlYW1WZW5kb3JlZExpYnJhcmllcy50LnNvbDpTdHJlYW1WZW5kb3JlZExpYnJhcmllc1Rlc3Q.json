@@ -1,0 +1,335 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest#function:0xe476c773",
+          "declaringDefinitionId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testBase64EncodingMatchesOpenZeppelinGoldenVectors",
+          "outputs": [],
+          "selector": "0xe476c773",
+          "signature": "testBase64EncodingMatchesOpenZeppelinGoldenVectors()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest#function:0x4872a99c",
+          "declaringDefinitionId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testBase64EncodingPreservesBinaryInputsAndPadding",
+          "outputs": [],
+          "selector": "0x4872a99c",
+          "signature": "testBase64EncodingPreservesBinaryInputsAndPadding()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest#function:0xb28fa958",
+          "declaringDefinitionId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMathMulDivHandlesFullPrecisionBoundaries",
+          "outputs": [],
+          "selector": "0xb28fa958",
+          "signature": "testMathMulDivHandlesFullPrecisionBoundaries()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest#function:0x1681095f",
+          "declaringDefinitionId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMathMulDivRevertsForOverflowAndZeroDenominator",
+          "outputs": [],
+          "selector": "0x1681095f",
+          "signature": "testMathMulDivRevertsForOverflowAndZeroDenominator()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest#function:0xe7e883f9",
+          "declaringDefinitionId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMathMulDivRoundingUpOnlyIncrementsOnRemainder",
+          "outputs": [],
+          "selector": "0xe7e883f9",
+          "signature": "testMathMulDivRoundingUpOnlyIncrementsOnRemainder()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testBase64EncodingMatchesOpenZeppelinGoldenVectors()",
+          "displaySignature": "testBase64EncodingMatchesOpenZeppelinGoldenVectors()",
+          "functionKind": "function",
+          "id": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest#function:0xe476c773",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1WZW5kb3JlZExpYnJhcmllcy50LnNvbDpTdHJlYW1WZW5kb3JlZExpYnJhcmllc1Rlc3QjZnVuY3Rpb246MHhlNDc2Yzc3Mw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testBase64EncodingMatchesOpenZeppelinGoldenVectors",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 601,
+            "byteStart": 904,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamVendoredLibraries.t.sol#L30-L38",
+            "lineEnd": 38,
+            "lineStart": 30,
+            "snippetSha256": "sha256:7ed566a6f9bedb874a39f9fd14efd5a76985d7b296d7fab2a530d51e940b1719",
+            "sourceSha256": "sha256:c4bc523ff1b2bea08514070b0330108688b894c03acacbbac9d018bc56e321a6"
+          },
+          "selector": "0xe476c773",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testBase64EncodingPreservesBinaryInputsAndPadding()",
+          "displaySignature": "testBase64EncodingPreservesBinaryInputsAndPadding()",
+          "functionKind": "function",
+          "id": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest#function:0x4872a99c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1WZW5kb3JlZExpYnJhcmllcy50LnNvbDpTdHJlYW1WZW5kb3JlZExpYnJhcmllc1Rlc3QjZnVuY3Rpb246MHg0ODcyYTk5Yw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testBase64EncodingPreservesBinaryInputsAndPadding",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 436,
+            "byteStart": 1511,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamVendoredLibraries.t.sol#L40-L48",
+            "lineEnd": 48,
+            "lineStart": 40,
+            "snippetSha256": "sha256:3c8d557741174f86603f7ffdcbb181ee7e2a3852dd6a1e08c202ee7790c2e820",
+            "sourceSha256": "sha256:c4bc523ff1b2bea08514070b0330108688b894c03acacbbac9d018bc56e321a6"
+          },
+          "selector": "0x4872a99c",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMathMulDivHandlesFullPrecisionBoundaries()",
+          "displaySignature": "testMathMulDivHandlesFullPrecisionBoundaries()",
+          "functionKind": "function",
+          "id": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest#function:0xb28fa958",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1WZW5kb3JlZExpYnJhcmllcy50LnNvbDpTdHJlYW1WZW5kb3JlZExpYnJhcmllc1Rlc3QjZnVuY3Rpb246MHhiMjhmYTk1OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMathMulDivHandlesFullPrecisionBoundaries",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 398,
+            "byteStart": 1953,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamVendoredLibraries.t.sol#L50-L56",
+            "lineEnd": 56,
+            "lineStart": 50,
+            "snippetSha256": "sha256:09fae30c54e87387390b7b846df587b5534c7ce6701ceb11e66961930f2b545c",
+            "sourceSha256": "sha256:c4bc523ff1b2bea08514070b0330108688b894c03acacbbac9d018bc56e321a6"
+          },
+          "selector": "0xb28fa958",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMathMulDivRoundingUpOnlyIncrementsOnRemainder()",
+          "displaySignature": "testMathMulDivRoundingUpOnlyIncrementsOnRemainder()",
+          "functionKind": "function",
+          "id": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest#function:0xe7e883f9",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1WZW5kb3JlZExpYnJhcmllcy50LnNvbDpTdHJlYW1WZW5kb3JlZExpYnJhcmllc1Rlc3QjZnVuY3Rpb246MHhlN2U4ODNmOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMathMulDivRoundingUpOnlyIncrementsOnRemainder",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 218,
+            "byteStart": 2357,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamVendoredLibraries.t.sol#L58-L61",
+            "lineEnd": 61,
+            "lineStart": 58,
+            "snippetSha256": "sha256:ddc21497ca42325aedcd9c34c7fc2d7998bd0ea04133baf9177aeff20edcebe6",
+            "sourceSha256": "sha256:c4bc523ff1b2bea08514070b0330108688b894c03acacbbac9d018bc56e321a6"
+          },
+          "selector": "0xe7e883f9",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMathMulDivRevertsForOverflowAndZeroDenominator()",
+          "displaySignature": "testMathMulDivRevertsForOverflowAndZeroDenominator()",
+          "functionKind": "function",
+          "id": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest#function:0x1681095f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1WZW5kb3JlZExpYnJhcmllcy50LnNvbDpTdHJlYW1WZW5kb3JlZExpYnJhcmllc1Rlc3QjZnVuY3Rpb246MHgxNjgxMDk1Zg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMathMulDivRevertsForOverflowAndZeroDenominator",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1089,
+            "byteStart": 2581,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamVendoredLibraries.t.sol#L63-L85",
+            "lineEnd": 85,
+            "lineStart": 63,
+            "snippetSha256": "sha256:35af435dbe40760431a0ac08ac85853f3117eaa830e5164703088e7136d441b9",
+            "sourceSha256": "sha256:c4bc523ff1b2bea08514070b0330108688b894c03acacbbac9d018bc56e321a6"
+          },
+          "selector": "0x1681095f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "harness",
+          "natspec": "",
+          "range": {
+            "byteLength": 69,
+            "byteStart": 828,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamVendoredLibraries.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:3e3f294907f0cdd5b0d4392980441b6c010869a8f6c7029c8c30bb8a183b6191",
+            "sourceSha256": "sha256:c4bc523ff1b2bea08514070b0330108688b894c03acacbbac9d018bc56e321a6"
+          },
+          "selector": null,
+          "type": "VendoredLibraryHarness",
+          "typeString": "contract VendoredLibraryHarness",
+          "valueRange": {
+            "byteLength": 28,
+            "byteStart": 869,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamVendoredLibraries.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:91e4fcc5e4f2fe1412d6d67f3c52e7d94f6685692c84a6df15339690de18f1bc",
+            "sourceSha256": "sha256:c4bc523ff1b2bea08514070b0330108688b894c03acacbbac9d018bc56e321a6"
+          },
+          "valueSource": "new VendoredLibraryHarness()",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1WZW5kb3JlZExpYnJhcmllcy50LnNvbDpTdHJlYW1WZW5kb3JlZExpYnJhcmllc1Rlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamVendoredLibrariesTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 3020,
+      "byteStart": 652,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamVendoredLibraries.t.sol#L22-L86",
+      "lineEnd": 86,
+      "lineStart": 22,
+      "snippetSha256": "sha256:ff70bdbb63e885fd1a8421088eafac5ff9e748dd948aff8ffb08684958cc0578",
+      "sourceSha256": "sha256:c4bc523ff1b2bea08514070b0330108688b894c03acacbbac9d018bc56e321a6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamVendoredLibraries.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 6
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 5
+    },
+    "totalCount": 6
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest#function:0x1681095f",
+      "definitionId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest#function:0x4872a99c",
+      "definitionId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest#function:0xb28fa958",
+      "definitionId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest#function:0xe476c773",
+      "definitionId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest#function:0xe7e883f9",
+      "definitionId": "test/StreamVendoredLibraries.t.sol:StreamVendoredLibrariesTest",
+      "severity": "advisory"
+    }
+  ]
+}

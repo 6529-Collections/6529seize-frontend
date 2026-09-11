@@ -1,0 +1,277 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock#function:0x50f9b6cd",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "called",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x50f9b6cd",
+          "signature": "called()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock#function:0x58be074e",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "returnDataBytes",
+              "type": "uint256"
+            }
+          ],
+          "name": "revertWithReturndata",
+          "outputs": [],
+          "selector": "0x58be074e",
+          "signature": "revertWithReturndata(uint256)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock#function:0x32cfe8aa",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "returnDataBytes",
+              "type": "uint256"
+            }
+          ],
+          "name": "succeedWithReturndata",
+          "outputs": [],
+          "selector": "0x32cfe8aa",
+          "signature": "succeedWithReturndata(uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "called()",
+          "displaySignature": "called()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock#function:0x50f9b6cd",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRSZXR1cm5kYXRhTW9jayNmdW5jdGlvbjoweDUwZjliNmNk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "called",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 18,
+            "byteStart": 1771,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L65",
+            "lineEnd": 65,
+            "lineStart": 65,
+            "snippetSha256": "sha256:c9e68a865dd7711c3684f2545e3b6eba5218b3ec5e52eb0b993d0788f3ec0b5f",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x50f9b6cd",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "succeedWithReturndata(uint256)",
+          "displaySignature": "succeedWithReturndata(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock#function:0x32cfe8aa",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "returnDataBytes",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRSZXR1cm5kYXRhTW9jayNmdW5jdGlvbjoweDMyY2ZlOGFh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "succeedWithReturndata",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 182,
+            "byteStart": 1796,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L67-L72",
+            "lineEnd": 72,
+            "lineStart": 67,
+            "snippetSha256": "sha256:b18ca2f6928c9d287a4601efe4679b721c86eedd9bb74945304b37862ff3ee6d",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x32cfe8aa",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "revertWithReturndata(uint256)",
+          "displaySignature": "revertWithReturndata(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock#function:0x58be074e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "returnDataBytes",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRSZXR1cm5kYXRhTW9jayNmdW5jdGlvbjoweDU4YmUwNzRl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "revertWithReturndata",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 163,
+            "byteStart": 1984,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L74-L78",
+            "lineEnd": 78,
+            "lineStart": 74,
+            "snippetSha256": "sha256:5c291e5675f1c61631dad897dc6e8bbe8e70e41e4431ca3e690972787b9015dc",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x58be074e",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock#function:0x50f9b6cd",
+          "immutable": false,
+          "name": "called",
+          "natspec": "",
+          "range": {
+            "byteLength": 18,
+            "byteStart": 1771,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L65",
+            "lineEnd": 65,
+            "lineStart": 65,
+            "snippetSha256": "sha256:c9e68a865dd7711c3684f2545e3b6eba5218b3ec5e52eb0b993d0788f3ec0b5f",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x50f9b6cd",
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRSZXR1cm5kYXRhTW9jaw",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "GovernedReturndataMock",
+    "natspec": "",
+    "range": {
+      "byteLength": 416,
+      "byteStart": 1733,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L64-L79",
+      "lineEnd": 79,
+      "lineStart": 64,
+      "snippetSha256": "sha256:792544585379f02f6704850a7a3867735f5f3634239bf054006bd4501cae438a",
+      "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamGovernanceExecutor.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock#function:0x32cfe8aa",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock#function:0x50f9b6cd",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock#function:0x58be074e",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedReturndataMock",
+      "severity": "advisory"
+    }
+  ]
+}

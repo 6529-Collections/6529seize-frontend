@@ -59,9 +59,22 @@ describe("UserPageHeaderBanner", () => {
       />
     );
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "Edit alice's profile banner" })
+    const editButton = screen.getByRole("button", {
+      name: "Edit alice's profile banner",
+    });
+    expect(editButton).toHaveClass("tw-hidden", "sm:tw-block");
+    expect(editButton.firstElementChild).toHaveClass(
+      "tw-opacity-0",
+      "desktop-hover:group-hover:tw-opacity-100",
+      "touch-only:tw-opacity-100",
+      "touch-only:tw-bg-transparent"
     );
+    expect(editButton.querySelector('[aria-hidden="true"]')).toHaveClass(
+      "touch-only:tw-size-9",
+      "touch-only:tw-bg-iron-950"
+    );
+
+    await userEvent.click(editButton);
     expect(screen.getByTestId("edit")).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId("edit"));
@@ -80,5 +93,68 @@ describe("UserPageHeaderBanner", () => {
     );
 
     expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  it("keeps mobile artwork full strength under the shared bottom fade", () => {
+    const { container } = render(
+      <UserPageHeaderBanner
+        profile={{
+          ...baseProfile,
+          banner1: "https://example.com/banner.jpg",
+        }}
+        defaultBanner1="#000"
+        defaultBanner2="#fff"
+        canEdit={false}
+        profileLabel="alice"
+      />
+    );
+
+    const imageLayer = container.querySelector<HTMLElement>(
+      'div[style*="background-image"]'
+    );
+    expect(imageLayer).toHaveClass("md:tw-opacity-80");
+    expect(imageLayer).not.toHaveClass("tw-mix-blend-lighten");
+    expect(imageLayer).not.toHaveClass("tw-opacity-80");
+
+    expect(
+      container.querySelector<HTMLElement>('div[class~="tw-ring-white/5"]')
+    ).toHaveClass("md:tw-hidden");
+    expect(
+      container.querySelector<HTMLElement>('div[class~="tw-bg-gradient-to-t"]')
+    ).not.toHaveClass("tw-hidden", "md:tw-block");
+    expect(
+      container.querySelector<HTMLElement>('div[class~="tw-bg-gradient-to-b"]')
+    ).toHaveClass("tw-hidden", "md:tw-block");
+  });
+
+  it("keeps the gradient fallback full strength under the shared bottom fade", () => {
+    const { container } = render(
+      <UserPageHeaderBanner
+        profile={baseProfile}
+        defaultBanner1="#000"
+        defaultBanner2="#fff"
+        canEdit={false}
+        profileLabel="alice"
+      />
+    );
+
+    const gradientLayer = container.querySelector<HTMLElement>(
+      'div[style*="linear-gradient"]'
+    );
+    expect(gradientLayer).toHaveAttribute(
+      "style",
+      "background: linear-gradient(45deg, #000 0%, #fff 100%);"
+    );
+    expect(gradientLayer).not.toHaveClass("tw-mix-blend-lighten");
+    expect(gradientLayer).not.toHaveClass("tw-opacity-60");
+    expect(
+      container.querySelector<HTMLElement>('div[class~="tw-ring-white/5"]')
+    ).toHaveClass("md:tw-hidden");
+    expect(
+      container.querySelector<HTMLElement>('div[class~="tw-bg-gradient-to-t"]')
+    ).not.toHaveClass("tw-hidden", "md:tw-block");
+    expect(
+      container.querySelector<HTMLElement>('div[class~="tw-bg-gradient-to-b"]')
+    ).toHaveClass("tw-hidden", "md:tw-block");
   });
 });

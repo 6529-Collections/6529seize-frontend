@@ -1,0 +1,1075 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment#function:0xc0406226",
+          "declaringDefinitionId": "script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment",
+          "inherited": false,
+          "inputs": [],
+          "name": "run",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct RehearseEmergencyRedeployment.EmergencyRedeploymentResult",
+              "name": "result",
+              "type": "(bytes32,uint256,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,address,address,address,address,address,address,address,address,uint256,uint256,uint256,address,bytes32,uint256)"
+            }
+          ],
+          "selector": "0xc0406226",
+          "signature": "run()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "deployment_or_operational_source",
+    "classificationReason": "Declared under the pinned deployment-script source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "run()",
+          "displaySignature": "run()",
+          "functionKind": "function",
+          "id": "script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment#function:0xc0406226",
+          "inputs": [],
+          "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOlJlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50I2Z1bmN0aW9uOjB4YzA0MDYyMjY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "run",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "result",
+              "storageLocation": "memory",
+              "type": "EmergencyRedeploymentResult"
+            }
+          ],
+          "range": {
+            "byteLength": 3275,
+            "byteStart": 3243,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L91-L149",
+            "lineEnd": 149,
+            "lineStart": 91,
+            "snippetSha256": "sha256:cb243fbf22dda8118f42bc681ba256573a697e2dba6567594f1faeb44979e1d1",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": "0xc0406226",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertDeploymentCeremony(RehearseDeployment.DeploymentResult,RehearseDeployment.DeploymentConfig)",
+          "functionKind": "function",
+          "id": "script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment#function:_assertDeploymentCeremony(RehearseDeployment.DeploymentResult,RehearseDeployment.DeploymentConfig)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "RehearseDeployment.DeploymentResult"
+            },
+            {
+              "index": 1,
+              "name": "config",
+              "storageLocation": "memory",
+              "type": "RehearseDeployment.DeploymentConfig"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOlJlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50I2Z1bmN0aW9uOl9hc3NlcnREZXBsb3ltZW50Q2VyZW1vbnkoUmVoZWFyc2VEZXBsb3ltZW50LkRlcGxveW1lbnRSZXN1bHQsUmVoZWFyc2VEZXBsb3ltZW50LkRlcGxveW1lbnRDb25maWcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertDeploymentCeremony",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 781,
+            "byteStart": 6524,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L151-L162",
+            "lineEnd": 162,
+            "lineStart": 151,
+            "snippetSha256": "sha256:45088d56ef524dc3294afac4cd786e57065d907ba30ceccc45f68ae44a057690",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertDistinctDeployments(RehearseDeployment.DeploymentResult,RehearseDeployment.DeploymentResult)",
+          "functionKind": "function",
+          "id": "script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment#function:_assertDistinctDeployments(RehearseDeployment.DeploymentResult,RehearseDeployment.DeploymentResult)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "oldDeployment",
+              "storageLocation": "memory",
+              "type": "RehearseDeployment.DeploymentResult"
+            },
+            {
+              "index": 1,
+              "name": "replacementDeployment",
+              "storageLocation": "memory",
+              "type": "RehearseDeployment.DeploymentResult"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOlJlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50I2Z1bmN0aW9uOl9hc3NlcnREaXN0aW5jdERlcGxveW1lbnRzKFJlaGVhcnNlRGVwbG95bWVudC5EZXBsb3ltZW50UmVzdWx0LFJlaGVhcnNlRGVwbG95bWVudC5EZXBsb3ltZW50UmVzdWx0KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertDistinctDeployments",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 747,
+            "byteStart": 7311,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L164-L174",
+            "lineEnd": 174,
+            "lineStart": 164,
+            "snippetSha256": "sha256:6d2b2503bc4ca2911d59ed9a4c5fcfdb1f035c3a29aa91f4c987658782992d1a",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_smokeMintReplacement(RehearseDeployment.DeploymentResult,RehearseDeployment.DeploymentConfig)",
+          "functionKind": "function",
+          "id": "script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment#function:_smokeMintReplacement(RehearseDeployment.DeploymentResult,RehearseDeployment.DeploymentConfig)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "RehearseDeployment.DeploymentResult"
+            },
+            {
+              "index": 1,
+              "name": "config",
+              "storageLocation": "memory",
+              "type": "RehearseDeployment.DeploymentConfig"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOlJlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50I2Z1bmN0aW9uOl9zbW9rZU1pbnRSZXBsYWNlbWVudChSZWhlYXJzZURlcGxveW1lbnQuRGVwbG95bWVudFJlc3VsdCxSZWhlYXJzZURlcGxveW1lbnQuRGVwbG95bWVudENvbmZpZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_smokeMintReplacement",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "tokenHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "signerEpoch",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 1638,
+            "byteStart": 8064,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L176-L208",
+            "lineEnd": 208,
+            "lineStart": 176,
+            "snippetSha256": "sha256:5af48a0d71494125c7e56589d743685b5402a0917953b50181ad7f123ed842a4",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_buildAuthorization(StreamDrops,uint256)",
+          "functionKind": "function",
+          "id": "script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment#function:_buildAuthorization(StreamDrops,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "drops",
+              "type": "StreamDrops"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOlJlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50I2Z1bmN0aW9uOl9idWlsZEF1dGhvcml6YXRpb24oU3RyZWFtRHJvcHMsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_buildAuthorization",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            }
+          ],
+          "range": {
+            "byteLength": 930,
+            "byteStart": 9708,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L210-L235",
+            "lineEnd": 235,
+            "lineStart": 210,
+            "snippetSha256": "sha256:253ae20e26001daf8998a0ffabe9b1ceed6ad81f4f26a1c808355c912d3cde20",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_signAuthorization(StreamDrops,StreamDrops.DropAuthorization)",
+          "functionKind": "function",
+          "id": "script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment#function:_signAuthorization(StreamDrops,StreamDrops.DropAuthorization)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "drops",
+              "type": "StreamDrops"
+            },
+            {
+              "index": 1,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOlJlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50I2Z1bmN0aW9uOl9zaWduQXV0aG9yaXphdGlvbihTdHJlYW1Ecm9wcyxTdHJlYW1Ecm9wcy5Ecm9wQXV0aG9yaXphdGlvbik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_signAuthorization",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 330,
+            "byteStart": 10644,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L237-L245",
+            "lineEnd": 245,
+            "lineStart": 237,
+            "snippetSha256": "sha256:99ef29bd6d1857265b0c0870d4f9d23b430f19c82a40f2264c3863f5dd7b1151",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assert(bool,string)",
+          "functionKind": "function",
+          "id": "script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment#function:_assert(bool,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "condition",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "message",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOlJlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50I2Z1bmN0aW9uOl9hc3NlcnQoYm9vbCxzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assert",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 113,
+            "byteStart": 10980,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L247-L249",
+            "lineEnd": 249,
+            "lineStart": 247,
+            "snippetSha256": "sha256:2ffdce6f1b4f32faf589389fe02ed7136dd5104bcc527e26911d0f261cf7a46a",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "vm",
+          "natspec": "",
+          "range": {
+            "byteLength": 134,
+            "byteStart": 1493,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L51-L52",
+            "lineEnd": 52,
+            "lineStart": 51,
+            "snippetSha256": "sha256:458d7dd9f2391d9261d2e82390c3f5d6249d8ccc3b8902a72b49ef368a002665",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": null,
+          "type": "EmergencyRedeploymentVm",
+          "typeString": "contract EmergencyRedeploymentVm",
+          "valueRange": {
+            "byteLength": 80,
+            "byteStart": 1547,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L52",
+            "lineEnd": 52,
+            "lineStart": 52,
+            "snippetSha256": "sha256:c8f71019b18ffb92837abb1a2f726e78810802bb9b3fe83f486d6498879e7c5a",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "valueSource": "EmergencyRedeploymentVm(address(uint160(uint256(keccak256(\"hevm cheat code\")))))",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SIGNER_KEY",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 1634,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L54",
+            "lineEnd": 54,
+            "lineStart": 54,
+            "snippetSha256": "sha256:86188036364272899d12c56aaaff0a29caa4d696ab78e27c7e51b9db61073a14",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 1672,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L54",
+            "lineEnd": 54,
+            "lineStart": 54,
+            "snippetSha256": "sha256:bfca7fba1700a19a3e273d41ced09c1fceed240e49d534ac6e7e75c21054ca23",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "valueSource": "0xA11CE",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "REPLACEMENT_DEPLOYMENT_VERSION",
+          "natspec": "",
+          "range": {
+            "byteLength": 104,
+            "byteStart": 1685,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L55-L56",
+            "lineEnd": 56,
+            "lineStart": 55,
+            "snippetSha256": "sha256:9523245cfbd0edec7ef4d7068112e6bf1ffb7aa729f36a8cf664f6b4f81d3d6d",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": null,
+          "type": "string",
+          "typeString": "string",
+          "valueRange": {
+            "byteLength": 39,
+            "byteStart": 1750,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L56",
+            "lineEnd": 56,
+            "lineStart": 56,
+            "snippetSha256": "sha256:6b86a090ad154c9ac9235a6f8dbc4bd618995c4e2b8acfad190945f25fae09bc",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "valueSource": "\"anvil-6529stream-v0.1.0-emergency-002\"",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "EVIDENCE_KIND_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 93,
+            "byteStart": 1795,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L57",
+            "lineEnd": 57,
+            "lineStart": 57,
+            "snippetSha256": "sha256:0c915f7b26063be37c7f4bb5d765491c189e022b1e23e9527d28bd5fbc249533",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 47,
+            "byteStart": 1841,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L57",
+            "lineEnd": 57,
+            "lineStart": 57,
+            "snippetSha256": "sha256:0b17284e9b8a563e18986fcb1d28fde0b20dfe5ce199b9a55a9b496122e8da8c",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "valueSource": "keccak256(\"local-anvil-emergency-redeployment\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "OLD_LIFECYCLE_STATE_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 84,
+            "byteStart": 1894,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L58",
+            "lineEnd": 58,
+            "lineStart": 58,
+            "snippetSha256": "sha256:9bbec3d9b749cbdd71dbf23505ae67864c9b8f366ec9af8d1065518cfa3c4e02",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 32,
+            "byteStart": 1946,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L58",
+            "lineEnd": 58,
+            "lineStart": 58,
+            "snippetSha256": "sha256:a9364793033d1284961d7d911a58b79f796ab3ed12d26a78495352f13b28e8d3",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "valueSource": "keccak256(\"EmergencySuperseded\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "REPLACEMENT_LIFECYCLE_STATE_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 82,
+            "byteStart": 1984,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L59",
+            "lineEnd": 59,
+            "lineStart": 59,
+            "snippetSha256": "sha256:83910a2f2f01afbd4ac0a98ad9a38a5289a4a82a0191cd75d9245bfd1c7ce1bb",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 22,
+            "byteStart": 2044,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L59",
+            "lineEnd": 59,
+            "lineStart": 59,
+            "snippetSha256": "sha256:357a9982c3ab03cb3f54c5e232bba7557b27a6d3c59cbedf2835a2f2e124e9b0",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "valueSource": "keccak256(\"Rehearsed\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_DATA",
+          "natspec": "",
+          "range": {
+            "byteLength": 67,
+            "byteStart": 2072,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L60",
+            "lineEnd": 60,
+            "lineStart": 60,
+            "snippetSha256": "sha256:a3415e95f44e1c16ec9bea868d88daafefa4bc71528148c03b9bc716e6895264",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": null,
+          "type": "string",
+          "typeString": "string",
+          "valueRange": {
+            "byteLength": 30,
+            "byteStart": 2109,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L60",
+            "lineEnd": 60,
+            "lineStart": 60,
+            "snippetSha256": "sha256:eeef2e285a1c18c87b2306ddfee0795830b3e5c46f66673d3b52dbde39bdbe4c",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "valueSource": "\"emergency-redeployment-smoke\"",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "POSTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 85,
+            "byteStart": 2145,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L61",
+            "lineEnd": 61,
+            "lineStart": 61,
+            "snippetSha256": "sha256:9adabf7316a63dab8c104cf8a6b382c130f9072b8a99817d67ff935cfcafe2cc",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 51,
+            "byteStart": 2179,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L61",
+            "lineEnd": 61,
+            "lineStart": 61,
+            "snippetSha256": "sha256:5cf1dc7864e60486747a13da1c7a434e4990529003d2bef152f28a4e39d79f9b",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "valueSource": "address(0x00000000000000000000000000000000000065E1)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 88,
+            "byteStart": 2236,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L62",
+            "lineEnd": 62,
+            "lineStart": 62,
+            "snippetSha256": "sha256:a3594505445c5e8cc63793e0753ee43f5fe8b2870278c211c0c0159b47632de4",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 51,
+            "byteStart": 2273,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L62",
+            "lineEnd": 62,
+            "lineStart": 62,
+            "snippetSha256": "sha256:1b0aa49978dfe1f3490c92dfb062bb34524d03c2d1fa4e9229c0e5dc567e942e",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "valueSource": "address(0x00000000000000000000000000000000000065E2)",
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "evidenceKindHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 24,
+                "byteStart": 2376,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L65",
+                "lineEnd": 65,
+                "lineStart": 65,
+                "snippetSha256": "sha256:ddfb95f42dec6a6b91bb1e425d0bbfdea8e90f370d44f3a3c33235af7fd86ed0",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "chainId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 2410,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L66",
+                "lineEnd": 66,
+                "lineStart": 66,
+                "snippetSha256": "sha256:fd6a4dd841f90c6927932cd5c99efdd50a83dc2a6517a3449b2d645dc20a76e4",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "oldLifecycleStateHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 29,
+                "byteStart": 2435,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L67",
+                "lineEnd": 67,
+                "lineStart": 67,
+                "snippetSha256": "sha256:f1c51b8d2576de97f091695d86b7b0734146a1527b956b0fd12facff124e6066",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "replacementLifecycleStateHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 37,
+                "byteStart": 2474,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L68",
+                "lineEnd": 68,
+                "lineStart": 68,
+                "snippetSha256": "sha256:ddd4e9908f8144cebdb527eabb7b72b632fef265e1e97a99d09326376d07a6bf",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "oldDeploymentVersionHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 32,
+                "byteStart": 2521,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L69",
+                "lineEnd": 69,
+                "lineStart": 69,
+                "snippetSha256": "sha256:f3b08d45aa700ba16af0875a5867e72c8f5056c721c4d386318a96acbc09aadb",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "replacementDeploymentVersionHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 40,
+                "byteStart": 2563,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L70",
+                "lineEnd": 70,
+                "lineStart": 70,
+                "snippetSha256": "sha256:b33ac5e156ded994662fb8afddff0f10bb01d1830df340128180f8dae85de704",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "oldManifestHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 2613,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L71",
+                "lineEnd": 71,
+                "lineStart": 71,
+                "snippetSha256": "sha256:eeae99e506ea0b3f76e3b5055af0a4c596699f516a350ff580e3bd365db7ed16",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "replacementManifestHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 31,
+                "byteStart": 2646,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L72",
+                "lineEnd": 72,
+                "lineStart": 72,
+                "snippetSha256": "sha256:203ea0bd3145b1fdb781f35d9d14cc439271981e20dbc7bfe28a8f71c6815b51",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 8,
+              "name": "oldDropDomainSeparator",
+              "natspec": "",
+              "range": {
+                "byteLength": 30,
+                "byteStart": 2687,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L73",
+                "lineEnd": 73,
+                "lineStart": 73,
+                "snippetSha256": "sha256:cc1f8e708ced31f619f5fbac208c47f1881a1f9d8d35ab055152bbe111d065d1",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 9,
+              "name": "replacementDropDomainSeparator",
+              "natspec": "",
+              "range": {
+                "byteLength": 38,
+                "byteStart": 2727,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L74",
+                "lineEnd": 74,
+                "lineStart": 74,
+                "snippetSha256": "sha256:c1ea769cbc249a9a459f87eca4bbe33975547058425ad298a0b220aca2670987",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 10,
+              "name": "adminSafe",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 2775,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L75",
+                "lineEnd": 75,
+                "lineStart": 75,
+                "snippetSha256": "sha256:c28f534d321e8a9d5d2e962b4f209cb2c8cd2dfe92634ec28ea7710ca9e66dee",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 11,
+              "name": "tdhSigner",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 2802,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L76",
+                "lineEnd": 76,
+                "lineStart": 76,
+                "snippetSha256": "sha256:53bccf34b3050b2bb19c0f47fede2c889ebb49f38ce6b379a4103264dc6c0b8d",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 12,
+              "name": "oldCore",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 2829,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L77",
+                "lineEnd": 77,
+                "lineStart": 77,
+                "snippetSha256": "sha256:a36ef76f92c10e8ccf6cec20c525dad385a60cb94a35b3248a3944fe09b47b62",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 13,
+              "name": "replacementCore",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 2854,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L78",
+                "lineEnd": 78,
+                "lineStart": 78,
+                "snippetSha256": "sha256:7275be6bba16aaf3af41d6ac819b8d5176296edb1ac9b2c19c92710222d92e00",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 14,
+              "name": "oldDrops",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 2887,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L79",
+                "lineEnd": 79,
+                "lineStart": 79,
+                "snippetSha256": "sha256:2d0866ff179309813306564c8dc1aaf23052dc851d0443b71c9d4d6c9ef158bf",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 15,
+              "name": "replacementDrops",
+              "natspec": "",
+              "range": {
+                "byteLength": 24,
+                "byteStart": 2913,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L80",
+                "lineEnd": 80,
+                "lineStart": 80,
+                "snippetSha256": "sha256:e03d6de1c88c3b450c7ee89ceef69770be9ae0d9da1a6bfecf516414a830c8ee",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 16,
+              "name": "oldAuctions",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 2947,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L81",
+                "lineEnd": 81,
+                "lineStart": 81,
+                "snippetSha256": "sha256:c197271b1718def1f28982ee2550692178c90d0602e86b12013452122c813cda",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 17,
+              "name": "replacementAuctions",
+              "natspec": "",
+              "range": {
+                "byteLength": 27,
+                "byteStart": 2976,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L82",
+                "lineEnd": 82,
+                "lineStart": 82,
+                "snippetSha256": "sha256:385291fde2612f03cb82e705c8372ec83cac802f75723c9348c0617cd393d121",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 18,
+              "name": "oldCollectionId",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 3013,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L83",
+                "lineEnd": 83,
+                "lineStart": 83,
+                "snippetSha256": "sha256:72d0e7ba6a38ddcecd320c93eb724fb89fc9b60f6b612dbb65aa5f6f1e7917d0",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 19,
+              "name": "replacementCollectionId",
+              "natspec": "",
+              "range": {
+                "byteLength": 31,
+                "byteStart": 3046,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L84",
+                "lineEnd": 84,
+                "lineStart": 84,
+                "snippetSha256": "sha256:f9d0e6dc90c316376612a3f27842d2adb8031f0ef26c79977d58321c25726727",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 20,
+              "name": "replacementTokenId",
+              "natspec": "",
+              "range": {
+                "byteLength": 26,
+                "byteStart": 3087,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L85",
+                "lineEnd": 85,
+                "lineStart": 85,
+                "snippetSha256": "sha256:3b677630742f4e663d3d41ebd2c03dd0563bed0fd18e1b5a9183e2d13e471549",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 21,
+              "name": "replacementTokenOwner",
+              "natspec": "",
+              "range": {
+                "byteLength": 29,
+                "byteStart": 3123,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L86",
+                "lineEnd": 86,
+                "lineStart": 86,
+                "snippetSha256": "sha256:7564ad031f0495698d3c44fffec1e8b40cb46331c34e47eb4ced73f319155756",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 22,
+              "name": "replacementTokenHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 28,
+                "byteStart": 3162,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L87",
+                "lineEnd": 87,
+                "lineStart": 87,
+                "snippetSha256": "sha256:2674329d8a153aa685184106ec4b5fa67a92f597e2651d6d1d3b97368444e998",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 23,
+              "name": "replacementSignerEpoch",
+              "natspec": "",
+              "range": {
+                "byteLength": 30,
+                "byteStart": 3200,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L88",
+                "lineEnd": 88,
+                "lineStart": 88,
+                "snippetSha256": "sha256:caaecff5df8850c8fc5f50e7455ac9315c61c1fe975f7ae4796cc8950af6a6db",
+                "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            }
+          ],
+          "name": "EmergencyRedeploymentResult",
+          "natspec": "",
+          "range": {
+            "byteLength": 906,
+            "byteStart": 2331,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L64-L89",
+            "lineEnd": 89,
+            "lineStart": 64,
+            "snippetSha256": "sha256:1396910d4c154abb854d6e3627da185c8dedcb73917b873f84c95dda6b935887",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOlJlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RehearseEmergencyRedeployment",
+    "natspec": "",
+    "range": {
+      "byteLength": 9647,
+      "byteStart": 1448,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L50-L250",
+      "lineEnd": 250,
+      "lineStart": 50,
+      "snippetSha256": "sha256:50e52830603c62b7540fdc65f1f08cec4b8a290a4940e147fb4ec74085314fbc",
+      "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "script",
+    "sourcePath": "script/RehearseEmergencyRedeployment.s.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment#function:0xc0406226",
+      "definitionId": "script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment",
+      "severity": "advisory"
+    }
+  ]
+}

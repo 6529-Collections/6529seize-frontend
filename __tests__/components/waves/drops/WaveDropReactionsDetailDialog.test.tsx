@@ -169,7 +169,7 @@ describe("WaveDropReactionsDetailDialog", () => {
       />
     );
 
-    const closeButton = screen.getByTitle("Close panel");
+    const closeButton = screen.getByRole("button", { name: "Close" });
     fireEvent.click(closeButton);
 
     expect(onClose).toHaveBeenCalled();

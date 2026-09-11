@@ -6,10 +6,7 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
-import {
-  gotoDocumentWithTransientRetry,
-  gotoReadyWithApiResponse,
-} from "../support/routeReadiness";
+import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 
 function exactName(label: string) {
   return new RegExp(`^${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`);
@@ -133,44 +130,6 @@ async function expectDropForgeDenied(
   ]);
 }
 
-async function parseGroupsJson(
-  response: Awaited<ReturnType<typeof waitForApiGroups>>
-) {
-  try {
-    return (await response.json()) as unknown;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`/api/groups returned non-JSON content: ${message}`);
-  }
-}
-
-async function waitForApiGroups(page: Page) {
-  return gotoReadyWithApiResponse(
-    page,
-    "/network/groups",
-    (url) => url.pathname === "/api/groups"
-  );
-}
-
-async function gotoGroupsReady(page: Page) {
-  const response = await waitForApiGroups(page);
-  const groups = await parseGroupsJson(response);
-  expect(Array.isArray(groups)).toBe(true);
-
-  if (Array.isArray(groups) && groups.length > 0) {
-    await expect(
-      page
-        .locator("main")
-        .getByRole("button", { name: /^Open / })
-        .first()
-    ).toBeVisible({ timeout: 30000 });
-  }
-  // Empty group lists are valid in local or staging data; route-level controls
-  // are still checked below, while card-level controls need a rendered card.
-
-  await expectNoHorizontalOverflow(page);
-}
-
 test.describe("Admin and destructive route guards @surface @medium @large @readonly", () => {
   test("keeps the NextGen manager fail-closed without admin authority", async ({
     page,
@@ -211,28 +170,5 @@ test.describe("Admin and destructive route guards @surface @medium @large @reado
     ]) {
       await expectDropForgeDenied(page, route);
     }
-  });
-
-  test("keeps public Groups browse free of owner and voting controls", async ({
-    page,
-  }) => {
-    await gotoGroupsReady(page);
-
-    await expect(page).toHaveURL((url) => url.pathname === "/network/groups");
-    await expect(
-      page.getByRole("heading", { level: 1, name: "Groups" })
-    ).toBeVisible();
-    await expect(page.getByLabel("By Identity")).toBeVisible();
-    await expect(page.getByLabel("By Group Name")).toBeVisible();
-    await expectNoMainButtons(page, [
-      exactName("Create New"),
-      exactName("My groups"),
-      exactName("Rep all"),
-      exactName("NIC all"),
-      exactName("Open options"),
-      exactName("Edit"),
-      exactName("Clone"),
-      exactName("Delete"),
-    ]);
   });
 });

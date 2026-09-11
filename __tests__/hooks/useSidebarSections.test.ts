@@ -2,11 +2,12 @@ import { renderHook } from "@testing-library/react";
 import { useSidebarSections } from "@/hooks/useSidebarSections";
 
 describe("useSidebarSections", () => {
-  it("returns the menu IA groups with NFT and Waves secondary links", () => {
+  it("returns the menu IA groups with the Museum reading room link", () => {
     const { result } = renderHook(() => useSidebarSections(false, false, "US"));
 
     expect(result.current.map((section) => section.key)).toEqual([
       "nfts",
+      "museum",
       "waves",
       "about",
     ]);
@@ -16,6 +17,7 @@ describe("useSidebarSections", () => {
     );
     expect(nftsSection?.name).toBe("NFTs");
     expect(nftsSection?.items.map((item) => item.name)).toEqual([
+      "Collect",
       "The Memes",
       "6529 Gradient",
       "NextGen",
@@ -36,6 +38,43 @@ describe("useSidebarSections", () => {
       },
       { name: "Discover Waves", href: "/discover" },
     ]);
+
+    const museumSection = result.current.find(
+      (section) => section.key === "museum"
+    );
+    expect(museumSection?.items).toEqual([
+      {
+        name: "Museum",
+        href: "/museum/network",
+        activePathPrefixes: ["/museum/network/"],
+      },
+    ]);
+  });
+
+  it("inserts the Stream review after live collections only when enabled", () => {
+    const { result } = renderHook(() =>
+      useSidebarSections(false, false, "US", true)
+    );
+
+    const nftsSection = result.current.find(
+      (section) => section.key === "nfts"
+    );
+    expect(nftsSection?.items.map((item) => item.name)).toEqual([
+      "Collect",
+      "The Memes",
+      "6529 Gradient",
+      "NextGen",
+      "Meme Lab",
+      "ReMemes",
+      "6529 Stream — Review",
+      "NFT Activity",
+      "Memes Calendar",
+    ]);
+    expect(nftsSection?.items[6]).toEqual({
+      name: "6529 Stream — Review",
+      href: "/reviews/6529-stream",
+      activePathPrefixes: ["/reviews/6529-stream/"],
+    });
   });
 
   it("does not include retired release notes links", () => {
@@ -60,12 +99,12 @@ describe("useSidebarSections", () => {
     );
 
     expect(aboutSection?.items).toEqual([
-      { name: "About", href: "/about", activePathPrefixes: ["/about/"] },
+      { name: "Overview", href: "/about", activePathPrefixes: ["/about/"] },
     ]);
     expect(
       aboutSection?.subsections.map((subsection) => subsection.name)
     ).toEqual([
-      "About 6529",
+      "Overview",
       "Collections & Minting",
       "Network & Reputation",
       "Delegation & Wallets",
@@ -74,7 +113,14 @@ describe("useSidebarSections", () => {
     ]);
     expect(
       aboutSection?.subsections[0]?.items.map((item) => item.name)
-    ).toEqual(["FAQ", "ENS", "Nakamoto Threshold", "Apply", "Contact Us"]);
+    ).toEqual([
+      "6529 Apps",
+      "FAQ",
+      "ENS",
+      "Nakamoto Threshold",
+      "Apply",
+      "Contact Us",
+    ]);
     expect(aboutSection?.subsections[1]?.items).toEqual([
       { name: "About The Memes", href: "/about/the-memes" },
       { name: "Subscription Minting", href: "/about/subscriptions" },
@@ -85,7 +131,6 @@ describe("useSidebarSections", () => {
     expect(aboutSection?.subsections[2]?.items).toEqual([
       { name: "Identities", href: "/network" },
       { name: "Activity", href: "/network/activity" },
-      { name: "Groups", href: "/network/groups" },
       { name: "TDH", href: "/network/tdh" },
       { name: "xTDH Overview", href: "/network/xtdh" },
       { name: "xTDH Allocations Dashboard", href: "/xtdh" },

@@ -1,33 +1,3 @@
-import type { Suggestion, SupportedChain } from "@/types/nft";
-
-export type SearchContractsParams = {
-  query: string;
-  chain?: SupportedChain | undefined;
-  pageKey?: string | undefined;
-  hideSpam?: boolean | undefined;
-  signal?: AbortSignal | undefined;
-};
-
-export type SearchContractsResult = {
-  items: Suggestion[];
-  hiddenCount: number;
-  nextPageKey?: string | undefined;
-};
-
-export type ContractOverviewParams = {
-  address: `0x${string}`;
-  chain?: SupportedChain | undefined;
-  signal?: AbortSignal | undefined;
-};
-
-export type TokenMetadataParams = {
-  address?: `0x${string}` | undefined;
-  tokenIds?: readonly string[] | undefined;
-  tokens?: readonly { contract: string; tokenId: string }[] | undefined;
-  chain?: SupportedChain | undefined;
-  signal?: AbortSignal | undefined;
-};
-
 export type AlchemyContractMetadata = {
   address?: string | null | undefined;
   name?: string | null | undefined;
@@ -77,11 +47,6 @@ export type AlchemyContractResult = {
   openSeaMetadata?: AlchemyOpenSeaMetadata | undefined;
   openseaMetadata?: AlchemyOpenSeaMetadata | undefined;
 } & AlchemyContractMetadata;
-
-export type AlchemySearchResponse = {
-  contracts?: AlchemyContractResult[] | undefined;
-  pageKey?: string | undefined;
-};
 
 export type AlchemyContractMetadataResponse = AlchemyContractMetadata & {
   contractMetadata?: AlchemyContractMetadata | null | undefined;

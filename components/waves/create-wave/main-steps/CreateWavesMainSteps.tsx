@@ -1,21 +1,27 @@
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
 import {
-  CREATE_WAVE_MAIN_STEPS,
-  CREATE_WAVE_STEPS_LABELS,
+  getCreateWaveStepLabel,
+  getCreateWaveMainSteps,
 } from "@/helpers/waves/waves.constants";
 import type { CreateWaveStep } from "@/types/waves.types";
 import CreateWavesMainStep from "./CreateWavesMainStep";
 
 export default function CreateWavesMainSteps({
   waveType,
+  ongoingRanking = false,
   activeStep,
+  disabled = false,
   onStep,
 }: {
   readonly waveType: ApiWaveType;
+  readonly ongoingRanking?: boolean;
   readonly activeStep: CreateWaveStep;
+  readonly disabled?: boolean;
   readonly onStep: (step: CreateWaveStep) => void;
 }) {
-  const steps = CREATE_WAVE_MAIN_STEPS[waveType];
+  const locale = useBrowserLocale();
+  const steps = getCreateWaveMainSteps({ waveType, ongoingRanking });
   const activeStepIndex = steps.indexOf(activeStep);
   return (
     <div className="tw-hidden tw-min-h-full tw-w-full lg:tw-block">
@@ -25,10 +31,11 @@ export default function CreateWavesMainSteps({
             <CreateWavesMainStep
               key={step}
               isLast={stepIndex === steps.length - 1}
-              label={CREATE_WAVE_STEPS_LABELS[waveType][step]}
+              label={getCreateWaveStepLabel({ step, waveType, locale })}
               stepIndex={stepIndex}
               activeStepIndex={activeStepIndex}
               step={step}
+              disabled={disabled}
               onStep={onStep}
             />
           ))}

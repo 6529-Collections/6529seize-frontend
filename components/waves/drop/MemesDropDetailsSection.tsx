@@ -12,9 +12,11 @@ import type {
   MemesDropFileInfo,
   MemesDropMedia,
 } from "./memesDropPanelTypes";
+import type { DropVoteSummaryState } from "./useDropVoteSummary";
 
 interface MemesDropDetailsSectionProps {
   readonly drop: ExtendedDrop;
+  readonly voteSummary: DropVoteSummaryState;
   readonly wave: ApiWave | null;
   readonly artworkMedia?: MemesDropMedia | null | undefined;
   readonly fileInfo: MemesDropFileInfo | null;
@@ -27,6 +29,7 @@ interface MemesDropDetailsSectionProps {
 
 export function MemesDropDetailsSection({
   drop,
+  voteSummary,
   wave,
   artworkMedia,
   fileInfo,
@@ -44,19 +47,21 @@ export function MemesDropDetailsSection({
     <div className="tw-px-4 tw-pb-8 sm:tw-px-6 md:tw-pb-10 xl:tw-px-20">
       <div className="tw-mx-auto tw-max-w-3xl tw-space-y-8">
         <SingleWaveDropTraits drop={drop} />
-        <SingleWaveDropInfoDetails drop={drop} />
+        <SingleWaveDropInfoDetails drop={drop} voteSummary={voteSummary} />
         <WaveDropAdditionalInfo drop={drop} />
 
         {hasDownloads ? (
           <div className="tw-mt-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8">
-            <div className="tw-inline-grid tw-grid-cols-[auto_auto_auto] tw-items-center tw-gap-x-3 tw-gap-y-2">
+            <div className="tw-inline-grid tw-grid-cols-[auto_auto] tw-items-center tw-gap-x-3 tw-gap-y-2">
               {artworkMedia && fileInfo && (
                 <>
-                  <span className="tw-text-xs tw-font-medium tw-text-iron-600">
-                    Media Type:
-                  </span>
-                  <span className="tw-text-xs tw-font-medium tw-text-iron-400">
-                    {fileInfo.extension.toUpperCase()}
+                  <span className="tw-inline-flex tw-items-baseline tw-gap-x-1.5">
+                    <span className="tw-text-xs tw-font-medium tw-text-iron-600">
+                      Media Type:
+                    </span>
+                    <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+                      {fileInfo.extension.toUpperCase()}
+                    </span>
                   </span>
                   <Download
                     href={artworkMedia.url}
@@ -69,11 +74,13 @@ export function MemesDropDetailsSection({
               )}
               {previewImageData && (
                 <>
-                  <span className="tw-text-xs tw-font-medium tw-text-iron-600">
-                    Preview:
-                  </span>
-                  <span className="tw-text-xs tw-font-medium tw-text-iron-400">
-                    {previewImageData.fileInfo.extension.toUpperCase()}
+                  <span className="tw-inline-flex tw-items-baseline tw-gap-x-1.5">
+                    <span className="tw-text-xs tw-font-medium tw-text-iron-600">
+                      Preview:
+                    </span>
+                    <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+                      {previewImageData.fileInfo.extension.toUpperCase()}
+                    </span>
                   </span>
                   <Download
                     href={previewImageData.url}
@@ -86,11 +93,13 @@ export function MemesDropDetailsSection({
               )}
               {promoVideoData && (
                 <>
-                  <span className="tw-text-xs tw-font-medium tw-text-iron-600">
-                    Promo Video:
-                  </span>
-                  <span className="tw-text-xs tw-font-medium tw-text-iron-400">
-                    {promoVideoData.fileInfo.extension.toUpperCase()}
+                  <span className="tw-inline-flex tw-items-baseline tw-gap-x-1.5">
+                    <span className="tw-text-xs tw-font-medium tw-text-iron-600">
+                      Promo Video:
+                    </span>
+                    <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+                      {promoVideoData.fileInfo.extension.toUpperCase()}
+                    </span>
                   </span>
                   <Download
                     href={promoVideoData.url}

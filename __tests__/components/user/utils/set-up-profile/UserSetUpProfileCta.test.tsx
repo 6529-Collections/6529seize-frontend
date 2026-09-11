@@ -94,15 +94,19 @@ describe("UserSetUpProfileCta", () => {
   it("shows link when handle missing", () => {
     useCtx.mockReturnValue({ address: "0xabc", hasValidWalletAuth: true });
     renderWithProfile(profileWithHandle(null));
-    expect(screen.getByRole("button")).toBeInTheDocument();
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/0xabc");
+    expect(
+      screen.getByRole("link", { name: "Create profile" })
+    ).toHaveAttribute("href", "/0xabc");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
   it("shows link when connected wallet has no loaded profile", () => {
     useCtx.mockReturnValue({ address: "0xabc", hasValidWalletAuth: true });
     renderWithProfile(null);
-    expect(screen.getByRole("button")).toBeInTheDocument();
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/0xabc");
+    expect(
+      screen.getByRole("link", { name: "Create profile" })
+    ).toHaveAttribute("href", "/0xabc");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
   it("returns null when address missing or handle exists", () => {

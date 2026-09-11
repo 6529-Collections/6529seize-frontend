@@ -22,6 +22,10 @@ jest.mock("@/components/drops/create/DropEditor", () =>
       useCreateDropEmojiPickerLayer,
     } = require("@/components/waves/CreateDropEmojiPickerLayerContext");
     const emojiPickerLayer = useCreateDropEmojiPickerLayer();
+    const {
+      useDraftMentionSearchScope,
+    } = require("@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext");
+    const draftMentionSearchScope = useDraftMentionSearchScope();
 
     React.useImperativeHandle(ref, () => ({
       getDropSnapshot: () => ({ content: "snapshot drop" }),
@@ -45,6 +49,9 @@ jest.mock("@/components/drops/create/DropEditor", () =>
         <div data-testid="wave-name">{props.wave?.name}</div>
         <div data-testid="wave-image">{props.wave?.image}</div>
         <div data-testid="wave-id-prop">{props.wave?.id}</div>
+        <div data-testid="draft-mention-search-scope">
+          {JSON.stringify(draftMentionSearchScope)}
+        </div>
         <div data-testid="emoji-picker-desktop-z-index">
           {emojiPickerLayer.desktopZIndex}
         </div>
@@ -89,6 +96,7 @@ describe("CreateWaveDescription", () => {
     wave: mockWave,
     submitting: false,
     showDropError: false,
+    visibilityGroupId: "visibility-group",
     onHaveDropToSubmitChange: jest.fn(),
   };
 
@@ -112,10 +120,14 @@ describe("CreateWaveDescription", () => {
   it("renders description title and instructions", () => {
     render(<CreateWaveDescription {...defaultProps} />);
 
-    expect(screen.getByText("Description")).toBeInTheDocument();
     expect(
-      screen.getByText(/Give a good description of your wave/)
-    ).toBeInTheDocument();
+      screen.getByRole("heading", { level: 2, name: "Description" })
+    ).toBeVisible();
+    expect(
+      screen.getByText(
+        "Give a good description of your wave so participants know what you expect in this wave. More information, including any content moderation parameters, is better than less."
+      )
+    ).toBeVisible();
   });
 
   it("renders DropEditor with correct props", () => {
@@ -133,6 +145,22 @@ describe("CreateWaveDescription", () => {
       "https://example.com/image.png"
     );
     expect(screen.getByTestId("wave-id-prop")).toHaveTextContent("wave-123");
+    expect(screen.getByTestId("draft-mention-search-scope")).toHaveTextContent(
+      JSON.stringify({
+        kind: "group",
+        visibilityGroupId: "visibility-group",
+      })
+    );
+  });
+
+  it("uses the explicit public draft mention scope", () => {
+    render(
+      <CreateWaveDescription {...defaultProps} visibilityGroupId={null} />
+    );
+
+    expect(screen.getByTestId("draft-mention-search-scope")).toHaveTextContent(
+      JSON.stringify({ kind: "public" })
+    );
   });
 
   it("scopes emoji picker layer above the create-wave modal", () => {
@@ -174,12 +202,17 @@ describe("CreateWaveDescription", () => {
     expect(screen.getByTestId("wave-id-prop")).toHaveTextContent("");
   });
 
-  it("returns null when profile has no id or handle", () => {
+  it("explains the missing profile instead of rendering a blank step", () => {
     mockProfileAndConsolidationsToProfileMin.mockReturnValue(null);
 
-    const { container } = render(<CreateWaveDescription {...defaultProps} />);
+    render(<CreateWaveDescription {...defaultProps} />);
 
-    expect(container.firstChild).toBeNull();
+    // Rendering nothing left users staring at a dead Complete button; the
+    // step must say why it cannot continue.
+    expect(
+      screen.getByText(/A profile handle is required to create a wave/)
+    ).toBeVisible();
+    expect(screen.queryByTestId("drop-editor")).not.toBeInTheDocument();
   });
 
   it("exposes requestDrop through ref", () => {
@@ -226,24 +259,29 @@ describe("CreateWaveDescription", () => {
   });
 
   it("displays proper styling classes", () => {
-    const { container } = render(<CreateWaveDescription {...defaultProps} />);
+    render(<CreateWaveDescription {...defaultProps} />);
 
-    const title = screen.getByText("Description");
+    const title = screen.getByRole("heading", {
+      level: 2,
+      name: "Description",
+    });
     expect(title).toHaveClass(
-      "tw-mb-0",
-      "tw-text-lg",
-      "sm:tw-text-xl",
+      "tw-m-0",
+      "tw-text-xl",
       "tw-font-semibold",
-      "tw-text-iron-50"
+      "tw-leading-7",
+      "tw-text-white"
     );
 
-    const subtitle = screen.getByText(/Give a good description of your wave/);
+    const subtitle = screen.getByText(
+      "Give a good description of your wave so participants know what you expect in this wave. More information, including any content moderation parameters, is better than less."
+    );
     expect(subtitle).toHaveClass(
-      "tw-mt-2",
-      "tw-mb-0",
-      "tw-text-base",
+      "tw-m-0",
+      "tw-text-sm",
       "tw-font-normal",
-      "tw-text-iron-400"
+      "tw-leading-5",
+      "tw-text-iron-300"
     );
   });
 });

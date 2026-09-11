@@ -1,46 +1,50 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import Page from '@/app/om/instruction-manual/page';
+import Page, { generateMetadata } from "@/app/om/instruction-manual/page";
+import { omInstructionManualMigratedWordPressPage } from "@/app/om/instruction-manual/content";
+import { render, screen } from "@testing-library/react";
 
-describe('OM Instruction Manual Page', () => {
-  const renderComponent = () => render(<Page />);
+describe("OM Instruction Manual Page (migrated WordPress static page)", () => {
+  it("renders the instruction manual title and guide sections", () => {
+    render(<Page />);
 
-  it('renders the page title', () => {
-    renderComponent();
-    const title = document.querySelector('title');
-    expect(title?.textContent).toBe('OM INSTRUCTION MANUAL - 6529.io');
+    expect(
+      screen.getByRole("heading", { level: 1, name: "OM Instruction Manual" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "QUICK GUIDE TO NAVIGATING OM",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText("Use Arrow Keys or WASD keys (if you are a gamer)")
+    ).toHaveLength(2);
   });
 
-  it('includes canonical link', () => {
-    renderComponent();
-    const canonical = document.querySelector('link[rel="canonical"]');
-    expect(canonical).toBeInTheDocument();
-    expect(canonical?.getAttribute('href')).toBe('/om/instruction-manual/');
+  it("marks the page with its auditable migration source", () => {
+    render(<Page />);
+
+    expect(document.querySelector("main")).toHaveAttribute(
+      "data-content-source",
+      "migrated-wordpress"
+    );
   });
 
-  it('includes robots meta tag', () => {
-    renderComponent();
-    const robots = document.querySelector('meta[name="robots"]');
-    expect(robots?.getAttribute('content')).toBe('index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+  it("exposes title and Open Graph metadata via generateMetadata", () => {
+    const metadata = generateMetadata();
+
+    expect(metadata.title).toBe("OM Instruction Manual - 6529.io");
+    expect(metadata.openGraph).toMatchObject({
+      siteName: "6529.io",
+      title: "OM Instruction Manual - 6529.io",
+    });
   });
 
-  it('includes Open Graph title', () => {
-    renderComponent();
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    expect(ogTitle?.getAttribute('content')).toBe('OM INSTRUCTION MANUAL - 6529.io');
-  });
-
-  it('has skip to content link', () => {
-    renderComponent();
-    const skip = screen.getByText('Skip to content');
-    expect(skip).toBeInTheDocument();
-    expect(skip).toHaveAttribute('href', '#content');
-  });
-
-  it('has go to top link', () => {
-    renderComponent();
-    const link = document.querySelector('#toTop');
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveClass('fusion-top-top-link');
+  it("keeps the content module aligned with the page path", () => {
+    expect(omInstructionManualMigratedWordPressPage.path).toBe(
+      "/om/instruction-manual"
+    );
+    expect(omInstructionManualMigratedWordPressPage.source).toBe(
+      "migrated-wordpress"
+    );
   });
 });

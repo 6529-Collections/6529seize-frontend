@@ -10,16 +10,16 @@ interface HorizontalTimelineDotProps {
  */
 export const HorizontalTimelineDot: React.FC<HorizontalTimelineDotProps> = ({
   isNext,
-  isPast
+  isPast,
 }) => {
   return (
     <div
-      className={`tw-w-3 tw-h-3 tw-rounded-full ${
+      className={`tw-size-2 tw-rounded-full ${
         isNext
-          ? "tw-bg-primary-400 tw-ring-2 tw-ring-primary-400/30"
+          ? "tw-bg-primary-400 tw-ring-2 tw-ring-primary-400/20"
           : isPast
-          ? "tw-bg-iron-600"
-          : "tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-700"
+            ? "tw-bg-iron-600"
+            : "tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950"
       }`}
     ></div>
   );

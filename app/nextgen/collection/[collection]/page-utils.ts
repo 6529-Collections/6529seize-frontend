@@ -8,6 +8,9 @@ import { isEmptyObject } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
+import { getNextgenTitle } from "../../title-utils";
+
+const COLLECTION_VIEW_PATH_SEGMENT_INDEX = 3;
 
 export async function fetchCollection(
   id: string,
@@ -38,6 +41,14 @@ export function getCollectionView(view: string): NextgenCollectionView {
   return NextgenCollectionView.OVERVIEW;
 }
 
+export function getCollectionViewFromPathname(
+  pathname: string
+): NextgenCollectionView {
+  const pathSegments = pathname.split("/").filter(Boolean);
+  const viewSegment = pathSegments[COLLECTION_VIEW_PATH_SEGMENT_INDEX] ?? "";
+  return getCollectionView(viewSegment);
+}
+
 export function getContentViewKeyByValue(value: string): string {
   for (const [key, val] of Object.entries(NextgenCollectionView)) {
     if (val === value) {
@@ -48,6 +59,24 @@ export function getContentViewKeyByValue(value: string): string {
     return NextgenCollectionView.TOP_TRAIT_SETS;
   }
   return NextgenCollectionView.OVERVIEW;
+}
+
+export function getNextgenCollectionDocumentTitle(
+  collectionName: string,
+  view: NextgenCollectionView
+): string {
+  return view === NextgenCollectionView.OVERVIEW
+    ? getNextgenTitle(collectionName, "NextGen")
+    : getNextgenTitle(String(view), collectionName);
+}
+
+export function getNextgenCollectionSocialCardTitle(
+  collectionName: string,
+  view: NextgenCollectionView
+): string {
+  return view === NextgenCollectionView.OVERVIEW
+    ? getNextgenTitle(collectionName)
+    : getNextgenTitle(String(view), collectionName);
 }
 
 export function getNextgenCollectionMetadata({
@@ -86,11 +115,13 @@ export async function generateNextgenCollectionMetadata({
 }): Promise<Metadata> {
   const resolvedCollection = await fetchCollection(collection, headers);
   if (!resolvedCollection) {
-    return getAppMetadata({ title: page });
+    return getAppMetadata({ title: getNextgenTitle(page, "NextGen") });
   }
+  const title = getNextgenTitle(page, resolvedCollection.name);
   return getNextgenCollectionMetadata({
     collection: resolvedCollection,
+    documentTitle: title,
     subtitle: `${resolvedCollection.name} | NextGen`,
-    title: `${page} | ${resolvedCollection.name}`,
+    title,
   });
 }

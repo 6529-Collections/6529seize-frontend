@@ -7,7 +7,8 @@ It combines `Rep` and `NIC` on one route.
 
 - Desktop shows both surfaces at the same time.
 - Rep supports direction toggles: `Received` and `Given`.
-- Mobile switches between `Rep` and `Identity` subviews inside the same URL.
+- Mobile switches between `Total Rep`, `NIC`, and `ID Statements` subviews
+  inside the same URL.
 
 ## Location in the Site
 
@@ -22,10 +23,15 @@ Desktop (`>= lg`):
 - Right: NIC summary, ID statements, and `Rate NIC` entry point
 
 Mobile (`< lg`):
-- Top cards: direction-aware `Total Rep` and `NIC`
-- `Rep` subview: rep direction toggle, categories, received-only `Grant Rep`,
-  REP activity log
-- `Identity` subview: `Rate NIC`, ID statements, NIC activity log
+- Top segmented control: direction-aware `Total Rep`, `NIC`, and
+  `ID Statements`
+- `Total Rep` subview: contributor summary, rep direction toggle, categories,
+  received-only `Grant Rep`, and REP activity log
+- `NIC` subview: NIC explanation, status, top-rater avatars, `Rate NIC`, and NIC
+  activity log
+- `ID Statements` subview: a possessive profile heading, short public-data
+  description, statement card, and the statement add action beside the heading
+  when editing is allowed
 
 ## Entry Points
 
@@ -44,7 +50,8 @@ Mobile (`< lg`):
 5. If actions are available, open `Grant Rep` (received only) or `Rate NIC`.
 6. `Rate NIC` opens a modal; submit to save or select `Cancel` to close.
 7. Review activity logs and apply filters.
-8. On mobile, switch between `Rep` and `NIC` cards as needed.
+8. On mobile, switch between `Total Rep`, `NIC`, and `ID Statements` as
+   needed.
 
 ## Rep Behavior
 
@@ -84,9 +91,19 @@ Mobile (`< lg`):
 ### Grant Rep Dialog
 
 - Category search accepts 3-100 characters.
-- Results appear after a short debounce.
-- Dropdown order is typed value first, then matching categories.
-- Selecting a category validates availability before selection.
+- Results appear after a short debounce as compact category pills, including the
+  typed category and matching categories returned by the existing search.
+- Similar categories remain independent and selectable. The exact
+  `MemesNominee` pill is marked as counting toward the 50,000 REP submission
+  requirement. When the typed value differs from it only by capitalization,
+  spacing, punctuation, or Unicode width, the exact pill is surfaced first; the
+  typed value remains available and look-alikes use subdued styling. Search
+  guidance stays neutral until a category is selected. Selecting exact
+  `MemesNominee` confirms the requirement in green; selecting a look-alike
+  instead shows an amber informational note explaining that the categories are
+  separate and only exact `MemesNominee` counts toward the requirement. All
+  other category pills keep their existing behavior.
+- Selecting an option validates availability before enabling the REP amount.
 - If availability fails, inline error is shown.
 - Editing text after category selection clears selected category and amount.
 - Amount accepts integers.
@@ -94,17 +111,27 @@ Mobile (`< lg`):
 - `Grant Rep` stays disabled until category is selected, amount changed, amount
   is valid, and submit is idle.
 
+### Localization fallback debt
+
+- Surface: the Grant REP dialog under the profile Identity tab.
+- Current fallback: `rep.categories.grant.*` messages use the canonical `en-US`
+  source copy in locales without translated entries.
+- User impact: supported non-English locales can see English fallback copy while
+  the complete grant flow remains functional.
+- Owner/follow-up: frontend localization maintainers can add translated entries
+  during the next profile localization pass.
+
 ## NIC and Statements Behavior
 
 - NIC panel shows NIC value, NIC status, top-contributor avatars, and rater
   count.
 - Desktop shows a `Rate NIC` CTA in the NIC section when rating is allowed.
-- Mobile shows `Rate NIC` only in the `Identity` subview when rating is
-  allowed.
+- Mobile shows `Rate NIC` only in the `NIC` subview when rating is allowed.
 - Desktop and mobile rating flows open a modal with `Save` and `Cancel`.
 - `Rate` is enabled only when the value changed and is valid.
 
 Statement ownership in this tab:
+
 - [Profile Identity Statements](feature-identity-statements.md)
 
 ## Activity Log Behavior
@@ -114,8 +141,8 @@ Statement ownership in this tab:
   - direction tabs: `All`, `Incoming`, `Outgoing`
   - NIC-only log-type filter when matter is `NIC`
 - Mobile:
-  - `Rep` subview uses REP log with direction tabs
-  - `Identity` subview uses NIC log with direction tabs and NIC log-type filter
+  - `Total Rep` subview uses REP log with direction tabs
+  - `NIC` subview uses NIC log with direction tabs and NIC log-type filter
 - Empty results show `No Activity Log`.
 
 ## Permissions and Visibility Rules
@@ -126,13 +153,13 @@ Statement ownership in this tab:
   - Rep actions require `AllocateRep`
   - NIC actions require `AllocateCic`
   - proxy grantor profile cannot be the target
-- Mobile `Rep`/`Identity` switching does not change URL state.
+- Mobile `Total Rep`/`NIC`/`ID Statements` switching does not change URL state.
 
 ## Common Scenarios
 
 - Desktop viewers compare `Rep` and `NIC` side by side on the same route.
-- Mobile viewers switch between `Rep` and `Identity` cards without leaving
-  `/{user}`.
+- Mobile viewers switch between `Total Rep`, `NIC`, and `ID Statements`
+  without leaving `/{user}`.
 - Profiles with many rep categories use `+N more`, then `Load more`, to reveal
   additional categories incrementally.
 - Eligible viewers open `Grant Rep` from the received-rep surface or `Rate NIC`
@@ -142,6 +169,9 @@ Statement ownership in this tab:
 
 - `Received` and `Given` keep separate expanded-category counts while you stay
   on the same profile route.
+- Category spelling remains exact. Similar spellings stay separate and
+  selectable, matching the existing Grant REP behavior.
+- Mobile keyboards do not auto-capitalize or autocorrect category input.
 - Opening a different profile resets the visible category counts back to that
   profile's initial list state.
 - Outside proxy mode, self-rating is blocked even when the rest of the profile
@@ -156,8 +186,8 @@ Statement ownership in this tab:
 - If loading a later categories page fails, already visible categories stay on
   screen; use `Load more` again or refresh the route to retry.
 - Selecting `Cancel` closes NIC rating without applying changes.
-- Statement or rating fetch failures can leave empty/partial sections; refresh
-  to retry.
+- Statement fetch failures show an error panel with `Retry`; consolidated
+  addresses remain available while statement groups are unavailable.
 - Replace old `/{user}/rep` bookmarks with `/{user}`.
 
 ## Limitations / Notes
@@ -167,7 +197,7 @@ Statement ownership in this tab:
 - Action availability still depends on wallet, profile-handle, and proxy
   permission context at runtime.
 - Mobile subview switching is local UI state and does not create a distinct URL
-  for `Rep` versus `Identity`.
+  for `Total Rep`, `NIC`, or `ID Statements`.
 
 ## Related Pages
 

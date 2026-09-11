@@ -1,9 +1,10 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiFeedItemType } from "@/generated/models/ApiFeedItemType";
 import type { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ApiNotificationsResponse } from "@/generated/models/ApiNotificationsResponse";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
-import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiSubscriptionCoverageNotificationRisk } from "@/generated/models/ApiSubscriptionCoverageNotificationRisk";
+import type { ApiSubscriptionCoveragePoint } from "@/generated/models/ApiSubscriptionCoveragePoint";
+import type { ApiSubscriptionCoverageStatus } from "@/generated/models/ApiSubscriptionCoverageStatus";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 
 export const DROP_POLL_VOTED_NOTIFICATION_CAUSE = "DROP_POLL_VOTED" as const;
@@ -20,34 +21,6 @@ export type NotificationPollVoteOption = {
 type NotificationWaveOverview = ApiWaveOverview & {
   readonly is_direct_message?: boolean;
 };
-
-type IFeedItemWaveCreated = {
-  readonly serial_no: number;
-  readonly item: ApiWave;
-  readonly type: ApiFeedItemType.WaveCreated;
-};
-
-type IFeedItemDropCreated = {
-  readonly serial_no: number;
-  readonly item: ApiDrop;
-  readonly type: ApiFeedItemType.DropCreated;
-};
-
-type IFeedItemDropRepliedItem = {
-  readonly drop: ApiDrop;
-  readonly reply: ApiDrop;
-};
-
-type IFeedItemDropReplied = {
-  readonly serial_no: number;
-  readonly item: IFeedItemDropRepliedItem;
-  readonly type: ApiFeedItemType.DropReplied;
-};
-
-export type TypedFeedItem =
-  | IFeedItemWaveCreated
-  | IFeedItemDropCreated
-  | IFeedItemDropReplied;
 
 /**
  * Base notification fields shared by all notification types.
@@ -166,6 +139,25 @@ export type INotificationPriorityAlert = NotificationBase &
     readonly additional_context: Record<string, unknown>;
   };
 
+export type INotificationSubscriptionCoverage = {
+  readonly id: number;
+  readonly created_at: number;
+  readonly read_at: number | null;
+  readonly cause: ApiNotificationCause.SubscriptionCoverage;
+  readonly additional_context: {
+    readonly profile_handle: string;
+    readonly status: ApiSubscriptionCoverageStatus;
+    readonly consolidation_key: string;
+    readonly mint_capacity: number;
+    readonly allocated_mints: number;
+    readonly fully_funded_drops: number;
+    readonly funded_through: ApiSubscriptionCoveragePoint | null;
+    readonly next_unfunded: ApiSubscriptionCoverageNotificationRisk | null;
+    readonly minimum_top_up_eth: string | null;
+    readonly top_up_deadline: Date | null;
+  };
+};
+
 export type TypedNotification =
   | INotificationIdentitySubscribed
   | INotificationIdentityMentioned
@@ -179,7 +171,8 @@ export type TypedNotification =
   | INotificationDropReplied
   | INotificationWaveCreated
   | INotificationAllDrops
-  | INotificationPriorityAlert;
+  | INotificationPriorityAlert
+  | INotificationSubscriptionCoverage;
 
 export type GroupedReactionsItem = {
   readonly type: "grouped_reactions";

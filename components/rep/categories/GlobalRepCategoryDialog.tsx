@@ -20,10 +20,17 @@ export default function GlobalRepCategoryDialog({
       tall
       fixedHeight
       tabletModal
-      maxWidthClass="md:tw-max-w-5xl md:[&_h2]:tw-mt-2"
+      maxWidthClass="md:tw-max-w-4xl"
+      zIndexClassName="tw-z-[1010]"
       showScrollbar
+      showHeaderCloseButton
+      surfaceClassName="tw-bg-iron-950"
+      headerClassName="!tw-absolute tw-right-4 tw-top-4 tw-z-30 !tw-p-0 sm:tw-right-10 sm:tw-top-6"
+      titleClassName="tw-sr-only"
     >
-      <div className="tw-px-4 sm:tw-px-6">
+      <div
+        className={`tw-px-6 tw-pt-4 sm:tw-px-10 sm:tw-pt-6 [&_.rep-category-header]:tw-pr-14 sm:[&_.rep-category-header]:tw-pr-16`}
+      >
         {category && (
           <GlobalRepCategoryDetail
             category={category}

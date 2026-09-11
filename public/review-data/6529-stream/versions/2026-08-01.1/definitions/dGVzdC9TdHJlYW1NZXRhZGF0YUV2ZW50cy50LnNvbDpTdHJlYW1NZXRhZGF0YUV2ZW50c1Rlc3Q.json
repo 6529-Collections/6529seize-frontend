@@ -1,0 +1,920 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0xe6ad43f3",
+          "declaringDefinitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testBurnDoesNotEmitMetadataUpdate",
+          "outputs": [],
+          "selector": "0xe6ad43f3",
+          "signature": "testBurnDoesNotEmitMetadataUpdate()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0xb9833502",
+          "declaringDefinitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCollectionMetadataMutationWithoutMintedTokensDoesNotEmitBatchUpdate",
+          "outputs": [],
+          "selector": "0xb9833502",
+          "signature": "testCollectionMetadataMutationWithoutMintedTokensDoesNotEmitBatchUpdate()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0x8fe8f3a9",
+          "declaringDefinitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCollectionMetadataMutationsEmitBatchMetadataUpdate",
+          "outputs": [],
+          "selector": "0x8fe8f3a9",
+          "signature": "testCollectionMetadataMutationsEmitBatchMetadataUpdate()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0xa984db90",
+          "declaringDefinitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMintWithoutRandomnessFulfillmentDoesNotEmitMetadataUpdate",
+          "outputs": [],
+          "selector": "0xa984db90",
+          "signature": "testMintWithoutRandomnessFulfillmentDoesNotEmitMetadataUpdate()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0xef31af10",
+          "declaringDefinitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPostBurnRandomnessFulfillmentStoresHashWithoutMetadataUpdate",
+          "outputs": [],
+          "selector": "0xef31af10",
+          "signature": "testPostBurnRandomnessFulfillmentStoresHashWithoutMetadataUpdate()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0x600cfc12",
+          "declaringDefinitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPremintRandomnessFulfillmentStoresHashWithoutMetadataUpdate",
+          "outputs": [],
+          "selector": "0x600cfc12",
+          "signature": "testPremintRandomnessFulfillmentStoresHashWithoutMetadataUpdate()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0x1d5e1c4f",
+          "declaringDefinitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRandomnessFulfillmentEmitsMetadataUpdate",
+          "outputs": [],
+          "selector": "0x1d5e1c4f",
+          "signature": "testRandomnessFulfillmentEmitsMetadataUpdate()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0xc7a98f22",
+          "declaringDefinitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSupportsErc4906Interface",
+          "outputs": [],
+          "selector": "0xc7a98f22",
+          "signature": "testSupportsErc4906Interface()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0x23e2777a",
+          "declaringDefinitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testTokenMetadataMutationsEmitMetadataUpdate",
+          "outputs": [],
+          "selector": "0x23e2777a",
+          "signature": "testTokenMetadataMutationsEmitMetadataUpdate()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testSupportsErc4906Interface()",
+          "displaySignature": "testSupportsErc4906Interface()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0xc7a98f22",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUV2ZW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUV2ZW50c1Rlc3QjZnVuY3Rpb246MHhjN2E5OGYyMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSupportsErc4906Interface",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 567,
+            "byteStart": 1010,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L24-L32",
+            "lineEnd": 32,
+            "lineStart": 24,
+            "snippetSha256": "sha256:e6020d4b8e8cfc7d51bde325e4c79ba3120e5c06860ed3f375f3a1eabfbc17dc",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": "0xc7a98f22",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRandomnessFulfillmentEmitsMetadataUpdate()",
+          "displaySignature": "testRandomnessFulfillmentEmitsMetadataUpdate()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0x1d5e1c4f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUV2ZW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUV2ZW50c1Rlc3QjZnVuY3Rpb246MHgxZDVlMWM0Zg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRandomnessFulfillmentEmitsMetadataUpdate",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 368,
+            "byteStart": 1583,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L34-L42",
+            "lineEnd": 42,
+            "lineStart": 34,
+            "snippetSha256": "sha256:aaf138c9f2b0b9c489c2a8df667489be71478c4592963a6e6759facfafb5c137",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": "0x1d5e1c4f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMintWithoutRandomnessFulfillmentDoesNotEmitMetadataUpdate()",
+          "displaySignature": "testMintWithoutRandomnessFulfillmentDoesNotEmitMetadataUpdate()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0xa984db90",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUV2ZW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUV2ZW50c1Rlc3QjZnVuY3Rpb246MHhhOTg0ZGI5MA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMintWithoutRandomnessFulfillmentDoesNotEmitMetadataUpdate",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 639,
+            "byteStart": 1957,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L44-L55",
+            "lineEnd": 55,
+            "lineStart": 44,
+            "snippetSha256": "sha256:8af16a5032dce87ecdae99060d769b9ac93de3efd284006c7bd74378a1b0b824",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": "0xa984db90",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPremintRandomnessFulfillmentStoresHashWithoutMetadataUpdate()",
+          "displaySignature": "testPremintRandomnessFulfillmentStoresHashWithoutMetadataUpdate()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0x600cfc12",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUV2ZW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUV2ZW50c1Rlc3QjZnVuY3Rpb246MHg2MDBjZmMxMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPremintRandomnessFulfillmentStoresHashWithoutMetadataUpdate",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 722,
+            "byteStart": 2602,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L57-L69",
+            "lineEnd": 69,
+            "lineStart": 57,
+            "snippetSha256": "sha256:6b519f34341e91d1c505afe8e2b250687bd25c6d55f2c4f7a01e0f87bee452d2",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": "0x600cfc12",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testTokenMetadataMutationsEmitMetadataUpdate()",
+          "displaySignature": "testTokenMetadataMutationsEmitMetadataUpdate()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0x23e2777a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUV2ZW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUV2ZW50c1Rlc3QjZnVuY3Rpb246MHgyM2UyNzc3YQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testTokenMetadataMutationsEmitMetadataUpdate",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1305,
+            "byteStart": 3330,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L71-L98",
+            "lineEnd": 98,
+            "lineStart": 71,
+            "snippetSha256": "sha256:c59c3de2bdb5655cbc61966a855fb6a6876cddccd113b417035e55fa1d4c5f44",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": "0x23e2777a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCollectionMetadataMutationsEmitBatchMetadataUpdate()",
+          "displaySignature": "testCollectionMetadataMutationsEmitBatchMetadataUpdate()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0x8fe8f3a9",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUV2ZW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUV2ZW50c1Rlc3QjZnVuY3Rpb246MHg4ZmU4ZjNhOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCollectionMetadataMutationsEmitBatchMetadataUpdate",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1253,
+            "byteStart": 4641,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L100-L134",
+            "lineEnd": 134,
+            "lineStart": 100,
+            "snippetSha256": "sha256:3879d7e510b04086e74558782834e3261d7cdcd082684bc4983405d0407ceb4d",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": "0x8fe8f3a9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCollectionMetadataMutationWithoutMintedTokensDoesNotEmitBatchUpdate()",
+          "displaySignature": "testCollectionMetadataMutationWithoutMintedTokensDoesNotEmitBatchUpdate()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0xb9833502",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUV2ZW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUV2ZW50c1Rlc3QjZnVuY3Rpb246MHhiOTgzMzUwMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCollectionMetadataMutationWithoutMintedTokensDoesNotEmitBatchUpdate",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 570,
+            "byteStart": 5900,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L136-L147",
+            "lineEnd": 147,
+            "lineStart": 136,
+            "snippetSha256": "sha256:32c2e23321240a56449992d104ea0591151fafa628f635d3415890fa95ef029a",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": "0xb9833502",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testBurnDoesNotEmitMetadataUpdate()",
+          "displaySignature": "testBurnDoesNotEmitMetadataUpdate()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0xe6ad43f3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUV2ZW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUV2ZW50c1Rlc3QjZnVuY3Rpb246MHhlNmFkNDNmMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testBurnDoesNotEmitMetadataUpdate",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 690,
+            "byteStart": 6476,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L149-L163",
+            "lineEnd": 163,
+            "lineStart": 149,
+            "snippetSha256": "sha256:4addd222fc8e297cff210f579e2814910e661c45e4622071656486aba0620b8a",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": "0xe6ad43f3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPostBurnRandomnessFulfillmentStoresHashWithoutMetadataUpdate()",
+          "displaySignature": "testPostBurnRandomnessFulfillmentStoresHashWithoutMetadataUpdate()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0xef31af10",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUV2ZW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUV2ZW50c1Rlc3QjZnVuY3Rpb246MHhlZjMxYWYxMA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPostBurnRandomnessFulfillmentStoresHashWithoutMetadataUpdate",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 985,
+            "byteStart": 7172,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L165-L184",
+            "lineEnd": 184,
+            "lineStart": 165,
+            "snippetSha256": "sha256:b8084a7f42bd936f9efba30c33a36e9c9f46bee62ba5448e53cc447a0652077c",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": "0xef31af10",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintToken(DeployedStream,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:_mintToken(DeployedStream,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "salt",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUV2ZW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUV2ZW50c1Rlc3QjZnVuY3Rpb246X21pbnRUb2tlbihEZXBsb3llZFN0cmVhbSx1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintToken",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 220,
+            "byteStart": 8163,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L186-L189",
+            "lineEnd": 189,
+            "lineStart": 186,
+            "snippetSha256": "sha256:06e172aaf5abfc47b8a90c8c309b9e6961fc0e5508c4d8b3398fa91e39519366",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_countMetadataUpdates(Vm.Log[],uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:_countMetadataUpdates(Vm.Log[],uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUV2ZW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUV2ZW50c1Rlc3QjZnVuY3Rpb246X2NvdW50TWV0YWRhdGFVcGRhdGVzKFZtLkxvZ1tdLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_countMetadataUpdates",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "count",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 482,
+            "byteStart": 8389,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L191-L204",
+            "lineEnd": 204,
+            "lineStart": 191,
+            "snippetSha256": "sha256:db5bcd20f27dbca325c0b400641e4397cb0327a672e098f0ee8d9ff7340df3a5",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_countBatchMetadataUpdates(Vm.Log[],uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:_countBatchMetadataUpdates(Vm.Log[],uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "fromTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "toTokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUV2ZW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUV2ZW50c1Rlc3QjZnVuY3Rpb246X2NvdW50QmF0Y2hNZXRhZGF0YVVwZGF0ZXMoVm0uTG9nW10sdWludDI1Nix1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_countBatchMetadataUpdates",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "count",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 618,
+            "byteStart": 8877,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L206-L220",
+            "lineEnd": 220,
+            "lineStart": 206,
+            "snippetSha256": "sha256:2d4c488efa0fd067c85fbb36d6da8426f33ac64612630e544ad4ea1ca9880a5e",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_countTopic(Vm.Log[],bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:_countTopic(Vm.Log[],bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "topic",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUV2ZW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUV2ZW50c1Rlc3QjZnVuY3Rpb246X2NvdW50VG9waWMoVm0uTG9nW10sYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_countTopic",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "count",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 278,
+            "byteStart": 9501,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L222-L228",
+            "lineEnd": 228,
+            "lineStart": 222,
+            "snippetSha256": "sha256:04f769c4de94a6a1ec988fd10f94987b5a4ee4e0908c2270b5865d5d533bfb15",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ERC2981_INTERFACE_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 451,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:928e69789f8afc4ce7687ecb45bf8a753d08122bbe0440140e07a46634d868da",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": {
+            "byteLength": 10,
+            "byteStart": 498,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:753ff0d239fb6fa6a497ebfc94aa6fb5936579bd703b698e5d81d3d81f7e317b",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "valueSource": "0x2a55205a",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ERC4906_INTERFACE_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 514,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:78fb19cd249e32df9a689cb7596efacb159d791e7853c0e363d08b9a7f39cf35",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": {
+            "byteLength": 10,
+            "byteStart": 561,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:c41ada30a6612b9275b3b7ead18832a4bc13611ebd273ed173a09675023d4f18",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "valueSource": "0x49064906",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ERC721_ENUMERABLE_INTERFACE_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 67,
+            "byteStart": 577,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:d67184a911f399471d6821f2865bab3623f67681ae2f4c673858b05de7cf9408",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": {
+            "byteLength": 10,
+            "byteStart": 634,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:0e3e0bacada769ad98dc61357e1f39739ccfd073c87dcecfb3cc57a6cbabc29b",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "valueSource": "0x780e9d63",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "METADATA_UPDATE_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 85,
+            "byteStart": 650,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:bed32f9fe7984bc07db2c5f9ec8d9ba88c5fb3db95d8bd8e8aef91d02393de7e",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 36,
+            "byteStart": 699,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:2826f0dbf8eb545c8c9b7de48ad0ba4b2e55328e87a7f33b0b2c75ad9ccbd0ee",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "valueSource": "keccak256(\"MetadataUpdate(uint256)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "BATCH_METADATA_UPDATE_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 112,
+            "byteStart": 741,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L18-L19",
+            "lineEnd": 19,
+            "lineStart": 18,
+            "snippetSha256": "sha256:6af0b289b155b4d16ee9184db63786de35a6ba8d01396f2e23546e97a0ec80d9",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 49,
+            "byteStart": 804,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:119a9e6b574ca2ff3d124c03f6cd7300698a398802d5d893fa07fde7912c1852",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "valueSource": "keccak256(\"BatchMetadataUpdate(uint256,uint256)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 859,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 900,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 907,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 943,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 950,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:9ad3cd03bccb87616377ded5a696e0eb9dcbd4debf5aabca58a379ad81e19501",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 16,
+            "byteStart": 987,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:ff90295fee849d58a9a67d401763bcdf9a2e87e84bdeb02ce3ca102c5621224f",
+            "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+          },
+          "valueSource": "address(0xA11CE)",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUV2ZW50cy50LnNvbDpTdHJlYW1NZXRhZGF0YUV2ZW50c1Rlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamMetadataEventsTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 9479,
+      "byteStart": 302,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEvents.t.sol#L10-L229",
+      "lineEnd": 229,
+      "lineStart": 10,
+      "snippetSha256": "sha256:79d39dd263141dcd181397ee979107d6b843d6baa149ce10d46907b0ef2754d3",
+      "sourceSha256": "sha256:c62eff7b5af5003cd9b694e920c8d2a358fafe294b6f200763ec30765b19b2eb"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMetadataEvents.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 10
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 9
+    },
+    "totalCount": 10
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0x1d5e1c4f",
+      "definitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0x23e2777a",
+      "definitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0x600cfc12",
+      "definitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0x8fe8f3a9",
+      "definitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0xa984db90",
+      "definitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0xb9833502",
+      "definitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0xc7a98f22",
+      "definitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0xe6ad43f3",
+      "definitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest#function:0xef31af10",
+      "definitionId": "test/StreamMetadataEvents.t.sol:StreamMetadataEventsTest",
+      "severity": "advisory"
+    }
+  ]
+}

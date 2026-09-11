@@ -11,20 +11,51 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import ConnectWallet from "@/components/common/ConnectWallet";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
+import { useAuth } from "@/components/auth/Auth";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 export default function NotificationsPage() {
-  const { hasValidWalletAuth } = useSeizeConnectContext();
+  const { connectionState, hasValidWalletAuth } = useSeizeConnectContext();
+  const { connectedProfile, fetchingProfile } = useAuth();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const { activeDrop: modalDrop, isDropOpen, onDropClose } = useDropModal();
   const { isApp } = useDeviceInfo();
-  const { spaces } = useLayout();
+  const { notificationsViewStyle, spaces } = useLayout();
 
   const onCancelReplyQuote = () => {
     setActiveDrop(null);
   };
 
+  if (connectionState === "initializing" || connectionState === "connecting") {
+    return (
+      <div
+        className="tailwind-scope tw-flex tw-items-center tw-justify-center tw-bg-black"
+        style={notificationsViewStyle}
+      >
+        <output aria-label="Loading notifications" aria-live="polite">
+          <CircleLoader size={CircleLoaderSize.LARGE} />
+        </output>
+      </div>
+    );
+  }
+
   if (!hasValidWalletAuth) {
     return <ConnectWallet />;
+  }
+
+  if (!fetchingProfile && !connectedProfile?.handle) {
+    return (
+      <ConnectWallet
+        title={t(DEFAULT_LOCALE, "profileSetup.requiredTitle")}
+        description={t(DEFAULT_LOCALE, "profileSetup.notificationsDescription")}
+        action={<UserSetUpProfileCta />}
+      />
+    );
   }
 
   return (

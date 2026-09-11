@@ -7,6 +7,7 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
+import { MEMES_MINT_TITLE_PATTERN } from "../support/mintTitle";
 
 async function gotoReady(page: Page, path: string) {
   await gotoDocumentWithTransientRetry(page, path);
@@ -18,9 +19,10 @@ async function expectNavigation(page: Page, name: string) {
   await expect(page.getByRole("navigation", { name })).toBeVisible();
 }
 
-async function expectTableHasRows(page: Page, tableName: string | RegExp) {
+async function expectTableHasRows(page: Page, regionName: string) {
+  const region = page.getByRole("region", { name: regionName });
   await expect(
-    page.getByRole("table", { name: tableName }).getByRole("row").first()
+    region.getByRole("table", { name: "NFT activity" }).getByRole("row").first()
   ).toBeVisible({ timeout: 20000 });
 }
 
@@ -100,7 +102,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       page.getByRole("region", { name: "The Memes card activity" })
     ).toBeVisible();
     if (!isLocalBaseURL(baseURL)) {
-      await expectTableHasRows(page, "The Memes Card 1 activity");
+      await expectTableHasRows(page, "The Memes card activity");
     }
     await expect(
       page.getByRole("link", { name: "View SZN 1 cards" })
@@ -113,11 +115,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   test("renders The Memes mint page read-only", async ({ page }) => {
     await gotoReady(page, "/the-memes/mint");
 
-    // The "Mint #N | <name>" prefix is client-side enrichment (TitleContext)
-    // that races the App Router's metadata commit on deployed builds; the
-    // server metadata title is "Mint | The Memes". Accept both so the pack
-    // asserts the page, not the race.
-    await expect(page).toHaveTitle(/^Mint( #\d+ \| [^|]+)? \| The Memes$/);
+    await expect(page).toHaveTitle(MEMES_MINT_TITLE_PATTERN);
     await expect(page.getByText("Retrieving Mint information")).toBeHidden({
       timeout: 15000,
     });
@@ -125,7 +123,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       page.locator("main a[href^='/the-memes/']").first()
     ).toBeVisible({ timeout: 15000 });
     await expect(
-      page.locator("main img[id^='image-'][alt], main iframe").first()
+      page.locator("main [data-nft-media-renderer]").first()
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "Distribution Plan" })

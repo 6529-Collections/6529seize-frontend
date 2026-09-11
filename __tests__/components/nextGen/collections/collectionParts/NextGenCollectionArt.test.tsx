@@ -23,6 +23,9 @@ jest.mock('@/helpers/AllowlistToolHelpers', () => ({
 }));
 
 jest.mock('@/components/dotLoader/DotLoader', () => () => <div data-testid="loader" />);
+jest.mock('@/hooks/useBrowserLocale', () => ({
+  useBrowserLocale: () => 'en-US',
+}));
 jest.mock("@/components/nextGen/nextgen_helpers", () => ({
   formatNameForUrl: (s: string) => s,
   NextGenListFilters: { ID: "ID" },
@@ -36,6 +39,7 @@ const collection = { id: 1, name: 'Cool' } as any;
 describe('NextGenCollectionArt', () => {
   beforeEach(() => {
     (commonApiFetch as jest.Mock).mockClear();
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 });
   });
 
   it('shows view all link and renders token list with limit', async () => {
@@ -61,5 +65,20 @@ describe('NextGenCollectionArt', () => {
     render(<NextGenCollectionArt collection={collection} />);
     await screen.findByTestId('token-list');
     expect(screen.queryByText('Traits')).toBeNull();
+  });
+
+  it('locale-formats trait and value counts', async () => {
+    (commonApiFetch as jest.Mock).mockResolvedValue([
+      {
+        trait: 'Palette',
+        values: Array.from({ length: 1234 }, (_, index) => `Value ${index}`),
+        value_counts: [{ key: 'Blue', count: 2345 }],
+      },
+    ]);
+
+    render(<NextGenCollectionArt collection={collection} />);
+
+    expect(await screen.findByText('x1,234')).toBeInTheDocument();
+    expect(screen.getByText('x2,345')).toBeInTheDocument();
   });
 });

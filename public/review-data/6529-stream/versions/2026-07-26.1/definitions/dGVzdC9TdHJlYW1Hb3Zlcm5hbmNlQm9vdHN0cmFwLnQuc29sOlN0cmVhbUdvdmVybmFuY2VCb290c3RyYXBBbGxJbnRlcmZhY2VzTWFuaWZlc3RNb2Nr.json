@@ -1,0 +1,358 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock#function:0xf2f4eb26",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "core",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xf2f4eb26",
+          "signature": "core()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock#function:0x8fc98386",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "governanceExecutor",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamGovernanceExecutor",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x8fc98386",
+          "signature": "governanceExecutor()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock#function:0x01ffc9a7",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "core()",
+          "displaySignature": "core()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock#function:0xf2f4eb26",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VCb290c3RyYXBBbGxJbnRlcmZhY2VzTWFuaWZlc3RNb2NrI2Z1bmN0aW9uOjB4ZjJmNGViMjY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "core",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 29,
+            "byteStart": 1669,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L52",
+            "lineEnd": 52,
+            "lineStart": 52,
+            "snippetSha256": "sha256:ff26dad26e6edc1ecd1aeeb8339b1613d8706c1dba00ba398da6ab5578ed0c4b",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0xf2f4eb26",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "governanceExecutor()",
+          "displaySignature": "governanceExecutor()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock#function:0x8fc98386",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VCb290c3RyYXBBbGxJbnRlcmZhY2VzTWFuaWZlc3RNb2NrI2Z1bmN0aW9uOjB4OGZjOTgzODY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "governanceExecutor",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamGovernanceExecutor",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 61,
+            "byteStart": 1704,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L53",
+            "lineEnd": 53,
+            "lineStart": 53,
+            "snippetSha256": "sha256:1dd7993d753acb23a9063307cdda158b4edb5a8ffabb4fa16e1ae9c5aeef15dd",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0x8fc98386",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(address,IStreamGovernanceExecutor)",
+          "functionKind": "constructor",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock#function:constructor(address,IStreamGovernanceExecutor)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core_",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "governanceExecutor_",
+              "type": "IStreamGovernanceExecutor"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VCb290c3RyYXBBbGxJbnRlcmZhY2VzTWFuaWZlc3RNb2NrI2Z1bmN0aW9uOmNvbnN0cnVjdG9yKGFkZHJlc3MsSVN0cmVhbUdvdmVybmFuY2VFeGVjdXRvcik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 153,
+            "byteStart": 1772,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L55-L58",
+            "lineEnd": 58,
+            "lineStart": 55,
+            "snippetSha256": "sha256:5750c52f49fc2dcc6b41b878bc3a04468694491fd888be12b0a1f5f1c1f07965",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VCb290c3RyYXBBbGxJbnRlcmZhY2VzTWFuaWZlc3RNb2NrI2Z1bmN0aW9uOjB4MDFmZmM5YTc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 92,
+            "byteStart": 1931,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L60-L62",
+            "lineEnd": 62,
+            "lineStart": 60,
+            "snippetSha256": "sha256:a7d5a2ebc8af4492df7c0c624372574bcd0745de58ed793490fc136487e70045",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock#function:0xf2f4eb26",
+          "immutable": true,
+          "name": "core",
+          "natspec": "",
+          "range": {
+            "byteLength": 29,
+            "byteStart": 1669,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L52",
+            "lineEnd": 52,
+            "lineStart": 52,
+            "snippetSha256": "sha256:ff26dad26e6edc1ecd1aeeb8339b1613d8706c1dba00ba398da6ab5578ed0c4b",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0xf2f4eb26",
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock#function:0x8fc98386",
+          "immutable": true,
+          "name": "governanceExecutor",
+          "natspec": "",
+          "range": {
+            "byteLength": 61,
+            "byteStart": 1704,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L53",
+            "lineEnd": 53,
+            "lineStart": 53,
+            "snippetSha256": "sha256:1dd7993d753acb23a9063307cdda158b4edb5a8ffabb4fa16e1ae9c5aeef15dd",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0x8fc98386",
+          "type": "IStreamGovernanceExecutor",
+          "typeString": "contract IStreamGovernanceExecutor",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VCb290c3RyYXBBbGxJbnRlcmZhY2VzTWFuaWZlc3RNb2Nr",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGovernanceBootstrapAllInterfacesManifestMock",
+    "natspec": "",
+    "range": {
+      "byteLength": 422,
+      "byteStart": 1603,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L51-L63",
+      "lineEnd": 63,
+      "lineStart": 51,
+      "snippetSha256": "sha256:4fe68069c29cceb6be9bda5ed1b97b70077f421d3d924cd0990501f07c457501",
+      "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamGovernanceBootstrap.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 5
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 4
+    },
+    "totalCount": 5
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock#function:0x01ffc9a7",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock#function:0x8fc98386",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock#function:0xf2f4eb26",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock#function:constructor(address,IStreamGovernanceExecutor)",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapAllInterfacesManifestMock",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -14,8 +14,8 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import DropCurationButton from "../DropCurationButton";
 import DropMinimalIdentityRow from "../DropMinimalIdentityRow";
+import { DropAuthorBadges } from "../DropAuthorBadges";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
 import WaveDropContent from "../WaveDropContent";
@@ -32,8 +32,14 @@ import type {
   DropTimestampLayout,
 } from "../drop.types";
 import { DropLocation, hasDropFooter } from "../drop.types";
-import type { DropContentPresentation } from "../dropContentPresentation";
+import {
+  CHAT_PROPOSAL_CARD_SURFACE_CLASS,
+  type DropContentPresentation,
+} from "../dropContentPresentation";
 import ParticipationIdentityProfileCard from "./ParticipationIdentityProfileCard";
+import ProposalCardContextLabel from "../proposal/ProposalCardContextLabel";
+import ProposalCardDetachedHeader from "../proposal/ProposalCardDetachedHeader";
+import ProposalCardReadFullButton from "../proposal/ProposalCardReadFullButton";
 import {
   getParticipationIdentityProfile,
   getParticipationVisibleMetadata,
@@ -113,7 +119,10 @@ function EndedParticipationDropInner({
   const mobileMenu = useWaveDropMobileMenu();
   const showIdentity = identityMode !== "hidden";
   const isStackedTimestamp = timestampLayout === "stacked";
-  const shouldOffsetRows = showIdentity && !inlineAuthorOnDesktop;
+  const isChatProposal =
+    contentPresentation === "proposalCard" && location === DropLocation.WAVE;
+  const shouldOffsetRows =
+    showIdentity && !inlineAuthorOnDesktop && !isChatProposal;
 
   const handleNavigation = (e: React.MouseEvent, path: string) => {
     e.preventDefault();
@@ -127,13 +136,18 @@ function EndedParticipationDropInner({
     setIsSlideUp(true);
   }, [canUseTouchActionSheet, showInteractions]);
 
+  const handleMobileMenuOpenChange = useCallback((open: boolean) => {
+    setIsSlideUp(open);
+    if (!open) {
+      setLongPressTriggered(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (canUseTouchActionSheet) {
       return;
     }
 
-    setIsSlideUp(false);
-    setLongPressTriggered(false);
     mobileMenu?.close();
   }, [canUseTouchActionSheet, mobileMenu]);
 
@@ -149,12 +163,16 @@ function EndedParticipationDropInner({
   }, [mobileMenu]);
 
   const getDropLocationBackground = () => {
-    return "tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800";
+    return "tw-bg-[var(--drop-card-background,theme(colors.iron.950))] tw-ring-1 tw-ring-inset tw-ring-iron-800";
   };
 
-  const dropBackgroundClass = isActiveDrop
-    ? "tw-bg-[#3CCB7F]/10"
-    : getDropLocationBackground();
+  let dropBackgroundClass = getDropLocationBackground();
+  if (isChatProposal) {
+    dropBackgroundClass = CHAT_PROPOSAL_CARD_SURFACE_CLASS;
+  }
+  if (isActiveDrop) {
+    dropBackgroundClass = "tw-bg-[#3CCB7F]/10";
+  }
   const identityHeader =
     identityMode === "minimal" ? (
       <DropMinimalIdentityRow drop={drop} timestampLayout={timestampLayout} />
@@ -168,12 +186,7 @@ function EndedParticipationDropInner({
           }
         >
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-            <UserCICAndLevel
-              level={drop.author.level}
-              size={UserCICAndLevelSize.SMALL}
-            />
-
-            <p className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
+            <p className="tw-m-0 tw-inline-flex tw-h-5 tw-items-center tw-text-md tw-font-semibold tw-leading-5">
               <Link
                 onClick={(e) =>
                   handleNavigation(
@@ -188,18 +201,29 @@ function EndedParticipationDropInner({
               </Link>
             </p>
 
+            <UserCICAndLevel
+              level={drop.author.level}
+              size={UserCICAndLevelSize.SMALL}
+            />
+
+            <DropAuthorBadges
+              profile={drop.author}
+              wave={drop.wave}
+              tooltipIdPrefix={`ended-participation-author-badges-${drop.id}`}
+            />
+
             {!isStackedTimestamp && (
               <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
             )}
 
             {!isStackedTimestamp && (
-              <p className="tw-mb-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
+              <p className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
                 {getTimeAgoShort(drop.created_at)}
               </p>
             )}
           </div>
           {isStackedTimestamp && (
-            <p className="tw-mb-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
+            <p className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
               {getTimeAgoShort(drop.created_at)}
             </p>
           )}
@@ -231,6 +255,13 @@ function EndedParticipationDropInner({
       maxEmbedDepth={maxEmbedDepth}
     />
   );
+  const detachedProposalHeader =
+    isChatProposal && showIdentity ? (
+      <ProposalCardDetachedHeader
+        drop={drop}
+        identityHeader={identityHeader}
+      />
+    ) : null;
   const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
 
   useWaveDropMobileMenuController({
@@ -239,15 +270,15 @@ function EndedParticipationDropInner({
     isOpen: effectiveIsSlideUp,
     longPressTriggered,
     showReplyAndQuote,
-    onOpenChange: setIsSlideUp,
+    onOpenChange: handleMobileMenuOpenChange,
     onReply: handleOnReply,
     onAddReaction: handleOnAddReaction,
   });
 
   return (
     <div
-      className={`${
-        location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
+      className={`${location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""} ${
+        location === DropLocation.PROFILE ? "tw-mb-3" : ""
       } tw-w-full`}
     >
       <div className="tw-group tw-relative tw-w-full">
@@ -260,25 +291,43 @@ function EndedParticipationDropInner({
           />
         )}
 
+        {detachedProposalHeader}
+
         <div
-          className={`tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 tw-ease-linear ${dropBackgroundClass}`}
+          className={`tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-px-4 tw-py-3 tw-transition-colors ${isChatProposal ? "tw-duration-300" : "tw-duration-200"} tw-ease-linear ${
+            isChatProposal
+              ? "sm:tw-ml-[3.25rem] sm:tw-w-[calc(100%-3.25rem)]"
+              : ""
+          } ${dropBackgroundClass}`}
         >
           <div
             className={`tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-text-left ${
-              inlineAuthorOnDesktop ? "tw-flex-col tw-gap-y-2" : "tw-gap-x-3"
+              inlineAuthorOnDesktop || isChatProposal
+                ? "tw-flex-col tw-gap-y-2"
+                : "tw-gap-x-3"
             }`}
           >
-            {inlineAuthorOnDesktop
-              ? showIdentity && (
-                  <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
-                    <WaveDropAuthorPfp drop={drop} />
-                    <div className="tw-min-w-0 tw-flex-1">{identityHeader}</div>
-                  </div>
-                )
-              : showIdentity && <WaveDropAuthorPfp drop={drop} />}
+            {!isChatProposal &&
+              (inlineAuthorOnDesktop
+                ? showIdentity && (
+                    <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
+                      <WaveDropAuthorPfp drop={drop} />
+                      <div className="tw-min-w-0 tw-flex-1">
+                        {identityHeader}
+                      </div>
+                    </div>
+                  )
+                : showIdentity && <WaveDropAuthorPfp drop={drop} />)}
 
-            <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
-              {showIdentity && !inlineAuthorOnDesktop && identityHeader}
+            <div
+              className={`tw-flex tw-w-full tw-flex-col ${
+                isChatProposal ? "tw-gap-y-1" : "tw-gap-y-2"
+              }`}
+            >
+              {showIdentity &&
+                !inlineAuthorOnDesktop &&
+                !isChatProposal &&
+                identityHeader}
               {identityMode === "default" &&
                 showWaveInfo &&
                 (() => {
@@ -317,7 +366,14 @@ function EndedParticipationDropInner({
                   );
                 })()}
 
+              {isChatProposal && <ProposalCardContextLabel />}
               {content}
+              {isChatProposal && (
+                <ProposalCardReadFullButton
+                  drop={drop}
+                  onReadFull={onDropContentClick}
+                />
+              )}
             </div>
           </div>
 
@@ -339,12 +395,6 @@ function EndedParticipationDropInner({
           )}
           {showInteractions && (
             <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-              <DropCurationButton
-                dropId={drop.id}
-                waveId={drop.wave.id}
-                isCuratable={drop.context_profile_context?.curatable ?? false}
-                isCurated={drop.context_profile_context?.curated ?? false}
-              />
               <WaveDropReactions drop={drop} />
             </div>
           )}

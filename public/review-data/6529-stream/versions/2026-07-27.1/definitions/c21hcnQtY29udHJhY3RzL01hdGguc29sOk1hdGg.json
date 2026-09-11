@@ -1,0 +1,737 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [
+        {
+          "memberDetails": [
+            {
+              "index": 0,
+              "name": "Down",
+              "range": {
+                "byteLength": 4,
+                "byteStart": 245,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L11",
+                "lineEnd": 11,
+                "lineStart": 11,
+                "snippetSha256": "sha256:b86d11af79188e58af384b421f2799b08bfb151939b4404679d948aae2720b0b",
+                "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+              }
+            },
+            {
+              "index": 1,
+              "name": "Up",
+              "range": {
+                "byteLength": 2,
+                "byteStart": 287,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L12",
+                "lineEnd": 12,
+                "lineStart": 12,
+                "snippetSha256": "sha256:55490a4bf3a8e8cb5eed69720293a700ff01ef7da2bfc749f332f626cb584916",
+                "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Zero",
+              "range": {
+                "byteLength": 4,
+                "byteStart": 318,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L13",
+                "lineEnd": 13,
+                "lineStart": 13,
+                "snippetSha256": "sha256:973d0c649aa97a0635e387399f32c49abdaa7b2e812a65812255d1ed863b1604",
+                "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+              }
+            }
+          ],
+          "members": [
+            "Down",
+            "Up",
+            "Zero"
+          ],
+          "name": "Rounding",
+          "natspec": "",
+          "range": {
+            "byteLength": 122,
+            "byteStart": 221,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L10-L14",
+            "lineEnd": 14,
+            "lineStart": 10,
+            "snippetSha256": "sha256:b728aad52ef7fdcdfbb89f0756573c14e6e011e64a926e75b43bb4f6848fb916",
+            "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+          }
+        }
+      ],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "max(uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/Math.sol:Math#function:max(uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "a",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "b",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01hdGguc29sOk1hdGgjZnVuY3Rpb246bWF4KHVpbnQyNTYsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "max",
+          "natspec": "@dev Returns the largest of two numbers.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 104,
+            "byteStart": 413,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L19-L21",
+            "lineEnd": 21,
+            "lineStart": 19,
+            "snippetSha256": "sha256:5c43386e5f10176f52860ef40cf05742d001e670ff1500b4d3656b6bbb201b81",
+            "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "min(uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/Math.sol:Math#function:min(uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "a",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "b",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01hdGguc29sOk1hdGgjZnVuY3Rpb246bWluKHVpbnQyNTYsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "min",
+          "natspec": "@dev Returns the smallest of two numbers.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 104,
+            "byteStart": 588,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L26-L28",
+            "lineEnd": 28,
+            "lineStart": 26,
+            "snippetSha256": "sha256:760a9d2c1de5efa3db4f7dcee62348031541c9031a59e20402731cf50faaea10",
+            "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "average(uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/Math.sol:Math#function:average(uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "a",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "b",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01hdGguc29sOk1hdGgjZnVuY3Rpb246YXZlcmFnZSh1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "average",
+          "natspec": "@dev Returns the average of two numbers. The result is rounded towards\n zero.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 153,
+            "byteStart": 805,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L34-L37",
+            "lineEnd": 37,
+            "lineStart": 34,
+            "snippetSha256": "sha256:5d0a320c0b670664c8c0791100798b5bf8219c0c467c6a0a4b8b6acbcf235c83",
+            "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "ceilDiv(uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/Math.sol:Math#function:ceilDiv(uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "a",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "b",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01hdGguc29sOk1hdGgjZnVuY3Rpb246Y2VpbERpdih1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "ceilDiv",
+          "natspec": "@dev Returns the ceiling of the division of two numbers.\n This differs from standard division with `/` in that it rounds up instead\n of rounding down.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 194,
+            "byteStart": 1157,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L45-L48",
+            "lineEnd": 48,
+            "lineStart": 45,
+            "snippetSha256": "sha256:98438a4218b7352d1634acb4ff39491a40a59d66e1fa9f228420fb87e58e782c",
+            "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "mulDiv(uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/Math.sol:Math#function:mulDiv(uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "x",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "y",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "denominator",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01hdGguc29sOk1hdGgjZnVuY3Rpb246bXVsRGl2KHVpbnQyNTYsdWludDI1Nix1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "mulDiv",
+          "natspec": "@notice Calculates floor(x * y / denominator) with full precision. Throws if result overflows a uint256 or denominator == 0\n @dev Original credit to Remco Bloemen under MIT license (https://xn--2-umb.com/21/muldiv)\n with further edits by Uniswap Labs also under MIT license.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "result",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 4213,
+            "byteStart": 1667,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L55-L134",
+            "lineEnd": 134,
+            "lineStart": 55,
+            "snippetSha256": "sha256:e565e8d89803e41b73ed3fee71408063c0a11e223de521527055bce19c9fe64d",
+            "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "mulDiv(uint256,uint256,uint256,Rounding)",
+          "functionKind": "function",
+          "id": "smart-contracts/Math.sol:Math#function:mulDiv(uint256,uint256,uint256,Rounding)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "x",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "y",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "denominator",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "rounding",
+              "type": "Rounding"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01hdGguc29sOk1hdGgjZnVuY3Rpb246bXVsRGl2KHVpbnQyNTYsdWludDI1Nix1aW50MjU2LFJvdW5kaW5nKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "mulDiv",
+          "natspec": "@notice Calculates x * y / denominator with full precision, following the selected rounding direction.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 299,
+            "byteStart": 6012,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L139-L145",
+            "lineEnd": 145,
+            "lineStart": 139,
+            "snippetSha256": "sha256:3539b728b73da26d4a386e23114a4f7d8593f43ba1685c45ffc5efb76eab6a28",
+            "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "sqrt(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/Math.sol:Math#function:sqrt(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "a",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01hdGguc29sOk1hdGgjZnVuY3Rpb246c3FydCh1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "sqrt",
+          "natspec": "@dev Returns the square root of a number. If the number is not a perfect square, the value is rounded down.\n Inspired by Henry S. Warren, Jr.'s \"Hacker's Delight\" (Chapter 11).",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 1642,
+            "byteStart": 6530,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L152-L183",
+            "lineEnd": 183,
+            "lineStart": 152,
+            "snippetSha256": "sha256:56e2ae08c83e8aeb95932a83974452048d54f801e63cfb2647a01b3e3a942c0d",
+            "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "sqrt(uint256,Rounding)",
+          "functionKind": "function",
+          "id": "smart-contracts/Math.sol:Math#function:sqrt(uint256,Rounding)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "a",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "rounding",
+              "type": "Rounding"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01hdGguc29sOk1hdGgjZnVuY3Rpb246c3FydCh1aW50MjU2LFJvdW5kaW5nKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "sqrt",
+          "natspec": "@notice Calculates sqrt(a), following the selected rounding direction.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 237,
+            "byteStart": 8272,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L188-L193",
+            "lineEnd": 193,
+            "lineStart": 188,
+            "snippetSha256": "sha256:ac5e4ba4aaecd62f0cb1ce9608cf3f055dd186c7041c6ffa109ca39fcf661454",
+            "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "log2(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/Math.sol:Math#function:log2(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01hdGguc29sOk1hdGgjZnVuY3Rpb246bG9nMih1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "log2",
+          "natspec": "@dev Return the log in base 2, rounded down, of a positive value.\n Returns 0 if given 0.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 983,
+            "byteStart": 8633,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L199-L235",
+            "lineEnd": 235,
+            "lineStart": 199,
+            "snippetSha256": "sha256:54eec0adeff0f62d12ec0caf2ecccaaaa8f9593eab60eac29359f6e761a7ad4f",
+            "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "log2(uint256,Rounding)",
+          "functionKind": "function",
+          "id": "smart-contracts/Math.sol:Math#function:log2(uint256,Rounding)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "rounding",
+              "type": "Rounding"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01hdGguc29sOk1hdGgjZnVuY3Rpb246bG9nMih1aW50MjU2LFJvdW5kaW5nKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "log2",
+          "natspec": "@dev Return the log in base 2, following the selected rounding direction, of a positive value.\n Returns 0 if given 0.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 245,
+            "byteStart": 9769,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L241-L246",
+            "lineEnd": 246,
+            "lineStart": 241,
+            "snippetSha256": "sha256:92d0b5302389b82ffe20505c9157e46419d44af1117741d2fa6ca3d7e0d0826a",
+            "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "log10(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/Math.sol:Math#function:log10(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01hdGguc29sOk1hdGgjZnVuY3Rpb246bG9nMTAodWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "log10",
+          "natspec": "@dev Return the log in base 10, rounded down, of a positive value.\n Returns 0 if given 0.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 916,
+            "byteStart": 10139,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L252-L284",
+            "lineEnd": 284,
+            "lineStart": 252,
+            "snippetSha256": "sha256:3424567a03b0bd50ee96e5a5f853b4afe0b4c2060e8e5018dc4037a180700d22",
+            "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "log10(uint256,Rounding)",
+          "functionKind": "function",
+          "id": "smart-contracts/Math.sol:Math#function:log10(uint256,Rounding)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "rounding",
+              "type": "Rounding"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01hdGguc29sOk1hdGgjZnVuY3Rpb246bG9nMTAodWludDI1NixSb3VuZGluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "log10",
+          "natspec": "@dev Return the log in base 10, following the selected rounding direction, of a positive value.\n Returns 0 if given 0.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 248,
+            "byteStart": 11209,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L290-L295",
+            "lineEnd": 295,
+            "lineStart": 290,
+            "snippetSha256": "sha256:87b07fb15eaac4d1fb25647e025921b57fddd7acaa62eeff23197a64453aca93",
+            "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "log256(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/Math.sol:Math#function:log256(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01hdGguc29sOk1hdGgjZnVuY3Rpb246bG9nMjU2KHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "log256",
+          "natspec": "@dev Return the log in base 256, rounded down, of a positive value.\n Returns 0 if given 0.\n Adding one to the result gives the number of pairs of hex symbols needed to represent `value` as a hex string.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 663,
+            "byteStart": 11708,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L303-L327",
+            "lineEnd": 327,
+            "lineStart": 303,
+            "snippetSha256": "sha256:b6e27fa6c81ba6c7352a8c9509ddbf95801cef10d6ae8bcf3985a5295403576d",
+            "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "log256(uint256,Rounding)",
+          "functionKind": "function",
+          "id": "smart-contracts/Math.sol:Math#function:log256(uint256,Rounding)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "rounding",
+              "type": "Rounding"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01hdGguc29sOk1hdGgjZnVuY3Rpb246bG9nMjU2KHVpbnQyNTYsUm91bmRpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "log256",
+          "natspec": "@dev Return the log in base 256, following the selected rounding direction, of a positive value.\n Returns 0 if given 0.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 256,
+            "byteStart": 12526,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L333-L338",
+            "lineEnd": 338,
+            "lineStart": 333,
+            "snippetSha256": "sha256:1d31bf62764c3fe85146308a5c921cf1e675ed074553c1ae0681051269ea2d84",
+            "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/Math.sol:Math",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL01hdGguc29sOk1hdGg",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "smart-contracts/Math.sol:Math"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "Math",
+    "natspec": "@dev Standard math utilities missing in the Solidity language.",
+    "range": {
+      "byteLength": 12582,
+      "byteStart": 202,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Math.sol#L9-L339",
+      "lineEnd": 339,
+      "lineStart": 9,
+      "snippetSha256": "sha256:c3447affdd2d5abd55c5de920b8faff5b5542e1b7f627527d6ccaf14c3167119",
+      "sourceSha256": "sha256:d684ae61f88d564de2d0515bc6356d0972c3cf9421f185a862d30662b7e1ad21"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/Math.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

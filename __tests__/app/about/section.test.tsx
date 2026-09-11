@@ -3,6 +3,7 @@
  */
 
 import AboutPage, { generateMetadata } from "@/app/about/[section]/page";
+import { publicEnv } from "@/config/env";
 import { AboutSection } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 import { notFound, redirect } from "next/navigation";
@@ -16,6 +17,8 @@ jest.mock("@/components/about/About", () => ({
   __esModule: true,
   default: jest.fn(() => <div data-testid="about-component" />),
 }));
+
+const domain = new URL(publicEnv.BASE_ENDPOINT).hostname;
 
 describe("AboutPage", () => {
   beforeEach(() => {
@@ -49,6 +52,40 @@ describe("AboutPage", () => {
 
     expect(await screen.findByTestId("about-component")).toBeInTheDocument();
   });
+
+  it("uses the modern About surface for Legal sections", async () => {
+    const element = await AboutPage({
+      params: Promise.resolve({ section: AboutSection.LICENSE }),
+    });
+
+    const { container } = render(element);
+
+    expect(container.querySelector("main")).toHaveClass(
+      "tw-border-r",
+      "tw-border-iron-800",
+      "tw-bg-[#0D0D0F]"
+    );
+  });
+
+  it.each([
+    AboutSection.NAKAMOTO_THRESHOLD,
+    AboutSection.FAQ,
+    AboutSection.APPLY,
+    AboutSection.CONTACT_US,
+    AboutSection.NFT_DELEGATION,
+  ])("uses the modern About surface for %s", async (section) => {
+    const element = await AboutPage({
+      params: Promise.resolve({ section }),
+    });
+
+    const { container } = render(element);
+
+    expect(container.querySelector("main")).toHaveClass(
+      "tw-border-r",
+      "tw-border-iron-800",
+      "tw-bg-[#0D0D0F]"
+    );
+  });
 });
 
 describe("generateMetadata", () => {
@@ -69,7 +106,7 @@ describe("generateMetadata", () => {
     } as any);
 
     expect(meta.title).toBe("About");
-    expect(meta.description).toBe("About | 6529.io");
+    expect(meta.description).toBe(`About | ${domain}`);
   });
 
   it("returns correct metadata for valid section", async () => {
@@ -78,6 +115,6 @@ describe("generateMetadata", () => {
     } as any);
 
     expect(meta.title).toContain("Memes");
-    expect(meta.description).toBe("About | 6529.io");
+    expect(meta.description).toBe(`About | ${domain}`);
   });
 });

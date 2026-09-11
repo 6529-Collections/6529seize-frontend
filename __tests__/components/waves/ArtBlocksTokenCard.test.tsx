@@ -21,9 +21,47 @@ describe("ArtBlocksTokenCard", () => {
 
   beforeEach(() => {
     mockFetchMeta.mockReset();
-    (window as unknown as { awsRum?: { recordEvent?: jest.Mock | undefined } | undefined }).awsRum = {
+    (
+      window as unknown as {
+        awsRum?: { recordEvent?: jest.Mock | undefined } | undefined;
+      }
+    ).awsRum = {
       recordEvent: jest.fn(),
     };
+  });
+
+  it("records a privacy-safe impression again when the token changes", async () => {
+    mockFetchMeta.mockResolvedValue(null);
+    const { rerender } = render(
+      <ArtBlocksTokenCard
+        href="https://www.artblocks.io/token/private-1"
+        id={{ tokenId: "private-1" }}
+      />
+    );
+
+    rerender(
+      <ArtBlocksTokenCard
+        href="https://www.artblocks.io/token/private-2"
+        id={{ tokenId: "private-2" }}
+      />
+    );
+
+    const recordEvent = (
+      window as {
+        awsRum?: { recordEvent?: jest.Mock | undefined } | undefined;
+      }
+    ).awsRum?.recordEvent as jest.Mock;
+    await waitFor(() => {
+      const impressionCalls = recordEvent.mock.calls.filter(
+        ([eventName]) => eventName === "ab_card_impression"
+      );
+      expect(impressionCalls).toEqual([
+        ["ab_card_impression", { surface: "wave_artblocks_card" }],
+        ["ab_card_impression", { surface: "wave_artblocks_card" }],
+      ]);
+    });
+    expect(JSON.stringify(recordEvent.mock.calls)).not.toContain("private-1");
+    expect(JSON.stringify(recordEvent.mock.calls)).not.toContain("private-2");
   });
 
   it("renders image immediately and enriches with metadata", async () => {
@@ -44,10 +82,7 @@ describe("ArtBlocksTokenCard", () => {
     const image = screen.getByRole("img", {
       name: "Art Blocks #123 by Unknown",
     });
-    expect(image).toHaveAttribute(
-      "src",
-      "https://media.artblocks.io/123.png"
-    );
+    expect(image).toHaveAttribute("src", "https://media.artblocks.io/123.png");
 
     resolveMeta({
       projectName: "Chromie Squiggle",
@@ -58,9 +93,7 @@ describe("ArtBlocksTokenCard", () => {
     });
 
     await waitFor(() =>
-      expect(
-        screen.getByText("Chromie Squiggle #123")
-      ).toBeInTheDocument()
+      expect(screen.getByText("Chromie Squiggle #123")).toBeInTheDocument()
     );
 
     expect(screen.getByText("by Snowfro")).toBeInTheDocument();
@@ -132,15 +165,22 @@ describe("ArtBlocksTokenCard", () => {
     );
     expect(openButton).toHaveFocus();
 
-    const recordEvent = (window as { awsRum?: { recordEvent?: jest.Mock | undefined } | undefined })
-      .awsRum?.recordEvent as jest.Mock;
+    const recordEvent = (
+      window as {
+        awsRum?: { recordEvent?: jest.Mock | undefined } | undefined;
+      }
+    ).awsRum?.recordEvent as jest.Mock;
     expect(recordEvent).toHaveBeenCalledWith(
       "ab_card_link_out",
       expect.objectContaining({ target: "viewer" })
     );
     expect(recordEvent).toHaveBeenCalledWith(
       "ab_card_live_open",
-      expect.objectContaining({ dwell_ms: expect.any(Number) })
+      expect.objectContaining({ dwell_bucket: expect.any(String) })
+    );
+    expect(JSON.stringify(recordEvent.mock.calls)).not.toContain("flagship-7");
+    expect(JSON.stringify(recordEvent.mock.calls)).not.toContain(
+      "https://www.artblocks.io"
     );
   });
 

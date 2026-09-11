@@ -98,7 +98,7 @@ export default function CreateWaveImageInput({
   };
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-5">
+    <div className="tw-flex tw-items-start tw-gap-x-5">
       <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-1.5">
         <div className="tw-flex-shrink-0">
           {imageToShow ? (
@@ -165,15 +165,17 @@ export default function CreateWaveImageInput({
                 </svg>
               </div>
             </div>
-            <p className="tw-mb-1 tw-mt-3 tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-text-sm">
-              <span className="tw-font-medium tw-text-white">
-                Click to upload
-              </span>{" "}
-              or drag and drop
-            </p>
-            <p className="tw-mb-0 tw-text-xs tw-font-normal tw-text-iron-500">
-              JPEG, JPG, PNG, GIF, WEBP
-            </p>
+            <div className="tw-mt-2 tw-flex tw-flex-col tw-items-center tw-gap-y-1">
+              <p className="tw-m-0 tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-text-sm">
+                <span className="tw-font-medium tw-text-white">
+                  Click to upload
+                </span>{" "}
+                or drag and drop
+              </p>
+              <p className="tw-m-0 tw-text-xs tw-font-normal tw-text-iron-400">
+                JPEG, JPG, PNG, GIF, WEBP
+              </p>
+            </div>
           </div>
           <input
             id="pfp-upload-input"

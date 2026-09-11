@@ -40,10 +40,10 @@ export default function DropItemChat({
                 <MediaTypeBadge
                   mimeType={artworkMedia?.mime_type}
                   dropId={drop.id}
-                  size="sm"
+                  size="xs"
                 />
               )}
-              <h3 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-100 sm:tw-text-lg">
+              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100 sm:tw-text-lg">
                 {canOpenDrop ? (
                   <Link className="tw-no-underline" href={relativeLink}>
                     {title}

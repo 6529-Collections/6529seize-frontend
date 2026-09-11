@@ -3,12 +3,11 @@ import { render, screen, fireEvent, act } from "@testing-library/react";
 
 // Mock the FontAwesome icons and components
 jest.mock("@fortawesome/react-fontawesome", () => ({
-  FontAwesomeIcon: ({ icon, onClick, style }: any) => (
+  FontAwesomeIcon: ({ icon, className }: any) => (
     <svg
       data-testid="fontawesome-icon"
       data-icon={icon.iconName}
-      onClick={onClick}
-      style={style}
+      className={className}
     />
   ),
 }));
@@ -63,7 +62,7 @@ describe("SwiperAutoplayButton", () => {
 
       const icon = screen.getByTestId("fontawesome-icon");
       expect(icon).toBeInTheDocument();
-      expect(icon).toHaveAttribute("style", "height: 24px; cursor: pointer;");
+      expect(icon).toHaveClass("tw-h-8", "tw-w-8");
     });
   });
 
@@ -358,15 +357,19 @@ describe("SwiperAutoplayButton", () => {
     it("provides clickable button with proper cursor", () => {
       render(<SwiperAutoplayButton isInViewport={true} />);
 
-      const icon = screen.getByTestId("fontawesome-icon");
-      expect(icon).toHaveAttribute("style", "height: 24px; cursor: pointer;");
+      const button = screen.getByRole("button", { name: "Pause slideshow" });
+      expect(button).toHaveClass(
+        "tw-min-h-11",
+        "tw-min-w-11",
+        "tw-rounded-full"
+      );
     });
 
     it("icon is properly sized for touch interaction", () => {
       render(<SwiperAutoplayButton isInViewport={true} />);
 
       const icon = screen.getByTestId("fontawesome-icon");
-      expect(icon).toHaveAttribute("style", "height: 24px; cursor: pointer;");
+      expect(icon).toHaveClass("tw-h-8", "tw-w-8");
     });
   });
 });

@@ -2,6 +2,8 @@
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useCallback, useMemo } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
@@ -9,6 +11,7 @@ import { useWaveData } from "@/hooks/useWaveData";
 import { DROP_DETAIL_STALE_TIME_MS } from "@/services/api/drop-api";
 import { fetchDropMetadataByIdV2 } from "@/services/api/wave-drops-v2-api";
 import { useQuery } from "@tanstack/react-query";
+import { useDropVoteSummary } from "./useDropVoteSummary";
 
 export const useSingleWaveDropData = (
   initialDrop: ExtendedDrop,
@@ -41,6 +44,14 @@ export const useSingleWaveDropData = (
     staleTime: DROP_DETAIL_STALE_TIME_MS,
   });
 
+  const voteSummary = useDropVoteSummary({
+    dropId: initialDrop.id,
+    waveId: initialDrop.wave.id,
+    enabled:
+      initialDrop.drop_type === ApiDropType.Participatory &&
+      wave?.wave.type === ApiWaveType.Rank,
+  });
+
   const drop = useMemo<ApiDrop>(
     () => ({
       ...initialDrop,
@@ -59,5 +70,5 @@ export const useSingleWaveDropData = (
     [drop, initialDrop.stableHash, initialDrop.stableKey]
   );
 
-  return { drop, wave, extendedDrop };
+  return { drop, wave, extendedDrop, voteSummary };
 };

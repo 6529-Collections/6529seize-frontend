@@ -1,0 +1,3313 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#error:0xf385ff46",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "DependencyChunkIndexOutOfBounds",
+          "selector": "0xf385ff46",
+          "signature": "DependencyChunkIndexOutOfBounds(bytes32,uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#error:0xf533e9d7",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "field",
+              "type": "bytes32"
+            }
+          ],
+          "name": "DependencyFieldInvalidUTF8",
+          "selector": "0xf533e9d7",
+          "signature": "DependencyFieldInvalidUTF8(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#error:0x6f01a118",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "field",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "actual",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "maximum",
+              "type": "uint256"
+            }
+          ],
+          "name": "DependencyFieldTooLarge",
+          "selector": "0x6f01a118",
+          "signature": "DependencyFieldTooLarge(bytes32,uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#error:0x09fd460b",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            }
+          ],
+          "name": "DependencyKeyReserved",
+          "selector": "0x09fd460b",
+          "signature": "DependencyKeyReserved(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#error:0x01b533a8",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "name": "DependencyVersionMissing",
+          "selector": "0x01b533a8",
+          "signature": "DependencyVersionMissing(bytes32,uint256)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#event:DependencyVersionCreated(bytes32,uint256,bytes32,address)",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "contentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "DependencyVersionCreated",
+          "signature": "DependencyVersionCreated(bytes32,uint256,bytes32,address)",
+          "topic0": "0xd792dc8007c9bdf7d5e4c1d523d5be3928cf69e240eac259be132006fda3db05"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#event:DependencyVersionDeprecated(bytes32,uint256,address)",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "DependencyVersionDeprecated",
+          "signature": "DependencyVersionDeprecated(bytes32,uint256,address)",
+          "topic0": "0xe93ec9a06e5333819ff91c7118e0ba48094f8bc805e37319b6ef16f5d6121138"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xf035e880",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "DEPENDENCY_SCRIPT_CHUNK_TYPEHASH",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xf035e880",
+          "signature": "DEPENDENCY_SCRIPT_CHUNK_TYPEHASH()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x178fd473",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "DEPENDENCY_SCRIPT_CONTENT_TYPEHASH",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x178fd473",
+          "signature": "DEPENDENCY_SCRIPT_CONTENT_TYPEHASH()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xd02b3d44",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "MAX_DEPENDENCY_PROVENANCE_BYTES",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xd02b3d44",
+          "signature": "MAX_DEPENDENCY_PROVENANCE_BYTES()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x13bcdf36",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "MAX_DEPENDENCY_SCRIPT_CHUNKS",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x13bcdf36",
+          "signature": "MAX_DEPENDENCY_SCRIPT_CHUNKS()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x93dcb683",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "MAX_DEPENDENCY_SCRIPT_CHUNK_BYTES",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x93dcb683",
+          "signature": "MAX_DEPENDENCY_SCRIPT_CHUNK_BYTES()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x894f23b9",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "_collectionDependencyName",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "string[]",
+              "name": "_libraryScript",
+              "type": "string[]"
+            }
+          ],
+          "name": "addDependency",
+          "outputs": [],
+          "selector": "0x894f23b9",
+          "signature": "addDependency(bytes32,string[])",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xd3d2f5c9",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "_collectionDependencyName",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "string",
+              "name": "_libraryScript",
+              "type": "string"
+            }
+          ],
+          "name": "addDependencyScriptIndex",
+          "outputs": [],
+          "selector": "0xd3d2f5c9",
+          "signature": "addDependencyScriptIndex(bytes32,uint256,string)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x19d5cea5",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "_collectionDependencyName",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "string[]",
+              "name": "_libraryScript",
+              "type": "string[]"
+            },
+            {
+              "index": 2,
+              "internalType": "string",
+              "name": "_provenance",
+              "type": "string"
+            }
+          ],
+          "name": "addDependencyWithProvenance",
+          "outputs": [],
+          "selector": "0x19d5cea5",
+          "signature": "addDependencyWithProvenance(bytes32,string[],string)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xad8afc86",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "_collectionDependencyName",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "name": "deprecateDependencyVersion",
+          "outputs": [],
+          "selector": "0xad8afc86",
+          "signature": "deprecateDependencyVersion(bytes32,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x518cb3df",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "getDependencyScript",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x518cb3df",
+          "signature": "getDependencyScript(bytes32,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x7a3b9abd",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "getDependencyScriptAtVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x7a3b9abd",
+          "signature": "getDependencyScriptAtVersion(bytes32,uint256,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x8aaaaaad",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "getDependencyScriptChunkHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x8aaaaaad",
+          "signature": "getDependencyScriptChunkHash(bytes32,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x79f9ad3a",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "getDependencyScriptChunkHashAtVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x79f9ad3a",
+          "signature": "getDependencyScriptChunkHashAtVersion(bytes32,uint256,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x25c4dccd",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            }
+          ],
+          "name": "getDependencyScriptContentHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x25c4dccd",
+          "signature": "getDependencyScriptContentHash(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x72b2af62",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "name": "getDependencyScriptContentHashAtVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x72b2af62",
+          "signature": "getDependencyScriptContentHashAtVersion(bytes32,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x5668bc5e",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            }
+          ],
+          "name": "getDependencyScriptCount",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x5668bc5e",
+          "signature": "getDependencyScriptCount(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xdd201a84",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "name": "getDependencyScriptCountAtVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xdd201a84",
+          "signature": "getDependencyScriptCountAtVersion(bytes32,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xbea18adc",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "name": "getDependencyVersionCreatedBlock",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xbea18adc",
+          "signature": "getDependencyVersionCreatedBlock(bytes32,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x2c7c4bcc",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "name": "getDependencyVersionCreatedTimestamp",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x2c7c4bcc",
+          "signature": "getDependencyVersionCreatedTimestamp(bytes32,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x5ba0aba4",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "name": "getDependencyVersionCreator",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x5ba0aba4",
+          "signature": "getDependencyVersionCreator(bytes32,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xfff01fa9",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "name": "getDependencyVersionProvenance",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0xfff01fa9",
+          "signature": "getDependencyVersionProvenance(bytes32,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xef8bd1a0",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "name": "getDependencyVersionRecord",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            },
+            {
+              "index": 5,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 7,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 8,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xef8bd1a0",
+          "signature": "getDependencyVersionRecord(bytes32,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x489108f6",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "name": "isDependencyVersionDeprecated",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x489108f6",
+          "signature": "isDependencyVersionDeprecated(bytes32,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x08f0052a",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            }
+          ],
+          "name": "latestDependencyVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x08f0052a",
+          "signature": "latestDependencyVersion(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x388d2c24",
+          "declaringDefinitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_newadminsContract",
+              "type": "address"
+            }
+          ],
+          "name": "updateAdminContract",
+          "outputs": [],
+          "selector": "0x388d2c24",
+          "signature": "updateAdminContract(address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "production_release_contract",
+    "classificationReason": "Listed in release-artifacts/contracts.json production_contracts.",
+    "declarations": {
+      "enums": [],
+      "errors": [
+        {
+          "astId": 7245,
+          "canonicalSignature": "DependencyChunkIndexOutOfBounds(bytes32,uint256,uint256)",
+          "displaySignature": "DependencyChunkIndexOutOfBounds(bytes32,uint256,uint256)",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#error:0xf385ff46",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Vycm9yOjB4ZjM4NWZmNDY",
+          "kind": "error",
+          "name": "DependencyChunkIndexOutOfBounds",
+          "natspec": "",
+          "range": {
+            "byteLength": 118,
+            "byteStart": 1130,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L30-L32",
+            "lineEnd": 32,
+            "lineStart": 30,
+            "snippetSha256": "sha256:e9eca2220a1860062e000f2c5d98f5bd3fe9f0e11336dde1fec6fa8157a908b1",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0xf385ff46"
+        },
+        {
+          "astId": 7251,
+          "canonicalSignature": "DependencyVersionMissing(bytes32,uint256)",
+          "displaySignature": "DependencyVersionMissing(bytes32,uint256)",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#error:0x01b533a8",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Vycm9yOjB4MDFiNTMzYTg",
+          "kind": "error",
+          "name": "DependencyVersionMissing",
+          "natspec": "",
+          "range": {
+            "byteLength": 82,
+            "byteStart": 1253,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L33",
+            "lineEnd": 33,
+            "lineStart": 33,
+            "snippetSha256": "sha256:5f200aa7f5cbdc084b011fed94c4ec9f0ed0b53d31a8df99af5313e448340fc7",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x01b533a8"
+        },
+        {
+          "astId": 7255,
+          "canonicalSignature": "DependencyKeyReserved(bytes32)",
+          "displaySignature": "DependencyKeyReserved(bytes32)",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#error:0x09fd460b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Vycm9yOjB4MDlmZDQ2MGI",
+          "kind": "error",
+          "name": "DependencyKeyReserved",
+          "natspec": "",
+          "range": {
+            "byteLength": 62,
+            "byteStart": 1340,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:454aeabdd53eee0177f59cc9a4d9acf54c6cd1115353624ce023ece197110b05",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x09fd460b"
+        },
+        {
+          "astId": 7263,
+          "canonicalSignature": "DependencyFieldTooLarge(bytes32,uint256,uint256)",
+          "displaySignature": "DependencyFieldTooLarge(bytes32,uint256,uint256)",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#error:0x6f01a118",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "field",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "actual",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "maximum",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Vycm9yOjB4NmYwMWExMTg",
+          "kind": "error",
+          "name": "DependencyFieldTooLarge",
+          "natspec": "",
+          "range": {
+            "byteLength": 78,
+            "byteStart": 1407,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:194b37b1cafbae3a2dff131f6daa56b27b8cee0002483201edf82761f1180bcd",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x6f01a118"
+        },
+        {
+          "astId": 7267,
+          "canonicalSignature": "DependencyFieldInvalidUTF8(bytes32)",
+          "displaySignature": "DependencyFieldInvalidUTF8(bytes32)",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#error:0xf533e9d7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "field",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Vycm9yOjB4ZjUzM2U5ZDc",
+          "kind": "error",
+          "name": "DependencyFieldInvalidUTF8",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 1490,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:10de27553561597d513f1ce941f108a4b0d3efeace165ab6ef4b08cf598f5f9b",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0xf533e9d7"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 7277,
+          "canonicalSignature": "DependencyVersionCreated(bytes32,uint256,bytes32,address)",
+          "displaySignature": "DependencyVersionCreated(bytes32,uint256,bytes32,address)",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#event:DependencyVersionCreated(bytes32,uint256,bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "version",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "contentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2V2ZW50OkRlcGVuZGVuY3lWZXJzaW9uQ3JlYXRlZChieXRlczMyLHVpbnQyNTYsYnl0ZXMzMixhZGRyZXNzKQ",
+          "kind": "event",
+          "name": "DependencyVersionCreated",
+          "natspec": "",
+          "range": {
+            "byteLength": 180,
+            "byteStart": 1544,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L38-L43",
+            "lineEnd": 43,
+            "lineStart": 38,
+            "snippetSha256": "sha256:7f82b321d94e5b5a2c1df86515ab1aaa2d2ce0ee16ab4974d971832f392ebd35",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "topic0": "0xd792dc8007c9bdf7d5e4c1d523d5be3928cf69e240eac259be132006fda3db05"
+        },
+        {
+          "anonymous": false,
+          "astId": 7285,
+          "canonicalSignature": "DependencyVersionDeprecated(bytes32,uint256,address)",
+          "displaySignature": "DependencyVersionDeprecated(bytes32,uint256,address)",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#event:DependencyVersionDeprecated(bytes32,uint256,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "version",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2V2ZW50OkRlcGVuZGVuY3lWZXJzaW9uRGVwcmVjYXRlZChieXRlczMyLHVpbnQyNTYsYWRkcmVzcyk",
+          "kind": "event",
+          "name": "DependencyVersionDeprecated",
+          "natspec": "",
+          "range": {
+            "byteLength": 138,
+            "byteStart": 1729,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L44-L46",
+            "lineEnd": 46,
+            "lineStart": 44,
+            "snippetSha256": "sha256:2f6af8bdc2aaf21cad18638534aad6e8a12ab2d87e1d9ddfbed34ace826ef116",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "topic0": "0xe93ec9a06e5333819ff91c7118e0ba48094f8bc805e37319b6ef16f5d6121138"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "DEPENDENCY_SCRIPT_CONTENT_TYPEHASH()",
+          "displaySignature": "DEPENDENCY_SCRIPT_CONTENT_TYPEHASH()",
+          "functionKind": "getter",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x178fd473",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4MTc4ZmQ0NzM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "DEPENDENCY_SCRIPT_CONTENT_TYPEHASH",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 186,
+            "byteStart": 309,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L17-L19",
+            "lineEnd": 19,
+            "lineStart": 17,
+            "snippetSha256": "sha256:169953d4d857d92ba0fb1931122940db52496c2cf59bf8b045c299714415bd58",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x178fd473",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "DEPENDENCY_SCRIPT_CHUNK_TYPEHASH()",
+          "displaySignature": "DEPENDENCY_SCRIPT_CHUNK_TYPEHASH()",
+          "functionKind": "getter",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xf035e880",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4ZjAzNWU4ODA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "DEPENDENCY_SCRIPT_CHUNK_TYPEHASH",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 169,
+            "byteStart": 501,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L20-L22",
+            "lineEnd": 22,
+            "lineStart": 20,
+            "snippetSha256": "sha256:5c728a0962af3d828bc32d631add8ffffdcef4964dea909ea13f0f5e1ff16882",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0xf035e880",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "MAX_DEPENDENCY_SCRIPT_CHUNK_BYTES()",
+          "displaySignature": "MAX_DEPENDENCY_SCRIPT_CHUNK_BYTES()",
+          "functionKind": "getter",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x93dcb683",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4OTNkY2I2ODM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "MAX_DEPENDENCY_SCRIPT_CHUNK_BYTES",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 65,
+            "byteStart": 676,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:07fa23427752c1e1e078e8afe6956329a331f727f5c4a55d6472d3124e5846f3",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x93dcb683",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "MAX_DEPENDENCY_SCRIPT_CHUNKS()",
+          "displaySignature": "MAX_DEPENDENCY_SCRIPT_CHUNKS()",
+          "functionKind": "getter",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x13bcdf36",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4MTNiY2RmMzY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "MAX_DEPENDENCY_SCRIPT_CHUNKS",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 57,
+            "byteStart": 747,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:aef59b7a952ea75bd834b55d5cdbeb3a7638632661683832f3f9e505f617e177",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x13bcdf36",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "MAX_DEPENDENCY_PROVENANCE_BYTES()",
+          "displaySignature": "MAX_DEPENDENCY_PROVENANCE_BYTES()",
+          "functionKind": "getter",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xd02b3d44",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4ZDAyYjNkNDQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "MAX_DEPENDENCY_PROVENANCE_BYTES",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 63,
+            "byteStart": 810,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:c6aee28e0fec9ae9eab1046d04d5db5679c907313a0a88cc5e08c4cc7447b531",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0xd02b3d44",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(address)",
+          "functionKind": "constructor",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:constructor(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_adminsContract",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOmNvbnN0cnVjdG9yKGFkZHJlc3Mp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 101,
+            "byteStart": 2776,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L77-L79",
+            "lineEnd": 79,
+            "lineStart": 77,
+            "snippetSha256": "sha256:5ae843762f66fdb35eb3a85bb494d0102ff5199c1cb2b47d54c3b7ad43976d11",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "addDependency(bytes32,string[])",
+          "displaySignature": "addDependency(bytes32,string[])",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x894f23b9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionDependencyName",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "_libraryScript",
+              "storageLocation": "memory",
+              "type": "string[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4ODk0ZjIzYjk",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "addDependency",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 256,
+            "byteStart": 2883,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L81-L86",
+            "lineEnd": 86,
+            "lineStart": 81,
+            "snippetSha256": "sha256:43f9e2e90390d1fb5d8f6309ce6bd47538b58bbf12033482e9249724bc4a9a9e",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x894f23b9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "addDependencyWithProvenance(bytes32,string[],string)",
+          "displaySignature": "addDependencyWithProvenance(bytes32,string[],string)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x19d5cea5",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionDependencyName",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "_libraryScript",
+              "storageLocation": "memory",
+              "type": "string[]"
+            },
+            {
+              "index": 2,
+              "name": "_provenance",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4MTlkNWNlYTU",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "addDependencyWithProvenance",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 330,
+            "byteStart": 3145,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L88-L94",
+            "lineEnd": 94,
+            "lineStart": 88,
+            "snippetSha256": "sha256:e1d71a7c0df99e42740ef0afad81803ef4ff1a852d84aa6006e3d07b0806c90a",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x19d5cea5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "addDependencyScriptIndex(bytes32,uint256,string)",
+          "displaySignature": "addDependencyScriptIndex(bytes32,uint256,string)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xd3d2f5c9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionDependencyName",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "index",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "_libraryScript",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4ZDNkMmY1Yzk",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "addDependencyScriptIndex",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1020,
+            "byteStart": 3481,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L96-L115",
+            "lineEnd": 115,
+            "lineStart": 96,
+            "snippetSha256": "sha256:3337fedf6c9922b7a3d64c6ddadd50afe7e1b8e8fc10644285a2ec1dfb7e91bb",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0xd3d2f5c9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "deprecateDependencyVersion(bytes32,uint256)",
+          "displaySignature": "deprecateDependencyVersion(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xad8afc86",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionDependencyName",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4YWQ4YWZjODY",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "deprecateDependencyVersion",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 502,
+            "byteStart": 4507,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L117-L126",
+            "lineEnd": 126,
+            "lineStart": 117,
+            "snippetSha256": "sha256:fa470a74d357a35ee8c4c0ca99c43388db671b4ff3111978d4249570bb4d00f4",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0xad8afc86",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "updateAdminContract(address)",
+          "displaySignature": "updateAdminContract(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x388d2c24",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_newadminsContract",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4Mzg4ZDJjMjQ",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "updateAdminContract",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 333,
+            "byteStart": 5057,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L130-L138",
+            "lineEnd": 138,
+            "lineStart": 130,
+            "snippetSha256": "sha256:3df385e4cdd01b789dfcc7e0d35643d54414c253472cf30d1a8ca2829852980e",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x388d2c24",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "latestDependencyVersion(bytes32)",
+          "displaySignature": "latestDependencyVersion(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x08f0052a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4MDhmMDA1MmE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "latestDependencyVersion",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 201,
+            "byteStart": 5396,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L140-L146",
+            "lineEnd": 146,
+            "lineStart": 140,
+            "snippetSha256": "sha256:daf6517fe7347de5608203455a79a22bcc99a39e8794a3ec312e1071eb3dcd14",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x08f0052a",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getDependencyVersionRecord(bytes32,uint256)",
+          "displaySignature": "getDependencyVersionRecord(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xef8bd1a0",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4ZWY4YmQxYTA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getDependencyVersionRecord",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 5,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 7,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 8,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 678,
+            "byteStart": 5603,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L148-L166",
+            "lineEnd": 166,
+            "lineStart": 148,
+            "snippetSha256": "sha256:d680af49795ded7b9ac3e7e774a6ef78b9b7bab8633087f56abd203ed660002d",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0xef8bd1a0",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getDependencyVersionProvenance(bytes32,uint256)",
+          "displaySignature": "getDependencyVersionProvenance(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xfff01fa9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4ZmZmMDFmYTk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getDependencyVersionProvenance",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 251,
+            "byteStart": 6287,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L168-L174",
+            "lineEnd": 174,
+            "lineStart": 168,
+            "snippetSha256": "sha256:7080814de4ac04c62126bbeb431e146fffc027269262c6cabd458e904e95ea94",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0xfff01fa9",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getDependencyVersionCreator(bytes32,uint256)",
+          "displaySignature": "getDependencyVersionCreator(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x5ba0aba4",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4NWJhMGFiYTQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getDependencyVersionCreator",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 239,
+            "byteStart": 6544,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L176-L182",
+            "lineEnd": 182,
+            "lineStart": 176,
+            "snippetSha256": "sha256:e59763553272e0fb19844c46288fc77add6af64421cd2b873baef7a31e477346",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x5ba0aba4",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getDependencyVersionCreatedBlock(bytes32,uint256)",
+          "displaySignature": "getDependencyVersionCreatedBlock(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xbea18adc",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4YmVhMThhZGM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getDependencyVersionCreatedBlock",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 249,
+            "byteStart": 6789,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L184-L190",
+            "lineEnd": 190,
+            "lineStart": 184,
+            "snippetSha256": "sha256:4aec315cc83e3d5cae313bfb03317e20317499f38e2cfbd0be292043c1eb6303",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0xbea18adc",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getDependencyVersionCreatedTimestamp(bytes32,uint256)",
+          "displaySignature": "getDependencyVersionCreatedTimestamp(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x2c7c4bcc",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4MmM3YzRiY2M",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getDependencyVersionCreatedTimestamp",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 257,
+            "byteStart": 7044,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L192-L198",
+            "lineEnd": 198,
+            "lineStart": 192,
+            "snippetSha256": "sha256:5d5b3a2cf5652b39d7b2133ee9e18deb7ad6f778218650a4417f76ca8dc584f6",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x2c7c4bcc",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isDependencyVersionDeprecated(bytes32,uint256)",
+          "displaySignature": "isDependencyVersionDeprecated(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x489108f6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4NDg5MTA4ZjY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isDependencyVersionDeprecated",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 241,
+            "byteStart": 7307,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L200-L206",
+            "lineEnd": 206,
+            "lineStart": 200,
+            "snippetSha256": "sha256:25e90d35b14c4c8c724d16d517f8c36f86a6dbcc8f1ad4d7bf11350042fa98ab",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x489108f6",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getDependencyScriptCount(bytes32)",
+          "displaySignature": "getDependencyScriptCount(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x5668bc5e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4NTY2OGJjNWU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getDependencyScriptCount",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 285,
+            "byteStart": 7554,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L208-L216",
+            "lineEnd": 216,
+            "lineStart": 208,
+            "snippetSha256": "sha256:be7e8cac737f743423d823848e9ab7279a2d4e89837a5263550f36074a8f7209",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x5668bc5e",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getDependencyScriptCountAtVersion(bytes32,uint256)",
+          "displaySignature": "getDependencyScriptCountAtVersion(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xdd201a84",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4ZGQyMDFhODQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getDependencyScriptCountAtVersion",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 316,
+            "byteStart": 7845,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L218-L227",
+            "lineEnd": 227,
+            "lineStart": 218,
+            "snippetSha256": "sha256:ca7a140df0e0cfd5ecf493381688243ac141c4b2c4aa98f81555d2b5692506cc",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0xdd201a84",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "getDependencyScript(bytes32,uint256)",
+          "displaySignature": "getDependencyScript(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x518cb3df",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4NTE4Y2IzZGY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getDependencyScript",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 303,
+            "byteStart": 8167,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L229-L237",
+            "lineEnd": 237,
+            "lineStart": 229,
+            "snippetSha256": "sha256:0b0c760e37585cddb888788d3d1e60233168478af93520d7a17d9edd741bc5e4",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x518cb3df",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getDependencyScriptAtVersion(bytes32,uint256,uint256)",
+          "displaySignature": "getDependencyScriptAtVersion(bytes32,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x7a3b9abd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4N2EzYjlhYmQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getDependencyScriptAtVersion",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 499,
+            "byteStart": 8476,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L239-L250",
+            "lineEnd": 250,
+            "lineStart": 239,
+            "snippetSha256": "sha256:f9f74b9fd9aaae94a04b2708f42dfefe9a93ca749689ea111df8b38472eeba3a",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x7a3b9abd",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "getDependencyScriptChunkHash(bytes32,uint256)",
+          "displaySignature": "getDependencyScriptChunkHash(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x8aaaaaad",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4OGFhYWFhYWQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getDependencyScriptChunkHash",
+          "natspec": "@notice Returns the typed hash of one dependency script chunk.\n @param dependencyNameAndVersion Dependency key currently stored in the registry.\n @param index Chunk index inside the latest dependency script version.\n @return The chunk hash, bound to chunk index, chunk byte length, and chunk contents.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 313,
+            "byteStart": 9312,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L256-L264",
+            "lineEnd": 264,
+            "lineStart": 256,
+            "snippetSha256": "sha256:f3fdc29ed2b034e7dbbd7920ada51d2843c8229f78857793a22cac405efa41b2",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x8aaaaaad",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "getDependencyScriptChunkHashAtVersion(bytes32,uint256,uint256)",
+          "displaySignature": "getDependencyScriptChunkHashAtVersion(bytes32,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x79f9ad3a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4NzlmOWFkM2E",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getDependencyScriptChunkHashAtVersion",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 324,
+            "byteStart": 9631,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L266-L274",
+            "lineEnd": 274,
+            "lineStart": 266,
+            "snippetSha256": "sha256:8412d64c3ba5f46b14d26dcea69f9764ff6d5f6b1140bb791002431f1876e5f7",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x79f9ad3a",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "getDependencyScriptContentHash(bytes32)",
+          "displaySignature": "getDependencyScriptContentHash(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x25c4dccd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4MjVjNGRjY2Q",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getDependencyScriptContentHash",
+          "natspec": "@notice Returns the typed content hash for the latest dependency script version.\n @param dependencyNameAndVersion Dependency key currently stored in the registry.\n @return The content hash for the latest chunk sequence under the dependency key.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 297,
+            "byteStart": 10228,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L279-L287",
+            "lineEnd": 287,
+            "lineStart": 279,
+            "snippetSha256": "sha256:af421b168a9cfedc4669b6fd7568a01ed038e51e8e31382b1ec1cff375721e64",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x25c4dccd",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getDependencyScriptContentHashAtVersion(bytes32,uint256)",
+          "displaySignature": "getDependencyScriptContentHashAtVersion(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x72b2af62",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4NzJiMmFmNjI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getDependencyScriptContentHashAtVersion",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 432,
+            "byteStart": 10531,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L289-L298",
+            "lineEnd": 298,
+            "lineStart": 289,
+            "snippetSha256": "sha256:2e35f712d552ba4b1a2129d369e24669f2a55223fb2bf823cf6d67d9b6517549",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x72b2af62",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_createDependencyVersion(bytes32,string[],string)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:_createDependencyVersion(bytes32,string[],string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionDependencyName",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "_libraryScript",
+              "storageLocation": "memory",
+              "type": "string[]"
+            },
+            {
+              "index": 2,
+              "name": "_provenance",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOl9jcmVhdGVEZXBlbmRlbmN5VmVyc2lvbihieXRlczMyLHN0cmluZ1tdLHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_createDependencyVersion",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1312,
+            "byteStart": 10969,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L300-L326",
+            "lineEnd": 326,
+            "lineStart": 300,
+            "snippetSha256": "sha256:e6bb081ff66d6ce78e661702b614f4e45cd4e2834b523aae0a7ba3e05e59e8d5",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requireDependencyKeyNotReserved(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:_requireDependencyKeyNotReserved(bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOl9yZXF1aXJlRGVwZW5kZW5jeUtleU5vdFJlc2VydmVkKGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requireDependencyKeyNotReserved",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 228,
+            "byteStart": 12287,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L328-L332",
+            "lineEnd": 332,
+            "lineStart": 328,
+            "snippetSha256": "sha256:cae2629b07598796c4e810ada295eaf749f540b6c4120fd66f6132da619a7b7a",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requireDependencyLimits(string[],string)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:_requireDependencyLimits(string[],string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "chunks",
+              "storageLocation": "memory",
+              "type": "string[]"
+            },
+            {
+              "index": 1,
+              "name": "provenance",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOl9yZXF1aXJlRGVwZW5kZW5jeUxpbWl0cyhzdHJpbmdbXSxzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requireDependencyLimits",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 612,
+            "byteStart": 12521,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L334-L347",
+            "lineEnd": 347,
+            "lineStart": 334,
+            "snippetSha256": "sha256:fc3675a9dec588fadb325d6a18df90960317fb4bc513a74f19a339bd2bfc507b",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requireMaxBytes(bytes32,string,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:_requireMaxBytes(bytes32,string,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "field",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "value",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "maximum",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOl9yZXF1aXJlTWF4Qnl0ZXMoYnl0ZXMzMixzdHJpbmcsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requireMaxBytes",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 329,
+            "byteStart": 13139,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L349-L353",
+            "lineEnd": 353,
+            "lineStart": 349,
+            "snippetSha256": "sha256:ebbfcc639737a81d6ef2696d6ed3c6544a78edf9b8712e0f50df7b0473bdbb30",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_dependencyVersionRecord(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:_dependencyVersionRecord(bytes32,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOl9kZXBlbmRlbmN5VmVyc2lvblJlY29yZChieXRlczMyLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_dependencyVersionRecord",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "storage",
+              "type": "dependencyInfoStructure"
+            }
+          ],
+          "range": {
+            "byteLength": 420,
+            "byteStart": 13597,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L357-L366",
+            "lineEnd": 366,
+            "lineStart": 357,
+            "snippetSha256": "sha256:1fe86dcfea1fc83509030ff53d6f93cba1f86ab1533fe93de8ab1324b2744220",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_hashDependencyScriptContent(bytes32,string[])",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:_hashDependencyScriptContent(bytes32,string[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "chunks",
+              "storageLocation": "memory",
+              "type": "string[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOl9oYXNoRGVwZW5kZW5jeVNjcmlwdENvbnRlbnQoYnl0ZXMzMixzdHJpbmdbXSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_hashDependencyScriptContent",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 598,
+            "byteStart": 14060,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L369-L388",
+            "lineEnd": 388,
+            "lineStart": 369,
+            "snippetSha256": "sha256:90c2db89d4c04aa4d243fe9fcde502bb57ac1d215879f425c6b0f0a0edb1dedf",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_hashDependencyScriptChunk(uint256,string)",
+          "functionKind": "function",
+          "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:_hashDependencyScriptChunk(uint256,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "index",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "chunk",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5I2Z1bmN0aW9uOl9oYXNoRGVwZW5kZW5jeVNjcmlwdENodW5rKHVpbnQyNTYsc3RyaW5nKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_hashDependencyScriptChunk",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 359,
+            "byteStart": 14664,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L390-L401",
+            "lineEnd": 401,
+            "lineStart": 390,
+            "snippetSha256": "sha256:ff82e3592f2209709e03334580ef5214f6b36972838021312be1e1bf38d508f9",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [
+        {
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_selector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "FunctionAdminRequired",
+          "natspec": "",
+          "overrides": [],
+          "range": {
+            "byteLength": 291,
+            "byteStart": 2460,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L67-L74",
+            "lineEnd": 74,
+            "lineStart": 67,
+            "snippetSha256": "sha256:d2b86078c6bc7300ffcf81bfedb5a8a24ac5f97764a479cec340246d5c25afe4",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "virtual": false
+        }
+      ],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x178fd473",
+          "immutable": false,
+          "name": "DEPENDENCY_SCRIPT_CONTENT_TYPEHASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 186,
+            "byteStart": 309,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L17-L19",
+            "lineEnd": 19,
+            "lineStart": 17,
+            "snippetSha256": "sha256:169953d4d857d92ba0fb1931122940db52496c2cf59bf8b045c299714415bd58",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x178fd473",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 125,
+            "byteStart": 370,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L17-L19",
+            "lineEnd": 19,
+            "lineStart": 17,
+            "snippetSha256": "sha256:1b6492deed2fdf69793fdb03824a2e723638dd30bbaef469d1f36e2f6b2c8616",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "valueSource": "keccak256(\n        \"6529StreamDependencyScript(bytes32 dependencyNameAndVersion,uint256 chunkCount,bytes32 chunksHash)\"\n    )",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xf035e880",
+          "immutable": false,
+          "name": "DEPENDENCY_SCRIPT_CHUNK_TYPEHASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 169,
+            "byteStart": 501,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L20-L22",
+            "lineEnd": 22,
+            "lineStart": 20,
+            "snippetSha256": "sha256:5c728a0962af3d828bc32d631add8ffffdcef4964dea909ea13f0f5e1ff16882",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0xf035e880",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 110,
+            "byteStart": 560,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L20-L22",
+            "lineEnd": 22,
+            "lineStart": 20,
+            "snippetSha256": "sha256:93e38adacb85019e1172812f97e350dc9922f22d2fe23d45feeb5d84087bfbf8",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "valueSource": "keccak256(\n        \"6529StreamDependencyScriptChunk(uint256 index,bytes32 chunkHash,uint256 byteLength)\"\n    )",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x93dcb683",
+          "immutable": false,
+          "name": "MAX_DEPENDENCY_SCRIPT_CHUNK_BYTES",
+          "natspec": "",
+          "range": {
+            "byteLength": 65,
+            "byteStart": 676,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:07fa23427752c1e1e078e8afe6956329a331f727f5c4a55d6472d3124e5846f3",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x93dcb683",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 5,
+            "byteStart": 736,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:d09a34c98d3a82af1ada577519d9839ffb143fb488d39b5c1f8c1b21c974f159",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "valueSource": "8_192",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x13bcdf36",
+          "immutable": false,
+          "name": "MAX_DEPENDENCY_SCRIPT_CHUNKS",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 747,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:aef59b7a952ea75bd834b55d5cdbeb3a7638632661683832f3f9e505f617e177",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0x13bcdf36",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 2,
+            "byteStart": 802,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:e29c9c180c6279b0b02abd6a1801c7c04082cf486ec027aa13515e4f3884bb6b",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "valueSource": "32",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xd02b3d44",
+          "immutable": false,
+          "name": "MAX_DEPENDENCY_PROVENANCE_BYTES",
+          "natspec": "",
+          "range": {
+            "byteLength": 63,
+            "byteStart": 810,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:c6aee28e0fec9ae9eab1046d04d5db5679c907313a0a88cc5e08c4cc7447b531",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": "0xd02b3d44",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 5,
+            "byteStart": 868,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:f127cada2c166851ea3481aeeca4f1981763135072c4dddcdaf555fc513b4eae",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "valueSource": "2_048",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_FIELD_DEPENDENCY_SCRIPT",
+          "natspec": "",
+          "range": {
+            "byteLength": 71,
+            "byteStart": 879,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:bf5c768af0fdb0de4969798f5135da9fd12a51f1c7abe775534c99bab6ed7f2d",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 19,
+            "byteStart": 931,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:314e38afefc6afac0b6b9139777ef5e62764a9739e36d28a48a89b4ddedb2d4a",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "valueSource": "\"dependency.script\"",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_FIELD_DEPENDENCY_SCRIPT_COUNT",
+          "natspec": "",
+          "range": {
+            "byteLength": 82,
+            "byteStart": 956,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:7782f2499977361a07a510685f1b234834a458b7457e842414034735f8b86ced",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 24,
+            "byteStart": 1014,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:7f1cd12b68f217b82c3668e34d088534ac3e134b1e95d7d23f2a1c9d7d706605",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "valueSource": "\"dependency.scriptCount\"",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_FIELD_DEPENDENCY_PROVENANCE",
+          "natspec": "",
+          "range": {
+            "byteLength": 79,
+            "byteStart": 1044,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:59bbf030f45d61b5543b77e5ca51bf6eb7cd94b0faa6c934789989307b913265",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 23,
+            "byteStart": 1100,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:4595c63e1f7b13b16778b1229df2e984d615ee41c27bace951fe897231ee92e8",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "valueSource": "\"dependency.provenance\"",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "dependencyInfo",
+          "natspec": "",
+          "range": {
+            "byteLength": 86,
+            "byteStart": 2183,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L60",
+            "lineEnd": 60,
+            "lineStart": 60,
+            "snippetSha256": "sha256:8760e4a5be77e8732acdae80408e45b8cfa4b995ad8e73563ef4374476596d07",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": null,
+          "type": "mapping(bytes32 => mapping(uint256 => dependencyInfoStructure))",
+          "typeString": "mapping(bytes32 => mapping(uint256 => struct DependencyRegistry.dependencyInfoStructure))",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "latestDependencyVersions",
+          "natspec": "",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 2275,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L61",
+            "lineEnd": 61,
+            "lineStart": 61,
+            "snippetSha256": "sha256:9a2edafe73793b218a00b33d123af0ef7fc449af2895399f5a29fe7317067b01",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": null,
+          "type": "mapping(bytes32 => uint256)",
+          "typeString": "mapping(bytes32 => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "adminsContract",
+          "natspec": "",
+          "range": {
+            "byteLength": 36,
+            "byteStart": 2342,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L63",
+            "lineEnd": 63,
+            "lineStart": 63,
+            "snippetSha256": "sha256:1754a17cc9aaeccdc5f6ba9305051d7a6d108a566bb43cc1b5a1c4dc2e37c823",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          },
+          "selector": null,
+          "type": "IStreamAdmins",
+          "typeString": "contract IStreamAdmins",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "_collectionDependencyName",
+              "natspec": "",
+              "range": {
+                "byteLength": 33,
+                "byteStart": 1914,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L49",
+                "lineEnd": 49,
+                "lineStart": 49,
+                "snippetSha256": "sha256:f208d2aefa582f2e550dc23b41a7778640d01c7f026545fd1ab9101e5547278d",
+                "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "libraryScript",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 1957,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L50",
+                "lineEnd": 50,
+                "lineStart": 50,
+                "snippetSha256": "sha256:a551d104647b819a92cce41ec13035f1d3e7eed60fe26dcd3604ca957fb7f61c",
+                "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+              },
+              "type": "string[]",
+              "typeString": "string[]"
+            },
+            {
+              "index": 2,
+              "name": "contentHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 1989,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L51",
+                "lineEnd": 51,
+                "lineStart": 51,
+                "snippetSha256": "sha256:97d6491c90735e1017b375484ebe7fe90d28ffaae21d66095773f5f2e29e0756",
+                "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "provenance",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 2018,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L52",
+                "lineEnd": 52,
+                "lineStart": 52,
+                "snippetSha256": "sha256:60dd198b6f7e727a061fbf9b23f31e28533df8d350d0438a98bb743ef5af6e3d",
+                "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+              },
+              "type": "string",
+              "typeString": "string"
+            },
+            {
+              "index": 4,
+              "name": "creator",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 2045,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L53",
+                "lineEnd": 53,
+                "lineStart": 53,
+                "snippetSha256": "sha256:a65d03d35535540ba18f556e28c71474a98bd21637bc442af1bfa68736b9cf32",
+                "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 5,
+              "name": "createdBlock",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 2070,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L54",
+                "lineEnd": 54,
+                "lineStart": 54,
+                "snippetSha256": "sha256:4302654812fea90810a6b93ecb0b99701c8419eb8be6889e53bab182e6d3809a",
+                "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "createdTimestamp",
+              "natspec": "",
+              "range": {
+                "byteLength": 24,
+                "byteStart": 2100,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L55",
+                "lineEnd": 55,
+                "lineStart": 55,
+                "snippetSha256": "sha256:513a10d657039a8fb67ea83dd0079dd726417345b4926d6cc3753c038c63f216",
+                "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 7,
+              "name": "deprecated",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 2134,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L56",
+                "lineEnd": 56,
+                "lineStart": 56,
+                "snippetSha256": "sha256:602725b108882e07e68be1c732587ca2d63f95f2eadad0c58c116a99bfa96637",
+                "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+              },
+              "type": "bool",
+              "typeString": "bool"
+            },
+            {
+              "index": 8,
+              "name": "exists",
+              "natspec": "",
+              "range": {
+                "byteLength": 11,
+                "byteStart": 2159,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L57",
+                "lineEnd": 57,
+                "lineStart": 57,
+                "snippetSha256": "sha256:041ce23d54f8b35f170b82ee9449e0912fe43a77cf4182d478591f51ef1fb39d",
+                "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+              },
+              "type": "bool",
+              "typeString": "bool"
+            }
+          ],
+          "name": "dependencyInfoStructure",
+          "natspec": "",
+          "range": {
+            "byteLength": 304,
+            "byteStart": 1873,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L48-L58",
+            "lineEnd": 58,
+            "lineStart": 48,
+            "snippetSha256": "sha256:835d4151c5a9517c495ff8744fef708e14a640560c62d94d13f5d2d1b2675bb6",
+            "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0RlcGVuZGVuY3lSZWdpc3RyeS5zb2w6RGVwZW5kZW5jeVJlZ2lzdHJ5",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/DependencyRegistry.sol:DependencyRegistry"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "production_contract"
+    },
+    "name": "DependencyRegistry",
+    "natspec": "",
+    "range": {
+      "byteLength": 14750,
+      "byteStart": 275,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/DependencyRegistry.sol#L16-L402",
+      "lineEnd": 402,
+      "lineStart": 16,
+      "snippetSha256": "sha256:7558af1ef1f8dfdf5a0fa7dc2dcab1fbe14f16892af8b6dbb5506ce2d86d89c9",
+      "sourceSha256": "sha256:1617156a050f1a2c93fd9b2247537f4035e08efe7cb516e05b07816093c32815"
+    },
+    "release": {
+      "abiSha256": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
+      "bytecodeSha256": "sha256:d9137961326627de597c1227ebf6c46da7d117d7e311cc144a6519f0a08f5263",
+      "deployedBytecodeSha256": "sha256:726829cfc6aaef0e47871a33834a43bb7b98526d1ba0e87d9127ec43c9431643",
+      "deployedBytecodeSizeBytes": 5953,
+      "summary": {
+        "custom_error_count": 5,
+        "event_count": 2,
+        "function_count": 25,
+        "payable_function_count": 0,
+        "read_function_count": 20,
+        "write_function_count": 5
+      },
+      "tracked": true
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/DependencyRegistry.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 25
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 24
+    },
+    "totalCount": 25
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x08f0052a",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x13bcdf36",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x178fd473",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x19d5cea5",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x2c7c4bcc",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x388d2c24",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x489108f6",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x518cb3df",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x5668bc5e",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x5ba0aba4",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x72b2af62",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x79f9ad3a",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x7a3b9abd",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x894f23b9",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0x93dcb683",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xad8afc86",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xbea18adc",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xd02b3d44",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xd3d2f5c9",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xdd201a84",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xef8bd1a0",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xf035e880",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:0xfff01fa9",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry#function:constructor(address)",
+      "definitionId": "smart-contracts/DependencyRegistry.sol:DependencyRegistry",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -1,0 +1,163 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceRootMock#function:0xb002fba9",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceRootMock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "name": "callTarget",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes",
+              "name": "result",
+              "type": "bytes"
+            }
+          ],
+          "selector": "0xb002fba9",
+          "signature": "callTarget(address,bytes)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "callTarget(address,bytes)",
+          "displaySignature": "callTarget(address,bytes)",
+          "functionKind": "function",
+          "id": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceRootMock#function:0xb002fba9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "data",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VCb290c3RyYXBIYXJuZXNzLnNvbDpTdHJlYW1Hb3Zlcm5hbmNlUm9vdE1vY2sjZnVuY3Rpb246MHhiMDAyZmJhOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "callTarget",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "result",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 361,
+            "byteStart": 13101,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceBootstrapHarness.sol#L387-L398",
+            "lineEnd": 398,
+            "lineStart": 387,
+            "snippetSha256": "sha256:346c4830c0096a9af1819ba1d139fea510da7e2be722cc1e2265c28cb6e08e34",
+            "sourceSha256": "sha256:865dacdc23f2027c5e863b1fc6244ab265a4778d228dd42e6429b0eec90f5fce"
+          },
+          "selector": "0xb002fba9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceRootMock",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VCb290c3RyYXBIYXJuZXNzLnNvbDpTdHJlYW1Hb3Zlcm5hbmNlUm9vdE1vY2s",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceRootMock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGovernanceRootMock",
+    "natspec": "",
+    "range": {
+      "byteLength": 403,
+      "byteStart": 13061,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceBootstrapHarness.sol#L386-L399",
+      "lineEnd": 399,
+      "lineStart": 386,
+      "snippetSha256": "sha256:32a9fb2da5cc6578ab1e87331d9191c6b6cb6a18bd0aedd1c3f5520a98b50b05",
+      "sourceSha256": "sha256:865dacdc23f2027c5e863b1fc6244ab265a4778d228dd42e6429b0eec90f5fce"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/StreamGovernanceBootstrapHarness.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceRootMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceRootMock#function:0xb002fba9",
+      "definitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceRootMock",
+      "severity": "advisory"
+    }
+  ]
+}

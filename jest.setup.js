@@ -150,7 +150,7 @@ if (!process.env.PUBLIC_RUNTIME) {
     IPFS_GATEWAY_ENDPOINT: "https://ipfs.test.6529.io",
     MEDIA_RESOLVER_ENDPOINT: "https://media.6529.io",
     IPFS_MFS_PATH: "testfiles",
-    TENOR_API_KEY: "test-tenor-api-key",
+    GIPHY_API_KEY: "test-giphy-api-key",
     WS_ENDPOINT: "wss://ws.test.6529.io",
     DEV_MODE_MEMES_WAVE_ID: "test-memes-wave-id",
     DEV_MODE_CURATION_WAVE_ID: "test-curation-wave-id",

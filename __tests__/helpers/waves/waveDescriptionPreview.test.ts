@@ -1,4 +1,7 @@
-import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
+import {
+  getWaveDescriptionPreviewText,
+  markdownToPlainText,
+} from "@/helpers/waves/waveDescriptionPreview";
 
 describe("getWaveDescriptionPreviewText", () => {
   it("returns a cleaned one-line preview from first description part", () => {
@@ -57,6 +60,28 @@ describe("getWaveDescriptionPreviewText", () => {
     expect(getWaveDescriptionPreviewText(wave)).toBe(
       "Docs readme (https://example.com/path_(v1)) today"
     );
+  });
+
+  it("handles nested and escaped markdown delimiters", () => {
+    expect(
+      markdownToPlainText(
+        "Docs [read [this]](https://example.com/path_(v1)) and [escaped](https://example.com/a\\)b)"
+      )
+    ).toBe(
+      "Docs read [this] (https://example.com/path_(v1)) and escaped (https://example.com/a\\)b)"
+    );
+  });
+
+  it("can omit link destinations and image URLs for bounded summaries", () => {
+    expect(
+      markdownToPlainText(
+        "Read [the guide](https://example.com/path_(v1)) ![diagram](https://example.com/image.png)",
+        {
+          includeImageUrls: false,
+          includeLinkDestinations: false,
+        }
+      )
+    ).toBe("Read the guide");
   });
 
   it("keeps image markdown as URL text", () => {

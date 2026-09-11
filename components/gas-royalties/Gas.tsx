@@ -3,18 +3,25 @@
 import { useTitle } from "@/contexts/TitleContext";
 import type { Gas } from "@/entities/IGas";
 import { capitalizeEveryWord, displayDecimal } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import { GasRoyaltiesCollectionFocus } from "@/types/enums";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
+  GAS_ROYALTIES_PAGE_CONTAINER_CLASS_NAME,
+  GAS_ROYALTIES_TABLE_CELL_CLASS_NAME,
+  GAS_ROYALTIES_TABLE_CLASS_NAME,
+  GAS_ROYALTIES_TABLE_HEADER_CELL_CLASS_NAME,
+  GAS_ROYALTIES_TABLE_ROW_CLASS_NAME,
   GasRoyaltiesHeader,
   GasRoyaltiesTokenImage,
   useSharedState,
 } from "./GasRoyalties";
-import styles from "./GasRoyalties.module.css";
 
 export default function GasComponent() {
+  const locale = useBrowserLocale();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -38,7 +45,7 @@ export default function GasComponent() {
 
   const [gas, setGas] = useState<Gas[]>([]);
   const [sumGas, setSumGas] = useState(0);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState(false);
 
   const {
     dateSelection,
@@ -66,7 +73,7 @@ export default function GasComponent() {
 
   async function fetchGas() {
     setFetching(true);
-    setFetchError(null);
+    setFetchError(false);
     try {
       const res = await fetchUrl<Gas[]>(getUrlWithParams());
       res.forEach((r) => {
@@ -78,7 +85,7 @@ export default function GasComponent() {
       console.error("Failed to fetch gas data", error);
       setGas([]);
       setSumGas(0);
-      setFetchError("Failed to load gas data. Please try again.");
+      setFetchError(true);
     } finally {
       setFetching(false);
     }
@@ -124,25 +131,45 @@ export default function GasComponent() {
         getUrl={getUrlWithParams}
         {...getSharedProps()}
       />
-      <section className="tailwind-scope tw-container tw-mx-auto tw-px-0 tw-pt-4">
-        <div className={`tw-pt-3 ${styles["scrollContainer"]}`}>
+      <section
+        className={`${GAS_ROYALTIES_PAGE_CONTAINER_CLASS_NAME} tw-mt-2 tw-flow-root lg:tw-mt-3`}
+      >
+        <div className="tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-600">
           {gas.length > 0 && (
-            <table
-              className={`${styles["gasTable"]} tw-mb-4 tw-w-full tw-border-collapse tw-text-inherit`}
-            >
+            <table className={GAS_ROYALTIES_TABLE_CLASS_NAME}>
               <thead>
                 <tr>
-                  <th className="tw-p-2 tw-text-left">
-                    Meme Card (x{gas.length})
+                  <th
+                    className={`${GAS_ROYALTIES_TABLE_HEADER_CELL_CLASS_NAME} tw-text-left`}
+                    scope="col"
+                  >
+                    {t(locale, "memeData.columns.memeCardCount", {
+                      count: gas.length,
+                    })}
                   </th>
-                  <th className="tw-p-2 tw-text-left">Artist</th>
-                  <th className="tw-p-2 tw-text-center">Gas (ETH)</th>
+                  <th
+                    className={`${GAS_ROYALTIES_TABLE_HEADER_CELL_CLASS_NAME} tw-text-left`}
+                    scope="col"
+                  >
+                    {t(locale, "memeData.columns.artist")}
+                  </th>
+                  <th
+                    className={`${GAS_ROYALTIES_TABLE_HEADER_CELL_CLASS_NAME} tw-text-right`}
+                    scope="col"
+                  >
+                    {t(locale, "memeData.columns.gasEth")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {gas.map((g) => (
-                  <tr key={`token-${g.token_id}`}>
-                    <td className="tw-p-2 tw-align-middle">
+                  <tr
+                    className={GAS_ROYALTIES_TABLE_ROW_CLASS_NAME}
+                    key={`token-${g.token_id}`}
+                  >
+                    <td
+                      className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-left`}
+                    >
                       <GasRoyaltiesTokenImage
                         path={
                           collectionFocus ===
@@ -155,20 +182,31 @@ export default function GasComponent() {
                         thumbnail={g.thumbnail}
                       />
                     </td>
-                    <td className="tw-p-2 tw-align-middle">{g.artist}</td>
-                    <td className="tw-p-2 tw-text-center tw-align-middle">
+                    <td
+                      className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-left tw-text-iron-50`}
+                    >
+                      {g.artist}
+                    </td>
+                    <td
+                      className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-tabular-nums`}
+                    >
                       {displayDecimal(g.gas)}
                     </td>
                   </tr>
                 ))}
-                <tr key={`gas-total`}>
+                <tr
+                  className={GAS_ROYALTIES_TABLE_ROW_CLASS_NAME}
+                  key="gas-total"
+                >
                   <td
                     colSpan={2}
-                    className="tw-p-2 tw-text-right tw-align-middle"
+                    className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-font-semibold tw-text-iron-300`}
                   >
-                    <b>TOTAL</b>
+                    <b>{t(locale, "memeData.total")}</b>
                   </td>
-                  <td className="tw-p-2 tw-text-center tw-align-middle">
+                  <td
+                    className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-font-semibold tw-tabular-nums`}
+                  >
                     {displayDecimal(sumGas)}
                   </td>
                 </tr>
@@ -177,13 +215,23 @@ export default function GasComponent() {
           )}
         </div>
         {!fetching && gas.length === 0 && (
-          <div>
-            <h5>{fetchError || "No gas info found for selected dates"}</h5>
+          <div className="tw-mt-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-px-4 tw-py-8 tw-text-center">
+            <p
+              role={fetchError ? "alert" : "status"}
+              className={`tw-mb-0 tw-text-sm tw-leading-6 ${
+                fetchError ? "tw-text-red-500" : "tw-text-iron-400"
+              }`}
+            >
+              {t(
+                locale,
+                fetchError ? "memeData.gas.loadError" : "memeData.gas.empty"
+              )}
+            </p>
           </div>
         )}
         {!fetching && gas.length > 0 && (
-          <div className="tw-pb-3 tw-pt-3 tw-text-iron-400">
-            All values are in ETH
+          <div className="tw-pb-3 tw-pt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
+            {t(locale, "memeData.ethFootnote")}
           </div>
         )}
       </section>

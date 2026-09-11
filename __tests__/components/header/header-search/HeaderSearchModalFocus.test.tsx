@@ -14,7 +14,7 @@ const useQueryMock = jest.fn();
 const useRouterMock = jest.fn();
 const usePathnameMock = jest.fn();
 const useSearchParamsMock = jest.fn();
-const useWavesMock = jest.fn();
+const useHeaderSearchWavesMock = jest.fn();
 const useLocalPreferenceMock = jest.fn();
 const useKeyMock = useKey as jest.MockedFunction<typeof useKey>;
 const useClickAwayMock = useClickAway as jest.MockedFunction<
@@ -52,9 +52,13 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => useSearchParamsMock(),
 }));
 
-jest.mock("@/hooks/useWaves", () => ({
-  useWaves: (...args: any[]) => useWavesMock(...args),
-}));
+jest.mock(
+  "@/components/header/header-search/header-search-modal/useHeaderSearchWaves",
+  () => ({
+    useHeaderSearchWaves: (name: string, enabled: boolean) =>
+      useHeaderSearchWavesMock(name, enabled),
+  })
+);
 
 jest.mock("@/hooks/useLocalPreference", () => ({
   __esModule: true,
@@ -153,7 +157,7 @@ beforeEach(() => {
   useRouterMock.mockReturnValue({ push: jest.fn() });
   usePathnameMock.mockReturnValue("/");
   useSearchParamsMock.mockReturnValue(new URLSearchParams());
-  useWavesMock.mockReturnValue({
+  useHeaderSearchWavesMock.mockReturnValue({
     waves: [],
     isFetching: false,
     error: null,
@@ -170,7 +174,8 @@ beforeEach(() => {
   });
 });
 
-const PLACEHOLDER_TEXT = "Search 6529.io";
+const SITE_SEARCH_DIALOG_TITLE = "Search 6529";
+const SITE_SEARCH_PLACEHOLDER = "Search 6529.io";
 
 describe("HeaderSearchModal focus management", () => {
   it("keeps focus trapped within the modal while it is open", async () => {
@@ -180,10 +185,11 @@ describe("HeaderSearchModal focus management", () => {
     const trigger = screen.getByRole("button", { name: /search/i });
     await user.click(trigger);
 
-    const input = await screen.findByPlaceholderText(PLACEHOLDER_TEXT);
+    const input = await screen.findByPlaceholderText(SITE_SEARCH_PLACEHOLDER);
     await waitFor(() => expect(input).toHaveFocus());
 
-    await screen.findByRole("dialog");
+    await screen.findByRole("dialog", { name: SITE_SEARCH_DIALOG_TITLE });
+    expect(input).not.toHaveAttribute("required");
     const modalRoot = document.body.querySelector(
       ".tailwind-scope.tw-cursor-default.tw-relative.tw-z-1000"
     ) as HTMLElement | null;
@@ -218,14 +224,14 @@ describe("HeaderSearchModal focus management", () => {
 
     await waitFor(() => {
       expect(
-        screen.queryByPlaceholderText(PLACEHOLDER_TEXT)
+        screen.queryByPlaceholderText(SITE_SEARCH_PLACEHOLDER)
       ).not.toBeInTheDocument();
       expect(trigger).toHaveFocus();
     });
 
     await user.keyboard("[Space]");
 
-    await screen.findByPlaceholderText(PLACEHOLDER_TEXT);
+    await screen.findByPlaceholderText(SITE_SEARCH_PLACEHOLDER);
 
     expect(escapeHandler).not.toBeNull();
 
@@ -235,7 +241,7 @@ describe("HeaderSearchModal focus management", () => {
 
     await waitFor(() => {
       expect(
-        screen.queryByPlaceholderText(PLACEHOLDER_TEXT)
+        screen.queryByPlaceholderText(SITE_SEARCH_PLACEHOLDER)
       ).not.toBeInTheDocument();
       expect(trigger).toHaveFocus();
     });

@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 type MediaQueryListOptionalListeners = {
   addEventListener?: MediaQueryList["addEventListener"];
@@ -8,6 +8,14 @@ type MediaQueryListOptionalListeners = {
 type BrowserWindowWithMatchMedia = {
   readonly matchMedia?: (query: string) => MediaQueryList;
 };
+
+type LegacySubscription = {
+  readonly listeners: Set<() => void>;
+  readonly handler: NonNullable<MediaQueryList["onchange"]>;
+  readonly previousOnChange: MediaQueryList["onchange"];
+};
+
+const legacySubscriptions = new WeakMap<MediaQueryList, LegacySubscription>();
 
 const getBrowserWindow = (): BrowserWindowWithMatchMedia | undefined =>
   (globalThis as { window?: BrowserWindowWithMatchMedia }).window;
@@ -24,54 +32,85 @@ const getMediaQueryList = (query: string): MediaQueryList | null => {
   return browserWindow.matchMedia(query);
 };
 
-export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
-  const syncMatches = useEffectEvent((nextMatches: boolean) => {
-    setMatches((currentMatches) =>
-      currentMatches === nextMatches ? currentMatches : nextMatches
-    );
-  });
+const subscribeWithOnChange = (
+  mediaQueryList: MediaQueryList,
+  onStoreChange: () => void
+): (() => void) => {
+  let subscription = legacySubscriptions.get(mediaQueryList);
 
-  useEffect(() => {
-    const mediaQueryList = getMediaQueryList(query);
-    if (!mediaQueryList) {
+  if (subscription === undefined) {
+    const listeners = new Set<() => void>();
+    const previousOnChange = mediaQueryList.onchange;
+    const handler: NonNullable<MediaQueryList["onchange"]> = (event) => {
+      previousOnChange?.call(mediaQueryList, event);
+      listeners.forEach((listener) => listener());
+    };
+
+    subscription = { listeners, handler, previousOnChange };
+    legacySubscriptions.set(mediaQueryList, subscription);
+    mediaQueryList.onchange = handler;
+  }
+
+  subscription.listeners.add(onStoreChange);
+  let isSubscribed = true;
+
+  return () => {
+    if (!isSubscribed) {
       return;
     }
 
-    syncMatches(mediaQueryList.matches);
-
-    const handleChange = (event: MediaQueryListEvent) => {
-      syncMatches(event.matches);
-    };
-
-    const mediaQueryListListeners =
-      mediaQueryList as MediaQueryListOptionalListeners;
-
-    if (
-      typeof mediaQueryListListeners.addEventListener === "function" &&
-      typeof mediaQueryListListeners.removeEventListener === "function"
-    ) {
-      mediaQueryListListeners.addEventListener("change", handleChange);
-      return () =>
-        mediaQueryListListeners.removeEventListener?.("change", handleChange);
+    isSubscribed = false;
+    subscription.listeners.delete(onStoreChange);
+    if (subscription.listeners.size > 0) {
+      return;
     }
 
-    const previousOnChange = mediaQueryList.onchange;
-    const fallbackHandler: NonNullable<MediaQueryList["onchange"]> = (
-      event
-    ) => {
-      previousOnChange?.call(mediaQueryList, event);
-      syncMatches(mediaQueryList.matches);
-    };
+    legacySubscriptions.delete(mediaQueryList);
+    if (mediaQueryList.onchange === subscription.handler) {
+      mediaQueryList.onchange = subscription.previousOnChange;
+    }
+  };
+};
 
-    mediaQueryList.onchange = fallbackHandler;
+const subscribeToMediaQueryList = (
+  mediaQueryList: MediaQueryList | null,
+  onStoreChange: () => void
+): (() => void) => {
+  if (mediaQueryList === null) {
+    return () => undefined;
+  }
 
-    return () => {
-      if (mediaQueryList.onchange === fallbackHandler) {
-        mediaQueryList.onchange = previousOnChange;
-      }
+  const mediaQueryListListeners =
+    mediaQueryList as MediaQueryListOptionalListeners;
+
+  if (
+    typeof mediaQueryListListeners.addEventListener === "function" &&
+    typeof mediaQueryListListeners.removeEventListener === "function"
+  ) {
+    mediaQueryListListeners.addEventListener("change", onStoreChange);
+    return () =>
+      mediaQueryListListeners.removeEventListener?.("change", onStoreChange);
+  }
+
+  return subscribeWithOnChange(mediaQueryList, onStoreChange);
+};
+
+const getServerSnapshot = (): boolean => false;
+
+export function useMediaQuery(query: string): boolean {
+  const store = useMemo(() => {
+    const mediaQueryList = getMediaQueryList(query);
+
+    return {
+      getSnapshot: () => mediaQueryList?.matches ?? false,
+      subscribe: (onStoreChange: () => void) =>
+        subscribeToMediaQueryList(mediaQueryList, onStoreChange),
     };
   }, [query]);
 
-  return matches;
+  return useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot,
+    getServerSnapshot
+  );
 }

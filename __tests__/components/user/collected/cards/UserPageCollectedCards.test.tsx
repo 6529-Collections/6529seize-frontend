@@ -8,6 +8,7 @@ import {
 import { SortDirection } from "@/entities/ISort";
 import { t as translate } from "@/i18n/messages";
 import { render, screen, within } from "@testing-library/react";
+import Link from "next/link";
 import React from "react";
 
 jest.mock("@/i18n/messages", () => {
@@ -21,9 +22,14 @@ jest.mock("@/i18n/messages", () => {
 
 jest.mock("@/components/user/collected/cards/UserPageCollectedCard", () => {
   const MockedCard = (props: any) => (
-    <div data-testid="card" data-show-data-row={props.showDataRow}>
+    <Link
+      href="/token"
+      data-testid="card"
+      data-show-data-row={props.showDataRow}
+      data-return-to={props.returnTo}
+    >
       {props.card.token_id}
-    </div>
+    </Link>
   );
   MockedCard.displayName = "UserPageCollectedCard";
   return MockedCard;
@@ -101,6 +107,11 @@ const translateMock = translate as jest.MockedFunction<typeof translate>;
 describe("UserPageCollectedCards", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    window.history.replaceState({}, "", "/Shelby/collected");
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      value: jest.fn(),
+    });
     for (const key of Object.keys(paginationProps)) {
       delete paginationProps[key];
     }
@@ -174,5 +185,36 @@ describe("UserPageCollectedCards", () => {
     );
     expect(screen.queryByRole("list", { name: "Collected cards" })).toBeNull();
     expect(screen.queryByTestId("card")).toBeNull();
+  });
+
+  it("passes return context to cards and restores the anchored card", () => {
+    window.history.replaceState(
+      {},
+      "",
+      "/Shelby/collected?collection=memes#collected-card-memes-2"
+    );
+
+    renderWithProviders(
+      <UserPageCollectedCards
+        cards={sampleCards}
+        totalPages={1}
+        page={1}
+        showDataRow={false}
+        filters={{ ...baseFilters, collection: CollectedCollectionType.MEMES }}
+        setPage={() => {}}
+        dataTransfer={[]}
+        returnTo="/Shelby/collected?collection=memes"
+      />
+    );
+
+    const cards = screen.getAllByTestId("card");
+    expect(cards[0]).toHaveAttribute(
+      "data-return-to",
+      "/Shelby/collected?collection=memes"
+    );
+    expect(cards[1]).toHaveFocus();
+    expect(HTMLElement.prototype.scrollIntoView).toHaveBeenCalledWith({
+      block: "center",
+    });
   });
 });

@@ -13,6 +13,165 @@ const minimalCmsPackage = minimalPackage as unknown as CmsPackageV1;
 const galleryCmsPackage = walletGalleryPackage as unknown as CmsPackageV1;
 
 describe("profile CMS runtime routes", () => {
+  it.each(["identity", "Identity", "%69dentity"])(
+    "rejects reserved archive namespace %s",
+    (segment) => {
+      expect(
+        buildProfileCmsPath({
+          handle: "punk6529",
+          segments: [segment, "index.html"],
+        })
+      ).toBeNull();
+      expect(
+        buildProfileCmsPath({ handle: "punk6529", segments: ["index.html"] })
+      ).toBe("/punk6529/index.html");
+    }
+  );
+  const withRoutes = (
+    routes: CmsPackageV1["payload"]["routes"]
+  ): CmsPackageV1 => ({
+    ...minimalCmsPackage,
+    payload: { ...minimalCmsPackage.payload, routes },
+  });
+
+  it.each(["/punk6529/Gallery/index.html", "/Punk6529/Gallery/index.html"])(
+    "resolves display-case manifest handles for %s without changing page slugs",
+    (path) => {
+      const cmsPackage = withRoutes([
+        {
+          path: "/PUNK6529/Gallery/index.html",
+          kind: "page",
+          page_id: "page-home",
+        },
+      ]);
+      expect(resolveCmsRoute(cmsPackage, path).kind).toBe("page");
+      expect(
+        resolveCmsRoute(cmsPackage, "/punk6529/gallery/index.html")
+      ).toEqual({
+        kind: "not_found",
+        reason: "route_missing",
+      });
+      expect(getCmsPagePath(cmsPackage, "page-home")).toBe(
+        "/punk6529/Gallery/index.html"
+      );
+      expect(cmsPackage.payload.routes[0]?.path).toBe(
+        "/PUNK6529/Gallery/index.html"
+      );
+    }
+  );
+
+  it.each([false, true])(
+    "rejects canonical route collisions regardless of order (reversed: %s)",
+    (reversed) => {
+      const routes: CmsPackageV1["payload"]["routes"] = [
+        { path: "/Punk6529/index.html", kind: "page", page_id: "page-home" },
+        {
+          path: "/punk6529/index.html",
+          kind: "redirect",
+          target: "/punk6529/Other/index.html",
+        },
+      ];
+      const cmsPackage = withRoutes(reversed ? routes.toReversed() : routes);
+      expect(resolveCmsRoute(cmsPackage, "/punk6529/index.html")).toEqual({
+        kind: "not_found",
+        reason: "route_missing",
+      });
+    }
+  );
+
+  it("normalizes path aliases and detects cycles across handle casing", () => {
+    const cmsPackage = withRoutes([
+      {
+        path: "/Punk6529/index.html",
+        kind: "alias",
+        target: "/PUNK6529/Home/index.html",
+      },
+      { path: "/punk6529/Home/index.html", kind: "alias", target: "page-home" },
+      {
+        path: "/Punk6529/loop/index.html",
+        kind: "alias",
+        target: "/punk6529/loop/index.html",
+      },
+    ]);
+    expect(resolveCmsRoute(cmsPackage, "/punk6529/index.html").kind).toBe(
+      "page"
+    );
+    expect(resolveCmsRoute(cmsPackage, "/PUNK6529/loop/index.html")).toEqual({
+      kind: "not_found",
+      reason: "route_missing",
+    });
+  });
+
+  it.each([
+    [
+      "/Punk6529/Gallery/index.html?view=Grid#Artwork",
+      "/punk6529/Gallery/index.html?view=Grid#Artwork",
+    ],
+    ["/Punk6529?view=Grid#Artwork", "/punk6529?view=Grid#Artwork"],
+    ["/Punk6529#Artwork", "/punk6529#Artwork"],
+  ])(
+    "preserves query and fragment casing in redirects to %s",
+    (target, expected) => {
+      const cmsPackage = withRoutes([
+        { path: "/Punk6529/go/index.html", kind: "redirect", target },
+      ]);
+      expect(
+        resolveCmsRoute(cmsPackage, "/punk6529/go/index.html")
+      ).toMatchObject({
+        kind: "redirect",
+        target: expected,
+      });
+    }
+  );
+
+  it("normalizes fallback page paths without changing the package", () => {
+    const cmsPackage: CmsPackageV1 = {
+      ...minimalCmsPackage,
+      payload: {
+        ...minimalCmsPackage.payload,
+        routes: [],
+        pages: minimalCmsPackage.payload.pages.map((page) => ({
+          ...page,
+          path: "/Punk6529/Home/index.html",
+        })),
+      },
+    };
+    expect(getCmsPagePath(cmsPackage, "page-home")).toBe(
+      "/punk6529/Home/index.html"
+    );
+    expect(getCmsPagePath(cmsPackage, "missing")).toBeNull();
+    expect(cmsPackage.payload.pages[0]?.path).toBe("/Punk6529/Home/index.html");
+  });
+
+  it("normalizes nested internal navigation without rewriting external URLs or anchors", () => {
+    const urls = [
+      "/Punk6529/Gallery/index.html?view=Grid#Artwork",
+      "/Punk6529?view=Grid#Artwork",
+      "https://Example.com/Gallery?view=Grid#Artwork",
+      "//Example.com/Gallery",
+      "#Artwork",
+    ];
+    const items = [
+      { label: "Gallery", children: urls.map((url) => ({ label: url, url })) },
+    ];
+    const cmsPackage: CmsPackageV1 = {
+      ...minimalCmsPackage,
+      site: { ...minimalCmsPackage.site, navigation_id: "navigation-test" },
+      payload: {
+        ...minimalCmsPackage.payload,
+        navigation: [{ id: "navigation-test", items }],
+      },
+    };
+    expect(
+      getCmsNavigationItems(cmsPackage)[0]?.children?.map((item) => item.url)
+    ).toEqual([
+      "/punk6529/Gallery/index.html?view=Grid#Artwork",
+      "/punk6529?view=Grid#Artwork",
+      ...urls.slice(2),
+    ]);
+    expect(items[0]?.children.map((item) => item.url)).toEqual(urls);
+  });
+
   it("only treats index.html paths as CMS routes", () => {
     expect(isProfileCmsIndexSegments(undefined)).toBe(false);
     expect(isProfileCmsIndexSegments([])).toBe(false);

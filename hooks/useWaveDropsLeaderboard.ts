@@ -6,6 +6,8 @@ import {
   WAVE_DROPS_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
+import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import {
   generateUniqueKeys,
   mapToExtendedDrops,
@@ -13,6 +15,10 @@ import {
 import { fetchWaveLeaderboardV2 } from "@/services/api/wave-drops-v2-api";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
+
+// Leaderboard views opt into a 500-drop window. Earlier pages remain reachable
+// through bidirectional pagination when the user scrolls back.
+export const WAVE_DROPS_LEADERBOARD_MAX_PAGES = 10;
 
 export enum WaveDropsLeaderboardSort {
   RANK = "RANK",
@@ -28,6 +34,7 @@ interface UseWaveDropsLeaderboardProps {
   readonly waveId: string;
   readonly sort?: WaveDropsLeaderboardSort | undefined;
   readonly enabled?: boolean | undefined;
+  readonly maxPages?: number | undefined;
   readonly minPrice?: number | undefined;
   readonly maxPrice?: number | undefined;
   readonly priceCurrency?: string | undefined;
@@ -56,16 +63,23 @@ interface LeaderboardQueryKeyInput {
   readonly waveId: string;
   readonly sort: WaveDropsLeaderboardSort;
   readonly sortDirection: "ASC" | "DESC" | undefined;
+  readonly maxPages: number | undefined;
   readonly priceFilters: CanonicalPriceFilters;
 }
 
-interface LeaderboardParamsInput extends LeaderboardQueryKeyInput {
+interface LeaderboardParamsInput
+  extends Omit<LeaderboardQueryKeyInput, "maxPages"> {
   readonly pageParam: number | null;
   readonly pageSize: number;
 }
 
 interface FetchLeaderboardPageInput extends LeaderboardParamsInput {
   readonly signal?: AbortSignal | undefined;
+}
+
+export interface WaveDropsLeaderboardPageMetadata {
+  readonly page: number;
+  readonly dropIds: readonly string[];
 }
 
 const normalizePriceFilter = (value?: number): number | undefined =>
@@ -118,6 +132,7 @@ const buildLeaderboardQueryKey = ({
   waveId,
   sort,
   sortDirection,
+  maxPages,
   priceFilters,
 }: LeaderboardQueryKeyInput) =>
   [
@@ -127,6 +142,7 @@ const buildLeaderboardQueryKey = ({
       page_size: WAVE_DROPS_PARAMS.limit,
       sort,
       sort_direction: sortDirection,
+      page_window: maxPages ?? null,
       min_price: priceFilters.normalizedPriceLower ?? null,
       max_price: priceFilters.normalizedPriceUpper ?? null,
       price_currency: priceFilters.normalizedPriceCurrency ?? null,
@@ -204,7 +220,27 @@ const getNextLeaderboardPageParam = ({
   return lastPage.next ? lastPage.page + 1 : null;
 };
 
-const getLeaderboardDrops = ({
+const getPreviousLeaderboardPageParam = (
+  firstPage: ApiDropsLeaderboardPage
+): number | null => (firstPage.page > 1 ? firstPage.page - 1 : null);
+
+const getVisiblePageDrops = (
+  page: ApiDropsLeaderboardPage,
+  sort: WaveDropsLeaderboardSort
+) =>
+  sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE
+    ? page.drops.filter(
+        (drop) => drop.context_profile_context?.rating !== 0
+      )
+    : page.drops;
+
+interface VisibleLeaderboardPage {
+  readonly page: number;
+  readonly wave: ApiWaveMin;
+  readonly drops: readonly ApiDropWithoutWave[];
+}
+
+const getVisibleLeaderboardPages = ({
   data,
   sort,
 }: {
@@ -214,26 +250,37 @@ const getLeaderboardDrops = ({
       }
     | undefined;
   readonly sort: WaveDropsLeaderboardSort;
-}) => {
+}): VisibleLeaderboardPage[] => {
   if (!data?.pages) {
     return [];
   }
 
+  // A vote can move a drop across a page boundary before the retained window
+  // is naturally reconciled. Keep the first occurrence so the user never sees
+  // the same card twice while continuing to scroll.
+  const seenDropIds = new Set<string>();
+  return data.pages.map((page) => ({
+    page: page.page,
+    wave: page.wave,
+    drops: getVisiblePageDrops(page, sort).filter((drop) => {
+      if (seenDropIds.has(drop.id)) {
+        return false;
+      }
+      seenDropIds.add(drop.id);
+      return true;
+    }),
+  }));
+};
+
+const getLeaderboardDrops = (pages: readonly VisibleLeaderboardPage[]) => {
   const mappedDrops = mapToExtendedDrops(
-    data.pages.map((page) => ({
+    pages.map((page) => ({
       wave: page.wave,
-      drops: page.drops,
+      drops: [...page.drops],
     })),
     []
   );
   const uniqueDrops = generateUniqueKeys(mappedDrops, []);
-
-  if (sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
-    return uniqueDrops.filter(
-      (drop) => drop.context_profile_context?.rating !== 0
-    );
-  }
-
   return uniqueDrops;
 };
 
@@ -257,6 +304,7 @@ export function useWaveDropsLeaderboard({
   waveId,
   sort = WaveDropsLeaderboardSort.RANK,
   enabled = true,
+  maxPages,
   minPrice,
   maxPrice,
   priceCurrency,
@@ -277,18 +325,24 @@ export function useWaveDropsLeaderboard({
         waveId,
         sort,
         sortDirection,
+        maxPages,
         priceFilters: canonicalPriceFilters,
       }),
-    [canonicalPriceFilters, sort, sortDirection, waveId]
+    [canonicalPriceFilters, maxPages, sort, sortDirection, waveId]
   );
 
   const {
     data,
     fetchNextPage,
+    fetchPreviousPage,
     hasNextPage,
+    hasPreviousPage,
     isError,
+    isFetchNextPageError,
+    isFetchPreviousPageError,
     isFetching,
     isFetchingNextPage,
+    isFetchingPreviousPage,
     refetch,
   } = useInfiniteQuery({
     queryKey,
@@ -311,15 +365,30 @@ export function useWaveDropsLeaderboard({
     initialPageParam: null,
     getNextPageParam: (lastPage: ApiDropsLeaderboardPage) =>
       getNextLeaderboardPageParam({ lastPage, sort }),
+    getPreviousPageParam: getPreviousLeaderboardPageParam,
+    ...(maxPages === undefined ? {} : { maxPages }),
     enabled: isQueryEnabled,
     staleTime: 60000,
     ...getDefaultQueryRetry(),
   });
 
-  const drops = useMemo(
-    () => getLeaderboardDrops({ data, sort }),
+  const visiblePages = useMemo(
+    () => getVisibleLeaderboardPages({ data, sort }),
     [data, sort]
   );
+  const drops = useMemo(
+    () => getLeaderboardDrops(visiblePages),
+    [visiblePages]
+  );
+  const pageMetadata = useMemo<WaveDropsLeaderboardPageMetadata[]>(
+    () =>
+      visiblePages.map((page) => ({
+        page: page.page,
+        dropIds: page.drops.map((drop) => drop.id),
+      })),
+    [visiblePages]
+  );
+  const queryWindowKey = useMemo(() => JSON.stringify(queryKey), [queryKey]);
 
   // Derive hasInitialized from whether we have data
   const hasInitialized = !!data?.pages;
@@ -334,11 +403,18 @@ export function useWaveDropsLeaderboard({
 
   return {
     drops,
+    pageMetadata,
+    queryWindowKey,
     fetchNextPage,
+    fetchPreviousPage,
     hasNextPage,
+    hasPreviousPage,
     isError,
+    isFetchNextPageError,
+    isFetchPreviousPageError,
     isFetching: isQueryEnabled && (isFetching || !hasInitialized),
     isFetchingNextPage,
+    isFetchingPreviousPage,
     refetch,
     manualFetch,
   };

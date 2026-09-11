@@ -16,7 +16,7 @@ function HeaderActionButtonsContent() {
   const { openWave, openDirectMessage } = useCreateModalState();
 
   const baseButtonClasses =
-    "tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800";
+    "tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800";
 
   const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({
@@ -43,7 +43,7 @@ function HeaderActionButtonsContent() {
         onClick={onCreateWave}
         className={baseButtonClasses}
       >
-        <PlusIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
+        <PlusIcon className="tw-size-5 tw-flex-shrink-0" />
       </button>
     );
   }

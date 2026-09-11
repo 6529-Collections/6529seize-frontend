@@ -4,9 +4,22 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
-import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
-import React from "react";
+import {
+  useWaveDropsLeaderboard,
+  WAVE_DROPS_LEADERBOARD_MAX_PAGES,
+} from "@/hooks/useWaveDropsLeaderboard";
+import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
+import React, { useMemo } from "react";
+import {
+  useLeaderboardLeadingItemCount,
+  WaveLeaderboardVirtualizedRows,
+} from "../WaveLeaderboardVirtualizedRows";
+import {
+  useWaveLeaderboardVotingModal,
+  WaveLeaderboardVotingModal,
+} from "../WaveLeaderboardVotingModal";
 import { WaveLeaderboardGridItem } from "./WaveLeaderboardGridItem";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 export type WaveLeaderboardGridMode = "compact" | "content_only";
 
@@ -20,7 +33,10 @@ interface WaveLeaderboardGridProps {
   readonly minPrice?: number | undefined;
   readonly maxPrice?: number | undefined;
   readonly priceCurrency?: string | undefined;
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 }
+
+const getDropId = (drop: ExtendedDrop): string => drop.id;
 
 export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
   wave,
@@ -32,6 +48,7 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
   minPrice,
   maxPrice,
   priceCurrency,
+  scrollContainerRef,
 }) => {
   const winningThreshold =
     wave.wave.type === ApiWaveType.Approve ? wave.wave.winning_threshold : null;
@@ -39,14 +56,40 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
     wave.wave.type === ApiWaveType.Approve
       ? wave.wave.winning_threshold_min_duration_ms
       : null;
-  const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-    useWaveDropsLeaderboard({
-      waveId: wave.id,
-      sort,
-      minPrice,
-      maxPrice,
-      priceCurrency,
-    });
+  const isProposalCard =
+    useWaveProposalCardPresentation(wave.id) === "proposalCard";
+  const {
+    drops,
+    pageMetadata,
+    queryWindowKey,
+    fetchNextPage,
+    fetchPreviousPage,
+    hasNextPage,
+    hasPreviousPage,
+    isFetching,
+    isFetchingNextPage,
+    isFetchingPreviousPage,
+    isFetchNextPageError,
+    isFetchPreviousPageError,
+  } = useWaveDropsLeaderboard({
+    waveId: wave.id,
+    sort,
+    maxPages: WAVE_DROPS_LEADERBOARD_MAX_PAGES,
+    minPrice,
+    maxPrice,
+    priceCurrency,
+  });
+  const visibleDropIds = useMemo(
+    () => new Set(drops.map((drop) => drop.id)),
+    [drops]
+  );
+  const leadingItemCount = useLeaderboardLeadingItemCount({
+    pageMetadata,
+    visibleItemIds: visibleDropIds,
+    windowKey: queryWindowKey,
+  });
+  const { votingDrop, openVotingModal, closeVotingModal } =
+    useWaveLeaderboardVotingModal(drops, scrollContainerRef);
 
   if (isFetching && drops.length === 0) {
     return (
@@ -83,33 +126,42 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
   }
 
   return (
-    <div className="tw-@container">
-      <div className="tw-grid tw-gap-4 @lg:tw-grid-cols-2 @3xl:tw-grid-cols-3">
-        {drops.map((drop) => (
-          <WaveLeaderboardGridItem
-            key={drop.id}
-            drop={drop}
-            mode={mode}
-            isVotingClosed={isVotingClosed}
-            isVotingControlsLocked={isVotingControlsLocked}
-            winningThreshold={winningThreshold}
-            winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-            onDropClick={onDropClick}
-          />
-        ))}
-
-        {hasNextPage && (
-          <div className="tw-col-span-full tw-mb-2 tw-mt-4 tw-flex tw-justify-center">
-            <button
-              onClick={() => fetchNextPage()}
-              disabled={isFetchingNextPage}
-              className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-400 tw-transition desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300"
-            >
-              {isFetchingNextPage ? "Loading more..." : "Load more drops"}
-            </button>
-          </div>
+    <>
+      <WaveLeaderboardVirtualizedRows
+        items={drops}
+        getItemId={getDropId}
+        leadingItemCount={leadingItemCount}
+        windowKey={queryWindowKey}
+        layout="grid"
+        scrollContainerRef={scrollContainerRef}
+        fetchNextPage={fetchNextPage}
+        fetchPreviousPage={fetchPreviousPage}
+        hasNextPage={hasNextPage}
+        hasPreviousPage={hasPreviousPage}
+        isFetchingNextPage={isFetchingNextPage}
+        isFetchingPreviousPage={isFetchingPreviousPage}
+        isFetchNextPageError={isFetchNextPageError}
+        isFetchPreviousPageError={isFetchPreviousPageError}
+        renderItem={(drop) => (
+          <ContentModerationDropGate drop={drop} compact>
+            <WaveLeaderboardGridItem
+              drop={drop}
+              mode={mode}
+              isVotingClosed={isVotingClosed}
+              isVotingControlsLocked={isVotingControlsLocked}
+              winningThreshold={winningThreshold}
+              winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+              emphasizeCurrent={isProposalCard}
+              onDropClick={onDropClick}
+              onVoteClick={openVotingModal}
+            />
+          </ContentModerationDropGate>
         )}
-      </div>
-    </div>
+      />
+      <WaveLeaderboardVotingModal
+        drop={votingDrop}
+        onClose={closeVotingModal}
+      />
+    </>
   );
 };

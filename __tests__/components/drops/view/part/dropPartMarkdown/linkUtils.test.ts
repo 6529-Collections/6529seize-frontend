@@ -1,4 +1,7 @@
-import { shouldUseOpenGraphPreview } from "@/components/drops/view/part/dropPartMarkdown/linkUtils";
+import {
+  isDirectImageUrl,
+  shouldUseOpenGraphPreview,
+} from "@/components/drops/view/part/dropPartMarkdown/linkUtils";
 
 jest.mock("@/lib/ens/detect", () => ({
   isLikelyEnsTarget: jest.fn(() => false),
@@ -52,6 +55,33 @@ describe("shouldUseOpenGraphPreview", () => {
   it("does not fall through to generic previews for unsupported YouTube URLs", () => {
     expect(
       shouldUseOpenGraphPreview("https://www.youtube.com/channel/UC123456789")
+    ).toBe(false);
+  });
+});
+
+describe("isDirectImageUrl", () => {
+  it("does not treat GitHub blob image pages as direct image files", () => {
+    expect(
+      isDirectImageUrl(
+        "https://github.com/david-6529/self-custody-education/blob/main/output/craig-self-custody-comic/pages/page-01.png"
+      )
+    ).toBe(false);
+  });
+
+  it("still treats raw GitHub image URLs as direct image files", () => {
+    expect(
+      isDirectImageUrl(
+        "https://raw.githubusercontent.com/david-6529/self-custody-education/main/output/craig-self-custody-comic/pages/page-01.png"
+      )
+    ).toBe(true);
+  });
+
+  it("does not treat Wikimedia Commons file pages as direct images", () => {
+    expect(
+      isDirectImageUrl("https://commons.wikimedia.org/wiki/File:Example.jpg")
+    ).toBe(false);
+    expect(
+      isDirectImageUrl("https://commons.wikimedia.org/wiki/File%3AExample.jpg")
     ).toBe(false);
   });
 });

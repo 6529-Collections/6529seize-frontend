@@ -16,6 +16,7 @@ export interface HeaderWaveDropAction {
   readonly label: string;
   readonly compactLabel: string;
   readonly restrictionMessage: string | null;
+  readonly restrictionKind?: "memes-nomination" | undefined;
   readonly onOpen: () => void;
 }
 
@@ -73,3 +74,6 @@ export const useHeaderContext = (): HeaderContextType => {
   }
   return context;
 };
+
+export const useOptionalHeaderContext = (): HeaderContextType | undefined =>
+  useContext(HeaderContext);

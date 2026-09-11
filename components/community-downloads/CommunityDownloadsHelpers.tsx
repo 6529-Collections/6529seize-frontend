@@ -1,10 +1,21 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Fragment } from "react";
+import { ABOUT_PAGE_HORIZONTAL_PADDING_CLASS_NAME } from "@/components/about/AboutLayout";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
-import styles from "./CommunityDownloads.module.css";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import {
+  DATA_TABLE_HEADER_TEXT_CLASS_NAME,
+  DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME,
+} from "@/components/utils/table/tableStyles";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+
+export const DOWNLOADS_TABLE_ROW_CLASS_NAME = `tw-group ${DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME}`;
+
+export const DOWNLOADS_TABLE_CELL_CLASS_NAME =
+  "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-align-middle tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-100 md:tw-px-4 md:tw-py-3 md:tw-text-sm";
+
+const DOWNLOADS_TABLE_HEADER_CELL_CLASS_NAME = `tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-left tw-align-middle tw-font-semibold tw-text-iron-400 md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`;
 
 export function formatDate(dateString: string): string {
   const isYYYYMMDDFormat = (str: string): boolean => /^\d{8}$/.test(str);
@@ -27,9 +38,15 @@ export function DownloadsLayout({
   readonly title: string;
   readonly children: ReactNode;
 }) {
+  const locale = useBrowserLocale();
+
   return (
-    <section className="[min-width:1200px]:tw-max-w-[1050px] [min-width:1300px]:tw-max-w-[1150px] [min-width:1400px]:tw-max-w-[1250px] [min-width:1500px]:tw-max-w-[1280px] tw-mx-auto tw-w-full tw-px-3 tw-pt-4 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px]">
-      <h1>{title} Downloads</h1>
+    <section
+      className={`tailwind-scope tw-container tw-mx-auto tw-w-full tw-pb-4 tw-pt-6 sm:tw-pt-8 ${ABOUT_PAGE_HORIZONTAL_PADDING_CLASS_NAME}`}
+    >
+      <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+        {t(locale, "openData.downloads.pageTitle", { title })}
+      </h1>
       {children}
     </section>
   );
@@ -53,22 +70,22 @@ export function DownloadsTable<T>({
   }
 
   return (
-    <div className={`tw-pt-3 ${styles["downloadsScrollContainer"] ?? ""}`}>
-      <table className={`tw-w-full ${styles["downloadsTable"] ?? ""}`}>
+    <div className="tw-mt-2 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-600 lg:tw-mt-3">
+      <table className="tw-mb-4 tw-min-w-full tw-border-collapse">
         <thead>
           <tr>
             {columns.map((col) => (
-              <th key={col}>{col}</th>
+              <th
+                className={DOWNLOADS_TABLE_HEADER_CELL_CLASS_NAME}
+                key={col}
+                scope="col"
+              >
+                {col}
+              </th>
             ))}
           </tr>
         </thead>
-        <tbody>
-          {data.map((item, idx) => (
-            <Fragment key={getRandomObjectId()}>
-              {renderRow(item, idx)}
-            </Fragment>
-          ))}
-        </tbody>
+        <tbody>{data.map((item, index) => renderRow(item, index))}</tbody>
       </table>
     </div>
   );

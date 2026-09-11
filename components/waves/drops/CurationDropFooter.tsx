@@ -29,11 +29,16 @@ export default function CurationDropFooter({
       data-text-selection-exclude="true"
     >
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-        {hasVisibleReactions && (
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-            <WaveDropReactions drop={drop} />
-          </div>
-        )}
+        <div
+          hidden={!hasVisibleReactions}
+          className={
+            hasVisibleReactions
+              ? "tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1"
+              : undefined
+          }
+        >
+          <WaveDropReactions drop={drop} />
+        </div>
         <div className="tw-mt-1 tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-dashed tw-border-iron-700/80 tw-bg-iron-900/20 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-900/40">
           <WaveDropActionsAddReaction
             drop={drop}
@@ -42,7 +47,7 @@ export default function CurationDropFooter({
           />
         </div>
       </div>
-      <div className="tw-ml-2 tw-mt-1 tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-500 desktop-hover:hover:tw-text-iron-300">
+      <div className="-tw-mr-px tw-ml-2 tw-mt-1 tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center">
         <WaveDropActionsCopyLink drop={drop} size="compact" />
       </div>
     </div>

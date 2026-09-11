@@ -6,16 +6,16 @@ import {
   CheckIcon,
   ChevronDoubleLeftIcon,
   ChevronDownIcon,
-  EllipsisHorizontalIcon,
   LinkIcon,
   MagnifyingGlassIcon,
   ShareIcon,
 } from "@heroicons/react/24/outline";
-import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
+import type { CompactMenuItem } from "@/components/compact-menu";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import type { SetActiveContentTab } from "@/components/brain/ContentTabContext";
+import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
@@ -31,9 +31,14 @@ import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
 import MyStreamActionTooltip from "../MyStreamActionTooltip";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
 import WaveRepButton from "@/components/waves/header/rep/WaveRepButton";
+import WaveParentNavigation from "@/components/waves/header/WaveParentNavigation";
+import CompactWaveActions from "./CompactWaveActions";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import { BRAIN_RIGHT_SIDEBAR_ID } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 
 const TRUNCATION_EPSILON_PX = 1;
 const WAVE_SCORE_LEARN_MORE_HREF = "/network/wave-score";
+type OpenSearch = "site" | "wave" | null;
 
 export interface MyStreamWaveTabsHeaderActionContext {
   readonly activeContentTab: MyStreamWaveTab;
@@ -51,7 +56,6 @@ interface MyStreamWaveTabsHeaderProps {
   readonly headerActionsTooltipId: string;
   readonly headerClassName: string;
   readonly actionsClassName: string;
-  readonly rightSidebarButtonBackgroundClassName?: string | undefined;
   readonly renderLeadingActions?:
     | ((context: MyStreamWaveTabsHeaderActionContext) => React.ReactNode)
     | undefined;
@@ -134,8 +138,8 @@ function MyStreamWaveHeaderIdentity({
   waveScoreLearnMoreHref,
   showWaveRepAction,
 }: MyStreamWaveHeaderIdentityProps) {
-  const scoreActions = (
-    <span className="-tw-ml-1.5 tw-mt-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-1.5">
+  const scoreActions = !isCompact ? (
+    <span className="tw-mt-1.5 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-1.5 tw-self-start">
       <WaveTrustSignals
         waveRep={wave.wave_rep}
         waveScore={wave.wave_score}
@@ -143,11 +147,9 @@ function MyStreamWaveHeaderIdentity({
         mode="summary"
         learnMoreHref={waveScoreLearnMoreHref}
       />
-      {showWaveRepAction && !isCompact && (
-        <WaveRepButton wave={wave} variant="compact" />
-      )}
+      {showWaveRepAction && <WaveRepButton wave={wave} variant="compact" />}
     </span>
-  );
+  ) : null;
 
   if (directMessageProfileHref) {
     return (
@@ -172,7 +174,7 @@ function MyStreamWaveHeaderIdentity({
 
   return (
     <>
-      <div className="tw-size-9 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950">
+      <div className="tw-size-9 tw-flex-shrink-0 tw-self-start tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950">
         <WavePicture
           name={wave.name}
           picture={wave.picture}
@@ -180,6 +182,10 @@ function MyStreamWaveHeaderIdentity({
         />
       </div>
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
+        <WaveParentNavigation
+          parentWave={wave.parent_wave}
+          variant={isCompact ? "compact-header" : "header"}
+        />
         {showDescriptionPreview ? (
           <>
             <WaveDescriptionPopover
@@ -222,10 +228,7 @@ function MyStreamWaveHeaderIdentity({
                 </>
               )}
             </WaveDescriptionPopover>
-            {!isCompact && (
-              <span className="tw-self-start">{scoreActions}</span>
-            )}
-            {isCompact && scoreActions}
+            {scoreActions}
           </>
         ) : (
           <>
@@ -250,7 +253,6 @@ export default function MyStreamWaveTabsHeader({
   headerActionsTooltipId,
   headerClassName,
   actionsClassName,
-  rightSidebarButtonBackgroundClassName = "tw-bg-iron-800",
   renderLeadingActions,
   renderOverflowMenuItems,
 }: MyStreamWaveTabsHeaderProps) {
@@ -264,7 +266,7 @@ export default function MyStreamWaveTabsHeader({
   });
   const { isApp } = useDeviceInfo();
   const { connectedProfile, activeProfileProxy } = useAuth();
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [openSearch, setOpenSearch] = useState<OpenSearch>(null);
   const descriptionPreviewRef = useRef<HTMLSpanElement>(null);
   const [isDescriptionPreviewTruncated, setIsDescriptionPreviewTruncated] =
     useState(false);
@@ -336,11 +338,11 @@ export default function MyStreamWaveTabsHeader({
       : "tw-text-emerald-300";
   const searchMessagesLabel = "Search messages in this wave";
   const rightSidebarActionLabel = isRightSidebarOpen
-    ? "Hide right sidebar"
-    : "Show right sidebar";
+    ? waveRightPanelText("waves.sidebar.rightPanel.controls.hide")
+    : waveRightPanelText("waves.sidebar.rightPanel.controls.show");
   const rightSidebarCompactLabel = isRightSidebarOpen
-    ? "Hide details"
-    : "Wave details";
+    ? waveRightPanelText("waves.sidebar.rightPanel.controls.hideDetails")
+    : waveRightPanelText("waves.sidebar.rightPanel.controls.openDetails");
   const renderWaveLinkActionIcon = () => {
     if (waveLinkActionFeedbackState !== "idle") {
       return <CheckIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />;
@@ -372,19 +374,6 @@ export default function MyStreamWaveTabsHeader({
               },
             ]
           : []),
-        {
-          id: "wave-details",
-          label: rightSidebarCompactLabel,
-          icon: (
-            <ChevronDoubleLeftIcon
-              strokeWidth={2}
-              className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition ${
-                isRightSidebarOpen ? "tw-rotate-180" : "tw-rotate-0"
-              }`}
-            />
-          ),
-          onSelect: toggleRightSidebar,
-        },
       ]
     : [];
   const compactMenuItems = [
@@ -445,7 +434,7 @@ export default function MyStreamWaveTabsHeader({
             <button
               type="button"
               onClick={handleMobileBack}
-              className="tw-flex tw-h-full tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-px-1.5 tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50 sm:-tw-ml-2.5 sm:tw-px-2.5"
+              className="tw-flex tw-h-9 tw-items-center tw-self-start tw-border-0 tw-bg-transparent tw-p-0 tw-px-1.5 tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50 sm:-tw-ml-2.5 sm:tw-px-2.5"
               aria-label="Go back"
             >
               <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 sm:tw-h-6 sm:tw-w-6" />
@@ -474,64 +463,64 @@ export default function MyStreamWaveTabsHeader({
               data-tooltip-id={headerActionsTooltipId}
               data-tooltip-content={waveLinkActionLabel}
               data-wave-link-action-mode={waveLinkActionMode}
-              className={`tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white ${waveLinkActionIconColor}`}
+              className={`tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-transition-colors tw-duration-150 hover:tw-border-white/10 hover:tw-bg-white/[0.08] hover:tw-text-white ${waveLinkActionIconColor}`}
             >
               {renderWaveLinkActionIcon()}
             </button>
           )}
+          {isCompact && compactMenuItems.length > 0 && (
+            <CompactWaveActions items={compactMenuItems} />
+          )}
           <button
             type="button"
-            onClick={() => setIsSearchOpen(true)}
+            onClick={() => setOpenSearch("wave")}
             aria-label={searchMessagesLabel}
             data-tooltip-id={headerActionsTooltipId}
             data-tooltip-content={searchMessagesLabel}
-            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
+            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-text-iron-200 tw-transition-colors tw-duration-150 hover:tw-border-white/10 hover:tw-bg-white/[0.08] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
             <MagnifyingGlassIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
           </button>
-          {!isCompact && (
-            <button
-              type="button"
-              onClick={toggleRightSidebar}
-              data-tooltip-id={headerActionsTooltipId}
-              data-tooltip-content={rightSidebarActionLabel}
-              className={`tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 ${rightSidebarButtonBackgroundClassName} tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-500/80 desktop-hover:hover:tw-bg-iron-700/85 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]`}
-              aria-label={rightSidebarActionLabel}
-            >
-              <ChevronDoubleLeftIcon
-                strokeWidth={2}
-                className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-300 ${
-                  isRightSidebarOpen
-                    ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"
-                    : "tw-rotate-0 desktop-hover:group-hover:-tw-translate-x-0.5"
-                }`}
-              />
-            </button>
-          )}
-          {isCompact && compactMenuItems.length > 0 && (
-            <CompactMenu
-              aria-label="More wave actions"
-              unstyledTrigger
-              triggerClassName="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
-              trigger={
-                <>
-                  <span className="tw-sr-only">More wave actions</span>
-                  <EllipsisHorizontalIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                </>
-              }
-              items={compactMenuItems}
-              menuWidthClassName="tw-w-52"
+          <button
+            type="button"
+            onClick={toggleRightSidebar}
+            data-tooltip-id={headerActionsTooltipId}
+            data-tooltip-content={
+              isCompact ? rightSidebarCompactLabel : rightSidebarActionLabel
+            }
+            className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-white/[0.08]"
+            aria-label={
+              isCompact ? rightSidebarCompactLabel : rightSidebarActionLabel
+            }
+            aria-controls={
+              isRightSidebarOpen ? BRAIN_RIGHT_SIDEBAR_ID : undefined
+            }
+            aria-expanded={isRightSidebarOpen}
+            aria-pressed={isRightSidebarOpen}
+          >
+            <ChevronDoubleLeftIcon
+              strokeWidth={2}
+              aria-hidden="true"
+              className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-300 ${
+                isRightSidebarOpen
+                  ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"
+                  : "tw-rotate-0 desktop-hover:group-hover:-tw-translate-x-0.5"
+              }`}
             />
-          )}
+          </button>
         </div>
       </div>
       <MyStreamActionTooltip id={headerActionsTooltipId} />
       <WaveDropsSearchModal
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
+        isOpen={openSearch === "wave"}
+        onClose={() => setOpenSearch(null)}
         wave={wave}
         onSelectSerialNo={handleSearchSelect}
+        onSearchAll={() => setOpenSearch("site")}
       />
+      {openSearch === "site" && (
+        <HeaderSearchModal onClose={() => setOpenSearch(null)} wave={null} />
+      )}
     </>
   );
 }

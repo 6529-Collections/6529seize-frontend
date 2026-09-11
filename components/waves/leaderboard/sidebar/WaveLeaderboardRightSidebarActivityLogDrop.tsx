@@ -1,6 +1,7 @@
 "use client";
 
 import type { FC } from "react";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 type WaveLeaderboardRightSidebarActivityLogDropProps = {
   readonly onDropClick: () => void;
@@ -9,15 +10,20 @@ type WaveLeaderboardRightSidebarActivityLogDropProps = {
 export const WaveLeaderboardRightSidebarActivityLogDrop: FC<
   WaveLeaderboardRightSidebarActivityLogDropProps
 > = ({ onDropClick }) => {
+  const openDropLabel = waveRightPanelText(
+    "waves.sidebar.rightPanel.activity.openDropAriaLabel"
+  );
   const handleClick = () => {
     onDropClick();
   };
 
   return (
     <button
+      type="button"
       onClick={handleClick}
-      title="View drop in chat"
-      className="tw-flex tw-items-center tw-gap-1.5 tw-border-none tw-bg-transparent tw-text-iron-400 tw-transition-colors tw-duration-200 hover:tw-text-iron-300"
+      title={openDropLabel}
+      aria-label={openDropLabel}
+      className="tw-flex tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-none tw-bg-transparent tw-p-1 tw-text-iron-400 tw-transition-colors tw-duration-200 hover:tw-text-iron-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
     >
       <svg
         className="tw-size-4"

@@ -1,0 +1,662 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0x33b9e0f0",
+          "declaringDefinitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuctionDropMintsCustodyToAuctionContractAndRecordsAuctionState",
+          "outputs": [],
+          "selector": "0x33b9e0f0",
+          "signature": "testAuctionDropMintsCustodyToAuctionContractAndRecordsAuctionState()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0x8d6719f6",
+          "declaringDefinitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuctionDropRejectsNonZeroRecipient",
+          "outputs": [],
+          "selector": "0x8d6719f6",
+          "signature": "testAuctionDropRejectsNonZeroRecipient()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0xf42941ae",
+          "declaringDefinitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testContractExecutorCanMintFixedPriceDropToExplicitRecipient",
+          "outputs": [],
+          "selector": "0xf42941ae",
+          "signature": "testContractExecutorCanMintFixedPriceDropToExplicitRecipient()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0xfb929b5f",
+          "declaringDefinitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFixedPriceDropCreditsProceedsAndMintsToExplicitRecipient",
+          "outputs": [],
+          "selector": "0xfb929b5f",
+          "signature": "testFixedPriceDropCreditsProceedsAndMintsToExplicitRecipient()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0x1875f32a",
+          "declaringDefinitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFixedPriceDropSucceedsWhenCuratorsPoolRejectsETH",
+          "outputs": [],
+          "selector": "0x1875f32a",
+          "signature": "testFixedPriceDropSucceedsWhenCuratorsPoolRejectsETH()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0xe7a9c637",
+          "declaringDefinitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFixedPriceDropSucceedsWhenPayoutAddressRejectsETH",
+          "outputs": [],
+          "selector": "0xe7a9c637",
+          "signature": "testFixedPriceDropSucceedsWhenPayoutAddressRejectsETH()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0xdcc792cc",
+          "declaringDefinitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFixedPriceDropSucceedsWhenPosterRejectsETH",
+          "outputs": [],
+          "selector": "0xdcc792cc",
+          "signature": "testFixedPriceDropSucceedsWhenPosterRejectsETH()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0xe44f9399",
+          "declaringDefinitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testNoBidAuctionSettlementTransfersToPoster",
+          "outputs": [],
+          "selector": "0xe44f9399",
+          "signature": "testNoBidAuctionSettlementTransfersToPoster()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0x565c9cd2",
+          "declaringDefinitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPendingMetadataCurrentlyUsesPendingSuffixWhenRandomizerDoesNothing",
+          "outputs": [],
+          "selector": "0x565c9cd2",
+          "signature": "testPendingMetadataCurrentlyUsesPendingSuffixWhenRandomizerDoesNothing()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0x85330c36",
+          "declaringDefinitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSetTokenHashCurrentlyAllowsConfiguredRandomizerOnlyAndOnlyOnce",
+          "outputs": [],
+          "selector": "0x85330c36",
+          "signature": "testSetTokenHashCurrentlyAllowsConfiguredRandomizerOnlyAndOnlyOnce()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testFixedPriceDropCreditsProceedsAndMintsToExplicitRecipient()",
+          "displaySignature": "testFixedPriceDropCreditsProceedsAndMintsToExplicitRecipient()",
+          "functionKind": "function",
+          "id": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0xfb929b5f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvbi50LnNvbDpTdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvblRlc3QjZnVuY3Rpb246MHhmYjkyOWI1Zg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFixedPriceDropCreditsProceedsAndMintsToExplicitRecipient",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2137,
+            "byteStart": 798,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L23-L62",
+            "lineEnd": 62,
+            "lineStart": 23,
+            "snippetSha256": "sha256:6f269c47bacc24ffcdebfdefd7fe975168435d525554b8c4bcadef77bed8eb05",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "selector": "0xfb929b5f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFixedPriceDropSucceedsWhenPosterRejectsETH()",
+          "displaySignature": "testFixedPriceDropSucceedsWhenPosterRejectsETH()",
+          "functionKind": "function",
+          "id": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0xdcc792cc",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvbi50LnNvbDpTdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvblRlc3QjZnVuY3Rpb246MHhkY2M3OTJjYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFixedPriceDropSucceedsWhenPosterRejectsETH",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1194,
+            "byteStart": 2941,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L64-L93",
+            "lineEnd": 93,
+            "lineStart": 64,
+            "snippetSha256": "sha256:2c06796d44134522b2cf959a3f8d30011ea932b8d363021f2b3bc82e6b13a272",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "selector": "0xdcc792cc",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFixedPriceDropSucceedsWhenPayoutAddressRejectsETH()",
+          "displaySignature": "testFixedPriceDropSucceedsWhenPayoutAddressRejectsETH()",
+          "functionKind": "function",
+          "id": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0xe7a9c637",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvbi50LnNvbDpTdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvblRlc3QjZnVuY3Rpb246MHhlN2E5YzYzNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFixedPriceDropSucceedsWhenPayoutAddressRejectsETH",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1211,
+            "byteStart": 4141,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L95-L124",
+            "lineEnd": 124,
+            "lineStart": 95,
+            "snippetSha256": "sha256:fcc530675486a40408729575a8c5b4cc6d183326650e0753db114270ec97d8f2",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "selector": "0xe7a9c637",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFixedPriceDropSucceedsWhenCuratorsPoolRejectsETH()",
+          "displaySignature": "testFixedPriceDropSucceedsWhenCuratorsPoolRejectsETH()",
+          "functionKind": "function",
+          "id": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0x1875f32a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvbi50LnNvbDpTdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvblRlc3QjZnVuY3Rpb246MHgxODc1ZjMyYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFixedPriceDropSucceedsWhenCuratorsPoolRejectsETH",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1236,
+            "byteStart": 5358,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L126-L155",
+            "lineEnd": 155,
+            "lineStart": 126,
+            "snippetSha256": "sha256:b652b4dba192f3650ed5633db0727a6189dbd49d65eed2c7652de8fc13a83590",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "selector": "0x1875f32a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuctionDropMintsCustodyToAuctionContractAndRecordsAuctionState()",
+          "displaySignature": "testAuctionDropMintsCustodyToAuctionContractAndRecordsAuctionState()",
+          "functionKind": "function",
+          "id": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0x33b9e0f0",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvbi50LnNvbDpTdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvblRlc3QjZnVuY3Rpb246MHgzM2I5ZTBmMA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuctionDropMintsCustodyToAuctionContractAndRecordsAuctionState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2123,
+            "byteStart": 6600,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L157-L201",
+            "lineEnd": 201,
+            "lineStart": 157,
+            "snippetSha256": "sha256:073b37c7a1cf3350d3a50e4ddb304542c60b0a7dee2cbf5d9cb623a1afd6870b",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "selector": "0x33b9e0f0",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuctionDropRejectsNonZeroRecipient()",
+          "displaySignature": "testAuctionDropRejectsNonZeroRecipient()",
+          "functionKind": "function",
+          "id": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0x8d6719f6",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvbi50LnNvbDpTdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvblRlc3QjZnVuY3Rpb246MHg4ZDY3MTlmNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuctionDropRejectsNonZeroRecipient",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1053,
+            "byteStart": 8729,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L203-L230",
+            "lineEnd": 230,
+            "lineStart": 203,
+            "snippetSha256": "sha256:628beff3bfb61d0fa6ff082c7c3ebaa3f3e03a578517c0b9eadfdd41a2c083e6",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "selector": "0x8d6719f6",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testNoBidAuctionSettlementTransfersToPoster()",
+          "displaySignature": "testNoBidAuctionSettlementTransfersToPoster()",
+          "functionKind": "function",
+          "id": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0xe44f9399",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvbi50LnNvbDpTdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvblRlc3QjZnVuY3Rpb246MHhlNDRmOTM5OQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testNoBidAuctionSettlementTransfersToPoster",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1544,
+            "byteStart": 9788,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L232-L271",
+            "lineEnd": 271,
+            "lineStart": 232,
+            "snippetSha256": "sha256:6747c8551257cf9b968367555fe8a635e3e1c5b237cde21b0228f481dbc5fb49",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "selector": "0xe44f9399",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testContractExecutorCanMintFixedPriceDropToExplicitRecipient()",
+          "displaySignature": "testContractExecutorCanMintFixedPriceDropToExplicitRecipient()",
+          "functionKind": "function",
+          "id": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0xf42941ae",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvbi50LnNvbDpTdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvblRlc3QjZnVuY3Rpb246MHhmNDI5NDFhZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testContractExecutorCanMintFixedPriceDropToExplicitRecipient",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1094,
+            "byteStart": 11338,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L273-L298",
+            "lineEnd": 298,
+            "lineStart": 273,
+            "snippetSha256": "sha256:f5e33ada1efd8b09252140fad90d33fe240579b3066974fb0613fcef744c8072",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "selector": "0xf42941ae",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPendingMetadataCurrentlyUsesPendingSuffixWhenRandomizerDoesNothing()",
+          "displaySignature": "testPendingMetadataCurrentlyUsesPendingSuffixWhenRandomizerDoesNothing()",
+          "functionKind": "function",
+          "id": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0x565c9cd2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvbi50LnNvbDpTdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvblRlc3QjZnVuY3Rpb246MHg1NjVjOWNkMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPendingMetadataCurrentlyUsesPendingSuffixWhenRandomizerDoesNothing",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1025,
+            "byteStart": 12438,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L300-L324",
+            "lineEnd": 324,
+            "lineStart": 300,
+            "snippetSha256": "sha256:d86e1766cd76f8b399b84c7ca76dea564e1677eecd087f06ced16f9a5e4af128",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "selector": "0x565c9cd2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSetTokenHashCurrentlyAllowsConfiguredRandomizerOnlyAndOnlyOnce()",
+          "displaySignature": "testSetTokenHashCurrentlyAllowsConfiguredRandomizerOnlyAndOnlyOnce()",
+          "functionKind": "function",
+          "id": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0x85330c36",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvbi50LnNvbDpTdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvblRlc3QjZnVuY3Rpb246MHg4NTMzMGMzNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSetTokenHashCurrentlyAllowsConfiguredRandomizerOnlyAndOnlyOnce",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2142,
+            "byteStart": 13469,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L326-L375",
+            "lineEnd": 375,
+            "lineStart": 326,
+            "snippetSha256": "sha256:d51b98fbc2346e7398f4e536cb3373706faa9beb7c6c9bbae556ea31e75d374f",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "selector": "0x85330c36",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "POSTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 567,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:695a59e12d896c6e13bf8a41a7b87f2dbedaa0e769d3f48d88cfb58046e19145",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 601,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:0ab9e750f7c6ea7ca35cb67c84e1deac4cd43cc2a6a45b284817308c28bdf2a2",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "valueSource": "address(0x1001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 622,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:3e651fdfebdcfe0dd0fdc57a7c7e95dcc88555bb618ed67eaaae88bb2f03bb11",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 659,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:1e80055498f115d09b966c83a4320475410b3488cc2e25d7bd51229b835b3e62",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "valueSource": "address(0x5005)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYOUT",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 680,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:6de2ca19a7b0e6342b9c731f9156dbb66238022542868c0f1d32ade32ca072b7",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 714,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:f459905761015e37605475907d05df689f55b238aec15260d4f0510e5e363c1f",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "valueSource": "address(0x2002)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CURATORS_POOL",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 735,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:c7bb6fdd9819faf3c363c0c7247b0cfebcb63e2077a5c446bc0035b0e17c4018",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 776,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:59382625991cd4bee04dd9942857caa65309d0e0d4b1f91c186b3b9845797e29",
+            "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+          },
+          "valueSource": "address(0x3003)",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+        "name": "DropAuthTestHelper"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvbi50LnNvbDpTdHJlYW1Ecm9wc0ludGVncmF0aW9uQ2hhcmFjdGVyaXphdGlvblRlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamDropsIntegrationCharacterizationTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 15308,
+      "byteStart": 305,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsIntegrationCharacterization.t.sol#L11-L376",
+      "lineEnd": 376,
+      "lineStart": 11,
+      "snippetSha256": "sha256:f560b3eb498ea7578371c8d47385ba2db4037de5e62bd1aa6a7d2ab59c0990db",
+      "sourceSha256": "sha256:1b54ce6d5c9836b1d0bc53d7d62b3c5a5da5c9ac14b2cb6d73d3badc251126d2"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamDropsIntegrationCharacterization.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 11
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 10
+    },
+    "totalCount": 11
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0x1875f32a",
+      "definitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0x33b9e0f0",
+      "definitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0x565c9cd2",
+      "definitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0x85330c36",
+      "definitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0x8d6719f6",
+      "definitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0xdcc792cc",
+      "definitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0xe44f9399",
+      "definitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0xe7a9c637",
+      "definitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0xf42941ae",
+      "definitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest#function:0xfb929b5f",
+      "definitionId": "test/StreamDropsIntegrationCharacterization.t.sol:StreamDropsIntegrationCharacterizationTest",
+      "severity": "advisory"
+    }
+  ]
+}

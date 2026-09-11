@@ -3,6 +3,7 @@
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
+import Button from "@/components/utils/button/Button";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
@@ -10,6 +11,8 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { preserveAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { voteDropPollV2 } from "@/services/api/wave-drops-v2-api";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -77,25 +80,28 @@ const getScopedPollInteractionState = (
 
 const getEffectivePollView = ({
   canRespond,
-  canShowResults,
   isOpen,
   scopedView,
 }: {
   readonly canRespond: boolean;
-  readonly canShowResults: boolean;
   readonly isOpen: boolean;
   readonly scopedView: PollView;
 }): PollView => {
-  if (!canRespond) {
-    return "results";
-  }
-
-  if (canShowResults && (!isOpen || scopedView === "results")) {
+  if (!canRespond || !isOpen || scopedView === "results") {
     return "results";
   }
 
   return "vote";
 };
+
+const getCanRespondToPoll = ({
+  isViewerChatEligible,
+  poll,
+}: {
+  readonly isViewerChatEligible: boolean;
+  readonly poll: ApiDropPoll | null | undefined;
+}): boolean =>
+  poll?.only_droppers_can_respond === true ? isViewerChatEligible : true;
 
 const stopPollEventPropagation = (event: SyntheticEvent) => {
   event.stopPropagation();
@@ -166,6 +172,7 @@ const useUpdatedVoteStatus = () => {
 };
 
 export default function WaveDropPoll({ drop }: WaveDropPollProps) {
+  const locale = useBrowserLocale();
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useAuth();
   const { getEligibility } = useWaveEligibility();
@@ -183,8 +190,10 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const isViewerChatEligible =
     waveEligibility?.authenticated_user_eligible_to_chat ??
     drop.wave.authenticated_user_eligible_to_chat;
-  const canRespondToPoll =
-    poll?.only_droppers_can_respond === true ? isViewerChatEligible : true;
+  const canRespondToPoll = getCanRespondToPoll({
+    isViewerChatEligible,
+    poll,
+  });
 
   const voteMutation = useMutation({
     mutationFn: async (options: readonly number[]) =>
@@ -204,7 +213,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         });
       }
       updateDropInCachedDrops(queryClient, updatedDrop);
-      myStream?.processIncomingDrop(
+      void myStream?.processIncomingDrop(
         updatedDrop,
         ProcessIncomingDropType.DROP_INSERT
       );
@@ -373,11 +382,29 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       return {
         ...scopedState,
         view: "vote",
-        selectedOptionNos: [...poll.voted],
+        selectedOptionNos:
+          poll.voted.length > 0
+            ? [...poll.voted]
+            : scopedState.selectedOptionNos,
         expandedOptionNo: null,
       };
     });
   }, [canRespondToPoll, poll]);
+
+  const showResultsView = useCallback(() => {
+    if (!poll) {
+      return;
+    }
+
+    setInteractionState((current) => {
+      const scopedState = getScopedPollInteractionState(current, poll);
+      return {
+        ...scopedState,
+        view: "results",
+        expandedOptionNo: null,
+      };
+    });
+  }, [poll]);
 
   const cancelVoteChange = useCallback(() => {
     if (!poll) {
@@ -407,10 +434,8 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   }, 0);
   const votedOptionNos = new Set(poll.voted);
   const showSelectionIndicator = votedOptionNos.size > 0;
-  const canShowResults = !poll.is_open || hasVoted || !canRespondToPoll;
   const effectiveView = getEffectivePollView({
     canRespond: canRespondToPoll,
-    canShowResults,
     isOpen: poll.is_open,
     scopedView: scopedState.view,
   });
@@ -420,12 +445,19 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
     isPending: voteMutation.isPending,
     hasVoted,
   });
-  const showResultsFooterActions =
-    effectiveView === "results" && hasVoted && canRespondToPoll;
-  const showFooterAction = poll.is_open && showResultsFooterActions;
+  const showResultsFooterAction =
+    effectiveView === "results" && poll.is_open && canRespondToPoll;
+  const showVoteResultsFooterAction =
+    effectiveView === "vote" && poll.is_open && canRespondToPoll && !hasVoted;
   const isChangingVote = effectiveView === "vote" && hasVoted;
   const showVoteEditFooterAction =
     effectiveView === "vote" && poll.is_open && isChangingVote;
+  const resultsFooterActionLabel = hasVoted
+    ? t(locale, "waves.poll.actions.changeVote")
+    : t(locale, "waves.poll.actions.vote");
+  const voteStatusLabel = showUpdated
+    ? t(locale, "waves.poll.status.updated")
+    : t(locale, "waves.poll.status.voted");
   const showMultichoiceActions =
     poll.multichoice && (selectedOptions.size > 0 || isChangingVote);
   const multichoiceSubmitDisabled =
@@ -478,17 +510,19 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
                 className="tw-overflow-hidden"
               >
                 <div className="tw-flex tw-gap-2">
-                  <button
+                  <Button
                     type="button"
                     disabled={multichoiceSubmitDisabled}
                     onClick={(event) => {
                       event.stopPropagation();
                       handleSubmitVote().catch(() => undefined);
                     }}
-                    className="tw-flex tw-flex-1 tw-transform-gpu tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-4 tw-py-2 tw-text-[13.5px] tw-font-bold tw-text-black tw-transition-all tw-duration-300 disabled:tw-cursor-not-allowed disabled:tw-border-white/[0.06] disabled:tw-bg-white/[0.025] disabled:tw-text-iron-500 desktop-hover:hover:tw-bg-iron-100"
+                    variant="primary"
+                    size="sm"
+                    className="tw-flex-1"
                   >
                     {submitButtonLabel}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -556,83 +590,110 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         </div>
       )}
 
+      {showVoteResultsFooterAction && (
+        <div className="tw-mt-3.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3.5">
+          <div className="tw-flex tw-justify-start">
+            <Button
+              type="button"
+              disabled={voteMutation.isPending}
+              onClick={(event) => {
+                event.stopPropagation();
+                showResultsView();
+              }}
+              variant="secondary"
+              size="xs"
+            >
+              {t(locale, "waves.poll.actions.viewResults")}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {showVoteEditFooterAction && (
         <div className="tw-mt-3.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3.5">
           {poll.multichoice ? (
             <div className="tw-flex tw-gap-2">
-              <button
+              <Button
                 type="button"
                 disabled={voteMutation.isPending}
                 onClick={(event) => {
                   event.stopPropagation();
                   cancelVoteChange();
                 }}
-                className="tw-flex tw-flex-1 tw-transform-gpu tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-4 tw-py-2 tw-text-[13.5px] tw-font-medium tw-text-iron-300 tw-transition-all disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-text-white"
+                variant="secondary"
+                size="sm"
+                className="tw-flex-1"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 disabled={multichoiceSubmitDisabled}
                 onClick={(event) => {
                   event.stopPropagation();
                   handleSubmitVote().catch(() => undefined);
                 }}
-                className="tw-flex tw-flex-1 tw-transform-gpu tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-4 tw-py-2 tw-text-[13.5px] tw-font-bold tw-text-black tw-transition-all tw-duration-300 disabled:tw-cursor-not-allowed disabled:tw-border-white/[0.06] disabled:tw-bg-white/[0.025] disabled:tw-text-iron-500 desktop-hover:hover:tw-bg-iron-100"
+                variant="primary"
+                size="sm"
+                className="tw-flex-1"
               >
                 {submitButtonLabel}
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="tw-flex tw-justify-start">
-              <button
+              <Button
                 type="button"
                 disabled={voteMutation.isPending}
                 onClick={(event) => {
                   event.stopPropagation();
                   cancelVoteChange();
                 }}
-                className="tw-flex tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-[13px] tw-font-medium tw-text-iron-300 tw-transition-all disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-text-white"
+                variant="secondary"
+                size="xs"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           )}
         </div>
       )}
 
-      {showFooterAction && (
+      {showResultsFooterAction && (
         <div className="tw-mt-3.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3.5">
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-            <button
+            <Button
               type="button"
               disabled={voteMutation.isPending}
               onClick={(event) => {
                 event.stopPropagation();
                 showVoteView();
               }}
-              className="tw-flex tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-[13px] tw-font-medium tw-text-iron-300 tw-transition-all disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-text-white"
+              variant="secondary"
+              size="xs"
             >
-              Change vote
-            </button>
-            <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-transition-all tw-duration-300">
-              <span
-                className="tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-emerald-500/30 tw-bg-emerald-500/15"
-                aria-hidden="true"
-              >
-                <CheckIcon
-                  className="tw-size-2.5 tw-text-emerald-400"
-                  strokeWidth={3}
-                />
+              {resultsFooterActionLabel}
+            </Button>
+            {hasVoted && (
+              <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-transition-all tw-duration-300">
+                <span
+                  className="tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-emerald-500/30 tw-bg-emerald-500/15"
+                  aria-hidden="true"
+                >
+                  <CheckIcon
+                    className="tw-size-2.5 tw-text-emerald-400"
+                    strokeWidth={3}
+                  />
+                </span>
+                <span
+                  className={`tw-text-[12px] tw-font-medium tw-transition-colors tw-duration-300 ${
+                    showUpdated ? "tw-text-emerald-400" : "tw-text-iron-300"
+                  }`}
+                >
+                  {voteStatusLabel}
+                </span>
               </span>
-              <span
-                className={`tw-text-[12px] tw-font-medium tw-transition-colors tw-duration-300 ${
-                  showUpdated ? "tw-text-emerald-400" : "tw-text-iron-300"
-                }`}
-              >
-                {showUpdated ? "Updated" : "Voted"}
-              </span>
-            </span>
+            )}
           </div>
         </div>
       )}

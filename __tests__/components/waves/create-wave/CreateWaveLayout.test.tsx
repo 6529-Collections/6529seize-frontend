@@ -28,6 +28,9 @@ const { useNativeKeyboard } = require("@/hooks/useNativeKeyboard") as {
 
 const config = {
   overview: { type: "CHAT" },
+  // dates is required on CreateWaveConfig; the mobile progress header reads
+  // ongoingRanking from it.
+  dates: { ongoingRanking: false },
 } as any;
 
 describe("CreateWaveLayout", () => {
@@ -54,10 +57,29 @@ describe("CreateWaveLayout", () => {
     const footer = screen.getByTestId("create-wave-actions").parentElement;
 
     expect(footer?.className).toContain(
-      "tw-pb-[calc(1rem+env(safe-area-inset-bottom,0px))]"
+      "tw-pb-[max(calc(env(safe-area-inset-bottom,0px)_-_0.5rem),0.5rem)]"
     );
-    expect(footer?.className).toContain(
-      "lg:tw-pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))]"
+    expect(footer?.className).toContain("lg:tw-pb-5");
+  });
+
+  it("fills the flow height on mobile so actions stay at the bottom", () => {
+    render(
+      <CreateWaveLayout
+        config={config}
+        step={CreateWaveStep.OVERVIEW}
+        showActions={true}
+        submitting={false}
+        setStep={jest.fn()}
+        onComplete={async () => {}}
+      >
+        <div>content</div>
+      </CreateWaveLayout>
     );
+
+    const layout = screen.getByText("content").closest(".tw-min-h-full");
+
+    expect(layout).toHaveClass("tw-flex");
+    expect(layout).toHaveClass("tw-h-max");
+    expect(layout).toHaveClass("tw-shrink-0");
   });
 });

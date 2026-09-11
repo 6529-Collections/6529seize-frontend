@@ -2,357 +2,47 @@
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
-import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import type {
   WsAttachmentStatusUpdateMessage,
+  WsDropDeleteMessage,
+  WsDropUpdateRefMessage,
   WsDropUpdateMessage,
 } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
-import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
-import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
-import { useWaveEligibility } from "../WaveEligibilityContext";
-import type { WaveDataStoreUpdater, WaveMessages } from "./types";
-import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
-import { recordReactionRealtimeReconciliation } from "@/utils/monitoring/dropReactionMonitoring";
-import { useQueryClient, type QueryClient } from "@tanstack/react-query";
-import { reconcileDropAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import {
-  updateAttachmentInCachedDrops,
-  updateDropInCachedDrops,
-} from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
-import { upsertDropIntoMatchingDropsQueries } from "@/components/react-query-wrapper/utils/addDropsToDrops";
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  type RefObject,
+} from "react";
+import { useWaveEligibility } from "../WaveEligibilityContext";
+import { useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { updateAttachmentInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { isWaveDropNearViewport } from "@/contexts/wave/drop-visibility";
+import {
+  ProcessIncomingDropType,
+  applyCanonicalDropUpdate,
+  buildOptimisticDrop,
+  getIncomingWaveId,
+  getNewestKnownSerialNo,
+  isCanonicalDropUpdate,
+  isHelpBotFinalReactionUpdate,
+  normalizeRealtimeDrop,
+  replaceAttachmentInDrops,
+  reportBackgroundTaskError,
+  updateCachedDrop,
+  type ProcessIncomingDropFn,
+  type ProcessIncomingDropOptions,
+  type UseWaveRealtimeUpdaterProps,
+} from "./useWaveRealtimeUpdater.helpers";
+import { useDropUpdateRefMessages } from "./useDropUpdateRefMessages";
 
-const HELP_BOT_HANDLE = "help6529";
-const HELP_BOT_FINAL_REACTIONS = new Set([
-  ":white_check_mark:",
-  ":warning:",
-]);
-
-type ApiDropWithUnknownSerialNo = Omit<ApiDrop, "serial_no"> & {
-  readonly serial_no: unknown;
-};
-
-interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
-  readonly activeWaveId: string | null;
-  readonly registerWave: (waveId: string) => void;
-  readonly syncNewestMessages: (
-    waveId: string,
-    sinceSerialNo: number,
-    signal: AbortSignal
-  ) => Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }>;
-  readonly removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;
-  readonly isWaveMuted: (waveId: string) => boolean;
-}
-
-export enum ProcessIncomingDropType {
-  DROP_RATING_UPDATE = "DROP_RATING_UPDATE",
-  DROP_INSERT = "DROP_INSERT",
-  DROP_REACTION_UPDATE = "DROP_REACTION_UPDATE",
-}
-
-type ProcessIncomingDropFn = (
-  dropData: ApiDrop,
-  type: ProcessIncomingDropType,
-  options?: ProcessIncomingDropOptions
-) => Promise<void>;
-
-interface ProcessIncomingDropOptions {
-  readonly preferExistingPollVote?: boolean;
-}
-
-function replaceAttachmentInPart(
-  part: ApiDropPart,
-  attachment: ApiAttachment
-): ApiDropPart {
-  const attachments = part.attachments;
-  const hasAttachment = attachments.some(
-    (item) => item.attachment_id === attachment.attachment_id
-  );
-
-  if (!hasAttachment) {
-    return part;
-  }
-
-  return {
-    ...part,
-    attachments: attachments.map((item) =>
-      item.attachment_id === attachment.attachment_id ? attachment : item
-    ),
-  };
-}
-
-const getIncomingWaveId = (drop: ApiDrop): string | null => {
-  const wave = (drop as { readonly wave?: { readonly id?: unknown } }).wave;
-  return typeof wave?.id === "string" && wave.id.length > 0 ? wave.id : null;
-};
-
-const parseRealtimeSerialNo = (value: unknown): number | null => {
-  if (typeof value === "number" && Number.isSafeInteger(value)) {
-    return value;
-  }
-
-  if (typeof value !== "string") {
-    return null;
-  }
-
-  const normalized = value.trim();
-  if (!/^\d+$/.test(normalized)) {
-    return null;
-  }
-
-  const parsed = Number(normalized);
-  return Number.isSafeInteger(parsed) ? parsed : null;
-};
-
-const normalizeRealtimeDrop = (drop: ApiDrop): ApiDrop => {
-  const rawSerialNo = (drop as ApiDropWithUnknownSerialNo).serial_no;
-  const serialNo = parseRealtimeSerialNo(rawSerialNo);
-
-  if (serialNo === null || serialNo === rawSerialNo) {
-    return drop;
-  }
-
-  return {
-    ...drop,
-    serial_no: serialNo,
-  };
-};
-
-const isCanonicalDropUpdate = (type: ProcessIncomingDropType): boolean =>
-  type === ProcessIncomingDropType.DROP_RATING_UPDATE ||
-  type === ProcessIncomingDropType.DROP_REACTION_UPDATE;
-
-const shouldUpdateCachedDrop = (type: ProcessIncomingDropType): boolean =>
-  type !== ProcessIncomingDropType.DROP_REACTION_UPDATE;
-
-const updateCachedDrop = ({
-  drop,
-  options,
-  queryClient,
-  type,
-}: {
-  readonly drop: ApiDrop;
-  readonly options: ProcessIncomingDropOptions;
-  readonly queryClient: QueryClient;
-  readonly type: ProcessIncomingDropType;
-}): void => {
-  if (!shouldUpdateCachedDrop(type)) {
-    return;
-  }
-
-  if (type === ProcessIncomingDropType.DROP_INSERT) {
-    upsertDropIntoMatchingDropsQueries(queryClient, { drop });
-  }
-
-  const preferExistingPollVote = options.preferExistingPollVote;
-  if (preferExistingPollVote === undefined) {
-    updateDropInCachedDrops(queryClient, drop);
-    return;
-  }
-
-  updateDropInCachedDrops(queryClient, drop, { preferExistingPollVote });
-};
-
-const normalizeHandle = (handle: string | null | undefined): string =>
-  handle?.replace(/^@/, "").trim().toLowerCase() ?? "";
-
-const hasHelpBotReactionProfile = (drop: ApiDrop): boolean =>
-  (drop.reactions ?? []).some(
-    (reaction) =>
-      HELP_BOT_FINAL_REACTIONS.has(reaction.reaction) &&
-      reaction.profiles.some(
-        (profile) => normalizeHandle(profile.handle) === HELP_BOT_HANDLE
-      )
-  );
-
-const hasHelpBotMention = (drop: ApiDrop): boolean =>
-  (drop.mentioned_users ?? []).some((user) => {
-    const mention = user as {
-      readonly handle_in_content?: string | null | undefined;
-      readonly current_handle?: string | null | undefined;
-    };
-    return (
-      normalizeHandle(mention.handle_in_content) === HELP_BOT_HANDLE ||
-      normalizeHandle(mention.current_handle) === HELP_BOT_HANDLE
-    );
-  });
-
-const isHelpBotFinalReactionUpdate = (drop: ApiDrop): boolean =>
-  hasHelpBotReactionProfile(drop) ||
-  (hasHelpBotMention(drop) &&
-    (drop.reactions ?? []).some((reaction) =>
-      HELP_BOT_FINAL_REACTIONS.has(reaction.reaction)
-    ));
-
-const getNewestKnownSerialNo = (waveMessages: WaveMessages): number | null => {
-  if (waveMessages.latestFetchedSerialNo !== null) {
-    return waveMessages.latestFetchedSerialNo;
-  }
-
-  const serials = waveMessages.drops
-    .map((drop) => drop.serial_no)
-    .filter((serialNo) => Number.isFinite(serialNo));
-  return serials.length ? Math.max(...serials) : null;
-};
-
-const reportBackgroundTaskError = (message: string, error: unknown): void => {
-  console.error(message, error);
-};
-
-const shouldApplyCanonicalDrop = (
-  type: ProcessIncomingDropType,
-  drop: ApiDrop
-): boolean => {
-  if (type !== ProcessIncomingDropType.DROP_REACTION_UPDATE) {
-    return true;
-  }
-
-  return recordReactionRealtimeReconciliation({
-    drop: {
-      id: drop.id,
-      wave: { id: drop.wave.id },
-      context_profile_context: drop.context_profile_context,
-    },
-    websocketStatus: WebSocketStatus.CONNECTED,
-  }).shouldApplyCanonicalDrop;
-};
-
-interface CanonicalDropUpdateParams {
-  readonly dropId: string;
-  readonly existingDrop: ExtendedDrop;
-  readonly waveId: string;
-  readonly type: ProcessIncomingDropType;
-  readonly options: ProcessIncomingDropOptions;
-  readonly queryClient: QueryClient;
-  readonly updateData: WaveDataStoreUpdater["updateData"];
-}
-
-const applyCanonicalDropUpdate = async ({
-  dropId,
-  existingDrop,
-  waveId,
-  type,
-  options,
-  queryClient,
-  updateData,
-}: CanonicalDropUpdateParams): Promise<void> => {
-  const apiDrop = await fetchDropByIdBatched(dropId);
-  const preferExistingPollVote = options.preferExistingPollVote;
-  const reconciledApiDrop =
-    preferExistingPollVote === undefined
-      ? reconcileDropAuthenticatedPollVote(apiDrop, existingDrop)
-      : reconcileDropAuthenticatedPollVote(apiDrop, existingDrop, {
-          preferExistingVote: preferExistingPollVote,
-        });
-
-  if (!shouldApplyCanonicalDrop(type, reconciledApiDrop)) {
-    return;
-  }
-
-  if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
-    updateDropInCachedDrops(queryClient, reconciledApiDrop);
-  }
-
-  updateData({
-    key: waveId,
-    drops: [
-      {
-        ...reconciledApiDrop,
-        type: DropSize.FULL,
-        stableHash: existingDrop.stableHash,
-        stableKey: existingDrop.stableKey,
-      },
-    ],
-  });
-};
-
-const buildOptimisticDrop = ({
-  drop,
-  existingDrop,
-  options,
-}: {
-  readonly drop: ApiDrop;
-  readonly existingDrop: ExtendedDrop | null;
-  readonly options: ProcessIncomingDropOptions;
-}): ExtendedDrop => {
-  const preferExistingPollVote = options.preferExistingPollVote;
-  let reconciledDrop = drop;
-  if (existingDrop !== null && preferExistingPollVote === undefined) {
-    reconciledDrop = reconcileDropAuthenticatedPollVote(drop, existingDrop);
-  }
-  if (existingDrop !== null && preferExistingPollVote !== undefined) {
-    reconciledDrop = reconcileDropAuthenticatedPollVote(drop, existingDrop, {
-      preferExistingVote: preferExistingPollVote,
-    });
-  }
-
-  return {
-    ...reconciledDrop,
-    type: DropSize.FULL,
-    author: {
-      ...reconciledDrop.author,
-      subscribed_actions:
-        existingDrop === null
-          ? reconciledDrop.author.subscribed_actions
-          : existingDrop.author.subscribed_actions,
-    },
-    wave: {
-      ...reconciledDrop.wave,
-      authenticated_user_eligible_to_participate:
-        existingDrop === null
-          ? reconciledDrop.wave.authenticated_user_eligible_to_participate
-          : existingDrop.wave.authenticated_user_eligible_to_participate,
-      authenticated_user_eligible_to_vote:
-        existingDrop === null
-          ? reconciledDrop.wave.authenticated_user_eligible_to_vote
-          : existingDrop.wave.authenticated_user_eligible_to_vote,
-      authenticated_user_eligible_to_chat:
-        existingDrop === null
-          ? reconciledDrop.wave.authenticated_user_eligible_to_chat
-          : existingDrop.wave.authenticated_user_eligible_to_chat,
-      authenticated_user_admin:
-        existingDrop === null
-          ? reconciledDrop.wave.authenticated_user_admin
-          : existingDrop.wave.authenticated_user_admin,
-    },
-    stableKey: reconciledDrop.id,
-    stableHash: reconciledDrop.id,
-    context_profile_context:
-      existingDrop === null
-        ? (reconciledDrop.context_profile_context ?? null)
-        : existingDrop.context_profile_context,
-  };
-};
-
-function replaceAttachmentInDrop(drop: Drop, attachment: ApiAttachment): Drop {
-  if (drop.type !== DropSize.FULL) {
-    return drop;
-  }
-
-  const parts = drop.parts.map((part) =>
-    replaceAttachmentInPart(part, attachment)
-  );
-  const changed = parts.some((part, index) => part !== drop.parts[index]);
-
-  return changed ? { ...drop, parts } : drop;
-}
-
-function replaceAttachmentInDrops(
-  drops: Drop[],
-  attachment: ApiAttachment
-): { drops: Drop[]; changed: boolean } {
-  const updatedDrops = drops.map((drop) =>
-    replaceAttachmentInDrop(drop, attachment)
-  );
-  const changed = updatedDrops.some((drop, index) => drop !== drops[index]);
-
-  return { drops: updatedDrops, changed };
-}
+export { ProcessIncomingDropType } from "./useWaveRealtimeUpdater.helpers";
 
 type InitiateFetchNewestCycleFn = (
   waveId: string,
@@ -445,19 +135,26 @@ const useNewestMessagesSync = ({
   return initiateFetchNewestCycle;
 };
 
-const useActiveWaveReadMarker = ({
-  activeWaveId,
-  removeWaveDeliveredNotifications,
-}: Pick<
-  UseWaveRealtimeUpdaterProps,
-  "activeWaveId" | "removeWaveDeliveredNotifications"
->): ((waveId: string) => void) => {
+const useLatestActiveWaveIdRef = (
+  activeWaveId: string | null
+): RefObject<string | null> => {
   const activeWaveIdRef = useRef(activeWaveId);
-  const pendingDeliveredNotificationsRef = useRef<Promise<void> | null>(null);
-  const pendingReadNotificationsRef = useRef<Promise<void> | null>(null);
+
   useLayoutEffect(() => {
     activeWaveIdRef.current = activeWaveId;
   }, [activeWaveId]);
+
+  return activeWaveIdRef;
+};
+
+const useActiveWaveReadMarker = ({
+  activeWaveIdRef,
+  removeWaveDeliveredNotifications,
+}: Pick<UseWaveRealtimeUpdaterProps, "removeWaveDeliveredNotifications"> & {
+  readonly activeWaveIdRef: RefObject<string | null>;
+}): ((waveId: string, readThroughSerialNo?: number) => void) => {
+  const pendingDeliveredNotificationsRef = useRef<Promise<void> | null>(null);
+  const pendingReadNotificationsRef = useRef<Promise<void> | null>(null);
 
   const markWaveNotificationsRead = useMarkWaveNotificationsRead();
   const canSendReadForWave = useCallback((waveId: string): boolean => {
@@ -482,10 +179,11 @@ const useActiveWaveReadMarker = ({
   );
 
   const markNotificationsRead = useCallback(
-    async (waveId: string) => {
+    async (waveId: string, readThroughSerialNo?: number) => {
       try {
         await markWaveNotificationsRead(waveId, {
           shouldSend: () => canSendReadForWave(waveId),
+          readThroughSerialNo,
         });
       } catch (error) {
         reportBackgroundTaskError("Failed to mark wave as read:", error);
@@ -495,16 +193,22 @@ const useActiveWaveReadMarker = ({
   );
 
   return useCallback(
-    (waveId: string) => {
-      if (activeWaveId !== waveId || document.visibilityState !== "visible") {
+    (waveId: string, readThroughSerialNo?: number) => {
+      if (
+        activeWaveIdRef.current !== waveId ||
+        document.visibilityState !== "visible"
+      ) {
         return;
       }
 
       pendingDeliveredNotificationsRef.current =
         removeDeliveredNotifications(waveId);
-      pendingReadNotificationsRef.current = markNotificationsRead(waveId);
+      pendingReadNotificationsRef.current = markNotificationsRead(
+        waveId,
+        readThroughSerialNo
+      );
     },
-    [activeWaveId, removeDeliveredNotifications, markNotificationsRead]
+    [activeWaveIdRef, removeDeliveredNotifications, markNotificationsRead]
   );
 };
 
@@ -618,6 +322,7 @@ interface UseProcessIncomingDropParams extends Pick<
   UseWaveRealtimeUpdaterProps,
   | "activeWaveId"
   | "getData"
+  | "hasServerFeedSeed"
   | "updateData"
   | "registerWave"
   | "syncNewestMessages"
@@ -630,20 +335,25 @@ interface UseProcessIncomingDropParams extends Pick<
 const useProcessIncomingDrop = ({
   activeWaveId,
   getData,
+  hasServerFeedSeed,
   updateData,
   registerWave,
   syncNewestMessages,
   removeWaveDeliveredNotifications,
   isWaveMuted,
   queryClient,
-}: UseProcessIncomingDropParams): ProcessIncomingDropFn => {
+}: UseProcessIncomingDropParams): {
+  readonly processIncomingDrop: ProcessIncomingDropFn;
+  readonly processDropUpdateRef: (messageData: unknown) => void;
+} => {
   const initiateFetchNewestCycle = useNewestMessagesSync({
     getData,
     updateData,
     syncNewestMessages,
   });
+  const activeWaveIdRef = useLatestActiveWaveIdRef(activeWaveId);
   const markActiveWaveAsRead = useActiveWaveReadMarker({
-    activeWaveId,
+    activeWaveIdRef,
     removeWaveDeliveredNotifications,
   });
   const refreshEligibilityAfterVisibilityChange =
@@ -654,7 +364,7 @@ const useProcessIncomingDrop = ({
     initiateFetchNewestCycle
   );
 
-  return useCallback(
+  const processIncomingDrop = useCallback(
     async (
       dropData: ApiDrop,
       type: ProcessIncomingDropType,
@@ -669,14 +379,39 @@ const useProcessIncomingDrop = ({
 
       updateCachedDrop({ drop, options, queryClient, type });
 
-      if (isWaveMuted(waveId)) {
+      const shouldSkipMutedWave = () =>
+        isWaveMuted(waveId) && activeWaveIdRef.current !== waveId;
+
+      // Mute suppresses inactive-Wave processing, not live content in the open Wave.
+      if (shouldSkipMutedWave()) {
         return;
       }
 
       await refreshEligibilityAfterVisibilityChange(waveId);
 
+      if (shouldSkipMutedWave()) {
+        return;
+      }
+
       const currentData = getData(waveId);
       if (!currentData) {
+        if (
+          type === ProcessIncomingDropType.DROP_INSERT &&
+          hasServerFeedSeed(waveId)
+        ) {
+          updateData({
+            key: waveId,
+            drops: [
+              buildOptimisticDrop({
+                drop,
+                existingDrop: null,
+                options,
+              }),
+            ],
+          });
+          markActiveWaveAsRead(waveId, drop.serial_no);
+          return;
+        }
         registerWave(waveId);
         return;
       }
@@ -714,7 +449,7 @@ const useProcessIncomingDrop = ({
           type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
           isWaveDropNearViewport(waveId, drop.id)
         ) {
-          markActiveWaveAsRead(waveId);
+          markActiveWaveAsRead(waveId, drop.serial_no);
         }
         return;
       }
@@ -736,10 +471,12 @@ const useProcessIncomingDrop = ({
         optimisticDrop.id
       );
 
-      markActiveWaveAsRead(waveId);
+      markActiveWaveAsRead(waveId, drop.serial_no);
     },
     [
+      activeWaveIdRef,
       getData,
+      hasServerFeedSeed,
       updateData,
       registerWave,
       applyCanonicalDropUpdateForExistingDrop,
@@ -750,6 +487,12 @@ const useProcessIncomingDrop = ({
       syncNewestMessagesAfterDropUpdate,
     ]
   );
+
+  const processDropUpdateRef = useDropUpdateRefMessages({
+    processIncomingDrop,
+  });
+
+  return { processIncomingDrop, processDropUpdateRef };
 };
 
 const useAttachmentStatusUpdate = ({
@@ -792,9 +535,15 @@ const useAttachmentStatusUpdate = ({
   );
 
 const useDropUpdateMessages = (
-  processIncomingDrop: ProcessIncomingDropFn
+  processIncomingDrop: ProcessIncomingDropFn,
+  processDropUpdateRef: (messageData: unknown) => void
 ): void => {
   const pendingDropUpdateRef = useRef<Promise<void> | null>(null);
+
+  useWebSocketMessage<WsDropUpdateRefMessage["data"]>(
+    WsMessageType.DROP_UPDATE_REF,
+    processDropUpdateRef
+  );
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
@@ -832,9 +581,21 @@ const useDropUpdateMessages = (
   );
 };
 
+const useDropDeleteMessages = (
+  processDropRemoved: (waveId: string, dropId: string) => void
+): void => {
+  useWebSocketMessage<WsDropDeleteMessage["data"]>(
+    WsMessageType.DROP_DELETE,
+    (messageData) => {
+      processDropRemoved(messageData.wave_id, messageData.drop_id);
+    }
+  );
+};
+
 export function useWaveRealtimeUpdater({
   activeWaveId,
   getData,
+  hasServerFeedSeed,
   updateData,
   registerWave,
   syncNewestMessages,
@@ -846,9 +607,10 @@ export function useWaveRealtimeUpdater({
   processDropRemoved: (waveId: string, dropId: string) => void;
 } {
   const queryClient = useQueryClient();
-  const processIncomingDrop = useProcessIncomingDrop({
+  const { processIncomingDrop, processDropUpdateRef } = useProcessIncomingDrop({
     activeWaveId,
     getData,
+    hasServerFeedSeed,
     updateData,
     registerWave,
     syncNewestMessages,
@@ -871,7 +633,8 @@ export function useWaveRealtimeUpdater({
     queryClient,
   });
 
-  useDropUpdateMessages(processIncomingDrop);
+  useDropUpdateMessages(processIncomingDrop, processDropUpdateRef);
+  useDropDeleteMessages(processDropRemoved);
 
   useWebSocketMessage<WsAttachmentStatusUpdateMessage["data"]>(
     WsMessageType.ATTACHMENT_STATUS_UPDATE,

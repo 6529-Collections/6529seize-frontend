@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
  * 6529.io API
- * This is the API interface description. Brief terminology overview and an authentication example can be found at <a href=\"https://6529.io/about/api\">https://6529.io/about/api</a>.
+ * JSON REST API for 6529.io. New here? A terminology overview and a step-by-step authentication walkthrough (guides &amp; auth) live at <a href=\"https://6529.io/tools/api\">https://6529.io/tools/api</a>. The raw machine-readable spec is downloadable at <a href=\"/openapi.yaml\">/openapi.yaml</a> and <a href=\"/openapi.json\">/openapi.json</a>.
  *
  * OpenAPI spec version: 1.0.0
  * 
@@ -14,6 +14,7 @@
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiXTdhGrantStatus } from '../models/ApiXTdhGrantStatus';
 import { ApiXTdhGrantTargetChain } from '../models/ApiXTdhGrantTargetChain';
+import { ApiXTdhGrantTargetTokenMode } from '../models/ApiXTdhGrantTargetTokenMode';
 import { HttpFile } from '../http/http';
 
 export class ApiXTdhGrant {
@@ -21,6 +22,7 @@ export class ApiXTdhGrant {
     'grantor': ApiProfileMin;
     'target_chain': ApiXTdhGrantTargetChain;
     'target_contract': string;
+    'target_token_mode'?: ApiXTdhGrantTargetTokenMode;
     'target_tokens_count': number;
     'target_collection_name': string | null;
     'created_at': number;
@@ -63,6 +65,12 @@ export class ApiXTdhGrant {
             "name": "target_contract",
             "baseName": "target_contract",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "target_token_mode",
+            "baseName": "target_token_mode",
+            "type": "ApiXTdhGrantTargetTokenMode",
             "format": ""
         },
         {

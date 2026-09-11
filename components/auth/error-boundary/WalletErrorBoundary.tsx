@@ -1,5 +1,6 @@
 import type { ErrorInfo, ReactNode } from "react";
 import { Component } from "react";
+import Button from "@/components/utils/button/Button";
 import { sanitizeErrorMessage, logError } from "@/utils/security-logger";
 import { clearAllWalletAuth } from "@/services/auth/auth.utils";
 
@@ -73,18 +74,20 @@ export class WalletErrorBoundary extends Component<Props, State> {
             Something went wrong with your wallet connection.
           </p>
           <div className="tw-flex tw-flex-col tw-justify-center tw-gap-3 sm:tw-flex-row">
-            <button
+            <Button
               onClick={this.handleRetry}
-              className="tw-rounded-md tw-bg-blue-600 tw-px-4 tw-py-2 tw-text-white tw-transition-colors hover:tw-bg-blue-700"
+              variant="action"
+              size="md"
             >
               Try Again
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={this.handleReset}
-              className="tw-bg-red-600 hover:tw-bg-red-700 tw-rounded-md tw-px-4 tw-py-2 tw-text-white tw-transition-colors"
+              variant="destructive"
+              size="md"
             >
               Clear Storage & Reload
-            </button>
+            </Button>
           </div>
         </div>
       </div>

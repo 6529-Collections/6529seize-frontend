@@ -122,15 +122,14 @@ describe("MyStreamWaveTabsDefault", () => {
       participation: {
         authenticated_user_eligible: true,
       },
-      chat:
-        overrides.chat ?? {
-          authenticated_user_eligible: true,
-          scope: {
-            group: {
-              is_direct_message: isDirectMessage,
-            },
+      chat: overrides.chat ?? {
+        authenticated_user_eligible: true,
+        scope: {
+          group: {
+            is_direct_message: isDirectMessage,
           },
         },
+      },
     }) as any;
 
   beforeEach(() => {
@@ -284,8 +283,9 @@ describe("MyStreamWaveTabsDefault", () => {
       </AuthContext.Provider>
     );
 
-    expect(screen.getByRole("link", { name: "View prxt0's profile" }))
-      .toHaveAttribute("href", "/prxt0");
+    expect(
+      screen.getByRole("link", { name: "View prxt0's profile" })
+    ).toHaveAttribute("href", "/prxt0");
     expect(
       screen.queryByRole("button", { name: "Share wave" })
     ).not.toBeInTheDocument();
@@ -497,7 +497,7 @@ describe("MyStreamWaveTabsDefault", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders share in mobile right action cluster and keeps search trigger", () => {
+  it("renders compact actions in the mobile bottom sheet", () => {
     mockUseBreakpoint.mockReturnValue("S");
     useContentTab.mockReturnValue({
       activeContentTab: "CHAT",
@@ -518,12 +518,19 @@ describe("MyStreamWaveTabsDefault", () => {
       screen.getByRole("button", { name: "Search messages in this wave" })
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Go back" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+    const moreActionsButton = screen.getByRole("button", {
+      name: "More wave actions",
+    });
+    expect(moreActionsButton).toHaveAttribute("aria-haspopup", "dialog");
+    fireEvent.click(moreActionsButton);
     expect(
-      screen.getByRole("menuitem", { name: "Share wave" })
+      screen.getByRole("dialog", { name: "More wave actions" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("menuitem", { name: "Switch to gallery view" })
+      screen.getByRole("button", { name: "Share wave" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Switch to gallery view" })
     ).toBeInTheDocument();
   });
 
@@ -546,7 +553,7 @@ describe("MyStreamWaveTabsDefault", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
     fireEvent.click(
-      screen.getByRole("menuitem", { name: "Switch to gallery view" })
+      screen.getByRole("button", { name: "Switch to gallery view" })
     );
 
     expect(mockToggleViewMode).toHaveBeenCalledTimes(1);
@@ -664,7 +671,7 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(screen.queryByText("Create proposal")).not.toBeInTheDocument();
   });
 
-  it("shows a disabled Submit drop reason", () => {
+  it("keeps a restricted Submit drop reason keyboard-focusable", () => {
     const restrictionMessage = "Please log in to make submissions";
 
     useContentTab.mockReturnValue({
@@ -689,12 +696,10 @@ describe("MyStreamWaveTabsDefault", () => {
 
     const button = screen.getByRole("button", { name: "Submit drop" });
 
-    expect(button).toBeDisabled();
-    expect(button).toHaveAttribute("title", restrictionMessage);
-    expect(button.parentElement).toHaveAttribute(
-      "data-tooltip-content",
-      restrictionMessage
-    );
+    expect(button).not.toBeDisabled();
+    expect(button).toHaveAttribute("aria-haspopup", "dialog");
+    expect(button).toHaveAccessibleDescription(restrictionMessage);
+    expect(button).toHaveTextContent(restrictionMessage);
   });
 
   it("copies in mobile right action cluster when share is unavailable", () => {
@@ -716,13 +721,13 @@ describe("MyStreamWaveTabsDefault", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
-    fireEvent.click(screen.getByRole("menuitem", { name: "Copy wave link" }));
+    fireEvent.click(screen.getByRole("button", { name: "Copy wave link" }));
 
     expect(mockCopyToClipboard).toHaveBeenCalledWith(
       "http://localhost/waves/w1"
     );
     expect(
-      screen.getByRole("menuitem", { name: "Link copied" })
+      screen.getByRole("button", { name: "Link copied" })
     ).toBeInTheDocument();
   });
 });

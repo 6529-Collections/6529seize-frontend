@@ -1,7 +1,7 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
 import type { ReactNode, RefObject } from "react";
 import {
   useCallback,
@@ -15,6 +15,7 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 const VIEWPORT_PADDING = 16;
 const MENU_GAP = 8;
 const DEFAULT_MENU_MIN_WIDTH = 224;
+const PASSIVE_SCROLL_OPTIONS: AddEventListenerOptions = { passive: true };
 type DropdownHorizontalAlign = "auto" | "left" | "right";
 const unsubscribeFromClientMount = () => undefined;
 const subscribeToClientMount = (onStoreChange: () => void) => {
@@ -124,10 +125,10 @@ export default function CommonDropdownItemsDefaultWrapper({
     if (!dynamicPosition || !isOpen) return;
     const onResize = () => position();
     window.addEventListener("resize", onResize);
-    window.addEventListener("scroll", onResize); // Also update on scroll
+    window.addEventListener("scroll", onResize, PASSIVE_SCROLL_OPTIONS);
     return () => {
       window.removeEventListener("resize", onResize);
-      window.removeEventListener("scroll", onResize);
+      window.removeEventListener("scroll", onResize, PASSIVE_SCROLL_OPTIONS);
     };
   }, [dynamicPosition, isOpen, position]);
 
@@ -170,31 +171,33 @@ export default function CommonDropdownItemsDefaultWrapper({
         width: `${minWidth}px`,
       }}
     >
-      <AnimatePresence mode="wait" initial={false}>
-        {isOpen && (
-          <motion.div
-            id={menuId}
-            ref={listRef}
-            role="menu"
-            aria-labelledby={menuLabelledBy}
-            tabIndex={-1}
-            className="tw-w-full tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="tw-max-h-80 tw-overflow-y-auto tw-overflow-x-hidden [scrollbar-color:#3f3f46_#18181b] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb:hover]:tw-bg-iron-600 [&::-webkit-scrollbar-thumb]:tw-rounded-full [&::-webkit-scrollbar-thumb]:tw-bg-iron-700 [&::-webkit-scrollbar-track]:tw-bg-iron-900 [&::-webkit-scrollbar]:tw-w-2">
-              <ul
-                role="none"
-                className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-px-2"
-              >
-                {children}
-              </ul>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <LazyMotion features={domAnimation}>
+        <AnimatePresence mode="wait" initial={false}>
+          {isOpen && (
+            <m.div
+              id={menuId}
+              ref={listRef}
+              role="menu"
+              aria-labelledby={menuLabelledBy}
+              tabIndex={-1}
+              className="tw-w-full tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="tw-max-h-80 tw-overflow-y-auto tw-overflow-x-hidden [scrollbar-color:#3f3f46_#18181b] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb:hover]:tw-bg-iron-600 [&::-webkit-scrollbar-thumb]:tw-rounded-full [&::-webkit-scrollbar-thumb]:tw-bg-iron-700 [&::-webkit-scrollbar-track]:tw-bg-iron-900 [&::-webkit-scrollbar]:tw-w-2">
+                <ul
+                  role="none"
+                  className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-px-2"
+                >
+                  {children}
+                </ul>
+              </div>
+            </m.div>
+          )}
+        </AnimatePresence>
+      </LazyMotion>
     </div>,
     document.body
   );

@@ -1,0 +1,657 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0x930e79f1",
+          "declaringDefinitionId": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "getAuctionEndTime",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x930e79f1",
+          "signature": "getAuctionEndTime(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0x7765c52c",
+          "declaringDefinitionId": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "getAuctionStatus",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x7765c52c",
+          "signature": "getAuctionStatus(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0x9067b677",
+          "declaringDefinitionId": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_collectionID",
+              "type": "uint256"
+            }
+          ],
+          "name": "getEndTime",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x9067b677",
+          "signature": "getEndTime(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0xfb9422ff",
+          "declaringDefinitionId": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+          "inherited": false,
+          "inputs": [],
+          "name": "isMinterContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xfb9422ff",
+          "signature": "isMinterContract()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0x1f14ec74",
+          "declaringDefinitionId": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address[]",
+              "name": "_recipients",
+              "type": "address[]"
+            },
+            {
+              "index": 1,
+              "internalType": "string[]",
+              "name": "_tokenData",
+              "type": "string[]"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256[]",
+              "name": "_saltfun_o",
+              "type": "uint256[]"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "internalType": "uint256[]",
+              "name": "_numberOfTokens",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "mint",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x1f14ec74",
+          "signature": "mint(address[],string[],uint256[],uint256,uint256[])",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0x46372ba6",
+          "declaringDefinitionId": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_recipient",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "string",
+              "name": "_tokenData",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "_saltfun_o",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "internalType": "uint256",
+              "name": "_auctionEndTime",
+              "type": "uint256"
+            }
+          ],
+          "name": "mintAndAuction",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x46372ba6",
+          "signature": "mintAndAuction(address,string,uint256,uint256,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0xd9f303a2",
+          "declaringDefinitionId": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "_auctionEndTime",
+              "type": "uint256"
+            }
+          ],
+          "name": "updateAuctionEndTime",
+          "outputs": [],
+          "selector": "0xd9f303a2",
+          "signature": "updateAuctionEndTime(uint256,uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "isMinterContract()",
+          "displaySignature": "isMinterContract()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0xfb9422ff",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50ZXIuc29sOklTdHJlYW1NaW50ZXIjZnVuY3Rpb246MHhmYjk0MjJmZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isMinterContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 57,
+            "byteStart": 140,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMinter.sol#L7",
+            "lineEnd": 7,
+            "lineStart": 7,
+            "snippetSha256": "sha256:0db13c4db3d42a3d6a03766b922a288745ced34b51c9df42d8b5d8a8d64e07e6",
+            "sourceSha256": "sha256:f0fbd729ed7f2d33d83ca4a1889582c9fe07a2984f168c34004dcd711fec463f"
+          },
+          "selector": "0xfb9422ff",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getEndTime(uint256)",
+          "displaySignature": "getEndTime(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0x9067b677",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionID",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50ZXIuc29sOklTdHJlYW1NaW50ZXIjZnVuY3Rpb246MHg5MDY3YjY3Nw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getEndTime",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 75,
+            "byteStart": 249,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMinter.sol#L10",
+            "lineEnd": 10,
+            "lineStart": 10,
+            "snippetSha256": "sha256:25e5305ef92eb4b022fa5b698a2608bc95b9762447334fe2801393e5eb8faaf5",
+            "sourceSha256": "sha256:f0fbd729ed7f2d33d83ca4a1889582c9fe07a2984f168c34004dcd711fec463f"
+          },
+          "selector": "0x9067b677",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getAuctionEndTime(uint256)",
+          "displaySignature": "getAuctionEndTime(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0x930e79f1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50ZXIuc29sOklTdHJlYW1NaW50ZXIjZnVuY3Rpb246MHg5MzBlNzlmMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getAuctionEndTime",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 77,
+            "byteStart": 363,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMinter.sol#L13",
+            "lineEnd": 13,
+            "lineStart": 13,
+            "snippetSha256": "sha256:c8645631010ed6b94dbce89f91aeb39e94170b5ca6b310f4441442234b359532",
+            "sourceSha256": "sha256:f0fbd729ed7f2d33d83ca4a1889582c9fe07a2984f168c34004dcd711fec463f"
+          },
+          "selector": "0x930e79f1",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getAuctionStatus(uint256)",
+          "displaySignature": "getAuctionStatus(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0x7765c52c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50ZXIuc29sOklTdHJlYW1NaW50ZXIjZnVuY3Rpb246MHg3NzY1YzUyYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getAuctionStatus",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 73,
+            "byteStart": 477,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMinter.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:8a8d86b533f989c565165a79af3d47b9e70472bca35381b3f7052119f3bf2522",
+            "sourceSha256": "sha256:f0fbd729ed7f2d33d83ca4a1889582c9fe07a2984f168c34004dcd711fec463f"
+          },
+          "selector": "0x7765c52c",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "mint(address[],string[],uint256[],uint256,uint256[])",
+          "displaySignature": "mint(address[],string[],uint256[],uint256,uint256[])",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0x1f14ec74",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_recipients",
+              "storageLocation": "memory",
+              "type": "address[]"
+            },
+            {
+              "index": 1,
+              "name": "_tokenData",
+              "storageLocation": "memory",
+              "type": "string[]"
+            },
+            {
+              "index": 2,
+              "name": "_saltfun_o",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            },
+            {
+              "index": 3,
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "_numberOfTokens",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50ZXIuc29sOklTdHJlYW1NaW50ZXIjZnVuY3Rpb246MHgxZjE0ZWM3NA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "mint",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 231,
+            "byteStart": 580,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMinter.sol#L19-L25",
+            "lineEnd": 25,
+            "lineStart": 19,
+            "snippetSha256": "sha256:acce02239f0f60dd2a3f5da771ac2eea3edeed3d0d37c94012271a0ef8c3467b",
+            "sourceSha256": "sha256:f0fbd729ed7f2d33d83ca4a1889582c9fe07a2984f168c34004dcd711fec463f"
+          },
+          "selector": "0x1f14ec74",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "mintAndAuction(address,string,uint256,uint256,uint256)",
+          "displaySignature": "mintAndAuction(address,string,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0x46372ba6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_recipient",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "_saltfun_o",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "_auctionEndTime",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50ZXIuc29sOklTdHJlYW1NaW50ZXIjZnVuY3Rpb246MHg0NjM3MmJhNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "mintAndAuction",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 211,
+            "byteStart": 850,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMinter.sol#L28-L34",
+            "lineEnd": 34,
+            "lineStart": 28,
+            "snippetSha256": "sha256:229cb8aa6a2b22f65116ca01af7291e21bcc4a9ed24e5d950c5fa445f9d8ce14",
+            "sourceSha256": "sha256:f0fbd729ed7f2d33d83ca4a1889582c9fe07a2984f168c34004dcd711fec463f"
+          },
+          "selector": "0x46372ba6",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "updateAuctionEndTime(uint256,uint256)",
+          "displaySignature": "updateAuctionEndTime(uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0xd9f303a2",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "_auctionEndTime",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50ZXIuc29sOklTdHJlYW1NaW50ZXIjZnVuY3Rpb246MHhkOWYzMDNhMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "updateAuctionEndTime",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 82,
+            "byteStart": 1097,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMinter.sol#L37",
+            "lineEnd": 37,
+            "lineStart": 37,
+            "snippetSha256": "sha256:f1c72bebb127c74f5fde669832aa88e789ac594f166fdc96e24cfa433b6bd0e6",
+            "sourceSha256": "sha256:f0fbd729ed7f2d33d83ca4a1889582c9fe07a2984f168c34004dcd711fec463f"
+          },
+          "selector": "0xd9f303a2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+    "inheritance": [],
+    "interface": {
+      "abiSha256": "sha256:649d9216a2db37e90086197519c338afd3344a311d86336726fce30694ad851c",
+      "interfaceId": "0x0f48ec25",
+      "interfaceIdSource": "selector_xor",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50ZXIuc29sOklTdHJlYW1NaW50ZXI",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamMinter.sol:IStreamMinter"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IStreamMinter",
+    "natspec": "",
+    "range": {
+      "byteLength": 1122,
+      "byteStart": 59,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMinter.sol#L5-L38",
+      "lineEnd": 38,
+      "lineStart": 5,
+      "snippetSha256": "sha256:5dd5ecbca5e231aadb2700dfa285f62d7b826ea7a17fd56070eb376189b651c9",
+      "sourceSha256": "sha256:f0fbd729ed7f2d33d83ca4a1889582c9fe07a2984f168c34004dcd711fec463f"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamMinter.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 8
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 7
+    },
+    "totalCount": 8
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0x1f14ec74",
+      "definitionId": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0x46372ba6",
+      "definitionId": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0x7765c52c",
+      "definitionId": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0x9067b677",
+      "definitionId": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0x930e79f1",
+      "definitionId": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0xd9f303a2",
+      "definitionId": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamMinter.sol:IStreamMinter#function:0xfb9422ff",
+      "definitionId": "smart-contracts/IStreamMinter.sol:IStreamMinter",
+      "severity": "advisory"
+    }
+  ]
+}

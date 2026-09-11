@@ -43,11 +43,13 @@ export interface NextGenToken {
   icon_url?: string | undefined;
   thumbnail_url: string;
   animation_url: string;
-  generator?: {
-    html: string;
-    metadata: string;
-    image: string;
-  } | undefined;
+  generator?:
+    | {
+        html: string;
+        metadata: string;
+        image: string;
+      }
+    | undefined;
   owner: string;
   pending: boolean;
   burnt: boolean;
@@ -97,13 +99,14 @@ export interface NextGenToken {
 
 export interface NextGenLog {
   created_at: string;
-  id: number;
+  id: number | string;
   transaction: string;
   block: number;
   block_timestamp: number;
   heading: string;
   log: string;
   collection_id: number;
+  token_id?: number | null | undefined;
   source: string;
   from_address: string;
   to_address: string;
@@ -186,17 +189,24 @@ export interface NextgenAllowlist {
 }
 
 export interface NextgenTraitSet {
+  account_key?: string | undefined;
+  profile_id?: string | null | undefined;
+  consolidation_key?: string | undefined;
+  custody_wallets?: string[] | undefined;
+  trait_sets?: Record<string, number> | undefined;
+  /** Representative profile address; token custody is reported in token_owners. */
   owner: string;
-  normalised_handle: string;
-  handle: string;
+  normalised_handle: string | null;
+  handle: string | null;
   level: number;
   tdh: number;
-  consolidation_display: string;
+  consolidation_display: string | null;
   rep_score: number;
   distinct_values_count: number;
   token_ids: number[];
   token_values: {
     value: string;
     tokens: number[];
+    token_owners?: { token_id: number; wallet: string }[] | undefined;
   }[];
 }

@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useState } from "react";
 import type { SetStateAction } from "react";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 
 interface AppliedDropState {
@@ -30,7 +29,6 @@ interface UseSingleWaveDropVoteStateResult {
   readonly submitBlockReason: string | null;
   readonly handleSliderValueAccepted: (acceptedValue: number) => void;
   readonly handleVoteApplied: (updatedDrop: ApiDrop) => void;
-  readonly handleBackgroundVoteApplied: () => void;
 }
 
 const getEffectiveMinRating = (drop: ApiDrop): number => {
@@ -89,7 +87,6 @@ const getSubmitVoteValue = (
 export const useSingleWaveDropVoteState = ({
   drop,
 }: UseSingleWaveDropVoteStateParams): UseSingleWaveDropVoteStateResult => {
-  const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const [appliedDropState, setAppliedDropState] =
     useState<AppliedDropState | null>(null);
   const [voteDraftState, setVoteDraftState] = useState<VoteDraftState | null>(
@@ -165,14 +162,9 @@ export const useSingleWaveDropVoteState = ({
         drop: updatedDrop,
       });
       setVoteDraftState(null);
-      invalidateDrops();
     },
-    [baseRating, drop.id, invalidateDrops]
+    [baseRating, drop.id]
   );
-
-  const handleBackgroundVoteApplied = useCallback(() => {
-    invalidateDrops();
-  }, [invalidateDrops]);
 
   return {
     displayDrop,
@@ -184,6 +176,5 @@ export const useSingleWaveDropVoteState = ({
     submitBlockReason,
     handleSliderValueAccepted,
     handleVoteApplied,
-    handleBackgroundVoteApplied,
   };
 };

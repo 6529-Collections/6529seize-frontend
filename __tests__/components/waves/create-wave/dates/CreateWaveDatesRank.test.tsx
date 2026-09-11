@@ -1,7 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveDatesRank from "@/components/waves/create-wave/dates/CreateWaveDatesRank";
-import { adjustDatesAfterSubmissionChange } from "@/components/waves/create-wave/services/waveDecisionService";
+import {
+  adjustDatesAfterSubmissionChange,
+  getDefaultFirstDecisionTime,
+} from "@/components/waves/create-wave/services/waveDecisionService";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
@@ -46,9 +49,7 @@ jest.mock(
             "RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE"
           )
         )}
-        onClick={() => {
-          props.onInteraction();
-        }}
+        data-has-advanced-error={String(props.hasAdvancedError)}
       >
         decisions
       </button>
@@ -66,6 +67,7 @@ jest.mock(
       >
         enable rolling
       </button>
+      {props.advancedContent}
     </>
   )
 );
@@ -148,7 +150,9 @@ describe("CreateWaveDatesRank", () => {
       ...baseDates,
       submissionStartDate: 50,
       votingStartDate: 50,
-      firstDecisionTime: 50,
+      // Voting start caught up to the first decision (both 50), so it is
+      // reseeded to the safe one-week-out default rather than left flush.
+      firstDecisionTime: getDefaultFirstDecisionTime(50),
       endDate: 123,
     });
   });
@@ -242,6 +246,10 @@ describe("CreateWaveDatesRank", () => {
       "data-has-rank-error",
       "true"
     );
+    expect(screen.getByTestId("decisions")).toHaveAttribute(
+      "data-has-advanced-error",
+      "true"
+    );
   });
 
   it("routes fixed rank end-before-voting errors to the decisions section", () => {
@@ -288,6 +296,10 @@ describe("CreateWaveDatesRank", () => {
     );
     expect(screen.getByTestId("rolling")).toHaveAttribute(
       "data-has-end-before-voting-error",
+      "true"
+    );
+    expect(screen.getByTestId("decisions")).toHaveAttribute(
+      "data-has-advanced-error",
       "true"
     );
   });
@@ -352,7 +364,7 @@ describe("CreateWaveDatesRank", () => {
     );
   });
 
-  it("auto collapses start section after decisions interaction", async () => {
+  it("keeps the start section expanded during decisions interaction", async () => {
     const user = userEvent.setup();
     render(
       <CreateWaveDatesRank
@@ -367,10 +379,13 @@ describe("CreateWaveDatesRank", () => {
       "data-expanded",
       "true"
     );
+    // Auto-collapsing the section above the one being edited shifts the
+    // whole page mid-tap (reported as the calendar "jumping around" on
+    // mobile) — interacting with decisions must not touch the start section.
     await user.click(screen.getByTestId("decisions"));
     expect(screen.getByTestId("start")).toHaveAttribute(
       "data-expanded",
-      "false"
+      "true"
     );
   });
 
@@ -408,6 +423,57 @@ describe("CreateWaveDatesRank", () => {
     await user.click(screen.getByTestId("enable-rolling"));
 
     expect(screen.getByTestId("rolling")).toHaveAttribute(
+      "data-expanded",
+      "true"
+    );
+  });
+
+  it("hides winner announcements when perpetual ranking is selected", () => {
+    render(
+      <CreateWaveDatesRank
+        waveType={ApiWaveType.Rank}
+        dates={{ ...baseDates, ongoingRanking: true }}
+        errors={[]}
+        setDates={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId("decisions")).toBeNull();
+    expect(screen.queryByTestId("rolling")).toBeNull();
+    // The mode itself is chosen on the Overview step, not here.
+    expect(screen.queryByText("Perpetual Ranking")).toBeNull();
+  });
+
+  it("keeps the perpetual end date cleared when other dates change", async () => {
+    const setDates = jest.fn();
+    const user = userEvent.setup();
+    render(
+      <CreateWaveDatesRank
+        waveType={ApiWaveType.Rank}
+        dates={{ ...baseDates, ongoingRanking: true, endDate: 999 }}
+        errors={[]}
+        setDates={setDates}
+      />
+    );
+
+    await user.click(screen.getByTestId("start"));
+
+    expect(setDates).toHaveBeenCalledWith(
+      expect.objectContaining({ ongoingRanking: true, endDate: null })
+    );
+  });
+
+  it("expands winner announcements by default so the schedule is not missed", () => {
+    render(
+      <CreateWaveDatesRank
+        waveType={ApiWaveType.Rank}
+        dates={baseDates}
+        errors={[]}
+        setDates={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("decisions")).toHaveAttribute(
       "data-expanded",
       "true"
     );

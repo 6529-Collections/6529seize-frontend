@@ -9,10 +9,12 @@ import {
 
 interface WaveWinnersDropHeaderVotersProps {
   readonly winner: ApiWaveDecisionWinner;
+  readonly tight?: boolean | undefined;
 }
 
 export default function WaveWinnersDropHeaderVoters({
   winner,
+  tight = false,
 }: WaveWinnersDropHeaderVotersProps) {
   const userVote = winner.drop.context_profile_context?.rating ?? 0;
   const hasUserVoted = userVote !== 0;
@@ -35,7 +37,10 @@ export default function WaveWinnersDropHeaderVoters({
             ))}
           </div>
         )}
-        <ParticipationDropVoteDetailsTrigger drop={winner.drop} />
+        <ParticipationDropVoteDetailsTrigger
+          drop={winner.drop}
+          density={tight ? "tight" : undefined}
+        />
       </div>
 
       {hasUserVoted && (

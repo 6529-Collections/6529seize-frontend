@@ -26,6 +26,7 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import type { WaveMessages } from "./hooks/types";
+import type { ServerWaveFeedSeedResult } from "./server-wave-feed-seed";
 import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
 import type { MinimalWave } from "./hooks/useEnhancedWavesListCore";
 import useEnhancedWavesListCore from "./hooks/useEnhancedWavesListCore";
@@ -35,6 +36,8 @@ import useWaveMessagesStore from "./hooks/useWaveMessagesStore";
 import type { NextPageProps } from "./hooks/useWavePagination";
 import type { ProcessIncomingDropType } from "./hooks/useWaveRealtimeUpdater";
 import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
+import { useDmUnreadConversations } from "@/services/dm-unread/DmUnreadStateProvider";
+import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 
 // Define nested structures for context data
 interface WavesContextData {
@@ -48,7 +51,7 @@ interface WavesContextData {
   readonly loadSubwavesForParent: (parentWaveId: string) => void;
   readonly prefetchSubwavesForParent: (parentWaveId: string) => void;
   readonly loadingSubwaveParentIds: readonly string[];
-  readonly markWaveRead: (waveId: string) => void;
+  readonly markWaveRead: (waveId: string, readThroughSerialNo?: number) => void;
   readonly restoreWaveUnreadCount: (waveId: string, count?: number) => void;
 }
 
@@ -81,6 +84,33 @@ interface MyStreamContextType {
   readonly requestMainWavesList: () => () => void;
   readonly requestDirectMessagesList: () => () => void;
   readonly registerWave: (waveId: string, syncNewest?: boolean) => void;
+  readonly serverFeedSeed: {
+    readonly registerPending: (
+      waveId: string,
+      promise: Promise<ServerWaveFeedSeedResult>
+    ) => void;
+    readonly clearPending: (
+      waveId: string,
+      promise: Promise<ServerWaveFeedSeedResult>
+    ) => void;
+    readonly replacePending: (
+      waveId: string,
+      expectedPromise: Promise<ServerWaveFeedSeedResult>,
+      promise: Promise<ServerWaveFeedSeedResult>
+    ) => boolean;
+    readonly expire: (
+      waveId: string,
+      expectedPromise: Promise<ServerWaveFeedSeedResult>
+    ) => void;
+    readonly apply: (params: {
+      readonly drops: ApiDrop[];
+      readonly hasNextPage: boolean;
+      readonly onReady: () => void;
+      readonly promise: Promise<ServerWaveFeedSeedResult>;
+      readonly waveId: string;
+    }) => boolean;
+    readonly completeInitialRegistration: (waveId: string) => void;
+  };
   readonly fetchNextPageForWave: (
     props: NextPageProps
   ) => Promise<(ApiDrop | ApiDropId)[] | null>;
@@ -126,6 +156,11 @@ type WaveMuteState = {
 const getWaveMuted = (wave: WaveMuteState | null | undefined): boolean =>
   wave?.metrics?.muted ?? false;
 
+const hasSerialNoTarget = (
+  serialNo: ActiveWaveSetOptions["serialNo"]
+): boolean =>
+  serialNo !== undefined && serialNo !== null && String(serialNo).trim() !== "";
+
 const scheduleAfterRouteIdle = (runTask: () => void): (() => void) => {
   let idleHandle: number | null = null;
   const timeoutHandle = globalThis.setTimeout(() => {
@@ -159,13 +194,17 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 }) => {
   const { isCapacitor, isActive } = useCapacitor();
   const pathname = usePathname() as string | null;
-  const { activeWaveId, setActiveWave } = useActiveWaveManager();
+  const { activeWaveId, hasActiveWaveDropTarget, setActiveWave } =
+    useActiveWaveManager();
   const [
     directMessagesListActivationCount,
     setDirectMessagesListActivationCount,
   ] = useState(0);
   const isDirectMessagesRoute = pathname?.startsWith("/messages") ?? false;
   const isWaveDetailRoute = pathname?.startsWith("/waves/") ?? false;
+  const isDirectMessageDetailRoute =
+    pathname?.startsWith("/messages/") ?? false;
+  const hasMountedActiveWaveRegistrationRef = useRef(false);
   const shouldDeferMainWavesList =
     isCapacitor && isWaveDetailRoute && !isDirectMessagesRoute;
   const [hasMainWavesListBeenRequested, setHasMainWavesListBeenRequested] =
@@ -178,12 +217,17 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const { wave: activeWaveData } = useWaveById(activeWaveId, {
     enabled: Boolean(activeWaveId),
   });
+  const resolvedActiveWaveData =
+    activeWaveData?.id === activeWaveId ? activeWaveData : null;
   const mainWavesData = useWavesList({
     enabled: isMainWavesListEnabled,
+    ...(resolvedActiveWaveData ? { activeWave: resolvedActiveWaveData } : {}),
   });
   const dmWavesData = useDmWavesList({
     enabled: isDirectMessagesListEnabled,
   });
+  const dmUnreadByWaveId = useDmUnreadConversations();
+  const markWaveNotificationsRead = useMarkWaveNotificationsRead();
   const mainWaveIds = useMemo<ReadonlySet<string>>(
     () => new Set(mainWavesData.waves.map((wave) => wave.id)),
     [mainWavesData.waves]
@@ -203,18 +247,30 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     supportsPinning: false,
     otherListWaveIds: mainWaveIds,
     sortMutedLast: false,
+    canonicalUnreadByWaveId: dmUnreadByWaveId,
   });
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();
   const prevIsActiveRef = useRef(isActive);
   const lastBrowserResumeSyncAtRef = useRef(0);
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
+  const markDirectMessageRead = useCallback(
+    (waveId: string, readThroughSerialNo?: number) => {
+      void markWaveNotificationsRead(waveId, {
+        readThroughSerialNo,
+        requestDmUnreadState: true,
+      }).catch(() => undefined);
+    },
+    [markWaveNotificationsRead]
+  );
 
   // Instantiate the data manager, passing the updater function from the store
   const waveDataManager = useWaveDataManager({
     updateData: waveMessagesStore.updateData,
     getData: waveMessagesStore.getData,
+    hasServerFeedSeed: waveMessagesStore.hasServerFeedSeed,
     removeDrop: waveMessagesStore.removeDrop,
+    isCapacitor,
   });
   const {
     registerWave,
@@ -275,8 +331,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     dmWavesRef.current = dmWavesHookData.waves;
   }, [wavesHookData.waves, dmWavesHookData.waves]);
 
-  const activeWaveDataId = activeWaveData?.id ?? null;
-  const activeWaveMuted = getWaveMuted(activeWaveData);
+  const activeWaveDataId = resolvedActiveWaveData?.id ?? null;
+  const activeWaveMuted = getWaveMuted(resolvedActiveWaveData);
   const isWaveMuted = useCallback(
     (waveId: string): boolean => {
       const wave = wavesRef.current.find((w) => w.id === waveId);
@@ -293,6 +349,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const { processIncomingDrop, processDropRemoved } = useWaveRealtimeUpdater({
     activeWaveId,
     getData: waveMessagesStore.getData,
+    hasServerFeedSeed: waveMessagesStore.hasServerFeedSeed,
     updateData: waveMessagesStore.updateData,
     registerWave,
     syncNewestMessages,
@@ -304,7 +361,9 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const setActiveWaveAndRegister = useCallback<ActiveWaveContextData["set"]>(
     (waveId, options) => {
       if (waveId) {
-        registerWave(waveId, true);
+        registerWave(waveId, true, {
+          skipInitialBackfill: hasSerialNoTarget(options?.serialNo),
+        });
       }
       setActiveWave(waveId, options);
     },
@@ -313,7 +372,9 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
   const syncActiveWaveAndRefetch = useEffectEvent(() => {
     if (activeWaveId) {
-      registerWave(activeWaveId, true);
+      registerWave(activeWaveId, true, {
+        skipInitialBackfill: hasActiveWaveDropTarget,
+      });
     }
     refetchAllMainWaves();
     if (isDirectMessagesListEnabled) {
@@ -364,10 +425,24 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   }, [websocketStatus]);
 
   useEffect(() => {
-    if (activeWaveId) {
-      registerWave(activeWaveId, true);
+    if (!hasMountedActiveWaveRegistrationRef.current) {
+      hasMountedActiveWaveRegistrationRef.current = true;
+      if (isWaveDetailRoute || isDirectMessageDetailRoute) {
+        return;
+      }
     }
-  }, [activeWaveId, registerWave]);
+    if (activeWaveId) {
+      registerWave(activeWaveId, true, {
+        skipInitialBackfill: hasActiveWaveDropTarget,
+      });
+    }
+  }, [
+    activeWaveId,
+    hasActiveWaveDropTarget,
+    isDirectMessageDetailRoute,
+    isWaveDetailRoute,
+    registerWave,
+  ]);
 
   // Detect when app comes to foreground on mobile
   useEffect(() => {
@@ -419,8 +494,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   // Create the context value using the nested structure
   const contextValue = useMemo<MyStreamContextType>(() => {
     const activeWaveParentId =
-      activeWaveData?.id === activeWaveId
-        ? (activeWaveData.parent_wave?.id ?? null)
+      resolvedActiveWaveData?.id === activeWaveId
+        ? (resolvedActiveWaveData.parent_wave?.id ?? null)
         : null;
 
     const waves: WavesContextData = {
@@ -449,7 +524,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       loadSubwavesForParent: dmWavesHookData.loadSubwavesForParent,
       prefetchSubwavesForParent: dmWavesHookData.prefetchSubwavesForParent,
       loadingSubwaveParentIds: dmWavesHookData.loadingSubwaveParentIds,
-      markWaveRead: dmWavesHookData.markWaveRead,
+      markWaveRead: markDirectMessageRead,
       restoreWaveUnreadCount: dmWavesHookData.restoreWaveUnreadCount,
     };
 
@@ -474,6 +549,15 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       requestMainWavesList,
       requestDirectMessagesList,
       registerWave,
+      serverFeedSeed: {
+        registerPending: waveMessagesStore.registerPendingServerFeedSeed,
+        clearPending: waveMessagesStore.clearPendingServerFeedSeed,
+        replacePending: waveMessagesStore.replacePendingServerFeedSeed,
+        expire: waveMessagesStore.expireServerFeedSeed,
+        apply: waveMessagesStore.applyServerFeedSeed,
+        completeInitialRegistration:
+          waveMessagesStore.completeInitialServerFeedRegistration,
+      },
       fetchNextPageForWave: fetchNextPage,
       fetchAroundSerialNo,
       processIncomingDrop,
@@ -503,10 +587,10 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     dmWavesHookData.loadSubwavesForParent,
     dmWavesHookData.prefetchSubwavesForParent,
     dmWavesHookData.loadingSubwaveParentIds,
-    dmWavesHookData.markWaveRead,
     dmWavesHookData.restoreWaveUnreadCount,
+    markDirectMessageRead,
     activeWaveId,
-    activeWaveData,
+    resolvedActiveWaveData,
     setActiveWaveAndRegister,
     requestMainWavesList,
     requestDirectMessagesList,
@@ -514,6 +598,12 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     waveMessagesStore.subscribe,
     waveMessagesStore.unsubscribe,
     registerWave,
+    waveMessagesStore.registerPendingServerFeedSeed,
+    waveMessagesStore.clearPendingServerFeedSeed,
+    waveMessagesStore.replacePendingServerFeedSeed,
+    waveMessagesStore.expireServerFeedSeed,
+    waveMessagesStore.applyServerFeedSeed,
+    waveMessagesStore.completeInitialServerFeedRegistration,
     fetchNextPage,
     fetchAroundSerialNo,
     processIncomingDrop,

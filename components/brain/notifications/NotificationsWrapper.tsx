@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import { flushSync } from "react-dom";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { NotificationDisplayItem } from "@/types/feed.types";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -10,6 +11,7 @@ import NotificationItems from "./NotificationItems";
 import { useRouter } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 
 type WaveWithChatScope = ExtendedDrop["wave"] & {
   is_direct_message?: boolean | undefined;
@@ -48,10 +50,24 @@ export default function NotificationsWrapper({
 }: NotificationsWrapperProps) {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
+  const prefetchWaveData = usePrefetchWaveData();
+  const keyboardPrimerRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    if (activeDrop || document.activeElement !== keyboardPrimerRef.current) {
+      return;
+    }
+
+    keyboardPrimerRef.current?.blur();
+  }, [activeDrop]);
+
+  const focusKeyboardPrimer = useCallback(() => {
+    keyboardPrimerRef.current?.focus({ preventScroll: true });
+  }, []);
 
   const onDropContentClick = useCallback(
     (drop: ExtendedDrop) => {
-      if (!drop?.wave?.id) {
+      if (!drop.wave.id) {
         return;
       }
 
@@ -75,17 +91,43 @@ export default function NotificationsWrapper({
 
   const onReply = useCallback(
     (param: DropInteractionParams) => {
-      setActiveDrop({
+      const nextActiveDrop = {
         action: ActiveDropAction.REPLY,
         drop: param.drop,
         partId: param.partId,
-      });
+      };
+      prefetchWaveData(param.drop.wave.id);
+
+      if (isApp) {
+        // WKWebView only opens the soft keyboard when focus starts inside the
+        // user gesture. This hidden textarea is already mounted; the real
+        // Lexical editor takes focus during the synchronous reply render.
+        focusKeyboardPrimer();
+        flushSync(() => {
+          setActiveDrop(nextActiveDrop);
+        });
+        return;
+      }
+
+      setActiveDrop(nextActiveDrop);
     },
-    [setActiveDrop]
+    [focusKeyboardPrimer, isApp, prefetchWaveData, setActiveDrop]
   );
 
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-gap-3">
+      {isApp && (
+        <textarea
+          ref={keyboardPrimerRef}
+          tabIndex={-1}
+          aria-hidden="true"
+          autoCapitalize="none"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
+          className="tw-pointer-events-none tw-fixed tw-bottom-0 tw-left-0 tw-h-px tw-w-px tw-opacity-0"
+        />
+      )}
       {loadingOlder && (
         <div className="tw-flex tw-w-full tw-justify-center tw-py-3">
           <div className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-400">

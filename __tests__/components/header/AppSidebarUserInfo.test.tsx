@@ -53,11 +53,13 @@ function setup(options: any) {
       options.connectedAccountUnreadNotifications ?? {},
     connectedAccounts: options.connectedAccounts ?? [],
     canAddConnectedAccount: options.canAddConnectedAccount ?? false,
+    seizeConnectOpen: options.seizeConnectOpen ?? false,
     seizeAddConnectedAccount: jest.fn(),
     seizeSwitchConnectedAccount: jest.fn(),
   });
   (useAuth as jest.Mock).mockReturnValue({
     activeProfileProxy: options.activeProfileProxy,
+    setToast: jest.fn(),
   });
   (useIdentity as jest.Mock).mockReturnValue({ profile: options.profile });
   return render(<AppSidebarUserInfo onNavigate={options.onNavigate} />);
@@ -145,7 +147,7 @@ describe("AppSidebarUserInfo", () => {
     expect(onNavigate).toHaveBeenCalledTimes(1);
   });
 
-  it("does not navigate when clicking handle text", async () => {
+  it("navigates when clicking handle text", async () => {
     const onNavigate = jest.fn();
     setup({
       address: "0xabc",
@@ -155,7 +157,19 @@ describe("AppSidebarUserInfo", () => {
     });
 
     await userEvent.click(screen.getByText("bob"));
-    expect(onNavigate).not.toHaveBeenCalled();
+    expect(onNavigate).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses the user fallback when the profile label is blank", () => {
+    setup({
+      address: null,
+      activeProfileProxy: null,
+      profile: { handle: "   " },
+    });
+
+    expect(
+      screen.getByRole("link", { name: "Open user profile" })
+    ).toHaveAttribute("href", "/profile");
   });
 
   it("keeps level control outside profile link", () => {

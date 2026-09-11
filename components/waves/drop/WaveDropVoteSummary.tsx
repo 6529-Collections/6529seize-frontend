@@ -2,6 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import Button from "@/components/utils/button/Button";
 import {
   WAVE_VOTING_LABELS,
   WAVE_VOTE_STATS_LABELS,
@@ -17,9 +18,6 @@ interface WaveDropVoteSummaryProps {
   readonly onVoteClick: () => void;
   readonly winningThreshold?: number | null | undefined;
 }
-
-const PRIMARY_BUTTON_CLASSES =
-  "tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-flex tw-items-center tw-rounded-lg tw-bg-iron-200 tw-text-iron-950 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-white hover:tw-bg-iron-300 hover:tw-ring-iron-300 tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer";
 
 export const WaveDropVoteSummary = ({
   drop,
@@ -104,13 +102,14 @@ export const WaveDropVoteSummary = ({
       )}
 
       {canShowVote && (
-        <button
+        <Button
           type="button"
           onClick={onVoteClick}
-          className={PRIMARY_BUTTON_CLASSES}
+          variant="primary"
+          size="md"
         >
           Vote
-        </button>
+        </Button>
       )}
     </div>
   );

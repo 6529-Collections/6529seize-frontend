@@ -146,6 +146,51 @@ describe("getReactionErrorMessage", () => {
     ).toBe("Unauthorized");
   });
 
+  it("maps a raw Unauthorized body even when the content type claims JSON", () => {
+    expect(
+      getReactionErrorMessage(
+        createStructuredReactionError({
+          body: "Unauthorized",
+          headers: new Headers({ "Content-Type": "application/json" }),
+          message: "Unauthorized",
+          status: 401,
+        }),
+        "Error adding reaction"
+      )
+    ).toBe("Unauthorized");
+  });
+
+  it("preserves a structured message ahead of the unauthorized status fallback", () => {
+    expect(
+      getReactionErrorMessage(
+        createStructuredReactionError({
+          body: JSON.stringify({
+            message: "Sign in with the wallet that owns this profile.",
+          }),
+          message: "Unauthorized",
+          status: 401,
+        }),
+        "Error adding reaction"
+      )
+    ).toBe("Sign in with the wallet that owns this profile.");
+  });
+
+  it.each([403, 500])(
+    "keeps the safe fallback for an opaque %s response",
+    (status) => {
+      expect(
+        getReactionErrorMessage(
+          createStructuredReactionError({
+            body: "Unauthorized",
+            message: "Unauthorized",
+            status,
+          }),
+          "Error adding reaction"
+        )
+      ).toBe("Error adding reaction");
+    }
+  );
+
   it("maps unauthorized status when response is null", () => {
     expect(
       getReactionErrorMessage(
@@ -156,6 +201,36 @@ describe("getReactionErrorMessage", () => {
         "Error adding reaction"
       )
     ).toBe("Unauthorized");
+  });
+
+  it("maps the exact disabled-wave capability response", () => {
+    expect(
+      getReactionErrorMessage(
+        createStructuredReactionError({
+          body: JSON.stringify({
+            error: "Chatting and reacting is not enabled in this wave",
+          }),
+          message: "Chatting and reacting is not enabled in this wave",
+          status: 403,
+        }),
+        "Error adding reaction"
+      )
+    ).toBe("Reactions are disabled for this wave.");
+  });
+
+  it("maps a 504 to clear reconciliation guidance", () => {
+    expect(
+      getReactionErrorMessage(
+        createStructuredReactionError({
+          body: JSON.stringify({ error: "Endpoint request timed out" }),
+          message: "Endpoint request timed out",
+          status: 504,
+        }),
+        "Error adding reaction"
+      )
+    ).toBe(
+      "The reaction request timed out. Refreshing the latest reaction state; wait before trying again."
+    );
   });
 
   it("maps rate-limit status when the structured body is blank", () => {
@@ -312,16 +387,16 @@ describe("getReactionErrorMessage", () => {
     );
   });
 
-  it("does not use the raw error message when an unsafe body is present", () => {
+  it("maps the unauthorized status without exposing an unsafe body or message", () => {
     expect(
       getReactionErrorMessage(
         createStructuredReactionError({
           body: "<html><body>Bad Gateway</body></html>",
-          message: "Unauthorized",
+          message: "<html><body>Bad Gateway</body></html>",
           status: 401,
         }),
         "Error adding reaction"
       )
-    ).toBe("Error adding reaction");
+    ).toBe("Unauthorized");
   });
 });

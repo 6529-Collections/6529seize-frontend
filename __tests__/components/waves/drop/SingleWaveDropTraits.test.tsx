@@ -2,11 +2,11 @@ import { render, screen, fireEvent, within } from "@testing-library/react";
 import { SingleWaveDropTraits } from "@/components/waves/drop/SingleWaveDropTraits";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import type { ReactNode } from "react";
 
 // Mock dependencies
-jest.mock("@/hooks/isMobileDevice", () => ({
+jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
   __esModule: true,
   default: jest.fn(() => false),
 }));
@@ -47,7 +47,7 @@ jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => {
             ReactActual.createElement(
               "button",
               { type: "button", onClick: onClose },
-              "Close panel"
+              "Close"
             ),
             children
           )
@@ -55,9 +55,10 @@ jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => {
   };
 });
 
-const mockedUseIsMobileDevice = useIsMobileDevice as jest.MockedFunction<
-  typeof useIsMobileDevice
->;
+const mockedUseIsMobileLayoutViewport =
+  useIsMobileLayoutViewport as jest.MockedFunction<
+    typeof useIsMobileLayoutViewport
+  >;
 
 describe("SingleWaveDropTraits", () => {
   const createMockDrop = (
@@ -93,7 +94,7 @@ describe("SingleWaveDropTraits", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedUseIsMobileDevice.mockReturnValue(false);
+    mockedUseIsMobileLayoutViewport.mockReturnValue(false);
   });
 
   describe("trait card interaction", () => {
@@ -123,7 +124,7 @@ describe("SingleWaveDropTraits", () => {
     });
 
     it("renders mobile trait cards as tappable buttons", () => {
-      mockedUseIsMobileDevice.mockReturnValue(true);
+      mockedUseIsMobileLayoutViewport.mockReturnValue(true);
       const value = "Readable mobile artist value";
       const drop = createMockDrop([createMetadata("artist", value)], "");
       drop.parts = [];
@@ -146,7 +147,7 @@ describe("SingleWaveDropTraits", () => {
     });
 
     it("opens and closes a full-value mobile dialog", () => {
-      mockedUseIsMobileDevice.mockReturnValue(true);
+      mockedUseIsMobileLayoutViewport.mockReturnValue(true);
       const value =
         "Parent value with enough detail to need the full mobile bottom sheet";
       const drop = createMockDrop([createMetadata("parent", value)], "");
@@ -167,13 +168,37 @@ describe("SingleWaveDropTraits", () => {
         "tw-break-words"
       );
 
-      fireEvent.click(
-        within(dialog).getByRole("button", { name: "Close panel" })
-      );
+      fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
 
       expect(
         screen.queryByRole("dialog", { name: "Parent" })
       ).not.toBeInTheDocument();
+    });
+
+    it("does not reopen a trait dialog after leaving compact layout", () => {
+      mockedUseIsMobileLayoutViewport.mockReturnValue(true);
+      const value = "Detailed parent value";
+      const drop = createMockDrop([createMetadata("parent", value)], "");
+      drop.parts = [];
+      const { rerender } = render(<SingleWaveDropTraits drop={drop} />);
+
+      fireEvent.click(screen.getByText("Show all"));
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: `View full Parent trait: ${value}`,
+        })
+      );
+      expect(
+        screen.getByRole("dialog", { name: "Parent" })
+      ).toBeInTheDocument();
+
+      mockedUseIsMobileLayoutViewport.mockReturnValue(false);
+      rerender(<SingleWaveDropTraits drop={drop} />);
+      expect(screen.queryByRole("dialog", { name: "Parent" })).toBeNull();
+
+      mockedUseIsMobileLayoutViewport.mockReturnValue(true);
+      rerender(<SingleWaveDropTraits drop={drop} />);
+      expect(screen.queryByRole("dialog", { name: "Parent" })).toBeNull();
     });
   });
 

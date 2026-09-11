@@ -10,18 +10,29 @@ jest.mock('@/helpers/image.helpers', () => ({
 
 describe('DropListItemContentNftDetails', () => {
   const referencedNft = { contract: 'c', token: '1', name: 'Token' } as any;
-  const nft = { token: { collection: { image: 'url' } } } as any;
+  const nft = { imageUrl: 'url' } as any;
 
   it('renders image and name', () => {
-    render(<DropListItemContentNftDetails referencedNft={referencedNft} nft={nft} />);
+    const { container } = render(
+      <DropListItemContentNftDetails
+        referencedNft={referencedNft}
+        nft={nft}
+      />
+    );
     expect(getScaledImageUri).toHaveBeenCalledWith('url', 'W_AUTO_H_50');
-    expect(screen.getByAltText('Seize')).toHaveAttribute('src', 'scaled');
+    expect(container.querySelector('img')).toHaveAttribute('src', 'scaled');
+    expect(container.querySelector('img')).toHaveAttribute('alt', '');
     expect(screen.getByText('Token')).toBeInTheDocument();
   });
 
   it('handles missing image', () => {
-    render(<DropListItemContentNftDetails referencedNft={referencedNft} nft={null} />);
+    const { container } = render(
+      <DropListItemContentNftDetails
+        referencedNft={referencedNft}
+        nft={null}
+      />
+    );
     expect(screen.getByText('Token')).toBeInTheDocument();
-    expect(screen.queryByAltText('Seize')).toBeNull();
+    expect(container.querySelector('img')).toBeNull();
   });
 });

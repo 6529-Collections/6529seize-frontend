@@ -116,10 +116,12 @@ describe("WalletChecker", () => {
       </TestWrapper>
     );
 
-    expect(screen.getByPlaceholderText("0x... or ENS")).toHaveValue(address);
-    await waitFor(() => {
-      expect(setAddressQuery).toHaveBeenCalledWith(address);
-    });
+    expect(screen.getByText("Viewing wallet")).toBeInTheDocument();
+    expect(screen.getByText(address)).toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText("0x... or ENS")
+    ).not.toBeInTheDocument();
+    expect(setAddressQuery).not.toHaveBeenCalled();
     expect(mockFetchUrl).toHaveBeenCalledWith(
       `https://api.test.6529.io/api/delegations/${address}`
     );

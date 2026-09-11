@@ -8,6 +8,7 @@ jest.mock('@/helpers/AllowlistToolHelpers', () => ({
 
 jest.mock('@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems', () => ({
   __esModule: true,
+  GROUP_IDENTITY_MIN_SEARCH_LENGTH: 3,
   default: (props: any) => (
     <div
       data-testid="identity-search-items"
@@ -19,16 +20,20 @@ jest.mock('@/components/groups/page/create/config/identities/select/GroupCreateI
 }));
 
 describe('GroupCreateIdentitiesSearch', () => {
-  it('opens on focus and resets on select', async () => {
+  it('opens after the minimum query length and resets on select', async () => {
     const onSelect = jest.fn();
     render(<GroupCreateIdentitiesSearch selectedWallets={[]} onIdentitySelect={onSelect} />);
 
     const input = screen.getByRole('textbox');
     await userEvent.click(input);
-    expect(screen.getByText('select')).toBeInTheDocument();
+    expect(screen.queryByText('select')).not.toBeInTheDocument();
 
-    await userEvent.type(input, 'abc');
+    await userEvent.type(input, 'ab');
+    expect(screen.queryByText('select')).not.toBeInTheDocument();
+
+    await userEvent.type(input, 'c');
     expect(input).toHaveValue('abc');
+    expect(screen.getByText('select')).toBeInTheDocument();
 
     await userEvent.click(screen.getByText('select'));
     expect(onSelect).toHaveBeenCalledWith({ wallet: '0x1' });
@@ -64,6 +69,7 @@ describe('GroupCreateIdentitiesSearch', () => {
 
     const input = screen.getByRole('textbox');
     await user.click(input);
+    await user.type(input, 'abc');
     expect(screen.getByRole('button', { name: 'select' })).toBeInTheDocument();
 
     await user.tab();

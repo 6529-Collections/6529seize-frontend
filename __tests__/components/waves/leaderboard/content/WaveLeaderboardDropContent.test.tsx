@@ -1,10 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { WaveLeaderboardDropContent } from "@/components/waves/leaderboard/content/WaveLeaderboardDropContent";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 
-jest.mock("next/navigation", () => ({ useRouter: jest.fn() }));
+jest.mock("next/navigation", () => ({
+  usePathname: jest.fn(),
+  useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
 const waveDropContentMock = jest.fn((props: any) => (
   <div
     data-testid="content"
@@ -21,10 +25,14 @@ jest.mock("@/components/waves/drops/WaveDropReactions", () => ({
 }));
 
 const routerMock = useRouter as jest.Mock;
+const pathnameMock = usePathname as jest.Mock;
+const searchParamsMock = useSearchParams as jest.Mock;
 
 describe("WaveLeaderboardDropContent", () => {
   beforeEach(() => {
     waveDropContentMock.mockClear();
+    pathnameMock.mockReturnValue("/waves/w");
+    searchParamsMock.mockReturnValue(new URLSearchParams());
   });
 
   it("navigates on drop click and renders reactions", () => {
@@ -67,5 +75,43 @@ describe("WaveLeaderboardDropContent", () => {
         contentPresentation: "quorumCompact",
       })
     );
+  });
+
+  it("renders proposal cards with a working full-detail action", () => {
+    const push = jest.fn();
+    routerMock.mockReturnValue({ push });
+    const drop = {
+      id: "drop-1",
+      title: null,
+      wave: { id: "w" },
+      serial_no: 5,
+      metadata: [],
+      parts_count: 1,
+      parts: [
+        {
+          part_id: 1,
+          content: "Proposal title\n\nProposal body",
+          media: [],
+          attachments: [],
+        },
+      ],
+      nft_links: [],
+    } as any;
+
+    render(
+      <WaveLeaderboardDropContent
+        drop={drop}
+        contentPresentation="proposalCard"
+      />
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Proposal title" })
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Read full: Proposal title" })
+    );
+
+    expect(push).toHaveBeenCalledWith("/waves/w?drop=drop-1");
   });
 });

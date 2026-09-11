@@ -33,6 +33,7 @@ const renderContent = (
       canManageOwnOfficialWave={true}
       containerWidth={600}
       onCreateCuration={jest.fn()}
+      onAddPost={jest.fn()}
       profileIdentity={{ id: "profile-1", handle: "alice" }}
       areCurationsError={false}
       areCurationsFetching={false}

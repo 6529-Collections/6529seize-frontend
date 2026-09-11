@@ -215,18 +215,23 @@ describe("useSidebarWaveTree", () => {
     });
   });
 
-  it("keeps parent unread metadata separate from unread subwave metadata", () => {
+  it("reconciles the aggregate with loaded subwave unread counts", () => {
     const wavesWithParentAndSubwaveUnread = [
       createMockMinimalWave({
         id: "parent",
         hasSubwaves: true,
         unreadDropsCount: 2,
-        unreadFollowedSubwaveDrops: 7,
+        unreadSubwaveDrops: 7,
       }),
       createMockMinimalWave({
-        id: "child",
+        id: "first-child",
         parentWaveId: "parent",
         unreadDropsCount: 9,
+      }),
+      createMockMinimalWave({
+        id: "second-child",
+        parentWaveId: "parent",
+        unreadDropsCount: 4,
       }),
     ];
     const { result } = renderHook(() =>
@@ -240,7 +245,7 @@ describe("useSidebarWaveTree", () => {
 
     expect(rows[0]).toMatchObject({
       rowType: "wave",
-      unreadSubwaveDropsCount: 7,
+      unreadSubwaveDropsCount: 13,
       wave: expect.objectContaining({
         unreadDropsCount: 2,
       }),
@@ -248,7 +253,7 @@ describe("useSidebarWaveTree", () => {
     expect(rows[1]).toMatchObject({
       rowType: "subwaves-toggle",
       hasUnreadSubwaves: true,
-      unreadSubwaveDropsCount: 7,
+      unreadSubwaveDropsCount: 13,
     });
   });
 
@@ -274,6 +279,41 @@ describe("useSidebarWaveTree", () => {
     expect(
       globalThis.sessionStorage.getItem("sidebar-wave-tree-expansion-v1")
     ).toBeNull();
+  });
+
+  it("ignores a persisted collapse while its subwave is active", () => {
+    globalThis.sessionStorage.setItem(
+      "sidebar-wave-tree-expansion-v1",
+      JSON.stringify({
+        expandedParentIds: ["parent"],
+        collapsedParentIds: ["parent"],
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useSidebarWaveTree({
+        waves,
+        activeWaveId: "older-child",
+      })
+    );
+
+    expect(
+      getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
+    ).toEqual([
+      "parent",
+      "parent:subwaves-toggle",
+      "parent:older-child",
+      "parent:newer-child",
+    ]);
+    expect(
+      JSON.parse(
+        globalThis.sessionStorage.getItem("sidebar-wave-tree-expansion-v1") ??
+          "{}"
+      )
+    ).toEqual({
+      expandedParentIds: ["parent"],
+      collapsedParentIds: ["parent"],
+    });
   });
 
   it("does not reload the same active parent when the expand callback changes", () => {
@@ -312,7 +352,7 @@ describe("useSidebarWaveTree", () => {
     ]);
   });
 
-  it("lets manual collapse hide the active subwave parent rows", () => {
+  it("keeps active subwave parent rows visible when collapse is requested", () => {
     const onParentExpand = jest.fn();
     const { result } = renderHook(() =>
       useSidebarWaveTree({
@@ -338,27 +378,30 @@ describe("useSidebarWaveTree", () => {
 
     expect(
       getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
-    ).toEqual(["parent", "parent:subwaves-toggle"]);
+    ).toEqual([
+      "parent",
+      "parent:subwaves-toggle",
+      "parent:older-child",
+      "parent:newer-child",
+    ]);
     expect(onParentExpand).not.toHaveBeenCalled();
   });
 
-  it("reopens a manually collapsed active subwave parent", () => {
+  it("applies an active-parent collapse after navigation leaves the subwave", () => {
     const onParentExpand = jest.fn();
-    const { result } = renderHook(() =>
-      useSidebarWaveTree({
-        waves,
-        activeWaveId: "older-child",
-        onParentExpand,
-      })
+    const { result, rerender } = renderHook(
+      ({ activeWaveId }: { readonly activeWaveId: string | null }) =>
+        useSidebarWaveTree({
+          waves,
+          activeWaveId,
+          onParentExpand,
+        }),
+      {
+        initialProps: {
+          activeWaveId: "older-child" as string | null,
+        },
+      }
     );
-
-    act(() => {
-      result.current.toggleParent("parent");
-    });
-
-    expect(
-      getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
-    ).toEqual(["parent", "parent:subwaves-toggle"]);
 
     act(() => {
       result.current.toggleParent("parent");
@@ -372,8 +415,13 @@ describe("useSidebarWaveTree", () => {
       "parent:older-child",
       "parent:newer-child",
     ]);
-    expect(onParentExpand).toHaveBeenCalledTimes(1);
-    expect(onParentExpand).toHaveBeenLastCalledWith("parent");
+
+    rerender({ activeWaveId: null });
+
+    expect(
+      getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
+    ).toEqual(["parent", "parent:subwaves-toggle"]);
+    expect(onParentExpand).not.toHaveBeenCalled();
   });
 
   it("loads a direct active subwave parent without showing it expanded before rows exist", () => {
@@ -433,7 +481,7 @@ describe("useSidebarWaveTree", () => {
     const parentContainer = createMockMinimalWave({
       id: "parent-container",
       followedSubwavesCount: 1,
-      unreadFollowedSubwaveDrops: 2,
+      unreadSubwaveDrops: 2,
     });
     const onParentExpand = jest.fn();
     const { result } = renderHook(() =>
@@ -474,7 +522,7 @@ describe("useSidebarWaveTree", () => {
     const mutedParentContainer = createMockMinimalWave({
       id: "muted-parent-container",
       followedSubwavesCount: 1,
-      unreadFollowedSubwaveDrops: 2,
+      unreadSubwaveDrops: 2,
       isMuted: true,
     });
     const unreadChild = createMockMinimalWave({

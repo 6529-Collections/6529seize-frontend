@@ -27,14 +27,19 @@ participatory submissions in the configured memes wave.
 
 1. Open quick vote from any available trigger.
 2. Quick vote opens a full dialog skeleton while it loads the unrated memes
-   queue plus recent amount memory from newest to oldest.
+   queue and remembered vote amounts.
 3. Review the current meme preview, including artwork, title, description,
-   author, timestamp, remaining voting power, and remaining queue count.
+   author, and timestamp. Submission counts appear at the top; remaining voting
+   power appears above the voting controls.
 4. Vote by either:
+   - selecting `Vote` with the amount shown on the button
    - tapping a remembered amount button
-   - entering a custom amount
-   - swiping right on mobile using the currently selected amount
-5. Skip the current meme by clicking `Skip` or swiping left on mobile.
+   - opening `Change vote amount`, entering an amount, and selecting `Vote` or
+     pressing Enter
+   - swiping right on a touch screen in the mobile layout using the currently
+     selected amount
+5. Skip the current meme by clicking `Skip` or swiping left on a touch screen in
+   the mobile layout.
 6. After each vote or skip, quick vote advances to the next eligible meme.
 7. When no unrated memes remain, or remaining power reaches zero, the dialog
    ends with `You're all caught up`.
@@ -44,13 +49,22 @@ participatory submissions in the configured memes wave.
 - Expanded surfaces show an `Uncast Power` card with remaining power plus
   `{count} unexplored`; compact surfaces show the remaining count only.
 - Quick amount buttons remember up to five recent vote amounts per profile and
-  memes wave. The most recent remembered amount is marked `Last used`.
-- When remembered amounts exist, quick vote opens on that amount row first and
-  exposes `Change vote amount` to switch into custom entry.
-- If no recent amounts are stored yet, quick vote opens with the custom-amount
-  panel expanded.
-- On desktop, descriptions longer than four lines start collapsed with a
-  `See more` action; `See less` returns the panel to the compact view.
+  memes wave. The most recent remembered amount is highlighted.
+- The bottom control bar places `Change vote amount` on the left, `Vote` in the
+  center, and `Skip` on the right.
+- Custom entry starts closed, including when there are no remembered amounts.
+  Select `Change vote amount` to open it. Closing the editor keeps the typed
+  draft for reopening on the same submission; typing alone does not save a
+  remembered amount for later submissions.
+- In the native app's mobile layout, the dialog shrinks when the keyboard opens
+  to keep the amount input and voting controls above it.
+- Remembered amounts appear above the control bar while custom entry is closed.
+  Selecting one submits that amount.
+- Descriptions start collapsed to two lines in the mobile layout and four on
+  desktop. `See more` appears only when text is hidden; `See less` collapses it
+  again.
+- Swipe chevrons appear only on touch screens in the mobile layout. In a narrow
+  browser window without touch input, use the `Vote` and `Skip` buttons.
 - Custom amounts are normalized to a whole number and capped at the current
   remaining voting power.
 - `Skip` defers the current meme instead of discarding it permanently.

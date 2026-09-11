@@ -1,14 +1,12 @@
 "use client";
 
-import {
-  DELEGATION_ALL_ADDRESS,
-  DELEGATION_CONTRACT,
-} from "@/constants/constants";
+import Button from "@/components/utils/button/Button";
+import TooltipIconButton from "@/components/common/TooltipIconButton";
+import { DELEGATION_ALL_ADDRESS } from "@/constants/constants";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import { useEnsResolution } from "@/hooks/useEnsResolution";
 import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   useEffect,
   useEffectEvent,
@@ -16,22 +14,27 @@ import {
   type ComponentPropsWithoutRef,
   type ReactNode,
 } from "react";
-import { Tooltip } from "react-tooltip";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import type { DelegationCollection } from "./delegation-constants";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
-import type { DelegationWriteParams } from "./delegation-shared";
+import type {
+  DelegationWriteParams,
+  DelegationWriteSettledHandler,
+} from "./delegation-shared";
 import { useOrignalDelegatorEnsResolution } from "./delegation-shared";
-import styles from "./Delegation.module.css";
+import type { DelegationToastState } from "./DelegationToast";
+import {
+  DELEGATION_CARD_CLASS_NAME,
+  DELEGATION_FIELD_CLASS_NAME,
+  DELEGATION_FIELD_LABEL_CLASS_NAME,
+} from "./delegation-ui";
 
 const FORM_ROW_CLASS =
   "tw-grid tw-grid-cols-1 tw-gap-2 tw-pb-4 sm:tw-grid-cols-12 sm:tw-gap-4";
 const FORM_ROW_COMPACT_CLASS =
   "tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-12 sm:tw-gap-4";
-const INPUT_CLASS =
-  "tw-block tw-w-full tw-min-w-0 tw-border tw-border-solid tw-border-iron-300 tw-bg-white tw-px-3 tw-py-2 tw-text-base tw-leading-6 tw-text-black focus:tw-border-primary-400 focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-opacity-75";
 const RADIO_CLASS =
-  "tw-mr-2 tw-h-4 tw-w-4 tw-cursor-pointer tw-border-0 tw-bg-white tw-text-black focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
+  "tw-h-4 tw-w-4 tw-cursor-pointer tw-border tw-border-solid tw-border-white/20 tw-bg-black/30 tw-text-primary-400 focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
 
 function getLabelSpanClass(span: number) {
   if (span === 4) {
@@ -63,6 +66,41 @@ export function DelegationFormRow(
   );
 }
 
+export function DelegationFormShell(
+  props: Readonly<{
+    title: string;
+    description?: string | undefined;
+    closeTitle?: string | undefined;
+    showClose?: boolean | undefined;
+    onHide: () => void;
+    children: ReactNode;
+  }>
+) {
+  return (
+    <section className={`${DELEGATION_CARD_CLASS_NAME} tw-p-4 sm:tw-p-6`}>
+      <header className="tw-flex tw-items-start tw-justify-between tw-gap-4">
+        <div>
+          <h2 className="tw-mb-2 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
+            {props.title}
+          </h2>
+          {props.description && (
+            <p className="tw-mb-0 tw-text-base tw-leading-6 tw-text-iron-300">
+              {props.description}
+            </p>
+          )}
+        </div>
+        {props.showClose !== false && (
+          <DelegationCloseButton
+            onHide={props.onHide}
+            title={props.closeTitle ?? props.title}
+          />
+        )}
+      </header>
+      <div className="tw-mt-6">{props.children}</div>
+    </section>
+  );
+}
+
 export function DelegationFormField(
   props: Readonly<{
     children: ReactNode;
@@ -86,7 +124,7 @@ export function DelegationFormInput(props: ComponentPropsWithoutRef<"input">) {
   return (
     <input
       {...inputProps}
-      className={`${styles["formInput"]} ${INPUT_CLASS} ${className ?? ""}`}
+      className={`${DELEGATION_FIELD_CLASS_NAME} ${className ?? ""}`}
     />
   );
 }
@@ -98,7 +136,7 @@ export function DelegationFormSelect(
   return (
     <select
       {...selectProps}
-      className={`${styles["formInput"]} ${INPUT_CLASS} ${className ?? ""}`}
+      className={`${DELEGATION_FIELD_CLASS_NAME} ${className ?? ""}`}
     >
       {children}
     </select>
@@ -115,7 +153,7 @@ export function DelegationRadio(
   const { label, className, ...inputProps } = props;
   return (
     <label
-      className={`${styles["newDelegationFormToggle"]} tw-inline-flex tw-items-center ${className ?? ""}`}
+      className={`tw-mr-4 tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-2 tw-py-2 tw-text-base tw-text-iron-100 ${className ?? ""}`}
     >
       <input {...inputProps} type="radio" className={RADIO_CLASS} />
       <span>{label}</span>
@@ -159,34 +197,20 @@ function DelegationAddressInput(
 export function DelegationFormLabel(
   props: Readonly<{ title: string; tooltip: string; span?: number | undefined }>
 ) {
-  const tooltipId = `delegation-form-label-${props.title
-    .toLowerCase()
-    .replace(/\s+/g, "-")}`;
-
   return (
-    <label
-      className={`tw-flex tw-items-center ${getLabelSpanClass(
+    <div
+      className={`tw-flex tw-items-center sm:tw-min-h-11 ${DELEGATION_FIELD_LABEL_CLASS_NAME} ${getLabelSpanClass(
         props.span ?? 3
       )}`}
     >
-      {props.title}
-      <FontAwesomeIcon
-        className={styles["infoIcon"]}
+      <span>{props.title}</span>
+      <TooltipIconButton
+        className="tw-ml-1 tw-text-iron-400 hover:tw-bg-white/[0.05] hover:tw-text-iron-200"
         icon={faInfoCircle}
-        data-tooltip-id={tooltipId}
-      ></FontAwesomeIcon>
-      <Tooltip
-        id={tooltipId}
-        place="top"
-        style={{
-          backgroundColor: "#1F2937",
-          color: "white",
-          padding: "4px 8px",
-        }}
-      >
-        {props.tooltip}
-      </Tooltip>
-    </label>
+        iconClassName="tw-size-3.5 tw-text-current"
+        tooltipText={props.tooltip}
+      />
+    </div>
   );
 }
 
@@ -208,7 +232,6 @@ export function DelegationFormOriginalDelegatorFormGroup(
       <DelegationFormField>
         <DelegationFormInput
           aria-label="Original Delegator"
-          className={styles["formInputDisabled"]}
           type="text"
           value={
             orignalDelegatorEnsResolution.data
@@ -238,7 +261,6 @@ export function DelegationAddressDisabledInput(
   return (
     <DelegationFormInput
       aria-label={props.label ?? "Address"}
-      className={styles["formInputDisabled"]}
       type="text"
       value={displayValue}
       disabled
@@ -357,9 +379,11 @@ export function DelegationSubmitGroups(
     writeParams: DelegationWriteParams;
     showCancel: boolean;
     gasError?: string | undefined;
+    onWriteSettled?: DelegationWriteSettledHandler | undefined;
+    isDestructive?: boolean | undefined;
     validate: () => string[];
     onHide: () => void;
-    onSetToast: (toast: { title: string; message: ReactNode }) => void;
+    onSetToast: (toast: DelegationToastState) => void;
     submitBtnLabel?: string | undefined;
   }>
 ) {
@@ -368,6 +392,8 @@ export function DelegationSubmitGroups(
     writeParams,
     showCancel,
     gasError,
+    onWriteSettled,
+    isDestructive = false,
     validate,
     onHide,
     onSetToast,
@@ -379,16 +405,14 @@ export function DelegationSubmitGroups(
     hash: writeDelegation.data,
   });
   const [errors, setErrors] = useState<string[]>([]);
-  const emitToast = useEffectEvent(
-    (toast: { title: string; message: ReactNode }) => {
-      onSetToast(toast);
-    }
-  );
+  const emitToast = useEffectEvent((toast: DelegationToastState) => {
+    onSetToast(toast);
+  });
 
   function submitDelegation() {
     const newErrors = validate();
-    if (newErrors.length > 0 || gasError) {
-      setErrors(newErrors);
+    setErrors(newErrors);
+    if (newErrors.length > 0) {
       window.scrollBy(0, 100);
     } else {
       const { functionName } = writeParams;
@@ -397,30 +421,25 @@ export function DelegationSubmitGroups(
         // the form components use to decide whether functionName is set.
         return;
       }
-      writeDelegation.writeContract({ ...writeParams, functionName });
+      const contractParams = { ...writeParams, functionName };
+      if (onWriteSettled) {
+        writeDelegation.writeContract(contractParams, {
+          onSettled: onWriteSettled,
+        });
+      } else {
+        writeDelegation.writeContract(contractParams);
+      }
       onSetToast({
+        status: "confirm_wallet",
         title,
-        message: "Confirm in your wallet...",
       });
     }
-  }
-
-  function getTransactionAnchor(hash: `0x${string}`) {
-    return (
-      <a
-        href={getTransactionLink(DELEGATION_CONTRACT.chain_id, hash)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={styles["etherscanLink"]}
-      >
-        view
-      </a>
-    );
   }
 
   useEffect(() => {
     if (writeDelegation.error) {
       emitToast({
+        status: "error",
         title,
         message: getTransactionErrorToastMessage(
           writeDelegation.error,
@@ -431,33 +450,25 @@ export function DelegationSubmitGroups(
     if (writeDelegation.data) {
       if (waitWriteDelegation.isLoading) {
         emitToast({
+          status: "submitted",
           title,
-          message: (
-            <>
-              Transaction submitted...{" "}
-              {getTransactionAnchor(writeDelegation.data)}
-              <br />
-              Waiting for confirmation...
-            </>
-          ),
+          transactionHash: writeDelegation.data,
         });
       } else if (waitWriteDelegation.isSuccess) {
         emitToast({
+          status: "success",
           title,
-          message: (
-            <>
-              Transaction Successful!{" "}
-              {getTransactionAnchor(writeDelegation.data)}
-            </>
-          ),
+          transactionHash: writeDelegation.data,
         });
       } else if (waitWriteDelegation.isError) {
         emitToast({
+          status: "error",
           title: `${title} Failed`,
           message: getTransactionErrorToastMessage(
             waitWriteDelegation.error,
             "Transaction failed while waiting for confirmation."
           ),
+          transactionHash: writeDelegation.data,
         });
       }
     }
@@ -479,43 +490,34 @@ export function DelegationSubmitGroups(
     <>
       <div className={`${FORM_ROW_COMPACT_CLASS} tw-pb-4 tw-pt-2`}>
         <div className="tw-hidden sm:tw-col-span-4 sm:tw-block"></div>
-        <div className="tw-flex tw-items-center tw-justify-center sm:tw-col-span-8">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-3 sm:tw-col-span-8">
           {showCancel && (
-            <button
+            <Button
               type="button"
-              className={styles["newDelegationCancelBtn"]}
+              variant="secondary"
+              size="lg"
               onClick={() => onHide()}
             >
               Cancel
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             type="button"
-            disabled={isLoading()}
-            className={`${styles["newDelegationSubmitBtn"]} ${
-              isLoading() ? `${styles["newDelegationSubmitBtnDisabled"]}` : ``
-            }`}
+            loading={isLoading()}
+            variant={isDestructive ? "destructive" : "primary"}
+            size="lg"
             onClick={(e) => {
               e.preventDefault();
               submitDelegation();
             }}
           >
-            {submitBtnLabel ?? "Submit"}{" "}
-            {isLoading() && (
-              <span className="tw-inline-block">
-                <output
-                  className={`${styles["loader"]} tw-inline-block tw-animate-spin tw-rounded-full tw-border-2 tw-border-solid tw-border-white/30 tw-border-t-white`}
-                >
-                  <span className="tw-sr-only">Transaction pending</span>
-                </output>
-              </span>
-            )}
-          </button>
+            {submitBtnLabel ?? "Submit"}
+          </Button>
         </div>
       </div>
       {(errors.length > 0 || gasError) && (
         <div
-          className={`${FORM_ROW_COMPACT_CLASS} tw-pb-2 tw-pt-2 ${styles["newDelegationError"]}`}
+          className={`${FORM_ROW_COMPACT_CLASS} tw-pb-2 tw-pt-2 tw-text-error`}
           role="alert"
           aria-live="assertive"
         >
@@ -540,25 +542,21 @@ export function DelegationExpiryCalendar(
   }>
 ) {
   return (
-    <div className="tw-w-full tw-p-0 tw-pt-3">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-w-full tw-px-3 md:tw-w-1/2 lg:tw-w-1/3">
-          <DelegationFormInput
-            aria-label="Expiry Date"
-            min={new Date().toISOString().slice(0, 10)}
-            type="date"
-            placeholder="Expiry Date"
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value) {
-                props.setDelegationDate(new Date(value));
-              } else {
-                props.setDelegationDate(undefined);
-              }
-            }}
-          />
-        </div>
-      </div>
+    <div className="tw-mt-3 tw-w-full sm:tw-max-w-xs">
+      <DelegationFormInput
+        aria-label="Expiry Date"
+        min={new Date().toISOString().slice(0, 10)}
+        type="date"
+        placeholder="Expiry Date"
+        onChange={(e) => {
+          const value = e.target.value;
+          if (value) {
+            props.setDelegationDate(new Date(value));
+          } else {
+            props.setDelegationDate(undefined);
+          }
+        }}
+      />
     </div>
   );
 }
@@ -569,60 +567,39 @@ export function DelegationTokenSelection(
   }>
 ) {
   return (
-    <div className="tw-w-full tw-p-0 tw-pt-3">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-w-full tw-px-3 md:tw-w-1/2 lg:tw-w-1/3">
-          <DelegationFormInput
-            aria-label="Token ID"
-            min={0}
-            type="number"
-            placeholder="Token ID"
-            onChange={(e) => {
-              const value = e.target.value;
-              try {
-                const intValue = parseInt(value);
-                props.setDelegationToken(intValue);
-              } catch {
-                props.setDelegationToken(undefined);
-              }
-            }}
-          />
-        </div>
-      </div>
+    <div className="tw-mt-3 tw-w-full sm:tw-max-w-xs">
+      <DelegationFormInput
+        aria-label="Token ID"
+        min={0}
+        type="number"
+        placeholder="Token ID"
+        onChange={(e) => {
+          const value = e.target.value;
+          try {
+            const intValue = parseInt(value);
+            props.setDelegationToken(intValue);
+          } catch {
+            props.setDelegationToken(undefined);
+          }
+        }}
+      />
     </div>
   );
 }
 
-export function DelegationCloseButton(
+function DelegationCloseButton(
   props: Readonly<{ title: string; onHide: () => void }>
 ) {
-  const tooltipId = `delegation-close-button-${props.title
-    .toLowerCase()
-    .replace(/\s+/g, "-")}`;
-
   return (
-    <>
-      <button
-        type="button"
-        aria-label={`Cancel ${props.title}`}
-        className={styles["closeNewDelegationForm"]}
-        onClick={() => props.onHide()}
-        data-tooltip-id={tooltipId}
-      >
-        <FontAwesomeIcon icon={faTimesCircle} aria-hidden />
-      </button>
-      <Tooltip
-        id={tooltipId}
-        place="top"
-        delayShow={250}
-        style={{
-          backgroundColor: "#1F2937",
-          color: "white",
-          padding: "4px 8px",
-        }}
-      >
-        {`Cancel ${props.title}`}
-      </Tooltip>
-    </>
+    <TooltipIconButton
+      aria-label={`Cancel ${props.title}`}
+      buttonShapeClassName="tw-rounded-lg"
+      buttonSizeClassName="tw-size-10"
+      className="tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.05] hover:tw-text-white"
+      icon={faTimesCircle}
+      iconClassName="tw-size-5 tw-text-current"
+      onClick={props.onHide}
+      tooltipText={`Cancel ${props.title}`}
+    />
   );
 }

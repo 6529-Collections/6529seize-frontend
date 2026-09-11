@@ -152,12 +152,14 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const initialize = async () => {
       let supported = false;
+      let initialStorageKeys: string[] | undefined;
       if (isCapacitor) {
         try {
-          await measureMobileLaunchAsync(
+          const keysResult = await measureMobileLaunchAsync(
             "app_wallets_secure_storage_support_check",
             () => SecureStoragePlugin.keys()
           );
+          initialStorageKeys = keysResult.value;
           supported = true;
         } catch (error) {
           console.error("SecureStoragePlugin is not available:", error);
@@ -181,9 +183,8 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       setFetchingAppWallets(true);
-      const wallets = await measureMobileLaunchAsync(
-        "app_wallets_load",
-        getAllWallets
+      const wallets = await measureMobileLaunchAsync("app_wallets_load", () =>
+        getAllWallets(initialStorageKeys)
       );
 
       if (isCancelled()) {
@@ -384,13 +385,11 @@ export const useAppWallets = () => {
   return context;
 };
 
-const getAllWallets = async () => {
+const getAllWallets = async (knownKeys?: string[]) => {
   let wallets: AppWallet[] = [];
   try {
-    const keysResult = await SecureStoragePlugin.keys();
-    const walletKeys = keysResult.value.filter((key) =>
-      key.startsWith(WALLET_KEY_PREFIX)
-    );
+    const keys = knownKeys ?? (await SecureStoragePlugin.keys()).value;
+    const walletKeys = keys.filter((key) => key.startsWith(WALLET_KEY_PREFIX));
 
     const walletValues = await Promise.all(
       walletKeys.map(async (key) => {

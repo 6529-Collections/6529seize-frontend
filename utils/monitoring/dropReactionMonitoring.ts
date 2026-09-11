@@ -2,8 +2,17 @@
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { extractRetryAfterMs } from "@/helpers/reactions/reactionRateLimit";
+import { isDropReactionRequestTimeout } from "@/helpers/reactions/dropReactionRequestQueue";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { getAwsRumPageId } from "@/utils/monitoring/mobileLaunchTimingSanitizers";
 import * as Sentry from "@sentry/nextjs";
+import {
+  classifyReactionError,
+  isExpectedProxyReactionPermissionDeniedError,
+  isExpectedStaleDropNotFoundError,
+  isExpectedWaveReactionDisabledError,
+  toErrorMessage,
+} from "./dropReactionErrorClassification";
 
 const RECONCILIATION_WINDOW_MS = 15_000;
 const DEDUPE_WINDOW_MS = 60_000;
@@ -16,31 +25,33 @@ const WEBSOCKET_STATUSES = new Set<string>(Object.values(WebSocketStatus));
 
 export type ReactionSource = "quick-react" | "picker" | "chip";
 type ReactionAction = "add" | "remove" | "replace";
-type ReactionErrorKind =
-  | "network"
-  | "auth"
-  | "rate-limit"
-  | "server"
-  | "endpoint-contract";
-
+type ReactionRequestMethod = "POST" | "DELETE";
+type ReactionDurationBucket =
+  | "under_250ms"
+  | "250ms_1s"
+  | "1s_5s"
+  | "5s_15s"
+  | "over_15s";
 interface ReactionMutationContext {
+  readonly isCurrentOwner?: (() => boolean) | undefined;
+  timeoutRecoveryPending?: boolean;
+  timeoutConfirmedAt?: number;
   readonly mutationId: string;
   readonly dropMutationSeq: number;
   readonly dropId: string;
-  readonly waveId: string;
   readonly source: ReactionSource;
   readonly action: ReactionAction;
   readonly previousReaction: string | null;
   readonly intendedReaction: string | null;
   readonly optimisticReaction: string | null;
-  readonly profileId: string | null;
+  readonly hasProfileContext: boolean;
   readonly startedAt: number;
-  readonly pathname: string | null;
+  readonly routeFamily: string;
   readonly visibilityState: string | null;
   readonly online: boolean | null;
   readonly websocketStatus: WebSocketStatus | null;
   endpoint?: string | null;
-  method?: string | null;
+  method?: ReactionRequestMethod | null;
   requestSentAt: number | null;
   apiSucceededAt: number | null;
   apiFailedAt: number | null;
@@ -114,11 +125,12 @@ function createMutationId(): string {
   return `reaction-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function getCurrentPathname(): string | null {
+function getCurrentRouteFamily(): string {
   if (typeof window === "undefined") {
-    return null;
+    return "unknown";
   }
-  return window.location.pathname || null;
+
+  return getAwsRumPageId(window.location.pathname);
 }
 
 function getVisibilityState(): string | null {
@@ -149,156 +161,84 @@ function toWebsocketStatus(
   return null;
 }
 
+function getReactionDurationBucket(durationMs: number): ReactionDurationBucket {
+  if (durationMs < 250) {
+    return "under_250ms";
+  }
+  if (durationMs < 1_000) {
+    return "250ms_1s";
+  }
+  if (durationMs < 5_000) {
+    return "1s_5s";
+  }
+  if (durationMs < 15_000) {
+    return "5s_15s";
+  }
+
+  return "over_15s";
+}
+
+function getRetryAfterBucket(
+  retryAfterMs: number | null
+): ReactionDurationBucket | undefined {
+  return retryAfterMs === null
+    ? undefined
+    : getReactionDurationBucket(retryAfterMs);
+}
+
+function getEndpointFamily(
+  context: ReactionMutationContext
+): "drop_reaction" | "other" | undefined {
+  if (!context.endpoint) {
+    return undefined;
+  }
+
+  return context.endpoint === `drops/${context.dropId}/reaction`
+    ? "drop_reaction"
+    : "other";
+}
+
+function getReactionStateData(
+  context: ReactionMutationContext
+): Record<string, unknown> {
+  return {
+    mutation_sequence: context.dropMutationSeq,
+    source: context.source,
+    action: context.action,
+    previous_reaction_present: context.previousReaction !== null,
+    intended_reaction_present: context.intendedReaction !== null,
+    optimistic_reaction_present: context.optimisticReaction !== null,
+    optimistic_matches_intended:
+      context.optimisticReaction === context.intendedReaction,
+    has_profile_context: context.hasProfileContext,
+    route_family: context.routeFamily,
+    visibility_state: context.visibilityState ?? undefined,
+    online: context.online ?? undefined,
+    websocket_status: context.websocketStatus ?? undefined,
+    endpoint_family: getEndpointFamily(context),
+    method: context.method ?? undefined,
+  };
+}
+
 function addReactionBreadcrumb(
   message: string,
   context: ReactionMutationContext,
   data: Record<string, unknown> = {},
   level: "info" | "warning" | "error" = "info"
 ): void {
-  Sentry.addBreadcrumb({
-    category: "reactions",
-    level,
-    message,
-    data: {
-      mutation_id: context.mutationId,
-      drop_mutation_seq: context.dropMutationSeq,
-      drop_id: context.dropId,
-      wave_id: context.waveId,
-      source: context.source,
-      action: context.action,
-      previous_reaction: context.previousReaction,
-      intended_reaction: context.intendedReaction,
-      optimistic_reaction: context.optimisticReaction,
-      profile_id: context.profileId ?? undefined,
-      pathname: context.pathname ?? undefined,
-      visibility_state: context.visibilityState ?? undefined,
-      online: context.online ?? undefined,
-      websocket_status: context.websocketStatus ?? undefined,
-      endpoint: context.endpoint ?? undefined,
-      method: context.method ?? undefined,
-      ...data,
-    },
-  });
-}
-
-function toErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
+  try {
+    Sentry.addBreadcrumb({
+      category: "reactions",
+      level,
+      message,
+      data: {
+        ...getReactionStateData(context),
+        ...data,
+      },
+    });
+  } catch {
+    // Reaction behavior must not depend on Sentry availability.
   }
-  if (typeof error === "string") {
-    return error;
-  }
-  if (typeof error === "object" && error) {
-    const typedError = error as {
-      message?: unknown;
-      error?: unknown;
-    };
-    if (typeof typedError.message === "string") {
-      return typedError.message;
-    }
-    if (typeof typedError.error === "string") {
-      return typedError.error;
-    }
-  }
-  return String(error);
-}
-
-function toCaptureExceptionInput(error: unknown): Error {
-  if (error instanceof Error) {
-    return error;
-  }
-  return new Error(toErrorMessage(error));
-}
-
-function parseStatusCode(status: unknown): number | null {
-  if (typeof status === "number" && Number.isFinite(status)) {
-    return status;
-  }
-
-  if (typeof status === "string") {
-    const normalizedStatus = status.trim();
-    if (!/^\d+$/.test(normalizedStatus)) {
-      return null;
-    }
-    const parsed = Number.parseInt(normalizedStatus, 10);
-    return Number.isNaN(parsed) ? null : parsed;
-  }
-
-  return null;
-}
-
-function extractErrorStatusCode(error: unknown): number | null {
-  if (error === null || typeof error !== "object") {
-    return null;
-  }
-
-  const typedError = error as {
-    status?: unknown;
-    code?: unknown;
-    response?: {
-      status?: unknown;
-    };
-    cause?: {
-      status?: unknown;
-      code?: unknown;
-      response?: {
-        status?: unknown;
-      };
-    };
-  };
-
-  return (
-    parseStatusCode(typedError.status) ??
-    parseStatusCode(typedError.response?.status) ??
-    parseStatusCode(typedError.code) ??
-    parseStatusCode(typedError.cause?.status) ??
-    parseStatusCode(typedError.cause?.response?.status) ??
-    parseStatusCode(typedError.cause?.code)
-  );
-}
-
-function isNetworkError(error: unknown): boolean {
-  if (error instanceof TypeError) {
-    return true;
-  }
-
-  const normalizedMessage = toErrorMessage(error).toLowerCase();
-  return (
-    normalizedMessage.includes("failed to fetch") ||
-    normalizedMessage.includes("load failed") ||
-    normalizedMessage.includes("networkerror") ||
-    normalizedMessage.includes("network error") ||
-    normalizedMessage.includes("network request failed")
-  );
-}
-
-function classifyReactionError(error: unknown): {
-  statusCode: number | null;
-  errorKind: ReactionErrorKind;
-} {
-  const statusCode = extractErrorStatusCode(error);
-
-  if (statusCode === 401 || statusCode === 403) {
-    return { statusCode, errorKind: "auth" };
-  }
-
-  if (statusCode === 429) {
-    return { statusCode, errorKind: "rate-limit" };
-  }
-
-  if (statusCode === 404 || statusCode === 405) {
-    return { statusCode, errorKind: "endpoint-contract" };
-  }
-
-  if (typeof statusCode === "number" && statusCode >= 500) {
-    return { statusCode, errorKind: "server" };
-  }
-
-  if (isNetworkError(error)) {
-    return { statusCode, errorKind: "network" };
-  }
-
-  return { statusCode, errorKind: "server" };
 }
 
 function captureReactionEvent({
@@ -314,21 +254,28 @@ function captureReactionEvent({
   tags: Record<string, string>;
   extra: Record<string, unknown>;
 }): void {
-  Sentry.withScope((scope) => {
-    scope.setLevel(level);
-    scope.setFingerprint(fingerprint);
-    Object.entries(tags).forEach(([key, value]) => {
-      scope.setTag(key, value);
+  try {
+    Sentry.withScope((scope) => {
+      scope.setLevel(level);
+      scope.setFingerprint(fingerprint);
+      Object.entries(tags).forEach(([key, value]) => {
+        scope.setTag(key, value);
+      });
+      scope.setExtras(extra);
+      Sentry.captureException(error);
     });
-    scope.setExtras(extra);
-    Sentry.captureException(error);
-  });
+  } catch {
+    // Reaction behavior must not depend on Sentry availability.
+  }
 }
 
 function recordSupersededResponse(
   context: ReactionMutationContext,
   now: number
 ): ReactionMutationResult {
+  if (context.isCurrentOwner?.() === false) {
+    return { isLatestMutation: false, supersededByMutationId: null };
+  }
   const latestMutationId = latestMutationIdByDrop.get(context.dropId);
   if (!latestMutationId || latestMutationId === context.mutationId) {
     return {
@@ -343,8 +290,9 @@ function recordSupersededResponse(
     context,
     {
       superseded: true,
-      superseded_by_mutation_id: latestMutationId,
-      time_since_mutation_ms: now - context.startedAt,
+      time_since_mutation_bucket: getReactionDurationBucket(
+        now - context.startedAt
+      ),
     },
     "warning"
   );
@@ -380,6 +328,7 @@ export function deriveReactionAction(
 }
 
 export function beginReactionMutation(params: {
+  isCurrentOwner?: (() => boolean) | undefined;
   dropId: string;
   waveId: string;
   source: ReactionSource;
@@ -397,18 +346,19 @@ export function beginReactionMutation(params: {
   dropMutationSeqByDrop.set(params.dropId, nextSeq);
 
   const context: ReactionMutationContext = {
+    isCurrentOwner: params.isCurrentOwner,
     mutationId: createMutationId(),
     dropMutationSeq: nextSeq,
     dropId: params.dropId,
-    waveId: params.waveId,
     source: params.source,
     action: params.action,
     previousReaction: toNullableReaction(params.previousReaction),
     intendedReaction: toNullableReaction(params.intendedReaction),
     optimisticReaction: toNullableReaction(params.optimisticReaction),
-    profileId: params.profileId ?? null,
+    hasProfileContext:
+      params.profileId !== null && params.profileId !== undefined,
     startedAt: now,
-    pathname: getCurrentPathname(),
+    routeFamily: getCurrentRouteFamily(),
     visibilityState: getVisibilityState(),
     online: getOnlineStatus(),
     websocketStatus: toWebsocketStatus(params.websocketStatus),
@@ -437,7 +387,7 @@ export function recordReactionRequestSent(
   context: ReactionMutationContext,
   params: {
     endpoint: string;
-    method: "POST" | "DELETE";
+    method: ReactionRequestMethod;
   }
 ): void {
   context.endpoint = params.endpoint;
@@ -463,7 +413,9 @@ export function recordReactionRequestSucceeded(
   const result = recordSupersededResponse(context, now);
 
   addReactionBreadcrumb("reaction.request_succeeded", context, {
-    latency_ms: now - (context.requestSentAt ?? context.startedAt),
+    latency_bucket: getReactionDurationBucket(
+      now - (context.requestSentAt ?? context.startedAt)
+    ),
   });
 
   return result;
@@ -479,6 +431,7 @@ export function recordReactionRequestFailed(
   const result = recordSupersededResponse(context, now);
 
   const { statusCode, errorKind } = classifyReactionError(error);
+  context.timeoutRecoveryPending = isDropReactionRequestTimeout(error);
   const latencyMs = now - (context.requestSentAt ?? context.startedAt);
   const errorMessage = toErrorMessage(error);
   const retryAfterMs =
@@ -489,10 +442,9 @@ export function recordReactionRequestFailed(
     context,
     {
       status_code: statusCode ?? undefined,
-      latency_ms: latencyMs,
+      latency_bucket: getReactionDurationBucket(latencyMs),
       error_kind: errorKind,
-      error_message: errorMessage,
-      retry_after_ms: retryAfterMs ?? undefined,
+      retry_after_bucket: getRetryAfterBucket(retryAfterMs),
     },
     "warning"
   );
@@ -502,6 +454,76 @@ export function recordReactionRequestFailed(
   }
 
   if (errorKind === "rate-limit") {
+    clearActiveIntentForContext(context);
+    return result;
+  }
+
+  if (
+    isExpectedWaveReactionDisabledError({
+      dropId: context.dropId,
+      endpoint: context.endpoint,
+      error,
+      method: context.method,
+    })
+  ) {
+    addReactionBreadcrumb(
+      "reaction.wave_capability_disabled",
+      context,
+      {
+        status_code: statusCode ?? undefined,
+        latency_bucket: getReactionDurationBucket(latencyMs),
+        error_kind: errorKind,
+        captured: false,
+      },
+      "warning"
+    );
+    clearActiveIntentForContext(context);
+    return result;
+  }
+
+  if (
+    isExpectedProxyReactionPermissionDeniedError({
+      dropId: context.dropId,
+      endpoint: context.endpoint,
+      errorMessage,
+      method: context.method,
+      statusCode,
+    })
+  ) {
+    addReactionBreadcrumb(
+      "reaction.proxy_permission_denied",
+      context,
+      {
+        status_code: statusCode ?? undefined,
+        latency_bucket: getReactionDurationBucket(latencyMs),
+        error_kind: errorKind,
+        captured: false,
+      },
+      "warning"
+    );
+    clearActiveIntentForContext(context);
+    return result;
+  }
+
+  if (
+    isExpectedStaleDropNotFoundError({
+      dropId: context.dropId,
+      endpoint: context.endpoint,
+      errorMessage,
+      statusCode,
+    })
+  ) {
+    addReactionBreadcrumb(
+      "reaction.stale_drop_not_found",
+      context,
+      {
+        status_code: statusCode ?? undefined,
+        latency_bucket: getReactionDurationBucket(latencyMs),
+        error_kind: errorKind,
+        captured: false,
+      },
+      "warning"
+    );
     clearActiveIntentForContext(context);
     return result;
   }
@@ -517,12 +539,12 @@ export function recordReactionRequestFailed(
 
   if (!shouldCaptureEvent(dedupeKey, now)) {
     context.failureCaptured = true;
-    clearActiveIntentForContext(context);
+    if (!context.timeoutRecoveryPending) clearActiveIntentForContext(context);
     return result;
   }
 
   captureReactionEvent({
-    error: toCaptureExceptionInput(error),
+    error: new Error("Drop reaction request failed"),
     level: errorKind === "server" ? "error" : "warning",
     fingerprint: [REACTION_FEATURE, errorKind],
     tags: {
@@ -533,31 +555,30 @@ export function recordReactionRequestFailed(
       error_kind: errorKind,
     },
     extra: {
-      mutation_id: context.mutationId,
-      drop_mutation_seq: context.dropMutationSeq,
-      drop_id: context.dropId,
-      wave_id: context.waveId,
-      previous_reaction: context.previousReaction,
-      intended_reaction: context.intendedReaction,
-      optimistic_reaction: context.optimisticReaction,
-      profile_id: context.profileId ?? undefined,
-      pathname: context.pathname ?? undefined,
-      visibility_state: context.visibilityState ?? undefined,
-      online: context.online ?? undefined,
-      websocket_status: context.websocketStatus ?? undefined,
-      endpoint: context.endpoint ?? undefined,
-      method: context.method ?? undefined,
+      ...getReactionStateData(context),
       status_code: statusCode ?? undefined,
-      latency_ms: latencyMs,
+      latency_bucket: getReactionDurationBucket(latencyMs),
       error_kind: errorKind,
-      error_message: errorMessage,
-      retry_after_ms: retryAfterMs ?? undefined,
+      retry_after_bucket: getRetryAfterBucket(retryAfterMs),
     },
   });
 
   context.failureCaptured = true;
-  clearActiveIntentForContext(context);
+  if (!context.timeoutRecoveryPending) clearActiveIntentForContext(context);
   return result;
+}
+
+export function recordReactionTimeoutReconciled(
+  context: ReactionMutationContext,
+  outcome: "confirmed" | "unconfirmed" | "superseded"
+): void {
+  context.timeoutRecoveryPending = false;
+  addReactionBreadcrumb("reaction.timeout_reconciled", context, { outcome });
+  if (outcome === "confirmed") {
+    context.timeoutConfirmedAt = Date.now();
+  } else {
+    clearActiveIntentForContext(context);
+  }
 }
 
 export function recordReactionRollbackApplied(
@@ -597,8 +618,32 @@ export function recordReactionRealtimeReconciliation(params: {
     return defaultResult;
   }
 
+  if (context.isCurrentOwner?.() === false) {
+    clearActiveIntentForContext(context);
+    return defaultResult;
+  }
+
   const expectedReaction = context.intendedReaction;
   const timeSinceMutationMs = now - context.startedAt;
+  // Queueing can outlast the reconciliation window. Start protection from
+  // the request/confirmation, and keep it through out-of-order WS refetches.
+  const reconciliationStartedAt =
+    context.timeoutConfirmedAt ??
+    context.apiSucceededAt ??
+    context.requestSentAt ??
+    context.startedAt;
+  const withinReconciliationWindow =
+    now - reconciliationStartedAt <= RECONCILIATION_WINDOW_MS;
+  if (
+    !withinReconciliationWindow &&
+    !context.timeoutRecoveryPending &&
+    (context.timeoutConfirmedAt !== undefined ||
+      (context.realtimeReconciledAt !== null &&
+        context.apiSucceededAt !== null))
+  ) {
+    clearActiveIntentForContext(context);
+    return defaultResult;
+  }
   const websocketStatus =
     toWebsocketStatus(params.websocketStatus) ?? undefined;
   const resultBase = {
@@ -606,12 +651,18 @@ export function recordReactionRealtimeReconciliation(params: {
     serverReaction,
   };
 
-  if (serverReaction === expectedReaction) {
+  if (
+    params.drop.context_profile_context &&
+    serverReaction === expectedReaction
+  ) {
     context.realtimeReconciledAt = now;
     addReactionBreadcrumb("reaction.realtime_reconciled", context, {
       reconciled_from: "ws_refetch",
-      server_reaction: serverReaction ?? undefined,
-      time_since_mutation_ms: timeSinceMutationMs,
+      expected_reaction_present: expectedReaction !== null,
+      server_reaction_present: serverReaction !== null,
+      server_matches_expected: true,
+      time_since_mutation_bucket:
+        getReactionDurationBucket(timeSinceMutationMs),
       websocket_status: websocketStatus,
     });
     return {
@@ -620,16 +671,22 @@ export function recordReactionRealtimeReconciliation(params: {
     };
   }
 
-  if (timeSinceMutationMs <= RECONCILIATION_WINDOW_MS) {
+  if (
+    context.timeoutRecoveryPending ||
+    (context.requestSentAt === null && context.apiFailedAt === null) ||
+    withinReconciliationWindow
+  ) {
     addReactionBreadcrumb(
       "reaction.realtime_superseded",
       context,
       {
         reconciled_from: "ws_refetch",
-        expected_reaction: expectedReaction ?? undefined,
-        server_reaction: serverReaction ?? undefined,
-        superseded_by_mutation_id: context.mutationId,
-        time_since_mutation_ms: timeSinceMutationMs,
+        expected_reaction_present: expectedReaction !== null,
+        server_reaction_present: serverReaction !== null,
+        server_matches_expected: false,
+        superseded: true,
+        time_since_mutation_bucket:
+          getReactionDurationBucket(timeSinceMutationMs),
         websocket_status: websocketStatus,
       },
       "warning"
@@ -654,8 +711,11 @@ export function recordReactionRealtimeReconciliation(params: {
     context,
     {
       reconciled_from: "ws_refetch",
-      server_reaction: serverReaction ?? undefined,
-      time_since_mutation_ms: timeSinceMutationMs,
+      expected_reaction_present: expectedReaction !== null,
+      server_reaction_present: serverReaction !== null,
+      server_matches_expected: false,
+      time_since_mutation_bucket:
+        getReactionDurationBucket(timeSinceMutationMs),
       websocket_status: websocketStatus,
     },
     "warning"
@@ -692,26 +752,17 @@ export function recordReactionRealtimeReconciliation(params: {
       action: context.action,
     },
     extra: {
-      mutation_id: context.mutationId,
-      drop_mutation_seq: context.dropMutationSeq,
-      drop_id: context.dropId,
-      wave_id: context.waveId,
-      previous_reaction: context.previousReaction,
-      intended_reaction: context.intendedReaction,
-      optimistic_reaction: context.optimisticReaction,
-      server_reaction: serverReaction ?? undefined,
-      profile_id: context.profileId ?? undefined,
-      pathname: context.pathname ?? undefined,
-      visibility_state: context.visibilityState ?? undefined,
-      online: context.online ?? undefined,
+      ...getReactionStateData(context),
+      expected_reaction_present: expectedReaction !== null,
+      server_reaction_present: serverReaction !== null,
+      server_matches_expected: false,
       websocket_status:
         toWebsocketStatus(params.websocketStatus) ??
         context.websocketStatus ??
         undefined,
-      endpoint: context.endpoint ?? undefined,
-      method: context.method ?? undefined,
       reconciled_from: "ws_refetch",
-      time_since_mutation_ms: timeSinceMutationMs,
+      time_since_mutation_bucket:
+        getReactionDurationBucket(timeSinceMutationMs),
       anomaly_kind: ANOMALY_OPTIMISTIC_REVERTED,
     },
   });

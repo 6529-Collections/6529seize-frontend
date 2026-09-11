@@ -17,8 +17,8 @@ context-aware `Back`).
 
 ## Entry Points
 
-- Web sidebar primary concepts (`NFTs`, `Waves`, `DMs`, `About`) plus
-  gated `Drop Forge` when available and connected utility rows
+- Web sidebar primary concepts (`NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529`,
+  `About`) plus gated `Drop Forge` when available and connected utility rows
   such as `Notifications`.
 - Small-screen header menu button (opens the sidebar in overlay mode).
 - App bottom navigation tabs (`Discovery`, `Waves`, `Messages`, `Home`,
@@ -38,8 +38,8 @@ context-aware `Back`).
    - web: direct sidebar rows
    - app: fixed bottom tabs
 3. Open secondary destinations:
-   - web: use lower connected `Notifications`/`Profile`, disconnected
-     `Share`, expand sidebar groups, or open search
+   - web: use lower `Search` and `Share` controls, connected
+     `Notifications` and account controls, expanded sidebar groups, or search
    - app: open sidebar drawer for grouped routes and account actions, or use
      the connected profile avatar shortcut in the drawer header
 4. Confirm route change via active states and unread indicators.
@@ -63,8 +63,13 @@ context-aware `Back`).
   connected wallet has landing access.
 - Small-screen web: open overlay menu, pick a route, and continue after
   auto-close on navigation.
-- Desktop web share: while disconnected use the standalone lower `Share` row;
-  while connected open the user menu and choose `Share`.
+- Join 6529 jump: use the primary `Join 6529` row to open `/join-6529`.
+- Museum jump: use the direct `Museum` row after `NFTs` to open
+  `/museum/network` in web and app sidebars.
+- Desktop web share: use the standalone lower `Share` row on a supported route,
+  whether connected or disconnected.
+- Mobile page share: use the header Share action on a supported small-screen
+  web or native-app route.
 - App secondary route jump: open app drawer and choose grouped `About` routes
   for network/reference/tool destinations.
 - App profile jump from the drawer: open app drawer and tap the connected
@@ -81,6 +86,8 @@ context-aware `Back`).
 - `Waves` is one-click from the web sidebar. `Discover Waves` is secondary in
   the Waves experience and searchable, while the app bottom bar keeps a
   dedicated `Discovery` tab for `/discover`.
+- `Museum` is one-click from both sidebar variants and has no dedicated app
+  bottom-navigation tab.
 - The app-drawer profile avatar is connected-only and resolves handle-first
   profile routing with wallet fallback.
 - In the app drawer header, only the connected profile avatar is a profile
@@ -91,9 +98,9 @@ context-aware `Back`).
   `Network & Reputation`, wallet/delegation routes in `Delegation & Wallets`,
   and open-data/tool routes in `Data & Developer Tools`. `Drop Forge` appears
   only when the connected wallet can access `/drop-forge`.
-- Sidebar `Share` is web-only: disconnected desktop web shows a standalone row,
-  connected desktop web moves it into the user menu, and Capacitor/native plus
-  mobile-device web hide it.
+- The sidebar `Share` row is desktop-web-only and remains standalone whether
+  connected or disconnected. Supported small-screen web and native-app routes
+  expose page sharing from the header instead.
 - `Messages`/`DMs` and `Notifications` unread dots require a connected profile
   with unread state.
 - Bottom navigation is not rendered during single-drop open or inline mobile
@@ -129,7 +136,7 @@ context-aware `Back`).
 - [Web Sidebar Navigation](feature-sidebar-navigation.md)
 - [App Sidebar Menu](feature-app-sidebar-menu.md)
 - [Header Search Modal](feature-header-search-modal.md)
-- [Share Modal](feature-share-modal.md)
+- [Page Sharing and Device Connection](feature-share-modal.md)
 - [Back Button](feature-back-button.md)
 - [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md)
 - [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)

@@ -7,7 +7,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { useSearchParams } from "next/navigation";
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import { buildCollectedStatsViewModel } from "./stats/helpers";
 import { CollectedStatsDetailsPanel } from "./stats/subcomponents/CollectedStatsDetailsPanel";
 import { CollectedStatsHeader } from "./stats/subcomponents/CollectedStatsHeader";
@@ -15,6 +15,9 @@ import { CollectedStatsSeasons } from "./stats/subcomponents/CollectedStatsSeaso
 import type { DisplaySeason } from "./stats/types";
 import { useCollectedStatsData } from "./stats/useCollectedStatsData";
 import { useDesktopSeasonRowCapacity } from "./stats/useDesktopSeasonRowCapacity";
+import CollectEntryLink from "@/components/collect/CollectEntryLink";
+import ButtonLink from "@/components/utils/button/ButtonLink";
+import { t } from "@/i18n/messages";
 
 const getCollapsedStartedSeasons = ({
   startedSeasons,
@@ -54,6 +57,7 @@ interface UserPageCollectedStatsProps {
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
   readonly initialStatsData: UserPageStatsInitialData;
+  readonly autoScrollDetailsOnOpen?: boolean | undefined;
   readonly locale?: SupportedLocale | undefined;
   readonly activeCollection?: CollectedCollectionType | null | undefined;
   readonly activeSeasonNumber?: number | null | undefined;
@@ -72,6 +76,7 @@ export default function UserPageCollectedStats({
   profile,
   activeAddress,
   initialStatsData,
+  autoScrollDetailsOnOpen = false,
   locale = DEFAULT_LOCALE,
   activeCollection = null,
   activeSeasonNumber = null,
@@ -89,6 +94,29 @@ export default function UserPageCollectedStats({
   const [isDesktopSeasonListExpanded, setIsDesktopSeasonListExpanded] =
     useState(false);
   const detailsId = useId();
+  const detailsScrollTargetRef = useRef<HTMLDivElement>(null);
+
+  const handleToggleDetails = () => {
+    if (isDetailsOpen) {
+      setIsDetailsOpen(false);
+      return;
+    }
+
+    setIsDetailsOpen(true);
+    if (!autoScrollDetailsOnOpen) {
+      return;
+    }
+
+    globalThis.requestAnimationFrame(() => {
+      const prefersReducedMotion =
+        typeof globalThis.matchMedia === "function" &&
+        globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      detailsScrollTargetRef.current?.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "start",
+      });
+    });
+  };
 
   const {
     statsPath,
@@ -158,56 +186,60 @@ export default function UserPageCollectedStats({
   return (
     <section className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-black">
       <div className="tw-p-4 sm:tw-p-5">
-        <div className="tw-space-y-4">
-          <CollectedStatsHeader
-            metrics={mainMetrics}
-            activeCollection={activeCollection}
-            isDetailsOpen={isDetailsOpen}
-            detailsId={detailsId}
-            locale={locale}
-            onToggleDetails={() => setIsDetailsOpen((current) => !current)}
-            onCollectionShortcut={onCollectionShortcut}
-          />
-
-          <CollectedStatsSeasons
-            allSeasonCount={allSeasons.length}
-            startedSeasons={startedSeasons}
-            visibleStartedSeasons={visibleStartedSeasons}
-            hiddenStartedSeasonCount={hiddenStartedSeasonCount}
-            notStartedSeasons={notStartedSeasons}
-            activeSeasonId={activeSeasonId}
-            activeSeasonNumber={activeSeasonNumber}
-            locale={locale}
-            hasTouchScreen={hasTouchScreen}
-            isDesktopLayout={isDesktopSeasonsLayout}
-            isDesktopSeasonListExpanded={isDesktopSeasonListExpanded}
-            desktopSeasonsRef={desktopSeasonsRef}
-            onActivateSeason={(seasonId) =>
-              setPreferredSeasonPreview({
-                seasonId,
-                activeSeasonFilterId,
-              })
-            }
-            onSeasonShortcut={onSeasonShortcut}
-            onToggleExpanded={() =>
-              setIsDesktopSeasonListExpanded((current) => !current)
-            }
-          />
-        </div>
+        <CollectedStatsHeader
+          metrics={mainMetrics}
+          activeCollection={activeCollection}
+          isDetailsOpen={isDetailsOpen}
+          detailsId={detailsId}
+          locale={locale}
+          onToggleDetails={handleToggleDetails}
+          onCollectionShortcut={onCollectionShortcut}
+        />
       </div>
 
-      <CollectedStatsDetailsPanel
-        isOpen={isDetailsOpen}
-        detailsId={detailsId}
-        statsPath={statsPath}
-        profile={profile}
-        activeAddress={activeAddress}
-        seasons={seasons}
-        tdh={tdh}
-        ownerBalance={ownerBalance}
-        balanceMemes={balanceMemes}
+      <CollectedStatsSeasons
+        allSeasonCount={allSeasons.length}
+        startedSeasons={startedSeasons}
+        visibleStartedSeasons={visibleStartedSeasons}
+        hiddenStartedSeasonCount={hiddenStartedSeasonCount}
+        notStartedSeasons={notStartedSeasons}
+        activeSeasonId={activeSeasonId}
+        activeSeasonNumber={activeSeasonNumber}
         locale={locale}
+        hasTouchScreen={hasTouchScreen}
+        isDesktopLayout={isDesktopSeasonsLayout}
+        isDesktopSeasonListExpanded={isDesktopSeasonListExpanded}
+        desktopSeasonsRef={desktopSeasonsRef}
+        onActivateSeason={(seasonId) =>
+          setPreferredSeasonPreview({
+            seasonId,
+            activeSeasonFilterId,
+          })
+        }
+        onSeasonShortcut={onSeasonShortcut}
+        onToggleExpanded={() =>
+          setIsDesktopSeasonListExpanded((current) => !current)
+        }
       />
+
+      <div ref={detailsScrollTargetRef} className="tw-scroll-mt-24">
+        <div className="tw-flex tw-flex-wrap tw-gap-2 tw-px-4 tw-py-4 sm:tw-px-5">
+          <CollectEntryLink collection="memes" intent={activeSeasonNumber === null ? "full_set" : "season"} definitionId={activeSeasonNumber === null ? undefined : String(activeSeasonNumber)} locale={locale} complete />
+          <ButtonLink href="/collect/orders" variant="tertiary" size="sm" className="tw-min-h-11">{t(locale, "collect.entry.manage")}</ButtonLink>
+        </div>
+        <CollectedStatsDetailsPanel
+          isOpen={isDetailsOpen}
+          detailsId={detailsId}
+          statsPath={statsPath}
+          profile={profile}
+          activeAddress={activeAddress}
+          seasons={seasons}
+          tdh={tdh}
+          ownerBalance={ownerBalance}
+          balanceMemes={balanceMemes}
+          locale={locale}
+        />
+      </div>
     </section>
   );
 }

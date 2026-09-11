@@ -7,11 +7,6 @@ jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: (...args: any[]) => useDropInteractionRules(...args),
 }));
 
-jest.mock("@/components/waves/drops/DropCurationButton", () => ({
-  __esModule: true,
-  default: () => <button data-testid="curation-button" type="button" />,
-}));
-
 jest.mock("@/components/waves/drops/WaveDropReactions", () => ({
   __esModule: true,
   default: () => <div data-testid="reactions" />,
@@ -47,6 +42,39 @@ describe("ParticipationDropFooter", () => {
     jest.clearAllMocks();
     useDropInteractionRules.mockReturnValue({ canShowVote: true });
   });
+
+  it.each([undefined, 10])(
+    "preserves the reaction view across an empty row with threshold %s",
+    (winningThreshold) => {
+      const drop = createDrop({
+        reactions: [{ reaction: ":wave:", profiles: [] }],
+      });
+      const { rerender } = render(
+        <ParticipationDropFooter
+          drop={drop}
+          winningThreshold={winningThreshold}
+        />
+      );
+      const view = screen.getByTestId("reactions");
+      expect(view).toBeVisible();
+      rerender(
+        <ParticipationDropFooter
+          drop={{ ...drop, reactions: [] }}
+          winningThreshold={winningThreshold}
+        />
+      );
+      expect(screen.getByTestId("reactions")).toBe(view);
+      expect(view).not.toBeVisible();
+      rerender(
+        <ParticipationDropFooter
+          drop={drop}
+          winningThreshold={winningThreshold}
+        />
+      );
+      expect(screen.getByTestId("reactions")).toBe(view);
+      expect(view).toBeVisible();
+    }
+  );
 
   it("renders ratings when the drop has raters", () => {
     render(<ParticipationDropFooter drop={createDrop()} />);
@@ -111,6 +139,27 @@ describe("ParticipationDropFooter", () => {
     );
   });
 
+  it("keeps chat proposal ratings and vote action on one row", () => {
+    render(
+      <ParticipationDropFooter
+        drop={createDrop()}
+        voteAction={<button data-testid="vote-action" type="button" />}
+        contentPresentation="proposalCard"
+        indentContent={false}
+      />
+    );
+
+    const actionRow = screen.getByTestId("vote-action").parentElement;
+    const footerRow = actionRow?.parentElement;
+    const footerSurface = footerRow?.parentElement;
+
+    expect(actionRow).toHaveClass("tw-ml-auto", "tw-w-auto", "tw-border-0");
+    expect(actionRow).not.toHaveClass("tw-w-full", "tw-border-t");
+    expect(footerRow).toHaveClass("tw-items-center", "tw-justify-between");
+    expect(footerRow).not.toHaveClass("tw-flex-col");
+    expect(footerSurface).toHaveClass("tw-bg-iron-800/20");
+  });
+
   it("keeps approval reactions above the approval footer controls", () => {
     render(
       <ParticipationDropFooter
@@ -166,20 +215,6 @@ describe("ParticipationDropFooter", () => {
     render(<ParticipationDropFooter drop={createDrop({ raters_count: 0 })} />);
 
     expect(screen.queryByTestId("ratings")).not.toBeInTheDocument();
-  });
-
-  it("keeps curation available when voting is closed", () => {
-    render(
-      <ParticipationDropFooter
-        drop={createDrop({
-          raters_count: 0,
-          context_profile_context: { curatable: true, curated: false } as any,
-        })}
-        isVotingClosed={true}
-      />
-    );
-
-    expect(screen.getByTestId("curation-button")).toBeInTheDocument();
   });
 
   it("keeps reactions visible when voting is closed", () => {

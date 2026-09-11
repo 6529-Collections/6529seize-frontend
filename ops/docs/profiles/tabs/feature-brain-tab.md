@@ -7,9 +7,12 @@ replies.
 The `Activity` card above the feed is documented separately in
 [Profile Brain Activity Heatmap](feature-brain-activity-heatmap.md).
 Clicking a drop body or quote preview opens that thread in Waves or Messages.
-The companion `Created Waves` and `Most Active In` surfaces inside this tab are
-documented separately in
+The companion `Created Waves` and `Recently Active In` surfaces inside this tab
+are documented separately in
 [Profile Brain Tab Wave Sidebar](feature-brain-wave-sidebar.md).
+On your own profile, the compact `Quick Tags` section appears beneath
+`Activity`. Its manager stays in the card; create and edit forms use a mobile
+bottom sheet and remain inline on wider screens.
 
 ## Location in the Site
 
@@ -36,15 +39,24 @@ documented separately in
    the tab loads the `Activity` card and first drop page.
 5. If the viewed profile exposes a Brain identity, the `Activity` card renders
    above the feed.
-6. Select a drop or quote preview to open its thread:
+6. On your own profile, use the `Quick Tags` section beneath `Activity` to open
+   the inline manager or a create/edit form. Mobile create and edit forms open
+   in a bottom sheet while the Brain page stays in place.
+7. Select a drop or quote preview to open its thread:
    - public wave drop: `/waves/{waveId}?serialNo={serialNo}`
    - direct-message drop: `/messages/{waveId}?serialNo={serialNo}`
-7. Scroll to load older drops.
+8. Scroll to load older drops.
 
 ## Common Scenarios
 
 - Visit someone else's profile Brain tab to read latest drops.
 - Visit your own profile Brain tab to review recent drops.
+- On your own profile, see up to three Quick Tags in the compact section; the
+  controls wrap at narrow widths, and `+N more` indicates additional tags and
+  opens the inline manager.
+- On mobile, selecting `New Quick Tag` or a Quick Tag to edit opens a
+  bottom-anchored sheet. Cancelling or dismissing it returns to the preceding
+  compact summary or manager without changing the Brain page.
 - Open a shared `/{user}/brain` link directly and stay on that route while the
   app decides whether Waves is available for the current viewer.
 - If Waves becomes available during that access check, the same
@@ -62,6 +74,7 @@ documented separately in
   navigation replaces the URL with `/{user}` and keeps the current query
   string.
 - Feed content renders only after profile resolution returns a handle.
+- Quick Tags are hidden when viewing another profile or acting through a proxy.
 
 ## Failure and Recovery
 
@@ -90,6 +103,7 @@ documented separately in
 - [Profiles Tabs Index](README.md)
 - [Profile Brain Activity Heatmap](feature-brain-activity-heatmap.md)
 - [Profile Brain Tab Wave Sidebar](feature-brain-wave-sidebar.md)
+- [Quick Tags](../../waves/composer/feature-personal-mention-shortcuts.md)
 - [Profile Navigation Flow](../navigation/flow-navigation.md)
 - [Profile Troubleshooting](../troubleshooting/troubleshooting-routes-and-tabs.md)
 - [Loading Status Indicators](../../shared/feature-loading-status-indicators.md)

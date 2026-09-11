@@ -286,6 +286,7 @@ describe("SeizeConnectContext switch sync guard", () => {
       ]);
       expect(mockUseUnreadNotifications).toHaveBeenCalledWith("alice", {
         enabled: true,
+        profileId: null,
       });
     });
 

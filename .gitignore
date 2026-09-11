@@ -13,6 +13,11 @@
 /playwright-report/
 /playwright/.cache/
 /.playwright-mcp/
+/.deployment-e2e-output/
+# Keep retired local operational artifacts out of commits.
+/.release-coordinator/
+/.deploy
+# Existing staging host storage, until its physical migration is complete.
 /storageState.json
 /playwright/.auth/
 storageState.json
@@ -20,6 +25,7 @@ storageState.json
 
 # next.js
 /.next/
+/.next-playwright-*/
 /out/
 # standalone/standalone-memes-mint
 /standalone/standalone-memes-mint/src/.next/
@@ -108,8 +114,15 @@ eslint-rule-summary.csv
 .cursor
 .cursorignore
 CLAUDE.md
-.claude
-.codex
+# Anchored on purpose: an unanchored `.claude` becomes a `**/.claude/**` ignore
+# inside knip, which silently drops every entry file knip resolves to an
+# absolute path when the checkout itself lives under .claude/worktrees/<wt>
+# (agent worktrees) — producing ~23 false unused-file/export findings.
+/.claude/
+/.codex/*
+!/.codex/environments/
+/.codex/environments/*
+!/.codex/environments/environment.toml
 .gemini
 .windsurfrules
 .agent

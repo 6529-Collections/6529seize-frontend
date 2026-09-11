@@ -37,6 +37,8 @@ export default function Providers({
   enableCookieConsent = true,
   enableMyStream = true,
   settingsMode = SeizeSettingsMode.REMOTE,
+  initialIsIos = false,
+  initialEulaConsentVersion,
 }: {
   readonly children: React.ReactNode;
   readonly enableVersionCheck?: boolean;
@@ -44,6 +46,8 @@ export default function Providers({
   readonly enableCookieConsent?: boolean;
   readonly enableMyStream?: boolean;
   readonly settingsMode?: SeizeSettingsMode;
+  readonly initialIsIos?: boolean;
+  readonly initialEulaConsentVersion?: string | undefined;
 }) {
   const sharedProviders = (
     <TitleProvider>
@@ -61,7 +65,6 @@ export default function Providers({
     <QueryClientSetup>
       <AppWalletsProvider>
         <WagmiSetup>
-          <CapacitorSetup />
           <IpfsImageSetup />
           <ReactQueryWrapper>
             <RefreshProvider>
@@ -83,21 +86,19 @@ export default function Providers({
                               disabled={!enableCookieConsent}
                             >
                               <MixpanelSetup />
-                              <EULAConsentProvider>
-                                <AppWebSocketProvider>
-                                  <LayoutProvider>
-                                    {enableMyStream ? (
-                                      <MyStreamProvider>
-                                        {sharedProviders}
-                                        <QuickDirectMessagesGate />
-                                      </MyStreamProvider>
-                                    ) : (
-                                      sharedProviders
-                                    )}
-                                  </LayoutProvider>
-                                  {enableVersionCheck && <NewVersionToast />}
-                                </AppWebSocketProvider>
-                              </EULAConsentProvider>
+                              <AppWebSocketProvider>
+                                <LayoutProvider>
+                                  {enableMyStream ? (
+                                    <MyStreamProvider>
+                                      {sharedProviders}
+                                      <QuickDirectMessagesGate />
+                                    </MyStreamProvider>
+                                  ) : (
+                                    sharedProviders
+                                  )}
+                                </LayoutProvider>
+                                {enableVersionCheck && <NewVersionToast />}
+                              </AppWebSocketProvider>
                             </CookieConsentProvider>
                           </NotificationsProvider>
                         </WaveEligibilityProvider>
@@ -114,8 +115,16 @@ export default function Providers({
   );
 
   return (
-    <EditingDropProvider>
-      <ActiveGroupProvider>{appProviders}</ActiveGroupProvider>
-    </EditingDropProvider>
+    <>
+      <CapacitorSetup />
+      <EULAConsentProvider
+        initialIsIos={initialIsIos}
+        initialConsentVersion={initialEulaConsentVersion}
+      >
+        <EditingDropProvider>
+          <ActiveGroupProvider>{appProviders}</ActiveGroupProvider>
+        </EditingDropProvider>
+      </EULAConsentProvider>
+    </>
   );
 }

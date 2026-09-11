@@ -3,6 +3,7 @@
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
+import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import type { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiReplyToDropResponse } from "@/generated/models/ApiReplyToDropResponse";
@@ -170,6 +171,14 @@ export const getOptimisticDrop = (
       dropRequest.is_additional_action_promised ?? false,
     hide_link_preview: false,
     mentioned_groups: dropRequest.mentioned_groups ?? [],
+    moderation: {
+      status: ApiDropModerationStatus.Visible,
+      can_view: true,
+    },
+    viewer_context: {
+      author_blocked: false,
+      drop_hidden: false,
+    },
     ...(poll ? { poll } : {}),
   };
 };

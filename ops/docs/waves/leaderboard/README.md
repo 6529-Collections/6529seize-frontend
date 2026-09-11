@@ -28,6 +28,9 @@ This area covers:
   sort options, curation-wave price filtering, and local-state behavior.
 - [Wave Leaderboard Gallery Cards](feature-gallery-cards.md): memes `Grid view`
   cards, media badges, and vote entry points.
+- [Compact Proposal Cards](../drop-actions/feature-proposal-cards.md):
+  configurable cards for standard proposal-bearing Waves and full-proposal
+  open behavior.
 
 ### Decision and Outcome Views
 

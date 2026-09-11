@@ -29,7 +29,7 @@ describe("TooltipIconButton", () => {
     fireEvent.mouseEnter(button);
     const tooltip = screen.getByRole("tooltip");
     expect(tooltip).toHaveTextContent("info");
-    expect(tooltip.className).toContain("tw-bottom-6");
+    expect(tooltip).toHaveClass("tw-bottom-full", "tw-mb-2");
 
     const describedBy = button.getAttribute("aria-describedby") ?? "";
     expect(describedBy).toContain("external-id");
@@ -50,7 +50,7 @@ describe("TooltipIconButton", () => {
     const button = screen.getByRole("button");
     fireEvent.mouseEnter(button);
     const tooltip = screen.getByRole("tooltip");
-    expect(tooltip.className).toContain("tw-top-6");
+    expect(tooltip).toHaveClass("tw-top-full", "tw-mt-2");
   });
 
   it("shows tooltip on focus and hides on blur triggered by keyboard navigation", async () => {

@@ -322,3 +322,43 @@ export async function fetchDelegationArticleHtml(
     `Unable to load delegation article ${slug}. ${errors.join("; ")}`
   );
 }
+
+const delegationArticleHtmlCache = new Map<
+  string,
+  DelegationArticleHtmlResult
+>();
+const delegationArticleHtmlRequests = new Map<
+  string,
+  Promise<DelegationArticleHtmlResult>
+>();
+
+export function loadDelegationArticleHtml(
+  slug: string,
+  fetchArticle: DelegationArticleFetch = fetch
+): Promise<DelegationArticleHtmlResult> {
+  const cached = delegationArticleHtmlCache.get(slug);
+  if (cached) {
+    return Promise.resolve(cached);
+  }
+
+  const pending = delegationArticleHtmlRequests.get(slug);
+  if (pending) {
+    return pending;
+  }
+
+  const request = fetchDelegationArticleHtml(slug, fetchArticle)
+    .then((result) => {
+      delegationArticleHtmlCache.set(slug, result);
+      return result;
+    })
+    .finally(() => {
+      delegationArticleHtmlRequests.delete(slug);
+    });
+
+  delegationArticleHtmlRequests.set(slug, request);
+  return request;
+}
+
+export function getCachedDelegationArticleHtml(slug: string) {
+  return delegationArticleHtmlCache.get(slug);
+}

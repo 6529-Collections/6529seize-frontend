@@ -1,0 +1,240 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamModuleRegistry.t.sol:RepricedRegistryModuleMock#function:0x01ffc9a7",
+          "declaringDefinitionId": "test/StreamModuleRegistry.t.sol:RepricedRegistryModuleMock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(bytes4,uint256)",
+          "functionKind": "constructor",
+          "id": "test/StreamModuleRegistry.t.sol:RepricedRegistryModuleMock#function:constructor(bytes4,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "extraInterfaceId",
+              "type": "bytes4"
+            },
+            {
+              "index": 1,
+              "name": "minimumProbeGas",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpSZXByaWNlZFJlZ2lzdHJ5TW9kdWxlTW9jayNmdW5jdGlvbjpjb25zdHJ1Y3RvcihieXRlczQsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 159,
+            "byteStart": 3867,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L123-L126",
+            "lineEnd": 126,
+            "lineStart": 123,
+            "snippetSha256": "sha256:ec7c920c473fa9eb543524f1f80200b6fb30bf4150cce206c42de506a0821d60",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:RepricedRegistryModuleMock#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpSZXByaWNlZFJlZ2lzdHJ5TW9kdWxlTW9jayNmdW5jdGlvbjoweDAxZmZjOWE3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 231,
+            "byteStart": 4032,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L128-L131",
+            "lineEnd": 131,
+            "lineStart": 128,
+            "snippetSha256": "sha256:307eec960f796dbc50106019c950face74135ffa3dcee42d09b4d0dd71a4ef33",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "_extraInterfaceId",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 3770,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L120",
+            "lineEnd": 120,
+            "lineStart": 120,
+            "snippetSha256": "sha256:10ee0f6c0e887ace062b9d637f0796197ff7b8cb5ec84d2e51d65133fb254fe5",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "_minimumProbeGas",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 3818,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L121",
+            "lineEnd": 121,
+            "lineStart": 121,
+            "snippetSha256": "sha256:128cf470f38bf205e245fcff8c168a9c462a870bacb2b482041e682f83c8eeb3",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamModuleRegistry.t.sol:RepricedRegistryModuleMock",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/ERC165.sol:ERC165",
+        "name": "ERC165"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpSZXByaWNlZFJlZ2lzdHJ5TW9kdWxlTW9jaw",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamModuleRegistry.t.sol:RepricedRegistryModuleMock",
+      "smart-contracts/ERC165.sol:ERC165",
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RepricedRegistryModuleMock",
+    "natspec": "@notice Simulates an ERC-165 read whose cost rose beyond the historical\n         30,000-gas convention.",
+    "range": {
+      "byteLength": 547,
+      "byteStart": 3718,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L119-L132",
+      "lineEnd": 132,
+      "lineStart": 119,
+      "snippetSha256": "sha256:a54e555ab5ddcab722d6d348bf4b3d1ddc0cbb1d5772089df97d0bc9f13e6831",
+      "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamModuleRegistry.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:RepricedRegistryModuleMock#function:0x01ffc9a7",
+      "definitionId": "test/StreamModuleRegistry.t.sol:RepricedRegistryModuleMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:RepricedRegistryModuleMock#function:constructor(bytes4,uint256)",
+      "definitionId": "test/StreamModuleRegistry.t.sol:RepricedRegistryModuleMock",
+      "severity": "advisory"
+    }
+  ]
+}

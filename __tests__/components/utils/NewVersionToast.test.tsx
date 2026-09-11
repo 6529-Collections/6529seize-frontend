@@ -3,6 +3,7 @@ import {
   MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE,
   MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE,
 } from "@/helpers/navigation.helpers";
+import { preserveWaveScrollPositionForReload } from "@/helpers/waves/wave-visible-serial.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIsVersionStale } from "@/hooks/useIsVersionStale";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -14,6 +15,14 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
+const mockPreserveCallSearches: string[] = [];
+jest.mock("@/helpers/waves/wave-visible-serial.helpers", () => ({
+  preserveWaveScrollPositionForReload: jest.fn(() => {
+    mockPreserveCallSearches.push(globalThis.location.search);
+  }),
+}));
+const mockedPreserveWaveScrollPosition =
+  preserveWaveScrollPositionForReload as jest.Mock;
 const mockedUseIsVersionStale = useIsVersionStale as jest.Mock;
 const mockedUseDeviceInfo = useDeviceInfo as jest.Mock;
 const NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY =
@@ -280,6 +289,20 @@ describe("NewVersionToast", () => {
     expect(globalThis.location.search).toBe("?wave=abc");
   });
 
+  it("pins the wave reading position after the toast param strip, before reload", () => {
+    mockedUseIsVersionStale.mockReturnValue(true);
+    mockPreserveCallSearches.length = 0;
+
+    render(<NewVersionToast />);
+    fireEvent.click(screen.getByRole("button"));
+
+    expect(mockedPreserveWaveScrollPosition).toHaveBeenCalledTimes(1);
+    // The pin must run against the cleaned URL so the toast override never
+    // survives into the pinned reload target.
+    expect(mockPreserveCallSearches[0]).not.toContain("showNewVersionToast");
+    expect(mockPreserveCallSearches[0]).toContain("wave=abc");
+  });
+
   it("tracks the measured mobile dock top while the dock compacts", async () => {
     mockedUseIsVersionStale.mockReturnValue(true);
     setMobileDockViewport(true);
@@ -329,11 +352,16 @@ describe("NewVersionToast", () => {
       isAppleMobile: true,
       isMobileDevice: true,
     });
-    setMobileDockViewport(true);
+    setMobileDockViewport(false);
 
     const { container } = render(<NewVersionToast />);
     const toastLayer = container.firstChild as HTMLElement;
 
+    expect(toastLayer).toHaveClass(
+      "tw-left-1/2",
+      "tw-right-auto",
+      "-tw-translate-x-1/2"
+    );
     expect(
       toastLayer.style.getPropertyValue(
         NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY
@@ -357,6 +385,42 @@ describe("NewVersionToast", () => {
     expect(
       toastLayer.style.getPropertyValue(NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY)
     ).toBe("1");
+  });
+
+  it("centers the wide native-app toast above the measured dock", async () => {
+    mockedUseIsVersionStale.mockReturnValue(true);
+    mockedUseDeviceInfo.mockReturnValue({
+      hasTouchScreen: true,
+      isApp: true,
+      isAppleMobile: true,
+      isMobileDevice: false,
+    });
+    setMobileDockViewport(false);
+    const dockRoot = createDockRoot();
+    createMeasuredDock({
+      height: 64,
+      parentElement: dockRoot,
+      top: 816,
+    });
+
+    const { container } = render(<NewVersionToast />);
+    const toastLayer = container.firstChild as HTMLElement;
+
+    expect(toastLayer).toHaveClass(
+      "tw-left-1/2",
+      "tw-right-auto",
+      "-tw-translate-x-1/2",
+      "tw-w-[min(calc(100vw-2rem),23.25rem)]"
+    );
+    expect(toastLayer).not.toHaveClass("sm:tw-bottom-7", "sm:tw-right-7");
+    expect(toastLayer).toHaveClass("sm:tw-scale-100");
+    await waitFor(() =>
+      expect(
+        toastLayer.style.getPropertyValue(
+          NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY
+        )
+      ).toBe("88px")
+    );
   });
 
   it("does not watch body mutations when mobile web has no dock root", async () => {

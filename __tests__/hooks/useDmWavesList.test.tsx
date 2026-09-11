@@ -1,7 +1,6 @@
 import { renderHook } from "@testing-library/react";
 import useDmWavesList from "@/hooks/useDmWavesList";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
-import { SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS } from "@/components/react-query-wrapper/utils/query-utils";
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
@@ -48,7 +47,7 @@ describe("useDmWavesList", () => {
     });
   });
 
-  it("sorts DMs by latest drop and uses foreground polling", () => {
+  it("sorts DMs by latest drop without configuring recurring polling", () => {
     const { result } = renderHook(() => useDmWavesList());
 
     expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
@@ -62,9 +61,10 @@ describe("useDmWavesList", () => {
         directMessage: true,
         viewerIdentityKey: "0xabc:primary",
         enabled: true,
-        refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
-        refetchIntervalInBackground: false,
       })
+    );
+    expect(useWavesV2Mock.mock.calls[0][0]).not.toHaveProperty(
+      "refetchInterval"
     );
   });
 

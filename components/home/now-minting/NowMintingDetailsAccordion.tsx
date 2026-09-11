@@ -1,5 +1,6 @@
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import { printMintDate } from "@/helpers/Helpers";
+import MemePageMainStageSubmissionLink from "@/components/the-memes/MemePageMainStageSubmissionLink";
 import Link from "next/link";
 
 interface NowMintingDetailsAccordionProps {
@@ -50,6 +51,10 @@ export default function NowMintingDetailsAccordion({
               View
             </Link>
           </div>
+          <MemePageMainStageSubmissionLink
+            memeCardId={nftId}
+            variant="details-row"
+          />
         </div>
       </div>
     </details>

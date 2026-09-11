@@ -1,0 +1,90 @@
+name: Resolve Production Artifact Metadata
+
+on:
+  workflow_call:
+    outputs:
+      artifact_id:
+        description: Exact artifact uploaded by this run's successful builder.
+        value: ${{ jobs.resolve.outputs.artifact_id }}
+      artifact_digest:
+        description: GitHub's digest of the uploaded artifact archive.
+        value: ${{ jobs.resolve.outputs.artifact_digest }}
+      producer_run_attempt:
+        description: Successful builder attempt that uploaded this artifact.
+        value: ${{ jobs.resolve.outputs.producer_run_attempt }}
+
+permissions:
+  actions: read
+
+jobs:
+  resolve:
+    name: Resolve uploaded production artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      artifact_id: ${{ steps.resolve.outputs.artifact_id }}
+      artifact_digest: ${{ steps.resolve.outputs.artifact_digest }}
+      producer_run_attempt: ${{ steps.resolve.outputs.producer_run_attempt }}
+    steps:
+      # No build secrets enter this reusable workflow. Short secret values can
+      # otherwise cause GitHub to redact ordinary SHA, digest, and ID outputs.
+      - name: Resolve artifact from the successful builder
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
+          [[ "$GITHUB_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$GITHUB_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$GITHUB_RUN_ATTEMPT" =~ ^[1-9][0-9]{0,8}$ ]]
+          metadata_root="$RUNNER_TEMP/production-artifact-metadata"
+          mkdir -p "$metadata_root"
+          gh api --paginate \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts?per_page=100" \
+            --jq '.artifacts' | jq -s 'add' > "$metadata_root/artifacts.json"
+          gh api --paginate \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs?filter=all&per_page=100" \
+            --jq '.jobs' | jq -s 'add' > "$metadata_root/jobs.json"
+          jq -e \
+            --arg name "production-frontend-${GITHUB_SHA}-${GITHUB_RUN_ID}" \
+            --arg sha "$GITHUB_SHA" \
+            --arg run_id "$GITHUB_RUN_ID" '
+              [.[] | select(.name == $name)] |
+              if length != 1 then error("Expected one exact production artifact") else .[0] end |
+              select(
+                .expired == false and
+                (.id | tostring | test("^[1-9][0-9]{0,19}$")) and
+                (.digest | test("^sha256:[a-f0-9]{64}$")) and
+                (.created_at | type) == "string" and
+                (.workflow_run.id | tostring) == $run_id and
+                .workflow_run.head_branch == "main" and
+                .workflow_run.head_sha == $sha
+              )
+            ' "$metadata_root/artifacts.json" > "$metadata_root/artifact.json"
+          # Failed-job reruns retain the earlier successful builder and its
+          # artifact. Bind the artifact to that attempt, not the current one.
+          producer_attempt="$(jq -er \
+            --slurpfile artifact "$metadata_root/artifact.json" \
+            --arg sha "$GITHUB_SHA" \
+            --arg run_id "$GITHUB_RUN_ID" \
+            --argjson current_attempt "$GITHUB_RUN_ATTEMPT" '
+              [.[] | select(
+                .name == "Build exact production artifact / Build exact production artifact" and
+                (.run_id | tostring) == $run_id and .head_sha == $sha and
+                .status == "completed" and .conclusion == "success" and
+                (.run_attempt | type) == "number" and
+                .run_attempt >= 1 and .run_attempt <= $current_attempt and
+                (.started_at | type) == "string" and
+                (.completed_at | type) == "string" and
+                .started_at <= $artifact[0].created_at and
+                .completed_at >= $artifact[0].created_at
+              )] |
+              if length != 1 then error("Expected one successful artifact producer") else .[0].run_attempt end
+            ' "$metadata_root/jobs.json")"
+          [[ "$producer_attempt" =~ ^[1-9][0-9]{0,8}$ ]]
+          {
+            echo "artifact_id=$(jq -r .id "$metadata_root/artifact.json")"
+            echo "artifact_digest=$(jq -r .digest "$metadata_root/artifact.json")"
+            echo "producer_run_attempt=$producer_attempt"
+          } >> "$GITHUB_OUTPUT"

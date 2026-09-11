@@ -1,0 +1,295 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry#function:0x72b2af62",
+          "declaringDefinitionId": "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "name": "getDependencyScriptContentHashAtVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x72b2af62",
+          "signature": "getDependencyScriptContentHashAtVersion(bytes32,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry#function:0x08f0052a",
+          "declaringDefinitionId": "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            }
+          ],
+          "name": "latestDependencyVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x08f0052a",
+          "signature": "latestDependencyVersion(bytes32)",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(bytes32)",
+          "functionKind": "constructor",
+          "id": "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry#function:constructor(bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_emptyContentHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1EZXBlbmRlbmN5UmVnaXN0cnkudC5zb2w6WmVyb0tleUxhdGVzdFJldmVydGluZ1JlZ2lzdHJ5I2Z1bmN0aW9uOmNvbnN0cnVjdG9yKGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 92,
+            "byteStart": 23525,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDependencyRegistry.t.sol#L550-L552",
+            "lineEnd": 552,
+            "lineStart": 550,
+            "snippetSha256": "sha256:b959403e8dfe521cb719e2865663d587ef84ad7c8cb3f274a1ae87ee5158b14d",
+            "sourceSha256": "sha256:13b5fb282ec271d4a8d8f30141d00e3c5499c0943d7ba3069409ae68b1eeb607"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "latestDependencyVersion(bytes32)",
+          "displaySignature": "latestDependencyVersion(bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry#function:0x08f0052a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1EZXBlbmRlbmN5UmVnaXN0cnkudC5zb2w6WmVyb0tleUxhdGVzdFJldmVydGluZ1JlZ2lzdHJ5I2Z1bmN0aW9uOjB4MDhmMDA1MmE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "latestDependencyVersion",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 231,
+            "byteStart": 23623,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDependencyRegistry.t.sol#L554-L561",
+            "lineEnd": 561,
+            "lineStart": 554,
+            "snippetSha256": "sha256:83d3202dbd288a15e4b94fb673f3cc63a94b0f04b4d3106ea2fbdbf6952ef078",
+            "sourceSha256": "sha256:13b5fb282ec271d4a8d8f30141d00e3c5499c0943d7ba3069409ae68b1eeb607"
+          },
+          "selector": "0x08f0052a",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getDependencyScriptContentHashAtVersion(bytes32,uint256)",
+          "displaySignature": "getDependencyScriptContentHashAtVersion(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry#function:0x72b2af62",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dependencyNameAndVersion",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "version",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1EZXBlbmRlbmN5UmVnaXN0cnkudC5zb2w6WmVyb0tleUxhdGVzdFJldmVydGluZ1JlZ2lzdHJ5I2Z1bmN0aW9uOjB4NzJiMmFmNjI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getDependencyScriptContentHashAtVersion",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 329,
+            "byteStart": 23860,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDependencyRegistry.t.sol#L563-L570",
+            "lineEnd": 570,
+            "lineStart": 563,
+            "snippetSha256": "sha256:d6e91efbe25b80f10c90a2bc931a04f981aaeee71de4b8c864bd47357e81f82f",
+            "sourceSha256": "sha256:13b5fb282ec271d4a8d8f30141d00e3c5499c0943d7ba3069409ae68b1eeb607"
+          },
+          "selector": "0x72b2af62",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "emptyContentHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 23476,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDependencyRegistry.t.sol#L548",
+            "lineEnd": 548,
+            "lineStart": 548,
+            "snippetSha256": "sha256:2a63a82ae30065229a0e0468af19ac8e11761e5c3e0acaa220906dfd3e4a5f16",
+            "sourceSha256": "sha256:13b5fb282ec271d4a8d8f30141d00e3c5499c0943d7ba3069409ae68b1eeb607"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1EZXBlbmRlbmN5UmVnaXN0cnkudC5zb2w6WmVyb0tleUxhdGVzdFJldmVydGluZ1JlZ2lzdHJ5",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ZeroKeyLatestRevertingRegistry",
+    "natspec": "",
+    "range": {
+      "byteLength": 761,
+      "byteStart": 23430,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDependencyRegistry.t.sol#L547-L571",
+      "lineEnd": 571,
+      "lineStart": 547,
+      "snippetSha256": "sha256:cfdc4fd84047a5cbc4b3ab7ae9e9068af5eefc4fdff3844e6b0b7f0f7c55cee1",
+      "sourceSha256": "sha256:13b5fb282ec271d4a8d8f30141d00e3c5499c0943d7ba3069409ae68b1eeb607"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamDependencyRegistry.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry#function:0x08f0052a",
+      "definitionId": "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry#function:0x72b2af62",
+      "definitionId": "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry#function:constructor(bytes32)",
+      "definitionId": "test/StreamDependencyRegistry.t.sol:ZeroKeyLatestRevertingRegistry",
+      "severity": "advisory"
+    }
+  ]
+}

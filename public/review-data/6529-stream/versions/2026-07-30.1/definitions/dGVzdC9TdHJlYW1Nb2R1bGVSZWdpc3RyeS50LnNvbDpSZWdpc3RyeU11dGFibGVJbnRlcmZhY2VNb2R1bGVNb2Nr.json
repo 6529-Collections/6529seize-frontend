@@ -1,0 +1,308 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock#function:0xa4f46448",
+          "declaringDefinitionId": "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "name": "setInterfaceEnabled",
+          "outputs": [],
+          "selector": "0xa4f46448",
+          "signature": "setInterfaceEnabled(bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock#function:0x01ffc9a7",
+          "declaringDefinitionId": "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(bytes4)",
+          "functionKind": "constructor",
+          "id": "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock#function:constructor(bytes4)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "extraInterfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpSZWdpc3RyeU11dGFibGVJbnRlcmZhY2VNb2R1bGVNb2NrI2Z1bmN0aW9uOmNvbnN0cnVjdG9yKGJ5dGVzNCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 90,
+            "byteStart": 6699,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L218-L220",
+            "lineEnd": 220,
+            "lineStart": 218,
+            "snippetSha256": "sha256:e1cf7dc9655acb8b3053ce7ff71fa8f5aacf69b44e6700e26bf9bf9b56cd7fad",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "setInterfaceEnabled(bool)",
+          "displaySignature": "setInterfaceEnabled(bool)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock#function:0xa4f46448",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpSZWdpc3RyeU11dGFibGVJbnRlcmZhY2VNb2R1bGVNb2NrI2Z1bmN0aW9uOjB4YTRmNDY0NDg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setInterfaceEnabled",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 87,
+            "byteStart": 6795,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L222-L224",
+            "lineEnd": 224,
+            "lineStart": 222,
+            "snippetSha256": "sha256:bb0cc099be5596fcdc1651e15f4e74015428a50d45c7377cd1470bfd669281af",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": "0xa4f46448",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpSZWdpc3RyeU11dGFibGVJbnRlcmZhY2VNb2R1bGVNb2NrI2Z1bmN0aW9uOjB4MDFmZmM5YTc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 205,
+            "byteStart": 6888,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L226-L229",
+            "lineEnd": 229,
+            "lineStart": 226,
+            "snippetSha256": "sha256:0443381e18224658e61d5c5cffbbea4be21505acef262f355909f0111d5e3c10",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "_extraInterfaceId",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 6616,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L215",
+            "lineEnd": 215,
+            "lineStart": 215,
+            "snippetSha256": "sha256:10ee0f6c0e887ace062b9d637f0796197ff7b8cb5ec84d2e51d65133fb254fe5",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_enabled",
+          "natspec": "",
+          "range": {
+            "byteLength": 28,
+            "byteStart": 6664,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L216",
+            "lineEnd": 216,
+            "lineStart": 216,
+            "snippetSha256": "sha256:713c3f02458d9aabbe25a47431bc3985fbb98fc61c8090d2f49ff0866833d703",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": {
+            "byteLength": 4,
+            "byteStart": 6688,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L216",
+            "lineEnd": 216,
+            "lineStart": 216,
+            "snippetSha256": "sha256:b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "valueSource": "true",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/ERC165.sol:ERC165",
+        "name": "ERC165"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpSZWdpc3RyeU11dGFibGVJbnRlcmZhY2VNb2R1bGVNb2Nr",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock",
+      "smart-contracts/ERC165.sol:ERC165",
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RegistryMutableInterfaceModuleMock",
+    "natspec": "",
+    "range": {
+      "byteLength": 539,
+      "byteStart": 6556,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L214-L230",
+      "lineEnd": 230,
+      "lineStart": 214,
+      "snippetSha256": "sha256:3ebf6049733009e84d0a40d1d09d3d3bdf4ba1296495e49a5d98dec5e53e176a",
+      "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamModuleRegistry.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock#function:0x01ffc9a7",
+      "definitionId": "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock#function:0xa4f46448",
+      "definitionId": "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock#function:constructor(bytes4)",
+      "definitionId": "test/StreamModuleRegistry.t.sol:RegistryMutableInterfaceModuleMock",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -1,0 +1,2448 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xc488549d",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "EmptyRandomWords",
+          "selector": "0xc488549d",
+          "signature": "EmptyRandomWords(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#error:0x7a189929",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [],
+          "name": "RandomizerRequestReentrancy",
+          "selector": "0x7a189929",
+          "signature": "RandomizerRequestReentrancy()"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0x5e315374",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "retryCount",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "maxRetryCount",
+              "type": "uint256"
+            }
+          ],
+          "name": "RandomnessPostProcessingRetryLimitReached",
+          "selector": "0x5e315374",
+          "signature": "RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xbc1cb82b",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "RandomnessRequestAlreadyExists",
+          "selector": "0xbc1cb82b",
+          "signature": "RandomnessRequestAlreadyExists(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0x8b6fdc0a",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+              "name": "state",
+              "type": "uint8"
+            }
+          ],
+          "name": "RandomnessRequestNotFailedPostProcessing",
+          "selector": "0x8b6fdc0a",
+          "signature": "RandomnessRequestNotFailedPostProcessing(uint256,uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xfae276cd",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+              "name": "state",
+              "type": "uint8"
+            }
+          ],
+          "name": "RandomnessRequestNotFulfilled",
+          "selector": "0xfae276cd",
+          "signature": "RandomnessRequestNotFulfilled(uint256,uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0x685e6fed",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+              "name": "state",
+              "type": "uint8"
+            }
+          ],
+          "name": "RandomnessRequestNotPending",
+          "selector": "0x685e6fed",
+          "signature": "RandomnessRequestNotPending(uint256,uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0x95d22d86",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "expectedEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "actualEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "address",
+              "name": "expectedProvider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "internalType": "address",
+              "name": "actualProvider",
+              "type": "address"
+            }
+          ],
+          "name": "StaleRandomnessRequest",
+          "selector": "0x95d22d86",
+          "signature": "StaleRandomnessRequest(uint256,uint256,uint256,address,address)"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xa68fbeff",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "TokenRandomnessRequestAlreadyExists",
+          "selector": "0xa68fbeff",
+          "signature": "TokenRandomnessRequestAlreadyExists(uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xab2112a6",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "UnknownRandomnessRequest",
+          "selector": "0xab2112a6",
+          "signature": "UnknownRandomnessRequest(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xc1ae599b",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "expectedProvider",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "actualProvider",
+              "type": "address"
+            }
+          ],
+          "name": "WrongRandomnessProvider",
+          "selector": "0xc1ae599b",
+          "signature": "WrongRandomnessProvider(uint256,address,address)"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xd6d556a3",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "expectedCollectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "actualCollectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "WrongRandomnessTokenCollection",
+          "selector": "0xd6d556a3",
+          "signature": "WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0x490dd684",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "ZeroDerivedSeed",
+          "selector": "0x490dd684",
+          "signature": "ZeroDerivedSeed(uint256)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "BurnedTokenRandomnessRecorded",
+          "signature": "BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "topic0": "0xfde245e26e3b5b676c8c9c34f0b1b92b8d8f2f14e91c619303c1f48f99838694"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RandomnessFulfilled",
+          "signature": "RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "topic0": "0xfd85cce4bf4d4f47a0065961da09b066c83ecec24be36440988898305b8db17c"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessPostProcessingFailed(uint256,uint256,uint256,address,uint256,bytes32,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "failureDataHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RandomnessPostProcessingFailed",
+          "signature": "RandomnessPostProcessingFailed(uint256,uint256,uint256,address,uint256,bytes32,bytes32,bytes32)",
+          "topic0": "0x301e99f83c934f6f0766cd151931e3b38ac1abe70e9d956b6eb0b7eef7aff13c"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessPostProcessingRetried(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "retryCount",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RandomnessPostProcessingRetried",
+          "signature": "RandomnessPostProcessingRetried(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32)",
+          "topic0": "0xc811cb1f3e4d0329bd50ef54ae5824d9339edcd7e47031f7babbbef5abfb2773"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessPostProcessingRetryFailed(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "retryCount",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "failureDataHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RandomnessPostProcessingRetryFailed",
+          "signature": "RandomnessPostProcessingRetryFailed(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32,bytes32)",
+          "topic0": "0xc11e913ac38116ce1ad83f1578d7f0a97637ad09a6cb66fbcf5029e99d2852c6"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessRequestMarkedStale(uint256,uint256,uint256,address,uint256)",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            }
+          ],
+          "name": "RandomnessRequestMarkedStale",
+          "signature": "RandomnessRequestMarkedStale(uint256,uint256,uint256,address,uint256)",
+          "topic0": "0xaf0065c93d2cdea9da65154eb41719040a346336bdf5f16b403067edf22294a0"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessRequested(uint256,uint256,uint256,address,uint256)",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            }
+          ],
+          "name": "RandomnessRequested",
+          "signature": "RandomnessRequested(uint256,uint256,uint256,address,uint256)",
+          "topic0": "0x4dd68c3d3b4fe85a1bb1d02c49f9c3e99963314aedff0d58ef155634fc9dd118"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#event:RequestFulfilled(uint256,uint256[])",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "uint256[]",
+              "name": "randomWords",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "RequestFulfilled",
+          "signature": "RequestFulfilled(uint256,uint256[])",
+          "topic0": "0xfe2e2d779dba245964d4e3ef9b994be63856fd568bf7d3ca9e224755cb1bd54d"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#event:Withdraw(address,bool,uint256)",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "_add",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "status",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "funds",
+              "type": "uint256"
+            }
+          ],
+          "name": "Withdraw",
+          "signature": "Withdraw(address,bool,uint256)",
+          "topic0": "0x4a48cb98c5be023b78a0b3ec94107a01a0397b2e389d4b5f252aef518e633ec3"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xe3a51e5a",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [],
+          "name": "MAX_RANDOMNESS_POST_PROCESSING_RETRIES",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xe3a51e5a",
+          "signature": "MAX_RANDOMNESS_POST_PROCESSING_RETRIES()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x50e4c060",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [],
+          "name": "RANDOMNESS_SEED_TYPEHASH",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x50e4c060",
+          "signature": "RANDOMNESS_SEED_TYPEHASH()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/arrng/ArrngConsumer.sol:ArrngConsumer#function:0x9d014275",
+          "declaringDefinitionId": "smart-contracts/integrations/arrng/ArrngConsumer.sol:ArrngConsumer",
+          "inherited": true,
+          "inputs": [],
+          "name": "arrngController",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IArrngController",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x9d014275",
+          "signature": "arrngController()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xbf1b89d3",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "_mintIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "_saltfun_o",
+              "type": "uint256"
+            }
+          ],
+          "name": "calculateTokenHash",
+          "outputs": [],
+          "selector": "0xbf1b89d3",
+          "signature": "calculateTokenHash(uint256,uint256,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xdb2e21bc",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [],
+          "name": "emergencyWithdraw",
+          "outputs": [],
+          "selector": "0xdb2e21bc",
+          "signature": "emergencyWithdraw()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x3e9d39ab",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [],
+          "name": "emergencyWithdrawable",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x3e9d39ab",
+          "signature": "emergencyWithdrawable()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xc7b010b0",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [],
+          "name": "gencoreContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamLegacyCore",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xc7b010b0",
+          "signature": "gencoreContract()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x4cf0c697",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [],
+          "name": "isRandomizerContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x4cf0c697",
+          "signature": "isRandomizerContract()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x0e24f4ce",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "markStaleRequest",
+          "outputs": [],
+          "selector": "0x0e24f4ce",
+          "signature": "markStaleRequest(uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xdd26bdd1",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "pendingRandomnessRequests",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xdd26bdd1",
+          "signature": "pendingRandomnessRequests(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xba73a1d8",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "randomnessRequestState",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0xba73a1d8",
+          "signature": "randomnessRequestState(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x841940f9",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "randomnessRequestStateForToken",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x841940f9",
+          "signature": "randomnessRequestStateForToken(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/arrng/ArrngConsumer.sol:ArrngConsumer#function:0x37f9c70d",
+          "declaringDefinitionId": "smart-contracts/integrations/arrng/ArrngConsumer.sol:ArrngConsumer",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "arrngRequestId_",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256[]",
+              "name": "randomNumbers_",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "receiveRandomness",
+          "outputs": [],
+          "selector": "0x37f9c70d",
+          "signature": "receiveRandomness(uint256,uint256[])",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x1b739ef1",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenid",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "_ethRequired",
+              "type": "uint256"
+            }
+          ],
+          "name": "requestRandomWords",
+          "outputs": [],
+          "selector": "0x1b739ef1",
+          "signature": "requestRandomWords(uint256,uint256)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x1370ba38",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "requestToToken",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x1370ba38",
+          "signature": "requestToToken(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x677e25c7",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveRandomnessRequest",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamRandomizerLifecycle.RandomnessRequest",
+              "name": "",
+              "type": "(uint256,uint256,address,uint256,uint256,uint8,uint256,uint256,uint256,uint256,bytes32,bytes32,bytes32,uint256)"
+            }
+          ],
+          "selector": "0x677e25c7",
+          "signature": "retrieveRandomnessRequest(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x60e26604",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveRandomnessRequestForToken",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamRandomizerLifecycle.RandomnessRequest",
+              "name": "",
+              "type": "(uint256,uint256,address,uint256,uint256,uint8,uint256,uint256,uint256,uint256,bytes32,bytes32,bytes32,uint256)"
+            }
+          ],
+          "selector": "0x60e26604",
+          "signature": "retrieveRandomnessRequestForToken(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x8a540ee2",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "retryRandomnessPostProcessing",
+          "outputs": [],
+          "selector": "0x8a540ee2",
+          "signature": "retryRandomnessPostProcessing(uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x81d673e0",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [],
+          "name": "supportsRandomizerLifecycle",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x81d673e0",
+          "signature": "supportsRandomizerLifecycle()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x13888565",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [],
+          "name": "surplus",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x13888565",
+          "signature": "surplus()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x94b8ae9d",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenIdToCollection",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x94b8ae9d",
+          "signature": "tokenIdToCollection(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xaa419ba4",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenToRequest",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xaa419ba4",
+          "signature": "tokenToRequest(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xe7fa9f7d",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [],
+          "name": "totalOwed",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xe7fa9f7d",
+          "signature": "totalOwed()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xe231f9df",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": true,
+          "inputs": [],
+          "name": "totalPendingRandomnessRequests",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xe231f9df",
+          "signature": "totalPendingRandomnessRequests()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xc80bf4f3",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [],
+          "name": "totalRandomnessReserved",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xc80bf4f3",
+          "signature": "totalRandomnessReserved()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xc71b0e1c",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [],
+          "name": "totalReserved",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xc71b0e1c",
+          "signature": "totalReserved()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x388d2c24",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_newadminsContract",
+              "type": "address"
+            }
+          ],
+          "name": "updateAdminContract",
+          "outputs": [],
+          "selector": "0x388d2c24",
+          "signature": "updateAdminContract(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x2b673a2e",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "_gencore",
+              "type": "address"
+            }
+          ],
+          "name": "updateCoreContract",
+          "outputs": [],
+          "selector": "0x2b673a2e",
+          "signature": "updateCoreContract(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x789c6072",
+          "declaringDefinitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_ethRequired",
+              "type": "uint256"
+            }
+          ],
+          "name": "updateRNGCost",
+          "outputs": [],
+          "selector": "0x789c6072",
+          "signature": "updateRNGCost(uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "production_release_contract",
+    "classificationReason": "Listed in release-artifacts/contracts.json production_contracts.",
+    "declarations": {
+      "enums": [],
+      "errors": [
+        {
+          "astId": 81278,
+          "canonicalSignature": "RandomizerRequestReentrancy()",
+          "displaySignature": "RandomizerRequestReentrancy()",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#error:0x7a189929",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNlcnJvcjoweDdhMTg5OTI5",
+          "kind": "error",
+          "name": "RandomizerRequestReentrancy",
+          "natspec": "",
+          "range": {
+            "byteLength": 36,
+            "byteStart": 860,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:0d77a3359e405b0a80bb0159418991faf2f806999ef5c6b5a42cc233f2f75b9a",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0x7a189929"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 81256,
+          "canonicalSignature": "RequestFulfilled(uint256,uint256[])",
+          "displaySignature": "RequestFulfilled(uint256,uint256[])",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#event:RequestFulfilled(uint256,uint256[])",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "randomWords",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNldmVudDpSZXF1ZXN0RnVsZmlsbGVkKHVpbnQyNTYsdWludDI1NltdKQ",
+          "kind": "event",
+          "name": "RequestFulfilled",
+          "natspec": "",
+          "range": {
+            "byteLength": 65,
+            "byteStart": 530,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:e6f798cb4226692303b687da1c4ca994f0aa38c4e0d28c916e1428073c98dd92",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "topic0": "0xfe2e2d779dba245964d4e3ef9b994be63856fd568bf7d3ca9e224755cb1bd54d"
+        },
+        {
+          "anonymous": false,
+          "astId": 81272,
+          "canonicalSignature": "Withdraw(address,bool,uint256)",
+          "displaySignature": "Withdraw(address,bool,uint256)",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#event:Withdraw(address,bool,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "_add",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "status",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "funds",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNldmVudDpXaXRoZHJhdyhhZGRyZXNzLGJvb2wsdWludDI1Nik",
+          "kind": "event",
+          "name": "Withdraw",
+          "natspec": "",
+          "range": {
+            "byteLength": 73,
+            "byteStart": 710,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:4450f9689b3a6b7b9acb13445450f27c5d2c68244e08fae156c3952d6ff10688",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "topic0": "0x4a48cb98c5be023b78a0b3ec94107a01a0397b2e389d4b5f252aef518e633ec3"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "gencoreContract()",
+          "displaySignature": "gencoreContract()",
+          "functionKind": "getter",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xc7b010b0",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjoweGM3YjAxMGIw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "gencoreContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamLegacyCore",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 40,
+            "byteStart": 622,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:a63d54458b2d11ee90751986f3271a719559b67feec368c4ad790527e0f528b3",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0xc7b010b0",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(address,address,address)",
+          "functionKind": "constructor",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:constructor(address,address,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_gencore",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "_adminsContract",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "_arRNG",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjpjb25zdHJ1Y3RvcihhZGRyZXNzLGFkZHJlc3MsYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [
+            "ArrngConsumer"
+          ],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 240,
+            "byteStart": 902,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L31-L35",
+            "lineEnd": 35,
+            "lineStart": 31,
+            "snippetSha256": "sha256:07af05e7ea4524046eb2d913d7d2a0bdab298d35f7ee6ba4aaa8fcb491d563d5",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "requestRandomWords(uint256,uint256)",
+          "displaySignature": "requestRandomWords(uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x1b739ef1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenid",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "_ethRequired",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjoweDFiNzM5ZWYx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestRandomWords",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 936,
+            "byteStart": 1744,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L50-L69",
+            "lineEnd": 69,
+            "lineStart": 50,
+            "snippetSha256": "sha256:1c19ab2db7b4048f013d3e1d2c90f867b2707642c6b8d3bb01cd81d8a91e7d0d",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0x1b739ef1",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "fulfillRandomWords(uint256,uint256[])",
+          "functionKind": "function",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:fulfillRandomWords(uint256,uint256[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "id",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "numbers",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjpmdWxmaWxsUmFuZG9tV29yZHModWludDI1Nix1aW50MjU2W10p",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fulfillRandomWords",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1184,
+            "byteStart": 2746,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L72-L93",
+            "lineEnd": 93,
+            "lineStart": 72,
+            "snippetSha256": "sha256:a89254d7c92e46411738bf885f75f217d8ab73f48a8bc728305de77488435701",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "displaySignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xbf1b89d3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "_mintIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "_saltfun_o",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjoweGJmMWI4OWQz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "calculateTokenHash",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 412,
+            "byteStart": 4023,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L96-L106",
+            "lineEnd": 106,
+            "lineStart": 96,
+            "snippetSha256": "sha256:06685b72dab0156e6d59ac219ae0724e6c8943546a39eb5cd79444b02521e84d",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0xbf1b89d3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "markStaleRequest(uint256)",
+          "displaySignature": "markStaleRequest(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x0e24f4ce",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjoweDBlMjRmNGNl",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "markStaleRequest",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 183,
+            "byteStart": 4441,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L108-L113",
+            "lineEnd": 113,
+            "lineStart": 108,
+            "snippetSha256": "sha256:5063accc52b18ea952bad9bf96b8b5a0494d9fe725dba899bf4fb1b9795d9078",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0x0e24f4ce",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "retryRandomnessPostProcessing(uint256)",
+          "displaySignature": "retryRandomnessPostProcessing(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x8a540ee2",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjoweDhhNTQwZWUy",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "retryRandomnessPostProcessing",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1164,
+            "byteStart": 4630,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L115-L135",
+            "lineEnd": 135,
+            "lineStart": 115,
+            "snippetSha256": "sha256:b0937ac01a8c1b1ce4184570c5e151b29d2142fdb8fed0d6bb3481946a0fe001",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0x8a540ee2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "updateAdminContract(address)",
+          "displaySignature": "updateAdminContract(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x388d2c24",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_newadminsContract",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjoweDM4OGQyYzI0",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "updateAdminContract",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 333,
+            "byteStart": 5837,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L139-L147",
+            "lineEnd": 147,
+            "lineStart": 139,
+            "snippetSha256": "sha256:3df385e4cdd01b789dfcc7e0d35643d54414c253472cf30d1a8ca2829852980e",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0x388d2c24",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "updateCoreContract(address)",
+          "displaySignature": "updateCoreContract(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x2b673a2e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_gencore",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjoweDJiNjczYTJl",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "updateCoreContract",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 219,
+            "byteStart": 6176,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L149-L155",
+            "lineEnd": 155,
+            "lineStart": 149,
+            "snippetSha256": "sha256:447070513eaf308bea031ab4bd48956366bb8d889a8bfc724eca200d6b1ee68a",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0x2b673a2e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "updateRNGCost(uint256)",
+          "displaySignature": "updateRNGCost(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x789c6072",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_ethRequired",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjoweDc4OWM2MDcy",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "updateRNGCost",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 166,
+            "byteStart": 6433,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L159-L164",
+            "lineEnd": 164,
+            "lineStart": 159,
+            "snippetSha256": "sha256:bdbffbe3db3d76df0d30a2d4bb95d20efd56f553fcd4133881c44c7e85c0e71f",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0x789c6072",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "totalRandomnessReserved()",
+          "displaySignature": "totalRandomnessReserved()",
+          "functionKind": "function",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xc80bf4f3",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjoweGM4MGJmNGYz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalRandomnessReserved",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 110,
+            "byteStart": 6605,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L166-L168",
+            "lineEnd": 168,
+            "lineStart": 166,
+            "snippetSha256": "sha256:7d1a74b73f08272b7a510726640046225b5119222c63cb0bd5280143f093ecde",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0xc80bf4f3",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "totalOwed()",
+          "displaySignature": "totalOwed()",
+          "functionKind": "function",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xe7fa9f7d",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjoweGU3ZmE5Zjdk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalOwed",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 100,
+            "byteStart": 6721,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L170-L172",
+            "lineEnd": 172,
+            "lineStart": 170,
+            "snippetSha256": "sha256:02ae29cb8f8f123cc4f5364a503a8be00a1a3a76390291924b91e324b7124db6",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0xe7fa9f7d",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "totalReserved()",
+          "displaySignature": "totalReserved()",
+          "functionKind": "function",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xc71b0e1c",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjoweGM3MWIwZTFj",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalReserved",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 104,
+            "byteStart": 6827,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L174-L176",
+            "lineEnd": 176,
+            "lineStart": 174,
+            "snippetSha256": "sha256:ddc5fd30c77d4418281bdeb2aacbe76a74b4302baf299176b97791452bf2a342",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0xc71b0e1c",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "emergencyWithdrawable()",
+          "displaySignature": "emergencyWithdrawable()",
+          "functionKind": "function",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x3e9d39ab",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjoweDNlOWQzOWFi",
+          "kind": "function",
+          "modifiers": [],
+          "name": "emergencyWithdrawable",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 96,
+            "byteStart": 6937,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L178-L180",
+            "lineEnd": 180,
+            "lineStart": 178,
+            "snippetSha256": "sha256:61036d75d6f0426fa2fa56445a9ad262da1784a2104a4bdb40a84df154932a8d",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0x3e9d39ab",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "surplus()",
+          "displaySignature": "surplus()",
+          "functionKind": "function",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x13888565",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjoweDEzODg4NTY1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "surplus",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 74,
+            "byteStart": 7039,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L182-L184",
+            "lineEnd": 184,
+            "lineStart": 182,
+            "snippetSha256": "sha256:b434b65aaae4fbba6742844a06eb076ac681b95e47b0eb75fc758cd39658b2db",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0x13888565",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "emergencyWithdraw()",
+          "displaySignature": "emergencyWithdraw()",
+          "functionKind": "function",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xdb2e21bc",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjoweGRiMmUyMWJj",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "emergencyWithdraw",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 164,
+            "byteStart": 7199,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L188-L190",
+            "lineEnd": 190,
+            "lineStart": 188,
+            "snippetSha256": "sha256:7b172d87ae6bf8e0f0f16207007446791d28a8adc492f152559587a4d7cb3240",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0xdb2e21bc",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "receive()",
+          "functionKind": "receive",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:receive()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjpyZWNlaXZlKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 30,
+            "byteStart": 7369,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L192",
+            "lineEnd": 192,
+            "lineStart": 192,
+            "snippetSha256": "sha256:5b6a98427c1f43e7515585164def7acd95a33725cb1caad01f96b99fb5352509",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": null,
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isRandomizerContract()",
+          "displaySignature": "isRandomizerContract()",
+          "functionKind": "function",
+          "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x4cf0c697",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORyNmdW5jdGlvbjoweDRjZjBjNjk3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isRandomizerContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 89,
+            "byteStart": 7443,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L195-L197",
+            "lineEnd": 197,
+            "lineStart": 195,
+            "snippetSha256": "sha256:3412ba8465dd926ea69d3502b00f54a0c0a74c39bc92b57709ee7b21969dbdd1",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0x4cf0c697",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [
+        {
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_selector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "FunctionAdminRequired",
+          "natspec": "",
+          "overrides": [],
+          "range": {
+            "byteLength": 291,
+            "byteStart": 1148,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L37-L44",
+            "lineEnd": 44,
+            "lineStart": 37,
+            "snippetSha256": "sha256:d2b86078c6bc7300ffcf81bfedb5a8a24ac5f97764a479cec340246d5c25afe4",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "virtual": false
+        }
+      ],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "gencore",
+          "natspec": "",
+          "range": {
+            "byteLength": 15,
+            "byteStart": 601,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:e28367d900053412905e8c294b954a9768746e62eb1f41f021de61ed2656d491",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "internal"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xc7b010b0",
+          "immutable": false,
+          "name": "gencoreContract",
+          "natspec": "",
+          "range": {
+            "byteLength": 40,
+            "byteStart": 622,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:a63d54458b2d11ee90751986f3271a719559b67feec368c4ad790527e0f528b3",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": "0xc7b010b0",
+          "type": "IStreamLegacyCore",
+          "typeString": "contract IStreamLegacyCore",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "adminsContract",
+          "natspec": "",
+          "range": {
+            "byteLength": 36,
+            "byteStart": 668,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:1754a17cc9aaeccdc5f6ba9305051d7a6d108a566bb43cc1b5a1c4dc2e37c823",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": null,
+          "type": "IStreamAdmins",
+          "typeString": "contract IStreamAdmins",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ethRequired",
+          "natspec": "",
+          "range": {
+            "byteLength": 19,
+            "byteStart": 788,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:3deb79553a9a19315f3ec7d58861c990f48264218d13ca70d0f62ae68810efa8",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "internal"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "randomnessRequestInProgress",
+          "natspec": "",
+          "range": {
+            "byteLength": 40,
+            "byteStart": 813,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:d5160adc7f68537c7b18d743400501448e62d14ec61aa90b69c918faf49af5ee",
+            "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+          },
+          "selector": null,
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/integrations/arrng/ArrngConsumer.sol:ArrngConsumer",
+        "name": "ArrngConsumer"
+      },
+      {
+        "definitionId": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+        "name": "StreamRandomizerLifecycle"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL2ludGVncmF0aW9ucy9yYW5kb21pemVycy9SYW5kb21pemVyUk5HLnNvbDpOZXh0R2VuUmFuZG9taXplclJORw",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+      "smart-contracts/integrations/arrng/ArrngConsumer.sol:ArrngConsumer",
+      "smart-contracts/integrations/arrng/IArrngConsumer.sol:IArrngConsumer"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "production_contract"
+    },
+    "name": "NextGenRandomizerRNG",
+    "natspec": "",
+    "range": {
+      "byteLength": 7084,
+      "byteStart": 450,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/92ea123380917032f01aae09691141a2a72df935/smart-contracts/integrations/randomizers/RandomizerRNG.sol#L19-L198",
+      "lineEnd": 198,
+      "lineStart": 19,
+      "snippetSha256": "sha256:40c8790beb785097436520cad7b47e16b191f46d9a15ca2d99d60a37214779c1",
+      "sourceSha256": "sha256:ece124cf8bc161d01566476629e1b80524fe3f6a3e0c63e6ca8431e779d0e654"
+    },
+    "release": {
+      "abiSha256": "sha256:3dcea39be05680867eae1e42a5f57f0c7cffe20ef714f468ad0a5718aad23a4d",
+      "bytecodeSha256": "sha256:aba7152235c82e6d9dda8d066e5f2686325ccc2dadb31cba7ea9d9b62bd95653",
+      "deployedBytecodeSha256": "sha256:186991193969a33bbd158f7a2ae520385680e1ced335aa3701085a6309ec1582",
+      "deployedBytecodeSizeBytes": 8973,
+      "summary": {
+        "custom_error_count": 13,
+        "event_count": 9,
+        "function_count": 29,
+        "payable_function_count": 2,
+        "read_function_count": 20,
+        "write_function_count": 9
+      },
+      "tracked": true
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/integrations/randomizers/RandomizerRNG.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 18
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 17
+    },
+    "totalCount": 18
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x0e24f4ce",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x13888565",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x1b739ef1",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x2b673a2e",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x388d2c24",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x3e9d39ab",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x4cf0c697",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x789c6072",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0x8a540ee2",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xbf1b89d3",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xc71b0e1c",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xc7b010b0",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xc80bf4f3",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xdb2e21bc",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:0xe7fa9f7d",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:constructor(address,address,address)",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG#function:receive()",
+      "definitionId": "smart-contracts/integrations/randomizers/RandomizerRNG.sol:NextGenRandomizerRNG",
+      "severity": "advisory"
+    }
+  ]
+}

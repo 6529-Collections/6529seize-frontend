@@ -32,6 +32,10 @@ import {
   renderExternalOrInternalLink,
   shouldUseOpenGraphPreview,
 } from "./linkUtils";
+import {
+  getMarkdownNodeStartOffset,
+  isPreviewableHrefSource,
+} from "./sourcePositions";
 
 interface LinkRendererConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;
@@ -112,23 +116,6 @@ const getImageLayout = (
   }
 
   return props.layout === "grouped" ? "grouped" : undefined;
-};
-
-const getMarkdownNodeStartOffset = (node: unknown): number | null => {
-  if (typeof node !== "object" || node === null || !("position" in node)) {
-    return null;
-  }
-
-  const position = (
-    node as {
-      readonly position?: {
-        readonly start?: { readonly offset?: unknown } | undefined;
-      };
-    }
-  ).position;
-  const offset = position?.start?.offset;
-
-  return typeof offset === "number" && offset >= 0 ? offset : null;
 };
 
 const getBodyGalleryItemId = (
@@ -213,10 +200,15 @@ export const createLinkRenderer = ({
     }
 
     const parsedUrl = parseUrl(stableHref);
+    const hasBareHrefLabel =
+      isBareHrefLabel(props.children, rawHref) ||
+      isBareHrefLabel(props.children, stableHref);
+    const hasPreviewableHrefSource = isPreviewableHrefSource(props.node);
+
     if (
       isDirectImageUrl(stableHref, parsedUrl) &&
-      (isBareHrefLabel(props.children, rawHref) ||
-        isBareHrefLabel(props.children, stableHref))
+      hasBareHrefLabel &&
+      hasPreviewableHrefSource
     ) {
       return (
         <DropPartMarkdownImage
@@ -247,6 +239,10 @@ export const createLinkRenderer = ({
         />
       );
     };
+
+    if (!hasBareHrefLabel || !hasPreviewableHrefSource) {
+      return renderFallbackAnchor();
+    }
 
     const tryRenderOpenGraph = () => {
       try {

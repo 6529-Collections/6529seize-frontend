@@ -1,6 +1,10 @@
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
-import { Tooltip } from "react-tooltip";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { useId } from "react";
+import { Tooltip } from "react-tooltip";
+import { getWalletActivityMessage } from "../../wallet-activity.messages";
 
 enum RoyaltiesType {
   NONE = "NONE",
@@ -13,10 +17,19 @@ const ROYALTIES_THRESHOLD = 0.069;
 export default function UserPageStatsActivityWalletTableRowRoyalties({
   royalties,
   transactionValue,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly royalties: number;
   readonly transactionValue: number;
+  readonly locale?: SupportedLocale | undefined;
 }) {
+  const tooltipId = buildTooltipId(useId(), "royalties-information");
+  const royaltiesInformationLabel = getWalletActivityMessage(
+    "user.collected.stats.walletActivity.royaltiesInformationLabel",
+    undefined,
+    locale
+  );
+
   const getRoyaltiesPercentage = () => {
     if (!royalties) {
       return 0;
@@ -49,9 +62,14 @@ export default function UserPageStatsActivityWalletTableRowRoyalties({
   const royaltiesType = getRoyaltiesType();
 
   const getContent = (): string =>
-    `Royalties: ${formatNumberWithCommas(
-      +royalties.toFixed(7)
-    )}ETH (${formatNumberWithCommas(+(percentage * 100).toFixed(3))}%)`;
+    getWalletActivityMessage(
+      "user.collected.stats.walletActivity.royaltiesValue",
+      {
+        amount: formatNumberWithCommas(+royalties.toFixed(7)),
+        percentage: formatNumberWithCommas(+(percentage * 100).toFixed(3)),
+      },
+      locale
+    );
 
   switch (royaltiesType) {
     case RoyaltiesType.NONE:
@@ -61,24 +79,18 @@ export default function UserPageStatsActivityWalletTableRowRoyalties({
         <>
           <button
             type="button"
-            className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
-            data-tooltip-id="royalties-below-threshold"
-            aria-label="Royalties information"
+            className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+            aria-label={royaltiesInformationLabel}
+            aria-describedby={tooltipId}
+            data-tooltip-id={tooltipId}
           >
             <img
               src="/pepe-smile.png"
-              className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-object-contain tw-flex-shrink-0"
+              className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-object-contain"
               alt="pepe-smile"
             />
           </button>
-          <Tooltip
-            id="royalties-below-threshold"
-            style={{
-              backgroundColor: "#1F2937",
-              color: "white",
-              padding: "4px 8px",
-            }}
-          >
+          <Tooltip id={tooltipId} place="left" style={TOOLTIP_STYLES}>
             {getContent()}
           </Tooltip>
         </>
@@ -88,24 +100,18 @@ export default function UserPageStatsActivityWalletTableRowRoyalties({
         <>
           <button
             type="button"
-            className="tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center tw-rounded-full tw-bg-transparent tw-border-none tw-p-0 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
-            data-tooltip-id="royalties-above-threshold"
-            aria-label="Royalties information"
+            className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+            aria-label={royaltiesInformationLabel}
+            aria-describedby={tooltipId}
+            data-tooltip-id={tooltipId}
           >
             <img
               src="/pepe-xglasses.png"
-              className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-object-contain tw-flex-shrink-0"
+              className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-object-contain"
               alt="pepe-xglasses"
             />
           </button>
-          <Tooltip
-            id="royalties-above-threshold"
-            style={{
-              backgroundColor: "#1F2937",
-              color: "white",
-              padding: "4px 8px",
-            }}
-          >
+          <Tooltip id={tooltipId} place="left" style={TOOLTIP_STYLES}>
             {getContent()}
           </Tooltip>
         </>

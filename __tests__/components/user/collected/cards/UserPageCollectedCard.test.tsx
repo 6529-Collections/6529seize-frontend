@@ -49,6 +49,23 @@ describe("UserPageCollectedCard", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows a dash instead of rank zero when rank data is missing", () => {
+    render(
+      <UserPageCollectedCard
+        card={{ ...memeCard, rank: null }}
+        contractType={ContractType.ERC1155}
+        showDataRow={true}
+        onToggle={() => {}}
+        onIncQty={() => {}}
+        onDecQty={() => {}}
+        copiesMax={1}
+      />
+    );
+
+    expect(screen.getByText("Rank -")).toBeInTheDocument();
+    expect(screen.queryByText("Rank 0")).not.toBeInTheDocument();
+  });
+
   it("hides seized count for zero balance by default", () => {
     render(
       <UserPageCollectedCard
@@ -362,6 +379,37 @@ describe("UserPageCollectedCard", () => {
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/the-memes/1");
   });
+
+  it.each([
+    [CollectedCollectionType.MEMES, "/the-memes/1", "memes"],
+    [CollectedCollectionType.GRADIENTS, "/6529-gradient/1", "gradients"],
+    [CollectedCollectionType.NEXTGEN, "/nextgen/token/1", "nextgen"],
+    [CollectedCollectionType.MEMELAB, "/meme-lab/1", "memelab"],
+  ])(
+    "includes the profile collected return target for %s cards",
+    (collection, expectedPath, anchorCollection) => {
+      render(
+        <UserPageCollectedCard
+          card={{ ...memeCard, collection }}
+          contractType={ContractType.ERC721}
+          showDataRow={true}
+          interactiveMode="link"
+          onToggle={() => {}}
+          onIncQty={() => {}}
+          onDecQty={() => {}}
+          copiesMax={1}
+          returnTo="/Shelby/collected?page=3"
+        />
+      );
+
+      const href = screen.getByRole("link").getAttribute("href");
+      const url = new URL(href ?? "", "https://6529.io");
+      expect(url.pathname).toBe(expectedPath);
+      expect(url.searchParams.get("returnTo")).toBe(
+        `/Shelby/collected?page=3#collected-card-${anchorCollection}-1`
+      );
+    }
+  );
 
   it("calls onToggle and onDecQty when decrementing from qtySelected 1 for ERC1155", async () => {
     const user = userEvent.setup();

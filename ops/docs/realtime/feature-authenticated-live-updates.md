@@ -33,18 +33,28 @@ updates. When auth is missing, the session disconnects and push updates pause.
 4. If token value changes while connected, the app reconnects with the new
    token.
 5. While connected, subscribers apply `DROP_UPDATE`,
-   `DROP_RATING_UPDATE`, `DROP_REACTION_UPDATE`, and `MEDIA_LINK_UPDATED`
-   messages.
+   `DROP_RATING_UPDATE`, `DROP_REACTION_UPDATE`, `MEDIA_LINK_UPDATED`, and
+   recipient-scoped notification invalidation messages.
+6. The client sends up to five currently usable account JWTs in
+   `SYNC_NOTIFICATION_IDENTITIES`. The server acknowledges only identities
+   authenticated by those JWTs, and notification realtime coverage begins for
+   those profile IDs.
 
 ## Common Scenarios
 
 - Sign in and resume live updates on waves and direct-message wave surfaces.
 - Logout or token loss pauses authenticated push updates.
 - Re-authentication or token refresh reconnects the socket with the new token.
+- Notification creation and read/unread mutations invalidate REST notification
+  queries on every acknowledged tab/device for the affected profile. Websocket
+  messages do not carry notification content.
 - Auth changes converge across tabs through cookie-store listeners when
   available, with broadcast-channel fallback (`auth-token-updates`) when not.
 - Temporary disconnects retry automatically while auth is still valid, using
   deterministic exponential backoff (`2s`, `3s`, `4.5s`, capped at `30s`).
+- Live-update listeners remain ready while the connection recovers, so Waves
+  and Messages resume receiving supported events as soon as reconnection and
+  authentication finish.
 
 ## Edge Cases
 
@@ -74,8 +84,14 @@ updates. When auth is missing, the session disconnects and push updates pause.
 
 - This behavior governs authenticated websocket session health, not guaranteed
   delivery of every individual event.
-- Subscribers attach only while status is `connected`; missed messages during a
-  disconnect window are not guaranteed to replay.
+- Live-update listeners stay registered across connection changes, but messages
+  can only arrive while status is `connected`; missed messages during a
+  disconnect window are not guaranteed to replay. Notification queries use
+  their normal 30-second/15-second REST fallback until subscription
+  acknowledgement, then retain a five-minute reconciliation poll.
+- Notification subscriptions are profile-specific, JWT-expiring, and removed
+  when the socket disconnects. A client cannot subscribe another profile
+  without a valid JWT for that profile.
 - Marketplace preview websocket patches only affect already-cached preview cards
   with matching canonical IDs.
 

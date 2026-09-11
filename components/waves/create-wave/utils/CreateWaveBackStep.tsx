@@ -1,16 +1,27 @@
+"use client";
+
+import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+
 export default function CreateWaveBackStep({
   onPreviousStep,
+  disabled = false,
 }: {
   readonly onPreviousStep: () => void;
+  readonly disabled?: boolean;
 }) {
+  const locale = useBrowserLocale();
+
   return (
-    <button
+    <Button
+      variant="secondary"
+      size="md"
       onClick={onPreviousStep}
-      type="button"
-      className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-px-6 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50"
+      disabled={disabled}
     >
       <svg
-        className="tw-mr-2 tw-size-6 tw-flex-shrink-0"
+        className="tw-size-4 tw-flex-shrink-0"
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"
@@ -25,7 +36,7 @@ export default function CreateWaveBackStep({
         />
       </svg>
 
-      <span>Previous</span>
-    </button>
+      <span>{t(locale, "waves.create.actions.previous")}</span>
+    </Button>
   );
 }

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">Repository to chain</title>
+  <desc id="desc">A four-stage diagram showing open record, commitment, contract, and public display, with decision, history, and provenance kept as separate record layers.</desc>
+  <rect width="1600" height="1000" fill="#090A0C"/>
+  <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+    <text x="86" y="92" fill="#79A9FF" font-size="22" font-weight="700" letter-spacing="5">DIGITAL-ART STEWARDSHIP</text>
+    <text x="86" y="160" fill="#F4F0E7" font-size="58" font-weight="650">Repository to chain</text>
+    <text x="86" y="204" fill="#A6A7AE" font-size="25">The display can move on-chain while the public record keeps its distinctions.</text>
+
+    <g fill="none" stroke="#3A4350" stroke-width="3">
+      <path d="M338 395 H474"/><path d="M738 395 H874"/><path d="M1138 395 H1274"/>
+    </g>
+    <g fill="#79A9FF">
+      <path d="M474 395 l-24 -14 v28 z"/><path d="M874 395 l-24 -14 v28 z"/><path d="M1274 395 l-24 -14 v28 z"/>
+    </g>
+    <g fill="#111419" stroke="#3A4350" stroke-width="3">
+      <rect x="70" y="286" width="268" height="218" rx="4"/><rect x="470" y="286" width="268" height="218" rx="4"/><rect x="870" y="286" width="268" height="218" rx="4"/><rect x="1270" y="286" width="268" height="218" rx="4"/>
+    </g>
+    <g fill="#79A9FF" font-size="18" font-weight="800" letter-spacing="3">
+      <text x="106" y="337">01</text><text x="506" y="337">02</text><text x="906" y="337">03</text><text x="1306" y="337">04</text>
+    </g>
+    <g fill="#F4F0E7" font-size="28" font-weight="700">
+      <text x="106" y="392">OPEN RECORD</text><text x="506" y="392">COMMITMENT</text><text x="906" y="392">CONTRACT</text><text x="1306" y="392">PUBLIC DISPLAY</text>
+    </g>
+    <g fill="#A6A7AE" font-size="19">
+      <text x="106" y="432"><tspan x="106" dy="0">readable source</tspan><tspan x="106" dy="28">editable history</tspan></text>
+      <text x="506" y="432"><tspan x="506" dy="0">fixed digest</tspan><tspan x="506" dy="28">versioned boundary</tspan></text>
+      <text x="906" y="432"><tspan x="906" dy="0">durable reference</tspan><tspan x="906" dy="28">chain-native proof</tspan></text>
+      <text x="1306" y="432"><tspan x="1306" dy="0">public encounter</tspan><tspan x="1306" dy="28">one view of the record</tspan></text>
+    </g>
+
+    <text x="86" y="606" fill="#79A9FF" font-size="19" font-weight="800" letter-spacing="4">THE RECORD KEEPS THREE LANES OPEN</text>
+    <g fill="none" stroke-width="3">
+      <path d="M86 668 H1120" stroke="#79A9FF"/><path d="M86 748 H1120" stroke="#A6A7AE"/><path d="M86 828 H1120" stroke="#F4F0E7"/>
+    </g>
+    <g fill="#F4F0E7" font-size="28" font-weight="700">
+      <text x="86" y="658">DECISION</text><text x="86" y="738">HISTORY</text><text x="86" y="818">PROVENANCE</text>
+    </g>
+    <g fill="#A6A7AE" font-size="20">
+      <text x="310" y="658">why the Museum acts</text><text x="310" y="738">what happened, and when</text><text x="310" y="818">where the object came from</text>
+    </g>
+    <g fill="#79A9FF">
+      <circle cx="1120" cy="668" r="7"/><circle cx="1120" cy="748" r="7"/><circle cx="1120" cy="828" r="7"/>
+    </g>
+    <path d="M1120 668 V828" stroke="#3A4350" stroke-width="2"/>
+    <rect x="1172" y="626" width="366" height="246" rx="4" fill="#111419" stroke="#79A9FF" stroke-width="3"/>
+    <text x="1210" y="684" fill="#79A9FF" font-size="18" font-weight="800" letter-spacing="3">PUBLIC VIEW</text>
+    <text x="1210" y="738" fill="#F4F0E7" font-size="29" font-weight="700">Separate layers.</text>
+    <text x="1210" y="778" fill="#F4F0E7" font-size="29" font-weight="700">Shared access.</text>
+    <text x="1210" y="828" fill="#A6A7AE" font-size="18">The interface is not the archive.</text>
+    <path d="M86 944 H1538" stroke="#252A34" stroke-width="2"/>
+    <text x="86" y="918" fill="#F4F0E7" font-size="25" font-weight="600">Move the commitment. Keep the history.</text>
+  </g>
+</svg>

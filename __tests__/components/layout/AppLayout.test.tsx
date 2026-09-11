@@ -9,6 +9,7 @@ const usePathname = jest.fn();
 const getSearchParams = jest.fn();
 const mockPullToRefresh = jest.fn();
 let mockDialogMountCount = 0;
+let mockKeyboardVisible = false;
 let mockLayoutSpaces = {
   headerSpace: 0,
   pinnedSpace: 0,
@@ -48,12 +49,27 @@ jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
 jest.mock(
   "@/components/navigation/BottomNavigation",
   () =>
-    function BottomNavigation({ hidden }: { readonly hidden?: boolean }) {
+    function BottomNavigation({
+      hidden,
+      preserveMeasurementWhileHidden,
+    }: {
+      readonly hidden?: boolean;
+      readonly preserveMeasurementWhileHidden?: boolean;
+    }) {
       return (
-        <div data-testid="bottom-nav" data-hidden={`${Boolean(hidden)}`} />
+        <div
+          data-testid="bottom-nav"
+          data-hidden={`${Boolean(hidden)}`}
+          data-preserve-measurement={`${Boolean(
+            preserveMeasurementWhileHidden
+          )}`}
+        />
       );
     }
 );
+jest.mock("@/hooks/useNativeKeyboard", () => ({
+  useNativeKeyboard: () => ({ isVisible: mockKeyboardVisible }),
+}));
 jest.mock(
   "@/components/brain/mobile/BrainMobileWaves",
   () =>
@@ -162,6 +178,7 @@ describe("AppLayout", () => {
     usePathname.mockReturnValue("/");
     getSearchParams.mockReturnValue(new URLSearchParams());
     mockDialogMountCount = 0;
+    mockKeyboardVisible = false;
     mockPullToRefresh.mockClear();
     mockLayoutSpaces = {
       headerSpace: 0,
@@ -214,6 +231,37 @@ describe("AppLayout", () => {
 
     expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
       "104px"
+    );
+  });
+
+  it("preserves nav measurement while the keyboard hides the nav", () => {
+    mockKeyboardVisible = true;
+
+    renderWithProvider(<AppLayout>child</AppLayout>);
+
+    expect(screen.getByTestId("bottom-nav")).toHaveAttribute(
+      "data-hidden",
+      "true"
+    );
+    expect(screen.getByTestId("bottom-nav")).toHaveAttribute(
+      "data-preserve-measurement",
+      "true"
+    );
+  });
+
+  it("does not preserve nav measurement when the route also hides it", () => {
+    usePathname.mockReturnValue("/waves/wave-123");
+    mockKeyboardVisible = true;
+
+    renderWithProvider(<AppLayout>child</AppLayout>);
+
+    expect(screen.getByTestId("bottom-nav")).toHaveAttribute(
+      "data-hidden",
+      "true"
+    );
+    expect(screen.getByTestId("bottom-nav")).toHaveAttribute(
+      "data-preserve-measurement",
+      "false"
     );
   });
 

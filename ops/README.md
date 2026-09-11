@@ -17,8 +17,8 @@ agents, keep that material in the relevant `ops/` area.
   work that should not live in product docs.
 - [Scripts](scripts/README.md): operational scripts for docs maintenance,
   agent workflows, and repo operations that are not app build/runtime scripts.
-- `workstreams/`: active or archived workstream briefs, manager memory,
-  handoffs, and evidence logs when a workstream needs durable state.
+- [Workstreams](workstreams/README.md): current workstream state plus a
+  date-organized, explicitly non-authoritative archive.
 - `state/`: durable operational state used by automation or manager workflows
   when a narrower folder does not own it.
 

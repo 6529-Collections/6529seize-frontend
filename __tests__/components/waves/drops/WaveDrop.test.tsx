@@ -13,6 +13,7 @@ import useHasTouchInput from "@/hooks/useHasTouchInput";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import { DropLocation } from "@/components/waves/drops/drop.types";
+import { DropClientDeliveryState } from "@/helpers/waves/drop.helpers";
 
 const mockWaveDropActions = jest.fn();
 const mockWaveDropContent = jest.fn();
@@ -227,6 +228,45 @@ describe("WaveDrop", () => {
     jest.useRealTimers();
   });
 
+  it.each([
+    { isMobile: false, canRemove: false },
+    { isMobile: false, canRemove: true },
+    { isMobile: true, canRemove: false },
+    { isMobile: true, canRemove: true },
+  ])(
+    "gates curation menu entry with permission on mobile=$isMobile, canRemove=$canRemove",
+    ({ isMobile, canRemove }) => {
+      isMobileMock.mockReturnValue(isMobile);
+      setViewportWidth(isMobile ? 390 : 1440);
+      setHoverSupport(!isMobile);
+
+      renderWithEditingDropProvider(
+        <WaveDrop
+          drop={drop}
+          previousDrop={null}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={false}
+          location={DropLocation.WAVE}
+          dropViewDropId={null}
+          onReply={jest.fn()}
+          onReplyClick={jest.fn()}
+          onQuoteClick={jest.fn()}
+          showStandaloneActionsButton
+          standaloneQuickRemoveCuration={
+            canRemove ? { id: "curation-1", name: "Marketplace" } : null
+          }
+        />
+      );
+
+      const headerProps = getLastMockProps(mockWaveDropHeader);
+      expect(headerProps.showActionsButton).toBe(isMobile && canRemove);
+      expect(Boolean(headerProps.desktopActions)).toBe(!isMobile && canRemove);
+      expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
+    }
+  );
+
   it("shows actions on desktop", () => {
     setHoverSupport(true);
 
@@ -247,6 +287,45 @@ describe("WaveDrop", () => {
       />
     );
     expect(getByTestId("actions")).toBeInTheDocument();
+  });
+
+  it("renders a moderation-rejected optimistic drop as a local failed delivery", () => {
+    setHoverSupport(true);
+
+    renderWithEditingDropProvider(
+      <WaveDrop
+        drop={{
+          ...drop,
+          clientDeliveryState: DropClientDeliveryState.MODERATION_REJECTED,
+        }}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={DropLocation.WAVE}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByTestId("moderation-rejected-delivery-status")
+    ).toHaveTextContent("Not sent · Blocked by safety check");
+    expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("reactions")).not.toBeInTheDocument();
+    expect(getLastMockProps(mockWaveDropContent)).toEqual(
+      expect.objectContaining({ hasTouch: false })
+    );
+
+    const content = screen.getByTestId("content");
+    const dropRoot = content.closest("[data-wave-drop-id]");
+    expect(dropRoot).toHaveClass("tw-bg-red-500/5");
+    expect(dropRoot).not.toHaveClass("desktop-hover:hover:tw-bg-iron-800/50");
+    expect(content.closest(".tw-opacity-75")).not.toBeNull();
+    expect(screen.getByTestId("pfp").closest(".tw-opacity-75")).toBeNull();
   });
 
   it("keeps hybrid touchscreen laptops on desktop drop interactions", () => {
@@ -793,6 +872,63 @@ describe("WaveDrop", () => {
 
     expect(getLastMockProps(mockWaveDropActions)).toEqual(
       expect.objectContaining({ suppressed: true })
+    );
+  });
+
+  it("reveals desktop actions from mouse pointer events without CSS :hover", () => {
+    // Capability-lying browsers never activate :hover although mouse pointer
+    // events flow — the row's pointerenter must force the action bar visible.
+    isMobileMock.mockReturnValue(false);
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(false);
+    setHoverSupport(true);
+    setViewportWidth(1440);
+
+    renderWithEditingDropProvider(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={DropLocation.WAVE}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(getLastMockProps(mockWaveDropActions)).toEqual(
+      expect.objectContaining({ forceVisible: false })
+    );
+
+    const dropRoot = screen
+      .getByTestId("content")
+      .closest("[data-wave-drop-id]")!;
+    // React synthesizes onPointerEnter/Leave from pointerover/pointerout.
+    fireEvent.pointerOver(dropRoot, { pointerType: "mouse" });
+    expect(getLastMockProps(mockWaveDropActions)).toEqual(
+      expect.objectContaining({ forceVisible: true })
+    );
+
+    fireEvent.pointerOut(dropRoot, {
+      pointerType: "mouse",
+      relatedTarget: document.body,
+    });
+    expect(getLastMockProps(mockWaveDropActions)).toEqual(
+      expect.objectContaining({ forceVisible: false })
+    );
+
+    // Touch enter must not force the desktop reveal. jsdom drops pointerType
+    // from event init, so define it explicitly on a hand-built event.
+    const touchOver = new Event("pointerover", { bubbles: true });
+    Object.defineProperty(touchOver, "pointerType", { value: "touch" });
+    dropRoot.dispatchEvent(touchOver);
+    expect(getLastMockProps(mockWaveDropActions)).toEqual(
+      expect.objectContaining({ forceVisible: false })
     );
   });
 

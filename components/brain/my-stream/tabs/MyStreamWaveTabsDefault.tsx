@@ -1,20 +1,22 @@
 import React from "react";
 import {
   ChatBubbleLeftIcon,
+  LockClosedIcon,
+  PlusIcon,
   Squares2X2Icon,
 } from "@heroicons/react/24/outline";
-import { PlusIcon } from "@heroicons/react/24/solid";
 import type { CompactMenuItem } from "@/components/compact-menu";
 import { createBreakpoint } from "react-use";
 import { useContentTab } from "@/components/brain/ContentTabContext";
 import { getBoostedDropsDisplayPreferenceMenuItems } from "@/components/waves/boosted-drops/BoostedDropsDisplayPreference";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBoostedDropsDisplayPreference } from "@/hooks/useBoostedDropsDisplayPreference";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
 import type { ChatSubmitDropAction } from "../chatSubmitDrop.types";
+import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRestrictionButton";
 import MyStreamWaveTabsHeader, {
   type MyStreamWaveTabsHeaderActionContext,
 } from "./MyStreamWaveTabsHeader";
@@ -67,27 +69,48 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
 
     return (
       <>
-        {showChatSubmitDropAction && (
+        {showChatSubmitDropAction && !action.canOpen && headerIsCompact && (
+          <WaveHeaderRestrictionButton
+            label={action.label}
+            reason={chatSubmitDropTooltip ?? action.label}
+            className="tw-h-8 tw-w-8 tw-min-w-8 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-300 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+          >
+            <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
+            <span className="tw-sr-only">{action.compactLabel}</span>
+          </WaveHeaderRestrictionButton>
+        )}
+        {showChatSubmitDropAction && !action.canOpen && !headerIsCompact && (
+          <WaveHeaderRestrictionButton
+            label={action.label}
+            reason={chatSubmitDropTooltip ?? action.label}
+            className="tw-h-8 tw-min-w-0 tw-max-w-[10rem] tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 lg:tw-max-w-[14rem]"
+          >
+            <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
+            <span className="tw-min-w-0 tw-truncate">
+              {chatSubmitDropTooltip}
+            </span>
+          </WaveHeaderRestrictionButton>
+        )}
+        {showChatSubmitDropAction && action.canOpen && (
           <span
             className="tw-inline-flex"
             title={chatSubmitDropTitle}
             data-tooltip-id={tooltipId}
             data-tooltip-content={chatSubmitDropTooltip}
           >
-            <PrimaryButton
-              loading={false}
-              disabled={!action.canOpen}
-              onClicked={action.onOpen}
-              padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
+            <Button
+              onClick={action.onOpen}
+              variant="primary"
+              size="xs"
               title={chatSubmitDropTitle}
-              ariaLabel={action.label}
-              className="tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-auto sm:tw-w-auto sm:tw-min-w-0"
+              aria-label={action.label}
+              className="tw-w-8 tw-min-w-8 tw-px-0 sm:tw-w-auto sm:tw-min-w-0 sm:tw-max-w-[10rem] sm:tw-px-2.5"
             >
               <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 sm:-tw-ml-1" />
               <span className="tw-sr-only sm:tw-not-sr-only sm:tw-inline">
                 {action.compactLabel}
               </span>
-            </PrimaryButton>
+            </Button>
           </span>
         )}
         {!headerIsCompact && showGalleryToggle && !activeCurationId && (
@@ -153,7 +176,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
         showBackButton={showBackButton}
         headerActionsTooltipId={headerActionsTooltipId}
         headerClassName="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-2 tw-py-3 sm:tw-gap-x-4 sm:tw-px-4"
-        actionsClassName="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-self-stretch tw-pl-3 sm:tw-pl-4"
+        actionsClassName="tw-flex tw-flex-shrink-0 tw-self-start tw-items-center tw-gap-x-2 tw-pl-3 tw-pt-0.5 sm:tw-pl-4"
         renderLeadingActions={renderHeaderLeadingActions}
         renderOverflowMenuItems={renderHeaderOverflowMenuItems}
       />

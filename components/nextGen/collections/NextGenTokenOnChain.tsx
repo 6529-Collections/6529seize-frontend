@@ -6,7 +6,6 @@ import { useEnsName, useReadContract } from "wagmi";
 import type { NextGenCollection } from "@/entities/INextgen";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
-import styles from "./NextGen.module.css";
 
 import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -20,11 +19,14 @@ import Address from "@/components/address/Address";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { formatNameForUrl, getOpenseaLink } from "../nextgen_helpers";
+import { NextGenBackToCollectionPageLink } from "./collectionParts/NextGenCollectionHeader";
 
 interface Props {
   collection: NextGenCollection;
   token_id: number;
 }
+
+const TOKEN_METADATA_FETCH_TIMEOUT_MS = 10_000;
 
 export default function NextGenTokenOnChain(props: Readonly<Props>) {
   const capacitor = useCapacitor();
@@ -54,20 +56,69 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
   });
 
   useEffect(() => {
+    if (tokenUriRead.isLoading) {
+      return undefined;
+    }
+
     const data = tokenUriRead.data;
     if (data) {
       const tokenUri = data as string;
       setTokenMetadataUrl(tokenUri);
-      fetch(tokenUri).then((meta) => {
-        meta.json().then((metaJson) => {
-          setTokenImage(metaJson.image);
-        });
-      });
-    } else {
-      setTokenNotFound(true);
+      setTokenNotFound(false);
+      setFetchingMetadata(true);
+
+      const controller = new AbortController();
+      let active = true;
+      const abortMetadataFetch = () => {
+        if (active) {
+          controller.abort();
+        }
+      };
+      const timeoutId = globalThis.setTimeout(
+        abortMetadataFetch,
+        TOKEN_METADATA_FETCH_TIMEOUT_MS
+      );
+      const fetchMetadata = async () => {
+        try {
+          const response = await fetch(tokenUri, { signal: controller.signal });
+          if (!response.ok) {
+            throw new Error(`Metadata request failed: ${response.status}`);
+          }
+          const metadata = (await response.json()) as { image?: unknown };
+          if (!active) {
+            return;
+          }
+          const image =
+            typeof metadata.image === "string" ? metadata.image.trim() : "";
+          if (!image) {
+            setTokenNotFound(true);
+            return;
+          }
+          setTokenImage(image);
+        } catch {
+          if (active) {
+            setTokenNotFound(true);
+          }
+        } finally {
+          globalThis.clearTimeout(timeoutId);
+          if (active) {
+            setFetchingMetadata(false);
+          }
+        }
+      };
+
+      void fetchMetadata();
+      return () => {
+        active = false;
+        globalThis.clearTimeout(timeoutId);
+        controller.abort();
+      };
     }
+
+    setTokenNotFound(true);
     setFetchingMetadata(false);
-  }, [tokenUriRead.data]);
+    return undefined;
+  }, [tokenUriRead.data, tokenUriRead.isLoading]);
 
   const ownerRead = useReadContract({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
@@ -104,168 +155,183 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
     initialProfile: null,
   });
 
-  function printToken() {
-    return (
-      <>
-        <div
-          className={`tw-w-full tw-max-w-none tw-px-3 ${styles["tokenContainer"]} tw-pb-6 tw-pt-6`}
-        >
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-            <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-              <div className="tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-                <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                  <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-items-center tw-justify-between tw-px-3">
-                    <h2 className="tw-mb-0">{tokenName}</h2>
-                  </div>
-                </div>
-                <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-6">
-                  <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-text-center">
-                    <Image
-                      unoptimized
-                      priority
-                      loading={"eager"}
-                      width="0"
-                      height="0"
-                      style={{
-                        height: "auto",
-                        width: "auto",
-                        maxHeight: "90vh",
-                        maxWidth: "100%",
-                      }}
-                      src={tokenImage}
-                      alt={tokenName}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-4 tw-pt-4 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-            <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-              <h4>About</h4>
-            </div>
-          </div>
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-            <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-items-center tw-gap-12 tw-px-3">
-              <span className="tw-flex tw-flex-col tw-pb-1 tw-pt-1">
-                <span className="tw-text-[#9a9a9a]">Token ID</span>
-                <span>#{props.token_id}</span>
-              </span>
-              <span className="tw-flex tw-flex-col tw-pb-1 tw-pt-1">
-                <span className="tw-text-[#9a9a9a]">Collection</span>
-                <Link
-                  href={`/nextgen/collection/${formatNameForUrl(
-                    props.collection.name
-                  )}`}
-                >
-                  {props.collection.name}
-                </Link>
-              </span>
-              <span className="tw-flex tw-flex-col tw-pb-1 tw-pt-1">
-                <span className="tw-text-[#9a9a9a]">Artist</span>
-                <Link href={`/${props.collection.artist_address}`}>
-                  {props.collection.artist}
-                </Link>
-              </span>
-              <span className="tw-flex tw-flex-col tw-pb-1 tw-pt-1">
-                <span className="tw-text-[#9a9a9a]">Owner</span>
-                <span className="tw-flex">
-                  <Address
-                    wallets={[owner as `0x${string}`]}
-                    display={profile?.handle ?? ownerENS}
-                  />
-                  {areEqualAddresses(owner, account.address) && (
-                    <span>(you)</span>
-                  )}
-                </span>
-              </span>
-              <span className="tw-flex tw-flex-col tw-pb-1 tw-pt-1">
-                <span className="tw-text-[#9a9a9a]">Metadata</span>
-                <span className="tw-flex tw-items-center tw-gap-1">
-                  <span>
-                    {props.collection.on_chain ? "On-Chain" : "Off-Chain"}{" "}
-                    <Link
-                      href={tokenMetadataUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <FontAwesomeIcon
-                        className={styles["copyIcon"]}
-                        icon={faExternalLinkSquare}
-                      ></FontAwesomeIcon>
-                    </Link>
-                  </span>
-                </span>
-              </span>
-              {(!capacitor.isIos || country === "US") && (
-                <span className="tw-flex tw-flex-col tw-pb-1 tw-pt-1">
-                  <span className="tw-text-[#9a9a9a]">Marketplaces</span>
-                  <span className="tw-flex tw-gap-6">
-                    <>
-                      <Link
-                        href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token_id)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        data-tooltip-id={`opensea-${props.token_id}`}
-                      >
-                        <Image
-                          unoptimized
-                          className={styles["marketplace"]}
-                          src="/opensea.png"
-                          alt="opensea"
-                          width={28}
-                          height={28}
-                        />
-                      </Link>
-                      <Tooltip
-                        id={`opensea-${props.token_id}`}
-                        content="Opensea"
-                        delayShow={250}
-                        style={{
-                          backgroundColor: "#1F2937",
-                          color: "white",
-                          padding: "4px 8px",
-                        }}
-                      />
-                    </>
-                  </span>
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
-            <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-              <b>
-                Token Indexing, check back later <DotLoader />
-              </b>
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }
-
   if (fetchingMetadata || tokenNotFound || !tokenImage) {
     return (
-      <div className="tw-mx-auto tw-w-full tw-px-3 tw-pt-12 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-text-center">
-            <h4 className="tw-mb-0">
-              {tokenNotFound ? (
-                <>Token Not Found</>
-              ) : (
-                <>
-                  Fetching Token <DotLoader />
-                </>
-              )}
-            </h4>
+      <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-pb-12 md:tw-px-6 lg:tw-px-8">
+        <section className="tw-py-6 sm:tw-py-8">
+          <NextGenBackToCollectionPageLink collection={props.collection} />
+          <h1 className="tw-mb-0 tw-mt-2 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-3xl">
+            {tokenName}
+          </h1>
+        </section>
+        <div
+          aria-live="polite"
+          className="tw-flex tw-min-h-48 tw-items-center tw-justify-center tw-text-center"
+        >
+          <div className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-300">
+            {tokenNotFound ? (
+              "Token not found"
+            ) : (
+              <>
+                Fetching token <DotLoader />
+              </>
+            )}
           </div>
         </div>
       </div>
     );
   }
 
-  return printToken();
+  return (
+    <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-pb-12 md:tw-px-6 lg:tw-px-8">
+      <section className="tw-py-6 sm:tw-py-8">
+        <NextGenBackToCollectionPageLink collection={props.collection} />
+        <h1 className="tw-mb-0 tw-mt-2 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-3xl">
+          {tokenName}
+        </h1>
+      </section>
+
+      <section
+        aria-label={`${tokenName} artwork`}
+        className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80"
+      >
+        <div className="tw-flex tw-min-h-72 tw-items-center tw-justify-center tw-bg-black tw-p-4 sm:tw-p-6">
+          <Image
+            unoptimized
+            priority
+            width={1600}
+            height={1600}
+            className="tw-h-auto tw-max-h-[80vh] tw-w-auto tw-max-w-full tw-object-contain"
+            src={tokenImage}
+            alt={tokenName}
+          />
+        </div>
+      </section>
+
+      <section className="tw-pt-6">
+        <h2 className="tw-mb-5 tw-mt-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-2xl">
+          About
+        </h2>
+        <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 sm:tw-p-5">
+          <dl className="tw-m-0 tw-grid tw-gap-5 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+            <div className="tw-min-w-0">
+              <dt className="tw-text-sm tw-font-semibold tw-text-iron-400">
+                Token ID
+              </dt>
+              <dd className="tw-m-0 tw-mt-1 tw-text-base tw-text-white">
+                #{props.token_id}
+              </dd>
+            </div>
+            <div className="tw-min-w-0">
+              <dt className="tw-text-sm tw-font-semibold tw-text-iron-400">
+                Collection
+              </dt>
+              <dd className="tw-m-0 tw-mt-1 tw-text-base">
+                <Link
+                  href={`/nextgen/collection/${formatNameForUrl(
+                    props.collection.name
+                  )}`}
+                  className="tw-text-white"
+                >
+                  {props.collection.name}
+                </Link>
+              </dd>
+            </div>
+            <div className="tw-min-w-0">
+              <dt className="tw-text-sm tw-font-semibold tw-text-iron-400">
+                Artist
+              </dt>
+              <dd className="tw-m-0 tw-mt-1 tw-text-base">
+                <Link
+                  href={`/${props.collection.artist_address}`}
+                  className="tw-text-white"
+                >
+                  {props.collection.artist}
+                </Link>
+              </dd>
+            </div>
+            <div className="tw-min-w-0">
+              <dt className="tw-text-sm tw-font-semibold tw-text-iron-400">
+                Owner
+              </dt>
+              <dd className="tw-m-0 tw-mt-1 tw-flex tw-min-w-0 tw-items-center tw-gap-1 tw-text-base tw-text-white">
+                {owner ? (
+                  <Address
+                    wallets={[owner]}
+                    display={profile?.handle ?? ownerENS}
+                  />
+                ) : (
+                  <span>Fetching owner…</span>
+                )}
+                {owner && areEqualAddresses(owner, account.address) && (
+                  <span>(you)</span>
+                )}
+              </dd>
+            </div>
+            <div className="tw-min-w-0">
+              <dt className="tw-text-sm tw-font-semibold tw-text-iron-400">
+                Metadata
+              </dt>
+              <dd className="tw-m-0 tw-mt-1 tw-flex tw-items-center tw-gap-2 tw-text-base tw-text-white">
+                <span>
+                  {props.collection.on_chain ? "On-chain" : "Off-chain"}
+                </span>
+                <Link
+                  href={tokenMetadataUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Open ${tokenName} metadata in a new tab`}
+                  className="tw-inline-flex tw-rounded-md tw-text-iron-300 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                >
+                  <FontAwesomeIcon
+                    className="tw-h-4 tw-w-4"
+                    icon={faExternalLinkSquare}
+                    aria-hidden="true"
+                  />
+                </Link>
+              </dd>
+            </div>
+            {(!capacitor.isIos || country === "US") && (
+              <div className="tw-min-w-0">
+                <dt className="tw-text-sm tw-font-semibold tw-text-iron-400">
+                  Marketplaces
+                </dt>
+                <dd className="tw-m-0 tw-mt-1">
+                  <Link
+                    href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token_id)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`View ${tokenName} on OpenSea`}
+                    data-tooltip-id={`opensea-${props.token_id}`}
+                    className="tw-inline-flex tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1.5 tw-transition hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  >
+                    <Image
+                      unoptimized
+                      src="/opensea.png"
+                      alt="OpenSea"
+                      width={28}
+                      height={28}
+                      className="tw-rounded-md"
+                    />
+                  </Link>
+                  <Tooltip
+                    id={`opensea-${props.token_id}`}
+                    content="OpenSea"
+                    delayShow={250}
+                    variant="light"
+                  />
+                </dd>
+              </div>
+            )}
+          </dl>
+          <div className="tw-mt-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5">
+            <div className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-300">
+              Token indexing is still in progress. Check back later for the
+              complete token details. <DotLoader />
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }

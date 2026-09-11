@@ -27,6 +27,7 @@ interface ExpandedWaveProps {
   readonly haveNewDrops: boolean;
   readonly href: string;
   readonly isActive: boolean;
+  readonly isAnnouncement?: boolean | undefined;
   readonly isDropWave: boolean;
   readonly isPinned: boolean;
   readonly latestDropTimestamp?: number | null | undefined;
@@ -53,6 +54,7 @@ export const ExpandedWave = ({
   haveNewDrops,
   href,
   isActive,
+  isAnnouncement = false,
   isDropWave,
   isPinned,
   latestDropTimestamp,
@@ -152,7 +154,7 @@ export const ExpandedWave = ({
       className={`tw-group tw-relative tw-flex tw-items-center ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
-          : "desktop-hover:hover:tw-bg-iron-800/80"
+          : "desktop-hover:hover:tw-bg-iron-900/80"
       }`}
     >
       {!isChildRow && showSubwaveConnector && (
@@ -180,6 +182,7 @@ export const ExpandedWave = ({
         >
           <WaveAvatar
             isActive={isActive}
+            isAnnouncement={isAnnouncement}
             isDropWave={isDropWave}
             showNewDropsBadge={!isActive && haveNewDrops}
             wave={wave}
@@ -219,7 +222,11 @@ export const ExpandedWave = ({
               </div>
               {shouldShowDropTime && (
                 <div
-                  className={`tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap ${timestampTextClasses} tw-leading-tight tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-400`}
+                  className={`tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap ${timestampTextClasses} tw-font-normal tw-leading-tight tw-transition-colors tw-duration-200 ${
+                    isActive
+                      ? "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-400"
+                      : "tw-text-iron-500 desktop-hover:group-hover:tw-text-iron-500"
+                  }`}
                 >
                   <BrainLeftSidebarWaveDropTime
                     time={presentLatestDropTimestamp}

@@ -1,0 +1,35 @@
+# Developer Operations
+
+## Overview
+
+Use these guides for deployment, repository tooling, runtime configuration, QA,
+and product-impact operations.
+
+## Features
+
+- [Next configuration runtime rationale](next-config-runtime-rationale.md)
+- [pnpm and Socket Firewall](pnpm-and-socket-firewall.md)
+- [Wallet authentication structure](wallet-auth-final-structure-and-merge-rationale.md)
+
+## Flows
+
+- [Deployment](deployment.md)
+- [CI wave deploy and WEB E2E notifications](ci-wave-deploy-validation-notifications.md)
+- [Build-runner benchmark and activation](runner-activation-playbook.md)
+- [Device farm QA](device-farm-qa.md)
+- [Recover a signed profile CMS website](profile-cms-recovery.md)
+- [Product-impact Mixpanel runbook](product-impact-mixpanel-runbook.md)
+
+## Troubleshooting
+
+- Use the failure and rollback sections in
+  [Deployment](deployment.md) for deployment recovery.
+
+## Stubs
+
+No developer-operation stubs are currently tracked.
+
+## Related Areas
+
+- [Documentation home](../README.md)
+- [Shared application behavior](../shared/README.md)

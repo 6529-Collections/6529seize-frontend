@@ -5,80 +5,25 @@ import {
   AboutContainer as Container,
   AboutRow as Row,
 } from "./AboutLayout";
-import styles from "./About.module.css";
+import AboutTermsDefinitions from "./AboutTermsDefinitions";
 
 export default function AboutTermsOfService() {
   return (
-    <Container>
+    <Container fluid horizontalPadding={false}>
       <Row>
         <Col>
           <h1>Terms Of Service</h1>
         </Col>
       </Row>
       <Row>
-        <Col
-          className={`${styles["lastUpdateText"]} tw-pb-3 tw-pt-3 tw-text-right`}
-        >
-          Last Updated: February 23, 2023
+        <Col className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500">
+          Last Updated: September 9, 2026
         </Col>
       </Row>
       <Row className="tw-pb-3 tw-pt-3">
         <Col>
           <ol>
-            <li>
-              <b>Abbreviations Make Documents More Readable</b>
-              <br />
-              <br />
-              These are the abbreviations used in this document.
-              <br />
-              <br />
-              &quot;Terms&quot;: Terms of Service
-              <br />
-              <br />
-              &quot;We&quot;: 6529 Collection LLC
-              <br />
-              <br />
-              &quot;6529 NFTs&quot;: The Memes, 6529 Gradient, Meme Lab,
-              GenMemes, 6529 Intern and other NFTs that may be added from time
-              to time.
-              <br />
-              <br />
-              &quot;You&quot;: An adult, at least 18 years of age, who is not
-              subject to sanctions by the US government.
-              <br />
-              <br />
-              &quot;Third Parties&quot;: Everyone else who is not &quot;We&quot;
-              or &quot;You&quot;
-              <br />
-              <br />
-              &quot;Our Platform&quot;: the website located at{" "}
-              <Link
-                href="https://6529.io"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                6529.io
-              </Link>{" "}
-              , any websites hosted at sub-domains of{" "}
-              <Link
-                href="https://6529.io"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                6529.io
-              </Link>{" "}
-              , including hosted minting or primary sales pages, any primary
-              mints or sales directly from our smart contracts, any mobile or
-              metaverse applications we may make, and any content (data,
-              descriptions or otherwise) on our website or decentralized file
-              storage platforms like IPFS or Arweave.
-              <br />
-              <br />
-              &quot;Not Our Platform&quot;: Everything else that is not included
-              in &quot;Our Platform&quot; including your Ethereum wallet, NFT
-              marketplaces, and publicly accessible secondary functions on our
-              smart contracts, such as token transfers.
-            </li>
+            <AboutTermsDefinitions />
             <br />
             <br />
             <li>
@@ -678,6 +623,13 @@ export default function AboutTermsOfService() {
               g. Your Violation of Laws/Regulations
               <br />
               h. Your Feedback And Ideas
+              <br />
+              <br />
+              For clarity, this indemnity applies to third-party claims against
+              the 6529 Parties arising out of or relating to your own acts or
+              omissions. It does not make you responsible for another person’s
+              acts or omissions merely because you use Our Platform, participate
+              in a Wave or community, or own 6529 NFTs.
               <br />
               <br />
               You will cooperate with the 6529 Parties in defending any such

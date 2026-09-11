@@ -13,7 +13,7 @@ export default function DistributionPlanToolWrapper({
     <div className="tw-bg-iron-900">
       <div
         id="allowlist-tool"
-        className="tailwind-scope tw-relative tw-min-h-screen tw-overflow-y-auto"
+        className="tailwind-scope tw-relative tw-min-h-screen tw-overflow-x-hidden tw-overflow-y-auto"
       >
         {children}
       </div>

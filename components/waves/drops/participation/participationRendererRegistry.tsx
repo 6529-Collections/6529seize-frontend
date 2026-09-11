@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type FC } from "react";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import {
   resolveWaveParticipationVariant,
@@ -12,8 +12,10 @@ import { MemesSingleWaveDrop } from "@/components/waves/drop/MemesSingleWaveDrop
 import { QuorumSingleWaveDrop } from "@/components/waves/drop/QuorumSingleWaveDrop";
 import QuorumParticipationDrop from "@/components/waves/quorum/QuorumParticipationDrop";
 import DefaultParticipationDrop from "./DefaultParticipationDrop";
+import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
 import type {
   ResolvedWaveParticipationRendererSet,
+  ParticipationDropProps,
   WaveParticipationRendererSet,
 } from "./participationRenderer.types";
 
@@ -44,10 +46,15 @@ const WAVE_PARTICIPATION_RENDERERS: Readonly<
   },
 };
 
+const ProposalCardParticipationDrop: FC<ParticipationDropProps> = (props) => (
+  <DefaultParticipationDrop {...props} contentPresentation="proposalCard" />
+);
+
 export const useWaveParticipationRendererSet = (
   waveId: string | null | undefined
 ): ResolvedWaveParticipationRendererSet => {
   const { isMemesWave, isCurationWave, isQuorumWave } = useSeizeSettings();
+  const proposalCardPresentation = useWaveProposalCardPresentation(waveId);
 
   return useMemo(() => {
     const variant = resolveWaveParticipationVariant({
@@ -58,9 +65,25 @@ export const useWaveParticipationRendererSet = (
       isQuorumWave,
     });
 
+    const rendererSet = WAVE_PARTICIPATION_RENDERERS[variant];
+
+    if (variant === "default" && proposalCardPresentation === "proposalCard") {
+      return {
+        variant,
+        ...rendererSet,
+        ParticipationDrop: ProposalCardParticipationDrop,
+      };
+    }
+
     return {
       variant,
-      ...WAVE_PARTICIPATION_RENDERERS[variant],
+      ...rendererSet,
     };
-  }, [isMemesWave, isCurationWave, isQuorumWave, waveId]);
+  }, [
+    isMemesWave,
+    isCurationWave,
+    isQuorumWave,
+    proposalCardPresentation,
+    waveId,
+  ]);
 };

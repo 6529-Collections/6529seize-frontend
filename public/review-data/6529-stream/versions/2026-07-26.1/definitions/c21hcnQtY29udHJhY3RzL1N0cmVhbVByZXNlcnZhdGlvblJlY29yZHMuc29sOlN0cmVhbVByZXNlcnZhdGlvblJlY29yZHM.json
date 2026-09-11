@@ -1,0 +1,2722 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x32f74e98",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "CollectionDoesNotExist",
+          "selector": "0x32f74e98",
+          "signature": "CollectionDoesNotExist(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x37610c08",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CollectionRecordAlreadyExists",
+          "selector": "0x37610c08",
+          "signature": "CollectionRecordAlreadyExists(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0xc5e92023",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "FunctionAdminUnauthorized",
+          "selector": "0xc5e92023",
+          "signature": "FunctionAdminUnauthorized(address,bytes4)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x313ee3c2",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": true,
+          "inputs": [],
+          "name": "InvalidAdminContract",
+          "selector": "0x313ee3c2",
+          "signature": "InvalidAdminContract()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0xa9359e59",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "subjectId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "schemaId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidCollectionRecord",
+          "selector": "0xa9359e59",
+          "signature": "InvalidCollectionRecord(bytes32,bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0xf48e6f72",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": true,
+          "inputs": [],
+          "name": "InvalidCoreContract",
+          "selector": "0xf48e6f72",
+          "signature": "InvalidCoreContract()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x60a92160",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "algorithm",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "digestLength",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidHashRef",
+          "selector": "0x60a92160",
+          "signature": "InvalidHashRef(uint16,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x1372e27c",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": true,
+          "inputs": [],
+          "name": "InvalidRecordFamilyRegistry",
+          "selector": "0x1372e27c",
+          "signature": "InvalidRecordFamilyRegistry()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x1c9aebc3",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": true,
+          "inputs": [],
+          "name": "MetadataMutationPaused",
+          "selector": "0x1c9aebc3",
+          "signature": "MetadataMutationPaused()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#error:0x502ad1b0",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "actual",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "maximum",
+              "type": "uint256"
+            }
+          ],
+          "name": "PreservationURITooLarge",
+          "selector": "0x502ad1b0",
+          "signature": "PreservationURITooLarge(uint256,uint256)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#event:CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address,uint8)",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "subjectId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "struct IStreamPreservationRecords.CollectionRecord",
+              "name": "record",
+              "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "recordHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "address",
+              "name": "recorder",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "authorizationClass",
+              "type": "uint8"
+            }
+          ],
+          "name": "CollectionRecordRecorded",
+          "signature": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address,uint8)",
+          "topic0": "0x0cf31fd070c965df9e1d59536a11a3beeef59103e660acbdb4c14d7510103676"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords#event:PreservationAdminContractUpdated(address,address,address)",
+          "declaringDefinitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "oldAdminContract",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "newAdminContract",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "PreservationAdminContractUpdated",
+          "signature": "PreservationAdminContractUpdated(address,address,address)",
+          "topic0": "0xdad559b0337ff66a6992e5c580b7bce04ca0aff3293062dab723e68c1fc1f478"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x15470a24",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "HASH_ARWEAVE_TX",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0x15470a24",
+          "signature": "HASH_ARWEAVE_TX()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x83858f47",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "HASH_BLAKE3",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0x83858f47",
+          "signature": "HASH_BLAKE3()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x5a930455",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "HASH_IPFS_CID",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0x5a930455",
+          "signature": "HASH_IPFS_CID()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x73add36c",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "HASH_KECCAK256",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0x73add36c",
+          "signature": "HASH_KECCAK256()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xdc4d322c",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "HASH_MULTIHASH",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0xdc4d322c",
+          "signature": "HASH_MULTIHASH()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xc4bf62e7",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "HASH_SHA256",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0xc4bf62e7",
+          "signature": "HASH_SHA256()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x820883df",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "MAX_DIGEST_BYTES",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x820883df",
+          "signature": "MAX_DIGEST_BYTES()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x718a60ee",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "MAX_URI_BYTES",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x718a60ee",
+          "signature": "MAX_URI_BYTES()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x7e3c9be7",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "adminsContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x7e3c9be7",
+          "signature": "adminsContract()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x59e28051",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "collectionRecord",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamPreservationRecords.CollectionRecord",
+              "name": "",
+              "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)"
+            }
+          ],
+          "selector": "0x59e28051",
+          "signature": "collectionRecord(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x2cf021cb",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "collectionRecordSummary",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamPreservationRecords.CollectionRecordSummary",
+              "name": "",
+              "type": "(uint256,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,string,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,uint64,address,uint64,uint8)"
+            }
+          ],
+          "selector": "0x2cf021cb",
+          "signature": "collectionRecordSummary(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x18cd4aad",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "struct IStreamPreservationRecords.CollectionRecord",
+              "name": "record",
+              "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)"
+            }
+          ],
+          "name": "deriveCollectionRecordHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x18cd4aad",
+          "signature": "deriveCollectionRecordHash(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x3efe1a5d",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamPreservationRecords",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x3efe1a5d",
+          "signature": "isStreamPreservationRecords()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x8b1d1ed9",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "subjectId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "latestCollectionRecordHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x8b1d1ed9",
+          "signature": "latestCollectionRecordHash(uint256,bytes32,bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xc3434532",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "struct IStreamPreservationRecords.CollectionRecord",
+              "name": "record",
+              "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)"
+            }
+          ],
+          "name": "recordCollectionRecord",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xc3434532",
+          "signature": "recordCollectionRecord(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xe96a886a",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "recordFamilyRegistry",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xe96a886a",
+          "signature": "recordFamilyRegistry()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x5f59b4d2",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamCore",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x5f59b4d2",
+          "signature": "streamCore()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xc4628276",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleFamily",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xc4628276",
+          "signature": "streamModuleFamily()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xdbff3398",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleSchemaHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xdbff3398",
+          "signature": "streamModuleSchemaHash()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x28746186",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleSupersedes",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x28746186",
+          "signature": "streamModuleSupersedes()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x99d8b2df",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x99d8b2df",
+          "signature": "streamModuleVersion()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x388d2c24",
+          "declaringDefinitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "newAdminsContract",
+              "type": "address"
+            }
+          ],
+          "name": "updateAdminContract",
+          "outputs": [],
+          "selector": "0x388d2c24",
+          "signature": "updateAdminContract(address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "production_release_contract",
+    "classificationReason": "Listed in release-artifacts/contracts.json production_contracts.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "MAX_URI_BYTES()",
+          "displaySignature": "MAX_URI_BYTES()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x718a60ee",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHg3MThhNjBlZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "MAX_URI_BYTES",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 45,
+            "byteStart": 380,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L13",
+            "lineEnd": 13,
+            "lineStart": 13,
+            "snippetSha256": "sha256:b8b94a728bbab6b5dd71c19125efb9f1aa30f407e12fca83c9acdb37a2f67006",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x718a60ee",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "MAX_DIGEST_BYTES()",
+          "displaySignature": "MAX_DIGEST_BYTES()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x820883df",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHg4MjA4ODNkZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "MAX_DIGEST_BYTES",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 46,
+            "byteStart": 431,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:d0b73c13568ae8d22c6f4bb092dd5e0758cf6b9500c354ece850838c269d17b4",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x820883df",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "HASH_KECCAK256()",
+          "displaySignature": "HASH_KECCAK256()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x73add36c",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHg3M2FkZDM2Yw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "HASH_KECCAK256",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "range": {
+            "byteLength": 41,
+            "byteStart": 483,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:d88f1cc6c72283ae269da48e4cedca4b5d02244464799c7cf95620f3eee8827b",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x73add36c",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "HASH_SHA256()",
+          "displaySignature": "HASH_SHA256()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xc4bf62e7",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHhjNGJmNjJlNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "HASH_SHA256",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "range": {
+            "byteLength": 38,
+            "byteStart": 530,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:06fcd0adbc50cd64ade4ff023c2068a49c1947f1c61bf3c70c64db3a31e772b8",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0xc4bf62e7",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "HASH_BLAKE3()",
+          "displaySignature": "HASH_BLAKE3()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x83858f47",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHg4Mzg1OGY0Nw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "HASH_BLAKE3",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "range": {
+            "byteLength": 38,
+            "byteStart": 574,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:d3b5ce3c43a493ff2619ff054cac95c2263c9286359efcaef1af07484e83efc1",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x83858f47",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "HASH_MULTIHASH()",
+          "displaySignature": "HASH_MULTIHASH()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xdc4d322c",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHhkYzRkMzIyYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "HASH_MULTIHASH",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "range": {
+            "byteLength": 41,
+            "byteStart": 618,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:8d38f63f57aa9e03a8134f529d85cf91a5b1bfefe16bf7da580944674dbafbb7",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0xdc4d322c",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "HASH_IPFS_CID()",
+          "displaySignature": "HASH_IPFS_CID()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x5a930455",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHg1YTkzMDQ1NQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "HASH_IPFS_CID",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "range": {
+            "byteLength": 40,
+            "byteStart": 665,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:c7bf8653d8c5308fe7d5366da7b1cd3f5287cf91da55a21f807a3e9a67abc006",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x5a930455",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "HASH_ARWEAVE_TX()",
+          "displaySignature": "HASH_ARWEAVE_TX()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x15470a24",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHgxNTQ3MGEyNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "HASH_ARWEAVE_TX",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "range": {
+            "byteLength": 42,
+            "byteStart": 711,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:3c7f178d716d3e60bd1d73a03ee9869daa91da676d36b62e110a472724f13928",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x15470a24",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "streamCore()",
+          "displaySignature": "streamCore()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x5f59b4d2",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHg1ZjU5YjRkMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamCore",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 44,
+            "byteStart": 1247,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:4f7f71c1b8da8958495b06edca8b47250c9c191d783803bba780c176566ce547",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x5f59b4d2",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "recordFamilyRegistry()",
+          "displaySignature": "recordFamilyRegistry()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xe96a886a",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHhlOTZhODg2YQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "recordFamilyRegistry",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 54,
+            "byteStart": 1297,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:737100415fb299e87ebd54d4c73144daba849e870ce70f6e7d001156949f0a1a",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0xe96a886a",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(address,address,address,address)",
+          "functionKind": "constructor",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:constructor(address,address,address,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "admins",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "familyRegistry",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "supersedes",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246Y29uc3RydWN0b3IoYWRkcmVzcyxhZGRyZXNzLGFkZHJlc3MsYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 689,
+            "byteStart": 2086,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L50-L64",
+            "lineEnd": 64,
+            "lineStart": 50,
+            "snippetSha256": "sha256:e9c9645fdc4ff8c3aeb834ca90fdad3e30f61fcc68846a112de2ee149035800e",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "adminsContract()",
+          "displaySignature": "adminsContract()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x7e3c9be7",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHg3ZTNjOWJlNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "adminsContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 115,
+            "byteStart": 2781,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L66-L68",
+            "lineEnd": 68,
+            "lineStart": 66,
+            "snippetSha256": "sha256:8f2adc6a109e5b36db63f33af178404fba63886122c81fb542cd8f03e1b4cf95",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x7e3c9be7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isStreamPreservationRecords()",
+          "displaySignature": "isStreamPreservationRecords()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x3efe1a5d",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHgzZWZlMWE1ZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamPreservationRecords",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 105,
+            "byteStart": 2902,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L70-L72",
+            "lineEnd": 72,
+            "lineStart": 70,
+            "snippetSha256": "sha256:5e7a647d717d9a99f5a2b204884f4a4f206d2a460031cc0180a85ab7f40fa6b5",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x3efe1a5d",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamModuleFamily()",
+          "displaySignature": "streamModuleFamily()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xc4628276",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHhjNDYyODI3Ng",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleFamily",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 109,
+            "byteStart": 3013,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L74-L76",
+            "lineEnd": 76,
+            "lineStart": 74,
+            "snippetSha256": "sha256:801879965448e7ba6679037734f60bf7adc8be9eb0076b861376a5bdaf849563",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0xc4628276",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamModuleVersion()",
+          "displaySignature": "streamModuleVersion()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x99d8b2df",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHg5OWQ4YjJkZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleVersion",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 111,
+            "byteStart": 3128,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L78-L80",
+            "lineEnd": 80,
+            "lineStart": 78,
+            "snippetSha256": "sha256:cb3ce0705f807d4340889f80c664c80fbbfdca573ffc92a8e2fdda72d0152063",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x99d8b2df",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamModuleSchemaHash()",
+          "displaySignature": "streamModuleSchemaHash()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xdbff3398",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHhkYmZmMzM5OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleSchemaHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 118,
+            "byteStart": 3245,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L82-L84",
+            "lineEnd": 84,
+            "lineStart": 82,
+            "snippetSha256": "sha256:36f8633db7fda317e671807fa79263e72cda5b6975a38ddccbcb5bb65300df38",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0xdbff3398",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "streamModuleSupersedes()",
+          "displaySignature": "streamModuleSupersedes()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x28746186",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHgyODc0NjE4Ng",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleSupersedes",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 116,
+            "byteStart": 3369,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L86-L88",
+            "lineEnd": 88,
+            "lineStart": 86,
+            "snippetSha256": "sha256:433b3d8c781d52022cc67855eb162017d35d657214670716b9f61bdb735467cd",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x28746186",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "updateAdminContract(address)",
+          "displaySignature": "updateAdminContract(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x388d2c24",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "newAdminsContract",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHgzODhkMmMyNA",
+          "kind": "function",
+          "modifiers": [
+            "FunctionAdminRequired"
+          ],
+          "name": "updateAdminContract",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 414,
+            "byteStart": 3491,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L90-L99",
+            "lineEnd": 99,
+            "lineStart": 90,
+            "snippetSha256": "sha256:298256440e760133c3903b36094ffa3e75264afeb6298979f72f540a09c8d098",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x388d2c24",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "recordCollectionRecord(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+          "displaySignature": "recordCollectionRecord(uint256,CollectionRecord)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xc3434532",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "record",
+              "storageLocation": "calldata",
+              "type": "CollectionRecord"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHhjMzQzNDUzMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "recordCollectionRecord",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "recordHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 2129,
+            "byteStart": 3911,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L101-L149",
+            "lineEnd": 149,
+            "lineStart": 101,
+            "snippetSha256": "sha256:453ca1a16725bc5dc9f503dbd5069e5de2f6a941d16c6db1193c0294194a7087",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0xc3434532",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "latestCollectionRecordHash(uint256,bytes32,bytes32)",
+          "displaySignature": "latestCollectionRecordHash(uint256,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x8b1d1ed9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "subjectId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHg4YjFkMWVkOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "latestCollectionRecordHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 252,
+            "byteStart": 6046,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L151-L158",
+            "lineEnd": 158,
+            "lineStart": 151,
+            "snippetSha256": "sha256:9457393ab67d3bae2882e300a5b0530fe95ab80d4623bba39d39209122545b62",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x8b1d1ed9",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionRecordSummary(bytes32)",
+          "displaySignature": "collectionRecordSummary(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x2cf021cb",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recordHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHgyY2YwMjFjYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionRecordSummary",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "CollectionRecordSummary"
+            }
+          ],
+          "range": {
+            "byteLength": 197,
+            "byteStart": 6304,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L160-L167",
+            "lineEnd": 167,
+            "lineStart": 160,
+            "snippetSha256": "sha256:4fc70aa647b8291ee947b301944bea5ee17ad58d7adc0d833b2e177013e6fc91",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x2cf021cb",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionRecord(bytes32)",
+          "displaySignature": "collectionRecord(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x59e28051",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recordHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHg1OWUyODA1MQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionRecord",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "CollectionRecord"
+            }
+          ],
+          "range": {
+            "byteLength": 190,
+            "byteStart": 6507,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L169-L176",
+            "lineEnd": 176,
+            "lineStart": 169,
+            "snippetSha256": "sha256:a9811dcfb0c3af0d1889cfa1a6b2cd4f775c8646dd337fe957d7a16d384241e6",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x59e28051",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "deriveCollectionRecordHash(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+          "displaySignature": "deriveCollectionRecordHash(uint256,CollectionRecord)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x18cd4aad",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "record",
+              "storageLocation": "calldata",
+              "type": "CollectionRecord"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHgxOGNkNGFhZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "deriveCollectionRecordHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 275,
+            "byteStart": 6703,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L178-L186",
+            "lineEnd": 186,
+            "lineStart": 178,
+            "snippetSha256": "sha256:4c3a78a99e2eab5d13e85e77bd47a040082a5ddb74ff856879735721e0f4574e",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x18cd4aad",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246MHgwMWZmYzlhNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 271,
+            "byteStart": 6984,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L188-L196",
+            "lineEnd": 196,
+            "lineStart": 188,
+            "snippetSha256": "sha256:999884be10c7a3a0174cc57cdb78406cc60e078951906f70d6ef671be4b618a4",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setAdminContract(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:_setAdminContract(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "admins",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246X3NldEFkbWluQ29udHJhY3QoYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setAdminContract",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 262,
+            "byteStart": 7261,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L198-L203",
+            "lineEnd": 203,
+            "lineStart": 198,
+            "snippetSha256": "sha256:cb7630491fc435f97b7c8750674ba0b34564856af64e688a8e0133485d531a37",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requireKnownCollection(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:_requireKnownCollection(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246X3JlcXVpcmVLbm93bkNvbGxlY3Rpb24odWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requireKnownCollection",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 239,
+            "byteStart": 7529,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L205-L209",
+            "lineEnd": 209,
+            "lineStart": 205,
+            "snippetSha256": "sha256:4a64a3e46399baeba0ed31a6dc19f516f37435195a81e13692d5cab103165a25",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deriveCollectionRecordHash(uint256,CollectionRecord)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:_deriveCollectionRecordHash(uint256,CollectionRecord)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "record",
+              "storageLocation": "calldata",
+              "type": "CollectionRecord"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246X2Rlcml2ZUNvbGxlY3Rpb25SZWNvcmRIYXNoKHVpbnQyNTYsQ29sbGVjdGlvblJlY29yZCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deriveCollectionRecordHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 708,
+            "byteStart": 7774,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L211-L233",
+            "lineEnd": 233,
+            "lineStart": 211,
+            "snippetSha256": "sha256:b5247067abfafab8e996323fa23bf434d04710ea7184a614bdebded0827f9d8f",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_validateRecord(CollectionRecord)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:_validateRecord(CollectionRecord)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "record",
+              "storageLocation": "calldata",
+              "type": "CollectionRecord"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246X3ZhbGlkYXRlUmVjb3JkKENvbGxlY3Rpb25SZWNvcmQp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_validateRecord",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1324,
+            "byteStart": 8488,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L235-L263",
+            "lineEnd": 263,
+            "lineStart": 235,
+            "snippetSha256": "sha256:ff6cbf96f3129218b7ce11c51428d501e380c23fb55a7e216e360cedf0e32dfd",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_validateRequiredHashRef(HashRef)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:_validateRequiredHashRef(HashRef)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "ref",
+              "storageLocation": "calldata",
+              "type": "HashRef"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246X3ZhbGlkYXRlUmVxdWlyZWRIYXNoUmVmKEhhc2hSZWYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_validateRequiredHashRef",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1015,
+            "byteStart": 9818,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L265-L288",
+            "lineEnd": 288,
+            "lineStart": 265,
+            "snippetSha256": "sha256:82dc327838d914fdbae939d65783dd6bcdcd008d8a419e74b97b9dbd663212d3",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_hashRef(HashRef)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:_hashRef(HashRef)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "ref",
+              "storageLocation": "calldata",
+              "type": "HashRef"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246X2hhc2hSZWYoSGFzaFJlZik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_hashRef",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 178,
+            "byteStart": 10839,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L290-L292",
+            "lineEnd": 292,
+            "lineStart": 290,
+            "snippetSha256": "sha256:5f5c788d9c10907df2ce618db9ba82ec67dad01cd549d951a5b3b0ff3a4145e3",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requireMetadataMutationNotPaused()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:_requireMetadataMutationNotPaused()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHMjZnVuY3Rpb246X3JlcXVpcmVNZXRhZGF0YU11dGF0aW9uTm90UGF1c2VkKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requireMetadataMutationNotPaused",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 257,
+            "byteStart": 11023,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L294-L300",
+            "lineEnd": 300,
+            "lineStart": 294,
+            "snippetSha256": "sha256:586880b0e2dddc6a1c55e6d9baada1e02d4ccd7d28a3c82f5dee64d1fae85fa6",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [
+        {
+          "inputs": [
+            {
+              "index": 0,
+              "name": "selector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "FunctionAdminRequired",
+          "natspec": "",
+          "overrides": [],
+          "range": {
+            "byteLength": 325,
+            "byteStart": 1755,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L40-L48",
+            "lineEnd": 48,
+            "lineStart": 40,
+            "snippetSha256": "sha256:30002de2821e7c3fc930a9204d3e0f93e31b54cd4b01b502b13975e32a6a212b",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "virtual": false
+        }
+      ],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x718a60ee",
+          "immutable": false,
+          "name": "MAX_URI_BYTES",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 380,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L13",
+            "lineEnd": 13,
+            "lineStart": 13,
+            "snippetSha256": "sha256:b8b94a728bbab6b5dd71c19125efb9f1aa30f407e12fca83c9acdb37a2f67006",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x718a60ee",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 5,
+            "byteStart": 420,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L13",
+            "lineEnd": 13,
+            "lineStart": 13,
+            "snippetSha256": "sha256:f127cada2c166851ea3481aeeca4f1981763135072c4dddcdaf555fc513b4eae",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "valueSource": "2_048",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x820883df",
+          "immutable": false,
+          "name": "MAX_DIGEST_BYTES",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 431,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:d0b73c13568ae8d22c6f4bb092dd5e0758cf6b9500c354ece850838c269d17b4",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x820883df",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 3,
+            "byteStart": 474,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:2747b7c718564ba5f066f0523b03e17f6a496b06851333d2d59ab6d863225848",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "valueSource": "128",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x73add36c",
+          "immutable": false,
+          "name": "HASH_KECCAK256",
+          "natspec": "",
+          "range": {
+            "byteLength": 41,
+            "byteStart": 483,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:d88f1cc6c72283ae269da48e4cedca4b5d02244464799c7cf95620f3eee8827b",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x73add36c",
+          "type": "uint16",
+          "typeString": "uint16",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 523,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "valueSource": "1",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xc4bf62e7",
+          "immutable": false,
+          "name": "HASH_SHA256",
+          "natspec": "",
+          "range": {
+            "byteLength": 38,
+            "byteStart": 530,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:06fcd0adbc50cd64ade4ff023c2068a49c1947f1c61bf3c70c64db3a31e772b8",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0xc4bf62e7",
+          "type": "uint16",
+          "typeString": "uint16",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 567,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "valueSource": "2",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x83858f47",
+          "immutable": false,
+          "name": "HASH_BLAKE3",
+          "natspec": "",
+          "range": {
+            "byteLength": 38,
+            "byteStart": 574,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:d3b5ce3c43a493ff2619ff054cac95c2263c9286359efcaef1af07484e83efc1",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x83858f47",
+          "type": "uint16",
+          "typeString": "uint16",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 611,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "valueSource": "3",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xdc4d322c",
+          "immutable": false,
+          "name": "HASH_MULTIHASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 41,
+            "byteStart": 618,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:8d38f63f57aa9e03a8134f529d85cf91a5b1bfefe16bf7da580944674dbafbb7",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0xdc4d322c",
+          "type": "uint16",
+          "typeString": "uint16",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 658,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "valueSource": "4",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x5a930455",
+          "immutable": false,
+          "name": "HASH_IPFS_CID",
+          "natspec": "",
+          "range": {
+            "byteLength": 40,
+            "byteStart": 665,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:c7bf8653d8c5308fe7d5366da7b1cd3f5287cf91da55a21f807a3e9a67abc006",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x5a930455",
+          "type": "uint16",
+          "typeString": "uint16",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 704,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "valueSource": "5",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x15470a24",
+          "immutable": false,
+          "name": "HASH_ARWEAVE_TX",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 711,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:3c7f178d716d3e60bd1d73a03ee9869daa91da676d36b62e110a472724f13928",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x15470a24",
+          "type": "uint16",
+          "typeString": "uint16",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 752,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:e7f6c011776e8db7cd330b54174fd76f7d0216b612387a5ffcfb81e6f0919683",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "valueSource": "6",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_MODULE_FAMILY",
+          "natspec": "",
+          "range": {
+            "byteLength": 93,
+            "byteStart": 760,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:744f962f449495aac67554af06aeb6c44e1420b0593df539f53691feb283b21a",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 51,
+            "byteStart": 802,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:294b714749da82f2dcd967374a9bc2de88522fd141e9da998e828ffba94697ec",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "valueSource": "keccak256(\"6529stream.module.preservation-records\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_MODULE_VERSION",
+          "natspec": "",
+          "range": {
+            "byteLength": 105,
+            "byteStart": 859,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L23-L24",
+            "lineEnd": 24,
+            "lineStart": 23,
+            "snippetSha256": "sha256:7e3144787a9400acee57b14d6f9689338b586cfd1822055141c9cd56d90b8458",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 54,
+            "byteStart": 910,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:eb2efdc962554437261a9554faa42ed920f50399ed134855148db03976881ec7",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "valueSource": "keccak256(\"6529stream.module.preservation-records.v2\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_MODULE_SCHEMA_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 109,
+            "byteStart": 970,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L25-L26",
+            "lineEnd": 26,
+            "lineStart": 25,
+            "snippetSha256": "sha256:b7215095744bfafed8c84053126cdb7bf1c550730d29ddd67a8c2dcbce3762ec",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 54,
+            "byteStart": 1025,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:e0429073f436c79431dcf7ca909b1a0b5d4fd8ebe730cb3ef384381c83617b73",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "valueSource": "keccak256(\"6529stream.preservation-records.schema.v2\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_RECORD_HASH_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 93,
+            "byteStart": 1085,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:988620f568f4900f4340b0058b8f1fe8b6da9d000e0db0b324167d2afcd2a9e8",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 46,
+            "byteStart": 1132,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:e56173c16b0adc95b8a03da6f76a5a277411f670f288594d3e08aa98ccace6eb",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "valueSource": "keccak256(\"6529stream.preservation-record.v2\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_FIELD_RECORD_URI",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 1184,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:152014de3b73f9384dd26055b54982dd2b224c3ed944f5652c19f5b0709fd0ba",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 11,
+            "byteStart": 1229,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:a9bca4fc270b9e654a00d453a9f779e4b31e11a12ded7929ca012be06bec7da6",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "valueSource": "\"recordURI\"",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x5f59b4d2",
+          "immutable": true,
+          "name": "streamCore",
+          "natspec": "",
+          "range": {
+            "byteLength": 44,
+            "byteStart": 1247,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:4f7f71c1b8da8958495b06edca8b47250c9c191d783803bba780c176566ce547",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0x5f59b4d2",
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xe96a886a",
+          "immutable": true,
+          "name": "recordFamilyRegistry",
+          "natspec": "",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 1297,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:737100415fb299e87ebd54d4c73144daba849e870ce70f6e7d001156949f0a1a",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": "0xe96a886a",
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "_moduleSupersedes",
+          "natspec": "",
+          "range": {
+            "byteLength": 43,
+            "byteStart": 1357,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:9fb6ec3467a6a4ac1e0a5a95a40c814d8f0778f67e8432be9bf8a4741571a476",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_adminsContract",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 1406,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L33",
+            "lineEnd": 33,
+            "lineStart": 33,
+            "snippetSha256": "sha256:7aeb5efe9490d5a367583fa47115a8b04bbb9d3bca509b04829ad4f96dbedee3",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "type": "IStreamAdmins",
+          "typeString": "contract IStreamAdmins",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "_recordFamilyRegistry",
+          "natspec": "",
+          "range": {
+            "byteLength": 67,
+            "byteStart": 1449,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:77e605673edf0b20912178505536abb4c09eec86c9c2cfae5c9e6205b3e11c56",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "type": "IStreamRecordFamilyRegistry",
+          "typeString": "contract IStreamRecordFamilyRegistry",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_records",
+          "natspec": "",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 1523,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:b25bf5f00358e45e95ceb8f539a5ed5e7e1959f12a0448c4c9de48eb6118871c",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "type": "mapping(bytes32 => CollectionRecordSummary)",
+          "typeString": "mapping(bytes32 => struct IStreamPreservationRecords.CollectionRecordSummary)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_recordPayloads",
+          "natspec": "",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 1589,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L37",
+            "lineEnd": 37,
+            "lineStart": 37,
+            "snippetSha256": "sha256:c908728c8115b7f2cc4c134a86a1396df0377e9d484075c1deb4a335c08d8af1",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "type": "mapping(bytes32 => CollectionRecord)",
+          "typeString": "mapping(bytes32 => struct IStreamPreservationRecords.CollectionRecord)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_latestRecordHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 93,
+            "byteStart": 1655,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L38",
+            "lineEnd": 38,
+            "lineStart": 38,
+            "snippetSha256": "sha256:205fdbd523639befa7bef0871917437ef73dc4dcda44a06e1b927d1c87f9870e",
+            "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => mapping(bytes32 => mapping(bytes32 => bytes32)))",
+          "typeString": "mapping(uint256 => mapping(bytes32 => mapping(bytes32 => bytes32)))",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/ERC165.sol:ERC165",
+        "name": "ERC165"
+      },
+      {
+        "definitionId": "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+        "name": "IStreamPreservationRecords"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByZXNlcnZhdGlvblJlY29yZHMuc29sOlN0cmVhbVByZXNlcnZhdGlvblJlY29yZHM",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "smart-contracts/IStreamPreservationRecords.sol:IStreamPreservationRecords",
+      "smart-contracts/ERC165.sol:ERC165",
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": true,
+      "releaseCatalog": "production_contract"
+    },
+    "name": "StreamPreservationRecords",
+    "natspec": "",
+    "range": {
+      "byteLength": 10981,
+      "byteStart": 301,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol#L12-L301",
+      "lineEnd": 301,
+      "lineStart": 12,
+      "snippetSha256": "sha256:7afea8e593f1749b94f73d9c39a1a5fee2075e05a30becbbf9aa2558c03db2c9",
+      "sourceSha256": "sha256:c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+    },
+    "release": {
+      "abiSha256": "sha256:7e0ccb80ec1f7bb8c2dd846d73a24759c8d5273c37e432b17d915dcd9c6a8fb5",
+      "bytecodeSha256": "sha256:e6077fa809b93d79e2ac23323253eddd9a6cd6720a4b95d536153640d6cb7233",
+      "deployedBytecodeSha256": "sha256:ed0cd8363b09eac6a4879a36fcebc3a6dbf9c0ddf616a23896939cef93dc798b",
+      "deployedBytecodeSizeBytes": 7826,
+      "summary": {
+        "custom_error_count": 10,
+        "event_count": 2,
+        "function_count": 23,
+        "payable_function_count": 0,
+        "read_function_count": 21,
+        "write_function_count": 2
+      },
+      "tracked": true
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamPreservationRecords.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 25
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 24
+    },
+    "totalCount": 25
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x01ffc9a7",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x15470a24",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x18cd4aad",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x28746186",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x2cf021cb",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x388d2c24",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x3efe1a5d",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x59e28051",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x5a930455",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x5f59b4d2",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x718a60ee",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x73add36c",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x7e3c9be7",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x820883df",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x83858f47",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x8b1d1ed9",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0x99d8b2df",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xc3434532",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xc4628276",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xc4bf62e7",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xdbff3398",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xdc4d322c",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:0xe96a886a",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords#function:constructor(address,address,address,address)",
+      "definitionId": "smart-contracts/StreamPreservationRecords.sol:StreamPreservationRecords",
+      "severity": "advisory"
+    }
+  ]
+}

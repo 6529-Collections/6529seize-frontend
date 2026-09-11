@@ -2,13 +2,17 @@
 
 import DotLoader from "../dotLoader/DotLoader";
 import AppWalletCard from "./AppWalletCard";
+import AppWalletActionButton from "./AppWalletActionButton";
 import { CreateAppWalletModal } from "./AppWalletModal";
 import { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import { useAppWallets } from "./AppWalletsContext";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
+import {
+  DELEGATION_CARD_CLASS_NAME,
+  DELEGATION_PAGE_CONTAINER_CLASS_NAME,
+  DELEGATION_PAGE_TITLE_CLASS_NAME,
+} from "@/components/delegation/delegation-ui";
 
 export default function AppWallets() {
   const { appWalletsSupported, fetchingAppWallets, appWallets } =
@@ -20,7 +24,9 @@ export default function AppWallets() {
   function printWallets() {
     if (fetchingAppWallets) {
       return (
-        <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
+        <div
+          className={`${DELEGATION_CARD_CLASS_NAME} tw-flex tw-min-h-32 tw-items-center tw-justify-center tw-p-5 tw-text-sm tw-text-iron-400`}
+        >
           Fetching wallets <DotLoader />
         </div>
       );
@@ -28,19 +34,16 @@ export default function AppWallets() {
 
     if (appWallets.length === 0) {
       return (
-        <div className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
+        <div
+          className={`${DELEGATION_CARD_CLASS_NAME} tw-flex tw-min-h-32 tw-items-center tw-justify-center tw-p-5 tw-text-sm tw-text-iron-400`}
+        >
           No wallets found
         </div>
       );
     }
 
-    return appWallets.map((w) => (
-      <div
-        key={w.address}
-        className="tw-relative tw-w-full tw-max-w-full tw-flex-none tw-px-3 tw-pb-3 min-[576px]:tw-w-1/2 min-[768px]:tw-w-1/3"
-      >
-        <AppWalletCard wallet={w} />
-      </div>
+    return appWallets.map((wallet) => (
+      <AppWalletCard key={wallet.address} wallet={wallet} />
     ));
   }
 
@@ -51,42 +54,38 @@ export default function AppWallets() {
 
     return (
       <>
-        <div className="-tw-mx-3 tw-mt-4 tw-flex tw-flex-wrap">
-          {printWallets()}
+        <div className="tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-flex sm:tw-items-center sm:tw-gap-3">
+          <CreateAppWalletModal
+            show={showCreateModal}
+            onHide={() => setShowCreateModal(false)}
+          />
+          <AppWalletActionButton
+            action="create"
+            onClick={() => setShowCreateModal(true)}
+            className="sm:tw-w-auto"
+          >
+            Create Wallet
+          </AppWalletActionButton>
+          <AppWalletActionButton
+            action="import"
+            onClick={() => router.push("/tools/app-wallets/import-wallet")}
+            className="sm:tw-w-auto"
+          >
+            Import Wallet
+          </AppWalletActionButton>
         </div>
-        <div className="-tw-mx-3 tw-mt-4 tw-flex tw-flex-wrap">
-          <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-gap-3 tw-px-3">
-            <CreateAppWalletModal
-              show={showCreateModal}
-              onHide={() => setShowCreateModal(false)}
-            />
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(true)}
-              className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
-            >
-              <FontAwesomeIcon icon={faPlusCircle} height={16} /> Create Wallet
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push("/tools/app-wallets/import-wallet")}
-              className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-[#198754] tw-bg-[#198754] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#146c43] enabled:hover:tw-bg-[#157347] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
-            >
-              <FontAwesomeIcon icon={faPlusCircle} height={16} /> Import Wallet
-            </button>
-          </div>
+        <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+          {printWallets()}
         </div>
       </>
     );
   }
 
   return (
-    <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-4 tw-pt-4 min-[576px]:tw-max-w-[540px] min-[768px]:tw-max-w-[720px] min-[992px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1140px] min-[1400px]:tw-max-w-[1320px]">
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-        <h1 className="tw-relative tw-w-full tw-max-w-full tw-flex-1 tw-px-3">
-          App Wallets
-        </h1>
-      </div>
+    <div className={DELEGATION_PAGE_CONTAINER_CLASS_NAME}>
+      <header className="tw-mb-6">
+        <h1 className={DELEGATION_PAGE_TITLE_CLASS_NAME}>App Wallets</h1>
+      </header>
       {printContent()}
     </div>
   );

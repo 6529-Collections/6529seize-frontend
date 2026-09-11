@@ -1,87 +1,114 @@
 "use client";
 
-import type { QueryStatus } from "@tanstack/react-query";
-import { useState } from "react";
-import type { ApiWave } from "@/generated/models/ApiWave";
+import { useLayoutEffect, useRef, useState } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { ProfileWaveActivityQueryState } from "@/hooks/useProfileWaveActivityWaves";
+import { getUserPageBrainSidebarMessage } from "./userPageBrainSidebar.messages";
+import UserPageBrainSidebarLoadMore from "./UserPageBrainSidebarLoadMore";
+import UserPageBrainSidebarSectionState, {
+  BRAIN_SIDEBAR_ACTION_BUTTON_CLASS,
+  BRAIN_SIDEBAR_COMPLETION_CLASS,
+} from "./UserPageBrainSidebarSectionState";
 import UserPageBrainSidebarWaveItem from "./UserPageBrainSidebarWaveItem";
+import { keepFocusedSidebarControlVisible } from "./userPageBrainSidebar.helpers";
 
-const DEFAULT_VISIBLE_CREATED_WAVES = 3;
+const DEFAULT_VISIBLE_CREATED_WAVES = 5;
+const CREATED_WAVES_LIST_ID = "brain-created-waves-list";
 
 interface UserPageBrainSidebarCreatedProps {
   readonly identity: string;
-  readonly waves: ApiWave[];
-  readonly status: QueryStatus;
+  readonly state: ProfileWaveActivityQueryState;
 }
 
 export default function UserPageBrainSidebarCreated({
   identity,
-  waves,
-  status,
+  state,
 }: UserPageBrainSidebarCreatedProps) {
+  const locale = useBrowserLocale();
+  const toggleButtonRef = useRef<HTMLButtonElement>(null);
   const [expandedIdentity, setExpandedIdentity] = useState<string | null>(null);
-  const showAllWaves = expandedIdentity === identity;
-  const visibleWaves = showAllWaves
-    ? waves
-    : waves.slice(0, DEFAULT_VISIBLE_CREATED_WAVES);
-  const remainingWavesCount = Math.max(
-    waves.length - DEFAULT_VISIBLE_CREATED_WAVES,
-    0
-  );
-  const showMoreLabel =
-    remainingWavesCount === 1
-      ? "Show 1 more"
-      : `Show ${remainingWavesCount} more`;
-  const shouldShowLoading = status === "pending" && waves.length === 0;
-  const shouldShowWaves = waves.length > 0;
-  if (!shouldShowLoading && !shouldShowWaves) {
+  const isExpanded = expandedIdentity === identity;
+  const visibleWaves = isExpanded
+    ? state.waves
+    : state.waves.slice(0, DEFAULT_VISIBLE_CREATED_WAVES);
+  const canRevealMore =
+    state.waves.length > DEFAULT_VISIBLE_CREATED_WAVES || state.hasNextPage;
+
+  useLayoutEffect(() => {
+    const button = toggleButtonRef.current;
+    if (button && globalThis.document.activeElement === button) {
+      keepFocusedSidebarControlVisible(button);
+    }
+  }, [isExpanded]);
+
+  if (state.status === "success" && state.waves.length === 0) {
     return null;
   }
 
   return (
     <section aria-labelledby="brain-created-waves-heading">
-      <span
+      <h2
         id="brain-created-waves-heading"
-        className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500"
+        className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500"
       >
-        Created Waves
-      </span>
-      <div className="tw-mt-3 tw-space-y-2.5">
-        {shouldShowLoading ? (
-          <div className="tw-space-y-2.5" aria-label="Loading created waves">
-            {[0, 1, 2].map((key) => (
-              <div
-                key={key}
-                className="tw-flex tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-white/5 tw-p-3 tw-shadow-inner"
-              >
-                <div className="tw-h-10 tw-w-10 tw-shrink-0 tw-animate-pulse tw-rounded-full tw-bg-white/[0.06]" />
-                <div className="tw-min-w-0 tw-flex-1 tw-space-y-1.5">
-                  <div className="tw-h-3 tw-w-2/3 tw-animate-pulse tw-rounded tw-bg-white/[0.06]" />
-                  <div className="tw-h-2.5 tw-w-1/2 tw-animate-pulse tw-rounded tw-bg-white/[0.05]" />
-                </div>
-              </div>
+        {getUserPageBrainSidebarMessage(
+          locale,
+          "user.brain.sidebar.createdHeading"
+        )}
+      </h2>
+
+      <UserPageBrainSidebarSectionState
+        state={state}
+        loadErrorMessageKey="user.brain.sidebar.createdLoadError"
+        emptyMessageKey="user.brain.sidebar.createdEmpty"
+      />
+
+      {state.waves.length > 0 && (
+        <div className="tw-mt-3">
+          <div id={CREATED_WAVES_LIST_ID} className="tw-space-y-2.5">
+            {visibleWaves.map((wave) => (
+              <UserPageBrainSidebarWaveItem
+                key={wave.id}
+                wave={wave}
+                showTotalPosts
+              />
             ))}
           </div>
-        ) : (
-          <>
-            {visibleWaves.map((wave) => (
-              <UserPageBrainSidebarWaveItem key={wave.id} wave={wave} />
-            ))}
-            {waves.length > DEFAULT_VISIBLE_CREATED_WAVES && (
+
+          {(canRevealMore || isExpanded) && (
+            <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
               <button
+                ref={toggleButtonRef}
                 type="button"
                 onClick={() =>
-                  setExpandedIdentity((current) =>
-                    current === identity ? null : identity
-                  )
+                  setExpandedIdentity(isExpanded ? null : identity)
                 }
-                className="tw-mt-2 tw-cursor-pointer tw-border-none tw-bg-black tw-px-1 tw-text-xs tw-font-semibold tw-text-iron-500 tw-transition-colors desktop-hover:hover:tw-text-iron-300"
+                className={BRAIN_SIDEBAR_ACTION_BUTTON_CLASS}
+                aria-controls={CREATED_WAVES_LIST_ID}
+                aria-expanded={isExpanded}
               >
-                {showAllWaves ? "Show less" : showMoreLabel}
+                {getUserPageBrainSidebarMessage(
+                  locale,
+                  isExpanded
+                    ? "user.brain.sidebar.showLess"
+                    : "user.brain.sidebar.showMore"
+                )}
               </button>
-            )}
-          </>
-        )}
-      </div>
+
+              {isExpanded && (
+                <UserPageBrainSidebarLoadMore
+                  state={state}
+                  buttonClassName={BRAIN_SIDEBAR_ACTION_BUTTON_CLASS}
+                  completionClassName={BRAIN_SIDEBAR_COMPLETION_CLASS}
+                  containerClassName="tw-contents"
+                  errorClassName="tw-m-0 tw-text-xs tw-text-red-300/80"
+                  showErrorMessage
+                />
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }

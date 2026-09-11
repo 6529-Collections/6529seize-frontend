@@ -55,14 +55,21 @@ Parent: [NextGen Index](README.md)
 - `Display Center` includes rendered downloads (`1K`, `2K`, `4K`, `8K`, `16K`),
   thumbnail-use variants (`Thumbnail`, `0.5K`), and custom render launch
   options (`Animated|Static`, `Final|OG`, optional custom height).
-- Download items verify source availability. Missing outputs show `Coming Soon`.
-- On-chain fallback can progress from `Fetching Token` to `Token Not Found`, or
-  show token metadata with `Token Indexing, check back later`.
+- `Provenance` presents token and collection history with the shared activity-row
+  treatment and explicit loading, error/retry, and no-entry states.
+- Download items show `Loading…` while checking source availability, then show
+  a file size when available or `Coming Soon` when the output is missing.
+- The on-chain fallback uses the same responsive token-page frame, artwork
+  surface, and details styling as indexed tokens. It can progress from
+  `Fetching token` to `Token not found`, or show available metadata while token
+  indexing is still in progress.
 
 ## Edge Cases
 
 - High-res zoom controls stay hidden until high-res image loading completes.
-- Pressing `Escape` or clicking closes light/dark viewer modes.
+- Light/dark viewer modes fill the viewport, center the image, and lock page
+  scrolling. Pressing `Escape`, using the close button, or clicking the
+  backdrop closes the viewer.
 - First/last token positions disable previous/next arrow navigation.
 - Switching away from high-res hides zoom controls until high-res is loaded
   again.

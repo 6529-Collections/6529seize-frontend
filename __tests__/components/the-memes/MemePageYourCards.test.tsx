@@ -26,9 +26,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 
 jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
   __esModule: true,
-  default: ({ variant }: { variant?: string }) => (
-    <tr data-testid="latest-activity-row" data-variant={variant ?? ""} />
-  ),
+  default: () => <tr data-testid="latest-activity-row" />,
 }));
 
 jest.mock("@/components/nft-transfer/TransferModal", () => ({
@@ -293,10 +291,6 @@ describe("MemePageYourCardsSubMenu", () => {
         expect(container.querySelector(".row")).not.toBeInTheDocument();
         expect(container.querySelector(".table")).not.toBeInTheDocument();
         expect(screen.getAllByTestId("latest-activity-row")).toHaveLength(2);
-        expect(screen.getAllByTestId("latest-activity-row")[0]).toHaveAttribute(
-          "data-variant",
-          "tailwind"
-        );
       });
     });
   });

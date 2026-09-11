@@ -4,7 +4,10 @@ import { useAuth } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
 import { WaveDropsAllWithoutProvider } from "@/components/waves/drops/wave-drops-all";
-import { DropMode } from "@/components/waves/dropComposer.types";
+import {
+  DropMode,
+  type DropComposerDensity,
+} from "@/components/waves/dropComposer.types";
 import {
   UnreadDividerProvider,
   useUnreadDivider,
@@ -13,6 +16,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getHomeRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -24,10 +28,15 @@ import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
+import type { WsDropDeleteMessage } from "@/helpers/Types";
+import { WsMessageType } from "@/helpers/Types";
+import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "@/components/waves/create-drop-content/reply-target-unavailable";
 import {
   ACCEPTED_FILE_TYPE_LABELS,
   isSupportedUploadFile,
 } from "@/services/uploads/mediaUploadMimeType";
+import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
+import { useDmUnreadConversation } from "@/services/dm-unread/DmUnreadStateProvider";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, {
@@ -59,10 +68,13 @@ interface MyStreamWaveChatProps {
   readonly chatSubmitDropAction?: ChatSubmitDropAction | null | undefined;
   readonly onCloseChatSubmitDrop?: (() => void) | undefined;
   readonly waveViewStyleOverride?: React.CSSProperties | undefined;
+  readonly composerDensity?: DropComposerDensity | undefined;
 }
 
 interface WaveChatLeaveHandlerProps {
   readonly enabled: boolean;
+  readonly isDirectMessage: boolean;
+  readonly readThroughSerialNo?: number | undefined;
   readonly waveId: string;
 }
 
@@ -74,6 +86,7 @@ interface WaveGalleryProps {
 interface PrivilegedDropCreatorProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
+  readonly onReplyTargetUnavailable?: (() => void) | undefined;
   readonly onDropAddedToQueue: () => void;
   readonly wave: ApiWave;
   readonly dropId: string | null;
@@ -116,6 +129,8 @@ interface WaveLeaderboardCurationDropModalProps {
 }
 
 const MAX_UNSUPPORTED_FILE_NAMES_IN_TOAST = 3;
+const NATIVE_KEYBOARD_COMPOSER_BOTTOM_PADDING =
+  "var(--native-keyboard-composer-bottom-padding, max(env(safe-area-inset-bottom,0px), 0.5rem))";
 const noop = () => {};
 
 const WaveGallery = dynamic<WaveGalleryProps>(
@@ -155,6 +170,8 @@ const WaveLeaderboardCurationDropModal =
 
 const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
   enabled,
+  isDirectMessage,
+  readThroughSerialNo,
   waveId,
 }) => {
   const { setUnreadDividerSerialNo } = useUnreadDivider();
@@ -163,6 +180,8 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
 
   useWaveChatLeaveCleanup({
     enabled,
+    isDirectMessage,
+    readThroughSerialNo,
     waveId,
     setUnreadDividerSerialNo,
     removeWaveDeliveredNotifications,
@@ -181,8 +200,11 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   chatSubmitDropAction = null,
   onCloseChatSubmitDrop,
   waveViewStyleOverride,
+  composerDensity = "default",
 }) => {
   const router = useRouter();
+  const dmUnreadConversation = useDmUnreadConversation(wave.id);
+  const isDirectMessage = isWaveDirectMessage(wave.id, wave);
   const { fetchAroundSerialNo } = useMyStream();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by MyStreamWave Suspense wrapper
   const searchParams = useSearchParams();
@@ -211,9 +233,17 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const activeDrop =
     activeDropState.waveId === wave.id ? activeDropState.activeDrop : null;
 
-  const setActiveDropForWave = (nextActiveDrop: ActiveDropState | null) => {
-    setActiveDropState({ waveId: wave.id, activeDrop: nextActiveDrop });
-  };
+  const setActiveDropForWave = useCallback(
+    (nextActiveDrop: ActiveDropState | null) => {
+      setActiveDropState({ waveId: wave.id, activeDrop: nextActiveDrop });
+    },
+    [wave.id]
+  );
+  const activeDropRef = useRef(activeDrop);
+
+  useEffect(() => {
+    activeDropRef.current = activeDrop;
+  }, [activeDrop]);
 
   const initialDropState = useMemo<InitialDropState | null>(() => {
     const dropParam = searchParams.get("serialNo");
@@ -308,22 +338,67 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
 
     return `${baseStyles} ${heightClass}`;
   }, []);
+  const composerContainerClassName = isApp
+    ? "tw-mt-auto tw-bg-iron-950"
+    : "tw-mt-auto tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)]";
+  const composerContainerStyle = useMemo<React.CSSProperties | undefined>(
+    () =>
+      isApp
+        ? {
+            paddingBottom: NATIVE_KEYBOARD_COMPOSER_BOTTOM_PADDING,
+          }
+        : undefined,
+    [isApp]
+  );
 
-  const onReply = (drop: ApiDrop, partId: number) => {
-    setActiveDropForWave({
-      action: ActiveDropAction.REPLY,
-      drop,
-      partId,
-    });
-  };
+  const onReply = useCallback(
+    (drop: ApiDrop, partId: number) => {
+      setActiveDropForWave({
+        action: ActiveDropAction.REPLY,
+        drop,
+        partId,
+      });
+    },
+    [setActiveDropForWave]
+  );
 
-  const handleReply = ({ drop, partId }: { drop: ApiDrop; partId: number }) => {
-    onReply(drop, partId);
-  };
+  const handleReply = useCallback(
+    ({ drop, partId }: { drop: ApiDrop; partId: number }) => {
+      onReply(drop, partId);
+    },
+    [onReply]
+  );
 
-  const onCancelReplyQuote = () => {
+  const onCancelReplyQuote = useCallback(() => {
     setActiveDropForWave(null);
-  };
+  }, [setActiveDropForWave]);
+
+  useWebSocketMessage<WsDropDeleteMessage["data"]>(
+    WsMessageType.DROP_DELETE,
+    useCallback(
+      (messageData) => {
+        if (messageData.wave_id !== wave.id) {
+          return;
+        }
+
+        if (activeDropRef.current?.drop.id !== messageData.drop_id) {
+          return;
+        }
+
+        setActiveDropForWave(null);
+        setToast({
+          type: "warning",
+          title: t(locale, "waves.chat.replyTargetDeletedToast.title"),
+          description: t(
+            locale,
+            "waves.chat.replyTargetDeletedToast.description"
+          ),
+          toastId: REPLY_TARGET_UNAVAILABLE_TOAST_ID,
+        });
+      },
+      [locale, setActiveDropForWave, setToast, wave.id]
+    )
+  );
   const {
     winningThreshold,
     winningThresholdMinDurationMs,
@@ -511,6 +586,12 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     >
       <WaveChatLeaveHandler
         enabled={Boolean(connectedProfile?.handle)}
+        isDirectMessage={isDirectMessage}
+        readThroughSerialNo={
+          isDirectMessage
+            ? dmUnreadConversation?.latest_drop_serial_no
+            : undefined
+        }
         waveId={wave.id}
       />
       <section
@@ -542,7 +623,11 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           activeDrop={activeDrop}
           initialDrop={scrollTarget}
           dividerSerialNo={dividerTarget}
-          unreadCount={wave.metrics.your_unread_drops_count}
+          unreadCount={
+            isDirectMessage
+              ? (dmUnreadConversation?.unread_count ?? 0)
+              : wave.metrics.your_unread_drops_count
+          }
           dropId={null}
           onDropContentClick={onDropClick}
           isMuted={wave.metrics.muted}
@@ -552,11 +637,15 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           isVotingControlsLocked={isVotingControlsLocked}
         />
         {!(isApp && editingDropId) && (
-          <div className="tw-mt-auto tw-bg-iron-950 tw-pb-[max(env(safe-area-inset-bottom,0px),0.5rem)] lg:tw-pb-0">
-            <CreateDropWaveWrapper>
+          <div
+            className={composerContainerClassName}
+            style={composerContainerStyle}
+          >
+            <CreateDropWaveWrapper composerDensity={composerDensity}>
               <PrivilegedDropCreator
                 activeDrop={activeDrop}
                 onCancelReplyQuote={onCancelReplyQuote}
+                onReplyTargetUnavailable={onCancelReplyQuote}
                 onDropAddedToQueue={onCancelReplyQuote}
                 wave={wave}
                 dropId={null}
@@ -579,7 +668,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           <WaveChatSubmitDropModal
             isOpen
             wave={wave}
-            title="Submit drop"
+            title={chatSubmitDropAction?.label ?? "Submit drop"}
             initialCurationUrl={chatSubmitDrop?.initialCurationUrl ?? null}
             onClose={closeChatSubmitDrop}
           />

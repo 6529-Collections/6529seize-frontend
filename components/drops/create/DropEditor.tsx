@@ -7,7 +7,10 @@ import {
   useRef,
   useState,
 } from "react";
-import type { CreateDropWrapperHandles } from "./utils/CreateDropWrapper";
+import type {
+  CreateDropScreenType,
+  CreateDropWrapperHandles,
+} from "./utils/CreateDropWrapper";
 import CreateDropWrapper from "./utils/CreateDropWrapper";
 import type {
   CreateDropConfig,
@@ -34,6 +37,7 @@ interface DropEditorWaveProps {
 }
 
 interface DropEditorProps {
+  readonly className?: string | undefined;
   readonly profile: ProfileMinWithoutSubs;
   readonly quotedDrop: {
     readonly dropId: string;
@@ -48,6 +52,8 @@ interface DropEditorProps {
   readonly showDropError?: boolean | undefined;
   readonly wave: DropEditorWaveProps | null;
   readonly waveId: string | null;
+  /** Pins the composer rendering branch; see CreateDropWrapper. */
+  readonly forceScreenType?: CreateDropScreenType | undefined;
   readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
   readonly onCanSubmitChange?:
     | ((canSubmit: boolean) => void)
@@ -58,6 +64,7 @@ interface DropEditorProps {
 const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
   (
     {
+      className,
       profile,
       quotedDrop,
       isClient = false,
@@ -69,6 +76,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
       showDropError = false,
       wave,
       waveId,
+      forceScreenType,
       onSubmitDrop,
       onCanSubmitChange,
     },
@@ -146,7 +154,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
     }
 
     return (
-      <div>
+      <div className={className}>
         <CreateDropWrapper
           ref={createDropWrapperRef}
           quotedDrop={quotedDrop}
@@ -163,6 +171,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           showSubmit={showSubmit}
           submitOnEnter={submitOnEnter}
           showDropError={showDropError}
+          forceScreenType={forceScreenType}
           wave={wave}
           setIsStormMode={setIsStormMode}
           setViewType={setViewType}

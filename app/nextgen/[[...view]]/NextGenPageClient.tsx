@@ -5,101 +5,89 @@ import NextgenAboutComponent from "@/components/nextGen/collections/NextGenAbout
 import NextgenArtistsComponent from "@/components/nextGen/collections/NextGenArtists";
 import NextgenCollectionsComponent from "@/components/nextGen/collections/NextGenCollections";
 import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNavigationHeader";
+import { NEXTGEN_PAGE_FRAME_CLASSNAME } from "@/components/nextGen/collections/NextGenPageFrame";
 import { useTitle } from "@/contexts/TitleContext";
 import type { NextGenCollection } from "@/entities/INextgen";
-import styles from "@/styles/Home.module.css";
 import { NextgenView } from "@/types/enums";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { getNextgenTitle } from "../title-utils";
 import { getNextGenView } from "./view-utils";
+
+function getPageTitle(view?: NextgenView): string {
+  return getNextgenTitle(view, "NextGen");
+}
 
 export default function NextGenPageClient({
   featuredCollection,
   initialView,
 }: {
-  readonly featuredCollection: NextGenCollection;
+  readonly featuredCollection: NextGenCollection | null;
   readonly initialView?: NextgenView | undefined;
 }) {
   const { setTitle } = useTitle();
 
-  const [collection] = useState<NextGenCollection>(featuredCollection);
   const [view, setView] = useState<NextgenView | undefined>(initialView);
-
-  useEffect(() => {
-    setTitle(view ? `NextGen ${view}` : "NextGen");
-  }, [setTitle, view]);
 
   const updateView = (newView?: NextgenView) => {
     setView(newView);
-    const newPath = newView ? `/nextgen/${newView.toLowerCase()}` : "/nextgen";
+    setTitle(getPageTitle(newView));
+    const newPath =
+      newView !== undefined ? `/nextgen/${newView.toLowerCase()}` : "/nextgen";
     window.history.pushState({ view: newView }, "", newPath);
   };
 
   useEffect(() => {
     const onPopState = (e: PopStateEvent) => {
-      if (e.state?.view) {
-        const newView = getNextGenView(e.state.view);
-        setView(newView);
-      }
+      const pathView = window.location.pathname.split("/")[2];
+      const historyState: unknown = e.state;
+      const stateView =
+        typeof historyState === "object" &&
+        historyState !== null &&
+        "view" in historyState &&
+        typeof historyState.view === "string"
+          ? historyState.view
+          : undefined;
+      const newView = stateView ?? pathView;
+      const nextView =
+        newView !== undefined ? getNextGenView(newView) : undefined;
+      setView(nextView);
+      setTitle(getPageTitle(nextView));
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, []);
-
-  const mainClassName = [
-    "tailwind-scope",
-    styles["main"],
-    "tw-border",
-    "tw-border-y-0",
-    "tw-border-l-0",
-    "tw-border-solid",
-    "tw-border-iron-800",
-    "tw-bg-[#0D0D0F]",
-  ]
-    .filter((className): className is string => Boolean(className))
-    .join(" ");
+  }, [setTitle]);
 
   return (
-    <main className={mainClassName}>
-      {collection?.id ? (
+    <main className={`${NEXTGEN_PAGE_FRAME_CLASSNAME} tw-pb-12`}>
+      {featuredCollection !== null && featuredCollection.id > 0 ? (
         <>
           <NextGenNavigationHeader view={view} setView={updateView} />
           {!view && (
-            <NextGenComponent collection={collection} setView={updateView} />
+            <NextGenComponent
+              collection={featuredCollection}
+              setView={updateView}
+            />
           )}
           {view && (
-            <div className={`tw-w-full tw-max-w-none tw-px-3 ${styles["main"]}`}>
-              <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-items-center">
-                <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-                  <div className="tw-mx-auto tw-w-full tw-px-3 tw-pb-6 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-                    <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                      <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-                        {view === NextgenView.COLLECTIONS && (
-                          <NextgenCollectionsComponent />
-                        )}
-                        {view === NextgenView.ARTISTS && (
-                          <NextgenArtistsComponent />
-                        )}
-                        {view === NextgenView.ABOUT && (
-                          <NextgenAboutComponent />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-pb-6 md:tw-px-6 lg:tw-px-8">
+              {view === NextgenView.COLLECTIONS && (
+                <NextgenCollectionsComponent />
+              )}
+              {view === NextgenView.ARTISTS && <NextgenArtistsComponent />}
+              {view === NextgenView.ABOUT && <NextgenAboutComponent />}
             </div>
           )}
         </>
       ) : (
-        <div className={styles["nextGenQuestion"]}>
+        <div className="tw-flex tw-min-h-[calc(100vh-120px)] tw-items-center tw-justify-center tw-p-6">
           <Image
             unoptimized
-            width={0}
-            height={0}
-            style={{ height: "auto", width: "25vw" }}
+            width={882}
+            height={882}
+            className="tw-h-auto tw-w-48 tw-max-w-[50vw]"
             src="/question.png"
-            alt="questionmark"
+            alt="NextGen collection unavailable"
           />
         </div>
       )}

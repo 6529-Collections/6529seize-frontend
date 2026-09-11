@@ -44,6 +44,9 @@ This page covers collection-route browsing:
 - Collection slideshow renders only when `mint_count > 0`.
 - `Trait Sets` tab uses `top-trait-sets`; `/trait-sets` is the dedicated
   full-page trait-set browser.
+- `Provenance` uses the compact activity-row layout shared with token history,
+  including token identity, transaction details, and expandable collection
+  updates.
 
 ## Art Browser (`/art`)
 

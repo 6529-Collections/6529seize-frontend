@@ -1,15 +1,17 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import UserPageSubscriptionsMode from '@/components/user/subscriptions/UserPageSubscriptionsMode';
-import { AuthContext } from '@/components/auth/Auth';
-import { commonApiPost } from '@/services/api/common-api';
+import { render, screen, fireEvent } from "@testing-library/react";
+import UserPageSubscriptionsMode from "@/components/user/subscriptions/UserPageSubscriptionsMode";
+import { AuthContext } from "@/components/auth/Auth";
+import { commonApiPost } from "@/services/api/common-api";
 
-jest.mock('@/services/api/common-api', () => ({
+jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
 }));
 
-jest.mock('@/components/dotLoader/DotLoader', () => ({ Spinner: () => <span data-testid="spinner" /> }));
+jest.mock("@/components/dotLoader/DotLoader", () => ({
+  Spinner: () => <span data-testid="spinner" />,
+}));
 
-describe('UserPageSubscriptionsMode', () => {
+describe("UserPageSubscriptionsMode", () => {
   const requestAuth = jest.fn();
   const setToast = jest.fn();
   const refresh = jest.fn();
@@ -21,7 +23,7 @@ describe('UserPageSubscriptionsMode', () => {
           profileKey="p1"
           details={{
             automatic: auto,
-            consolidation_key: '',
+            consolidation_key: "",
             last_update: 0,
             balance: 0,
             subscribe_all_editions: false,
@@ -39,20 +41,26 @@ describe('UserPageSubscriptionsMode', () => {
     requestAuth.mockResolvedValue({ success: true });
   });
 
-  it('initializes toggle state from props', () => {
+  it("initializes toggle state from props", () => {
     renderComponent(true);
-    const toggle = screen.getByRole('checkbox');
+    const toggle = screen.getByRole("switch", {
+      name: "Automatic subscription mode",
+    });
     expect(toggle).toBeChecked();
   });
 
-  it('toggles subscription mode on click', async () => {
+  it("toggles subscription mode on click", async () => {
     renderComponent(false);
-    const toggle = screen.getByRole('checkbox');
+    const toggle = screen.getByRole("switch", {
+      name: "Automatic subscription mode",
+    });
     fireEvent.click(toggle);
     expect(requestAuth).toHaveBeenCalled();
-    await screen.findByRole('checkbox');
+    await screen.findByRole("switch", {
+      name: "Automatic subscription mode",
+    });
     expect(commonApiPost).toHaveBeenCalledWith({
-      endpoint: 'subscriptions/p1/subscription-mode',
+      endpoint: "subscriptions/p1/subscription-mode",
       body: { automatic: true },
     });
     expect(setToast).toHaveBeenCalled();

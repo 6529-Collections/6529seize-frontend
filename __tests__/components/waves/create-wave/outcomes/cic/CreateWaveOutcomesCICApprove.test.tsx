@@ -2,21 +2,6 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveOutcomesCICApprove from "@/components/waves/create-wave/outcomes/cic/CreateWaveOutcomesCICApprove";
 
-jest.mock("@/components/utils/button/PrimaryButton", () => ({
-  __esModule: true,
-  default: ({ onClicked, disabled, loading, children, padding }: any) => (
-    <button
-      onClick={onClicked}
-      disabled={disabled}
-      data-testid="primary-button"
-      data-loading={loading}
-      className={padding}
-    >
-      {children}
-    </button>
-  ),
-}));
-
 describe("CreateWaveOutcomesCICApprove", () => {
   const defaultProps = {
     onOutcome: jest.fn(),
@@ -33,7 +18,7 @@ describe("CreateWaveOutcomesCICApprove", () => {
     expect(screen.getByLabelText("NIC")).toBeInTheDocument();
     expect(screen.queryByLabelText("Max Winners")).not.toBeInTheDocument();
     expect(screen.getByText("Cancel")).toBeInTheDocument();
-    expect(screen.getByTestId("primary-button")).toHaveTextContent("Save");
+    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
   });
 
   it("updates NIC value on numeric input", async () => {
@@ -53,7 +38,7 @@ describe("CreateWaveOutcomesCICApprove", () => {
     const nicInput = screen.getByLabelText("NIC");
     fireEvent.change(nicInput, { target: { value: "50.5" } });
 
-    await user.click(screen.getByTestId("primary-button"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(defaultProps.onOutcome).toHaveBeenCalledWith(
       expect.objectContaining({ credit: 50.5 })
@@ -91,9 +76,24 @@ describe("CreateWaveOutcomesCICApprove", () => {
 
     const nicInput = screen.getByLabelText("NIC");
     await user.type(nicInput, "0");
-    await user.click(screen.getByTestId("primary-button"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(nicInput).toHaveValue("0");
+    expect(
+      screen.getByText("NIC must be a positive number")
+    ).toBeInTheDocument();
+    expect(defaultProps.onOutcome).not.toHaveBeenCalled();
+  });
+
+  it("rejects non-finite NIC amounts", async () => {
+    const user = userEvent.setup();
+    render(<CreateWaveOutcomesCICApprove {...defaultProps} />);
+
+    fireEvent.change(screen.getByLabelText("NIC"), {
+      target: { value: "Infinity" },
+    });
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
     expect(
       screen.getByText("NIC must be a positive number")
     ).toBeInTheDocument();
@@ -104,7 +104,7 @@ describe("CreateWaveOutcomesCICApprove", () => {
     const user = userEvent.setup();
     render(<CreateWaveOutcomesCICApprove {...defaultProps} />);
 
-    await user.click(screen.getByTestId("primary-button"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
     expect(
       screen.getByText("NIC must be a positive number")
     ).toBeInTheDocument();
@@ -120,7 +120,7 @@ describe("CreateWaveOutcomesCICApprove", () => {
     const user = userEvent.setup();
     render(<CreateWaveOutcomesCICApprove {...defaultProps} />);
 
-    await user.click(screen.getByTestId("primary-button"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(
       screen.getByText("NIC must be a positive number")
@@ -135,7 +135,7 @@ describe("CreateWaveOutcomesCICApprove", () => {
     const nicInput = screen.getByLabelText("NIC");
     await user.type(nicInput, "100");
 
-    await user.click(screen.getByTestId("primary-button"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(defaultProps.onOutcome).toHaveBeenCalledWith({
       type: "NIC",
@@ -159,7 +159,7 @@ describe("CreateWaveOutcomesCICApprove", () => {
     const user = userEvent.setup();
     render(<CreateWaveOutcomesCICApprove {...defaultProps} />);
 
-    await user.click(screen.getByTestId("primary-button"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
     const nicInput = screen.getByLabelText("NIC");
     expect(nicInput).toHaveClass("tw-ring-error");
@@ -168,22 +168,22 @@ describe("CreateWaveOutcomesCICApprove", () => {
     expect(nicInput).toHaveClass("tw-caret-error");
   });
 
-  it("passes correct props to primary button", () => {
+  it("uses the shared medium primary button", () => {
     render(<CreateWaveOutcomesCICApprove {...defaultProps} />);
 
-    const primaryButton = screen.getByTestId("primary-button");
+    const primaryButton = screen.getByRole("button", { name: "Save" });
 
-    expect(primaryButton).toHaveAttribute("data-loading", "false");
+    expect(primaryButton).not.toHaveAttribute("aria-busy");
     expect(primaryButton).not.toBeDisabled();
-    expect(primaryButton).toHaveClass("tw-px-4 tw-py-3");
+    expect(primaryButton).toHaveClass("tw-h-10", "tw-px-3.5", "tw-text-sm");
   });
 
   it("applies normal styling when no error is present", () => {
     render(<CreateWaveOutcomesCICApprove {...defaultProps} />);
 
     const nicInput = screen.getByLabelText("NIC");
-    expect(nicInput).toHaveClass("tw-ring-iron-650");
-    expect(nicInput).toHaveClass("focus:tw-border-blue-500");
+    expect(nicInput).toHaveClass("tw-ring-white/5");
+    expect(nicInput).toHaveClass("focus:tw-border-primary-500/50");
     expect(nicInput).toHaveClass("focus:tw-ring-primary-400");
     expect(nicInput).toHaveClass("tw-caret-primary-400");
   });

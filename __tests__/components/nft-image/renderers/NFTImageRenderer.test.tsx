@@ -142,6 +142,7 @@ describe("NFTImageRenderer", () => {
       expect(image).toBeInTheDocument();
       expect(image).toHaveAttribute("alt", "Test NFT");
       expect(image).toHaveAttribute("src", "https://example.com/image.png");
+      expect(image).toHaveAttribute("data-nft-media-renderer", "image");
     });
 
     it("applies correct CSS classes from props", () => {

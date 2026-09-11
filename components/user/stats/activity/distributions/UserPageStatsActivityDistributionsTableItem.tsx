@@ -30,7 +30,7 @@ export default function UserPageStatsActivityDistributionsTableItem({
   );
 
   return (
-    <tr className="even:tw-bg-iron-900">
+    <tr>
       <td className="tw-whitespace-nowrap tw-px-4 tw-py-3.5 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-base lg:tw-pr-4">
         {collectionLabel}
       </td>

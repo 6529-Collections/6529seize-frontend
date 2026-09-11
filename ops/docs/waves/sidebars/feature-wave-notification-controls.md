@@ -17,33 +17,35 @@ behavior across thread header controls and sidebar wave rows.
 ## Control Availability
 
 - Header controls require a connected profile handle and no proxy session.
-- The speaker notification menu shows only after `Join` changes to `Joined`.
-- If you are not joined, the speaker notification menu is hidden but the
-  bell-slash mute button can still be shown.
+- The bell notification menu shows only after `Join` changes to `Joined`.
+- If you are not joined, the bell notification menu is hidden but the speaker
+  control can still be shown.
 - All-message notifications are unavailable when the wave reaches the configured
   follower limit unless the user already has them enabled.
-- Author-only options menu (`⋮`) includes `Mute` / `Unmute`.
+- The `Mute` / `Unmute` action lives in the dedicated speaker control, not in
+  the overflow menu.
 
 ## Notification Modes
 
-- The speaker button opens notification preferences.
-- The `@ALL` row turns on notifications for `@ALL` mentions.
-- The `Notify for all messages` row turns on notifications for every message.
+- The bell button opens notification preferences.
+- The `Broadcast mentions` row, shown with the `@` icon, turns on notifications
+  for the admin-only `@all` and `@contributors` broadcasts.
+- The `All messages` row turns on notifications for every message.
 - If all-message notifications are unavailable by follower limit and not already
-  enabled, the all-message row stays visible but disabled.
+  enabled, the all-message row stays visible but disabled with an inline reason.
 - If all-message notifications were already enabled before the limit applies,
-  the all-message row stays available so the user can disable it.
+  the all-message row stays available so the user can disable it and still shows
+  the follower-limit note.
 - While a mode toggle request runs, the clicked button shows a spinner and
   notification controls are temporarily disabled.
 
 ## Mute Behavior
 
-- Before joining, the bell-slash button can mute the wave without joining it.
-- In joined + muted state, the speaker notification menu is replaced by one
-  `Muted` bell-slash button that unmutes.
-- In joined + unmuted state, the bell-slash button mutes the wave from the
-  notification control row.
-- Author menu still exposes `Mute` / `Unmute`.
+- Before joining, the speaker control can mute the wave without joining it.
+- In joined + muted state, the bell notification menu is replaced by one
+  red `Muted` speaker-muted button that unmutes.
+- In joined + unmuted state, the `Mute` speaker-muted button mutes the wave from
+  the notification control row.
 - Mute is per-wave and does not block opening the wave manually.
 
 ## Sidebar and Realtime Effects
@@ -52,17 +54,17 @@ behavior across thread header controls and sidebar wave rows.
 - Muted rows suppress unread-count badges.
 - Muted waves sort after non-muted waves in wave and DM lists.
 - Muted waves skip websocket unread/new-drop accumulation.
-- Muted active threads also skip realtime drop processing and typing-indicator
-  subscription.
-- After mute changes, if the active thread looks stale, reopen the wave or
-  reload to resync.
+- Open muted threads still receive realtime drop updates, so visible content
+  stays current without a refresh.
+- Inactive muted threads skip Wave message-store processing and sync when opened.
+- Muted threads keep typing-indicator subscription disabled.
 
 ## Failure and Recovery
 
 - If mode or mute requests fail, the prior state stays and an error toast is
   shown.
-- If all-message notifications are unavailable due follower limit, use `@ALL`
-  mention notifications or mute the wave from the bell-slash control.
+- If all-message notifications are unavailable due follower limit, use
+  `Broadcast mentions` or mute the wave from the speaker control.
 - If header/list state looks stale after a toggle, reopen the wave thread or
   refresh.
 

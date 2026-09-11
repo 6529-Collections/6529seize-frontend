@@ -1,0 +1,1127 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0xdfefae65",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MockMintGate",
+          "inherited": false,
+          "inputs": [],
+          "name": "advertisesInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xdfefae65",
+          "signature": "advertisesInterface()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x6f031f99",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MockMintGate",
+          "inherited": false,
+          "inputs": [],
+          "name": "authorizationId",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x6f031f99",
+          "signature": "authorizationId()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x3b19b18b",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MockMintGate",
+          "inherited": false,
+          "inputs": [],
+          "name": "expectedCallDataHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x3b19b18b",
+          "signature": "expectedCallDataHash()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x18da9e08",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MockMintGate",
+          "inherited": false,
+          "inputs": [],
+          "name": "gateAuthorizer",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x18da9e08",
+          "signature": "gateAuthorizer()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x7d308062",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MockMintGate",
+          "inherited": false,
+          "inputs": [],
+          "name": "gateHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x7d308062",
+          "signature": "gateHash()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0xe640cf7d",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MockMintGate",
+          "inherited": false,
+          "inputs": [],
+          "name": "maxQuantity",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0xe640cf7d",
+          "signature": "maxQuantity()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x2910db6a",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MockMintGate",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "advertisesInterface_",
+              "type": "bool"
+            }
+          ],
+          "name": "setAdvertisesInterface",
+          "outputs": [],
+          "selector": "0x2910db6a",
+          "signature": "setAdvertisesInterface(bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0xe7978368",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MockMintGate",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes",
+              "name": "expectedCallData",
+              "type": "bytes"
+            }
+          ],
+          "name": "setExpectedCallData",
+          "outputs": [],
+          "selector": "0xe7978368",
+          "signature": "setExpectedCallData(bytes)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x6d5eaba6",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MockMintGate",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "nullifier",
+              "type": "bytes32"
+            }
+          ],
+          "name": "setNullifier",
+          "outputs": [],
+          "selector": "0x6d5eaba6",
+          "signature": "setNullifier(bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x930aad5a",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MockMintGate",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "authorizationId_",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "authorizer_",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint64",
+              "name": "maxQuantity_",
+              "type": "uint64"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "gateHash_",
+              "type": "bytes32"
+            }
+          ],
+          "name": "setResult",
+          "outputs": [],
+          "selector": "0x930aad5a",
+          "signature": "setResult(bytes32,address,uint64,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x34a0e778",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MockMintGate",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "shouldRevert_",
+              "type": "bool"
+            }
+          ],
+          "name": "setReverts",
+          "outputs": [],
+          "selector": "0x34a0e778",
+          "signature": "setReverts(bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0xd3072d82",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MockMintGate",
+          "inherited": false,
+          "inputs": [],
+          "name": "shouldRevert",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xd3072d82",
+          "signature": "shouldRevert()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x01ffc9a7",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MockMintGate",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "authorizationId()",
+          "displaySignature": "authorizationId()",
+          "functionKind": "getter",
+          "id": "test/StreamMintManager.t.sol:MockMintGate#function:0x6f031f99",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNb2NrTWludEdhdGUjZnVuY3Rpb246MHg2ZjAzMWY5OQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "authorizationId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 30,
+            "byteStart": 4237,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L120",
+            "lineEnd": 120,
+            "lineStart": 120,
+            "snippetSha256": "sha256:4f25986cdfda611d97c28e5db5d207215cac314b2069175347e3483aa9e28663",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x6f031f99",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "gateAuthorizer()",
+          "displaySignature": "gateAuthorizer()",
+          "functionKind": "getter",
+          "id": "test/StreamMintManager.t.sol:MockMintGate#function:0x18da9e08",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNb2NrTWludEdhdGUjZnVuY3Rpb246MHgxOGRhOWUwOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "gateAuthorizer",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 29,
+            "byteStart": 4273,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L121",
+            "lineEnd": 121,
+            "lineStart": 121,
+            "snippetSha256": "sha256:306e645af738cb8f092a5d0d17a5066bd4be966d87d00fa43c980eec9880cc35",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x18da9e08",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "maxQuantity()",
+          "displaySignature": "maxQuantity()",
+          "functionKind": "getter",
+          "id": "test/StreamMintManager.t.sol:MockMintGate#function:0xe640cf7d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNb2NrTWludEdhdGUjZnVuY3Rpb246MHhlNjQwY2Y3ZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "maxQuantity",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 25,
+            "byteStart": 4308,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L122",
+            "lineEnd": 122,
+            "lineStart": 122,
+            "snippetSha256": "sha256:edbdef89a12781d32db7a75efedfbffaacd63347d16625c0e8efe2187e78f8eb",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0xe640cf7d",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "gateHash()",
+          "displaySignature": "gateHash()",
+          "functionKind": "getter",
+          "id": "test/StreamMintManager.t.sol:MockMintGate#function:0x7d308062",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNb2NrTWludEdhdGUjZnVuY3Rpb246MHg3ZDMwODA2Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "gateHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 23,
+            "byteStart": 4339,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L123",
+            "lineEnd": 123,
+            "lineStart": 123,
+            "snippetSha256": "sha256:ac50eb7cb12dcfe7f7f95938cd0c15f154e7916332f8f566516a9a5c2b1e1214",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x7d308062",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "shouldRevert()",
+          "displaySignature": "shouldRevert()",
+          "functionKind": "getter",
+          "id": "test/StreamMintManager.t.sol:MockMintGate#function:0xd3072d82",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNb2NrTWludEdhdGUjZnVuY3Rpb246MHhkMzA3MmQ4Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "shouldRevert",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 24,
+            "byteStart": 4368,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L124",
+            "lineEnd": 124,
+            "lineStart": 124,
+            "snippetSha256": "sha256:029b3bad31e18f08d8ac1a030d8f0c8e8ba98b3fc0dd6aff6f05195c1876e860",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0xd3072d82",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "advertisesInterface()",
+          "displaySignature": "advertisesInterface()",
+          "functionKind": "getter",
+          "id": "test/StreamMintManager.t.sol:MockMintGate#function:0xdfefae65",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNb2NrTWludEdhdGUjZnVuY3Rpb246MHhkZmVmYWU2NQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "advertisesInterface",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 38,
+            "byteStart": 4398,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L125",
+            "lineEnd": 125,
+            "lineStart": 125,
+            "snippetSha256": "sha256:7eee83d1ece464ddfb34b4b51f9a64d9454e407e879c9516178cb7b4f423bcf2",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0xdfefae65",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "expectedCallDataHash()",
+          "displaySignature": "expectedCallDataHash()",
+          "functionKind": "getter",
+          "id": "test/StreamMintManager.t.sol:MockMintGate#function:0x3b19b18b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNb2NrTWludEdhdGUjZnVuY3Rpb246MHgzYjE5YjE4Yg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "expectedCallDataHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 35,
+            "byteStart": 4442,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L126",
+            "lineEnd": 126,
+            "lineStart": 126,
+            "snippetSha256": "sha256:ba6d4286f56668050fd87a36fd6a0c0851c5e8ff8ff93b768da7100e14c12d79",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x3b19b18b",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "setResult(bytes32,address,uint64,bytes32)",
+          "displaySignature": "setResult(bytes32,address,uint64,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:MockMintGate#function:0x930aad5a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorizationId_",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "authorizer_",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "maxQuantity_",
+              "type": "uint64"
+            },
+            {
+              "index": 3,
+              "name": "gateHash_",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNb2NrTWludEdhdGUjZnVuY3Rpb246MHg5MzBhYWQ1YQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setResult",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 308,
+            "byteStart": 4517,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L130-L140",
+            "lineEnd": 140,
+            "lineStart": 130,
+            "snippetSha256": "sha256:7cd6da312f8503b8a0010fc8d508bd95f1e89dfec4bb442d370cbe0abd6f6a3c",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x930aad5a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setReverts(bool)",
+          "displaySignature": "setReverts(bool)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:MockMintGate#function:0x34a0e778",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "shouldRevert_",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNb2NrTWludEdhdGUjZnVuY3Rpb246MHgzNGEwZTc3OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setReverts",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 94,
+            "byteStart": 4831,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L142-L144",
+            "lineEnd": 144,
+            "lineStart": 142,
+            "snippetSha256": "sha256:6b7634bea4fb598eb83d4f4bb9446d28ab7875f1be2c09da07bfb0541c5dad94",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x34a0e778",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setNullifier(bytes32)",
+          "displaySignature": "setNullifier(bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:MockMintGate#function:0x6d5eaba6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "nullifier",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNb2NrTWludEdhdGUjZnVuY3Rpb246MHg2ZDVlYWJhNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setNullifier",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 89,
+            "byteStart": 4931,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L146-L148",
+            "lineEnd": 148,
+            "lineStart": 146,
+            "snippetSha256": "sha256:cf3b7d27b7e50fb0b672fa9d2a081bbc2ec553c3da7874154dac02731845e0e0",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x6d5eaba6",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setAdvertisesInterface(bool)",
+          "displaySignature": "setAdvertisesInterface(bool)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:MockMintGate#function:0x2910db6a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "advertisesInterface_",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNb2NrTWludEdhdGUjZnVuY3Rpb246MHgyOTEwZGI2YQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setAdvertisesInterface",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 127,
+            "byteStart": 5026,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L150-L152",
+            "lineEnd": 152,
+            "lineStart": 150,
+            "snippetSha256": "sha256:10dc7ee73a3cb743783f5637e46bf9420320cd812e021b2ec922c9f9b357e224",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x2910db6a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setExpectedCallData(bytes)",
+          "displaySignature": "setExpectedCallData(bytes)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:MockMintGate#function:0xe7978368",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "expectedCallData",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNb2NrTWludEdhdGUjZnVuY3Rpb246MHhlNzk3ODM2OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setExpectedCallData",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 138,
+            "byteStart": 5159,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L154-L156",
+            "lineEnd": 156,
+            "lineStart": 154,
+            "snippetSha256": "sha256:3b785cf172a5971ee1cd11476c6f6d7d4ce148643f52797520e9d47f30c5e321",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0xe7978368",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "fallback()",
+          "functionKind": "fallback",
+          "id": "test/StreamMintManager.t.sol:MockMintGate#function:fallback()",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNb2NrTWludEdhdGUjZnVuY3Rpb246ZmFsbGJhY2soKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fallback",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 907,
+            "byteStart": 5303,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L158-L180",
+            "lineEnd": 180,
+            "lineStart": 158,
+            "snippetSha256": "sha256:18d8932abf168afbd11ccc3c8660e482e0c98f15cbb47a79a3ef7a4d216e204d",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:MockMintGate#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNb2NrTWludEdhdGUjZnVuY3Rpb246MHgwMWZmYzlhNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 232,
+            "byteStart": 6216,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L182-L185",
+            "lineEnd": 185,
+            "lineStart": 182,
+            "snippetSha256": "sha256:9b8eb970cd63c0f75e99a5126dd5ebe348b1adaeb32cb2b50629f08d69e7a88a",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x6f031f99",
+          "immutable": false,
+          "name": "authorizationId",
+          "natspec": "",
+          "range": {
+            "byteLength": 30,
+            "byteStart": 4237,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L120",
+            "lineEnd": 120,
+            "lineStart": 120,
+            "snippetSha256": "sha256:4f25986cdfda611d97c28e5db5d207215cac314b2069175347e3483aa9e28663",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x6f031f99",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x18da9e08",
+          "immutable": false,
+          "name": "gateAuthorizer",
+          "natspec": "",
+          "range": {
+            "byteLength": 29,
+            "byteStart": 4273,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L121",
+            "lineEnd": 121,
+            "lineStart": 121,
+            "snippetSha256": "sha256:306e645af738cb8f092a5d0d17a5066bd4be966d87d00fa43c980eec9880cc35",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x18da9e08",
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0xe640cf7d",
+          "immutable": false,
+          "name": "maxQuantity",
+          "natspec": "",
+          "range": {
+            "byteLength": 25,
+            "byteStart": 4308,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L122",
+            "lineEnd": 122,
+            "lineStart": 122,
+            "snippetSha256": "sha256:edbdef89a12781d32db7a75efedfbffaacd63347d16625c0e8efe2187e78f8eb",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0xe640cf7d",
+          "type": "uint64",
+          "typeString": "uint64",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x7d308062",
+          "immutable": false,
+          "name": "gateHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 23,
+            "byteStart": 4339,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L123",
+            "lineEnd": 123,
+            "lineStart": 123,
+            "snippetSha256": "sha256:ac50eb7cb12dcfe7f7f95938cd0c15f154e7916332f8f566516a9a5c2b1e1214",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x7d308062",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0xd3072d82",
+          "immutable": false,
+          "name": "shouldRevert",
+          "natspec": "",
+          "range": {
+            "byteLength": 24,
+            "byteStart": 4368,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L124",
+            "lineEnd": 124,
+            "lineStart": 124,
+            "snippetSha256": "sha256:029b3bad31e18f08d8ac1a030d8f0c8e8ba98b3fc0dd6aff6f05195c1876e860",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0xd3072d82",
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0xdfefae65",
+          "immutable": false,
+          "name": "advertisesInterface",
+          "natspec": "",
+          "range": {
+            "byteLength": 38,
+            "byteStart": 4398,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L125",
+            "lineEnd": 125,
+            "lineStart": 125,
+            "snippetSha256": "sha256:7eee83d1ece464ddfb34b4b51f9a64d9454e407e879c9516178cb7b4f423bcf2",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0xdfefae65",
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": {
+            "byteLength": 4,
+            "byteStart": 4432,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L125",
+            "lineEnd": 125,
+            "lineStart": 125,
+            "snippetSha256": "sha256:b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "valueSource": "true",
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x3b19b18b",
+          "immutable": false,
+          "name": "expectedCallDataHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 35,
+            "byteStart": 4442,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L126",
+            "lineEnd": 126,
+            "lineStart": 126,
+            "snippetSha256": "sha256:ba6d4286f56668050fd87a36fd6a0c0851c5e8ff8ff93b768da7100e14c12d79",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x3b19b18b",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_nullifier",
+          "natspec": "",
+          "range": {
+            "byteLength": 26,
+            "byteStart": 4484,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L128",
+            "lineEnd": 128,
+            "lineStart": 128,
+            "snippetSha256": "sha256:c5c3ca22b9743ae247f173f1e5eaacf91acfb245cf05b48a152472ca65b6dbae",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMintManager.t.sol:MockMintGate",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/ERC165.sol:ERC165",
+        "name": "ERC165"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNb2NrTWludEdhdGU",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMintManager.t.sol:MockMintGate",
+      "smart-contracts/ERC165.sol:ERC165",
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MockMintGate",
+    "natspec": "",
+    "range": {
+      "byteLength": 2251,
+      "byteStart": 4199,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L119-L186",
+      "lineEnd": 186,
+      "lineStart": 119,
+      "snippetSha256": "sha256:f09926647688744057a23158616c16c80b12bfa3b3234d68dfd8a8be3d8d3277",
+      "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMintManager.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 15
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 14
+    },
+    "totalCount": 15
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMintManager.t.sol:MockMintGate",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x01ffc9a7",
+      "definitionId": "test/StreamMintManager.t.sol:MockMintGate",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x18da9e08",
+      "definitionId": "test/StreamMintManager.t.sol:MockMintGate",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x2910db6a",
+      "definitionId": "test/StreamMintManager.t.sol:MockMintGate",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x34a0e778",
+      "definitionId": "test/StreamMintManager.t.sol:MockMintGate",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x3b19b18b",
+      "definitionId": "test/StreamMintManager.t.sol:MockMintGate",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x6d5eaba6",
+      "definitionId": "test/StreamMintManager.t.sol:MockMintGate",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x6f031f99",
+      "definitionId": "test/StreamMintManager.t.sol:MockMintGate",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x7d308062",
+      "definitionId": "test/StreamMintManager.t.sol:MockMintGate",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0x930aad5a",
+      "definitionId": "test/StreamMintManager.t.sol:MockMintGate",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0xd3072d82",
+      "definitionId": "test/StreamMintManager.t.sol:MockMintGate",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0xdfefae65",
+      "definitionId": "test/StreamMintManager.t.sol:MockMintGate",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0xe640cf7d",
+      "definitionId": "test/StreamMintManager.t.sol:MockMintGate",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:0xe7978368",
+      "definitionId": "test/StreamMintManager.t.sol:MockMintGate",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MockMintGate#function:fallback()",
+      "definitionId": "test/StreamMintManager.t.sol:MockMintGate",
+      "severity": "advisory"
+    }
+  ]
+}

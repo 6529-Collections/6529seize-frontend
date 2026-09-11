@@ -2,7 +2,10 @@ import { renderHook, act } from "@testing-library/react";
 import React from "react";
 import useNewDropCounter from "@/contexts/wave/hooks/useNewDropCounter";
 import { AuthContext } from "@/components/auth/Auth";
-import { WS_DROP_UPDATE_REASON_POLL_RESPONSE } from "@/helpers/Types";
+import {
+  WS_DROP_UPDATE_REASON_POLL_RESPONSE,
+  WsMessageType,
+} from "@/helpers/Types";
 
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: jest.fn(),
@@ -19,7 +22,9 @@ const waves = [
 
 let wsCallback: any;
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <AuthContext.Provider value={{ connectedProfile: { handle: "me" } } as any}>
+  <AuthContext.Provider
+    value={{ connectedProfile: { id: "me-id", handle: "me" } } as any}
+  >
     {children}
   </AuthContext.Provider>
 );
@@ -55,8 +60,23 @@ const emitDropUpdate = ({
   });
 };
 
+const emitDropUpdateRef = (message: Record<string, unknown>) => {
+  const compactCallback = (useWebSocketMessage as jest.Mock).mock.calls.find(
+    ([messageType]) => messageType === WsMessageType.DROP_UPDATE_REF
+  )?.[1];
+
+  if (!compactCallback) {
+    throw new Error("No compact drop-update callback registered");
+  }
+
+  act(() => {
+    compactCallback({ author_id: "other-id", ...message });
+  });
+};
+
 describe("useNewDropCounter", () => {
   beforeEach(() => {
+    (useWebSocketMessage as jest.Mock).mockClear();
     (useWebSocketMessage as jest.Mock).mockImplementation(
       (_t: any, cb: any) => {
         wsCallback = cb;
@@ -97,6 +117,93 @@ describe("useNewDropCounter", () => {
     emitDropUpdate({ reason: WS_DROP_UPDATE_REASON_POLL_RESPONSE });
 
     expect(result.current.newDropsCounts["wave2"]?.count ?? 0).toBe(0);
+    expect(refetch).not.toHaveBeenCalled();
+  });
+
+  it("counts only content compact refs and preserves poll-response suppression", () => {
+    const refetch = jest.fn();
+    jest.spyOn(Date, "now").mockReturnValue(1234);
+    const { result } = renderHook(
+      () => useNewDropCounter(null, waves, refetch),
+      { wrapper }
+    );
+
+    emitDropUpdateRef({
+      drop_id: "rating-drop",
+      wave_id: "wave2",
+      serial_no: 20,
+      update_type: WsMessageType.DROP_RATING_UPDATE,
+    });
+    emitDropUpdateRef({
+      drop_id: "poll-drop",
+      wave_id: "wave2",
+      serial_no: 21,
+      update_type: WsMessageType.DROP_UPDATE,
+      reason: WS_DROP_UPDATE_REASON_POLL_RESPONSE,
+    });
+    emitDropUpdateRef({
+      drop_id: "content-drop",
+      wave_id: "wave2",
+      serial_no: 22,
+      update_type: WsMessageType.DROP_UPDATE,
+      reason: "AUTHOR_EDIT",
+    });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 1,
+      latestDropTimestamp: 1234,
+      firstUnreadSerialNo: 22,
+    });
+    expect(refetch).not.toHaveBeenCalled();
+  });
+
+  it("counts an unknown-wave compact content ref before refreshing Waves", () => {
+    const refetch = jest.fn();
+    jest.spyOn(Date, "now").mockReturnValue(2345);
+    const { result } = renderHook(
+      () =>
+        useNewDropCounter(null, waves, refetch, {
+          otherListWaveIds: new Set(),
+        }),
+      { wrapper }
+    );
+
+    emitDropUpdateRef({
+      drop_id: "new-drop",
+      wave_id: "unknown-wave",
+      serial_no: 23,
+      update_type: WsMessageType.DROP_UPDATE,
+    });
+
+    expect(result.current.newDropsCounts["unknown-wave"]).toEqual({
+      count: 1,
+      latestDropTimestamp: 2345,
+      firstUnreadSerialNo: 23,
+    });
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not count the connected profile's compact content ref", () => {
+    const refetch = jest.fn();
+    jest.spyOn(Date, "now").mockReturnValue(3456);
+    const { result } = renderHook(
+      () => useNewDropCounter(null, waves, refetch),
+      { wrapper }
+    );
+
+    emitDropUpdateRef({
+      author_id: "me-id",
+      drop_id: "own-drop",
+      wave_id: "wave2",
+      serial_no: 24,
+      update_type: WsMessageType.DROP_UPDATE,
+    });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 3456,
+      firstUnreadSerialNo: null,
+    });
     expect(refetch).not.toHaveBeenCalled();
   });
 

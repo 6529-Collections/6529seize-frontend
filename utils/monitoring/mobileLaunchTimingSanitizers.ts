@@ -98,6 +98,8 @@ const STATIC_TOP_LEVEL_ROUTE_SEGMENTS = new Set([
   "error",
   "feed",
   "gm-or-die-small-mp4",
+  "join",
+  "join-6529",
   "meme-accounting",
   "meme-calendar",
   "meme-gas",
@@ -112,6 +114,7 @@ const STATIC_TOP_LEVEL_ROUTE_SEGMENTS = new Set([
   "om",
   "open-data",
   "open-mobile",
+  "rep",
   "rememes",
   "restricted",
   "sentry-example-page",
@@ -151,6 +154,10 @@ const STATIC_REMEMES_SEGMENTS = new Set(["add"]);
 const STATIC_THE_MEMES_SEGMENTS = new Set(["mint"]);
 const STATIC_MEME_LAB_SEGMENTS = new Set(["collection"]);
 const STATIC_NEXTGEN_SEGMENTS = new Set(["collection", "manager", "token"]);
+
+const AWS_RUM_NON_PAGE_ROUTE_SEGMENTS = new Set(["api"]);
+const AWS_RUM_PROFILE_CMS_PAGE_ID = "/[user]/[...cmsPath]";
+const AWS_RUM_UNKNOWN_PAGE_ID = "/unknown";
 
 type RoutePatternSegment =
   | string
@@ -281,6 +288,31 @@ export function sanitizeRouteFamily(route: string): string {
   return getAppRouteFamilyTemplate(route) ?? sanitizePathLikeValue(route);
 }
 
+export function getAwsRumPageId(route: string): string {
+  const segments = getRouteSegments(route);
+
+  if (segments.length === 0) {
+    return "/";
+  }
+
+  const firstSegment = segments[0] ?? "";
+  if (AWS_RUM_NON_PAGE_ROUTE_SEGMENTS.has(firstSegment)) {
+    return AWS_RUM_UNKNOWN_PAGE_ID;
+  }
+
+  const routeTemplate = getAppRouteFamilyTemplate(route);
+  if (routeTemplate) {
+    return routeTemplate;
+  }
+
+  const isKnownStaticPageRoot =
+    STATIC_TOP_LEVEL_ROUTE_SEGMENTS.has(firstSegment);
+
+  return isKnownStaticPageRoot
+    ? `/${firstSegment}`
+    : AWS_RUM_PROFILE_CMS_PAGE_ID;
+}
+
 function sanitizePathLikeValue(value: string): string {
   const path = extractPathWithoutQuery(value);
   const segments = path
@@ -342,7 +374,7 @@ function getUserRouteTemplate(segments: readonly string[]): string | undefined {
     return `/[user]/${segments[1]}`;
   }
 
-  return undefined;
+  return AWS_RUM_PROFILE_CMS_PAGE_ID;
 }
 
 function matchesRouteFamilyPattern(

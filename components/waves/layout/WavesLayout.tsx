@@ -9,6 +9,7 @@ import {
   scheduleMobileLaunchFlush,
 } from "../../../utils/monitoring/mobileLaunchTiming";
 import WavesMobile from "../WavesMobile";
+import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -134,17 +135,19 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const { contentState } = useAuthenticatedContent();
   const { isApp } = useDeviceInfo();
 
-  useEffect(() => {
-    const previousBodyOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+  // The chat/feed views manage their own internal scroll, so WavesLayout locks
+  // document scroll and clips its content. The create-wave route owns its
+  // scroll the same way: CreateWave bounds its scroll region to the layout
+  // system's measured content height (see CreateWaveFlow.nativeBoundedStyle),
+  // so the sticky footer pins inside the app shell's transformed wrappers
+  // instead of relying on document scroll (which the transforms break).
+  useBodyScrollLock();
 
-    return () => {
-      document.body.style.overflow = previousBodyOverflow;
-    };
-  }, []);
-
+  // tw-min-h-0 lets this flex item shrink below its content height so a child
+  // (e.g. the create-wave flow) can own an internal scroll region instead of
+  // overflowing the scroll-locked app shell.
   const containerClassName =
-    "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
+    "tw-relative tw-flex tw-min-h-0 tw-flex-col tw-flex-1 tailwind-scope";
   const connectPrompt = getConnectPrompt(contentState);
   const shouldRenderWavesContent =
     contentState === WAVES_CONTENT_STATE_READY ||
@@ -155,7 +158,8 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const hasUsefulWavesContent =
     contentState === WAVES_CONTENT_STATE_READY ||
     contentState === WAVES_CONTENT_STATE_PUBLIC ||
-    contentState === WAVES_CONTENT_STATE_NEEDS_PROFILE;
+    contentState === WAVES_CONTENT_STATE_NEEDS_PROFILE ||
+    contentState === WAVES_CONTENT_STATE_MEASURING;
   const hasVisibleLaunchContent =
     hasUsefulWavesContent || connectPrompt !== null;
 
@@ -164,8 +168,7 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   if (shouldRenderWavesContent) {
     content = getWavesContent({
       children:
-        contentState === WAVES_CONTENT_STATE_LOADING ||
-        contentState === WAVES_CONTENT_STATE_MEASURING ? (
+        contentState === WAVES_CONTENT_STATE_LOADING ? (
           <WavesContentLoadingFallback />
         ) : (
           children
@@ -194,6 +197,7 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
     }
 
     markMobileLaunchStep("waves_first_content_visible");
+    markMobileLaunchStep("route_first_useful_content");
     scheduleMobileLaunchFlush("waves_content_visible", 250);
   }, [hasVisibleLaunchContent]);
 

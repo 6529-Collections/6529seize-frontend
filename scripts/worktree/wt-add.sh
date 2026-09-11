@@ -239,7 +239,7 @@ echo "✓ Branch '$TARGET_BRANCH' ready in worktree '$WORKTREE_NAME'."
 echo "Syncing files..."
 "$SCRIPT_DIR/wt-sync.sh" "$WORKTREE_NAME"
 
-# 3. Bootstrap the repo-scoped 6529 command for this worktree
+# 3. Bootstrap and install in the target worktree.
 echo "Bootstrapping 6529 command in $WORKTREE_NAME..."
 (
   cd "$WORKTREE_PATH"
@@ -247,7 +247,7 @@ echo "Bootstrapping 6529 command in $WORKTREE_NAME..."
   PATH="$(strip_repo_bin_wrappers_from_path)"
   ./bin/6529 bootstrap
 
-  # Refresh this script's shell state so bare `6529` resolves immediately.
+  # Refresh this shell so bare `6529` resolves immediately.
   BOOTSTRAP_EXPORTS_FILE="$(mktemp)"
   trap 'rm -f "$BOOTSTRAP_EXPORTS_FILE"' EXIT
   ./bin/6529 bootstrap --print-export > "$BOOTSTRAP_EXPORTS_FILE"
@@ -257,7 +257,7 @@ echo "Bootstrapping 6529 command in $WORKTREE_NAME..."
   trap - EXIT
 
   echo "Running secure install in $WORKTREE_NAME..."
-  6529 install
+  6529 ci
 )
 
 echo "✅ Worktree '$WORKTREE_NAME' is ready."

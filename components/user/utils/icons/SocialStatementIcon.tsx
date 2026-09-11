@@ -1,4 +1,3 @@
-import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { STATEMENT_TYPE } from "@/helpers/Types";
 import DiscordIcon from "./DiscordIcon";
 import EmailIcon from "./EmailIcon";
@@ -37,7 +36,7 @@ import TransientIcon from "./TransientIcon";
 export default function SocialStatementIcon({
   statementType,
 }: {
-  readonly statementType: STATEMENT_TYPE;
+  readonly statementType: string;
 }) {
   switch (statementType) {
     case STATEMENT_TYPE.X:
@@ -107,7 +106,6 @@ export default function SocialStatementIcon({
     case STATEMENT_TYPE.TRANSIENT:
       return <TransientIcon />;
     default:
-      assertUnreachable(statementType);
-      return null;
+      return <LinkIcon aria-hidden="true" />;
   }
 }

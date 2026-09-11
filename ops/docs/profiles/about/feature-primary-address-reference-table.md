@@ -30,17 +30,23 @@ No wallet connection is required.
 ## User Journey
 
 1. Open `/about/primary-address`.
-2. If no cached data exists, the page shows `Loading...` while it requests
-   `"/primary_address.csv"`.
+2. If no cached data exists, the page shows `Loading...`
+   while it requests `"/primary_address.csv"`.
 3. On success, the page shows:
    - heading `On-Chain Primary Address`
    - rule notes for `Single Address` and `Consolidations`
    - static dated sentence ending with `Monday 29th April 2024`
    - table columns `Profile Handle`, `Current Selected Primary Address`, and
      `Primary Address Changed to`
-4. Rows are sorted alphabetically by `Profile Handle`.
-5. Selecting a `Profile Handle` link opens `/{current_primary}`.
-6. If loading fails, the query retries automatically before an error message is
+4. On large screens, the records use a full-width three-column table. On
+   smaller screens,
+   each row stacks its handle, current address, and changed-to address without
+   horizontal scrolling.
+5. The table uses a keyboard-focusable vertical scroll region with a maximum
+   height; the desktop column headings remain visible while scrolling.
+6. Rows are sorted alphabetically by `Profile Handle`.
+7. Selecting a `Profile Handle` link opens `/{current_primary}`.
+8. If loading fails, the query retries automatically before an error message is
    shown.
 
 ## Common Scenarios
@@ -58,15 +64,15 @@ No wallet connection is required.
 - HTTP error: `Error: Failed to fetch primary address data (<status>)`
 - Network failure: `Error: Failed to fetch`
 - CSV parse error: `Error: Failed to parse primary address data`
-- Empty-data success: table headers render with no rows and no empty-state copy
+- Empty-data success: table headers render with no rows and no empty-state copy.
 
 ## Edge Cases
 
 - Row links always use `current_primary`, not the handle value.
-- If the CSV includes a header row, that row is rendered as normal table data.
-- If a CSV row is missing columns, table cells can render blank.
+- CSV header rows, rows with the wrong column count, invalid addresses,
+  incomplete rows, and repeated profile IDs are ignored.
+- Long handles and wallet addresses wrap within the available row width.
 - The page keeps static dated copy: `Monday 29th April 2024`.
-- The table container scrolls horizontally on narrow screens.
 
 ## Failure and Recovery
 
@@ -77,7 +83,9 @@ No wallet connection is required.
 
 ## Limitations / Notes
 
-- No in-page search, filters, pagination, or retry button.
+- There is no in-page search, filters, pagination, or retry button.
+- Wallet addresses are displayed as text and are not separate links or copy
+  controls.
 - The page is informational only; editing is not available here.
 
 ## Related Pages

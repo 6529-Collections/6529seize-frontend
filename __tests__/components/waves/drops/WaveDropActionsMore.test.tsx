@@ -1,8 +1,15 @@
 import WaveDropActionsMore from "@/components/waves/drops/WaveDropActionsMore";
 import { useDropLinkPreviewToggleControl } from "@/components/waves/drops/useDropLinkPreviewToggleControl";
+import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
+import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+jest.mock(
+  "@/components/waves/drops/WaveDropDocumentationAction",
+  () => () => null
+);
 
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: jest.fn(),
@@ -11,7 +18,10 @@ jest.mock("@/components/waves/drops/useDropLinkPreviewToggleControl", () => ({
   useDropLinkPreviewToggleControl: jest.fn(),
 }));
 jest.mock("@/hooks/drops/useCanShowDropCurationsAction", () => ({
-  useCanShowDropCurationsAction: jest.fn(() => false),
+  useCanShowDropCurationsAction: jest.fn(),
+}));
+jest.mock("@/hooks/drops/useDropCurationMembershipMutation", () => ({
+  useDropCurationMembershipMutation: jest.fn(),
 }));
 
 jest.mock(
@@ -55,15 +65,35 @@ const mockedUseDropInteractionRules = jest.mocked(useDropInteractionRules);
 const mockedUseDropLinkPreviewToggleControl = jest.mocked(
   useDropLinkPreviewToggleControl
 );
+const mockedUseCanShowDropCurationsAction = jest.mocked(
+  useCanShowDropCurationsAction
+);
+const mockedUseDropCurationMembershipMutation = jest.mocked(
+  useDropCurationMembershipMutation
+);
+const updateMembershipAsync = jest.fn().mockResolvedValue(undefined);
 
 const drop = {
   id: "drop-1",
+  author: { id: "author-1" },
   wave: { authenticated_user_admin: false },
   parts: [],
 } as any;
 
 describe("WaveDropActionsMore", () => {
   beforeEach(() => {
+    updateMembershipAsync.mockClear();
+    mockedUseCanShowDropCurationsAction.mockReturnValue({
+      showManageCurations: false,
+      quickAddCuration: null,
+      quickRemoveCuration: null,
+    });
+    mockedUseDropCurationMembershipMutation.mockReturnValue({
+      updateMembership: jest.fn(),
+      updateMembershipAsync,
+      isPending: false,
+      pendingCurationId: null,
+    });
     mockedUseDropInteractionRules.mockReturnValue({
       canShowVote: true,
       canVote: true,
@@ -102,6 +132,21 @@ describe("WaveDropActionsMore", () => {
     await userEvent.click(screen.getByRole("button", { name: "More actions" }));
 
     expect(screen.queryByTestId("set-pinned-drop")).toBeNull();
+    expect(screen.getByTestId("copy-link")).toBeInTheDocument();
+  });
+
+  it("does not bubble the menu trigger click to a parent card", async () => {
+    const onParentClick = jest.fn();
+
+    render(
+      <div onClick={onParentClick}>
+        <WaveDropActionsMore drop={drop} />
+      </div>
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+
+    expect(onParentClick).not.toHaveBeenCalled();
   });
 
   it("shows restore link previews when the drop has hidden previews", async () => {
@@ -176,5 +221,108 @@ describe("WaveDropActionsMore", () => {
     await userEvent.click(screen.getByRole("button", { name: "More actions" }));
 
     expect(screen.queryByText("Download media")).toBeNull();
+  });
+
+  it("shows one Flag Content action as the final desktop menu entry", async () => {
+    mockedUseDropInteractionRules.mockReturnValue({
+      canShowVote: true,
+      canVote: true,
+      voteState: "CAN_VOTE" as any,
+      canDelete: true,
+      canSetPinnedDrop: true,
+      isAuthor: false,
+      isWinner: false,
+      isVotingEnded: false,
+    });
+
+    render(<WaveDropActionsMore drop={drop} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+
+    const reportAction = screen.getByRole("button", {
+      name: "Flag Content",
+    });
+    expect(reportAction.parentElement?.lastElementChild).toBe(reportAction);
+    expect(screen.queryByRole("button", { name: "Hide post" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Block author" })).toBeNull();
+  });
+
+  it("adds directly to the preferred curation", async () => {
+    mockedUseCanShowDropCurationsAction.mockReturnValue({
+      showManageCurations: true,
+      quickAddCuration: { id: "curation-1", name: "Marketplace" },
+      quickRemoveCuration: null,
+    });
+
+    render(<WaveDropActionsMore drop={drop} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Add to Marketplace" })
+    );
+
+    expect(updateMembershipAsync).toHaveBeenCalledWith(
+      "curation-1",
+      "add",
+      expect.objectContaining({ successMessage: "Added to Marketplace." })
+    );
+  });
+
+  it("shows only Remove for a post inside the active curation", async () => {
+    render(
+      <WaveDropActionsMore
+        drop={drop}
+        showOnlyQuickRemove
+        standaloneQuickRemoveCuration={{
+          id: "curation-1",
+          name: "Marketplace",
+        }}
+      />
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+
+    expect(screen.getByRole("button", { name: "Remove" })).toBeInTheDocument();
+    expect(screen.queryByTestId("copy-link")).toBeNull();
+    expect(screen.queryByText("Manage Curations")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Flag Content" })).toBeNull();
+    expect(mockedUseCanShowDropCurationsAction).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Remove" }));
+
+    expect(updateMembershipAsync).toHaveBeenCalledWith(
+      "curation-1",
+      "remove",
+      expect.objectContaining({ successMessage: "Removed from Marketplace." })
+    );
+    expect(screen.queryByTestId("dropdown")).not.toBeInTheDocument();
+  });
+
+  it("hides the curation-only menu when no removal action is available", () => {
+    render(<WaveDropActionsMore drop={drop} showOnlyQuickRemove />);
+
+    expect(screen.queryByRole("button", { name: "More actions" })).toBeNull();
+    expect(screen.queryByTestId("dropdown")).toBeNull();
+  });
+
+  it("removes an open curation-only menu when permission is lost", async () => {
+    const { rerender } = render(
+      <WaveDropActionsMore
+        drop={drop}
+        showOnlyQuickRemove
+        standaloneQuickRemoveCuration={{
+          id: "curation-1",
+          name: "Marketplace",
+        }}
+      />
+    );
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+
+    rerender(<WaveDropActionsMore drop={drop} showOnlyQuickRemove />);
+
+    expect(screen.queryByRole("button", { name: "More actions" })).toBeNull();
+    expect(screen.queryByTestId("dropdown")).toBeNull();
   });
 });

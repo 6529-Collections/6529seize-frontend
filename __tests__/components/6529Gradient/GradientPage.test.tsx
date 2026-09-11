@@ -36,21 +36,27 @@ jest.mock("@/components/you-own-nft-badge/YouOwnNftBadge", () => ({
 }));
 jest.mock("@/components/nft-navigation/NftNavigation", () => ({
   __esModule: true,
-  default: () => <div data-testid="nav" />,
+  default: ({ params }: { readonly params?: URLSearchParams }) => (
+    <div data-query={params?.toString()} data-testid="nav" />
+  ),
 }));
 jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
   __esModule: true,
   default: () => <div data-testid="links" />,
 }));
-jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
+jest.mock("@/components/nft-market-activity/NftMarketActivity", () => ({
   __esModule: true,
-  default: (props: any) => (
-    <tr
-      data-testid="activity-row"
-      data-variant={props.variant}
-      data-row-style={props.rowStyle}
+  default: ({ contract, tokenId }: { contract: string; tokenId: string }) => (
+    <div
+      data-testid="nft-market-activity"
+      data-contract={contract}
+      data-token-id={tokenId}
     />
   ),
+}));
+jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
+  __esModule: true,
+  default: () => <div data-testid="market-depth" />,
 }));
 jest.mock("@/components/nft-transfer/TransferSingle", () => ({
   __esModule: true,
@@ -82,29 +88,16 @@ const routerReplace = jest.fn();
 
 // Import the constant for testing
 
-const tx = {
-  from_address: "0x0",
-  to_address: "0x1",
-  transaction: "0xabc",
-  token_id: "1",
-};
-
 type MockGradientCollection = ReturnType<typeof mockGradientCollection>;
-type MockGradientTransaction = typeof tx;
 
 function mockGradientFetches({
   collection = mockGradientCollection(3),
-  transactions = [tx],
 }: {
   readonly collection?: MockGradientCollection;
-  readonly transactions?: MockGradientTransaction[];
 } = {}) {
   (fetchUrl as jest.Mock).mockImplementation((url: string) => {
     if (url.includes("/api/nfts/gradients")) {
       return Promise.resolve({ data: collection });
-    }
-    if (url.includes("/api/transactions")) {
-      return Promise.resolve({ data: transactions });
     }
     return Promise.resolve({ data: [] });
   });
@@ -125,9 +118,11 @@ beforeEach(() => {
 function renderPage({
   wallet = "0x1",
   connectedAddress = wallet,
+  searchParamsString = "",
 }: {
   readonly wallet?: string;
   readonly connectedAddress?: string | undefined;
+  readonly searchParamsString?: string | undefined;
 } = {}) {
   mockConnectedAddress = connectedAddress;
 
@@ -138,7 +133,10 @@ function renderPage({
       >
         <CookieConsentProvider>
           <SeizeConnectProvider>
-            <GradientPageComponent id="1" />
+            <GradientPageComponent
+              id="1"
+              searchParamsString={searchParamsString}
+            />
           </SeizeConnectProvider>
         </CookieConsentProvider>
       </AuthContext.Provider>
@@ -149,7 +147,7 @@ function renderPage({
 describe("GradientPage", () => {
   it("shows NFT data and owner badge", async () => {
     renderPage();
-    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
     await waitFor(() =>
       expect(screen.getByTestId("art-viewer")).toBeInTheDocument()
     );
@@ -157,6 +155,28 @@ describe("GradientPage", () => {
       expect(screen.getByTestId("owner-badge")).toBeInTheDocument()
     );
     expect(screen.getByTestId("transfer-action")).toBeInTheDocument();
+  });
+
+  it("returns to the originating profile collected card", async () => {
+    const returnTo =
+      "/Shelby/collected?collection=gradients&page=2#collected-card-gradients-1";
+    const searchParams = new URLSearchParams({
+      returnTo,
+      untrusted: "do-not-forward",
+    });
+
+    renderPage({ searchParamsString: searchParams.toString() });
+
+    expect(
+      screen.getByRole("link", { name: "Back to Shelby's collected" })
+    ).toHaveAttribute("href", returnTo);
+    expect(
+      screen.getByRole("link", { name: "6529 Gradient" }).parentElement
+    ).toHaveClass("tw-hidden", "md:tw-flex");
+    expect(await screen.findByTestId("nav")).toHaveAttribute(
+      "data-query",
+      new URLSearchParams({ returnTo }).toString()
+    );
   });
 
   it("hides owner badge for non-owner", async () => {
@@ -170,38 +190,36 @@ describe("GradientPage", () => {
     expect(screen.queryByTestId("transfer-action")).not.toBeInTheDocument();
   });
 
-  it("shows transaction history", async () => {
+  it("shows merged card activity", async () => {
     renderPage();
-    const row = await screen.findByTestId("activity-row");
-    expect(row).toBeInTheDocument();
-    expect(row).toHaveAttribute("data-variant", "tailwind");
-    expect(row).toHaveAttribute("data-row-style", "striped");
+    const activity = await screen.findByTestId("nft-market-activity");
+    expect(activity).toHaveAttribute("data-contract", GRADIENT_CONTRACT);
+    expect(activity).toHaveAttribute("data-token-id", "1");
+    expect(
+      screen.getByRole("heading", { name: "Card Activity" })
+    ).toBeInTheDocument();
   });
 
   it("renders navigation and rank", async () => {
     renderPage();
-    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
     expect(await screen.findByTestId("nav")).toBeInTheDocument();
     expect(screen.getByText("1/3")).toBeInTheDocument();
   });
 
   it("fetches correct NFT data on mount", async () => {
     renderPage();
-    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
 
     expect(fetchUrl).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/nfts/gradients?&page_size=101",
-      expect.objectContaining({ signal: expect.any(Object) })
-    );
-    expect(fetchUrl).toHaveBeenCalledWith(
-      `https://api.test.6529.io/api/transactions?contract=${GRADIENT_CONTRACT}&id=1`,
       expect.objectContaining({ signal: expect.any(Object) })
     );
   });
 
   it("displays NFT title correctly", async () => {
     renderPage();
-    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
     // Wait for the NFT name to appear, which indicates data has loaded
     await waitFor(() =>
       expect(screen.getByText("Gradient #1")).toBeInTheDocument()
@@ -218,7 +236,7 @@ describe("GradientPage", () => {
 
   it("displays owner information", async () => {
     renderPage();
-    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
     // Wait for the NFT name to appear, indicating the component has rendered with data
     await waitFor(() =>
       expect(screen.getByText("Gradient #1")).toBeInTheDocument()
@@ -231,7 +249,7 @@ describe("GradientPage", () => {
 
   it("displays NFT metadata", async () => {
     renderPage();
-    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
     // Wait for the NFT name to appear
     await waitFor(() =>
       expect(screen.getByText("Gradient #1")).toBeInTheDocument()
@@ -243,7 +261,7 @@ describe("GradientPage", () => {
     expect(screen.getByText("Mint Date")).toBeInTheDocument();
     expect(screen.getByText("Artist")).toBeInTheDocument();
     expect(screen.getByTestId("artist")).toBeInTheDocument();
-    expect(screen.getByText("Market Overview")).toBeInTheDocument();
+    expect(screen.queryByText("Market Overview")).not.toBeInTheDocument();
     expect(screen.getByText("Floor Price")).toBeInTheDocument();
     expect(screen.getByText("Market Cap")).toBeInTheDocument();
     expect(screen.getByText("Highest Offer")).toBeInTheDocument();
@@ -251,7 +269,7 @@ describe("GradientPage", () => {
 
   it("displays TDH information", async () => {
     renderPage();
-    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
     // Wait for the NFT name to appear
     await waitFor(() =>
       expect(screen.getByText("Gradient #1")).toBeInTheDocument()
@@ -266,7 +284,7 @@ describe("GradientPage", () => {
 
   it("displays marketplace links", async () => {
     renderPage();
-    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
     // Wait for the NFT name to appear
     await waitFor(() =>
       expect(screen.getByText("Gradient #1")).toBeInTheDocument()
@@ -275,21 +293,23 @@ describe("GradientPage", () => {
     expect(screen.getByTestId("links")).toBeInTheDocument();
   });
 
-  it("shows transaction history section", async () => {
+  it("shows the card activity section", async () => {
     renderPage();
-    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
     // Wait for the NFT name to appear
     await waitFor(() =>
       expect(screen.getByText("Gradient #1")).toBeInTheDocument()
     );
 
-    expect(screen.getByText("Card Activity")).toBeInTheDocument();
-    expect(screen.getByTestId("activity-row")).toBeInTheDocument();
+    expect(await screen.findByText("Card Activity")).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("nft-market-activity")
+    ).toBeInTheDocument();
   });
 
   it("shows transfer action only for the connected owner address", async () => {
     renderPage({ wallet: "0x1", connectedAddress: "0x2" });
-    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
     await waitFor(() =>
       expect(screen.getByTestId("owner-badge")).toBeInTheDocument()
     );
@@ -303,20 +323,21 @@ describe("GradientPage", () => {
     expect(screen.queryByText("1/3")).not.toBeInTheDocument();
   });
 
-  it("handles empty transaction history", async () => {
+  it("keeps merged activity available independently of the NFT request", async () => {
     jest.clearAllMocks();
     const collection = mockGradientCollection(3);
     if (collection[0]) {
       collection[0].owner = "0x1";
     }
-    mockGradientFetches({ collection, transactions: [] });
+    mockGradientFetches({ collection });
 
     renderPage();
-    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
 
-    // Transaction History section should not be rendered when no transactions
-    expect(screen.queryByText("Card Activity")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("activity-row")).not.toBeInTheDocument();
+    expect(await screen.findByText("Card Activity")).toBeInTheDocument();
+    expect(
+      await screen.findByTestId("nft-market-activity")
+    ).toBeInTheDocument();
   });
 
   it("handles wallet connection state changes", async () => {
@@ -330,7 +351,7 @@ describe("GradientPage", () => {
       </TitleProvider>
     );
 
-    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
 
     // Should show as non-owner when no connected profile
     await waitFor(() =>

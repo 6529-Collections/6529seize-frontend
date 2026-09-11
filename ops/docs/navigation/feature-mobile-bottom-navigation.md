@@ -36,14 +36,21 @@ Profile access stays in the app drawer/account surfaces.
    - `Network` -> `/network`
    - `Collections` -> `/the-memes`
    - `Notifications` -> `/notifications`
-3. Active-tab highlight updates from route path plus `wave`/`view` query state.
-4. Keep switching primary sections without opening the app sidebar.
+3. The pressed icon dims immediately. When a cold destination needs more time,
+   its lightweight route shell opens while the complete content loads.
+4. Active-tab highlight updates from route path plus `wave`/`view` query state.
+5. Keep switching primary sections without opening the app sidebar.
 
 ## Common Scenarios
 
 - From any app-shell route, tap `Discovery` to open the dedicated wave
   discovery page.
 - From `/waves` or `/messages`, tap `Home` to return to `/`.
+- Tap the bell at the right end of the bar to open `Notifications`. The tap
+  area includes the space around the bell, in both expanded and compact states.
+- Icons dim while pressed to acknowledge the touch.
+- Primary-tab icons and active states keep their established visual design
+  while route content is loading.
 - Use the app drawer/profile avatar when you need your own profile route.
 - From `/waves/{waveId}`, tap `Waves` once to clear cached wave thread state
   and return to `/waves`.
@@ -69,19 +76,37 @@ Profile access stays in the app drawer/account surfaces.
   has unread items.
 - On non-stream routes (for example `/network`, `/the-memes`),
   layout reserves bottom space so content is not hidden behind the bar.
+- Tablet-sized app viewports use wider expanded and compact dock widths so the
+  seven destinations remain balanced against the available canvas.
+- On phones, `Discovery` and `Notifications` keep extra tap space around their
+  icons when the bar compacts during scrolling.
+- In the Android app, bottom spacing respects the space the device reports
+  for system navigation.
+- Rotating a phone or tablet between portrait and landscape keeps the dock
+  available when no other hide condition is active.
 - While the mobile keyboard is open, the bar stays mounted but slides out of
   view and is non-interactive.
+- The new-version refresh prompt is centered directly above the dock in the
+  native app and follows the dock as it expands or compacts.
 - While a single drop is open (`?drop=...`) or an inline drop edit is active,
   the bar is not rendered.
+- `Home`, `Discovery`, `Network`, `Collections`, and `Notifications` provide a
+  lightweight route shell so a cold switch can commit without waiting for the
+  complete destination. `Notifications` data is not fully fetched in the
+  background merely because its tab is visible.
 
 ## Failure and Recovery
 
-- If a tab switch does not apply, wait for in-flight transition and tap again.
+- A tab should respond to a single tap. If taps repeatedly fail, reopen the
+  app; persistent failures should be reported with the device model, app
+  version, and whether the bar was expanded or compact.
 - If you expected a profile tab, use the app drawer instead; profile access is
   no longer part of bottom navigation.
 - If `Waves` or `Messages` keeps reopening a stale thread, tap that tab from an
   active thread once to reset to section root, then retry.
 - If the bar is hidden, dismiss keyboard and close drop/edit overlays first.
+- Rotation by itself should not hide the bar; if it remains hidden after
+  rotating, return to portrait once and rotate again.
 - If content appears clipped under the bar, return to a section root route once
   to reapply bottom reserve spacing.
 - If unread dots look stale, reopen the section after unread state refresh.

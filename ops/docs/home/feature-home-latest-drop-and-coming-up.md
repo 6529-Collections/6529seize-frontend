@@ -4,7 +4,8 @@
 
 On `/`, home has two data-driven sections:
 
-- `Latest Drop` (or `Next Drop` when mint is ended and a next winner exists)
+- `Latest Drop` (or `Next Drop` when the mint-end grace period has elapsed and
+  a next winner exists)
 - `Coming up` (next in queue plus top current leaders)
 
 Use this page for visibility rules, state switches, and route targets.
@@ -16,16 +17,19 @@ Use this page for visibility rules, state switches, and route targets.
   - Drop title: `/the-memes/{id}`
   - Artist handles: `/{handle}` (can render multiple handle pills)
   - Distribution plan link (inside `Edition Details`): `/the-memes/{id}/distribution`
+  - Main Stage submission link (inside `Edition Details`, when mapped):
+    `/waves/{mainStageWaveId}?drop={dropId}`
   - Mint action: `/the-memes/mint` (countdown state only)
   - Subscription info link: `/about/subscriptions`
   - Connected profile subscription link: `/{user}/subscriptions`
 - `Next Drop` actions (top-section replacement mode):
   - Drop title: `/waves?wave={waveId}&drop={dropId}`
+  - Mapped Meme card pill: `/the-memes/{id}`
   - Wave row link: `/waves/{waveId}`
   - Artist link: `/{handle}` (only when handle exists)
   - Subscription info link: `/about/subscriptions`
   - Connected profile subscription link: `/{user}/subscriptions`
-- Current The Memes detail page:
+- Current and upcoming The Memes detail pages:
   - Subscription info link: `/about/subscriptions`
   - Connected profile subscription link: `/{user}/subscriptions`
 - `Coming up` actions:
@@ -44,11 +48,14 @@ Use this page for visibility rules, state switches, and route targets.
 2. The top slot shows a loading placeholder while current mint data, claim
    status, and next-winner data resolve.
 3. The top slot then chooses one mode:
-   - `Latest Drop` when the current mint is not ended, or when no next winner
-     is available.
-   - `Next Drop` when the current mint is ended and a next winner exists.
-4. `Latest Drop` shows artwork, stats, subscription awareness, edition details,
-   and countdown states: `Upcoming`, `Live`, `Mint Complete`, or `Error`.
+   - `Latest Drop` while the current mint is active and for the configured
+     grace period after its scheduled end, or when no next winner is available.
+   - `Next Drop` when the current mint is complete, its grace period has
+     elapsed, and a next winner exists.
+4. `Latest Drop` shows artwork, stats, connected-wallet allowance,
+   subscription awareness, edition details, and countdown states: `Upcoming`,
+   `Live`, `Mint Complete`, or `Error`. When the card has an explicit Main Stage
+   mapping, edition details also includes `Main Stage Submission` → `View`.
 5. `Coming up` resolves after app settings load and `memes_wave_id` is
    available.
 6. `Coming up` then shows:
@@ -66,9 +73,12 @@ Use this page for visibility rules, state switches, and route targets.
   - Top slot: `Latest Drop`.
   - `Coming up`: up to 3 leaders.
 - Mint ended, next winner available:
-  - Top section switches from `Latest Drop` to `Next Drop`.
+  - Top section keeps `Latest Drop` through the configured grace period, then
+    replaces it with `Next Drop`.
   - The `Next Drop` panel can show subscription awareness or controls for the
     canonical next mint.
+  - When the winning drop includes an explicit Meme card mapping, the panel
+    shows a `The Memes #{id}` pill linked to that card.
   - `Coming up` hides `NEXT MINT` and shows up to 3 leaders.
 - Leaderboard still loading while `NEXT MINT` is ready:
   - `Coming up` can render with only the `NEXT MINT` card.
@@ -86,30 +96,56 @@ Use this page for visibility rules, state switches, and route targets.
   are not met, the top slot is hidden.
 - If next-winner title matches current mint title (case-insensitive and
   trimmed), `Coming up` suppresses the `NEXT MINT` card.
+- Main Stage submission and Meme card links are omitted when their explicit
+  backend mapping is unavailable; home does not infer a relationship.
+- The home `Next Drop` artwork panel includes a labeled local-time `Mint Date`
+  alongside its wave, submission time, and rating details.
 - On iOS outside the US, the countdown `Mint` button is hidden.
 - On iOS outside the US, The Memes subscription row is hidden.
+- Latest Drop and mapped Next Drop cards always show `Your allowance`. Before a
+  wallet is connected, the row prompts the user to connect to view it. Once
+  connected, compact wrapping pills list each nonzero Phase 0, Phase 1, Phase 2,
+  or Public allocation, spelling out Airdrop and Allowlist counts; Public can
+  contain Airdrop only.
+- The allowance row distinguishes loading, an unpublished distribution, a
+  published distribution with no matching allocation, and an unavailable
+  lookup. It reports planned allocation, not whether it is still unused or
+  mintable now.
 - Latest Drop subscription awareness is read-only and links to subscription
   info/profile subscriptions without querying the upcoming-meme status endpoint
   for the current or already-dropped card.
 - The current/latest `/the-memes/{id}` detail page uses the same awareness-only
   subscription row beside the mint countdown.
+- When an unresolved `/the-memes/{id}` URL is the canonical next Meme and the
+  Main Stage winner is explicitly mapped to that id, the page reuses the same
+  artwork panel above the calendar without waiting for the current mint or the
+  homepage grace period. Its Meme pill is static because the user is already on
+  that card route, and subscription awareness stays inside the artwork panel.
+- Other unresolved upcoming `/the-memes/{id}` pages keep the standalone
+  subscription awareness widget followed by the next-mint calendar panel.
 - Awareness-only rows do not embed the profile subscription editor. They show a
   blue read-only `Subscription Minting` box, a non-mutating on/off toggle,
   optional `xN` user subscribed count when already subscribed, an
-  `xN subscribers` total, a `Set up`/`Manage` profile-subscriptions action,
-  and a right-edge question-mark info link.
-- Balance, eligibility, quantity selectors, and subscription mutation controls
-  are intentionally not shown in home/latest-card awareness rows.
+  `xN subscribers` total, a contextual profile-subscriptions action, and a
+  right-edge question-mark info link.
+- For a connected non-proxy profile, the awareness row can also show the
+  compact runway summary, for example
+  `Automatic · 0.18 ETH · 4 drops funded`. Its action follows the coverage
+  state: setup/settings for non-minters, upcoming choices for Manual mode with
+  no selections, and top-up for low coverage.
+- Detailed forecast fields, eligibility controls, quantity selectors, and
+  subscription mutation controls are intentionally not shown in
+  home/latest-card awareness rows.
 - Without a connected profile, the subscription row can still show a read-only
   off toggle awareness state, a `Set up` action that opens wallet connection,
   and a link to `/about/subscriptions`.
 - With a connected profile, the subscription row can link to
   `/{user}/subscriptions`; profile-specific subscription status/count only
   render when the related read-only APIs return data.
-- On `/about/subscriptions`, connected users see a primary `Manage`
-  action on the left side of the about-section navigation row. Disconnected
-  users see a primary `Connect to Subscribe` action that opens wallet
-  connection and then routes to their profile subscriptions once connected.
+- On `/about/subscriptions`, users who can continue directly see a primary
+  `Manage` action. Users who still need the wallet/profile handoff see
+  `Connect to Subscribe`; it opens wallet connection and
+  then routes to profile subscriptions once connected.
 - In countdown error state, the `Next drop ...` status strip is not shown.
 - On touch devices, interactive HTML media can require `Tap to load` before
   playback.
@@ -123,6 +159,7 @@ Use this page for visibility rules, state switches, and route targets.
   - `/the-memes/mint`
   - `/the-memes/{id}`
   - `/the-memes/{id}/distribution`
+  - `/waves/{mainStageWaveId}?drop={dropId}`
 - If `Coming up` card links fail, open:
   - `/waves/{waveId}`
   - `/waves/{waveId}?drop={dropId}`
@@ -132,6 +169,12 @@ Use this page for visibility rules, state switches, and route targets.
 
 ## Limitations / Notes
 
+- The homepage top-slot grace period is configured by
+  `HOME_LATEST_DROP_GRACE_PERIOD_MINUTES` in
+  `helpers/mint-visibility.helpers.ts` and defaults to 10 minutes. The
+  transition uses the calendar's scheduled mint-end instant as its shared
+  deadline. The exact client render time can vary with the viewer's device
+  clock and browser timer scheduling.
 - `Coming up` uses prediction leaderboard ordering, not chronological ordering.
 - Leader count is capped:
   - With `NEXT MINT` card: up to 2 leader cards
@@ -139,9 +182,26 @@ Use this page for visibility rules, state switches, and route targets.
 - `Next Drop` uses mixed route styles:
   - title link: `/waves?wave={waveId}&drop={dropId}` (single-drop target)
   - wave row link: `/waves/{waveId}` (canonical wave route)
+- The `Next Drop` Meme card pill uses the explicit `meme_card_id` returned in
+  the winning drop’s submission context.
 - `Coming up` cards use path-style routes (`/waves/{waveId}?drop=...`).
 - `NEXT MINT` timestamps are displayed in the viewer's local timezone/locale.
 - No auth or wallet gate is required to view these sections.
+
+### `/about/subscriptions` localization fallback debt
+
+- Route or component: `/about/subscriptions` and its subscription action.
+- Untranslated surface: the restyled subscription guide and primary
+  subscription action.
+- Current fallback behavior: `en-GB`, `de-DE`, `es-ES`, and `fr-FR` use the
+  complete `en-US` source messages for missing `about.subscriptions.*` keys.
+- User impact: non-English locale users can see English subscription guidance;
+  the page remains functional and locale-sensitive gas values still use the
+  viewer's number and percentage conventions.
+- Owner or follow-up issue: frontend i18n backlog.
+- Expected remediation path: add reviewed translations for the
+  `about.subscriptions.*` message family to each partial locale dictionary and
+  repeat the responsive and assistive-technology QA pass.
 
 ## Related Pages
 

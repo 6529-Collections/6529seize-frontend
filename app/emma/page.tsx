@@ -7,10 +7,10 @@ export default function DistributionPlanTool() {
   return (
     <DistributionPlanToolWrapper>
       <div className="tw-flex tw-h-full tw-min-h-screen tw-overflow-x-hidden tw-bg-iron-900">
-        <div className="tw-flex tw-flex-wrap tw-h-full tw-w-full lg:tw-min-h-screen tw-px-2 lg:tw-px-4 xl:tw-px-8 tw-space-y-8 lg:tw-space-y-0">
-          <div className="lg:tw-w-1/2 xl:tw-w-[40%] 2xl:tw-w-1/2 tw-pt-8 md:tw-pt-14 lg:tw-pb-12">
-            <div className="2xl:tw-max-w-xl tw-mx-auto lg:tw-pr-10 xl:tw-pr-16 2xl:tw-pr-0">
-              <div className="tw-flex tw-flex-col">
+        <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-gap-y-8 tw-px-4 sm:tw-px-8 lg:tw-min-h-screen lg:tw-flex-row lg:tw-gap-y-0 lg:tw-px-0">
+          <div className="tw-w-full tw-min-w-0 tw-pt-8 md:tw-pt-14 lg:tw-w-1/2 lg:tw-px-8 lg:tw-pb-12 xl:tw-w-[40%] 2xl:tw-w-1/2">
+            <div className="tw-mx-auto tw-w-full tw-min-w-0 2xl:tw-max-w-xl">
+              <div className="tw-flex tw-min-w-0 tw-flex-col tw-break-words">
                 <p className="tw-text-white tw-font-semibold tw-mb-0 tw-text-base md:tw-text-lg">
                   Meet EMMA - The Editor for Managing Multiphase Allowlists: The
                   first reference implementation of Janus.
@@ -58,7 +58,7 @@ export default function DistributionPlanTool() {
             </div>
           </div>
 
-          <div className="lg:tw-w-1/2 xl:tw-w-[60%] 2xl:tw-w-1/2 tw-pt-8 tw-px-8 lg:tw-pt-12 tw-pb-12 lg:tw-pb-0 tw-border-l-0 lg:tw-border-l tw-border-solid tw-border-r-0 tw-border-t-1 lg:tw-border-t-0 tw-border-b-0 tw-border-iron-700">
+          <div className="tw-w-full tw-min-w-0 tw-border-b-0 tw-border-l-0 tw-border-r-0 tw-border-t-1 tw-border-solid tw-border-iron-700 tw-pb-12 tw-pt-8 lg:tw-w-1/2 lg:tw-border-l lg:tw-border-t-0 lg:tw-px-8 lg:tw-pb-0 lg:tw-pt-12 xl:tw-w-[60%] 2xl:tw-w-1/2">
             <DistributionPlanToolConnect />
           </div>
         </div>

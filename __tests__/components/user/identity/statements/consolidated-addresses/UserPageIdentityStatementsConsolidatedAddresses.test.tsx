@@ -53,6 +53,20 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
     ).toHaveAttribute("href", "/delegation/wallet-checker?address=0x2");
   });
 
+  it("omits wallet actions when the profile has no wallets", () => {
+    render(
+      <AuthContext.Provider value={{ activeProfileProxy: null } as any}>
+        <UserPageIdentityStatementsConsolidatedAddresses
+          profile={{ ...profile, wallets: [] }}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(
+      screen.queryByRole("link", { name: "Wallet Checker" })
+    ).not.toBeInTheDocument();
+  });
+
   it("keeps a single row expanded at a time", () => {
     render(
       <AuthContext.Provider value={{ activeProfileProxy: null } as any}>

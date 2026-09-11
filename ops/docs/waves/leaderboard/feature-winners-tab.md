@@ -33,11 +33,20 @@ right sidebar, and what users see for loading and empty states.
 ### Single-decision waves
 
 - Podium shows first, second, and third place when available.
+- First place is raised in the center, with second place on the left and third
+  place on the right. Names, nomination details, vote totals, credit labels,
+  voter counts, and outcomes wrap within cards that grow to fit their content.
+- Select a podium card outside its controls, or focus its winner button and
+  press Enter or Space, to open the winning drop. Keyboard focus is visible.
+- Profile links, voter details, and `Outcome` keep their own actions without
+  opening the winning drop. Hover, keyboard-focus, or tap `Outcome` to read the
+  awards; press Escape or tap outside it to close the tooltip.
 - Winner rows render below the podium.
 - If no winners exist, empty state shows:
   - `No Winners to Display`
   - `This wave ended without any submissions`
-- Podium can render fewer than three winners.
+- Podium can render fewer than three winners. Unfilled places use placeholders
+  with the same card shape and stagger as the available winners.
 
 ### Multi-decision waves
 
@@ -65,7 +74,23 @@ right sidebar, and what users see for loading and empty states.
 
 ## Common Scenarios
 
-- Memes waves show media-rich winner cards with traits and vote context.
+- Memes waves show media-rich winner cards with traits and vote context. Their
+  background, default border, and neutral hover highlight match the leaderboard
+  list cards.
+- In The Memes Main Stage wave, mapped winners show a `The Memes #N` link that
+  opens the Meme card minted from that submission. The same link appears when
+  the winning drop is open directly, where the minted outcome and compact Meme
+  link use their own row below the drop metadata. The frontend uses only the
+  explicit mapping returned in the V2 submission context; it never infers a
+  Meme ID from winner order. The link is omitted when no mapping is known.
+- Mapped Main Stage winner cards also show the Meme card's scheduled `Mint date`
+  in the viewer's local timezone and locale. This is separate from the decision
+  date shown above the winner group. The mint date is omitted when no explicit
+  Meme card mapping is known.
+- A mapped Meme card page also shows a `Main Stage Submission` action beside
+  `Distribution Plan` in the market overview panel to the right of the artwork.
+  It opens the winning drop in The Memes Main Stage. Older cards without an
+  explicit mapping do not show the action.
 - Non-memes waves show compact winner rows with rank, vote totals, voter
   counts, and outcome summaries.
 - Winner rank labels use ordinal place formatting (`1st`, `2nd`, `3rd`,
@@ -77,6 +102,8 @@ right sidebar, and what users see for loading and empty states.
 ## Loading, Failure, and Recovery
 
 - While decisions load, winners surfaces show loading placeholders.
+- The main-thread podium loading state keeps the three-place layout and rank
+  stagger.
 - There is no dedicated winners error panel.
 - If decision data is unavailable, winners can resolve to empty-state messaging.
 - Refresh the current wave route and retry.

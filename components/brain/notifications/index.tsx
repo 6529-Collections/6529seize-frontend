@@ -6,7 +6,8 @@ import {
   DROP_POLL_VOTED_NOTIFICATION_CAUSE,
   type NotificationCause,
 } from "@/types/feed.types";
-import { useMemo } from "react";
+import type { CSSProperties } from "react";
+import { useEffect, useMemo } from "react";
 import NotificationsCauseFilter from "./NotificationsCauseFilter";
 import { useNotificationsController } from "./hooks/useNotificationsController";
 import { useNotificationsScroll } from "./hooks/useNotificationsScroll";
@@ -14,6 +15,10 @@ import NotificationsContent from "./subcomponents/NotificationsContent";
 import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsReverseContainer";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { floatingDockClearanceClassName } from "./notifications.constants";
+import {
+  markMobileLaunchStep,
+  scheduleMobileLaunchFlush,
+} from "@/utils/monitoring/mobileLaunchTiming";
 
 interface NotificationsProps {
   readonly activeDrop: ActiveDropState | null;
@@ -34,6 +39,7 @@ const NOTIFICATION_CAUSE_PRIORITY: Record<NotificationCause, number> = {
   [ApiNotificationCause.WaveCreated]: 10,
   [ApiNotificationCause.AllDrops]: 11,
   [ApiNotificationCause.PriorityAlert]: 12,
+  [ApiNotificationCause.SubscriptionCoverage]: 13,
 };
 
 const compareNotificationCause = (
@@ -81,6 +87,29 @@ export default function Notifications({
     showErrorState: contentState.showErrorState,
     activeFilterKey,
   });
+  const hasFirstUsefulContent =
+    !contentState.isLoadingProfile && !contentState.showLoader;
+
+  useEffect(() => {
+    if (!hasFirstUsefulContent) {
+      return;
+    }
+
+    markMobileLaunchStep("route_first_useful_content");
+    scheduleMobileLaunchFlush("notifications_content_visible", 250);
+  }, [hasFirstUsefulContent]);
+
+  let bottomPaddingClassName: string | undefined;
+  let bottomPaddingStyle: CSSProperties | undefined;
+  if (activeDrop) {
+    bottomPaddingClassName = "tw-pb-0";
+    bottomPaddingStyle = {
+      paddingBottom:
+        "calc(var(--brain-content-composer-reserve, 0px) + 0.5rem)",
+    };
+  } else if (isApp) {
+    bottomPaddingClassName = floatingDockClearanceClassName;
+  }
 
   return (
     <div
@@ -99,20 +128,16 @@ export default function Notifications({
           onTopIntersection={handleTopIntersection}
           isFetchingNextPage={isFetchingNextPage}
           hasNextPage={pagination.hasNextPage}
-          bottomPaddingClassName={
-            isApp ? floatingDockClearanceClassName : undefined
-          }
+          bottomPaddingClassName={bottomPaddingClassName}
+          bottomPaddingStyle={bottomPaddingStyle}
           containerClassName="tw-bg-transparent"
         >
           <NotificationsContent
             isLoadingProfile={contentState.isLoadingProfile}
-            hasConnectedProfile={contentState.hasConnectedProfile}
-            hasProfileHandle={contentState.hasProfileHandle}
             showProxyDisabledState={contentState.showProxyDisabledState}
             showErrorState={contentState.showErrorState}
             resolvedErrorMessage={contentState.resolvedErrorMessage}
             handleRetry={handlers.handleRetry}
-            handleAuthRetry={handlers.handleAuthRetry}
             handleProxyDisable={handlers.handleProxyDisable}
             showLoader={contentState.showLoader}
             showNoItems={contentState.showNoItems}

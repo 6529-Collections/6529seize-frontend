@@ -1,6 +1,6 @@
 import { DelegationCenterSection } from "@/types/enums";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { createRef, type ComponentProps } from "react";
+import { type ComponentProps } from "react";
 
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -13,7 +13,18 @@ jest.mock("@/components/delegation/DelegationCenter", () => () => (
 jest.mock("@/components/delegation/walletChecker/WalletChecker", () => () => (
   <div />
 ));
-jest.mock("@/components/delegation/NewDelegation", () => () => <div />);
+jest.mock("@/components/delegation/NewDelegation", () => {
+  return function MockNewDelegation() {
+    const [value, setValue] = jest.requireActual("react").useState("");
+    return (
+      <input
+        aria-label="Mock delegation address"
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+      />
+    );
+  };
+});
 jest.mock("@/components/delegation/NewSubDelegation", () => () => <div />);
 jest.mock("@/components/delegation/NewConsolidation", () => () => <div />);
 jest.mock("@/components/delegation/NewAssignPrimaryAddress", () => () => (
@@ -22,8 +33,13 @@ jest.mock("@/components/delegation/NewAssignPrimaryAddress", () => () => (
 jest.mock("@/components/delegation/CollectionDelegation", () => () => <div />);
 jest.mock("@/components/delegation/html/DelegationHTML", () => () => <div />);
 
+let mockConnectedAddress = "0xabc";
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({ address: "0xabc" }),
+  useSeizeConnectContext: () => ({
+    address: mockConnectedAddress,
+    isConnected: true,
+    seizeConnect: jest.fn(),
+  }),
 }));
 
 jest.mock("wagmi", () => ({ useEnsName: () => ({ data: "ens" }) }));
@@ -45,6 +61,11 @@ const props = {
 };
 
 describe("DelegationCenterMenu links", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockConnectedAddress = "0xabc";
+  });
+
   it("renders resource links", async () => {
     const mod = await import("@/components/delegation/DelegationCenterMenu");
     const DelegationCenterMenu = mod.default;
@@ -70,14 +91,71 @@ describe("DelegationCenterMenu links", () => {
     );
   });
 
+  it.each([
+    DelegationCenterSection.REGISTER_DELEGATION,
+    DelegationCenterSection.REGISTER_SUB_DELEGATION,
+    DelegationCenterSection.REGISTER_CONSOLIDATION,
+    DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
+  ])("hides navigation on focused action route %s", async (section) => {
+    const mod = await import("@/components/delegation/DelegationCenterMenu");
+    const DelegationCenterMenu = mod.default;
+
+    render(<DelegationCenterMenu {...props} section={section} />);
+
+    expect(
+      screen.queryByRole("navigation", { name: "Delegation center" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("resets standalone form state when the connected account changes", async () => {
+    const mod = await import("@/components/delegation/DelegationCenterMenu");
+    const DelegationCenterMenu = mod.default;
+    const actionProps = {
+      ...props,
+      section: DelegationCenterSection.REGISTER_DELEGATION,
+    };
+    const { rerender } = render(<DelegationCenterMenu {...actionProps} />);
+    const addressInput = screen.getByRole("textbox", {
+      name: "Mock delegation address",
+    });
+
+    fireEvent.change(addressInput, { target: { value: "0xrecipient" } });
+    expect(addressInput).toHaveValue("0xrecipient");
+
+    mockConnectedAddress = "0xdef";
+    rerender(<DelegationCenterMenu {...actionProps} />);
+
+    expect(
+      screen.getByRole("textbox", { name: "Mock delegation address" })
+    ).toHaveValue("");
+  });
+
+  it("clears a primary-address query when the connected account changes", async () => {
+    const mod = await import("@/components/delegation/DelegationCenterMenu");
+    const DelegationCenterMenu = mod.default;
+    const setAddressQuery = jest.fn();
+    const actionProps = {
+      ...props,
+      section: DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
+      address_query: "0xrecipient",
+      setAddressQuery,
+    };
+    const { rerender } = render(<DelegationCenterMenu {...actionProps} />);
+
+    mockConnectedAddress = "0xdef";
+    rerender(<DelegationCenterMenu {...actionProps} />);
+
+    expect(setAddressQuery).toHaveBeenCalledWith("");
+  });
+
   it("renders toast text without interpreting it as html", async () => {
     const mod = await import("@/components/delegation/DelegationToast");
     const { DelegationToast } = mod;
 
     render(
       <DelegationToast
-        toastRef={createRef<HTMLDivElement>()}
         toast={{
+          status: "error",
           title: "Wallet Error",
           message: '<img src="x" onerror="alert(1)" />',
         }}
@@ -87,9 +165,37 @@ describe("DelegationCenterMenu links", () => {
     );
 
     expect(
-      screen.getByText('<img src="x" onerror="alert(1)" />')
+      screen.getByDisplayValue('<img src="x" onerror="alert(1)" />')
     ).toBeInTheDocument();
     expect(document.querySelector('img[src="x"]')).toBeNull();
+  });
+
+  it("portals delegation notifications into a viewport-fixed dialog", async () => {
+    const mod = await import("@/components/delegation/DelegationToast");
+    const { DelegationToast } = mod;
+
+    render(
+      <div style={{ transform: "translateZ(0)" }}>
+        <DelegationToast
+          toast={{
+            status: "success",
+            title: "Viewport Notice",
+            message: "Visible without scrolling",
+            transactionHash: "0xabc",
+          }}
+          showToast={true}
+          setShowToast={jest.fn()}
+        />
+      </div>
+    );
+
+    const dialog = screen.getByRole("dialog", { name: "Viewport Notice" });
+    expect(dialog.parentElement?.parentElement).toBe(document.body);
+    expect(dialog.parentElement).toHaveClass("tw-fixed", "tw-inset-0");
+    expect(screen.getByRole("link", { name: "View Tx" })).toHaveAttribute(
+      "href",
+      expect.stringContaining("etherscan.io/tx/0xabc")
+    );
   });
 
   it("reopens shared delegation toasts after a dismiss", async () => {
@@ -105,6 +211,7 @@ describe("DelegationCenterMenu links", () => {
             type="button"
             onClick={() =>
               toastState.showDelegationToast({
+                status: "success",
                 title: "First Toast",
                 message: "First body",
               })
@@ -122,6 +229,7 @@ describe("DelegationCenterMenu links", () => {
             type="button"
             onClick={() =>
               toastState.showDelegationToast({
+                status: "success",
                 title: "Second Toast",
                 message: "Second body",
               })
@@ -131,7 +239,6 @@ describe("DelegationCenterMenu links", () => {
           </button>
           {toastState.toast && (
             <DelegationToast
-              toastRef={toastState.toastRef}
               toast={toastState.toast}
               showToast={toastState.showToast}
               setShowToast={toastState.setToastVisibility}

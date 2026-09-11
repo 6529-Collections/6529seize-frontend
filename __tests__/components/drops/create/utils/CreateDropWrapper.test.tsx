@@ -1,12 +1,15 @@
 import React from "react";
 import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import CreateDropWrapper from "@/components/drops/create/utils/CreateDropWrapper";
+import CreateDropWrapper, {
+  type CreateDropWrapperHandles,
+} from "@/components/drops/create/utils/CreateDropWrapper";
 import { WalletValidationError } from "@/errors/wallet";
 import {
   CreateDropType,
   CreateDropViewType,
 } from "@/components/drops/create/types";
+import type { CreateDropConfig } from "@/entities/IDrop";
 
 // Mock the SeizeConnectContext
 const mockUseSeizeConnectContext = jest.fn();
@@ -385,7 +388,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
         isSafeWallet: false,
       });
 
-      const component = React.createRef<any>();
+      const component = React.createRef<CreateDropWrapperHandles>();
       render(
         <QueryClientProvider client={queryClient}>
           <CreateDropWrapper ref={component} {...defaultProps} />
@@ -394,7 +397,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       let result: any;
       act(() => {
-        result = component.current?.requestDrop();
+        result = component.current!.requestDrop();
       });
 
       expect(result).toMatchObject({
@@ -416,7 +419,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
         isSafeWallet: true,
       });
 
-      const component = React.createRef<any>();
+      const component = React.createRef<CreateDropWrapperHandles>();
       render(
         <QueryClientProvider client={queryClient}>
           <CreateDropWrapper ref={component} {...defaultProps} />
@@ -425,7 +428,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       let result: any;
       act(() => {
-        result = component.current?.requestDrop();
+        result = component.current!.requestDrop();
       });
 
       expect(result.is_safe_signature).toBe(true);
@@ -457,7 +460,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
         name: "Token One",
       };
       const setDrop = jest.fn();
-      const component = React.createRef<any>();
+      const component = React.createRef<CreateDropWrapperHandles>();
       const { getByTestId } = render(
         <QueryClientProvider client={queryClient}>
           <CreateDropWrapper
@@ -476,7 +479,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       fireEvent.click(getByTestId("set-full-editor-state"));
 
-      const result = component.current?.getDropSnapshot();
+      const result = component.current!.getDropSnapshot();
 
       expect(setDrop).not.toHaveBeenCalled();
       expect(result.parts).toHaveLength(1);
@@ -485,7 +488,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
         quoted_drop: null,
         media: [],
       });
-      expect(result.parts[0].clientId).toEqual(expect.any(String));
+      expect(result.parts[0]!.clientId).toEqual(expect.any(String));
       expect(result).toMatchObject({
         title: "Draft title",
         metadata: [metadata],
@@ -512,7 +515,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
         quoted_drop: null,
         media: [],
       };
-      const drop = {
+      const drop: CreateDropConfig = {
         title: null,
         parts: [existingPart],
         mentioned_users: [],
@@ -522,13 +525,13 @@ describe("CreateDropWrapper Authentication Validation", () => {
         signature: null,
       };
       const setDrop = jest.fn();
-      const component = React.createRef<any>();
+      const component = React.createRef<CreateDropWrapperHandles>();
       const { getByTestId } = render(
         <QueryClientProvider client={queryClient}>
           <CreateDropWrapper
             ref={component}
             {...defaultProps}
-            drop={drop as any}
+            drop={drop}
             setDrop={setDrop}
             viewType={CreateDropViewType.FULL}
           />
@@ -537,8 +540,8 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       fireEvent.click(getByTestId("set-full-editor-state"));
 
-      const firstSnapshot = component.current?.getDropSnapshot();
-      const secondSnapshot = component.current?.getDropSnapshot();
+      const firstSnapshot = component.current!.getDropSnapshot();
+      const secondSnapshot = component.current!.getDropSnapshot();
 
       expect(setDrop).not.toHaveBeenCalled();
       expect(drop.parts).toHaveLength(1);
@@ -546,8 +549,8 @@ describe("CreateDropWrapper Authentication Validation", () => {
         "first part",
         "second part",
       ]);
-      expect(firstSnapshot.parts[0].clientId).toBe("existing-part");
-      expect(firstSnapshot.parts[1].clientId).toEqual(expect.any(String));
+      expect(firstSnapshot.parts[0]!.clientId).toBe("existing-part");
+      expect(firstSnapshot.parts[1]!.clientId).toEqual(expect.any(String));
       expect(secondSnapshot.parts.map((part: any) => part.content)).toEqual([
         "first part",
         "second part",
@@ -563,7 +566,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
       });
 
       const setDrop = jest.fn();
-      const component = React.createRef<any>();
+      const component = React.createRef<CreateDropWrapperHandles>();
       const { getByTestId } = render(
         <QueryClientProvider client={queryClient}>
           <CreateDropWrapper
@@ -578,7 +581,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
       fireEvent.click(getByTestId("set-full-editor-state"));
       let result: any;
       act(() => {
-        result = component.current?.requestDrop();
+        result = component.current!.requestDrop();
       });
 
       expect(setDrop).toHaveBeenCalledWith(result);
@@ -594,7 +597,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
       });
 
       const setDrop = jest.fn();
-      const component = React.createRef<any>();
+      const component = React.createRef<CreateDropWrapperHandles>();
       const { getByTestId } = render(
         <QueryClientProvider client={queryClient}>
           <CreateDropWrapper
@@ -610,7 +613,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
       fireEvent.click(getByTestId("set-full-editor-state"));
       fireEvent.click(getByTestId("add-full-part"));
 
-      const result = component.current?.getDropSnapshot();
+      const result = component.current!.getDropSnapshot();
 
       expect(setDrop).not.toHaveBeenCalled();
       expect(result.parts).toEqual([]);
@@ -625,7 +628,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
       });
 
       const setDrop = jest.fn();
-      const component = React.createRef<any>();
+      const component = React.createRef<CreateDropWrapperHandles>();
       const { getByTestId } = render(
         <QueryClientProvider client={queryClient}>
           <CreateDropWrapper
@@ -640,10 +643,10 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       fireEvent.click(getByTestId("sync-full-upload-editor-state"));
 
-      const result = component.current?.getDropSnapshot();
+      const result = component.current!.getDropSnapshot();
 
       expect(setDrop).not.toHaveBeenCalled();
-      expect(result.parts[0].content).toBe(
+      expect(result.parts[0]!.content).toBe(
         "uploaded ![Seize](https://cdn.example/image.png)"
       );
     });
@@ -655,7 +658,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
         isSafeWallet: false,
       });
 
-      const component = React.createRef<any>();
+      const component = React.createRef<CreateDropWrapperHandles>();
       const { getByTestId } = render(
         <QueryClientProvider client={queryClient}>
           <CreateDropWrapper
@@ -687,6 +690,161 @@ describe("CreateDropWrapper Authentication Validation", () => {
       });
     });
 
+    it("allows a 25,000-character Storm part and rejects the next character", async () => {
+      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        hasValidWalletAuth: true,
+        address: "0x1234567890123456789012345678901234567890",
+        isSafeWallet: false,
+      });
+
+      const setDrop = jest.fn();
+      const onSubmitDrop = jest.fn();
+      const component = React.createRef<CreateDropWrapperHandles>();
+      const { getByTestId } = render(
+        <QueryClientProvider client={queryClient}>
+          <CreateDropWrapper
+            ref={component}
+            {...defaultProps}
+            setDrop={setDrop}
+            onSubmitDrop={onSubmitDrop}
+            viewType={CreateDropViewType.FULL}
+          />
+        </QueryClientProvider>
+      );
+
+      mockMarkdown = "a".repeat(25_000);
+      fireEvent.click(getByTestId("set-full-editor-state"));
+
+      await waitFor(() => {
+        expect(getByTestId("create-drop-full")).toHaveAttribute(
+          "data-can-add-part",
+          "true"
+        );
+        expect(getByTestId("create-drop-full")).toHaveAttribute(
+          "data-can-submit",
+          "true"
+        );
+      });
+
+      mockMarkdown = "a".repeat(25_001);
+      fireEvent.click(getByTestId("set-full-editor-state"));
+
+      await waitFor(() => {
+        expect(getByTestId("create-drop-full")).toHaveAttribute(
+          "data-can-add-part",
+          "false"
+        );
+        expect(getByTestId("create-drop-full")).toHaveAttribute(
+          "data-can-submit",
+          "false"
+        );
+      });
+
+      let requestResult: unknown;
+      act(() => {
+        requestResult = component.current!.requestDrop();
+      });
+      fireEvent.click(getByTestId("add-full-part"));
+      fireEvent.click(getByTestId("submit-full-drop"));
+
+      expect(requestResult).toBeNull();
+      expect(setDrop).not.toHaveBeenCalled();
+      expect(onSubmitDrop).not.toHaveBeenCalled();
+    });
+
+    it("rejects a Storm part above the UTF-8 byte limit", async () => {
+      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        hasValidWalletAuth: true,
+        address: "0x1234567890123456789012345678901234567890",
+        isSafeWallet: false,
+      });
+
+      const { getByTestId } = render(
+        <QueryClientProvider client={queryClient}>
+          <CreateDropWrapper
+            {...defaultProps}
+            viewType={CreateDropViewType.FULL}
+          />
+        </QueryClientProvider>
+      );
+
+      mockMarkdown = "界".repeat(21_846);
+      fireEvent.click(getByTestId("set-full-editor-state"));
+
+      await waitFor(() => {
+        expect(getByTestId("create-drop-full")).toHaveAttribute(
+          "data-can-add-part",
+          "false"
+        );
+      });
+    });
+
+    it("blocks every submission path when individually valid parts exceed the Storm total", async () => {
+      mockMarkdown = "c".repeat(10_001);
+      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        hasValidWalletAuth: true,
+        address: "0x1234567890123456789012345678901234567890",
+        isSafeWallet: false,
+      });
+
+      const drop: CreateDropConfig = {
+        title: null,
+        parts: ["a", "b"].map((character, index) => ({
+          clientId: `existing-part-${index}`,
+          content: character.repeat(20_000),
+          quoted_drop: null,
+          media: [],
+        })),
+        mentioned_users: [],
+        mentioned_waves: [],
+        referenced_nfts: [],
+        metadata: [],
+        signature: null,
+      };
+      const setDrop = jest.fn();
+      const onSubmitDrop = jest.fn();
+      const component = React.createRef<CreateDropWrapperHandles>();
+      const { getByTestId } = render(
+        <QueryClientProvider client={queryClient}>
+          <CreateDropWrapper
+            ref={component}
+            {...defaultProps}
+            drop={drop}
+            setDrop={setDrop}
+            onSubmitDrop={onSubmitDrop}
+            viewType={CreateDropViewType.FULL}
+          />
+        </QueryClientProvider>
+      );
+
+      fireEvent.click(getByTestId("set-full-editor-state"));
+
+      await waitFor(() => {
+        expect(getByTestId("create-drop-full")).toHaveAttribute(
+          "data-can-add-part",
+          "false"
+        );
+        expect(getByTestId("create-drop-full")).toHaveAttribute(
+          "data-can-submit",
+          "false"
+        );
+      });
+
+      let requestResult: unknown;
+      act(() => {
+        requestResult = component.current!.requestDrop();
+      });
+      fireEvent.click(getByTestId("add-full-part"));
+      fireEvent.click(getByTestId("submit-full-drop"));
+
+      expect(requestResult).toBeNull();
+      expect(setDrop).not.toHaveBeenCalled();
+      expect(onSubmitDrop).not.toHaveBeenCalled();
+    });
+
     it("does not save a storm part while inline image upload markdown is pending", () => {
       mockMarkdown = "pending ![Seize](loading)";
       mockUseSeizeConnectContext.mockReturnValue({
@@ -697,7 +855,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       const setDrop = jest.fn();
       const setIsStormMode = jest.fn();
-      const component = React.createRef<any>();
+      const component = React.createRef<CreateDropWrapperHandles>();
       const { getByTestId } = render(
         <QueryClientProvider client={queryClient}>
           <CreateDropWrapper
@@ -713,11 +871,11 @@ describe("CreateDropWrapper Authentication Validation", () => {
       fireEvent.click(getByTestId("set-full-editor-state"));
       fireEvent.click(getByTestId("add-full-part"));
 
-      const result = component.current?.getDropSnapshot();
+      const result = component.current!.getDropSnapshot();
 
       expect(setDrop).not.toHaveBeenCalled();
       expect(setIsStormMode).not.toHaveBeenCalled();
-      expect(result.parts[0].content).toBe("pending ![Seize](loading)");
+      expect(result.parts[0]!.content).toBe("pending ![Seize](loading)");
     });
 
     it("does not submit while inline image upload markdown is pending", async () => {
@@ -730,7 +888,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       const setDrop = jest.fn();
       const onSubmitDrop = jest.fn();
-      const component = React.createRef<any>();
+      const component = React.createRef<CreateDropWrapperHandles>();
       const { getByTestId } = render(
         <QueryClientProvider client={queryClient}>
           <CreateDropWrapper
@@ -754,11 +912,11 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       fireEvent.click(getByTestId("submit-full-drop"));
 
-      const result = component.current?.getDropSnapshot();
+      const result = component.current!.getDropSnapshot();
 
       expect(setDrop).not.toHaveBeenCalled();
       expect(onSubmitDrop).not.toHaveBeenCalled();
-      expect(result.parts[0].content).toBe("pending ![Seize](loading)");
+      expect(result.parts[0]!.content).toBe("pending ![Seize](loading)");
     });
 
     it("saves a storm part once inline image markdown has an uploaded URL", () => {

@@ -1,13 +1,12 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
-  FOLLOW_BTN_BUTTON_CLASSES,
-  FOLLOW_BTN_LOADER_SIZES,
+  FOLLOW_BUTTON_SIZES,
   UserFollowBtnSize,
 } from "@/components/user/utils/UserFollowBtn";
+import Button from "@/components/utils/button/Button";
 import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
@@ -15,6 +14,8 @@ import {
   commonApiDeleteWithBody,
   commonApiPost,
 } from "@/services/api/common-api";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { useMutation } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useContext, useState } from "react";
@@ -27,26 +28,34 @@ import {
 interface NotificationsFollowBtnProps {
   readonly profile: ApiProfileMin;
   readonly size?: UserFollowBtnSize | undefined;
+  readonly followLabel?: string | undefined;
+  readonly followingLabel?: string | undefined;
 }
 
 const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
   profile,
   size = UserFollowBtnSize.MEDIUM,
+  followLabel = t(DEFAULT_LOCALE, "notifications.followButton.follow"),
+  followingLabel = t(DEFAULT_LOCALE, "notifications.followButton.following"),
 }) => {
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
   const { setToast, requestAuth } = useAuth();
   const [mutating, setMutating] = useState<boolean>(false);
 
+  const handle = profile.handle?.trim();
   const following = profile.subscribed_actions.length > 0;
-  const label = following ? "Following" : "Follow";
+  const label = following ? followingLabel : followLabel;
 
   const followMutation = useMutation({
     mutationFn: async () => {
+      if (!handle) {
+        throw new Error("Missing profile handle.");
+      }
       await commonApiPost<
         ApiIdentitySubscriptionActions,
         ApiIdentitySubscriptionActions
       >({
-        endpoint: `identities/${profile.handle}/subscriptions`,
+        endpoint: `identities/${handle}/subscriptions`,
         body: DEFAULT_SUBSCRIPTION_BODY,
       });
     },
@@ -68,11 +77,14 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
 
   const unFollowMutation = useMutation({
     mutationFn: async () => {
+      if (!handle) {
+        throw new Error("Missing profile handle.");
+      }
       await commonApiDeleteWithBody<
         ApiIdentitySubscriptionActions,
         ApiIdentitySubscriptionActions
       >({
-        endpoint: `identities/${profile.handle}/subscriptions`,
+        endpoint: `identities/${handle}/subscriptions`,
         body: DEFAULT_SUBSCRIPTION_BODY,
       });
     },
@@ -93,6 +105,20 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
   });
 
   const onFollow = async (): Promise<void> => {
+    if (!handle) {
+      setToast({
+        type: "error",
+        title: t(
+          DEFAULT_LOCALE,
+          "notifications.followButton.error.missingHandleTitle"
+        ),
+        description: t(
+          DEFAULT_LOCALE,
+          "notifications.followButton.error.missingHandleDescription"
+        ),
+      });
+      return;
+    }
     setMutating(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -108,25 +134,17 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2">
-      <button
+      <Button
         onClick={onFollow}
-        disabled={mutating}
-        type="button"
-        className={`${FOLLOW_BTN_BUTTON_CLASSES[size]} ${
-          following
-            ? "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-800 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
-            : "tw-bg-primary-500 tw-text-white tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600"
-        } tw-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-font-semibold tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
+        loading={mutating}
+        hideChildrenWhenLoading
+        variant={following ? "secondary" : "primary"}
+        size={FOLLOW_BUTTON_SIZES[size]}
+        aria-label={label}
       >
-        {mutating ? (
-          <CircleLoader size={FOLLOW_BTN_LOADER_SIZES[size]} />
-        ) : following ? (
-          <FollowBtnCheckIcon />
-        ) : (
-          <FollowBtnPlusIcon size={size} />
-        )}
+        {following ? <FollowBtnCheckIcon /> : <FollowBtnPlusIcon size={size} />}
         <span>{label}</span>
-      </button>
+      </Button>
     </div>
   );
 };

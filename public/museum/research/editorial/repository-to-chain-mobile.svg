@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="1840" viewBox="0 0 640 1840" role="img" aria-labelledby="title desc">
+  <title id="title">Repository to chain</title>
+  <desc id="desc">A vertical four-stage diagram showing open record, commitment, contract, and public display, followed by separate decision, history, and provenance lanes.</desc>
+  <rect width="640" height="1840" fill="#090A0C"/>
+  <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+    <text x="44" y="64" fill="#79A9FF" font-size="18" font-weight="700" letter-spacing="3">DIGITAL-ART STEWARDSHIP</text>
+    <text x="44" y="126" fill="#F4F0E7" font-size="48" font-weight="650">Repository to chain</text>
+    <text x="44" y="170" fill="#A6A7AE" font-size="24">Four layers of public publication.</text>
+
+    <g fill="#111419" stroke="#3A4350" stroke-width="3">
+      <rect x="40" y="218" width="560" height="210" rx="4"/>
+      <rect x="40" y="470" width="560" height="210" rx="4"/>
+      <rect x="40" y="722" width="560" height="210" rx="4"/>
+      <rect x="40" y="974" width="560" height="210" rx="4"/>
+    </g>
+    <g fill="#79A9FF" font-size="20" font-weight="800" letter-spacing="4">
+      <text x="76" y="268">01</text><text x="76" y="520">02</text><text x="76" y="772">03</text><text x="76" y="1024">04</text>
+    </g>
+    <g fill="#F4F0E7" font-size="36" font-weight="700">
+      <text x="76" y="322">OPEN RECORD</text><text x="76" y="574">COMMITMENT</text><text x="76" y="826">CONTRACT</text><text x="76" y="1078">PUBLIC DISPLAY</text>
+    </g>
+    <g fill="#A6A7AE" font-size="26">
+      <text x="76" y="370">readable source · editable history</text>
+      <text x="76" y="622">fixed digest · versioned boundary</text>
+      <text x="76" y="874">durable reference · chain-native proof</text>
+      <text x="76" y="1126">public encounter · one view of the record</text>
+    </g>
+    <g fill="#79A9FF">
+      <path d="M320 428 l-14 24 h28 z"/><path d="M320 680 l-14 24 h28 z"/><path d="M320 932 l-14 24 h28 z"/>
+    </g>
+
+    <text x="44" y="1270" fill="#79A9FF" font-size="20" font-weight="800" letter-spacing="3">THREE RECORD LANES</text>
+    <g fill="#F4F0E7" font-size="32" font-weight="700">
+      <text x="44" y="1346">DECISION</text><text x="44" y="1456">HISTORY</text><text x="44" y="1566">PROVENANCE</text>
+    </g>
+    <g fill="#A6A7AE" font-size="24">
+      <text x="244" y="1346">why the Museum acts</text><text x="244" y="1456">what happened, and when</text><text x="244" y="1566">where the object came from</text>
+    </g>
+    <g stroke-width="3">
+      <path d="M44 1372 H596" stroke="#79A9FF"/><path d="M44 1482 H596" stroke="#A6A7AE"/><path d="M44 1592 H596" stroke="#F4F0E7"/>
+    </g>
+
+    <rect x="40" y="1650" width="560" height="130" rx="4" fill="#111419" stroke="#79A9FF" stroke-width="3"/>
+    <text x="72" y="1702" fill="#79A9FF" font-size="18" font-weight="800" letter-spacing="3">PUBLIC VIEW</text>
+    <text x="72" y="1752" fill="#F4F0E7" font-size="32" font-weight="700">Separate layers. Shared access.</text>
+  </g>
+</svg>

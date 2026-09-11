@@ -39,19 +39,20 @@ export default function NotificationHeader({
           <div className="tw-h-full tw-w-full tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
         )}
       </div>
-      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-start tw-gap-y-2 min-[390px]:tw-flex-row min-[390px]:tw-items-center min-[390px]:tw-justify-between min-[390px]:tw-gap-x-2">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1">
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-2">
+        <div className="tw-flex tw-min-w-[min(100%,16rem)] tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-leading-6 [overflow-wrap:anywhere]">
           <UserProfileTooltipWrapper user={author.handle ?? ""}>
             <Link
               href={`/${author.handle}`}
-              className={`${authorClassName} tw-font-semibold tw-text-iron-50 tw-no-underline`}
+              prefetch={false}
+              className={`${authorClassName} tw-max-w-full tw-rounded-sm tw-font-semibold tw-text-iron-50 tw-no-underline tw-underline-offset-4 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-underline`}
             >
               {author.handle}
             </Link>
           </UserProfileTooltipWrapper>
           {children}
         </div>
-        {actions && <div className="tw-flex-shrink-0">{actions}</div>}
+        {actions && <div className="tw-max-w-full tw-flex-none">{actions}</div>}
       </div>
     </div>
   );

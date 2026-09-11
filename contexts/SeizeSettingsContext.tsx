@@ -60,7 +60,6 @@ export const SeizeSettingsProvider = ({
 }) => {
   const [seizeSettings, setSeizeSettings] = useState<SeizeSettingsState>({
     rememes_submission_tdh_threshold: 0,
-    all_drops_notifications_subscribers_limit: 0,
     memes_wave_id: null,
     curation_wave_id: null,
     quorum_wave_id: null,

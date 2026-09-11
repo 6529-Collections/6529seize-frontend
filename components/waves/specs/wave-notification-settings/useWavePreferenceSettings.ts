@@ -1,5 +1,4 @@
 import { useAuth } from "@/components/auth/Auth";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import type { ApiUpdateWaveNotificationPreferencesRequest } from "@/generated/models/ApiUpdateWaveNotificationPreferencesRequest";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveNotificationPreferences } from "@/generated/models/ApiWaveNotificationPreferences";
@@ -8,13 +7,12 @@ import { useWaveNotificationSubscription } from "@/hooks/useWaveNotificationSubs
 import { commonApiPost } from "@/services/api/common-api";
 import { useCallback, useMemo, useState } from "react";
 import {
-  ALL_GROUP_MENTION,
-  getAllDropsTooltip,
+  BROADCAST_MENTION_PREFERENCE,
   type NotificationLoadingTarget,
 } from "./waveNotificationSettings.helpers";
+import { waveNotificationSettingsMessage } from "./waveNotificationSettings.messages";
 
 export function useWavePreferenceSettings(wave: ApiWave) {
-  const { seizeSettings } = useSeizeSettings();
   const { setToast } = useAuth();
   const [loadingTarget, setLoadingTarget] =
     useState<NotificationLoadingTarget | null>(null);
@@ -26,11 +24,6 @@ export function useWavePreferenceSettings(wave: ApiWave) {
     isPending: preferencesPending = false,
   } = useWaveNotificationSubscription(wave);
 
-  const allDropsNotificationsSubscribersLimit =
-    seizeSettings.all_drops_notifications_subscribers_limit;
-  const disableAllDropsSelection =
-    wave.metrics.subscribers_count >= allDropsNotificationsSubscribersLimit;
-
   const enabledGroupNotifications = useMemo(
     () => data?.enabled_group_notifications ?? [],
     [data?.enabled_group_notifications]
@@ -38,8 +31,9 @@ export function useWavePreferenceSettings(wave: ApiWave) {
 
   const subscribedToAllDrops = !!data?.subscribed;
   const allDropsEnabled = subscribedToAllDrops;
-  const allGroupNotificationsEnabled =
-    enabledGroupNotifications.includes(ALL_GROUP_MENTION);
+  const broadcastMentionsEnabled = enabledGroupNotifications.includes(
+    BROADCAST_MENTION_PREFERENCE
+  );
   const loading =
     loadingTarget !== null || preferencesPending || preferencesFetching;
   const preferencesUnavailable = !data && !preferencesPending;
@@ -67,8 +61,12 @@ export function useWavePreferenceSettings(wave: ApiWave) {
       } catch (error) {
         setToast({
           type: "error",
-          title: "Couldn't update notification settings.",
-          description: "Please try again.",
+          title: waveNotificationSettingsMessage(
+            "waves.notificationSettings.preferences.error.updateTitle"
+          ),
+          description: waveNotificationSettingsMessage(
+            "waves.notificationSettings.preferences.error.description"
+          ),
           details: getToastErrorDetails(error, errorMessage),
         });
       } finally {
@@ -78,30 +76,30 @@ export function useWavePreferenceSettings(wave: ApiWave) {
     [wave.id, refetch, setToast]
   );
 
-  const toggleAllGroupNotifications = useCallback(async () => {
+  const toggleBroadcastMentions = useCallback(async () => {
     await updateNotificationPreferences({
-      target: "all-group",
+      target: "broadcast-mentions",
       body: {
         subscribed: subscribedToAllDrops,
-        enabled_group_notifications: allGroupNotificationsEnabled
+        enabled_group_notifications: broadcastMentionsEnabled
           ? []
-          : [ALL_GROUP_MENTION],
+          : [BROADCAST_MENTION_PREFERENCE],
       },
-      errorMessage: allGroupNotificationsEnabled
-        ? "Unable to disable @ALL notifications"
-        : "Unable to enable @ALL notifications",
+      errorMessage: broadcastMentionsEnabled
+        ? waveNotificationSettingsMessage(
+            "waves.notificationSettings.preferences.error.disableBroadcastMentions"
+          )
+        : waveNotificationSettingsMessage(
+            "waves.notificationSettings.preferences.error.enableBroadcastMentions"
+          ),
     });
   }, [
-    allGroupNotificationsEnabled,
+    broadcastMentionsEnabled,
     subscribedToAllDrops,
     updateNotificationPreferences,
   ]);
 
   const toggleAllDropsNotifications = useCallback(async () => {
-    if (!subscribedToAllDrops && disableAllDropsSelection) {
-      return;
-    }
-
     await updateNotificationPreferences({
       target: "all-drops",
       body: {
@@ -109,19 +107,22 @@ export function useWavePreferenceSettings(wave: ApiWave) {
         enabled_group_notifications: enabledGroupNotifications,
       },
       errorMessage: subscribedToAllDrops
-        ? "Unable to disable all-message notifications"
-        : "Unable to enable all-message notifications",
+        ? waveNotificationSettingsMessage(
+            "waves.notificationSettings.preferences.error.disableAllMessages"
+          )
+        : waveNotificationSettingsMessage(
+            "waves.notificationSettings.preferences.error.enableAllMessages"
+          ),
     });
   }, [
-    disableAllDropsSelection,
     enabledGroupNotifications,
     subscribedToAllDrops,
     updateNotificationPreferences,
   ]);
 
-  const onAllGroupNotificationsClick = useCallback(() => {
-    void toggleAllGroupNotifications();
-  }, [toggleAllGroupNotifications]);
+  const onBroadcastMentionsClick = useCallback(() => {
+    void toggleBroadcastMentions();
+  }, [toggleBroadcastMentions]);
 
   const onAllDropsNotificationsClick = useCallback(() => {
     void toggleAllDropsNotifications();
@@ -131,25 +132,13 @@ export function useWavePreferenceSettings(wave: ApiWave) {
     void refetch();
   }, [refetch]);
 
-  const allGroupTooltip = allGroupNotificationsEnabled
-    ? "Click to disable @ALL notifications"
-    : "Click to enable @ALL notifications";
-  const allDropsTooltip = getAllDropsTooltip({
-    disableAllDropsSelection,
-    subscribedToAllDrops,
-    subscribersLimit: allDropsNotificationsSubscribersLimit,
-  });
-
   return {
     allDropsEnabled,
-    allGroupNotificationsEnabled,
-    allDropsTooltip,
-    allGroupTooltip,
-    disableAllDropsSelection,
+    broadcastMentionsEnabled,
     loading,
     loadingTarget,
     onAllDropsNotificationsClick,
-    onAllGroupNotificationsClick,
+    onBroadcastMentionsClick,
     onRetryClick,
     preferencesFetching,
     preferencesUnavailable,

@@ -1,4 +1,8 @@
+import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.en-US.json";
+import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.en-US.json";
+import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.en-US.json";
 /* eslint max-lines: "off" */
+import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-US.json";
 
 import {
   DISTRIBUTION_MESSAGES,
@@ -6,6 +10,7 @@ import {
   MEDIA_VIDEO_MESSAGES,
   MEME_CALENDAR_MESSAGES,
   MEME_LAB_DETAIL_MESSAGES,
+  MARKET_DEPTH_MESSAGES,
   THE_MEMES_DETAIL_ACTIVITY_MESSAGES,
   THE_MEMES_DETAIL_ART_MESSAGES,
   THE_MEMES_DETAIL_LIVE_MESSAGES,
@@ -13,11 +18,32 @@ import {
   THE_MEMES_DETAIL_TIMELINE_MESSAGES,
   TIMELINE_MESSAGES,
 } from "@/i18n/messages/collection-detail";
+import emmaSnapshotsMessages from "@/i18n/messages/emmaSnapshots.en-US.json";
 import aboutMessages from "@/i18n/messages/about.en-US.json";
+import homeNewcomerMessages from "@/i18n/messages/homeNewcomer.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
+import museumMessages from "@/i18n/messages/museum.en-US.json";
+import networkMetricsMessages from "@/i18n/messages/networkMetrics.en-US.json";
+import networkTdhMessages from "@/i18n/messages/networkTdh.en-US.json";
+import networkTdhExplainerMessages from "@/i18n/messages/networkTdhExplainer.en-US.json";
+import networkTdhExampleMessages from "@/i18n/messages/networkTdhExample.en-US.json";
+import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.json";
+import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
+import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
+import { CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
+import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
+import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
+import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
+import { CONTENT_MODERATION_MESSAGES } from "@/i18n/messages/content-moderation";
+import { EULA_MESSAGES } from "@/i18n/messages/eula";
+import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
+import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
+import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
+import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -38,6 +64,8 @@ function namespaceMessages<
 }
 
 type MessageMap = Record<string, string>;
+
+const PLEASE_TRY_AGAIN = "Please try again.";
 
 type ObjectMessages<Prefix extends string, Entries extends MessageMap> = {
   readonly [Entry in keyof Entries as `${Prefix}.${Entry & string}`]: Entries[Entry];
@@ -111,23 +139,61 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
   ] as const
 );
 
+const USER_BRAIN_SIDEBAR_MESSAGES = objectMessages("user.brain.sidebar", {
+  createdHeading: "Created Waves",
+  createdMobileHeading: "Created",
+  recentlyActiveHeading: "Recently Active In",
+  lastPost: "Last post {time}",
+  noPostsByProfile: "No posts by this profile",
+  "totalWavePosts.one": "{count} total wave post",
+  "totalWavePosts.other": "{count} total wave posts",
+  privateWave: "Private wave",
+  loadingWaveActivity: "Loading profile wave activity",
+  loadingMoreWaveActivity: "Loading more profile wave activity",
+  desktopScrollRegionLabel: "Brain waves",
+  mobileStripLabel: "Brain waves",
+  createdEmpty: "No accessible created waves.",
+  recentEmpty: "No recent wave posts.",
+  createdLoadError: "Created waves could not be loaded.",
+  recentLoadError: "Recent wave activity could not be loaded.",
+  loadMoreError: "More waves could not be loaded.",
+  retry: "Retry",
+  retryLoadMore: "Retry loading more",
+  loadMore: "Load more",
+  loadingMore: "Loading…",
+  allWavesLoaded: "All waves loaded.",
+  more: "More",
+  showLess: "Show less",
+  showMore: "Show more",
+  viewMoreCreatedWaves: "View more created waves",
+  createdModalTitle: "Created waves by {profile}",
+  "loadedCreatedCount.one": "Showing {count} loaded wave",
+  "loadedCreatedCount.other": "Showing {count} loaded waves",
+  "createdCount.one": "{count} created wave",
+  "createdCount.other": "{count} created waves",
+  closeCreatedWaves: "Close created waves",
+} as const);
+
 const USER_COLLECTED_STATS_DETAILS_MESSAGES = objectMessages(
   "user.collected.stats.details",
   {
     "collected.title": "Collected",
     overview: "Overview",
     "tables.overviewCaption": "Collected holdings summary by collection",
+    "tables.column.metric": "Metric",
     "tables.column.total": "Total",
     "tables.column.memes": "Memes",
     "tables.column.nextGen": "NextGen",
     "tables.column.gradient": "Gradient",
     "tables.column.memeLab": "Meme Lab",
+    "tables.column.season": "Season",
     "rows.cards": "Cards",
     "rows.rank": "Rank",
     "rows.tdh": "TDH",
     "rows.noTdh": "* No TDH",
     memesBySeason: "Memes Breakdown By Season",
     "tables.memesBySeasonCaption": "Collected Memes breakdown by season",
+    "tables.memesBySeasonEmpty": "No Meme holdings by season yet.",
     "tables.column.unique": "Unique",
     "tables.column.sets": "Sets",
     seasonLabel: "Season {seasonNumber}",
@@ -174,6 +240,24 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "search.placeholder": "Type a category name",
   "search.resultsLabel": "REP category search results",
   "helpBotReserved.error": "{category} is managed by help6529.",
+  "grant.searchPlaceholder": "Category to grant REP for",
+  "grant.minimumCharacters": "Type at least {min} characters.",
+  "grant.maximumCharacters": "Type at most {max} characters.",
+  "grant.searching": "Finding existing categories...",
+  "grant.submissionBadge": "Counts for submissions",
+  "grant.submissionHint":
+    "Memes submissions require {amount} REP in {category}.",
+  "grant.submissionLookalikeInfo":
+    '"{category}" is a separate category. Only {submissionCategory} counts for submissions.',
+  "grant.availableRep": "Your available REP: {amount}",
+  "grant.assignedRep": "Your REP assigned to {name}: {amount}",
+  "grant.actions.grant": "Grant REP",
+  "grant.actions.cancel": "Cancel",
+  "grant.toast.updated": "REP updated.",
+  "grant.toast.updateFailed": "Couldn't update this REP rating.",
+  "grant.toast.tryAgain": PLEASE_TRY_AGAIN,
+  "grant.toast.loginRequired": "Log in to continue.",
+  "grant.errors.generic": "Couldn't complete this request. Please try again.",
   "suggested.loading": "Loading active REP categories",
   "suggested.error": "Could not load active REP categories.",
   "suggested.empty": "No active REP categories found yet.",
@@ -181,6 +265,8 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "suggested.ratings": "Ratings",
   "suggested.title": "Active REP categories",
   "suggested.description": "Categories with the most profile REP activity.",
+  "activity.direction": "gave REP to",
+  "activity.value": "{value} REP",
   "wave.tabs.waves": "Waves",
   "wave.tabs.contributors": "Contributors",
   "wave.sort.repDesc": "REP impact high",
@@ -214,6 +300,57 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "wave.empty.contributors": "None yet",
   "wave.loadMore": "Load more",
   "wave.loadingMore": "Loading...",
+} as const);
+
+const USER_PROFILE_REP_MESSAGES = objectMessages("user.profile.rep", {
+  "contributors.raters.one": "{count} rater",
+  "contributors.raters.other": "{count} raters",
+  "contributors.receivers.one": "{count} receiver",
+  "contributors.receivers.other": "{count} receivers",
+  "contributors.viewRaters.one": "View {count} rater",
+  "contributors.viewRaters.other": "View {count} raters",
+  "contributors.viewReceivers.one": "View {count} receiver",
+  "contributors.viewReceivers.other": "View {count} receivers",
+  "nic.yourRating": "Your rating: {value}",
+  "nic.rateAction": "Rate NIC",
+  "rep.assignedToYou": "Assigned to you: {value}",
+  "rep.youAssigned": "You assigned: {value}",
+  "rep.grantAction": "Grant Rep",
+  "categories.loadMore": "Load more",
+  "categories.loadingMore": "Loading...",
+  "categories.more": "+{count} more",
+  "empty.given": "No rep given yet.",
+  "empty.received": "No rep received yet.",
+} as const);
+
+// Rep-category validation copy. Kept as its own group with unquoted keys
+// (not merged into the big REP block above) so its lines don't extend that
+// block's quoted-key run — which the duplication detector matches against
+// the parallel key blocks in the locale dictionaries.
+const REP_CATEGORY_VALIDATION_MESSAGES = objectMessages(
+  "rep.categories.validation",
+  {
+    errorTitle: "That category name won't work",
+    required: "Rep category is required.",
+    tooShort: "Use at least {min} characters.",
+    tooLong: "It's {length} characters long — the maximum is {max}.",
+    disallowedChars:
+      "These characters can't be used: {chars}. Stick to letters, numbers, spaces and , . ? ! ' ( )",
+    aiFilterDetails:
+      "Rep isn't meant for insults or doxxing, so proposed categories run through an AI filter. If you think it got yours wrong, hop into Brain on 6529.io and let us know — or try rephrasing what you want to say.",
+    closeErrorLabel: "Dismiss error",
+  } as const
+);
+
+const CREATE_WAVE_DRAFTS_MESSAGES = objectMessages("wave.create.drafts", {
+  heading: "Saved Drafts",
+  description:
+    "Saved on this device as you work. Tap one to pick up where you left off — the wave picture and description aren't kept, everything else is.",
+  savedAt: "Saved {timeAgo}",
+  untitled: "Untitled wave",
+  deleteLabel: 'Delete draft "{name}"',
+  newWave: "Create a Wave",
+  count: "{count} saved drafts",
 } as const);
 
 const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
@@ -279,7 +416,10 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "primary.dms": "DMs",
   "primary.join6529": "Join 6529",
   "primary.about": "About",
+  "about.overview": "Overview",
   "primary.home": "Home",
+  "sidebar.submenuLabel": "{section} sub-navigation",
+  "sidebar.panelLabel": "{section} items",
   "account.notifications": "Notifications",
   "section.main": "Main",
   "section.utility": "Utility",
@@ -292,6 +432,42 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "subsection.developerOpenData": "Data & Developer Tools",
 } as const);
 
+const TITLE_CONTEXT_MESSAGES = objectMessages("titleContext", {
+  "routes.waves": "Waves | Brain",
+  "routes.notifications": "Notifications | Brain",
+  "routes.messages": "Messages | Brain",
+  "routes.memeCalendar": "Memes Minting Calendar",
+  "routes.theMemes": "The Memes | Collections",
+  "routes.memeLab": "Meme Lab | Collections",
+  "routes.network": "Network",
+  "routes.gradient": "6529 Gradient | Collections",
+  "routes.nextGen": "NextGen | Collections",
+  "routes.rememes": "Rememes | Collections",
+  "routes.openData": "Open Data | Tools",
+  "routes.discovery": "Discovery",
+  "routes.profile": "Profile | 6529.io",
+  "wave.default": "{waveName} | Brain",
+  "wave.newMessages.one": "({count} new message) {waveName} | Brain",
+  "wave.newMessages.other": "({count} new messages) {waveName} | Brain",
+  "notifications.one": "({count} notification) {title}",
+  "notifications.other": "({count} notifications) {title}",
+} as const);
+
+const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
+  waveSections: "Wave sections",
+  appSections: "App sections",
+  loadingSections: "Loading wave sections",
+  fallbackCuration: "Curation",
+} as const);
+
+const MY_STREAM_CURATION_MESSAGES = objectMessages("waves.myStream.curation", {
+  remove: "Remove",
+  removing: "Removing",
+  removeAriaLabel: "Remove drop from this curation",
+  removingAriaLabel: "Removing drop from this curation",
+  removeTitle: "Remove from curation",
+} as const);
+
 const WAVE_SCORE_NAVIGATION_MESSAGES = objectMessages("waveScore.navigation", {
   "back.wave": "Back to wave",
   "back.previous": "Back to previous page",
@@ -302,10 +478,87 @@ const WAVE_SCORE_NAVIGATION_MESSAGES = objectMessages("waveScore.navigation", {
 } as const);
 
 const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
+  dialogLabel: "Memes quick vote",
+  closeDialog: "Close quick vote",
+  doneTitle: "You're all caught up",
+  doneDescription: "No unrated memes are left in quick vote right now.",
   leftThisRound: "{count} left this round",
   unrated: "{count} unrated",
   summary: "{leftThisRound}, {unrated}",
   inMemesWave: "{leftThisRound}, {unrated} in the memes wave",
+  remainingPower: "{amount} {unit} remaining",
+  powerLeft: "{amount} {unit} left",
+  unit: "votes",
+  untitledSubmission: "Untitled submission",
+  previewUnavailable: "Preview unavailable",
+  vote: "Vote",
+  voteAmount: "Vote {amount}",
+  voted: "Voted",
+  skip: "Skip",
+  changeAmount: "Change vote amount",
+  closeChangeAmount: "Close change vote amount",
+  expandDescription: "See more",
+  collapseDescription: "See less",
+  swipeHint: "Swipe left to skip · right to vote {amount} {unit}",
+} as const);
+
+const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
+  "media.missingUpload": "Select artwork or choose Interactive HTML.",
+  "media.missingInteractive": "Enter a valid hash or choose Upload File.",
+  "identity.connectPrompt":
+    "Connect a wallet to confirm the profile submitting this artwork.",
+  "identity.unknownProfile": "Unknown profile",
+  "identity.submittingAs": "Submitting as",
+  "identity.wallet": "Wallet",
+  "identity.walletConnected": "Wallet connected",
+  "identity.walletNotConnected": "Connect a wallet to submit",
+  "identity.eligible": "Eligible to submit",
+  "identity.loadingProfile": "Loading the connected profile…",
+  "identity.needsProfile":
+    "This wallet does not have a profile that can submit artwork.",
+  "identity.needsAuth": "Verify this profile before checking eligibility.",
+  "identity.verifyingProfile": "Verifying the connected profile…",
+  "identity.checking": "Checking this profile's eligibility…",
+  "identity.checkError":
+    "We couldn't verify this profile's eligibility. Try again before submitting.",
+  "identity.ineligible":
+    "This profile is not eligible to submit to this collection.",
+  "identity.limitReached":
+    "This profile has reached its submission limit for this collection.",
+  "identity.notStarted": "Submissions are not open yet.",
+  "identity.ended": "Submissions are closed.",
+  "identity.changedBeforeSubmit":
+    "The active wallet changed. Confirm the submitting profile and try again.",
+  "identity.connectErrorTitle": "Couldn't open wallet connection.",
+  "identity.connectErrorDescription": "Please try again.",
+  "action.connectWallet": "Connect Wallet",
+  "action.submitArtwork": "Submit Artwork",
+  "action.submitNewVersion": "Submit New Version",
+  "action.back": "Back",
+  "action.backToEdit": "Back to Edit",
+  "action.preview": "Preview",
+  "action.connecting": "Connecting…",
+  "action.loadingProfile": "Loading Profile…",
+  "action.verifyProfile": "Verify Profile",
+  "action.verifyingProfile": "Verifying Profile…",
+  "action.checkingEligibility": "Checking Eligibility…",
+  "action.retryEligibility": "Retry Eligibility Check",
+  "action.switchWallet": "Switch Wallet",
+  "action.submissionsNotOpen": "Submissions Not Open",
+  "action.submissionsClosed": "Submissions Closed",
+  "action.uploading": "Uploading {progress}%",
+  "action.signing": "Check Wallet to Sign…",
+  "action.submitting": "Submitting…",
+  "action.submitted": "Submitted",
+  "shell.submitTitle": "Submit Work to The Memes",
+  "shell.resubmitTitle": "Resubmit Work to The Memes",
+  "shell.resubmissionDescription":
+    "Resubmitting creates a new submission with this data, then asks you to confirm deleting the original.",
+  "preview.title": "Submission Preview",
+  "preview.description":
+    "Read-only preview of how your submission may appear in different views.",
+  "additionalInfo.description":
+    "Complete the following details for distribution and storytelling purposes.",
 } as const);
 
 const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
@@ -313,6 +566,7 @@ const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
   "quickVote.open": "Open quick vote",
   "uncastPower.ariaLabel":
     "Uncast Power, {power} {votingLabel} left, {leftThisRound}, {unrated}",
+  "uncastPower.compactLeft": "{count} left",
   "uncastPower.title": "Uncast Power",
   "uncastPower.visibleValue": "{power} {votingLabel}",
   "uncastPower.votes": "Votes",
@@ -320,6 +574,11 @@ const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
 } as const);
 
 const DROP_REACTION_MESSAGES = objectMessages("drops.reactions", {
+  unconfirmed:
+    "Could not confirm your reaction. Refresh to check before trying again.",
+  capabilityDisabled: "Reactions are disabled for this wave.",
+  requestTimedOut:
+    "The reaction request timed out. Refreshing the latest reaction state; wait before trying again.",
   "rateLimit.retryAfter.moment":
     "You are reacting too quickly. Try again in a moment.",
   "rateLimit.retryAfter.seconds.one":
@@ -337,12 +596,323 @@ const WAVES_MOBILE_MESSAGES = objectMessages("waves.mobile", {
   "profileFeed.subtitle": "Featured drops from profile waves",
 } as const);
 
+const PROFILE_WAVE_FEED_MESSAGES = objectMessages("waves.profileFeed", {
+  title: "Latest From Profile Waves",
+  description: "See what the community is sharing in Profile Waves.",
+  errorTitle: "Couldn’t load profile posts",
+  errorDescription: "Refresh this view to try again.",
+  emptyTitle: "No profile posts yet",
+  emptyDescription: "New posts from members’ Profile Waves will appear here.",
+} as const);
+
+const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
+  "voteSummary.total": "{creditType} total",
+  "voteSummary.yourVote": "Your vote: {vote}",
+  listLabel: "Leaderboard drops",
+  loadingEarlier: "Loading earlier drops",
+  previousLoadError:
+    "Earlier drops could not be loaded. Use the retry button to try again.",
+  retryEarlier: "Retry loading earlier drops",
+  loadingMore: "Loading more drops",
+  nextLoadError:
+    "More drops could not be loaded. Use the retry button to try again.",
+  retryMore: "Retry loading more drops",
+  loadMore: "Load more drops",
+  loadingMoreButton: "Loading more…",
+  "grid.untitled": "Untitled drop",
+  "grid.readFull": "Read full",
+  "grid.open": "Open",
+  "grid.openNamed": "Open {title}",
+  "grid.authorProfile": "View {author}'s profile",
+  "grid.voters.one": "{count} voter",
+  "grid.voters.other": "{count} voters",
+  "podium.place.first": "1st",
+  "podium.place.second": "2nd",
+  "podium.place.third": "3rd",
+  "podium.open.first": "Open 1st {name}",
+  "podium.open.second": "Open 2nd {name}",
+  "podium.open.third": "Open 3rd {name}",
+  "podium.avatar": "{name} avatar",
+  "podium.selfNominated": "self-nominated",
+  "podium.nominatedBy": "nominated by {nominator}",
+  "podium.outcome": "Outcome",
+  "podium.empty.title": "No Winners to Display",
+  "podium.empty.description": "This wave ended without any submissions",
+  "grid.you": "You",
+  "grid.votesNow": "Votes now",
+  "grid.status.approved": "Approved",
+  "grid.status.approvingIn": "Approving in {time}",
+  "grid.status.reachedThreshold": "Reached threshold",
+  "grid.status.closed": "Closed",
+  "grid.status.needs": "Needs {amount}",
+  "grid.voteSummary.approval":
+    "Reached {reached} of {required} {unit}. Status: {status}.",
+  "grid.voteSummary.approvalWithRealtime":
+    "Reached {reached} of {required} {unit}. Votes now: {votesNow} {unit}. Status: {status}.",
+  "grid.voteSummary.standard":
+    "Current vote: {current} {unit}. Projected: {projected} {unit}.",
+  "timeline.toggle": "Toggle decision timeline",
+  "timeline.decisionTimeline": "Decision Timeline",
+  "timeline.announcementHistory": "Announcement history",
+  "timeline.paused": "Paused",
+  "timeline.nextDecisionAfter": "Next decision after {date}",
+  "timeline.noDecisionScheduled": "No decision scheduled",
+  "timeline.noUpcomingEvents": "No upcoming events",
+  "timeline.nextWinner": "Next winner",
+  "timeline.nextWinnerIn": "Next winner in {countdown}",
+  "timeline.unit.day.one": "{count} day",
+  "timeline.unit.day.other": "{count} days",
+  "timeline.unit.hour.one": "{count} hour",
+  "timeline.unit.hour.other": "{count} hours",
+  "timeline.unit.minute.one": "{count} minute",
+  "timeline.unit.minute.other": "{count} minutes",
+  "timeline.unit.second.one": "{count} second",
+  "timeline.unit.second.other": "{count} seconds",
+  "timeline.status.next": "Next",
+  "timeline.status.done": "Done",
+  "timeline.status.completed": "Completed",
+} as const);
+
+const WAVE_VOTE_DETAILS_MESSAGES = objectMessages("waves.voteDetails", {
+  title: "Votes",
+  "trigger.one": "View voters and vote log for {count} voter",
+  "trigger.other": "View voters and vote log for {count} voters",
+} as const);
+
 const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
+  menuLabel: "Drop actions",
+  reactionPickerLabel: "Add reaction to drop",
   copyText: "Copy text",
   copyLink: "Copy link",
   copied: "Copied!",
   copyFailed: "Copy failed",
 } as const);
+
+const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
+  contextLabel: "Proposal",
+  readFull: "Read full",
+  readFullNamed: "Read full: {title}",
+  untitledProposal: "Untitled proposal",
+  previewAlt: "Media preview for {title}",
+  "part.one": "{count} part",
+  "part.other": "{count} parts",
+  "media.one": "{count} media item",
+  "media.other": "{count} media items",
+  "attachment.one": "{count} attachment",
+  "attachment.other": "{count} attachments",
+  appearanceLabel: "Proposal card appearance",
+  "mode.standard.label": "Full proposal",
+  "mode.standard.description": "Show original content directly in the feed.",
+  "mode.custom.label": "Summary card",
+  "mode.custom.description":
+    "Show a title, shortened text, and an optional image.",
+  excerptLabel: "Text preview limit",
+  excerptInputAriaLabel: "Maximum proposal preview characters",
+  characters: "characters",
+  excerptRangeError: "Enter a whole number from {min} to {max}.",
+  mediaLabel: "Image on summary card",
+  "settings.editLabel": "Edit proposal card settings",
+  "settings.layoutLabel": "Proposal layout",
+  "settings.rowLabel": "Proposal cards",
+  "settings.toastAuthFailed":
+    "Couldn't authenticate. Reconnect your wallet and try again.",
+  "settings.toastSaveFailedTitle":
+    "Couldn't save these proposal card settings.",
+  "settings.toastRetry": PLEASE_TRY_AGAIN,
+  tabLabelsLabel: "Tab labels",
+  tabLabelsDescription: "Names shown on this wave's tabs.",
+  approvalsTabLabel: "Approvals tab label",
+  approvedTabLabel: "Approved tab label",
+  "tabLabels.errorTooLong": "Labels must be {max} characters or fewer.",
+  "tabLabels.errorDuplicate": "Use two different tab labels.",
+  "tabLabels.errorReserved": "Labels cannot match existing tabs.",
+} as const);
+
+const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
+  "waves.competitionBadges",
+  {
+    participantTooltip: "View this participant’s competition entries in {wave}",
+    winnerTooltip: "View this winner’s competition entries in {wave}",
+    title: "{profile}'s competition entries",
+    profileFallback: "This member",
+    "tabs.active": "Active entries",
+    "tabs.winners": "Winning entries",
+    loading: "Loading competition entries…",
+    error: "Couldn’t load competition entries.",
+    emptyActive: "No active entries are available.",
+    emptyWinners: "No winning entries are available.",
+    retry: "Retry",
+    loadMore: "Load more entries",
+    loadingMore: "Loading more entries…",
+    close: "Close competition entries",
+    openEntry: "Open competition entry {title}",
+    untitled: "Untitled entry",
+    winner: "Winner",
+    rating: "{rating} total",
+  } as const
+);
+
+const WAVE_VOTE_RATIONALE_MESSAGES = objectMessages("waves.voteRationale", {
+  explain: "Explain",
+  explainAriaLabel: "Reply with vote rationale",
+  fieldLabel: "Optional rationale reply",
+  fieldDescription:
+    "Editing this text turns on Vote with reply until you choose the switch setting yourself.",
+  switchLabel: "Vote with reply",
+  stateOn: "On",
+  stateOff: "Off",
+  emptyBlockReason: "Add rationale text or turn Vote with reply off.",
+  submitLabel: "Vote + reply",
+  postErrorTitle: "Vote saved, but couldn't post your rationale reply.",
+  postErrorRetry: "Please try posting the reply again.",
+  postErrorEmpty: "Add rationale text and try posting the reply again.",
+  postErrorNoTarget: "The voted drop has no reply target.",
+  prefixTotal: "Vote rationale ({voteTotal} at time of posting):\n\n",
+  prefixTotalAndChange:
+    "Vote rationale ({voteTotal} total, {voteChange} change at time of posting):\n\n",
+} as const);
+
+const WAVE_VOTE_MODE_MESSAGES = objectMessages("waves.voteMode", {
+  groupLabel: "Vote input mode",
+  slider: "Slider",
+  numeric: "Numeric",
+  switchTitle: "Switch mode",
+  switchToNumeric: "Switch to numeric",
+  switchToSlider: "Switch to slider",
+  switchToNumericAriaLabel: "Switch to numeric input",
+  switchToSliderAriaLabel: "Switch to slider input",
+} as const);
+
+const WAVE_VOTE_MESSAGES = objectMessages("waves.vote", {
+  controlsLegend: "Vote controls",
+  modalTitle: "Vote for this artwork",
+  decreaseLabel: "Decrease vote",
+  increaseLabel: "Increase vote",
+} as const);
+
+const WAVE_VOTE_INSIGHTS_MESSAGES = objectMessages("waves.voteInsights", {
+  topVoters: "Top voters",
+  viewVoters: "View voters",
+  hideVoters: "Hide voters",
+  emptyVotersTitle: "Be the First to Make a Vote",
+  emptyVotersDescription:
+    "Vote on this drop to see voter rankings appear here.",
+  emptyActivityTitle: "Be the First to Make a Vote",
+  emptyActivityDescription:
+    "Vote on this drop to see activity updates appear here in real-time.",
+  downloadAll: "Download All",
+  downloading: "Downloading",
+  downloadAllVoters: "Download all voters as CSV",
+  largestVote: "Largest vote",
+  largestVotes: "Largest votes",
+  currentVotes: "Current votes",
+  loadingCurrentVotes: "Loading current votes…",
+  loadError: "Current votes couldn’t be loaded.",
+  retry: "Retry",
+  viewBreakdown: "View vote breakdown",
+  largestPositive: "Largest supporting vote",
+  largestNegative: "Largest opposing vote",
+  others: "Others",
+  otherPositiveVotes: "Other positive voters combined: {vote} {unit}",
+  otherNegativeVotes: "Other negative voters combined: {vote} {unit}",
+  positiveTotal: "Positive total",
+  negativeTotal: "Negative total",
+  allocationExplanation:
+    "Current individual vote allocations, not vote changes or the time-weighted score.",
+  voteByName: "{name}: {vote} {unit}",
+  largestVoteByName: "Largest vote by {name}: {vote} {unit}",
+} as const);
+
+const WAVE_MY_VOTES_MESSAGES = objectMessages("waves.myVotes", {
+  total: "Total",
+  votesGivenNow: "Votes given now",
+  projectedAtDecision: "Projected vote count at decision time",
+  yourVotes: "Your votes",
+  inCredit: "in {credit}",
+  vote: "Vote",
+  submitVote: "Submit vote",
+  voteUpdated: "Vote updated.",
+  voteUpdateError: "Couldn't update your vote.",
+  authError: "Couldn't authenticate. Reconnect your wallet and try again.",
+  tryAgain: "Please try again.",
+  "limit.maximum": "{label} is {value} {credit}.",
+  "limit.minimum": "Minimum is {value} {credit}.",
+  selectAll: "Select all",
+  deselectAll: "Deselect all",
+  resetVotes: "Reset votes",
+  resetting: "Resetting…",
+  resetError: "Couldn't reset this vote.",
+  availableInWave: "Available in wave",
+  "selected.one": "{count} selected",
+  "selected.other": "{count} selected",
+  "resetSelected.one": "Reset {count} vote",
+  "resetSelected.other": "Reset {count} votes",
+  "resetTitle.one": "Reset {count} vote?",
+  "resetTitle.other": "Reset {count} votes?",
+  "resetMessage.one":
+    "This will set your vote to 0 on the selected submission.",
+  "resetMessage.other":
+    "This will set your votes to 0 on the {count} selected submissions.",
+  "confirmReset.one": "Reset vote",
+  "confirmReset.other": "Reset {count} votes",
+  cancelReset: "Cancel",
+  selectForReset: "Select {title} for vote reset",
+  deselectForReset: "Deselect {title} from vote reset",
+  voterAvatar: "Voter {profile}",
+  "voter.one": "voter",
+  "voter.other": "voters",
+  empty: "You haven't voted on any submissions in this wave yet.",
+} as const);
+
+const WAVE_POLL_MESSAGES = objectMessages("waves.poll", {
+  "actions.viewResults": "View results",
+  "actions.vote": "Vote",
+  "actions.changeVote": "Change vote",
+  "status.voted": "Voted",
+  "status.updated": "Updated",
+  "composer.title": "Create poll",
+  "composer.questionPlaceholder": "Ask a poll question",
+  "composer.questionRequired": "Add a poll question.",
+  "composer.mode.groupLabel": "Poll response type",
+  "composer.mode.single": "Single",
+  "composer.mode.multiple": "Multiple",
+  "composer.mode.singleDescription": "Voters can select one option.",
+  "composer.mode.multipleDescription":
+    "Voters can select more than one option.",
+  "composer.optionLabel": "Poll option {number}",
+  "composer.optionPlaceholder": "Option {number}",
+  "composer.removeOption": "Remove option {number}",
+  "composer.add": "Add poll",
+  "composer.addOption": "Add option",
+  "composer.remove": "Remove poll",
+  "composer.closingTime": "Closing time",
+  "composer.onlyDroppersCanRespond": "Only people who can chat can respond",
+  "composer.anonymous": "Anonymous poll",
+  "composer.validation.minimumOptions": "Enter at least {count} options.",
+  "composer.validation.optionLength": "Options can be up to {max} characters.",
+  "composer.validation.uniqueOptions": "Poll options must be unique.",
+  "composer.validation.futureClosingTime": "Choose a future closing time.",
+} as const);
+
+const WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES = objectMessages(
+  "waves.submissionButtonLabel",
+  {
+    counter: "{count}/{max}",
+    defaultCreateProposal: "Create Proposal",
+    defaultDrop: "Drop",
+    defaultDropArt: "Drop Art",
+    defaultSubmitDrop: "Submit drop",
+    editLabel: "Edit submission button label",
+    errorTooLong: "Label must be {max} characters or fewer.",
+    label: "Submission button label",
+    rowLabel: "Submission button",
+    toastAuthFailed:
+      "Couldn't authenticate. Reconnect your wallet and try again.",
+    toastRetry: PLEASE_TRY_AGAIN,
+    toastSaveFailedTitle: "Couldn't save this submission button label.",
+    useDefault: "Use default",
+  } as const
+);
 
 const USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.walletActivity",
@@ -352,6 +922,13 @@ const USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES = objectMessages(
     filterOptionsLabel: "Wallet activity filter options",
     optionAriaLabel: "Show {filter} wallet activity",
     tableCaption: "Wallet activity transactions",
+    etherscanLinkLabel: "Go to Etherscan",
+    gasLabel: "Gas",
+    gasGweiLabel: "GWEI",
+    gasInformationLabel: "Gas Information",
+    gasPriceLabel: "Gas Price",
+    royaltiesInformationLabel: "Royalties information",
+    royaltiesValue: "Royalties: {amount}ETH ({percentage}%)",
     "filters.all": "All",
     "filters.airdrops": "Airdrops",
     "filters.mints": "Mints",
@@ -423,10 +1000,214 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   "badges.beta": "Beta",
 } as const);
 
+const USER_PROFILE_IDENTITY_MOBILE_TABS_MESSAGES = objectMessages(
+  "user.profile.identity.mobileTabs",
+  {
+    totalRep: "Total REP",
+    nic: "NIC",
+    idStatements: "ID Statements",
+  } as const
+);
+
+const USER_PROFILE_IDENTITY_STATEMENT_MESSAGES = objectMessages(
+  "user.profile.identity.statements.add",
+  {
+    triggerLabel: "Add",
+    dialogTitle: "Add identity statement",
+    contactDialogTitle: "Add contact",
+    nftDialogTitle: "Add NFT account",
+    socialDialogTitle: "Add social media account",
+    verificationDialogTitle: "Add verification post",
+    desktopTitle: "Add Statements About Your Identity",
+    mobileDescription: "Choose a type to add to your public profile.",
+    desktopDescription:
+      "Seize users can make statements asserting their identity (eponymous, pseudonymous or organizational). It is up to the community to evaluate if they are accurate.",
+    socialTitle: "Social Media Accounts",
+    socialDescription: "Your handle on social media platforms.",
+    nftTitle: "NFT Accounts",
+    nftDescription: "Your handle on NFT platforms.",
+    contactTitle: "Contact",
+    contactDescription: "Your handle on messaging platforms.",
+    verificationTitle: "Social Media Verification Posts",
+    verificationDescription: "Your posts verifying your profile here.",
+    aboutStatements: "About identity statements",
+    caveatOptional: "All statements are optional.",
+    caveatPublic: "All statements are fully and permanently public.",
+    caveatNoVerification:
+      "Seize does not connect to social media accounts or verify posts.",
+    caveatCommunityRates: "The community will rate the accuracy of statements.",
+  } as const
+);
+
+const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
+  "user.profile.identity.statements",
+  {
+    heading: "{name} ID Statements",
+    description: "Public identity links and consolidated wallet addresses.",
+    consolidatedAddresses: "Consolidated addresses",
+    help: "About identity statements",
+    loading: "Loading ID statements",
+    loadError: "ID statements couldn’t be loaded.",
+    retry: "Try again",
+    add: "Add",
+    walletChecker: "Wallet Checker",
+    delegationCenter: "Delegation Center",
+    primary: "Primary",
+    setPrimary: "Set primary",
+    settingPrimary: "Setting primary",
+    expandAddress: "Show wallet details",
+    collapseAddress: "Hide wallet details",
+    fullAddress: "Full address",
+    ensName: "ENS name",
+    copyFullAddress: "Copy full address",
+    copyEnsName: "Copy ENS name",
+    addressCopied: "Address copied",
+    ensCopied: "ENS name copied",
+    openEtherscan: "Open on Etherscan",
+    openOpenSea: "Open on OpenSea",
+    etherscan: "Etherscan",
+    openSea: "OpenSea",
+    confirmWallet: "Confirm in your wallet…",
+    waitingConfirmation: "Waiting for confirmation…",
+    primaryConfirmed:
+      "Confirmed. Check back in a few minutes to see the change.",
+    viewTransaction: "View transaction",
+    primarySuccess: "Primary address set.",
+    primaryErrorTitle: "Couldn’t set the primary address.",
+    primaryErrorDescription: PLEASE_TRY_AGAIN,
+    openStatement: "Open",
+    copyStatement: "Copy",
+    deleteStatement: "Delete",
+    copied: "Copied!",
+    socialMediaAccounts: "Social media accounts",
+    nftAccounts: "NFT accounts",
+    contact: "Contact",
+    verificationPosts: "Social media verification posts",
+    noSocialMediaAccounts: "No social media accounts added yet.",
+    noNftAccounts: "No NFT accounts added yet.",
+    noContact: "No contact details added yet.",
+    noVerificationPosts: "No verification posts added yet.",
+    addTitle: "Add an ID statement",
+    addDescription:
+      "Choose what you want to add. Every statement is public and the community decides whether it is accurate.",
+    addSocialTitle: "Social media account",
+    addSocialDescription: "Share your profile on a social platform.",
+    addNftTitle: "NFT account",
+    addNftDescription: "Share your profile on an NFT platform.",
+    addContactTitle: "Contact",
+    addContactDescription: "Share a messaging or contact detail.",
+    addVerificationTitle: "Verification post",
+    addVerificationDescription: "Link to a post that verifies this profile.",
+    addSocialDialogTitle: "Add social media account",
+    addNftDialogTitle: "Add NFT account",
+    addContactDialogTitle: "Add contact",
+    addVerificationDialogTitle: "Add verification post",
+    backToTypes: "Back to statement types",
+    selectPlatform: "Choose a platform",
+    otherPlatform: "Other",
+    customLinkLabel: "Display name",
+    customLinkLabelPlaceholder: "For example, AOTM",
+    customLinkLabelRequired: "Enter a display name that is not only spaces.",
+    customLinkUrl: "Art link URL",
+    customLinkUrlPlaceholder: "https://example.art/artist",
+    customLinkHint:
+      "Use a secure HTTPS link. The display name and link will be public.",
+    externalArtLink: "External art link",
+    save: "Save",
+    cancel: "Cancel",
+    optional: "All statements are optional.",
+    permanentlyPublic: "All statements are fully and permanently public.",
+    noVerification:
+      "Seize does not connect to social media accounts or verify posts.",
+    communityRates: "The community will rate statement accuracy.",
+    addSuccess: "ID statement added.",
+    addErrorTitle: "Couldn’t add this ID statement.",
+    addErrorDescription: "Check the link or statement details and try again.",
+    deleteTitle: "Delete statement?",
+    deleteDescription:
+      "This removes the statement from the profile. You can’t undo this action.",
+    deleteSuccess: "ID statement deleted.",
+    deleteErrorTitle: "Couldn’t delete this ID statement.",
+  } as const
+);
+
+const MENTION_SHORTCUT_COMPOSER_MESSAGES = objectMessages(
+  "waves.composer.mentionShortcuts",
+  {
+    optionOne: "Quick tag · 1 profile",
+    optionMany: "Quick tag · {count} profiles",
+    loadErrorTitle: "Quick Tags couldn't be loaded.",
+    loadErrorMessage: "Try again before sending this message.",
+  } as const
+);
+
+const GROUP_MENTION_COMPOSER_MESSAGES = objectMessages(
+  "waves.composer.groupMentions",
+  {
+    all: "All Wave followers",
+    contributors: "Can post in this Wave",
+    admins: "Wave creator and admins",
+    devs6529: "6529 developers",
+  } as const
+);
+
+const MENTION_SHORTCUT_SETTINGS_MESSAGES = objectMessages(
+  "user.mentionShortcuts",
+  {
+    title: "Quick Tags",
+    description:
+      "Create private tags such as @frens. In a Wave composer, each Quick Tag expands into the profile handles you choose.",
+    summaryDescription: "Mention several profiles with one shortcut.",
+    manage: "Manage",
+    back: "Back to Quick Tags",
+    more: "+{count} more",
+    memberCount: "{count} member",
+    memberCountMany: "{count} members",
+    new: "New Quick Tag",
+    newShort: "+ New",
+    create: "Create Quick Tag",
+    edit: "Edit Quick Tag",
+    editorDescription:
+      "It expands into ordinary profile mentions before your message is sent.",
+    cancel: "Cancel",
+    name: "Quick Tag name",
+    nameError: "Use 3–15 letters, numbers, or underscores.",
+    reservedError:
+      "That tag name is reserved. Try something a little more creative.",
+    addProfiles: "Add profiles ({count}/{max})",
+    searchLabel: "Search profiles by handle",
+    searchPlaceholder: "Search by handle",
+    searchPrompt: "Enter at least 3 characters to search profiles.",
+    searchResults: "{count} profiles available.",
+    searchResult: "1 profile available.",
+    removeProfile: "Remove @{handle}",
+    save: "Save Quick Tag",
+    saving: "Saving…",
+    created: "Quick Tag created.",
+    updated: "Quick Tag updated.",
+    saveErrorTitle: "Couldn't save Quick Tag.",
+    saveErrorDetails: "Unable to save Quick Tag",
+    deleteTitle: "Delete @{alias}?",
+    deleteWarning: "This cannot be undone.",
+    delete: "Delete Quick Tag",
+    deleting: "Deleting Quick Tag.",
+    deleted: "Quick Tag deleted.",
+    deleteErrorTitle: "Couldn't delete Quick Tag.",
+    deleteErrorDetails: "Unable to delete Quick Tag",
+    loading: "Loading…",
+    loadError: "Quick Tags could not be loaded.",
+    retry: "Retry",
+    empty: "You have no Quick Tags yet.",
+    editAction: "Edit",
+    deleteAction: "Delete",
+  } as const
+);
+
 const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "name.edit": "Edit {name}'s profile name",
+  "classification.edit": "Edit {name}'s classification",
   "dm.createFailed.title": "Couldn't create this direct message.",
-  "dm.createFailed.description": "Please try again.",
+  "dm.createFailed.description": PLEASE_TRY_AGAIN,
   "name.profileEnabled": "Profile enabled: {date}",
   "pfp.alt": "{name}'s profile picture",
   "pfp.edit": "Edit {name}'s profile picture",
@@ -445,20 +1226,34 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "aboutEdit.errors.saveFailed":
     "Couldn't save this about statement. Please try again.",
   "aboutEdit.errors.close": "Dismiss About statement error",
-  "aboutEdit.errors.unknown.title": "Unknown Error",
-  "aboutEdit.errors.hateSpeech.title": "Error: Hate Speech",
+  "aboutEdit.errors.unknown.title": "Couldn't save About",
+  "aboutEdit.errors.hateSpeech.title": "Hate speech warning",
   "aboutEdit.errors.hateSpeech.value":
-    "Your About text was not accepted because our automated checks flagged it for potentially containing hate speech. We want to keep seize a welcoming place! We'd appreciate it if you adjusted your text.",
-  "aboutEdit.errors.personalInsults.title": "Error: Personal Insults",
+    "Your About statement was flagged for possible hate speech. Revise it and try again.",
+  "aboutEdit.errors.personalInsults.title": "Personal insult warning",
   "aboutEdit.errors.personalInsults.value":
-    "Your About text was not accepted because our automated checks flagged it for potentially containing a personal insult. We want to keep seize a welcoming place! We'd appreciate it if you adjusted your text.",
-  "aboutEdit.errors.inappropriateLanguage.title":
-    "Error: Inappropriate Language",
+    "Your About statement was flagged for a possible personal insult. Revise it and try again.",
+  "aboutEdit.errors.inappropriateLanguage.title": "Language warning",
   "aboutEdit.errors.inappropriateLanguage.value":
-    "Your About text was not accepted because our automated checks flagged it for potentially containing inappropriate language that may make others uncomfortable. We want to keep seize a welcoming place! We'd appreciate it if you adjusted your text.",
-  "aboutEdit.errors.doxxing.title": "Error: Doxxing of Another Person",
+    "Your About statement was flagged for language that may be inappropriate. Revise it and try again.",
+  "aboutEdit.errors.doxxing.title": "Privacy warning",
   "aboutEdit.errors.doxxing.value":
-    "Your About text was not accepted because our automated checks flagged it for potentially doxxing another user of the system. We have a strong cultural value around respecting pseudonymity, so we'd appreciate it if you adjusted your text.",
+    "Your About statement may reveal another person's private information. Remove it and try again.",
+  "edit.open": "Edit profile",
+  "edit.title": "Edit profile",
+  "edit.banner": "Profile cover",
+  "edit.bannerDescription":
+    "Choose a gradient or upload an image for your profile cover.",
+  "edit.bannerImageRequired": "Select an image to use as your banner.",
+  "edit.pfp": "Profile picture",
+  "edit.name": "Profile name",
+  "edit.classification": "Classification",
+  "edit.about": "About",
+  "edit.aboutTitle": "Edit About",
+} as const);
+
+const USER_CIC_TYPE_MESSAGES = objectMessages("user.cicType", {
+  details: "Network ID Check details",
 } as const);
 
 const FOLLOWERS_MESSAGES = objectMessages("followers", {
@@ -470,6 +1265,17 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
 } as const);
 
 const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
+  "pinControl.pinTooltip": "Pin",
+  "pinControl.unpinTooltip": "Unpin",
+  "pinControl.pinAriaLabel": "Pin wave",
+  "pinControl.unpinAriaLabel": "Unpin wave",
+  "pinControl.pinErrorTitle": "Couldn't pin this wave.",
+  "pinControl.unpinErrorTitle": "Couldn't unpin this wave.",
+  "pinControl.retryDescription": PLEASE_TRY_AGAIN,
+  "pinControl.limitMessage": "Maximum {count} pinned waves allowed",
+  "pinControl.limitTooltip":
+    "Max {count} pinned waves. Unpin another wave first.",
+  "pinControl.viewerChanged": "The active profile changed. Please try again.",
   highlyRated: "Worth Checking Out",
   highlyRatedInfoTooltip: "Highly rated waves you don’t follow yet.",
   "highlyRatedPreviewOpenAriaLabel.none": "Open {waveName}",
@@ -532,22 +1338,892 @@ const QUICK_DM_MESSAGES = objectMessages("quickDm", {
   chatLoadError: "Unable to load this conversation.",
 } as const);
 
+const NOTIFICATIONS_FOLLOW_BUTTON_MESSAGES = objectMessages(
+  "notifications.followButton",
+  {
+    follow: "Follow",
+    following: "Following",
+    "error.missingHandleTitle": "Couldn't follow this profile.",
+    "error.missingHandleDescription": "This profile is missing a handle.",
+  } as const
+);
+
+const NOTIFICATIONS_WAVE_CREATED_MESSAGES = objectMessages(
+  "notifications.waveCreated",
+  {
+    normalCopy: "created a wave you can access:",
+    dmCopy: "started a DM with you:",
+    openDm: "Open DM",
+    joinWave: "Join wave",
+    joinedWave: "Joined",
+    followCreator: "Follow creator",
+    followingCreator: "Following creator",
+  } as const
+);
+
+const NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES = objectMessages(
+  "notifications.waveFollowButton",
+  {
+    join: "Join",
+    joined: "Joined",
+  } as const
+);
+
 const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
   createdLabel: "Created {relativeTime} · {date}",
-  "postsCount.one": "{count} Post",
-  "postsCount.other": "{count} Posts",
+  deleteCancel: "Cancel",
+  deleteDescription: "Are you sure you want to delete this wave?",
+  deleteErrorDescription: PLEASE_TRY_AGAIN,
+  deleteErrorTitle: "Couldn't delete this wave.",
+  deleteSuccess: "Wave deleted.",
+  deleteTitle: "Delete wave",
+  nameEditLabel: "Edit wave name",
+  nameEditSave: "Save",
+  nameEditTitle: "Rename wave",
+  ownerOptionsDelete: "Delete",
+  ownerOptionsOpenLabel: "Open options",
+  ownerOptionsTitle: "Wave options",
+  "parentNavigation.linkAriaLabel": "Subwave of {parentWaveName}",
+  "parentNavigation.linkTitle": "Open parent wave: {parentWaveName}",
+  "parentNavigation.regionLabel": "Wave hierarchy",
+  "parentNavigation.relationshipLabel": "Subwave of",
+  pictureEditCancel: "Cancel",
+  pictureEditDescription: "Choose a new image up to 10 MB.",
+  pictureEditLabel: "Edit wave picture",
+  pictureEditSave: "Save",
+  pictureEditTitle: "Update wave picture",
+  "postLabel.inProgress": "Posting",
+  "postLabel.one": "Post",
+  "postLabel.other": "Posts",
+} as const);
+
+const WAVE_DROP_ELIGIBILITY_MESSAGES = objectMessages("waves.dropEligibility", {
+  loginRequired: "Please log in",
+} as const);
+
+const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
+  "waves.notificationSettings",
+  [
+    ["trigger.tooltip", "Notification settings"],
+    ["trigger.ariaLabel", "Open notification settings"],
+    ["broadcastMentions.label", "Broadcast mentions"],
+    [
+      "broadcastMentions.ariaLabel",
+      "Receive @all and @contributors notifications",
+    ],
+    ["allMessages.label", "All messages"],
+    ["allMessages.ariaLabel", "Receive notifications for all messages"],
+    ["mute.label", "Mute"],
+    ["mute.activeLabel", "Muted"],
+    ["mute.ariaLabel", "Mute wave"],
+    ["mute.unmuteAriaLabel", "Unmute wave"],
+    ["mute.tooltip.enable", "Click to mute this wave"],
+    ["mute.tooltip.disable", "Click to unmute this wave"],
+    ["mute.error.muteTitle", "Couldn't mute this wave."],
+    ["mute.error.unmuteTitle", "Couldn't unmute this wave."],
+    ["mute.error.description", PLEASE_TRY_AGAIN],
+    ["mute.error.fallbackMute", "Unable to mute wave"],
+    ["mute.error.fallbackUnmute", "Unable to unmute wave"],
+    ["preferences.error.updateTitle", "Couldn't update notification settings."],
+    ["preferences.error.description", PLEASE_TRY_AGAIN],
+    [
+      "preferences.error.enableBroadcastMentions",
+      "Unable to enable broadcast mention notifications",
+    ],
+    [
+      "preferences.error.disableBroadcastMentions",
+      "Unable to disable broadcast mention notifications",
+    ],
+    [
+      "preferences.error.enableAllMessages",
+      "Unable to enable all-message notifications",
+    ],
+    [
+      "preferences.error.disableAllMessages",
+      "Unable to disable all-message notifications",
+    ],
+    ["retry.label", "Retry"],
+    ["retry.ariaLabel", "Retry notification settings"],
+  ] as const
+);
+
+const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
+  title: "Access",
+  description: "Choose who can access, participate in, and manage this wave.",
+  viewGroupName: "Who can access this wave",
+  adminGroupName: "Admins",
+  accessHelper:
+    "By default, everyone with access can participate. Only you can administer the wave.",
+  customizePermissions: "Customize other permissions",
+  selectedGroup: "Selected group",
+  currentGroup: "Before editing",
+  currentGroupWithName: "Current group: {name}",
+  unsavedGroup: "Unsaved group",
+  groupSource: "Group source",
+  existingGroup: "Existing group",
+  newGroup: "New group",
+  "dialog.addTitle": "Add group",
+  "dialog.changeTitle": "Change group",
+  "dialog.addDescription": "Create a new group or choose an existing group.",
+  "dialog.changeDescription":
+    "Create a new group or choose a different existing group.",
+  identities: "Identities",
+  addRule: "Add rule",
+  "xtdhGrant.change": "Change grant",
+  "xtdhGrant.cancelChange": "Cancel change",
+  "xtdhGrant.remove": "Remove grant",
+  done: "Done",
+  enableChat: "Enable chat",
+  allowAdminsToDeletePosts: "Allow admins to delete posts",
+  defaultGroupName: "Wave Group",
+  notAppliedYet: "Not applied yet.",
+  hideCriteriaAndMembers: "Hide criteria and members",
+  hideCriteriaAndMembersTooltip:
+    "The criteria and member list are visible to members of this group, but hidden from everyone else.",
+  hideCriteriaAndMembersInfoLabel: "About criteria and member visibility",
+  "editAccess.title": "Edit {groupLabel} access",
+  "editAccess.triggerLabel": "Edit {groupLabel} access",
+  "editAccess.chatLabel": "Chat",
+  "editAccess.description":
+    "The current criteria are prefilled. Saving creates a new group and changes only {groupLabel} access.",
+  "editAccess.loading": "Loading current criteria…",
+  "editAccess.loadErrorTitle": "Couldn't load the current criteria.",
+  "editAccess.loadErrorDescription":
+    "Nothing has been changed. Try loading the group again.",
+  "editAccess.retry": "Try again",
+  "editAccess.makePublic": "Make wave public",
+  "editAccess.makePublicDescription":
+    "Remove the Visibility restriction so everyone can access this wave.",
+  "editAccess.useVisibility": "Use visibility criteria",
+  "editAccess.useVisibilityDescription":
+    "Set {groupLabel} access to the same criteria as Visibility.",
+  "editAccess.useVisibilityPublicDescription":
+    "Visibility is public. Set {groupLabel} access to public too.",
+  "editAccess.makePublicConfirmTitle": "Make wave public?",
+  "editAccess.makePublicConfirmMessage":
+    "Everyone will be able to find and view this wave. Only Visibility access will change.",
+  "editAccess.useVisibilityConfirmTitle": "Use visibility criteria?",
+  "editAccess.useVisibilityConfirmMessage":
+    "{groupLabel} access will use the same group as Visibility. Only this access setting will change.",
+  "editAccess.useVisibilityPublicConfirmMessage":
+    "Visibility is public, so {groupLabel} access will become public too. Only this access setting will change.",
+  "editAccess.confirmMakePublic": "Make public",
+  "editAccess.confirmUseVisibility": "Use visibility criteria",
+  "actions.editCriteria": "Edit criteria",
+  "actions.edit": "Edit",
+  "actions.matchWaveAccess": "Match wave access",
+  "actions.chooseGroup": "Choose group",
+  "draft.notReadyTitle": "Not ready yet.",
+  "draft.notReadyDescription":
+    "Finish the missing group rules before you create this group.",
+  "draft.createTitle": "Create this new group",
+  "draft.discard": "Discard draft",
+  "draft.creating": "Creating group...",
+  "draft.createAndUse": "Create and use new group",
+  "draft.saveChanges": "Save changes",
+  "draft.afterEditing": "After editing",
+  "rules.configured": "Configured",
+  "validation.checking": "Checking group access…",
+  "validation.unavailableTitle": "Couldn't verify group access.",
+  "validation.unavailable":
+    "Group access could not be verified. Try again before continuing.",
+  "validation.outsideView":
+    'The "{groupName}" group includes people who are not in "{viewGroupName}".',
+  "validation.invalidTitle": "Some access groups need attention.",
+  "validation.invalidDescription":
+    "Every Drop, Vote, Chat, and Admins group member must also belong to the Visibility group.",
+  "inlineIdentities.modeLabel": "Identity treatment",
+  "inlineIdentities.included.label": "Included",
+  "inlineIdentities.included.searchLabel": "Find an identity to include",
+  "inlineIdentities.included.searchPlaceholder":
+    "Search identities to include...",
+  "inlineIdentities.included.emptyHelper":
+    "No identities are explicitly included.",
+  "inlineIdentities.excluded.label": "Excluded",
+  "inlineIdentities.excluded.searchLabel": "Find an identity to exclude",
+  "inlineIdentities.excluded.searchPlaceholder":
+    "Search identities to exclude...",
+  "inlineIdentities.excluded.emptyHelper":
+    "No identities are explicitly excluded.",
+  "inlineIdentities.includeMe": "Include me",
+  "inlineIdentities.sources.emma.title": "EMMA",
+  "inlineIdentities.sources.emma.description":
+    "Add every wallet from one of your EMMA allowlists.",
+  "inlineIdentities.sources.emma.searchLabel": "Search allowlists",
+  "inlineIdentities.sources.emma.searchLoading": "Loading allowlists...",
+  "inlineIdentities.sources.emma.searchEmpty": "No allowlists found",
+  "inlineIdentities.sources.emma.empty": "No allowlist added.",
+  "inlineIdentities.sources.emma.loading": "Adding allowlist identities...",
+  "inlineIdentities.sources.emma.load": "Load allowlist",
+  "inlineIdentities.sources.emma.error":
+    "Couldn't load this allowlist. Try again.",
+  "inlineIdentities.sources.emma.authenticationRequired":
+    "Connect your wallet to load this allowlist.",
+  "inlineIdentities.sources.emma.remove": "Remove EMMA allowlist",
+  "inlineIdentities.sources.csv.title": "CSV file",
+  "inlineIdentities.sources.csv.description":
+    "Import Ethereum wallets from a CSV file.",
+  "inlineIdentities.sources.csv.dropLabel":
+    "Drop a CSV file here, or choose a file",
+  "inlineIdentities.sources.csv.includeInputLabel":
+    "Choose a CSV file of identities to include",
+  "inlineIdentities.sources.csv.excludeInputLabel":
+    "Choose a CSV file of identities to exclude",
+  "inlineIdentities.sources.csv.invalidFile": "Choose a CSV file.",
+  "inlineIdentities.sources.csv.readError":
+    "Couldn't read this file. Try another CSV file.",
+  "inlineIdentities.sources.csv.noWallets":
+    "No valid Ethereum wallet addresses were found.",
+  "inlineIdentities.sources.csv.empty": "No CSV file added.",
+  "inlineIdentities.sources.csv.remove": "Remove CSV file",
+  "inlineIdentities.sources.count.one": "{count} identity added",
+  "inlineIdentities.sources.count.other": "{count} identities added",
+  "inlineIdentities.sources.total.included.one":
+    "{count} unique identity included",
+  "inlineIdentities.sources.total.included.other":
+    "{count} unique identities included",
+  "inlineIdentities.sources.total.excluded.one":
+    "{count} unique identity excluded",
+  "inlineIdentities.sources.total.excluded.other":
+    "{count} unique identities excluded",
+  "inlineIdentities.sources.includeLimit":
+    "A group can include at most {limit} identities.",
+  "inlineIdentities.sources.excludeLimit":
+    "A group can exclude at most {limit} identities.",
+  "inlineIdentities.sources.retry": "Try again",
+  "inlineIdentities.creatorExcludedWarning":
+    "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
+  "members.currentCount.one": "{count} user",
+  "members.currentCount.other": "{count} users",
+  "members.countLoading": "Checking current audience…",
+  "members.countUnavailable": "Current audience unavailable",
+  "members.view": "View members",
+  "members.previewDraft": "Preview matches",
+  "members.dialogTitle": "{role}: {group}",
+  "members.dynamicDescription":
+    "This is a live preview based on current profile, reputation, and ownership data. Membership can change over time.",
+  "members.criteriaSummary": "Why these identities qualify",
+  "members.criteriaUnavailable":
+    "Group criteria aren't available, but you can still inspect the current members below.",
+  "members.searchLabel": "Find an identity",
+  "members.searchPlaceholder": "Search by handle or wallet",
+  "members.clearSearch": "Clear identity search",
+  "members.loadingStatus": "Loading current members",
+  "members.empty": "No identities currently match this group.",
+  "members.searchEmpty": "No matching identities found.",
+  "members.errorTitle": "Couldn't load current members.",
+  "members.errorDescription": "Check your connection and try again.",
+  "members.retry": "Try again",
+  "members.listLabel": "Current group members",
+  "members.openProfile": "Open {identity}'s profile in a new tab",
+  "members.noCriteria": "No criteria selected",
+  "members.criteria.loading": "Loading group criteria…",
+  "members.criteria.unavailable": "Group criteria unavailable",
+  "members.criteria.metric.tdh": "TDH",
+  "members.criteria.metric.xtdh": "xTDH",
+  "members.criteria.metric.tdhAndXtdh": "TDH + xTDH",
+  "members.criteria.metric.rep": "REP",
+  "members.criteria.metric.nic": "NIC",
+  "members.criteria.metric.level": "Level",
+  "members.criteria.range.atMost": "{metric} at most {max}",
+  "members.criteria.range.atLeast": "{metric} at least {min}",
+  "members.criteria.range.between": "{metric} between {min} and {max}",
+  "members.criteria.identityRange.atMost":
+    "{metric} {direction} {identity} at most {max}",
+  "members.criteria.identityRange.atLeast":
+    "{metric} {direction} {identity} at least {min}",
+  "members.criteria.identityRange.between":
+    "{metric} {direction} {identity} between {min} and {max}",
+  "members.criteria.identity": "{metric} {direction} {identity}",
+  "members.criteria.categoryRange.atMost":
+    "{metric} in {category} at most {max}",
+  "members.criteria.categoryRange.atLeast":
+    "{metric} in {category} at least {min}",
+  "members.criteria.categoryRange.between":
+    "{metric} in {category} between {min} and {max}",
+  "members.criteria.category": "{metric} in {category}",
+  "members.criteria.categoryIdentityRange.atMost":
+    "{metric} in {category} {direction} {identity} at most {max}",
+  "members.criteria.categoryIdentityRange.atLeast":
+    "{metric} in {category} {direction} {identity} at least {min}",
+  "members.criteria.categoryIdentityRange.between":
+    "{metric} in {category} {direction} {identity} between {min} and {max}",
+  "members.criteria.categoryIdentity":
+    "{metric} in {category} {direction} {identity}",
+  "members.criteria.from": "from",
+  "members.criteria.to": "to",
+  "members.criteria.included.one": "{count} explicitly included user",
+  "members.criteria.included.other": "{count} explicitly included users",
+  "members.criteria.excluded.one": "{count} explicitly excluded user",
+  "members.criteria.excluded.other": "{count} explicitly excluded users",
+  "members.criteria.grant": "xTDH grant {grantId}",
+  "members.criteria.grant.collection": "xTDH grant for {collectionName}",
+  "members.criteria.grant.selected": "Selected xTDH grant",
+  "restore.loading": "Restoring the selected group…",
+  "restore.error":
+    "This selected group could not be loaded. Retry, replace its criteria, or choose another group before continuing.",
+  "restore.retry": "Retry group",
+  "error.missingWallet.title": "Add a primary wallet first.",
+  "error.missingWallet.description":
+    "A primary wallet is required to create this wave's admin group.",
+  "error.createAdmin.title": "Couldn't create the admin group.",
+  "error.createAdmin.description":
+    "Choose an existing admin group, or try again.",
+  "error.publishAdmin.title": "Couldn't make the admin group visible.",
+  "error.publishAdmin.description":
+    "Choose an existing admin group, or try again later.",
+  "error.fallbackDetails": "The group service did not complete the request.",
+} as const);
+
+const WAVE_CREATE_DATES_MESSAGES = objectMessages("waves.create.dates", {
+  title: "Schedule",
+  description:
+    "Review when this wave opens, voting begins, and winners are announced.",
+  "approve.noEndSummary": "Starts {start}. No end date.",
+  "approve.endSummary": "Starts {start}. Ends {end}.",
+  "approve.advancedSummary": "Wave end",
+  "approve.endInfoLabel": "About wave end",
+  "approve.start.title": "Wave Start",
+  "approve.start.tooltip":
+    "Choose when the approve wave opens. Approvals and submissions start at the same moment.",
+  "approve.start.infoLabel": "About wave start",
+  "approve.start.description":
+    "This is when the approve wave opens for submissions and approvals.",
+  "approve.start.summaryLabel": "Wave Starts",
+  "approve.end.title": "Wave End",
+  "approve.end.tooltip":
+    "Choose when the approve wave closes. Leave it blank to keep the wave open until max winners is reached, or indefinitely if max winners is blank.",
+  "approve.end.description": "Optional. Leave blank for no end date.",
+  "approve.end.summaryLabel": "Wave Ends",
+  "approve.end.noEndDate": "No end date",
+  "approve.end.clearAriaLabel": "Clear end date",
+  "approve.end.error": "Wave end must be after wave start.",
+  "approve.end.dateLabel": "Select End Date:",
+  "approve.end.timeLabel": "Select End Time:",
+  "approve.end.disabledTimeGuidance":
+    "Pick an end date first. The earliest allowed end time is {earliest}.",
+  "rank.ongoingSummary":
+    "Submissions start {submission}. Voting starts {voting}. Ranking stays open.",
+  "rank.scheduledSummary":
+    "Submissions start {submission}. Voting starts {voting}. First winners: {announcement}.",
+  "rank.advancedSummary": "Winner schedule",
+  "rank.timeline.title": "Opening dates",
+  "rank.timeline.submissionLabel": "Submissions Open",
+  "rank.timeline.votingLabel": "Voting Opens",
+  "rank.timeline.submissionDescription":
+    "Creators begin submitting work to your wave",
+  "rank.timeline.votingDescription":
+    "Community voting on wave submissions begins",
+  "rank.announcements.title": "Winners Announcements",
+  "rank.announcements.summaryLabel": "Winners",
+  "rank.announcements.summarySingular": "{count} announcement",
+  "rank.announcements.summaryPlural": "{count} announcements",
+  "rank.announcements.recurringBadge": "Recurring",
+  "rank.announcements.futureError":
+    "First winners announcement and wave end must be in the future.",
+  "rank.announcements.endBeforeVotingError":
+    "Last winners announcement cannot be before voting begins. Move voting start earlier or move winner announcements later.",
+  "rank.announcements.firstBeforeVotingError":
+    "First winners announcement cannot be before voting begins. Move voting start earlier or move first winners announcement later.",
+  "rank.announcements.description":
+    "{emphasis} for showcasing selected creators. Set your first date, then add more if needed.",
+  "rank.announcements.descriptionEmphasis": "Winner announcements",
+  "rank.announcements.fixedEndNote":
+    "With a fixed schedule, the last announcement marks your wave's end date.",
+  "rank.announcements.examples":
+    "Examples: Weekly, monthly, or quarterly announcements.",
+  "rank.recurring.title": "Repeating Announcement Cycles",
+  "rank.recurring.description":
+    "Repeat this pattern until an optional end date",
+  "rank.recurring.switchLabel": "Enable recurring cycles",
+  "rank.recurring.enabledTitle": "Recurring cycles enabled.",
+  "rank.recurring.enabledDescription":
+    "Announcements will repeat until an optional end date, or keep going with no end date.",
+  "rank.additional.title": "Additional Announcements",
+  "rank.additional.timelineLabel": "Timeline:",
+  "rank.additional.timelineDescription":
+    "Define when winners will be selected throughout your wave.",
+  "rank.additional.firstTitle": "First Winners Announcement",
+  "rank.additional.announcementTitle": "Winners Announcement #{number}",
+  "rank.additional.removeAriaLabel": "Remove announcement #{number}",
+  "rank.additional.scheduleTitle": "Schedule Next Winners Announcement",
+  "rank.additional.scheduleDescription": "Set time between announcements",
+  "rank.additional.timeValueAriaLabel": "Time value",
+  "rank.additional.addButton": "Add to Timeline",
+  "rank.additional.previewLabel": "Preview:",
+  "rank.additional.previewNext": "Next announcement #{number} on {date}",
+  "rank.additional.previewFirst": "First additional announcement on {date}",
+  "rank.additional.intervalWeeks": "{count}w",
+  "rank.additional.intervalDays": "{count}d",
+  "rank.additional.intervalHours": "{count}h",
+  "rank.additional.intervalMinutes": "{count}m",
+  "rank.end.collapsedLabel": "Wave End Date",
+  "rank.end.noEndDate": "No end date",
+  "rank.end.optionalTitle": "Optional Wave End Date",
+  "rank.end.setTitle": "Set Optional End Date",
+  "rank.end.description": "Leave blank for no end date.",
+  "rank.end.summaryLabel": "Wave Ends",
+  "rank.end.clearAriaLabel": "Clear end date",
+  "rank.end.futureError": "Wave end date must be in the future.",
+  "rank.end.beforeVotingError": "Wave end date cannot be before voting begins.",
+  "rank.end.dateLabel": "Select Official End Date:",
+  "rank.end.timeLabel": "Select Time:",
+  "rank.end.disabledTimeGuidance":
+    "Pick an end date first. Recurring announcements currently have no end date.",
+  "rank.end.lastAnnouncementLabel": "Last winner announcement will be at:",
+  "rank.end.aboutRecurringTitle": "About Recurring Winners",
+  "rank.end.aboutFixedTitle": "About Wave End Date",
+  "rank.end.recurringDescription":
+    "In recurring mode, your wave continues announcing winners in regular intervals until an optional end date.",
+  "rank.end.recurringOpenEndedDescription":
+    "Leave the end date blank to keep recurring announcements open-ended.",
+  "rank.end.fixedDescription":
+    "Your wave will end immediately after the final winner announcement.",
+  "rank.end.totalAnnouncementsLabel": "Total winner announcements:",
+} as const);
+
+const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
+  backToCriteria: "Back to criteria",
+  cancel: "Cancel",
+  complete: "Complete",
+  create: "Create",
+  createMenuHeader: "Create",
+  next: "Next",
+  newCuration: "New curation",
+  newSubwave: "New subwave",
+  openCreateMenu: "Open create menu",
+  previous: "Previous",
+  save: "Save",
+} as const);
+
+const WAVE_CREATE_DIALOG_MESSAGES = objectMessages("waves.create.dialog", {
+  subwaveOfTitle: 'Create subwave of "{parentWaveName}"',
+  profileRequiredConfirm: "Go to Identity",
+  profileRequiredDescription: "Set up your profile before creating a Wave.",
+  profileRequiredTitle: "Create your profile first",
+  subwaveTitle: "Create subwave",
+  waveTitle: "Create Wave",
+} as const);
+
+const WAVE_CREATE_ADVANCED_MESSAGES = objectMessages("waves.create.advanced", {
+  title: "Advanced settings",
+  customized: "Customized",
+  needsAttention: "Needs attention",
+  errorSummary: "Review the highlighted settings before continuing.",
+} as const);
+
+const WAVE_CREATE_OVERVIEW_MESSAGES = objectMessages("waves.create.overview", {
+  typeRequired: "Please choose a wave type to continue.",
+  subwaveTypeRequired: "Please choose a subwave type to continue.",
+  type: "Wave Type",
+  subwaveType: "Subwave Type",
+  subwavePicture: "Subwave Profile Picture",
+  subwaveName: "Subwave Name",
+  title: "Create Wave",
+  name: "Wave Name",
+  picture: "Wave Profile Picture",
+  advancedTitle: "Appearance and labels",
+  displaySettings: "Display settings",
+} as const);
+
+const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
+  "waves.create.rank.mode",
+  {
+    legend: "Ranking mode",
+    "announceWinners.title": "Announce Winners",
+    "announceWinners.description":
+      "Winners are announced on a schedule you'll set on the Schedule step — a fixed timeline that ends the wave, or repeating cycles.",
+    "perpetualRanking.title": "Perpetual Ranking",
+    "perpetualRanking.description":
+      "Rankings update continuously with no winners and no end date — a live, always-on leaderboard.",
+  } as const
+);
+
+const WAVE_CREATE_DROPS_MESSAGES = objectMessages("waves.create.drops", {
+  title: "Drops",
+  description: "Choose what participants can submit to this wave.",
+  requirementsTitle: "Submission requirements",
+  requiredTypesLegend: "Required Types",
+  "requiredType.none": "None",
+  "requiredType.image": "Image",
+  "requiredType.audio": "Audio",
+  "requiredType.video": "Video",
+  "advanced.defaultSummary": "No additional submission requirements.",
+  "advanced.customSummary": "Submission requirements customized.",
+  "maxSimultaneousSubmissions.label": "Max simultaneous submissions",
+  "maxSimultaneousSubmissions.description":
+    "Maximum number of simultaneous submissions per participant. Optional. Unlimited if left blank.",
+  identityDuplicatesRequireWinners:
+    "Perpetual ranking waves never announce winners, so identities can't be resubmitted “after a win”. Choose a different re-submission rule.",
+} as const);
+
+const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
+  title: "Outcomes",
+  rankAdvancedSummary: "Outcome visibility",
+  approveAdvancedSummary: "Winner limits",
+  chooseType: "Choose outcome type",
+  showOutcomes: "Show outcomes menu section",
+  showOutcomesDescription:
+    "Shows the Outcomes tab and reward details on leaderboard and winner cards. Rewards still apply when hidden.",
+  nicPositiveError: "NIC must be a positive number",
+  repPositiveError: "Rep must be a positive number",
+  "perpetual.title": "Outcome is leaderboard position",
+  "perpetual.description":
+    "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The outcomes tab stays hidden; the live leaderboard is the outcome.",
+  "empty.title": "No outcomes yet — add at least one to continue",
+  "empty.description":
+    "Outcomes define what winners receive when results are announced: a manual award you fulfill yourself, or automatic Rep or NIC distributed by the platform. Pick a type above to configure one.",
+  "warning.unlimited.title": "Warning: Unlimited Awards",
+  "warning.unlimited.description":
+    "You have not set a maximum number of winners for this challenge. Everyone who meets the threshold will be awarded.",
+  "warning.indefinite.title": "Warning: Challenge Will Run Indefinitely",
+  "warning.indefinite.description":
+    "You have not set an end date or a maximum number of winners for this challenge. It will run indefinitely, and everyone who meets the threshold will be awarded.",
+} as const);
+
+const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
+  title: "Guidelines",
+  advancedSummary: "Wave guidelines and acceptance",
+  chatAdvancedSummary: "Wave guidelines",
+  guidelinesFieldLabel: "Chat guidelines",
+  guidelinesDescription:
+    "These guidelines will be shown to user when they send their first chat message",
+  guidelinesPlaceholder: "Add chat guidelines...",
+  guidelinesSettingsLabel: "Guidelines",
+  guidelinesSettingsEditLabel: "Edit guidelines",
+  guidelinesSettingsAdded: "Added",
+  guidelinesSettingsNone: "None",
+  guidelinesAuthError:
+    "Couldn't authenticate. Reconnect your wallet and try again.",
+  guidelinesSaveError: "Couldn't save these guidelines. Please try again.",
+  guidelinesSaveErrorTitle: "Couldn't save these guidelines.",
+  guidelinesSaveErrorDescription: PLEASE_TRY_AGAIN,
+  acceptanceTitle: "Rules that require acceptance",
+  acceptanceDescription:
+    "Participants must accept these rules and sign with their wallet before submitting.",
+  acceptancePlaceholder:
+    "Enter rules participants must accept before submitting...",
+  acceptanceHelper: "Leave empty if no rules require signing.",
+  acceptanceCharacterCount: "Characters: {count}",
+} as const);
+
+const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
+  title: "How Drops are Voted",
+  ratingTitle: "How Drops are Rated",
+  rankAdvancedSummary: "Vote limits and behavior",
+  approveAdvancedSummary: "Vote limits, behavior, and timing",
+  "timeUnit.minutes": "Minutes",
+  "timeUnit.hours": "Hours",
+  "averaging.label": "Averaging Interval",
+  "averaging.description":
+    "The time period over which votes are averaged. Must be between {minMinutes} minutes and {maxHours} hours. Longer intervals are more resistant to manipulation.",
+  "averaging.unitAriaLabel": "Averaging interval time unit",
+  "scope.legend": "Voting power scope",
+  "scope.wave.label": "Whole wave",
+  "scope.wave.description":
+    "Each identity has one voting budget across the wave.",
+  "scope.drop.label": "Each drop",
+  "scope.drop.description": "Voting power applies separately to every drop.",
+  "negative.title": "Allow Negative Votes",
+  "negative.enabledDescription":
+    "Users can submit negative votes for drops. This allows for more nuanced voting but may lead to more contentious results.",
+  "negative.disabledDescription":
+    "Only positive votes are allowed. This encourages constructive voting and simplifies the voting dynamics.",
+  "negative.enabledLockedDescription":
+    "Users can submit negative votes for drops. This allows for more nuanced voting but may lead to more contentious results. This setting cannot be changed.",
+  "negative.disabledLockedDescription":
+    "Only positive votes are allowed. This encourages constructive voting and simplifies the voting dynamics. This setting cannot be changed.",
+  "timeWeighted.title": "Time-Weighted Voting",
+  "timeWeighted.description":
+    "Protects against last-minute vote manipulation by using a time-averaged vote count instead of the final tally. When enabled, votes are weighted based on when they were cast, making it harder to manipulate results at the end of voting.",
+  "approvalHold.legend": "Approval hold",
+  "approvalHold.none.label": "No hold",
+  "approvalHold.none.description":
+    "Approve as soon as the score reaches the threshold.",
+  "approvalHold.required.label": "Require hold time",
+  "approvalHold.required.description":
+    "Require the score to stay at or above the threshold.",
+} as const);
+
+const WAVE_CREATE_DROPDOWN_MESSAGES = objectMessages("waves.create.dropdown", {
+  currentValue: "Current value: {value}",
+} as const);
+
+const WAVE_CREATE_REVIEW_MESSAGES = objectMessages("waves.create.review", {
+  title: "Overview",
+  description:
+    "Review your wave before creating it. Use Previous or the completed steps to make changes.",
+  submit: "Confirm and create",
+  uploadsPending: "Wait for image uploads to finish.",
+  setup: "Setup",
+  name: "Name",
+  parent: "Parent wave",
+  picture: "Wave profile picture",
+  manual: "Manual",
+  outcomeType: "Outcome type",
+  reward: "Reward",
+  category: "Category",
+  total: "Total",
+  winner: "Winner {position}",
+  perApprovedDrop: "Per approved drop",
+  outcome: "Outcome {number}",
+} as const);
+
+const WAVE_CREATE_PROGRESS_MESSAGES = objectMessages("waves.create.progress", {
+  step: "Step {current} of {total}",
+  label: "Wave setup progress",
+} as const);
+
+const WAVE_CREATE_DESCRIPTION_MESSAGES = objectMessages(
+  "waves.create.description",
+  {
+    title: "Description",
+    description:
+      "Give a good description of your wave so participants know what you expect in this wave. More information, including any content moderation parameters, is better than less.",
+    missingProfile:
+      "A profile handle is required to create a wave. Set up your profile, then come back to finish this step.",
+    placeholder: "Describe your wave",
+  } as const
+);
+
+const WAVE_LEADERBOARD_PHASE_MESSAGES = objectMessages(
+  "waves.leaderboard.phase",
+  {
+    votingOngoing: "Voting ongoing",
+    droppingOngoing: "Dropping open",
+    noEndDate: "No end date",
+  } as const
+);
+
+const WAVE_RULES_SCHEDULE_MESSAGES = objectMessages("waves.rules.schedule", {
+  perpetualRankType: "Rank — Perpetual Ranking",
+  outcomesNotAvailable: "Not available (perpetual wave)",
+  "winnerAnnouncements.label": "Winner announcements",
+  "winnerAnnouncements.none": "None (ongoing ranking, no end date)",
+} as const);
+
+const GROUP_NFT_OWNERSHIP_MESSAGES = objectMessages("groups.nftOwnership", {
+  "collection.gradients": "Gradients",
+  "collection.memelab": "Meme Lab",
+  "collection.memes": "Memes",
+  "collection.nextgen": "NextGen",
+  "matchMode.any": "Own any",
+  "matchMode.all": "Own all",
+  requirementLabel: "{collection} requirement",
+  tokenRequirementLabel: "{collection} token requirement",
+  description:
+    "Choose whether identities must own any selected token or all selected tokens.",
+  "card.tooltip": "Internal NFT ownership requirements for this group.",
+  "card.anyCollectionToken": "{collection}: any collection token",
+  "card.anySelected": "{collection}: any selected ({count})",
+  "card.allSelected": "{collection}: all selected ({count})",
 } as const);
 
 const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   fileUploadAreaAriaLabel: "Wave chat file upload area",
+  "guidelinesDialog.title": "Wave guidelines",
+  "guidelinesDialog.description":
+    "Review this wave's guidelines before sending your first message.",
+  "guidelinesDialog.guidelinesLabel": "Guidelines",
+  "guidelinesDialog.actionHint":
+    "Agree sends your message. Decline keeps it as a draft.",
+  "guidelinesDialog.agree": "Agree",
+  "guidelinesDialog.decline": "Decline",
+  "guidelinesDialog.loadErrorTitle": "Couldn't load the wave guidelines.",
+  "guidelinesDialog.loadErrorDescription":
+    "Please try again before sending your message.",
+  "replyTargetDeletedToast.title": "Reply removed.",
+  "replyTargetDeletedToast.description":
+    "The message you were replying to was deleted. Your draft is still here.",
+  "replyTargetUnavailableToast.title": "Reply not sent.",
+  "replyTargetUnavailableToast.descriptionRestored":
+    "The message you replied to is no longer available. Your draft was restored.",
+  "replyTargetUnavailableToast.descriptionKept":
+    "The message you replied to is no longer available. Your current draft was kept.",
+  "replyTargetUnavailableToast.detailsRestored":
+    "You can send it as a new message instead.",
+  "replyTargetUnavailableToast.detailsKept":
+    "Your current draft was not changed.",
+  "replyTargetUnavailableToast.actionReviewDraft": "Review draft",
+} as const);
+
+const WAVE_COMPOSER_ACTION_MESSAGES = objectMessages("waves.composer.actions", {
+  show: "Show composer actions",
+  hide: "Hide composer actions",
+  label: "Composer actions",
+  metadata: "Metadata",
+  upload: "Upload",
+  gif: "GIF",
+  poll: "Poll",
+  closePoll: "Close poll",
+  storm: "Storm",
+} as const);
+
+const WAVE_COMPOSER_PLACEHOLDER_MESSAGES = objectMessages(
+  "waves.composer.placeholder",
+  {
+    createDrop: "Create a drop",
+    writeChatMessage: "Write a chat message",
+    dropReply: "Drop a reply",
+    postReply: "Post a reply",
+    quoteDrop: "Quote a drop",
+    postQuote: "Post a quote",
+  } as const
+);
+
+const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
+  draftTitle: "Storm draft",
+  emptyDraft: "Your storm parts will appear here.",
+  closeDraft: "Close",
+  privateDraftHint: "Only you can see this until you post it.",
+  partsCountOne: "{count} part",
+  partsCountOther: "{count} parts",
+  discard: "Discard",
+  discardConfirmation: "Discard every saved part and the part you are writing?",
+  keepDraft: "Keep draft",
+  discardDraft: "Discard draft",
+  part: "Part {number}",
+  mediaOnlyPart: "Media-only part",
+  edit: "Edit",
+  editPart: "Edit part {number}",
+  finishCurrentPartBeforeEditing:
+    "Add or clear the current part before editing another part",
+  editing: "Editing",
+  movePartEarlier: "Move part {number} earlier",
+  movePartLater: "Move part {number} later",
+  moveEarlier: "Move earlier",
+  moveLater: "Move later",
+  remove: "Remove",
+  removePart: "Remove part {number}",
+  nextPart: "Next: Part {number}",
+  editingPart: "Editing Part {number}",
+  cancelEdit: "Cancel edit",
+  writePart: "Write part {number}",
+  breakIntoStorm: "Break into storm",
+  addPart: "Add part",
+  saveChanges: "Save changes",
+  postStorm: "Post storm",
+} as const);
+
+const WAVE_CHAT_SETTINGS_MESSAGES = objectMessages("waves.chatSettings", {
+  "access.public": "Public",
+  "access.inspectGroup": "Inspect {groupName} group criteria and members",
+  "access.label": "Chat access",
+  "access.privateGroup": "Private group",
+  "access.unavailableGroup": "Group unavailable",
+  "groups.admin": "Admins",
+  "groups.drop": "Drop",
+  "groups.view": "Visibility",
+  "groups.vote": "Vote",
+  "status.disabled": "Disabled",
+  "status.editLabel": "Edit chat status",
+  "status.enabled": "Enabled",
+  "status.enableHelp":
+    "The chat access group still controls who can chat when chat is enabled.",
+  "status.enableLabel": "Enable chat",
+  "status.label": "Chat status",
+} as const);
+
+const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
+  "network.groupInspection",
+  {
+    selectedGroup: "Selected group",
+    close: "Clear selected group",
+    membersTitle: "Members",
+    membersUnavailable: "Group members unavailable.",
+    bulkRep: "REP everyone matching criteria",
+    bulkNic: "NIC everyone matching criteria",
+    bulkActionsLabel: "Bulk rating actions",
+    bulkRepSuccess: "REP distributed.",
+    bulkNicSuccess: "NIC distributed.",
+    source: "Source: filters + optional manual list",
+    loading: "Loading group criteria",
+    unavailableTitle: "Group criteria unavailable",
+    unavailableDescription:
+      "This group may be private, deleted, or temporarily unavailable.",
+  } as const
+);
+
+const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
+  title: "Filter Network",
+  suggestedName: "Network filter",
+  defaultLabel: "All Network members",
+  membersRoleLabel: "Network",
+  createErrorTitle: "Couldn't create this group.",
+  createErrorDescription: "Please check the group setup and try again.",
+  createSuccess: "Group created and applied as the Network filter.",
 } as const);
 
 const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingStatus: "Loading waves",
 } as const);
 
+const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
+  "waves.drops.searchModal",
+  {
+    authorFallback: "unknown author",
+    clear: "Clear search",
+    clearShort: "Clear",
+    close: "Close search",
+    descriptionPrefix: "in",
+    "empty.description": "Try a different word or phrase.",
+    "empty.title": "No messages found",
+    "error.description": "Change the query or reopen search to try again.",
+    "error.title": "Couldn't load results",
+    "error.retry": "Try again",
+    "error.retrying": "Trying again...",
+    "idle.description":
+      "Type at least {minLength} characters or add a filter to search this wave.",
+    "idle.title": "Ready to search",
+    inputDescription:
+      "Type at least {minLength} characters or add a filter to search messages in {waveName}.",
+    inputLabel: "Search messages in {waveName}",
+    loadMore: "Load more",
+    loadingMore: "Loading...",
+    "loading.description": "Looking through {waveName}.",
+    "loading.title": "Searching messages",
+    placeholder: "Search messages",
+    "result.open": "Open message {serialNo} by {author}",
+    "result.checked": "Checked task",
+    "result.imageFallback": "image",
+    "result.mediaOnly": "Message with media or an attachment",
+    "result.serial": "Message #{serialNo}",
+    "result.unavailable": "Message by {author} cannot be opened",
+    "result.unchecked": "Unchecked task",
+    "results.count.one": "{count} result",
+    "results.count.other": "{count} results",
+    "results.queryPrefix": "for",
+    "results.status.one": '{count} result for "{query}"',
+    "results.status.other": '{count} results for "{query}"',
+    searchAll: "Search all 6529",
+    "filters.after": "After",
+    "filters.authorPlaceholder": "Search wave authors",
+    "filters.authorResults": "Wave authors",
+    "filters.before": "Before",
+    "filters.clear": "Clear filters",
+    "filters.clearAuthor": "Clear author",
+    "filters.close": "Close filters",
+    "filters.from": "From",
+    "filters.invalidRange": '"After" must be earlier than "Before".',
+    "filters.loadingAuthors": "Loading authors...",
+    "filters.noAuthors": "No matching authors in this wave.",
+    "filters.open": "Filters",
+    "filters.removeAfter": "Remove after date filter {date}",
+    "filters.removeAuthor": "Remove author filter {author}",
+    "filters.removeBefore": "Remove before date filter {date}",
+    "filters.title": "Search filters",
+    "results.filtersApplied": "Filters applied",
+    title: "Search messages",
+  } as const
+);
+
 const WAVE_GIF_PICKER_MESSAGES = objectMessages("waves.gifPicker", {
+  open: "Add GIF",
   dialogTitle: "GIF search",
+  searchPlaceholder: "Search GIFs",
+  noResults: "No GIFs found.",
+  poweredBy: "Powered by {brandName}",
+  poweredByPrefix: "Powered by",
   "status.checking": "Checking GIF search...",
   "status.ready": "GIF search is ready.",
   "unavailable.title": "GIF search is temporarily unavailable.",
@@ -558,6 +2234,8 @@ const WAVE_EXPLORE_CARD_MESSAGES = objectMessages("waves.explore.card", {
   coverAlt: "{waveName} cover",
   "dropsCount.one": "{timeAgo} · {count} drop",
   "dropsCount.other": "{timeAgo} · {count} drops",
+  "dropsCountAgo.one": "{timeAgo} ago · {count} drop",
+  "dropsCountAgo.other": "{timeAgo} ago · {count} drops",
   noDropsYet: "No drops yet",
   viewAriaLabel: "View wave {waveName}",
   viewWithScoreAriaLabel: "View wave {waveName}. {scoreSummary}",
@@ -618,6 +2296,8 @@ const WAVE_REP_ACTION_MESSAGES = objectMessages("waves.rep.action", {
 } as const);
 
 const WAVE_REP_MODAL_MESSAGES = objectMessages("waves.rep.modal", {
+  title: "Rate Wave REP",
+  closeAriaLabel: "Close Wave REP dialog",
   remove: "Remove",
   removeAriaLabel: "Remove Wave REP",
   noAvailableCredit:
@@ -635,10 +2315,7 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
   "categories.title": "Categories",
   "categories.loading": "Loading",
   "categories.all": "All",
-  "categories.active": "Category",
-  "categories.activeAriaLabel": "Choose active Wave REP category",
-  "categories.browse": "Show all categories",
-  "categories.searchPlaceholder": "Search categories",
+  "categories.searchPlaceholder": "Search categories…",
   "categories.searchAriaLabel": "Search Wave REP categories",
   "categories.noMatches": "No matching categories",
   "categories.allAriaLabel":
@@ -650,6 +2327,7 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
   "categories.loadMoreError": "Could not load more categories.",
   "categories.loadingMore": "Loading categories",
   "categories.loadMore": "Load more categories",
+  "categories.searchMore": "Search more categories",
   "view.ariaLabel": "Wave REP detail view",
   "view.contributors": "Contributors",
   "view.activity": "Activity",
@@ -657,8 +2335,6 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
   "contributors.heading.category": "Contributors in {category}",
   "contributors.description.all": "{contributors}",
   "contributors.description.category": "{contributors}, {rep}",
-  "contributors.categoryFilter": "Category: {category}",
-  "contributors.categoryFilterAll": "All",
   "contributors.error": "Could not load contributors.",
   "contributors.empty.all": "No Wave REP yet.",
   "contributors.empty.category": "No contributors in {category} yet.",
@@ -691,6 +2367,23 @@ const USER_RATE_MESSAGES = objectMessages("user.rate", {
 const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "metadata.title": "Tech",
   "metadata.description": "About",
+  "index.eyebrow": "About / Tech",
+  "index.title": "Tech Updates",
+  "index.intro":
+    "This is a current casual area for longer 6529 tech updates: repo work, bot notes, release context, and build reports that are too large for a single wave drop.",
+  "index.longUpdates":
+    "Long updates, repo analysis, bot context, and links back into the wave conversation.",
+  "index.liveActivity":
+    "Shorter live repo activity still belongs in {followTheRepo}. This page is the linkable longer-form shelf beside it.",
+  "index.followTheRepo": "Follow The Repo",
+  "index.activeTechnicalNotes": "Active Technical Notes",
+  "index.authChanges": "Auth changes",
+  "index.walletAuthenticationTitle": "Wallet authentication upgrade",
+  "index.walletAuthenticationDescription":
+    "What is changing with the new secure session, why users may be asked to upgrade, and what to expect during rollout.",
+  "index.reportsEyebrow": "Index",
+  "index.reportsTitle": "Reports",
+  "index.openLatestReport": "Open latest report",
   "index.prsCovered": "PRs Covered",
   "notes.walletAuthentication.ariaLabel":
     "Wallet authentication upgrade: what is changing with the new secure session",
@@ -733,6 +2426,55 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "walletAuth.same.assets": "You do not need to move tokens or assets.",
   "walletAuth.same.desktop":
     "The 6529 Desktop app continues using the existing connection flow during this rollout.",
+  "walletAuth.builders.title": "Building with the API",
+  "walletAuth.builders.body":
+    "External clients should use the session-v2 API authentication guide instead of the user upgrade notes on this page.",
+  "walletAuth.builders.link": "Open API authentication guide",
+} as const);
+
+const REVIEWBOT_USAGE_MESSAGES = objectMessages("reviewbotUsage", {
+  "header.eyebrow": "Open Data",
+  "header.title": "6529bot Usage",
+  "header.description":
+    "Public AI review activity across configured 6529 repositories.",
+  "status.loading": "Loading 6529bot usage data.",
+  "status.loaded":
+    "6529bot usage data loaded. {reviewRuns} review runs across {dailyRows} daily rows.",
+  "metrics.reviewRuns": "Review Runs",
+  "metrics.uniquePrs": "Unique PRs",
+  "metrics.estimatedSpend": "Estimated Spend",
+  "metrics.averageRun": "Avg / Run",
+  "metrics.averagePr": "Avg / PR",
+  "metrics.tokens": "Tokens",
+  "metrics.budgetSkips": "Budget Skips",
+  "analysis.title": "Cost Analysis",
+  "analysis.budgetSkipRate": "Budget Skip Rate",
+  "analysis.averageTokensRun": "Avg Tokens / Run",
+  "analysis.averageTokensPr": "Avg Tokens / PR",
+  "analysis.topRepo": "Top Repo",
+  "analysis.topProvider": "Top Provider",
+  "analysis.topReviewType": "Top Review Type",
+  "sections.dailyUsage": "Daily Usage",
+  "sections.repositories": "Repositories",
+  "sections.providersModels": "Providers and Models",
+  "sections.reviewTypes": "Review Types",
+  "columns.day": "Day",
+  "columns.repository": "Repository",
+  "columns.providerModel": "Provider and Model",
+  "columns.reviewType": "Review Type",
+  "columns.runs": "Runs",
+  "columns.spend": "Spend",
+  "columns.average": "Avg",
+  "columns.tokens": "Tokens",
+  "columns.skips": "Skips",
+  "table.rows": "{count} rows",
+  "table.scrollableLabel": "{title} table, scrollable",
+  "table.empty": "No usage recorded.",
+  window: "Window: {from} to {to}",
+  "unavailable.title": "Usage Data Unavailable",
+  "values.none": "None",
+  "values.unknown": "unknown",
+  "values.topCost": "{name} ({cost}, {percent})",
 } as const);
 
 const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
@@ -746,11 +2488,468 @@ const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
 ] as const);
 
 const COMMON_MESSAGES = objectMessages("common", {
+  back: "Back",
   close: "Close",
+  expandEditor: "Expand editor",
 } as const);
 
+const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {
+  add: "Add",
+  addAriaLabel: "Add identity filter",
+  apply: "Done",
+  clearAll: "Clear all",
+  description:
+    "Add handles, ENS names, or wallet addresses. Results update as filters change.",
+  duplicate: "That identity is already included.",
+  empty: "No identity filters added. Showing everyone.",
+  inputLabel: "Handle, ENS name, or wallet address",
+  open: "Filter by identity",
+  placeholder: "Handle, ENS, or wallet address",
+  remove: "Remove {identity} from filters",
+  "selected.one": "{count} identity selected",
+  "selected.other": "{count} identities selected",
+  title: "Filter by identity",
+} as const);
+
+const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
+  "search.emptyDescription":
+    "Try another collection name or clear the search to see all collections.",
+  "search.emptyTitle": "No collections found for “{query}”",
+} as const);
+
+const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
+  "readError.message": "Unable to load delegation records for {collection}.",
+  "readError.retry": "Try Again",
+  "scope.all":
+    "Records here apply across every supported delegation collection.",
+  "scope.memes": "Records here apply only to The Memes collection.",
+  "scope.memeLab": "Records here apply only to Meme Lab.",
+  "scope.gradient": "Records here apply only to 6529 Gradient.",
+  "scope.selected": "Records here apply to the selected collection scope.",
+  "navigation.back": "Back to Delegation Center",
+  "connect.title": "Connect Wallet to Manage {collection}",
+  "connect.description":
+    "Connect the wallet whose outgoing and incoming records you want to review.",
+  "connect.button": "Connect Wallet",
+  "network.switch": "Switch to {network}",
+  "network.ethereumMainnet": "Ethereum Mainnet",
+  "network.sepolia": "Sepolia Network",
+  "sections.delegations.title": "Delegations",
+  "sections.delegations.description":
+    "Delegations let another wallet use NFT utility for this collection scope without moving the NFT.",
+  "sections.delegations.outgoing": "Outgoing Delegations",
+  "sections.delegations.incoming": "Incoming Delegations",
+  "sections.managers.title": "Delegation Managers",
+  "sections.managers.description":
+    "Manager rights let another wallet maintain delegations or consolidations for this collection scope.",
+  "sections.managers.outgoing": "Outgoing Manager Rights",
+  "sections.managers.incoming": "Incoming Manager Rights",
+  "sections.consolidations.title": "Consolidations",
+  "sections.consolidations.description":
+    "Consolidations link wallets you control so 6529 can treat them together for collection metrics.",
+  "sections.consolidations.outgoing": "Outgoing Consolidations",
+  "sections.consolidations.incoming": "Incoming Consolidations",
+  "scopeLabel.delegations": "delegations",
+  "scopeLabel.managers": "Delegation Managers",
+  "scopeLabel.consolidations": "consolidations",
+  "direction.outgoing": "outgoing",
+  "direction.incoming": "incoming",
+  "records.empty": "No {direction} {scope} found for {collection}",
+  "records.fetching": "Fetching {direction} {scope} for {collection}",
+  "row.allTokens": "all tokens",
+  "row.tokenId": " - token ID: {tokens}",
+  "row.status.active": "consolidation active",
+  "row.status.incomplete": "consolidation incomplete",
+  "row.status.unavailable": "consolidation status unavailable",
+  "row.consolidationMissing": "{label} consolidation missing",
+  "row.label.incoming": "Incoming",
+  "row.label.outgoing": "Outgoing",
+  "outgoing.selectBulk": "Select {wallet} for bulk revoke",
+  "outgoing.editAriaLabel": "Edit delegation for {wallet}",
+  "outgoing.edit": "Edit",
+  "outgoing.revokeAriaLabel": "Revoke delegation for {wallet}",
+  "outgoing.revoke": "Revoke",
+  "outgoing.selected": "Selected: {count}",
+  "outgoing.selectedMax": "{count} (max)",
+  "outgoing.batchRevoke": "Batch Revoke",
+  "incoming.selectOriginal": "Select {wallet} as original delegator",
+  "incoming.actionsDescription":
+    "Select a delegator above, then choose an action to perform on their behalf.",
+  "incoming.registerDelegation": "Register Delegation",
+  "incoming.registerManager": "Register Delegation Manager",
+  "incoming.registerConsolidation": "Register Consolidation",
+  "incoming.assignPrimary": "Assign Primary Address",
+  "incoming.revoke": "Revoke",
+  "transaction.pending": "Transaction pending",
+  "toast.revokingDelegation": "Revoking Delegation",
+  "toast.revokingDelegationFailed": "Revoking Delegation Failed",
+  "toast.revokingDelegationsFailed": "Revoking Delegations Failed",
+  "toast.batchRevoking": "Batch Revoking Delegations",
+  "toast.revokeStartFailed": "Failed to start revoking delegation.",
+  "toast.batchRevokeStartFailed": "Failed to start revoking delegations.",
+  "toast.confirmationFailed":
+    "Transaction failed while waiting for confirmation.",
+  "toast.lockingWallet": "Locking Wallet",
+  "toast.unlockingWallet": "Unlocking Wallet",
+  "toast.lockFailed": "{title} Failed",
+  "toast.walletLockStartFailed": "Failed to start wallet lock update.",
+  "toast.useCaseLockStartFailed": "Failed to start use-case lock update.",
+  "toast.lockingUseCase":
+    "Locking Wallet on Use Case\n#{useCase} {useCaseName}",
+  "toast.unlockingUseCase":
+    "Unlocking Wallet on Use Case\n#{useCase} {useCaseName}",
+  "locks.title": "Locks",
+  "locks.tooltip":
+    "Locks only block incoming delegations for this collection scope. They do not revoke outgoing records.",
+  "locks.description":
+    "Locks block incoming delegations for this collection scope. They do not stop delegations you already made to other wallets.",
+  "locks.wallet.lock": "Lock Wallet",
+  "locks.wallet.unlock": "Unlock Wallet",
+  "locks.useCase.ariaLabel": "Lock or unlock use case",
+  "locks.useCase.placeholder": "Lock/Unlock Use Case",
+  "locks.useCase.lock": "Lock Use Case",
+  "locks.useCase.unlock": "Unlock Use Case",
+  "locks.useCase.unavailable":
+    "This use case is unavailable. Select another use case and try again.",
+  "locks.note.label": "Note:",
+  "locks.useCase.globalNotePrefix": "Unlock use case in",
+  "locks.allCollections": "All Collections",
+  "locks.option.locked": "#{useCase} - {name} - LOCKED{globalMarker}",
+  "locks.option.unlocked": "#{useCase} - {name} - UNLOCKED",
+  "locks.note.local": "Unlock Wallet to lock/unlock specific use cases",
+  "locks.note.globalPrefix": "Unlock Wallet on",
+  "locks.note.globalSuffix":
+    "to lock/unlock specific collections and use cases",
+  "walletChecker.never": "Never",
+  "walletChecker.all": "All",
+  "walletChecker.delegations.title": "Delegations ({count})",
+  "walletChecker.managers.title": "Delegation Managers ({count})",
+  "walletChecker.consolidations.title": "Consolidations ({count})",
+  "walletChecker.columns.from": "From",
+  "walletChecker.columns.to": "To",
+  "walletChecker.columns.collection": "Collection",
+  "walletChecker.columns.useCase": "Use Case",
+  "walletChecker.columns.tokens": "Tokens",
+  "walletChecker.columns.expiry": "Expiry",
+  "walletChecker.delegations.empty": "No delegations found",
+  "walletChecker.managers.empty": "No delegation managers found",
+  "walletChecker.consolidations.empty": "No consolidations found",
+  "walletChecker.activeDelegation": "Active Minting Delegation for The Memes",
+  "walletChecker.activeConsolidation": "Active Consolidation",
+  "walletChecker.labels.to": "To:",
+  "walletChecker.labels.collection": "Collection:",
+  "walletChecker.labels.useCase": "Use Case:",
+  "walletChecker.labels.expiry": "Expiry:",
+  "walletChecker.incompleteConsolidation": "Incomplete Consolidation",
+  "walletChecker.recommendedActions": "Recommended Actions:",
+  "walletChecker.registerConsolidation":
+    "Register Consolidation from {from} to {to}",
+} as const);
+
+const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
+  "wave.byAuthor": "by {author}",
+  "wave.serial": "Wave #{serial}",
+  "wave.label": "Wave",
+  "category.all": "All",
+  "category.nfts": "NFTs",
+  "category.pages": "Pages",
+  "category.profiles": "Profiles",
+  "category.waves": "Waves",
+  "category.error": "Some results could not be loaded",
+  "category.loading": "Loading {category} results",
+  clear: "Clear search",
+  clearShort: "Clear",
+  close: "Close search",
+  "dialogTitle.site": "Search 6529",
+  "dialogTitle.wave": "Search this Wave",
+  "dialogDescription.site": "Find pages, NFTs, profiles, and Waves.",
+  error: "Something went wrong while searching. Please try again.",
+  "error.partial.one": "{category} results could not be loaded.",
+  "error.partial.other": "Some result types could not be loaded: {categories}.",
+  goBack: "Go back",
+  idle: "Start typing to search 6529.io",
+  "idleWithCountdown.one":
+    "Start typing to search 6529.io ({count} more character)",
+  "idleWithCountdown.other":
+    "Start typing to search 6529.io ({count} more characters)",
+  "inputDescription.site":
+    "Type at least {minLength} characters to search 6529.io.",
+  "inputDescription.wave":
+    "Type at least {minLength} characters to search messages in this Wave.",
+  inputLabel: "Search 6529",
+  loading: "Searching...",
+  loadingFor: 'Searching for "{query}"',
+  "mode.site": "Site-wide",
+  "mode.wave": "In this Wave",
+  noResults: "No results found",
+  noResultsFor: 'No matches in {category} for "{query}"',
+  noResultsHint:
+    "Check the spelling, try fewer words, or choose another result type.",
+  "placeholder.site": "Search 6529.io",
+  "placeholder.wave": "Search messages",
+  retry: "Try Again",
+  "results.count.one": "{count} result",
+  "results.count.other": "{count} results",
+  "results.queryPrefix": "for",
+  "results.panelLabel": "{category} results",
+  "results.status.one": '{count} result for "{query}"',
+  "results.status.other": '{count} results for "{query}"',
+  "recent.description": "Pick up where you left off.",
+  "recent.title": "Recent searches",
+  scopeLabel: "Result type",
+  "scope.allResults": "all results",
+  viewAllCategory: "View all {category}",
+} as const);
+
+const OPEN_DATA_DOWNLOAD_MESSAGES = objectMessages("openData.downloads", {
+  pageTitle: "{title} Downloads",
+  loading: "Loading downloads...",
+  loadError: "Failed to load community downloads. Please try again.",
+  "columns.date": "Date",
+  "columns.link": "Link",
+  "columns.tokenId": "Token ID",
+} as const);
+
+const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
+  "heading.gas": "Meme Gas",
+  "heading.accounting": "Meme Accounting",
+  "collection.label": "Collection",
+  "collection.theMemes": "The Memes",
+  "collection.memeLab": "Meme Lab",
+  "filters.artist": "Artist",
+  "filters.period": "Period",
+  "filters.all": "All",
+  "filters.primarySales": "Primary Sales",
+  "filters.customBlocks": "Custom Blocks",
+  "filters.date.today": "Today",
+  "filters.date.yesterday": "Yesterday",
+  "filters.date.lastSevenDays": "Last 7 Days",
+  "filters.date.monthToDate": "Month to Date",
+  "filters.date.lastMonth": "Last Month",
+  "filters.date.yearToDate": "Year to Date",
+  "filters.date.lastYear": "Last Year",
+  "filters.date.all": "All",
+  "filters.date.customDates": "Custom Dates",
+  "filters.blocks.both": "from block: {from} to block: {to}",
+  "filters.blocks.from": "from block: {from}",
+  "filters.blocks.to": "to block: {to}",
+  "filters.dates.both": "from: {from} to: {to}",
+  "filters.dates.from": "from: {from}",
+  "filters.dates.to": "to: {to}",
+  download: "Download",
+  "columns.memeCardCount": "Meme Card (x{count})",
+  "columns.memeLabCardCount": "Meme Lab Card (x{count})",
+  "columns.artist": "Artist",
+  "columns.gasEth": "Gas (ETH)",
+  "columns.volume": "Volume",
+  "columns.primaryProceeds": "Primary Proceeds",
+  "columns.royalties": "Royalties",
+  "columns.effectiveRoyalty": "Effective Royalty %",
+  "columns.artistSplit": "Artist Split",
+  total: "TOTAL",
+  "gas.loadError": "Error: Failed to load gas data. Please try again.",
+  "gas.empty": "No gas info found for selected dates",
+  "royalties.loadError":
+    "Error: Failed to load royalties data. Please try again.",
+  "royalties.empty": "No royalties found for selected dates",
+  ethFootnote: "All values are in ETH",
+  "tooltip.primaryProceeds.label": "About primary proceeds",
+  "tooltip.primaryProceeds.description":
+    "Total Minter payments less the Manifold fee",
+  "tooltip.artistSplit.label": "About the artist split",
+  "tooltip.artistSplit.primaryMemeLab":
+    "Primary mint revenues in Meme Lab are split between the artist and the collection solely at the artist's discretion.",
+  "tooltip.artistSplit.secondaryMemeLab":
+    "Secondary royalties in Meme Lab are split between the artist and the collection solely at the artist's discretion.",
+  "tooltip.artistSplit.primaryMemes":
+    "Primary mint revenues in The Memes are split 50:50 between the artist and the collection.",
+  "tooltip.artistSplit.secondaryMemes":
+    "Secondary royalties in The Memes are split 50:50 between the artist and the collection.",
+  "tooltip.artistSplit.customArrangements":
+    "6529 and 6529er have custom arrangements not reflected here for simplicity.",
+  "token.manualSaleNote":
+    "Figures not easily calculable as card was sold manually",
+} as const);
+
+const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
+
 export const EN_US_MESSAGES = {
+  ...COLLECT_MESSAGES,
+  ...profileCmsStudioMessages,
+  ...studioTemplateDescriptions,
+  ...profileCmsStudioUploadMessages,
+  ...studioWalletImportMessages,
+  "nftActivity.loading": "Loading NFT activity…",
+  "nftActivity.error": "Could not load NFT activity.",
+  "nftActivity.moreError": "Could not load more NFT activity.",
+  "nftActivity.retry": "Try again",
+  "nftActivity.empty": "No NFT activity found.",
+  "nftActivity.notAvailable": "Not available",
+  "nftActivity.tableLabel": "NFT activity",
+  "nftActivity.cardTitle": "Card Activity",
+  "nftActivity.action": "Action",
+  "nftActivity.item": "Item",
+  "nftActivity.maker": "From / maker",
+  "nftActivity.recipient": "To / recipient",
+  "nftActivity.totalPrice": "Total",
+  "nftActivity.date": "Date",
+  "nftActivity.collectionWide":
+    "Collection-level order · card eligibility varies",
+  "nftActivity.quantity": "Quantity {quantity}",
+  "nftActivity.token": TOKEN_NUMBER_MESSAGE,
+  "nftActivity.observedStatus": "Observed status",
+  "nftActivity.providerEvent": "Observed provider event",
+  "nftActivity.providerStatus": "Confirmed by provider status",
+  "nftActivity.elapsedExpiry": "Expired at the stated order time",
+  "nftActivity.scrollRegion": "Scrollable NFT activity table",
+  "nftActivity.transactionLink":
+    "View transaction on Etherscan (opens in a new tab)",
+  "nftActivity.marketHistory":
+    "Marketplace actions are available from {date}; earlier on-chain history may still appear.",
+  "nftActivity.loadingMore": "Loading more…",
+  "nftActivity.loadMore": "Load more",
+  "nftActivity.collections.memes": "The Memes",
+  "nftActivity.collections.memeLab": "Meme Lab",
+  "nftActivity.collections.gradients": "6529 Gradient",
+  "nftActivity.collections.nextgen": "NextGen",
+  "nftActivity.actions.sale": "Sold",
+  "nftActivity.actions.purchase": "Purchased",
+  "nftActivity.actions.mint": "Minted",
+  "nftActivity.actions.airdrop": "Airdropped",
+  "nftActivity.actions.transfer": "Transferred",
+  "nftActivity.actions.burn": "Burned",
+  "nftActivity.actions.listing": "Listed",
+  "nftActivity.actions.offer": "Offer",
+  "nftActivity.actions.cancellation": "Cancelled",
+  "nftActivity.actions.expiration": "Expired",
+  "nftActivity.actions.invalidation": "Invalidated",
+  "nftActivity.actions.revalidation": "Revalidated",
+  "nftActivity.actions.fulfilled": "Order filled",
+  "nftActivity.actions.unknown": "Unknown action ({action})",
+  "nftActivity.filters.collection": "Collection",
+  "nftActivity.filters.type": "Activity type",
+  "nftActivity.filters.all": "All activity",
+  "nftActivity.filters.airdrops": "Airdrops",
+  "nftActivity.filters.mints": "Mints",
+  "nftActivity.filters.sales": "Sales",
+  "nftActivity.filters.purchases": "Purchases",
+  "nftActivity.filters.transfers": "Transfers",
+  "nftActivity.filters.burns": "Burns",
+  "nftActivity.filters.listings": "Listings",
+  "nftActivity.filters.offers": "Offers",
+  "nftActivity.filters.cancellations": "Cancellations",
+  "nftActivity.filters.expirations": "Expirations",
+  "nftActivity.filters.invalidations": "Invalidations",
+  "nftActivity.filters.revalidations": "Revalidations",
+  "nftPicker.address.label": "Select collection",
+  "nftPicker.address.placeholder": "Paste an Ethereum contract address…",
+  "nftPicker.address.help":
+    "Paste the collection's Ethereum contract address (0x…). Collection-name search is unavailable.",
+  "nftPicker.address.invalid":
+    "Enter a valid Ethereum contract address: 0x followed by 40 hexadecimal characters.",
+  "nftPicker.address.loading": "Looking up collection…",
+  "nftPicker.address.error": "Could not load this collection. Try again.",
+  "nftPicker.address.notFound":
+    "No collection metadata found for this address. Check the address and try another.",
+  "nftPicker.address.unsupported":
+    "Only ERC-721 collections can be selected here.",
+  "nftPicker.address.found": "Select the collection below to continue.",
+  "nftPicker.address.retry": "Try again",
+  "profilePreferences.title": "Profile Preferences",
+  "profilePreferences.button": "Preferences",
+  "profilePreferences.loading": "Loading profile preferences",
+  "profilePreferences.loadError":
+    "Couldn’t load profile preferences. Please try again.",
+  "profilePreferences.save": "Save Changes",
+  "profilePreferences.saving": "Saving…",
+  "profilePreferences.saveSuccess": "Profile preferences saved.",
+  "profilePreferences.saveError":
+    "Couldn’t save profile preferences. Please try again.",
+  "profilePreferences.dm.heading": "Who can start a direct message with me?",
+  "profilePreferences.dm.description":
+    "This only affects new conversations. Existing direct messages and group messages stay available.",
+  "profilePreferences.dm.EVERYONE.label": "Everyone",
+  "profilePreferences.dm.EVERYONE.description":
+    "Any profile can start a new conversation with you.",
+  "profilePreferences.dm.PEOPLE_I_FOLLOW.label": "People I follow",
+  "profilePreferences.dm.PEOPLE_I_FOLLOW.description":
+    "Only profiles you follow can start a new conversation with you.",
+  "profilePreferences.dm.NOBODY.label": "Nobody",
+  "profilePreferences.dm.NOBODY.description":
+    "No one can start a new conversation with you.",
+  "profilePreferences.dm.createRetry": PLEASE_TRY_AGAIN,
+  "profilePreferences.notifications.heading": "Notifications",
+  "profilePreferences.notifications.description":
+    "Choose between All and Essential notifications.",
+  "profilePreferences.notifications.ALL.label": "All",
+  "profilePreferences.notifications.ALL.description":
+    "Essential security and account notifications, plus the optional categories selected below.",
+  "profilePreferences.notifications.ESSENTIAL_ONLY.label": "Essential",
+  "profilePreferences.notifications.ESSENTIAL_ONLY.description":
+    "Security and account notifications only.",
+  "profilePreferences.notifications.paused": "Paused",
+  "profilePreferences.notifications.category.direct_messages":
+    "Direct messages and wave activity",
+  "profilePreferences.notifications.category.mentions_replies_quotes":
+    "Mentions, replies, and quotes",
+  "profilePreferences.notifications.category.reactions_votes_boosts":
+    "Reactions, votes, and boosts",
+  "profilePreferences.notifications.category.new_followers": "New followers",
+  "profilePreferences.notifications.category.rep_and_nic":
+    "REP and NIC updates",
+  "profilePreferences.notifications.category.subscription_coverage":
+    "Subscription coverage",
+  "profilePreferences.notifications.deviceNote":
+    "Push notifications are managed separately on each device.",
+  "notifications.filter.ariaLabel": "Filter notifications: {selection}",
+  "notifications.filter.selected": "{count} selected",
+  "notifications.filter.sheetTitle": "Filter notifications",
+  "notifications.status.unread": "Unread",
+  "notifications.preview.expand": "Show full drop",
+  "notifications.filter.option.mentions": "Mentions",
+  "notifications.filter.option.replies": "Replies",
+  "notifications.filter.option.identity": "Identity",
+  "notifications.filter.option.reactions": "Reactions",
+  "notifications.filter.option.invites": "Invites",
+  "notifications.filter.option.subscriptions": "Subscriptions",
+  "linkPreview.twitter.kind.article": "Article",
+  "linkPreview.twitter.kind.post": "Post",
+  "linkPreview.twitter.article.provider": "Article on X",
+  "linkPreview.twitter.article.read": "Read article: {title}",
+  ...IDENTITY_FILTER_MESSAGES,
+  ...XTDH_COLLECTION_MESSAGES,
+  ...COLLECTION_DELEGATION_MESSAGES,
   ...join6529Messages,
+  "nextgen.brand": "NextGen",
+  "nextgen.navigation.featured": "Featured",
+  "nextgen.navigation.collections": "Collections",
+  "nextgen.navigation.artists": "Artists",
+  "nextgen.navigation.about": "About",
+  "nextgen.navigation.featuredAriaLabel": "NextGen featured",
+  "nextgen.navigation.sectionsAriaLabel": "NextGen sections",
+  "nextgen.token.navigation.viewOwnerCollected": "View {profile}'s collected",
+  "nextgen.home.byArtist": "by {artist}",
+  "nextgen.home.exploreCollection": "Explore Collection",
+  "nextgen.home.summary":
+    "NextGen is an on-chain generative art NFT contract. It is also a tool to support the ambitious aspirations of the 6529 community in the areas of art experimentation and decentralized social organization.",
+  "nextgen.home.learnMore": "Learn More",
+  "nextgen.home.exploreNamedCollection": "Explore {collectionName}",
+  "nextgen.home.featuredArtist": "Featured Artist",
+  "nextgen.home.distributionPlan": "Distribution Plan",
+  "nextgen.about.title": "About NextGen",
+  "nextgen.about.sections.overallApproach": "Overall Approach",
+  "nextgen.about.sections.nativeAllowlists": "Native Allowlists",
+  "nextgen.about.sections.nativeDelegation": "Native Delegation",
+  "nextgen.about.sections.personalization":
+    "Personalization, Customization and Collector Provenance",
+  "nextgen.about.sections.extraOnChain": "Extra On-Chain™",
+  "nextgen.about.sections.artistProvenance": "Artist Provenance",
+  "nextgen.about.sections.randomization": "Multiple Randomization Methods",
+  "nextgen.about.sections.phases": "Phases / Periodicity",
+  "nextgen.about.sections.mintingSales": "Minting Sales Models",
+  "nextgen.about.sections.libraries": "On-Chain Libraries",
+  "nextgen.about.sections.moreInformation": "More Information",
+  "nextgen.about.sections.collectionsModel": "NextGen Collections Model",
   "auth.sessionUpgrade.action": "Upgrade Authentication",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",
   "auth.signModal.upgradeAuthentication": "Upgrade Authentication",
@@ -812,6 +3011,11 @@ export const EN_US_MESSAGES = {
   "acceptConnection.toast.acceptFailed":
     "Couldn't accept this connection. Please try again.",
   "navigation.primary.ariaLabel": "Primary navigation",
+  "navigation.primary.loading.home": "Loading home",
+  "navigation.primary.loading.discovery": "Loading discovery",
+  "navigation.primary.loading.network": "Loading network",
+  "navigation.primary.loading.collections": "Loading collections",
+  "navigation.primary.loading.notifications": "Loading notifications",
   "appWallet.validation.name.alphanumericSpaces":
     "Name can only contain alphanumeric characters and spaces",
   "appWallet.validation.password.minLength":
@@ -824,44 +3028,104 @@ export const EN_US_MESSAGES = {
     "Password must include an uppercase letter",
   "appWallet.validation.password.number": "Password must include a number",
   "appWallet.validation.password.symbol": "Password must include a symbol",
-  "headerShare.trigger.ariaLabel": "QR Code",
-  "headerShare.trigger.title": "QR Code",
+  "appWallet.modal.close": "Close wallet dialog",
+  "appWallet.modal.cancel": "Cancel",
+  "appWallet.modal.walletName": "Wallet Name",
+  "appWallet.modal.walletNamePlaceholder": "My Wallet...",
+  "appWallet.modal.walletPassword": "Wallet Password",
+  "appWallet.modal.passwordPlaceholder": "Enter password",
+  "appWallet.modal.showPassword": "Show password",
+  "appWallet.modal.hidePassword": "Hide password",
+  "appWallet.modal.createTitle": "Create New Wallet",
+  "appWallet.modal.importTitle": "Import Wallet",
+  "appWallet.modal.unlockTitle": "Unlock Wallet",
+  "appWallet.modal.create": "Create",
+  "appWallet.modal.creating": "Creating...",
+  "appWallet.modal.import": "Import",
+  "appWallet.modal.importing": "Importing...",
+  "appWallet.modal.unlock": "Unlock",
+  "appWallet.modal.unlocking": "Unlocking...",
+  "appWallet.modal.createHelp":
+    "Provide a name and password for your new wallet.",
+  "appWallet.modal.unlockHelp": "Provide your wallet password to continue.",
+  "appWallet.modal.unlockFailed": "Failed to unlock wallet",
+  "appWallet.modal.createFailed":
+    "Couldn't create this wallet. Check the details and try again.",
+  "appWallet.modal.createSuccess": "Wallet created.",
+  "appWallet.modal.recoveryDownloadPrompt":
+    "Download the recovery file now to keep access to {walletName}.",
+  "appWallet.modal.importFailed":
+    "Couldn't import this wallet. Check the file and try again.",
+  "appWallet.modal.importSuccess": "Wallet imported.",
+  "appWallet.modal.sensitiveConfirmation":
+    "Type {confirmation} to confirm {action}",
+  "profileSetup.requiredTitle": "You need to set up a profile to continue.",
+  "profileSetup.messagesDescription": "Create a profile to access messages.",
+  "profileSetup.notificationsDescription":
+    "Create a profile to access notifications.",
+  "profileSetup.createAction": "Create profile",
+  "headerShare.trigger.ariaLabel": "Share this page",
+  "headerShare.trigger.title": "Share this page",
   "headerShare.trigger.text": "Share",
-  "headerShare.modal.title": "Share",
-  "headerShare.modal.closeAriaLabel": "Close share modal",
-  "headerShare.menu.shareType": "Share Type",
-  "headerShare.menu.selectPlatform": "Select Platform",
-  "headerShare.menu.openLinkIn": "Open Link In",
-  "headerShare.menu.openUrlIn": "Open URL In",
-  "headerShare.menu.connection": "Connection",
-  "headerShare.menu.currentUrl": "Current URL",
-  "headerShare.menu.apps": "6529 Apps",
-  "headerShare.menu.mobile": "6529 Mobile",
+  "headerShare.shareModal.title": "Share",
+  "headerShare.shareModal.closeAriaLabel": "Close share modal",
+  "headerShare.shareModal.backdropAriaLabel": "Dismiss share modal",
+  "headerShare.connectModal.title": "Connect Device",
+  "headerShare.connectModal.closeAriaLabel": "Close connect device modal",
+  "headerShare.connectModal.backdropAriaLabel": "Dismiss connect device modal",
+  "headerShare.connectModal.downloadApps": "Download apps",
+  "headerShare.connectModal.downloadAppsAriaLabel": "Open 6529 app downloads",
+  "headerShare.menu.deviceType": "Device type",
+  "headerShare.menu.qrTarget": "QR code target",
   "headerShare.menu.browser": "Browser",
-  "headerShare.menu.desktop": "6529 Desktop",
-  "headerShare.qr.browserAlt": "Browser Link - QR Code",
+  "headerShare.menu.app": "App",
+  "headerShare.menu.mobile": "Mobile",
+  "headerShare.menu.desktop": "Desktop",
+  "headerShare.qr.browserAlt": "Current page QR code",
   "headerShare.qr.mobileAlt": "Mobile App Link - QR Code",
-  "headerShare.qr.shareConnectionAlt": "Share Connection - QR Code",
+  "headerShare.qr.shareConnectionAlt": "Connect 6529 Mobile QR code",
   "headerShare.core.alt": "6529 Desktop",
   "headerShare.core.open": "Open in 6529 Desktop",
   "headerShare.connectionNotice.legacyTitle": "Update Authentication",
-  "headerShare.connectionNotice.loadingTitle": "Preparing Connection",
-  "headerShare.connectionNotice.errorTitle": "Connection Sharing Unavailable",
+  "headerShare.connectionNotice.loadingTitle": "Preparing Device Connection",
+  "headerShare.connectionNotice.errorTitle": "Device Connection Unavailable",
   "headerShare.connectionNotice.unauthenticatedTitle": "Sign In Required",
   "headerShare.connectionNotice.legacyMessage":
-    "You can't share a connection from your current authentication. Update to the new secure session first.",
+    "You can't connect a device from your current authentication. Update to the new secure session first.",
   "headerShare.connectionNotice.loadingMessage":
     "Creating a one-time connection code.",
   "headerShare.connectionNotice.errorMessage":
-    "We couldn't create a connection share. Close this dialog and try again.",
+    "We couldn't prepare this device connection. Close this dialog and try again.",
   "headerShare.connectionNotice.unauthenticatedMessage":
-    "Connect and authenticate your wallet before sharing a connection.",
+    "Connect and authenticate your wallet before connecting a device.",
   "headerShare.connectionNotice.cancel": "Cancel",
   "headerShare.connectionNotice.update": "Update",
-  "headerShare.invalidShareSubmode": "Invalid submode for SHARE",
-  "headerShare.copy.ariaLabel": "Copy URL",
-  "headerShare.copy.default": "Copy URL",
-  "headerShare.copy.copied": "Copied!",
+  "headerShare.invalidConnectTarget": "Invalid connection target",
+  "headerShare.copy.ariaLabel": "Copy link",
+  "headerShare.copy.default": "Copy Link",
+  "headerShare.copy.copied": "Copied",
+  "headerShare.social.x": "Share on X",
+  "headerShare.social.farcaster": "Share on Farcaster",
+  "headerShare.social.desktop": "Open in 6529 Desktop",
+  "headerShare.social.more": "More",
+  "headerShare.social.systemShare": "Share with another app",
+  "headerShare.social.systemShareUnavailable": "System sharing is unavailable.",
+  "headerUserMenu.profile": "Profile",
+  "headerUserMenu.connectDevice": "Connect Device",
+  "headerUserMenu.profiles": "Profiles",
+  "headerUserMenu.addProfile": "Add profile",
+  "appSidebar.openingAccountConnection": "Opening account connection",
+  "appSidebar.openProfile": "Open {name} profile",
+  "appSidebar.accountSwitchFailed":
+    "Failed to switch connected account. Please try again.",
+  "appSidebar.accountConnectionFailed":
+    "Failed to open the account connection. Please try again.",
+  "headerUserMenu.switchToProfile": "Switch to {profile} ({wallet})",
+  "headerUserMenu.signOutAll": "Sign out all",
+  "headerUserMenu.logout": "Logout",
+  "webSidebar.accountMenu.openAriaLabel": "Open account and profiles menu",
+  "webSidebar.accountMenu.openWithSwitchAriaLabel":
+    "Open account and profiles menu (double-click to switch profiles)",
   "headerPageShare.trigger.ariaLabel": "Share page",
   "headerPageShare.trigger.title": "Share page",
   "headerWaveLinkAction.share": "Share wave",
@@ -869,9 +3133,17 @@ export const EN_US_MESSAGES = {
   "headerWaveLinkAction.feedback.shared": "Link shared",
   "headerWaveLinkAction.feedback.copied": "Link copied",
   "acceptConnection.incoming.profileStats": "TDH: {tdh} · Level: {level}",
-  "tools.api.authentication.title": "Authentication",
+  "tools.api.authCallout.title": "v2 API authentication",
+  "tools.api.authCallout.description":
+    "New external clients should use session-v2 wallet authentication: request a signable message, sign it exactly, exchange the signature for an access token, then send that token as bearer auth.",
+  "tools.api.authCallout.link": "Read the full external-client auth guide",
+  "tools.api.authentication.title": "Authentication quickstart",
   "tools.api.authentication.basedOnSignatures":
-    "Authentication is based on Ethereum signatures.",
+    "Authentication is based on Ethereum signatures. For scripts and other external clients, request a native session-v2 challenge.",
+  "tools.api.authentication.externalNote":
+    "This example shows the short native/script flow for external API clients.",
+  "tools.api.authentication.fullGuideLink":
+    "Use the full guide for refresh, logout, and security notes.",
   "tools.api.authentication.flowIntro": "The flow works as follows:",
   "tools.api.authentication.requestSessionMessage":
     "Request a session-v2 signable message for the wallet you want to authenticate.",
@@ -881,8 +3153,6 @@ export const EN_US_MESSAGES = {
     "Send the signature back to the server.",
   "tools.api.authentication.receiveToken":
     "Receive a JWT bearer token, which you can include in headers of subsequent requests.",
-  "tools.api.authentication.nodeExample":
-    "Here's a full example in Node.js using ethers and node-fetch:",
   "home.boostedDrop.anonymousAuthor": "Anonymous",
   "home.boostedDrop.badge": "Boosted drop",
   "home.boostedDrop.boost": "Boost",
@@ -897,6 +3167,7 @@ export const EN_US_MESSAGES = {
   "home.boostedDrop.removeBoost": "Remove boost",
   "home.boostedDrop.removeBoostFromDrop": "Remove boost from drop by {author}",
   "home.boostedDrop.viewAuthor": "View {author}'s profile",
+  ...homeNewcomerMessages,
   "home.mintSubscriptions.balanceLabel": "Balance",
   "home.mintSubscriptions.infoLinkAriaLabel":
     "Learn more about The Memes subscriptions",
@@ -910,8 +3181,10 @@ export const EN_US_MESSAGES = {
   "home.mintSubscriptions.action.setUp": "Set up",
   "home.mintSubscriptions.subscribeLabel": "Subscribe",
   "home.mintSubscriptions.subscribedLabel": "Subscribed",
-  "home.mintSubscriptions.subscribersCount": "x{count} subscribers",
-  "home.mintSubscriptions.subscribersLoading": "Loading subscriber count",
+  "home.mintSubscriptions.subscriptionsCount.none": "No subscriptions",
+  "home.mintSubscriptions.subscriptionsCount.value":
+    "x{count} subscription{pluralSuffix}",
+  "home.mintSubscriptions.subscriptionsLoading": "Loading subscription count",
   "home.mintSubscriptions.tooltip.connect":
     "Connect to set up subscription minting.",
   "home.mintSubscriptions.tooltip.dropped":
@@ -928,14 +3201,152 @@ export const EN_US_MESSAGES = {
     "You are not subscribed for this drop.",
   "home.mintSubscriptions.tooltip.proxy":
     "Manage subscriptions from your own profile, not a proxy session.",
+  "home.mintAllowlist.label": "Your allowance",
+  "home.mintAllowlist.allocationsAriaLabel":
+    "Mint allocations for the connected wallet",
+  "home.mintAllowlist.connectWallet": "Connect your wallet to view details.",
+  "home.mintAllowlist.checking": "Checking…",
+  "home.mintAllowlist.notPublished":
+    "Available once distribution is published.",
+  "home.mintAllowlist.notFound": "None found for this wallet.",
+  "home.mintAllowlist.unavailable": "Temporarily unavailable.",
+  "home.mintAllowlist.phase.phase0": "Phase 0",
+  "home.mintAllowlist.phase.phase1": "Phase 1",
+  "home.mintAllowlist.phase.phase2": "Phase 2",
+  "home.mintAllowlist.phase.public": "Public",
+  "home.mintAllowlist.pill.airdrop": "{phase} · {airdrop}x Airdrop",
+  "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}x Allowlist",
+  "home.mintAllowlist.pill.mixed":
+    "{phase} · {airdrop}x Airdrop · {allowlist}x Allowlist",
+  "subscriptions.coverage.title": "Subscription coverage",
+  "subscriptions.coverage.loading": "Loading subscription coverage",
+  "subscriptions.coverage.unavailable":
+    "Coverage is temporarily unavailable. Your subscription settings have not changed.",
+  "subscriptions.coverage.stale":
+    "Last known coverage is shown and may be out of date.",
+  "subscriptions.coverage.refresh": "Refresh coverage",
+  "subscriptions.coverage.status.covered": "Covered",
+  "subscriptions.coverage.status.planTopUp": "Plan a top up",
+  "subscriptions.coverage.status.runningLow": "Running low",
+  "subscriptions.coverage.status.actionRequired": "Action required",
+  "subscriptions.coverage.status.notSetUp": "Not set up",
+  "subscriptions.coverage.status.noEligibility": "No current eligibility",
+  "subscriptions.coverage.status.noSelections": "No upcoming drops selected",
+  "subscriptions.coverage.status.unknown": "Coverage unavailable",
+  "subscriptions.coverage.action.setUp": "Set up",
+  "subscriptions.coverage.action.chooseDrops": "Choose drops",
+  "subscriptions.coverage.action.topUp": "Top up",
+  "subscriptions.coverage.action.topUpSubscriptions": "Top up subscriptions",
+  "subscriptions.coverage.action.manage": "Manage",
+  "subscriptions.coverage.action.reviewSettings": "Review settings",
+  "subscriptions.coverage.header.title": "Subscriptions",
+  "subscriptions.coverage.mode.automatic": "Automatic",
+  "subscriptions.coverage.mode.manual": "Manual",
+  "subscriptions.coverage.mode.notConfigured": "Not configured",
+  "subscriptions.coverage.balanceEth": "{amount} ETH",
+  "subscriptions.coverage.dropsFunded.one": "{count} drop funded",
+  "subscriptions.coverage.dropsFunded.many": "{count} drops funded",
+  "subscriptions.coverage.eligibility": "Eligibility ×{count}",
+  "subscriptions.coverage.eligibilityUnknown": "Eligibility unavailable",
+  "subscriptions.coverage.editions.one": "One edition",
+  "subscriptions.coverage.editions.all": "All eligible editions",
+  "subscriptions.coverage.capacity": "Balance capacity",
+  "subscriptions.coverage.capacityUnit": "mints",
+  "subscriptions.coverage.allocated": "Forecast use",
+  "subscriptions.coverage.allocatedUnit": "allocated",
+  "subscriptions.coverage.basis":
+    "Projected from current eligibility, settings, balance, and the published Meme schedule.",
+  "subscriptions.coverage.fundedThrough": "Funded through",
+  "subscriptions.coverage.nextUnfunded": "Next unfunded",
+  "subscriptions.coverage.projected": "Projected",
+  "subscriptions.coverage.memeToken": "The Memes #{token}",
+  "subscriptions.coverage.topUpBy":
+    "Top up by {deadline} to receive The Memes #{token}.",
+  "subscriptions.coverage.noDeadline":
+    "No authoritative top-up deadline is available yet.",
+  "subscriptions.coverage.recommended":
+    "Recommended: add {amount} ETH for {count} funded drops.",
+  "subscriptions.coverage.recommendedThrough":
+    "Recommended: add {amount} ETH for {count} funded drops through The Memes #{token}.",
+  "subscriptions.coverage.notSetUp.description":
+    "Set up subscription minting so eligible Meme drops can be handled automatically or one at a time.",
+  "subscriptions.coverage.noEligibility.description":
+    "This profile is not currently eligible for an upcoming Meme mint. Subscription balance does not create eligibility.",
+  "subscriptions.coverage.noSelections.description":
+    "Manual mode has no upcoming drops selected. Choose a drop to see how long the balance will last.",
+  "subscriptions.coverage.unknown.description":
+    "The forecast inputs are incomplete. Review settings or refresh when the schedule is available.",
+  "subscriptions.coverage.covered.description":
+    "Your immediate intended drops are fully funded.",
+  "subscriptions.coverage.earlyWarning.description":
+    "You are covered for now. Plan a top up before the funded runway ends.",
+  "subscriptions.coverage.runningLow.description":
+    "Only a few intended drops remain fully funded.",
+  "subscriptions.coverage.actionRequired.description":
+    "The immediate next intended drop is not fully funded.",
+  "subscriptions.coverage.header.through":
+    "{status} · through The Memes #{token}, {date}",
+  "subscriptions.coverage.header.noFundedThrough": "{status}",
+  "subscriptions.page.title": "Subscription minting",
+  "subscriptions.page.settingsTitle": "Minting settings",
+  "subscriptions.page.learnMore": "Learn more",
+  "subscriptions.page.topUpTitle": "Top up",
+  "subscriptions.balance.title": "Subscription balance",
+  "subscriptions.balance.ethUnit": "ETH",
+  "subscriptions.balance.mintCapacity.one": "{count} mint available",
+  "subscriptions.balance.mintCapacity.many": "{count} mints available",
+  "subscriptions.balance.mintCapacity.unknown": "mint capacity unavailable",
+  "subscriptions.topUp.recommended": "Recommended",
+  "subscriptions.topUp.minimum": "Minimum for next drop",
+  "subscriptions.topUp.coversDrops.one":
+    "Funds {count} intended drop through The Memes #{token}",
+  "subscriptions.topUp.coversDrops.many":
+    "Funds {count} intended drops through The Memes #{token}",
+  "subscriptions.topUp.chooseAmount": "Choose a top-up amount",
+  "subscriptions.topUp.submit": "Top up {amount} ETH",
+  "subscriptions.topUp.cardCount.one": "{count} Card",
+  "subscriptions.topUp.cardCount.many": "{count} Cards",
+  "subscriptions.topUp.cardOption.one": "{label} - {count} Card",
+  "subscriptions.topUp.cardOption.many": "{label} - {count} Cards",
+  "subscriptions.topUp.modalSubtitle.one": "{count} Card - {amount} ETH",
+  "subscriptions.topUp.modalSubtitle.many": "{count} Cards - {amount} ETH",
+  "subscriptions.topUp.validation.selectOption": "Select a top-up option",
+  "subscriptions.topUp.validation.wallet":
+    "You must have an active wallet connection to top up",
+  "subscriptions.topUp.sendingTo": "Sending to",
+  "subscriptions.notification.title": "Subscription coverage",
+  "subscriptions.notification.earlyWarning":
+    "Your subscription balance is getting low.",
+  "subscriptions.notification.runningLow":
+    "Only a few intended drops remain fully funded.",
+  "subscriptions.notification.actionRequired":
+    "Your immediate next intended drop is not fully funded.",
+  "subscriptions.notification.through":
+    "{count} · funded through The Memes #{token}, {date}",
+  "subscriptions.notification.noRunway": "{count}",
+  "subscriptions.notification.topUpBy":
+    "Top up by {deadline} to receive The Memes #{token}.",
+  "subscriptions.notification.nextUnfunded":
+    "Next unfunded: The Memes #{token}, {date}.",
+  "home.nextMint.status": "Next mint",
+  "home.nextMint.noImage": "No image",
+  "home.nextMint.untitled": "Untitled",
+  "home.nextMint.anonymous": "Anonymous",
+  "home.nextMint.stats.wave": "Wave",
+  "home.nextMint.stats.submitted": "Submitted",
+  "home.nextMint.stats.rating": "Rating",
   "waveChat.boostedDrops.display.description":
-    "Choose how inserted boosted-drop cards appear in wave chat on this device.",
+    "How boosted-drop cards show in chat.",
   "waveChat.boostedDrops.display.expanded": "Expanded",
   "waveChat.boostedDrops.display.hidden": "Hidden",
   "waveChat.boostedDrops.display.compact": "Compact",
   "waveChat.boostedDrops.display.label": "Boosted drops",
   "waveChat.boostedDrops.display.menuCurrent": "Boosted drops: {mode}",
   "waveChat.boostedDrops.display.sectionTitle": "Your display",
+  "waveChat.boostedDrops.display.personalTooltip":
+    "This setting only changes how boosted drops appear to you. It does not affect what other people see.",
+  "waveChat.boostedDrops.display.personalTooltipAriaLabel":
+    "About your display preference",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   "theMemes.title": "The Memes",
@@ -955,6 +3366,13 @@ export const EN_US_MESSAGES = {
   "theMemes.loading.fetching": "Fetching",
   "theMemes.empty.title": "No memes found",
   "theMemes.empty.description": "Try a different season or sort option.",
+  "theMemes.mint.transaction.title": "Mint The Memes",
+  "theMemes.mint.transaction.titleWithTokenId": "Mint: The Memes #{tokenId}",
+  "theMemes.mint.transaction.confirmWallet": "Confirm in your wallet",
+  "theMemes.mint.transaction.submitted": "Transaction Submitted - SEIZING",
+  "theMemes.mint.transaction.success": "SEIZED!",
+  "theMemes.mint.transaction.error": "Transaction failed",
+  "theMemes.mint.transaction.errorDetails": "{message}",
   "theMemes.card.linkAriaLabel": "View {name}, card #{tokenId}",
   "theMemes.card.metric.unavailable": "-",
   "theMemes.card.metric.editionSize": "Edition Size: {value}",
@@ -973,6 +3391,10 @@ export const EN_US_MESSAGES = {
   "theMemes.detail.backLink.ariaLabel": "Back to The Memes",
   "theMemes.detail.heading.card": "Card {tokenId}",
   "theMemes.detail.heading.ariaLabel": "Card {tokenId} - {name}",
+  "theMemes.detail.loadError.message":
+    "We couldn't load this card. Please try again.",
+  "theMemes.detail.loadError.retry": "Try again",
+  "theMemes.detail.mainStageSubmission.title": "Main Stage Submission",
   "theMemes.detail.sections.ariaLabel": "Meme page sections",
   "theMemes.detail.history.ariaLabel": "Meme history sections",
   "theMemes.detail.tabs.overview": "Overview",
@@ -985,6 +3407,7 @@ export const EN_US_MESSAGES = {
   "theMemes.detail.tabs.cardActivity": "Card Activity",
   "theMemes.detail.tabs.timeline": "Timeline",
   "theMemes.detail.tabs.yourTransactions": "Your Transactions",
+  ...EN_US_THE_MEMES_COLLECTORS_MESSAGES,
   ...THE_MEMES_DETAIL_LIVE_MESSAGES,
   ...THE_MEMES_DETAIL_ACTIVITY_MESSAGES,
   ...THE_MEMES_DETAIL_TIMELINE_MESSAGES,
@@ -1056,6 +3479,7 @@ export const EN_US_MESSAGES = {
   "memeLab.sort.volume": "Volume",
   "memeLab.sort.highestOffer": "Highest Offer",
   ...MEME_LAB_DETAIL_MESSAGES,
+  ...MARKET_DEPTH_MESSAGES,
   ...DISTRIBUTION_MESSAGES,
   "rememes.documentTitle": "ReMemes | Collections",
   "rememes.title": "ReMemes",
@@ -1077,9 +3501,10 @@ export const EN_US_MESSAGES = {
   "rememes.refresh.ariaLabel": "Refresh ReMemes results",
   "rememes.refresh.tooltip": "Refresh results",
   "rememes.card.linkAriaLabel": "View {name}, ReMeme #{tokenId}",
-  "rememes.card.tokenAriaLabel": "Token #{tokenId}",
+  "rememes.card.tokenAriaLabel": TOKEN_NUMBER_MESSAGE,
   "rememes.card.replicaCount": "(x{count})",
   "user.collected.cards.listLabel": "Collected cards",
+  "user.collected.navigation.backToCollected": "Back to {profile}'s collected",
   "user.collected.empty.noCards": "No cards to display",
   "user.collected.empty.fullSetter": "Congratulations, full setter!",
   "user.collected.empty.memesFullSetter":
@@ -1142,7 +3567,7 @@ export const EN_US_MESSAGES = {
   "profileCms.media.noCaptions":
     "No captions were provided for this media asset.",
   "profileCms.media.captionTrackLabel": "Description",
-  "profileCms.reference.tokenTitle": "Token #{tokenId}",
+  "profileCms.reference.tokenTitle": TOKEN_NUMBER_MESSAGE,
   "profileCms.reference.chain": "Chain {chainId}",
   "profileCms.walletGallery.title": "Wallet gallery",
   "profileCms.walletGallery.summary.one": "{count} wallet",
@@ -1208,6 +3633,10 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.gallery.snapshot.loading": "Requesting...",
   "profileCms.builder.gallery.snapshot.loadingDetail":
     "Collecting holdings and media candidates for review.",
+  "profileCms.builder.gallery.snapshot.signInRequired":
+    "Sign in to request a wallet snapshot.",
+  "profileCms.builder.gallery.snapshot.sessionExpired":
+    "Your session could not be verified. Sign in again to request a wallet snapshot.",
   "profileCms.builder.gallery.snapshot.failed":
     "Gallery snapshot could not be created.",
   "profileCms.builder.gallery.snapshot.fixture": "Fixture snapshot",
@@ -1372,7 +3801,7 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.publishState.packageHash": "Package hash",
   "profileCms.builder.publishState.payloadHash": "Payload hash",
   "profileCms.builder.publishState.pending":
-    "Save and publish require the backend builder endpoints. This UI will not fake a production publish.",
+    "Save a draft to keep an editable version. Publish when you are ready to make this website public.",
   "profileCms.builder.api.disabled":
     "Builder API writes are not enabled in this frontend environment.",
   "profileCms.builder.api.failed": "Builder API action failed.",
@@ -1387,7 +3816,118 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.api.serverValidationCompleted":
     "Server validation completed.",
   "profileCms.builder.api.draftSaved": "Draft saved.",
+  "profileCms.builder.gallery.snapshot.warning.unresolvedWallets":
+    "Some wallet entries could not be resolved and are not part of this snapshot.",
+  "profileCms.builder.gallery.snapshot.warning.truncated":
+    "The snapshot hit the asset limit, so some indexed works are not shown.",
+  "profileCms.builder.api.serverValidationInvalid":
+    "Server validation found blocking issues in this package.",
+  "profileCms.builder.drafts.title": "Saved drafts",
+  "profileCms.builder.drafts.refresh": "Refresh drafts",
+  "profileCms.builder.drafts.loading": "Loading...",
+  "profileCms.builder.drafts.failed": "Could not load saved drafts.",
+  "profileCms.builder.drafts.empty": "No saved drafts yet.",
+  "profileCms.builder.drafts.version": "Version {version}",
+  "profileCms.builder.drafts.load": "Load",
+  "profileCms.builder.drafts.status.draft": "Draft",
+  "profileCms.builder.drafts.status.validating": "Validating",
+  "profileCms.builder.drafts.status.published": "Published",
+  "profileCms.builder.drafts.status.failed": "Failed",
+  "profileCms.builder.drafts.status.archived": "Archived",
+  "profileCms.builder.drafts.status.superseded": "Superseded",
+  "profileCms.builder.drafts.loadFailed":
+    "This draft could not be loaded into the editor.",
+  "profileCms.builder.publish.title": "Publish",
+  "profileCms.builder.publish.description":
+    "Save, validate, upload to decentralized storage, sign with your wallet, then publish this package as your primary profile website.",
+  "profileCms.builder.publish.publish": "Publish website",
+  "profileCms.builder.publish.publishing": "Publishing...",
+  "profileCms.builder.publish.retry": "Retry",
+  "profileCms.builder.publish.reSign": "Sign again",
+  "profileCms.builder.publish.walletRequired":
+    "Connect the wallet linked to this profile to sign the publish.",
+  "profileCms.builder.publish.safeNotice":
+    "Smart-contract wallet detected. Your wallet must support this signature request. If it cannot, use another authorized wallet for this profile.",
+  "profileCms.builder.publish.success":
+    "Published. Your profile website is now live at:",
+  "profileCms.builder.publish.savedNotCurrent":
+    "This signed publication is saved but is not the active website. Review version history before changing the website.",
+  "profileCms.builder.gallery.snapshot.warning.unmeasuredImages":
+    "Some image sizes could not be verified. Those works keep their NFT details without an image in the publication. Refresh the snapshot to try again.",
+  "profileCms.builder.gallery.snapshot.required":
+    "Request and review a wallet snapshot before saving or publishing this gallery.",
+  "profileCms.builder.publish.step.validate": "Save and validate draft",
+  "profileCms.builder.publish.step.upload": "Upload to storage",
+  "profileCms.builder.publish.step.sign": "Sign with wallet",
+  "profileCms.builder.publish.step.publish": "Make website live",
+  "profileCms.builder.publish.error.validationInvalid":
+    "Server validation found blocking issues. Fix them, then publish again.",
+  "profileCms.builder.publish.error.saveFailed":
+    "Could not save the draft before publishing.",
+  "profileCms.builder.publish.error.validateFailed":
+    "The server validation request failed.",
+  "profileCms.builder.publish.error.uploadFailed":
+    "Uploading the package to decentralized storage failed.",
+  "profileCms.builder.publish.error.signatureRejected":
+    "The signature request was canceled in your wallet.",
+  "profileCms.builder.publish.error.signatureFailed":
+    "Wallet signing failed. Check your wallet and try again.",
+  "profileCms.builder.publish.error.deadlineExpired":
+    "The signature deadline expired before publishing. Sign again to continue.",
+  "profileCms.builder.publish.error.publishConflict":
+    "The published website changed during this attempt. Review version history before publishing again.",
+  "profileCms.builder.publish.error.storagePending":
+    "Permanent storage is still making your signed publication available. Wait a moment, then retry. Your signature and saved version will be reused.",
+  "profileCms.builder.publish.signedPublication": "Signed publication",
+  "profileCms.builder.publish.signedPublicationHash": "Manifest hash: {hash}",
+  "profileCms.builder.publish.error.publishFailed":
+    "Publishing failed. Please try again.",
+  "profileCms.builder.history.title": "Version history",
+  "profileCms.builder.history.refresh": "Refresh",
+  "profileCms.builder.history.loading": "Loading...",
+  "profileCms.builder.history.unavailable":
+    "Connect as this profile owner to view published versions.",
+  "profileCms.builder.history.failed": "Could not load version history.",
+  "profileCms.builder.history.actionFailed":
+    "The website could not be updated. Refresh version history and try again.",
+  "profileCms.builder.json.pending":
+    "Apply or discard your JSON changes before saving or publishing.",
+  "profileCms.builder.json.reviewPending": "Review JSON changes",
+  "profileCms.builder.json.discardPending": "Discard JSON changes",
+  "profileCms.builder.history.empty": "No saved versions yet.",
+  "profileCms.builder.history.version": "Version {version}",
+  "profileCms.builder.history.primary": "Primary",
+  "profileCms.builder.history.rollback": "Make primary",
+  "profileCms.builder.history.rollbackFailed": "Rollback failed.",
+  "profileCms.builder.history.confirm.title": "Confirm rollback",
+  "profileCms.builder.history.confirm.body":
+    "Point your primary profile website back to version {version}? This replaces the currently published version.",
+  "profileCms.builder.history.confirm.confirm": "Confirm",
+  "profileCms.builder.history.confirm.working": "Rolling back...",
+  "profileCms.builder.history.confirm.cancel": "Cancel",
+  "profileCms.builder.history.unpublish": "Unpublish website",
+  "profileCms.builder.history.unpublishConfirm":
+    "Remove this website from the public profile? Its saved versions remain available to restore.",
+  "profileCms.builder.recovery.title":
+    "An unsaved draft is available on this device.",
+  "profileCms.builder.recovery.restore": "Recover draft",
+  "profileCms.builder.recovery.discard": "Discard recovery",
+  "profileCms.builder.recovery.failed":
+    "This browser could not save a recovery copy. Save a draft or download JSON before leaving.",
+  "profileCms.builder.recovery.unsaved": "Unsaved changes",
+  "profileCms.builder.recovery.saved": "All changes saved",
+  "profileCms.builder.recovery.leave":
+    "Leave the editor with unsaved changes or an operation in progress? A recovery copy is kept when browser storage is available.",
+  "profileCms.builder.recovery.replace":
+    "Replace the current editor contents? Save or download your changes first.",
+  "profileCms.builder.editor.advanced":
+    "This package contains a custom site. Use JSON or Agent to edit it while preserving every page and asset.",
+  "profileCms.builder.history.changed":
+    "The public website was updated. It may take a few seconds for visitors to see the change.",
+  "profileCms.builder.publish.error.stale":
+    "The draft or wallet changed. Start publishing again.",
   ...USER_COLLECTED_STATS_MESSAGES,
+  ...USER_BRAIN_SIDEBAR_MESSAGES,
   ...USER_COLLECTED_STATS_DETAILS_MESSAGES,
   ...USER_COLLECTED_STATS_BOOST_MESSAGES,
   ...USER_COLLECTED_STATS_ACTIVITY_MESSAGES,
@@ -1399,7 +3939,7 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.listLabel": "Collected network cards",
   "user.collected.networkCards.empty": "No network tokens found",
   "user.collected.networkCards.defaultCollection": "Network",
-  "user.collected.networkCards.defaultTokenName": "Token #{tokenId}",
+  "user.collected.networkCards.defaultTokenName": TOKEN_NUMBER_MESSAGE,
   "user.collected.networkCards.imageAlt": "Network token image for {name}",
   "user.collected.networkCards.tokenLabel": "#{tokenId}",
   "user.collected.networkCards.xtdh": "xTDH",
@@ -1411,10 +3951,13 @@ export const EN_US_MESSAGES = {
     "Unmute notifications from this profile",
   "profile.mute.error.mute": "Couldn't mute this profile.",
   "profile.mute.error.unmute": "Couldn't unmute this profile.",
-  "profile.mute.error.description": "Please try again.",
+  "profile.mute.error.description": PLEASE_TRY_AGAIN,
   "profile.mute.status.muted": "Notifications from this profile are muted.",
   "profile.mute.status.unmuted":
     "Notifications from this profile are not muted.",
+  "profile.subscriptions.mintingToday.label": "Minting Today",
+  "profile.subscriptions.mintingToday.tooltip":
+    "No changes allowed on minting day",
   "drop.media.alt": "Drop media",
   "drop.media.processing": "Processing image",
   "drop.media.processingGeneric": "Processing media",
@@ -1428,24 +3971,71 @@ export const EN_US_MESSAGES = {
   "drop.media.saveDialogTitle": "Save image",
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
+  "media.interactive.untrustedContent": "Untrusted interactive content",
   "walletAddress.copy.optionsAriaLabel": "Copy wallet options",
   "walletAddress.copy.ensAriaLabel": "Copy ENS name",
   "walletAddress.copy.walletAriaLabel": "Copy wallet address",
   "walletAddress.copy.tooltip": "Copy",
   "walletAddress.copy.copiedTooltip": "Copied",
   ...QR_SCANNER_MESSAGES,
+  ...CAPACITOR_CONNECT_MESSAGES,
   "drops.additionalActionBadge.label": "Additional Action",
   "drops.additionalActionBadge.tooltip":
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
   ...USER_PROFILE_TABS_MESSAGES,
+  ...USER_PROFILE_IDENTITY_MOBILE_TABS_MESSAGES,
+  ...USER_PROFILE_IDENTITY_STATEMENT_MESSAGES,
+  ...USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES,
+  ...MENTION_SHORTCUT_COMPOSER_MESSAGES,
+  ...GROUP_MENTION_COMPOSER_MESSAGES,
+  ...MENTION_SHORTCUT_SETTINGS_MESSAGES,
   ...USER_PROFILE_HEADER_MESSAGES,
+  ...USER_CIC_TYPE_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
+  ...wavesRightPanelMessages,
   ...QUICK_DM_MESSAGES,
+  ...NOTIFICATIONS_FOLLOW_BUTTON_MESSAGES,
+  ...NOTIFICATIONS_WAVE_CREATED_MESSAGES,
+  ...NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES,
   ...WAVE_CHAT_MESSAGES,
+  ...WAVE_COMPOSER_ACTION_MESSAGES,
+  ...WAVE_COMPOSER_PLACEHOLDER_MESSAGES,
+  ...WAVE_STORM_COMPOSER_MESSAGES,
+  ...WAVE_CHAT_SETTINGS_MESSAGES,
+  ...NETWORK_GROUP_INSPECTION_MESSAGES,
+  ...NETWORK_GROUP_FILTER_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
+  ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
+  ...WAVE_DROP_ELIGIBILITY_MESSAGES,
+  ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
+  ...WAVE_CREATE_ACTIONS_MESSAGES,
+  ...WAVE_CREATE_DIALOG_MESSAGES,
+  ...WAVE_CREATE_ADVANCED_MESSAGES,
+  ...WAVE_CREATE_OVERVIEW_MESSAGES,
+  ...WAVE_CREATE_GROUPS_MESSAGES,
+  "waves.subwaves.accessWarning.title": "Parent wave restrictions apply",
+  "waves.subwaves.accessWarning.message":
+    "Some members of this group cannot access the parent wave, so they will not be able to open this subwave. You can still use this group.",
+  "waves.subwaves.accessWarning.continue": "Continue anyway",
+  "waves.subwaves.accessWarning.back": "Go back",
+  "waves.subwaves.accessWarning.checkFailed":
+    "Couldn't check parent wave access. Please try again.",
+  ...WAVE_CREATE_DATES_MESSAGES,
+  ...WAVE_CREATE_RANK_MODE_MESSAGES,
+  ...WAVE_CREATE_DROPS_MESSAGES,
+  ...WAVE_CREATE_OUTCOMES_MESSAGES,
+  ...WAVE_CREATE_RULES_MESSAGES,
+  ...WAVE_CREATE_VOTING_MESSAGES,
+  ...WAVE_CREATE_DROPDOWN_MESSAGES,
+  ...WAVE_CREATE_PROGRESS_MESSAGES,
+  ...WAVE_CREATE_REVIEW_MESSAGES,
+  ...WAVE_CREATE_DESCRIPTION_MESSAGES,
+  ...WAVE_LEADERBOARD_PHASE_MESSAGES,
+  ...WAVE_RULES_SCHEDULE_MESSAGES,
+  ...GROUP_NFT_OWNERSHIP_MESSAGES,
   ...WAVE_EXPLORE_CARD_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
   ...WAVE_SCORE_DETAILS_MESSAGES,
@@ -1455,22 +4045,61 @@ export const EN_US_MESSAGES = {
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
+  ...emmaSnapshotsMessages,
+  ...museumMessages,
+  ...networkMetricsMessages,
+  ...networkTdhMessages,
+  ...networkTdhExplainerMessages,
+  ...networkTdhExampleMessages,
+  ...networkTdhProfileMessages,
+  ...networkTdhRulesMessages,
   ...toolsMessages,
   ...ABOUT_TECH_MESSAGES,
+  ...REVIEWBOT_USAGE_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
+  ...USER_PROFILE_REP_MESSAGES,
+  ...REP_CATEGORY_VALIDATION_MESSAGES,
+  ...CREATE_WAVE_DRAFTS_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
   ...COMMON_MESSAGES,
+  ...EN_US_PAGINATION_MESSAGES,
+  ...OPEN_DATA_DOWNLOAD_MESSAGES,
+  ...MEME_DATA_TABLE_MESSAGES,
+  ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
+  ...PUBLIC_REVIEW_MESSAGES,
+  ...EULA_MESSAGES,
+  ...TITLE_CONTEXT_MESSAGES,
+  ...WAVE_NAVIGATION_MESSAGES,
+  ...MY_STREAM_CURATION_MESSAGES,
+  ...PROFILE_CURATION_MESSAGES,
+  ...ARTWORK_DOCUMENTATION_MESSAGES,
+  ...ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
+  ...MEMES_SUBMISSION_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,
   ...DROP_REACTION_MESSAGES,
   ...WAVES_MOBILE_MESSAGES,
+  ...PROFILE_WAVE_FEED_MESSAGES,
+  ...WAVE_LEADERBOARD_MESSAGES,
+  ...WAVE_VOTE_DETAILS_MESSAGES,
   ...WAVE_DROP_ACTIONS_MESSAGES,
+  ...WAVE_PROPOSAL_CARD_MESSAGES,
+  ...WAVE_COMPETITION_BADGE_MESSAGES,
+  ...WAVE_VOTE_RATIONALE_MESSAGES,
+  ...WAVE_VOTE_MODE_MESSAGES,
+  ...WAVE_VOTE_MESSAGES,
+  ...WAVE_VOTE_INSIGHTS_MESSAGES,
+  ...WAVE_MY_VOTES_MESSAGES,
+  ...WAVE_POLL_MESSAGES,
+  ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
+  ...TRANSFER_MESSAGES,
+  ...CONTENT_MODERATION_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

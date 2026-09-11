@@ -26,7 +26,7 @@ jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
     isOpen ? (
       <div role="dialog" aria-label={title}>
         <button type="button" onClick={onClose}>
-          Close panel
+          Close
         </button>
         {children}
       </div>
@@ -81,9 +81,9 @@ describe("WaveApprovalStatusBar", () => {
     expect(container.firstElementChild).not.toHaveClass("tw-overflow-hidden");
     expect(statusGroup).toHaveClass("tw-flex-1");
     expect(statusGroup.firstElementChild).toHaveClass(
-      "tw-grid",
-      "tw-grid-cols-2",
-      "md:tw-flex"
+      "tw-flex",
+      "tw-flex-col",
+      "md:tw-flex-row"
     );
     expect(statusGroup.firstElementChild?.firstElementChild).toHaveClass(
       "tw-items-baseline",
@@ -257,6 +257,18 @@ describe("WaveApprovalStatusBar", () => {
       name: "Approval status",
     });
     const statusItems = statusGroup.firstElementChild;
+    expect(statusItems).toHaveClass(
+      "tw-flex",
+      "tw-flex-col",
+      "tw-gap-y-1",
+      "md:tw-flex-row"
+    );
+    expect(statusItems?.firstElementChild).toHaveClass(
+      "tw-w-full",
+      "tw-justify-between",
+      "md:tw-w-auto",
+      "md:tw-justify-start"
+    );
     const labels = Array.from(statusItems?.children ?? [])
       .map((item) => item.firstElementChild?.textContent)
       .filter(Boolean);
@@ -268,6 +280,7 @@ describe("WaveApprovalStatusBar", () => {
       "Approval window",
     ]);
     expect(screen.getByText("10 TDH + XTDH")).toBeInTheDocument();
+    expect(screen.getByText("10 TDH + XTDH")).not.toHaveClass("tw-text-sm");
     expect(
       within(statusGroup).queryByRole("button", { name: "Approval rules" })
     ).not.toBeInTheDocument();
@@ -275,7 +288,7 @@ describe("WaveApprovalStatusBar", () => {
       name: "Approval rules",
     });
     expect(approvalRulesButton).toBeInTheDocument();
-    expect(approvalRulesButton).toHaveAttribute("aria-haspopup", "dialog");
+    expect(approvalRulesButton).not.toHaveAttribute("aria-haspopup");
     expect(approvalRulesButton).not.toHaveAttribute("aria-expanded");
     expect(approvalRulesButton).not.toHaveAttribute("aria-controls");
   });
@@ -318,6 +331,30 @@ describe("WaveApprovalStatusBar", () => {
     expect(
       screen.getByText("Votes count immediately in the approval score.")
     ).toBeInTheDocument();
+  });
+
+  it("uses the reusable tooltip on touch-capable desktop devices", () => {
+    useDeviceInfoMock.mockReturnValue({
+      hasTouchScreen: true,
+      isApp: false,
+      isAppleMobile: false,
+      isMobileDevice: false,
+    });
+
+    render(
+      <WaveApprovalStatusBar
+        approvedCount={1}
+        closeStatus={null}
+        wave={makeWave()}
+      />
+    );
+
+    const approvalRulesButton = screen.getByRole("button", {
+      name: "Approval rules",
+    });
+    expect(approvalRulesButton).not.toHaveAttribute("aria-haspopup");
+    expect(approvalRulesButton).not.toHaveAttribute("aria-expanded");
+    expect(approvalRulesButton).not.toHaveAttribute("aria-controls");
   });
 
   it("explains weighted approval with hold time", () => {
@@ -452,7 +489,7 @@ describe("WaveApprovalStatusBar", () => {
     expect(controlledContent).toBeInTheDocument();
     expect(dialog).toContainElement(controlledContent);
 
-    fireEvent.click(screen.getByRole("button", { name: "Close panel" }));
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
 
     expect(
       screen.queryByRole("dialog", { name: "Approval rules" })

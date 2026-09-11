@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AppWallet from '@/components/app-wallets/AppWallet';
 import { useAppWallets } from '@/components/app-wallets/AppWalletsContext';
+import { decryptData } from '@/components/app-wallets/app-wallet-helpers';
 import { useAuth } from '@/components/auth/Auth';
 import { useSeizeConnectContext } from '@/components/auth/SeizeConnectContext';
 import { useRouter } from 'next/navigation';
@@ -18,8 +19,33 @@ jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (props:any
 jest.mock('@/components/app-wallets/AppWalletAvatar', () => ({__esModule:true,default: ({address}:any)=><div data-testid="avatar">{address}</div>}));
 jest.mock('@/components/app-wallets/AppWalletsUnsupported', () => () => <div data-testid="unsupported"/>);
 jest.mock('@/components/dotLoader/DotLoader', () => ({__esModule:true,default: ()=> <span data-testid="dotloader"/>, Spinner: ()=> <span data-testid="spinner"/> }));
-jest.mock('@/components/app-wallets/AppWalletModal', () => ({ UnlockAppWalletModal: () => null }));
+jest.mock('@/components/app-wallets/AppWalletModal', () => ({
+  UnlockAppWalletModal: ({
+    show,
+    onUnlock,
+    sensitiveAction,
+  }: {
+    readonly show: boolean;
+    readonly onUnlock: (pass: string) => void;
+    readonly sensitiveAction?: { readonly label: string } | undefined;
+  }) =>
+    show ? (
+      <button type="button" onClick={() => onUnlock('pass123')}>
+        {sensitiveAction?.label ?? 'Unlock wallet'}
+      </button>
+    ) : null,
+}));
 jest.mock('@/components/app-wallets/app-wallet-helpers', () => ({ decryptData: jest.fn(()=>Promise.resolve('decrypted')) }));
+jest.mock('@capacitor/filesystem', () => ({
+  Filesystem: {
+    writeFile: jest.fn().mockResolvedValue({ uri: 'file://recovery' }),
+  },
+  Directory: { Documents: 'DOCUMENTS' },
+  Encoding: { UTF8: 'utf8' },
+}));
+jest.mock('@capacitor/share', () => ({
+  Share: { share: jest.fn().mockResolvedValue(undefined) },
+}));
 jest.mock('wagmi', () => ({ useBalance: jest.fn(), useChainId: jest.fn() }));
 jest.mock('react-tooltip', () => ({
   Tooltip: ({ children, id }: any) => (
@@ -35,6 +61,7 @@ const mockedUseSeize = useSeizeConnectContext as jest.Mock;
 const mockedUseRouter = useRouter as jest.Mock;
 const mockedUseBalance = useBalance as jest.Mock;
 const mockedUseChainId = useChainId as jest.Mock;
+const mockedDecryptData = decryptData as jest.Mock;
 
 const wallet = {
   name: 'Test',
@@ -53,7 +80,9 @@ beforeEach(()=>{
   mockedUseChainId.mockReturnValue(sepolia.id);
   mockedUseAuth.mockReturnValue({ setToast: jest.fn() });
   mockedUseSeize.mockReturnValue({ address: '0xDEF' });
-  Object.assign(navigator, { clipboard: { writeText: jest.fn() } });
+  Object.assign(navigator, {
+    clipboard: { writeText: jest.fn().mockResolvedValue(undefined) },
+  });
 });
 
 function renderComponent(ctx:any){
@@ -113,11 +142,77 @@ describe('AppWallet', () => {
   });
 
   it('copies wallet address to clipboard', async () => {
-    const { container } = renderComponent({fetchingAppWallets:false, appWalletsSupported:true, appWallets:[wallet], deleteAppWallet:jest.fn()});
-    // Find the icon that has the copy address tooltip
-    const copyIcon = container.querySelector('[data-tooltip-id="copy-address-0xABC"]');
-    expect(copyIcon).toBeTruthy();
-    await userEvent.click(copyIcon as HTMLElement);
+    renderComponent({fetchingAppWallets:false, appWalletsSupported:true, appWallets:[wallet], deleteAppWallet:jest.fn()});
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Copy address to clipboard' })
+    );
     expect((navigator.clipboard.writeText as jest.Mock)).toHaveBeenCalledWith('0xABC');
+  });
+
+  it('does not decrypt an unavailable mnemonic during plaintext export', async () => {
+    const walletWithoutMnemonic = {
+      ...wallet,
+      has_mnemonic: false,
+      mnemonic: 'encrypted-mnemonic',
+    };
+    renderComponent({fetchingAppWallets:false, appWalletsSupported:true, appWallets:[walletWithoutMnemonic], deleteAppWallet:jest.fn()});
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Export Plaintext Recovery' })
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: 'plaintext export' })
+    );
+
+    await waitFor(() => expect(mockedDecryptData).toHaveBeenCalledTimes(1));
+    expect(mockedDecryptData).toHaveBeenCalledWith('0xABC', 'pk', 'pass123');
+  });
+
+  it('reports a recovery phrase clipboard failure', async () => {
+    const toast = jest.fn();
+    mockedUseAuth.mockReturnValue({ setToast: toast });
+    (navigator.clipboard.writeText as jest.Mock).mockRejectedValueOnce(
+      new Error('denied')
+    );
+    renderComponent({fetchingAppWallets:false, appWalletsSupported:true, appWallets:[wallet], deleteAppWallet:jest.fn()});
+
+    await userEvent.click(screen.getAllByRole('button', { name: 'Reveal' })[0]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: 'secret reveal' })
+    );
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Copy to clipboard' })
+    );
+
+    await waitFor(() =>
+      expect(toast).toHaveBeenCalledWith({
+        message: 'Unable to copy recovery phrase.',
+        type: 'error',
+      })
+    );
+  });
+
+  it('reports a private key clipboard failure', async () => {
+    const toast = jest.fn();
+    mockedUseAuth.mockReturnValue({ setToast: toast });
+    (navigator.clipboard.writeText as jest.Mock).mockRejectedValueOnce(
+      new Error('denied')
+    );
+    renderComponent({fetchingAppWallets:false, appWalletsSupported:true, appWallets:[wallet], deleteAppWallet:jest.fn()});
+
+    await userEvent.click(screen.getAllByRole('button', { name: 'Reveal' })[1]!);
+    await userEvent.click(
+      screen.getByRole('button', { name: 'secret reveal' })
+    );
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Copy to clipboard' })
+    );
+
+    await waitFor(() =>
+      expect(toast).toHaveBeenCalledWith({
+        message: 'Unable to copy private key.',
+        type: 'error',
+      })
+    );
   });
 });

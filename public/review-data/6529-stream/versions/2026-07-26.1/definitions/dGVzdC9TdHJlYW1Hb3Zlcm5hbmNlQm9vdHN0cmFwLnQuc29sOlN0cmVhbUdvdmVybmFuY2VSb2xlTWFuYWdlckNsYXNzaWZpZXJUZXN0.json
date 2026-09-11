@@ -1,0 +1,691 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapTestBase#function:0x49bbca8f",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapTestBase",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamGovernanceBootstrapHarness.BootstrapArtifacts",
+              "name": "artifacts",
+              "type": "(address,address,address,address,address[],bytes32,bytes32,uint64,address,address,address,address,address,address,address,bytes32,bytes32,uint64,bytes32,uint256)"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "authority",
+              "type": "address"
+            }
+          ],
+          "name": "invokeSeal",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x49bbca8f",
+          "signature": "invokeSeal((address,address,address,address,address[],bytes32,bytes32,uint64,address,address,address,address,address,address,address,bytes32,bytes32,uint64,bytes32,uint256),address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0xff1e6172",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCanonicalRoleManagerDirectionClassifiesDisableAndEnable",
+          "outputs": [],
+          "selector": "0xff1e6172",
+          "signature": "testCanonicalRoleManagerDirectionClassifiesDisableAndEnable()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0x3561c3b3",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testClassifierOnlyAppliesToBoundRegistryAndExactSelector",
+          "outputs": [],
+          "selector": "0x3561c3b3",
+          "signature": "testClassifierOnlyAppliesToBoundRegistryAndExactSelector()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0xc136a8f2",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMalformedRoleManagerCalldataAndValueFailClosed",
+          "outputs": [],
+          "selector": "0xc136a8f2",
+          "signature": "testMalformedRoleManagerCalldataAndValueFailClosed()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0x04a3015f",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRoleManagerDisableCannotAuthorizeUnsolicitedManifestTail",
+          "outputs": [],
+          "selector": "0x04a3015f",
+          "signature": "testRoleManagerDisableCannotAuthorizeUnsolicitedManifestTail()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0x141f3b92",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testWrongRoleManagerDirectionClassReverts",
+          "outputs": [],
+          "selector": "0x141f3b92",
+          "signature": "testWrongRoleManagerDirectionClassReverts()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VSb2xlTWFuYWdlckNsYXNzaWZpZXJUZXN0I2Z1bmN0aW9uOjB4MGE5MjU0ZTQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 427,
+            "byteStart": 50109,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1271-L1278",
+            "lineEnd": 1278,
+            "lineStart": 1271,
+            "snippetSha256": "sha256:618f9ae4ac9c1c7cd9e311ea33e1c43da4a086a23b0f24d278a9a390c8733539",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCanonicalRoleManagerDirectionClassifiesDisableAndEnable()",
+          "displaySignature": "testCanonicalRoleManagerDirectionClassifiesDisableAndEnable()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0xff1e6172",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VSb2xlTWFuYWdlckNsYXNzaWZpZXJUZXN0I2Z1bmN0aW9uOjB4ZmYxZTYxNzI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCanonicalRoleManagerDirectionClassifiesDisableAndEnable",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 652,
+            "byteStart": 50542,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1280-L1294",
+            "lineEnd": 1294,
+            "lineStart": 1280,
+            "snippetSha256": "sha256:f6291e8d2e057d579f086fc8621ff502ccb7bf7f30f9f1d44fec2f14e12d58c5",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0xff1e6172",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testWrongRoleManagerDirectionClassReverts()",
+          "displaySignature": "testWrongRoleManagerDirectionClassReverts()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0x141f3b92",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VSb2xlTWFuYWdlckNsYXNzaWZpZXJUZXN0I2Z1bmN0aW9uOjB4MTQxZjNiOTI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testWrongRoleManagerDirectionClassReverts",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1408,
+            "byteStart": 51200,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1296-L1330",
+            "lineEnd": 1330,
+            "lineStart": 1296,
+            "snippetSha256": "sha256:d4086d1e8cbd7e8496b0c364aa76635764d6d20ce86f0045f4c1472722584708",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0x141f3b92",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMalformedRoleManagerCalldataAndValueFailClosed()",
+          "displaySignature": "testMalformedRoleManagerCalldataAndValueFailClosed()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0xc136a8f2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VSb2xlTWFuYWdlckNsYXNzaWZpZXJUZXN0I2Z1bmN0aW9uOjB4YzEzNmE4ZjI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMalformedRoleManagerCalldataAndValueFailClosed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 914,
+            "byteStart": 52614,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1332-L1355",
+            "lineEnd": 1355,
+            "lineStart": 1332,
+            "snippetSha256": "sha256:1c38c72ceea8c921609f32144a3ce32ed82e40dbff34287cb62a69b3143e579f",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0xc136a8f2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testClassifierOnlyAppliesToBoundRegistryAndExactSelector()",
+          "displaySignature": "testClassifierOnlyAppliesToBoundRegistryAndExactSelector()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0x3561c3b3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VSb2xlTWFuYWdlckNsYXNzaWZpZXJUZXN0I2Z1bmN0aW9uOjB4MzU2MWMzYjM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testClassifierOnlyAppliesToBoundRegistryAndExactSelector",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1477,
+            "byteStart": 53534,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1357-L1393",
+            "lineEnd": 1393,
+            "lineStart": 1357,
+            "snippetSha256": "sha256:0b7c8a6ccca223d1b89b6ca386d48e30c45030b2b60968eb78413b0d5456f8eb",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0x3561c3b3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRoleManagerDisableCannotAuthorizeUnsolicitedManifestTail()",
+          "displaySignature": "testRoleManagerDisableCannotAuthorizeUnsolicitedManifestTail()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0x04a3015f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VSb2xlTWFuYWdlckNsYXNzaWZpZXJUZXN0I2Z1bmN0aW9uOjB4MDRhMzAxNWY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRoleManagerDisableCannotAuthorizeUnsolicitedManifestTail",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1148,
+            "byteStart": 55017,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1395-L1421",
+            "lineEnd": 1421,
+            "lineStart": 1395,
+            "snippetSha256": "sha256:6ae18fa61c745df5998336b9bb95eadae5abd03a7716b20e8adbab5c357e9f93",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0x04a3015f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_managerData(bool)",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:_managerData(bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VSb2xlTWFuYWdlckNsYXNzaWZpZXJUZXN0I2Z1bmN0aW9uOl9tYW5hZ2VyRGF0YShib29sKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_managerData",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 168,
+            "byteStart": 56171,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1423-L1425",
+            "lineEnd": 1425,
+            "lineStart": 1423,
+            "snippetSha256": "sha256:a96f734dec54a243cea4f60d23baecb62f4d6ce84299eaa147f3758d49e338fa",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_calls(address,uint256,bytes4,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:_calls(address,uint256,bytes4,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "selector",
+              "type": "bytes4"
+            },
+            {
+              "index": 3,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VSb2xlTWFuYWdlckNsYXNzaWZpZXJUZXN0I2Z1bmN0aW9uOl9jYWxscyhhZGRyZXNzLHVpbnQyNTYsYnl0ZXM0LGJ5dGVzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_calls",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "calls",
+              "storageLocation": "memory",
+              "type": "GovernanceCall[]"
+            }
+          ],
+          "range": {
+            "byteLength": 499,
+            "byteStart": 56345,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1427-L1442",
+            "lineEnd": 1442,
+            "lineStart": 1427,
+            "snippetSha256": "sha256:490680ef9bddfeb482a14a9af9b645589727b67b2beefdba0a598f3a715b19f3",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_callDatas(bytes)",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:_callDatas(bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VSb2xlTWFuYWdlckNsYXNzaWZpZXJUZXN0I2Z1bmN0aW9uOl9jYWxsRGF0YXMoYnl0ZXMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_callDatas",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "callDatas",
+              "storageLocation": "memory",
+              "type": "bytes[]"
+            }
+          ],
+          "range": {
+            "byteLength": 159,
+            "byteStart": 56850,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1444-L1447",
+            "lineEnd": 1447,
+            "lineStart": 1444,
+            "snippetSha256": "sha256:194eef65b99ca6b90971fe212a39c63418087dbd7ee18697ff990fac3fd59975",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_expectInvalidRoleManagerCall(uint256,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:_expectInvalidRoleManagerCall(uint256,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VSb2xlTWFuYWdlckNsYXNzaWZpZXJUZXN0I2Z1bmN0aW9uOl9leHBlY3RJbnZhbGlkUm9sZU1hbmFnZXJDYWxsKHVpbnQyNTYsYnl0ZXMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_expectInvalidRoleManagerCall",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 491,
+            "byteStart": 57015,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1449-L1460",
+            "lineEnd": 1460,
+            "lineStart": 1449,
+            "snippetSha256": "sha256:93bfceded250513da1cca3dee63de1e33a90f334810a32bee0ccd51eb326fba9",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "REGISTER_ROLE_MANAGER_SELECTOR",
+          "natspec": "",
+          "range": {
+            "byteLength": 113,
+            "byteStart": 49756,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1263-L1264",
+            "lineEnd": 1264,
+            "lineStart": 1263,
+            "snippetSha256": "sha256:59a2059027d5967a87b6b98a5c695f4f2ecf643f77b9affa2cd7ecc2712a74e0",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": {
+            "byteLength": 48,
+            "byteStart": 49821,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1264",
+            "lineEnd": 1264,
+            "lineStart": 1264,
+            "snippetSha256": "sha256:612257504fe02deb250807a3ba463b97f274761432e6ff6b22182e4ad096a6fa",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "valueSource": "IStreamRoleRegistry.registerRoleManager.selector",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ACCOUNT",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 49875,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1265",
+            "lineEnd": 1265,
+            "lineStart": 1265,
+            "snippetSha256": "sha256:3b51e4ceb367485a247cdb3eb30516b29a1271f9ea73c723ddbf4720ad2799fb",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 49910,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1265",
+            "lineEnd": 1265,
+            "lineStart": 1265,
+            "snippetSha256": "sha256:232bf03a006714cd847ebe09f2aa6212dd2bfe3a1035b0e131a0075cb9b4ca68",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "valueSource": "address(0xBEEF)",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "policy",
+          "natspec": "",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 49932,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1267",
+            "lineEnd": 1267,
+            "lineStart": 1267,
+            "snippetSha256": "sha256:5e713b3c967ae6e1735f6c06485ab5d3bca21b97ad2ff1002474c3de27790dbc",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": null,
+          "type": "StreamGovernanceBootstrapPolicyHarness",
+          "typeString": "contract StreamGovernanceBootstrapPolicyHarness",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "registry",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 49991,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1268",
+            "lineEnd": 1268,
+            "lineStart": 1268,
+            "snippetSha256": "sha256:be400f382c5194e816b9443e342ec8d66694ba739075b58fcaf8746a4c46788b",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": null,
+          "type": "StreamGovernanceRoleManagerRegistryMock",
+          "typeString": "contract StreamGovernanceRoleManagerRegistryMock",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "tail",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 50053,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1269",
+            "lineEnd": 1269,
+            "lineStart": 1269,
+            "snippetSha256": "sha256:89e744cd62a53e18a6c7b3d8653d1621f8e5062bc94b57d3ea23c19d98435e02",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": null,
+          "type": "StreamGovernanceBootstrapTriggerMock",
+          "typeString": "contract StreamGovernanceBootstrapTriggerMock",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest",
+    "inheritance": [
+      {
+        "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapTestBase",
+        "name": "StreamGovernanceBootstrapTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VSb2xlTWFuYWdlckNsYXNzaWZpZXJUZXN0",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest",
+      "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapTestBase",
+      "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapHarness",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGovernanceRoleManagerClassifierTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 7846,
+      "byteStart": 49662,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L1262-L1461",
+      "lineEnd": 1461,
+      "lineStart": 1262,
+      "snippetSha256": "sha256:fc5ccf12fada906192de3fda16d2f403378fa96a5cc21df3aa6c69d23041b663",
+      "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamGovernanceBootstrap.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 7
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 7
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0x04a3015f",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0x0a9254e4",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0x141f3b92",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0x3561c3b3",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0xc136a8f2",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest#function:0xff1e6172",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceRoleManagerClassifierTest",
+      "severity": "advisory"
+    }
+  ]
+}

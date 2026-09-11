@@ -3,6 +3,7 @@ import { recordMobileLaunchApiRequest } from "@/utils/monitoring/mobileLaunchTim
 import { getAuthJwt, getStagingAuth } from "../auth/auth.utils";
 
 type ApiErrorMode = "legacy-string" | "structured";
+type ApiRequestOrigin = "api" | "app";
 
 type StructuredApiError = Error & {
   status: number;
@@ -13,6 +14,46 @@ type StructuredApiError = Error & {
     statusText?: string;
     body?: unknown;
   };
+};
+
+export const getStructuredApiErrorStatus = (
+  error: unknown
+): number | undefined => {
+  if (typeof error !== "object" || error === null || !("status" in error)) {
+    return undefined;
+  }
+  const status = (error as { readonly status?: unknown }).status;
+  return typeof status === "number" ? status : undefined;
+};
+
+export const getStructuredApiErrorCode = (
+  error: unknown
+): string | undefined => {
+  if (typeof error !== "object" || error === null || !("response" in error)) {
+    return undefined;
+  }
+  const response = (error as { readonly response?: unknown }).response;
+  if (
+    typeof response !== "object" ||
+    response === null ||
+    !("body" in response)
+  ) {
+    return undefined;
+  }
+  const rawBody = (response as { readonly body?: unknown }).body;
+  let body: unknown = rawBody;
+  if (typeof rawBody === "string") {
+    try {
+      body = JSON.parse(rawBody) as unknown;
+    } catch {
+      return undefined;
+    }
+  }
+  if (typeof body !== "object" || body === null || !("code" in body)) {
+    return undefined;
+  }
+  const code = (body as { readonly code?: unknown }).code;
+  return typeof code === "string" && code.trim().length > 0 ? code : undefined;
 };
 
 const getHeaders = (
@@ -33,10 +74,13 @@ const getHeaders = (
 const buildUrl = (
   endpoint: string,
   params?: Record<string, string>,
-  transformParams?: (params: Record<string, string>) => Record<string, string>
+  transformParams?: (params: Record<string, string>) => Record<string, string>,
+  requestOrigin: ApiRequestOrigin = "api"
 ): string => {
   let path = `/api/${endpoint}`;
-  let url = `${publicEnv.API_ENDPOINT}${path}`;
+  const apiEndpoint =
+    requestOrigin === "app" ? publicEnv.BASE_ENDPOINT : publicEnv.API_ENDPOINT;
+  let url = `${apiEndpoint}${path}`;
 
   if (params) {
     const queryParams = new URLSearchParams();
@@ -185,6 +229,7 @@ interface ExecuteApiRequestParams {
   readonly parseJson?: boolean | undefined;
   readonly errorMode?: ApiErrorMode | undefined;
   readonly credentials?: RequestCredentials | undefined;
+  readonly cache?: RequestCache | undefined;
 }
 
 type RequestStatus = number | "aborted" | "network_error" | "unknown";
@@ -195,9 +240,10 @@ const createRequestInit = ({
   body,
   signal,
   credentials,
+  cache,
 }: Pick<
   ExecuteApiRequestParams,
-  "method" | "headers" | "body" | "signal" | "credentials"
+  "method" | "headers" | "body" | "signal" | "credentials" | "cache"
 >): RequestInit => {
   const requestInit: RequestInit = {
     method,
@@ -206,6 +252,7 @@ const createRequestInit = ({
   const hasBody = body !== undefined;
   const hasSignal = signal !== undefined;
   const hasCredentials = credentials !== undefined;
+  const hasCache = cache !== undefined;
 
   if (hasBody) {
     requestInit.body = body;
@@ -215,6 +262,9 @@ const createRequestInit = ({
   }
   if (hasCredentials) {
     requestInit.credentials = credentials;
+  }
+  if (hasCache) {
+    requestInit.cache = cache;
   }
 
   return requestInit;
@@ -299,6 +349,7 @@ const executeApiRequest = async <T>({
   parseJson = true,
   errorMode = "legacy-string",
   credentials,
+  cache,
 }: ExecuteApiRequestParams): Promise<T> => {
   const requestStartedAtMs = getRequestTimingNow();
   let status: RequestStatus = "unknown";
@@ -308,6 +359,7 @@ const executeApiRequest = async <T>({
     body,
     signal,
     credentials,
+    cache,
   });
 
   try {
@@ -342,11 +394,13 @@ function getRequestTimingNow(): number {
 
 export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   endpoint: string;
+  requestOrigin?: ApiRequestOrigin | undefined;
   headers?: Record<string, string> | undefined;
   params?: U | undefined;
   signal?: AbortSignal | undefined;
   errorMode?: ApiErrorMode | undefined;
   includeWalletAuth?: boolean | undefined;
+  cache?: RequestCache | undefined;
 }): Promise<T> => {
   const url = buildUrl(
     param.endpoint,
@@ -357,7 +411,8 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
         transformed[key] = value === "nic" ? "cic" : value;
       });
       return transformed;
-    }
+    },
+    param.requestOrigin
   );
 
   return executeApiRequest<T>({
@@ -370,6 +425,7 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
     ),
     signal: param.signal,
     errorMode: param.errorMode ?? "legacy-string",
+    cache: param.cache,
   });
 };
 
@@ -538,6 +594,7 @@ export const commonApiPostWithoutBodyAndResponse = async (param: {
 export const commonApiDelete = async (param: {
   endpoint: string;
   headers?: Record<string, string> | undefined;
+  signal?: AbortSignal | undefined;
   errorMode?: ApiErrorMode | undefined;
 }): Promise<void> => {
   const url = buildUrl(param.endpoint);
@@ -546,7 +603,25 @@ export const commonApiDelete = async (param: {
     url,
     method: "DELETE",
     headers: getHeaders(param.headers),
+    signal: param.signal,
     parseJson: false,
+    errorMode: param.errorMode ?? "legacy-string",
+  });
+};
+
+export const commonApiDeleteWithResponse = async <T>(param: {
+  endpoint: string;
+  headers?: Record<string, string> | undefined;
+  signal?: AbortSignal | undefined;
+  errorMode?: ApiErrorMode | undefined;
+}): Promise<T> => {
+  const url = buildUrl(param.endpoint);
+
+  return executeApiRequest<T>({
+    url,
+    method: "DELETE",
+    headers: getHeaders(param.headers),
+    signal: param.signal,
     errorMode: param.errorMode ?? "legacy-string",
   });
 };
@@ -580,6 +655,7 @@ export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
   headers?: Record<string, string> | undefined;
   params?: Z | undefined;
   signal?: AbortSignal | undefined;
+  errorMode?: ApiErrorMode | undefined;
 }): Promise<U> => {
   const url = buildUrl(
     param.endpoint,
@@ -592,6 +668,7 @@ export const commonApiPut = async <T, U, Z = Record<string, string>>(param: {
     headers: getHeaders(param.headers, true),
     body: JSON.stringify(param.body),
     signal: param.signal,
+    errorMode: param.errorMode,
   });
 };
 
@@ -601,6 +678,7 @@ export const commonApiPatch = async <T, U, Z = Record<string, string>>(param: {
   headers?: Record<string, string> | undefined;
   params?: Z | undefined;
   signal?: AbortSignal | undefined;
+  errorMode?: ApiErrorMode | undefined;
 }): Promise<U> => {
   const url = buildUrl(
     param.endpoint,
@@ -613,6 +691,7 @@ export const commonApiPatch = async <T, U, Z = Record<string, string>>(param: {
     headers: getHeaders(param.headers, true),
     body: JSON.stringify(param.body),
     signal: param.signal,
+    errorMode: param.errorMode,
   });
 };
 

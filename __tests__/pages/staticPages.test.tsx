@@ -95,7 +95,9 @@ describe("static pages render", () => {
 
   it("renders capital fund page", () => {
     render(<CapitalFund />);
-    expect(screen.getByText(/6529 FUND/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 1, name: /6529 NFT FUND/i })
+    ).toBeInTheDocument();
   });
 
   it("sections page redirects", () => {

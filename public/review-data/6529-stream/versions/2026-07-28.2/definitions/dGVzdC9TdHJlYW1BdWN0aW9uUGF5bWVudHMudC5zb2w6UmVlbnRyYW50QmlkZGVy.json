@@ -1,0 +1,366 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamAuctionPayments.t.sol:ReentrantBidder#function:0x59d667a5",
+          "declaringDefinitionId": "test/StreamAuctionPayments.t.sol:ReentrantBidder",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract StreamAuctions",
+              "name": "auctions_",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "bid",
+          "outputs": [],
+          "selector": "0x59d667a5",
+          "signature": "bid(address,uint256)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "test/StreamAuctionPayments.t.sol:ReentrantBidder#function:0x3f09775e",
+          "declaringDefinitionId": "test/StreamAuctionPayments.t.sol:ReentrantBidder",
+          "inherited": false,
+          "inputs": [],
+          "name": "reentered",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x3f09775e",
+          "signature": "reentered()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamAuctionPayments.t.sol:ReentrantBidder#function:0x3fea217f",
+          "declaringDefinitionId": "test/StreamAuctionPayments.t.sol:ReentrantBidder",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract StreamAuctions",
+              "name": "auctions_",
+              "type": "address"
+            }
+          ],
+          "name": "withdrawToSelf",
+          "outputs": [],
+          "selector": "0x3fea217f",
+          "signature": "withdrawToSelf(address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "reentered()",
+          "displaySignature": "reentered()",
+          "functionKind": "getter",
+          "id": "test/StreamAuctionPayments.t.sol:ReentrantBidder#function:0x3f09775e",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUGF5bWVudHMudC5zb2w6UmVlbnRyYW50QmlkZGVyI2Z1bmN0aW9uOjB4M2YwOTc3NWU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "reentered",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 21,
+            "byteStart": 31426,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionPayments.t.sol#L701",
+            "lineEnd": 701,
+            "lineStart": 701,
+            "snippetSha256": "sha256:ea4a06bbe98b18186c836a056adbf275c2308f709949c2148cc123dfddddb7fb",
+            "sourceSha256": "sha256:543a0698c6732c75b5b682cd5ce6a08037afd6bfc9440253f9f391e395c779e6"
+          },
+          "selector": "0x3f09775e",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "receive()",
+          "functionKind": "receive",
+          "id": "test/StreamAuctionPayments.t.sol:ReentrantBidder#function:receive()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUGF5bWVudHMudC5zb2w6UmVlbnRyYW50QmlkZGVyI2Z1bmN0aW9uOnJlY2VpdmUoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 268,
+            "byteStart": 31482,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionPayments.t.sol#L704-L711",
+            "lineEnd": 711,
+            "lineStart": 704,
+            "snippetSha256": "sha256:e80fe5c2780e712e1875ce0df90174f030b3d558e7e4561fddba004fabacdfb4",
+            "sourceSha256": "sha256:543a0698c6732c75b5b682cd5ce6a08037afd6bfc9440253f9f391e395c779e6"
+          },
+          "selector": null,
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "bid(address,uint256)",
+          "displaySignature": "bid(StreamAuctions,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionPayments.t.sol:ReentrantBidder#function:0x59d667a5",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "auctions_",
+              "type": "StreamAuctions"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUGF5bWVudHMudC5zb2w6UmVlbnRyYW50QmlkZGVyI2Z1bmN0aW9uOjB4NTlkNjY3YTU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "bid",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 149,
+            "byteStart": 31756,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionPayments.t.sol#L713-L715",
+            "lineEnd": 715,
+            "lineStart": 713,
+            "snippetSha256": "sha256:7881347be70f73da58ca05529c32c17654385d4c59fb44cdf672120d5afedc42",
+            "sourceSha256": "sha256:543a0698c6732c75b5b682cd5ce6a08037afd6bfc9440253f9f391e395c779e6"
+          },
+          "selector": "0x59d667a5",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "withdrawToSelf(address)",
+          "displaySignature": "withdrawToSelf(StreamAuctions)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionPayments.t.sol:ReentrantBidder#function:0x3fea217f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "auctions_",
+              "type": "StreamAuctions"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUGF5bWVudHMudC5zb2w6UmVlbnRyYW50QmlkZGVyI2Z1bmN0aW9uOjB4M2ZlYTIxN2Y",
+          "kind": "function",
+          "modifiers": [],
+          "name": "withdrawToSelf",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 164,
+            "byteStart": 31911,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionPayments.t.sol#L717-L721",
+            "lineEnd": 721,
+            "lineStart": 717,
+            "snippetSha256": "sha256:3a20deb26c1ce6e2a39ac252dd95234f05ab1ae6b55a28ffcf05647af27ffe40",
+            "sourceSha256": "sha256:543a0698c6732c75b5b682cd5ce6a08037afd6bfc9440253f9f391e395c779e6"
+          },
+          "selector": "0x3fea217f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "auctions",
+          "natspec": "",
+          "range": {
+            "byteLength": 31,
+            "byteStart": 31389,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionPayments.t.sol#L700",
+            "lineEnd": 700,
+            "lineStart": 700,
+            "snippetSha256": "sha256:29ddcf0759bd08b9415e6cc5c3c366a20b423f8554251e795a7cd04643c88af8",
+            "sourceSha256": "sha256:543a0698c6732c75b5b682cd5ce6a08037afd6bfc9440253f9f391e395c779e6"
+          },
+          "selector": null,
+          "type": "StreamAuctions",
+          "typeString": "contract StreamAuctions",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamAuctionPayments.t.sol:ReentrantBidder#function:0x3f09775e",
+          "immutable": false,
+          "name": "reentered",
+          "natspec": "",
+          "range": {
+            "byteLength": 21,
+            "byteStart": 31426,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionPayments.t.sol#L701",
+            "lineEnd": 701,
+            "lineStart": 701,
+            "snippetSha256": "sha256:ea4a06bbe98b18186c836a056adbf275c2308f709949c2148cc123dfddddb7fb",
+            "sourceSha256": "sha256:543a0698c6732c75b5b682cd5ce6a08037afd6bfc9440253f9f391e395c779e6"
+          },
+          "selector": "0x3f09775e",
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "attacking",
+          "natspec": "",
+          "range": {
+            "byteLength": 22,
+            "byteStart": 31453,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionPayments.t.sol#L702",
+            "lineEnd": 702,
+            "lineStart": 702,
+            "snippetSha256": "sha256:98f3d8c9545dd9aba709d2540811c9b94b360afd8bcf0711d3e5ea5ab2941184",
+            "sourceSha256": "sha256:543a0698c6732c75b5b682cd5ce6a08037afd6bfc9440253f9f391e395c779e6"
+          },
+          "selector": null,
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamAuctionPayments.t.sol:ReentrantBidder",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1BdWN0aW9uUGF5bWVudHMudC5zb2w6UmVlbnRyYW50QmlkZGVy",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamAuctionPayments.t.sol:ReentrantBidder"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ReentrantBidder",
+    "natspec": "",
+    "range": {
+      "byteLength": 719,
+      "byteStart": 31358,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionPayments.t.sol#L699-L722",
+      "lineEnd": 722,
+      "lineStart": 699,
+      "snippetSha256": "sha256:12a46649b68523251115290132247bc57a1b19402b4433f09748983279fa87f0",
+      "sourceSha256": "sha256:543a0698c6732c75b5b682cd5ce6a08037afd6bfc9440253f9f391e395c779e6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamAuctionPayments.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 5
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 4
+    },
+    "totalCount": 5
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamAuctionPayments.t.sol:ReentrantBidder",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionPayments.t.sol:ReentrantBidder#function:0x3f09775e",
+      "definitionId": "test/StreamAuctionPayments.t.sol:ReentrantBidder",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionPayments.t.sol:ReentrantBidder#function:0x3fea217f",
+      "definitionId": "test/StreamAuctionPayments.t.sol:ReentrantBidder",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionPayments.t.sol:ReentrantBidder#function:0x59d667a5",
+      "definitionId": "test/StreamAuctionPayments.t.sol:ReentrantBidder",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionPayments.t.sol:ReentrantBidder#function:receive()",
+      "definitionId": "test/StreamAuctionPayments.t.sol:ReentrantBidder",
+      "severity": "advisory"
+    }
+  ]
+}

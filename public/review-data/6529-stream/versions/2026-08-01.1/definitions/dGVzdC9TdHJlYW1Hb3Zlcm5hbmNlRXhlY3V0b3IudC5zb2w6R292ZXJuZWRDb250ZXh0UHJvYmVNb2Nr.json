@@ -1,0 +1,732 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0xc34c08e5",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "executor",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamGovernanceExecutor",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xc34c08e5",
+          "signature": "executor()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0xb74af5a9",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "probe",
+          "outputs": [],
+          "selector": "0xb74af5a9",
+          "signature": "probe()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x242bc926",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "sawActionClass",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x242bc926",
+          "signature": "sawActionClass()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x25ac4b49",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "sawActionId",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x25ac4b49",
+          "signature": "sawActionId()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0xa6f0432c",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "sawExecuting",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xa6f0432c",
+          "signature": "sawExecuting()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x371bbd39",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "sawNewValueHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x371bbd39",
+          "signature": "sawNewValueHash()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x732b6acd",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "sawOldValueHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x732b6acd",
+          "signature": "sawOldValueHash()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0xba39628c",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "sawScopeHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xba39628c",
+          "signature": "sawScopeHash()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "executor()",
+          "displaySignature": "executor()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0xc34c08e5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRDb250ZXh0UHJvYmVNb2NrI2Z1bmN0aW9uOjB4YzM0YzA4ZTU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "executor",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamGovernanceExecutor",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 51,
+            "byteStart": 1010,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:d28556df7a53ff6479afc88fd1fef8b234603f8800628c9e2035c200c645d48e",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0xc34c08e5",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "sawExecuting()",
+          "displaySignature": "sawExecuting()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0xa6f0432c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRDb250ZXh0UHJvYmVNb2NrI2Z1bmN0aW9uOjB4YTZmMDQzMmM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "sawExecuting",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 24,
+            "byteStart": 1067,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:4b119b3abda5fdf22f8772d097d7c75b03231613eb0017b7c0cfc3732db7ea63",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0xa6f0432c",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "sawActionId()",
+          "displaySignature": "sawActionId()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x25ac4b49",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRDb250ZXh0UHJvYmVNb2NrI2Z1bmN0aW9uOjB4MjVhYzRiNDk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "sawActionId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 26,
+            "byteStart": 1097,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:05c4b26e48ce68d12f9cc46bd8bd5a941147a7e221f72c43849403a0750f6cab",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x25ac4b49",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "sawActionClass()",
+          "displaySignature": "sawActionClass()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x242bc926",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRDb250ZXh0UHJvYmVNb2NrI2Z1bmN0aW9uOjB4MjQyYmM5MjY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "sawActionClass",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 27,
+            "byteStart": 1129,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L37",
+            "lineEnd": 37,
+            "lineStart": 37,
+            "snippetSha256": "sha256:3b25dfe7b8d82d43f1dc108f4c2b700127767ad3e49c6c52826579fb62b3d544",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x242bc926",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "sawScopeHash()",
+          "displaySignature": "sawScopeHash()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0xba39628c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRDb250ZXh0UHJvYmVNb2NrI2Z1bmN0aW9uOjB4YmEzOTYyOGM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "sawScopeHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 27,
+            "byteStart": 1162,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L38",
+            "lineEnd": 38,
+            "lineStart": 38,
+            "snippetSha256": "sha256:30505b8a99176b91017d4a02b68ea78e89c3fb044188b5ce5f0bedf7c69177ab",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0xba39628c",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "sawOldValueHash()",
+          "displaySignature": "sawOldValueHash()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x732b6acd",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRDb250ZXh0UHJvYmVNb2NrI2Z1bmN0aW9uOjB4NzMyYjZhY2Q",
+          "kind": "function",
+          "modifiers": [],
+          "name": "sawOldValueHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 30,
+            "byteStart": 1195,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L39",
+            "lineEnd": 39,
+            "lineStart": 39,
+            "snippetSha256": "sha256:e10dc3330829fc9ca6a0a7dcf232d22bf66e96c6525c6bd0a55775a3b4d2d0b2",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x732b6acd",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "sawNewValueHash()",
+          "displaySignature": "sawNewValueHash()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x371bbd39",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRDb250ZXh0UHJvYmVNb2NrI2Z1bmN0aW9uOjB4MzcxYmJkMzk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "sawNewValueHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 30,
+            "byteStart": 1231,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L40",
+            "lineEnd": 40,
+            "lineStart": 40,
+            "snippetSha256": "sha256:c0bb2f00f0a3a67ce031f7cd2953825ca8549c09e80b409913712307cf1969f1",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x371bbd39",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(IStreamGovernanceExecutor)",
+          "functionKind": "constructor",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:constructor(IStreamGovernanceExecutor)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "executor_",
+              "type": "IStreamGovernanceExecutor"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRDb250ZXh0UHJvYmVNb2NrI2Z1bmN0aW9uOmNvbnN0cnVjdG9yKElTdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3Ip",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 86,
+            "byteStart": 1268,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L42-L44",
+            "lineEnd": 44,
+            "lineStart": 42,
+            "snippetSha256": "sha256:5f6dc1804d0be253f2de8f86b22904387bce84d433ceefda7397223579047cba",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "probe()",
+          "displaySignature": "probe()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0xb74af5a9",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRDb250ZXh0UHJvYmVNb2NrI2Z1bmN0aW9uOjB4Yjc0YWY1YTk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "probe",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 243,
+            "byteStart": 1360,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L46-L55",
+            "lineEnd": 55,
+            "lineStart": 46,
+            "snippetSha256": "sha256:837fcc3c1cf8c2466066c8cead021475e78b6a1af4bf3776e0a3f45a5a9c7a42",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0xb74af5a9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0xc34c08e5",
+          "immutable": true,
+          "name": "executor",
+          "natspec": "",
+          "range": {
+            "byteLength": 51,
+            "byteStart": 1010,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:d28556df7a53ff6479afc88fd1fef8b234603f8800628c9e2035c200c645d48e",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0xc34c08e5",
+          "type": "IStreamGovernanceExecutor",
+          "typeString": "contract IStreamGovernanceExecutor",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0xa6f0432c",
+          "immutable": false,
+          "name": "sawExecuting",
+          "natspec": "",
+          "range": {
+            "byteLength": 24,
+            "byteStart": 1067,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:4b119b3abda5fdf22f8772d097d7c75b03231613eb0017b7c0cfc3732db7ea63",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0xa6f0432c",
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x25ac4b49",
+          "immutable": false,
+          "name": "sawActionId",
+          "natspec": "",
+          "range": {
+            "byteLength": 26,
+            "byteStart": 1097,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:05c4b26e48ce68d12f9cc46bd8bd5a941147a7e221f72c43849403a0750f6cab",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x25ac4b49",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x242bc926",
+          "immutable": false,
+          "name": "sawActionClass",
+          "natspec": "",
+          "range": {
+            "byteLength": 27,
+            "byteStart": 1129,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L37",
+            "lineEnd": 37,
+            "lineStart": 37,
+            "snippetSha256": "sha256:3b25dfe7b8d82d43f1dc108f4c2b700127767ad3e49c6c52826579fb62b3d544",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x242bc926",
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0xba39628c",
+          "immutable": false,
+          "name": "sawScopeHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 27,
+            "byteStart": 1162,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L38",
+            "lineEnd": 38,
+            "lineStart": 38,
+            "snippetSha256": "sha256:30505b8a99176b91017d4a02b68ea78e89c3fb044188b5ce5f0bedf7c69177ab",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0xba39628c",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x732b6acd",
+          "immutable": false,
+          "name": "sawOldValueHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 30,
+            "byteStart": 1195,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L39",
+            "lineEnd": 39,
+            "lineStart": 39,
+            "snippetSha256": "sha256:e10dc3330829fc9ca6a0a7dcf232d22bf66e96c6525c6bd0a55775a3b4d2d0b2",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x732b6acd",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x371bbd39",
+          "immutable": false,
+          "name": "sawNewValueHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 30,
+            "byteStart": 1231,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L40",
+            "lineEnd": 40,
+            "lineStart": 40,
+            "snippetSha256": "sha256:c0bb2f00f0a3a67ce031f7cd2953825ca8549c09e80b409913712307cf1969f1",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x371bbd39",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRDb250ZXh0UHJvYmVNb2Nr",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "GovernedContextProbeMock",
+    "natspec": "",
+    "range": {
+      "byteLength": 635,
+      "byteStart": 970,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L33-L56",
+      "lineEnd": 56,
+      "lineStart": 33,
+      "snippetSha256": "sha256:3d5efd8abe203833bcf79a81756ebe1520e33025df9a7776baee0e0f83d792ca",
+      "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamGovernanceExecutor.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 10
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 9
+    },
+    "totalCount": 10
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x242bc926",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x25ac4b49",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x371bbd39",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0x732b6acd",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0xa6f0432c",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0xb74af5a9",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0xba39628c",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:0xc34c08e5",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock#function:constructor(IStreamGovernanceExecutor)",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedContextProbeMock",
+      "severity": "advisory"
+    }
+  ]
+}

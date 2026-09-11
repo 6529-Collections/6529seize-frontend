@@ -74,7 +74,6 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     onContractChange,
     chain: chainProp,
     outputMode = "number",
-    hideSpam: hideSpamProp = true,
     allowAll = true,
     allowRanges = true,
     fixedContract,
@@ -82,8 +81,9 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     maxSelectedCountMessage,
     debounceMs = DEFAULT_DEBOUNCE,
     overscan = DEFAULT_OVERSCAN,
-    placeholder = "Search by collection name or paste contract address…",
+    placeholder,
     className,
+    hideSelectionSummaryWhenEmpty = false,
     renderTokenExtra,
     variant = "card",
   } = props;
@@ -108,14 +108,15 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     setIsOpen,
     activeIndex,
     setActiveIndex,
-    hideSpam,
     suggestionList,
-    hiddenCount,
-    handleToggleSpam,
     resetSearch,
     primeContractCache,
     isLoading,
-  } = useNftSearch({ chain, debounceMs, hideSpamProp });
+    isError,
+    isNotFound,
+    isInvalidAddress,
+    retry,
+  } = useNftSearch({ chain, debounceMs });
 
   const {
     ranges,
@@ -247,6 +248,9 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
   }, [ranges, setTextValue]);
 
   const handleSelectSuggestion = (suggestion: Suggestion) => {
+    if (suggestion.tokenType !== "ERC721") {
+      return;
+    }
     primeContractCache(suggestion, chain);
     const overview = mapSuggestionToOverview(suggestion);
     setSelectedContract(overview);
@@ -366,7 +370,9 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     if (event.key === "ArrowDown") {
       event.preventDefault();
       setIsOpen(true);
-      setActiveIndex((prev) => Math.min(prev + 1, suggestionList.length - 1));
+      setActiveIndex((prev) =>
+        Math.max(0, Math.min(prev + 1, suggestionList.length - 1))
+      );
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setActiveIndex((prev) => Math.max(prev - 1, 0));
@@ -410,8 +416,6 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
           isOpen={isOpen}
           activeIndex={activeIndex}
           suggestionList={suggestionList}
-          hiddenCount={hiddenCount}
-          hideSpam={hideSpam}
           placeholder={placeholder}
           variant={variant}
           inputRef={inputRef}
@@ -424,10 +428,15 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
           }}
           onInputKeyDown={handleInputKeyDown}
           onInputFocus={() => setIsOpen(true)}
-          onToggleSpam={handleToggleSpam}
           onHoverSuggestion={setActiveIndex}
           onSelectSuggestion={handleSelectSuggestion}
           loading={isLoading}
+          isError={isError}
+          isNotFound={isNotFound}
+          isInvalidAddress={isInvalidAddress}
+          onRetry={() => {
+            void retry();
+          }}
         />
       )}
 
@@ -494,27 +503,33 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
                 helperMessageId={helperMessageId}
               />
 
-              <NftEditRanges
-                ranges={ranges}
-                isEditing={isEditingText}
-                textValue={textValue}
-                parseErrors={parseErrors}
-                allowAll={allowAll}
-                onToggle={() => setIsEditingText((prev) => !prev)}
-                onTextChange={(val) => {
-                  if (parseErrors.length) setParseErrors([]);
-                  if (addTokenInputError !== null) setAddTokenInputError(null);
-                  setTextValue(val);
-                }}
-                onApply={handleApplyText}
-                onCancel={() => {
-                  setTextValue(formatCanonical(ranges));
-                  setParseErrors([]);
-                  setAddTokenInputError(null);
-                  setIsEditingText(false);
-                }}
-                onClear={handleClearTokens}
-              />
+              {(!hideSelectionSummaryWhenEmpty ||
+                ranges.length > 0 ||
+                isEditingText) && (
+                <NftEditRanges
+                  ranges={ranges}
+                  isEditing={isEditingText}
+                  textValue={textValue}
+                  parseErrors={parseErrors}
+                  allowAll={allowAll}
+                  variant={variant}
+                  onToggle={() => setIsEditingText((prev) => !prev)}
+                  onTextChange={(val) => {
+                    if (parseErrors.length) setParseErrors([]);
+                    if (addTokenInputError !== null)
+                      setAddTokenInputError(null);
+                    setTextValue(val);
+                  }}
+                  onApply={handleApplyText}
+                  onCancel={() => {
+                    setTextValue(formatCanonical(ranges));
+                    setParseErrors([]);
+                    setAddTokenInputError(null);
+                    setIsEditingText(false);
+                  }}
+                  onClear={handleClearTokens}
+                />
+              )}
 
               {ranges.length > 0 ? (
                 <NftTokenList
@@ -522,6 +537,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
                   chain={chain}
                   ranges={ranges}
                   overscan={overscan}
+                  variant={variant}
                   renderTokenExtra={renderTokenExtra}
                   onRemove={handleRemoveToken}
                 />

@@ -3,14 +3,15 @@
 import {
   faPlugCircleMinus,
   faPlugCirclePlus,
-  faPlugCircleXmark,
   faRightFromBracket,
   faShuffle,
-  faShareNodes,
   faShieldHalved,
+  faSliders,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -19,8 +20,10 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import DevicesIcon from "@/components/common/icons/DevicesIcon";
 import HeaderUserConnectedAccounts from "./connected/HeaderUserConnectedAccounts";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
+import HeaderArtworkDocumentationLink from "./HeaderArtworkDocumentationLink";
 
 const HEADER_USER_MENU_LOCALE = DEFAULT_LOCALE;
 
@@ -28,12 +31,12 @@ export default function HeaderUserMenuDropdown({
   isOpen,
   profile,
   onClose,
-  onOpenShare,
+  onOpenConnect,
 }: {
   readonly isOpen: boolean;
   readonly profile: ApiIdentity;
   readonly onClose: () => void;
-  readonly onOpenShare?: (() => void) | undefined;
+  readonly onOpenConnect?: (() => void) | undefined;
 }) {
   const {
     address,
@@ -60,7 +63,11 @@ export default function HeaderUserMenuDropdown({
   } = useContext(AuthContext);
   const hasProxySection =
     !!activeProfileProxy || receivedProfileProxies.length > 0;
-
+  const hasConnectDeviceAction = onOpenConnect !== undefined;
+  const hasSessionUpgradeAction =
+    sessionUpgradeRequired && requestSessionUpgrade !== undefined;
+  const hasConnectionActions =
+    hasConnectDeviceAction || hasSessionUpgradeAction;
   const { chains, currentChainName, nextChainName, switchToNextChain } =
     useChainSwitcher();
   const upgradeAuthenticationLabel = t(
@@ -92,6 +99,15 @@ export default function HeaderUserMenuDropdown({
   };
 
   const [label, setLabel] = useState(getLabel());
+  const profilePath = (() => {
+    if (profile.handle) {
+      return `/${profile.handle}`;
+    }
+    if (address) {
+      return `/${address}`;
+    }
+    return null;
+  })();
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   useEffect(() => setLabel(getLabel()), [profile, address]);
 
@@ -143,15 +159,14 @@ export default function HeaderUserMenuDropdown({
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
-            className="tw-fixed tw-bottom-16 tw-left-6 tw-z-[9999] tw-mb-2 tw-mt-1 tw-w-72 tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.2 }}
+            className="tw-fixed tw-bottom-16 tw-z-[9999] tw-mb-2 tw-mt-1 tw-w-72 tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5 motion-safe:tw-animate-sidebar-account-menu-in motion-reduce:tw-animate-none"
+            style={{
+              left: "calc(var(--layout-margin, 0px) + 1.5rem)",
+            }}
           >
             <div className="tw-mt-1 tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl">
               <div className="tw-flow-root tw-overflow-y-auto tw-overflow-x-hidden tw-py-2">
-                <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-y-2 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-p-0">
+                <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-y-2 tw-divide-x-0 tw-divide-y-2 tw-divide-solid tw-divide-iron-700 tw-p-0">
                   {availableConnectedAccounts.length > 0 && (
                     <li className="tw-mx-0 tw-flex tw-flex-col tw-gap-y-2 tw-px-2">
                       <HeaderUserConnectedAccounts
@@ -172,6 +187,15 @@ export default function HeaderUserMenuDropdown({
                               "Failed to add connected account. Please try again.",
                           });
                         }}
+                        onSignOutAll={() => {
+                          void runMenuAction({
+                            action: seizeDisconnectAndLogoutAll,
+                            pendingKey: "logout-all",
+                            errorMessage:
+                              "Failed to sign out all profiles. Please try again.",
+                          });
+                        }}
+                        actionsDisabled={pendingAction !== null}
                       />
                     </li>
                   )}
@@ -253,7 +277,7 @@ export default function HeaderUserMenuDropdown({
                       ))}
                     </li>
                   )}
-                  <li className="tw-h-full tw-px-2 tw-pt-2">
+                  <li className="tw-flex tw-h-full tw-flex-col tw-gap-y-2 tw-px-2 tw-pt-2">
                     {isConnected ? (
                       <button
                         onClick={() => {
@@ -267,8 +291,7 @@ export default function HeaderUserMenuDropdown({
                         disabled={pendingAction !== null}
                         type="button"
                         aria-label="Disconnect"
-                        title="Disconnect"
-                        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                        className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                       >
                         <FontAwesomeIcon
                           icon={faPlugCircleMinus}
@@ -290,8 +313,7 @@ export default function HeaderUserMenuDropdown({
                         disabled={pendingAction !== null}
                         type="button"
                         aria-label="Connect"
-                        title="Connect"
-                        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                        className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                       >
                         <FontAwesomeIcon
                           icon={faPlugCirclePlus}
@@ -301,31 +323,58 @@ export default function HeaderUserMenuDropdown({
                         <span>Connect Wallet</span>
                       </button>
                     )}
-                    {sessionUpgradeRequired && requestSessionUpgrade && (
-                      <button
-                        onClick={() => {
-                          void runMenuAction({
-                            action: async () => {
-                              await requestSessionUpgrade();
-                            },
-                            pendingKey: "upgrade-auth",
-                            errorMessage:
-                              "Failed to start authentication upgrade. Please try again.",
-                          });
-                        }}
-                        disabled={pendingAction !== null}
-                        type="button"
-                        aria-label={upgradeAuthenticationLabel}
-                        title={upgradeAuthenticationLabel}
-                        className="tw-relative tw-mt-2 tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                      >
-                        <FontAwesomeIcon
-                          icon={faShieldHalved}
-                          height={20}
-                          width={20}
+                    {hasConnectionActions && (
+                      <>
+                        <div
+                          data-testid="connection-actions-divider"
+                          aria-hidden="true"
+                          className="-tw-mx-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700"
                         />
-                        <span>{upgradeAuthenticationLabel}</span>
-                      </button>
+                        {onOpenConnect && (
+                          <button
+                            onClick={onOpenConnect}
+                            type="button"
+                            aria-label={t(
+                              HEADER_USER_MENU_LOCALE,
+                              "headerUserMenu.connectDevice"
+                            )}
+                            className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                          >
+                            <DevicesIcon className="tw-size-5 tw-flex-shrink-0" />
+                            <span>
+                              {t(
+                                HEADER_USER_MENU_LOCALE,
+                                "headerUserMenu.connectDevice"
+                              )}
+                            </span>
+                          </button>
+                        )}
+                        {sessionUpgradeRequired && requestSessionUpgrade && (
+                          <button
+                            onClick={() => {
+                              void runMenuAction({
+                                action: async () => {
+                                  await requestSessionUpgrade();
+                                },
+                                pendingKey: "upgrade-auth",
+                                errorMessage:
+                                  "Failed to start authentication upgrade. Please try again.",
+                              });
+                            }}
+                            disabled={pendingAction !== null}
+                            type="button"
+                            aria-label={upgradeAuthenticationLabel}
+                            className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                          >
+                            <FontAwesomeIcon
+                              icon={faShieldHalved}
+                              height={20}
+                              width={20}
+                            />
+                            <span>{upgradeAuthenticationLabel}</span>
+                          </button>
+                        )}
+                      </>
                     )}
                   </li>
                   {isConnected && chains.length > 1 && (
@@ -337,8 +386,7 @@ export default function HeaderUserMenuDropdown({
                         onClick={onSwitchChain}
                         type="button"
                         aria-label="Switch Chain"
-                        title="Switch Chain"
-                        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                        className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                       >
                         <FontAwesomeIcon
                           icon={faShuffle}
@@ -349,25 +397,48 @@ export default function HeaderUserMenuDropdown({
                       </button>
                     </li>
                   )}
-                  {onOpenShare && (
-                    <li className="tw-h-full tw-px-2 tw-pt-2">
-                      <button
-                        onClick={onOpenShare}
-                        type="button"
-                        aria-label="Share"
-                        title="Share"
-                        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                  <li className="tw-flex tw-h-full tw-flex-col tw-gap-y-2 tw-px-2 tw-pt-2">
+                    <div className="tw-flex tw-w-full tw-items-stretch tw-justify-end tw-gap-2">
+                      {profilePath && (
+                        <Link
+                          href={profilePath}
+                          onClick={onClose}
+                          aria-label={t(
+                            HEADER_USER_MENU_LOCALE,
+                            "headerUserMenu.profile"
+                          )}
+                          className="tw-relative tw-grid tw-h-11 tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-iron-800 tw-px-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                        >
+                          <FontAwesomeIcon
+                            icon={faUser}
+                            height={20}
+                            width={20}
+                          />
+                          <span>
+                            {t(
+                              HEADER_USER_MENU_LOCALE,
+                              "headerUserMenu.profile"
+                            )}
+                          </span>
+                        </Link>
+                      )}
+                      <Link
+                        href="/preferences"
+                        onClick={onClose}
+                        aria-label={t(
+                          HEADER_USER_MENU_LOCALE,
+                          "profilePreferences.button"
+                        )}
+                        className="tw-relative tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-select-none tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-iron-800 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                       >
                         <FontAwesomeIcon
-                          icon={faShareNodes}
+                          icon={faSliders}
                           height={20}
                           width={20}
                         />
-                        <span>Share</span>
-                      </button>
-                    </li>
-                  )}
-                  <li className="tw-h-full tw-px-2 tw-pt-2">
+                      </Link>
+                    </div>
+                    <HeaderArtworkDocumentationLink onClose={onClose} />
                     <button
                       onClick={() => {
                         void runMenuAction({
@@ -378,41 +449,21 @@ export default function HeaderUserMenuDropdown({
                       }}
                       disabled={pendingAction !== null}
                       type="button"
-                      aria-label="Disconnect & Logout"
-                      title="Disconnect & Logout"
-                      className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                      aria-label={t(
+                        HEADER_USER_MENU_LOCALE,
+                        "headerUserMenu.logout"
+                      )}
+                      className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                     >
                       <FontAwesomeIcon
                         icon={faRightFromBracket}
                         height={20}
                         width={20}
                       />
-                      <span>{isConnected && `Disconnect & `}Logout</span>
+                      <span>
+                        {t(HEADER_USER_MENU_LOCALE, "headerUserMenu.logout")}
+                      </span>
                     </button>
-                    {availableConnectedAccounts.length > 1 && (
-                      <button
-                        onClick={() => {
-                          void runMenuAction({
-                            action: seizeDisconnectAndLogoutAll,
-                            pendingKey: "logout-all",
-                            errorMessage:
-                              "Failed to sign out all profiles. Please try again.",
-                          });
-                        }}
-                        disabled={pendingAction !== null}
-                        type="button"
-                        aria-label="Sign Out All Profiles"
-                        title="Sign Out All Profiles"
-                        className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                      >
-                        <FontAwesomeIcon
-                          icon={faPlugCircleXmark}
-                          height={20}
-                          width={20}
-                        />
-                        <span>Sign Out All Profiles</span>
-                      </button>
-                    )}
                   </li>
                 </ul>
               </div>

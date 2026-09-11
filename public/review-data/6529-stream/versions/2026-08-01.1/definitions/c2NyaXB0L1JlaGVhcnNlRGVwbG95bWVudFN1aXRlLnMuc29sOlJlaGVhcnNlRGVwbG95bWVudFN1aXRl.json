@@ -1,0 +1,364 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite#function:0x33f4d4c0",
+          "declaringDefinitionId": "script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite",
+          "inherited": false,
+          "inputs": [],
+          "name": "SUITE_KIND_HASH",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x33f4d4c0",
+          "signature": "SUITE_KIND_HASH()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite#function:0xc0406226",
+          "declaringDefinitionId": "script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite",
+          "inherited": false,
+          "inputs": [],
+          "name": "run",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct RehearseDeploymentSuite.DeploymentSuiteResult",
+              "name": "result",
+              "type": "(bytes32,(address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,address,uint256,uint256,uint256,uint256,bytes32),(string,uint256,bytes32,uint256,bytes32,uint256,uint256,address,address,uint256,uint8,uint256,uint256,uint256,uint256),(bytes32,uint256,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,address,address,address,address,address,address,address,address,uint256,uint256,uint256,address,bytes32,uint256),bytes32)"
+            }
+          ],
+          "selector": "0xc0406226",
+          "signature": "run()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "deployment_or_operational_source",
+    "classificationReason": "Declared under the pinned deployment-script source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "SUITE_KIND_HASH()",
+          "displaySignature": "SUITE_KIND_HASH()",
+          "functionKind": "getter",
+          "id": "script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite#function:0x33f4d4c0",
+          "inputs": [],
+          "key": "c2NyaXB0L1JlaGVhcnNlRGVwbG95bWVudFN1aXRlLnMuc29sOlJlaGVhcnNlRGVwbG95bWVudFN1aXRlI2Z1bmN0aW9uOjB4MzNmNGQ0YzA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "SUITE_KIND_HASH",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 83,
+            "byteStart": 225,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeploymentSuite.s.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:f37fb08bbed54fd2499771f396ad40916b3a29446a8a8e0f6eddc3128663406f",
+            "sourceSha256": "sha256:21b1a21c1c0e8a769c0ec8865de1f526b02972980f77832beb89a197a3a41781"
+          },
+          "selector": "0x33f4d4c0",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "run()",
+          "displaySignature": "run()",
+          "functionKind": "function",
+          "id": "script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite#function:0xc0406226",
+          "inputs": [],
+          "key": "c2NyaXB0L1JlaGVhcnNlRGVwbG95bWVudFN1aXRlLnMuc29sOlJlaGVhcnNlRGVwbG95bWVudFN1aXRlI2Z1bmN0aW9uOjB4YzA0MDYyMjY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "run",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "result",
+              "storageLocation": "memory",
+              "type": "DeploymentSuiteResult"
+            }
+          ],
+          "range": {
+            "byteLength": 370,
+            "byteStart": 611,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeploymentSuite.s.sol#L19-L25",
+            "lineEnd": 25,
+            "lineStart": 19,
+            "snippetSha256": "sha256:5d32ef5a827d92bb462eaaf777d8860f5154a9d9c9823166dba4dde2a06ecee2",
+            "sourceSha256": "sha256:21b1a21c1c0e8a769c0ec8865de1f526b02972980f77832beb89a197a3a41781"
+          },
+          "selector": "0xc0406226",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_suiteHash(DeploymentSuiteResult)",
+          "functionKind": "function",
+          "id": "script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite#function:_suiteHash(DeploymentSuiteResult)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "result",
+              "storageLocation": "memory",
+              "type": "DeploymentSuiteResult"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRGVwbG95bWVudFN1aXRlLnMuc29sOlJlaGVhcnNlRGVwbG95bWVudFN1aXRlI2Z1bmN0aW9uOl9zdWl0ZUhhc2goRGVwbG95bWVudFN1aXRlUmVzdWx0KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_suiteHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 230,
+            "byteStart": 987,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeploymentSuite.s.sol#L27-L31",
+            "lineEnd": 31,
+            "lineStart": 27,
+            "snippetSha256": "sha256:38c3d4cc77b755d42bb6dfc878feafed09dd15e716130946487757c8db2b5cd4",
+            "sourceSha256": "sha256:21b1a21c1c0e8a769c0ec8865de1f526b02972980f77832beb89a197a3a41781"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": "script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite#function:0x33f4d4c0",
+          "immutable": false,
+          "name": "SUITE_KIND_HASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 83,
+            "byteStart": 225,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeploymentSuite.s.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:f37fb08bbed54fd2499771f396ad40916b3a29446a8a8e0f6eddc3128663406f",
+            "sourceSha256": "sha256:21b1a21c1c0e8a769c0ec8865de1f526b02972980f77832beb89a197a3a41781"
+          },
+          "selector": "0x33f4d4c0",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 41,
+            "byteStart": 267,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeploymentSuite.s.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:e5af791aa1f0d004f95734f67ee27c33d3efe2a544cf5c4833ed6a7cf83fa70c",
+            "sourceSha256": "sha256:21b1a21c1c0e8a769c0ec8865de1f526b02972980f77832beb89a197a3a41781"
+          },
+          "valueSource": "keccak256(\"local-anvil-deployment-suite\")",
+          "visibility": "public"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "suiteKindHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 354,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeploymentSuite.s.sol#L12",
+                "lineEnd": 12,
+                "lineStart": 12,
+                "snippetSha256": "sha256:ad4c6c0c0b874e37cd18a3e9d8e9991838d6770073b269d367bf1c38d97ef9a8",
+                "sourceSha256": "sha256:21b1a21c1c0e8a769c0ec8865de1f526b02972980f77832beb89a197a3a41781"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "deployment",
+              "natspec": "",
+              "range": {
+                "byteLength": 46,
+                "byteStart": 385,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeploymentSuite.s.sol#L13",
+                "lineEnd": 13,
+                "lineStart": 13,
+                "snippetSha256": "sha256:8d1871d5bad94fbf17a9c7900b1b4ae0becf02661049eaef55cfa6d928a6a8cf",
+                "sourceSha256": "sha256:21b1a21c1c0e8a769c0ec8865de1f526b02972980f77832beb89a197a3a41781"
+              },
+              "type": "RehearseDeployment.DeploymentResult",
+              "typeString": "struct RehearseDeployment.DeploymentResult"
+            },
+            {
+              "index": 2,
+              "name": "auction",
+              "natspec": "",
+              "range": {
+                "byteLength": 53,
+                "byteStart": 441,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeploymentSuite.s.sol#L14",
+                "lineEnd": 14,
+                "lineStart": 14,
+                "snippetSha256": "sha256:8f56ee45405d09efd794d5d1cdad2a1dae1ebe9d58ec52990cb29a280dac155b",
+                "sourceSha256": "sha256:21b1a21c1c0e8a769c0ec8865de1f526b02972980f77832beb89a197a3a41781"
+              },
+              "type": "RehearseAuctionCeremony.AuctionCeremonyResult",
+              "typeString": "struct RehearseAuctionCeremony.AuctionCeremonyResult"
+            },
+            {
+              "index": 3,
+              "name": "emergency",
+              "natspec": "",
+              "range": {
+                "byteLength": 67,
+                "byteStart": 504,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeploymentSuite.s.sol#L15",
+                "lineEnd": 15,
+                "lineStart": 15,
+                "snippetSha256": "sha256:9c13f1a22ff101e7b8f78b5df9fef6db262baa48472bb501281b602cd0235ba7",
+                "sourceSha256": "sha256:21b1a21c1c0e8a769c0ec8865de1f526b02972980f77832beb89a197a3a41781"
+              },
+              "type": "RehearseEmergencyRedeployment.EmergencyRedeploymentResult",
+              "typeString": "struct RehearseEmergencyRedeployment.EmergencyRedeploymentResult"
+            },
+            {
+              "index": 4,
+              "name": "suiteHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 581,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeploymentSuite.s.sol#L16",
+                "lineEnd": 16,
+                "lineStart": 16,
+                "snippetSha256": "sha256:42ebfd65cad7b8f753d302bee72dad9b638657309ca2662b8e85c8f751a97ece",
+                "sourceSha256": "sha256:21b1a21c1c0e8a769c0ec8865de1f526b02972980f77832beb89a197a3a41781"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "DeploymentSuiteResult",
+          "natspec": "",
+          "range": {
+            "byteLength": 290,
+            "byteStart": 315,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeploymentSuite.s.sol#L11-L17",
+            "lineEnd": 17,
+            "lineStart": 11,
+            "snippetSha256": "sha256:eb35ab6dda495263d2d6c008f961af2338c934d949b1951e998b0873dfc2f73c",
+            "sourceSha256": "sha256:21b1a21c1c0e8a769c0ec8865de1f526b02972980f77832beb89a197a3a41781"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c2NyaXB0L1JlaGVhcnNlRGVwbG95bWVudFN1aXRlLnMuc29sOlJlaGVhcnNlRGVwbG95bWVudFN1aXRl",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RehearseDeploymentSuite",
+    "natspec": "",
+    "range": {
+      "byteLength": 1033,
+      "byteStart": 186,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeploymentSuite.s.sol#L8-L32",
+      "lineEnd": 32,
+      "lineStart": 8,
+      "snippetSha256": "sha256:462abe7494684f05306c31c30812d98bed0ffafe9c771a90ea7eb03d32ed453d",
+      "sourceSha256": "sha256:21b1a21c1c0e8a769c0ec8865de1f526b02972980f77832beb89a197a3a41781"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "script",
+    "sourcePath": "script/RehearseDeploymentSuite.s.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite#function:0x33f4d4c0",
+      "definitionId": "script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite#function:0xc0406226",
+      "definitionId": "script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite",
+      "severity": "advisory"
+    }
+  ]
+}

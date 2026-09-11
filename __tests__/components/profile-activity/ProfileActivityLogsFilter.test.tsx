@@ -19,6 +19,7 @@ jest.mock("framer-motion", () => ({
   AnimatePresence: ({ children }: any) => <div>{children}</div>,
   motion: { div: "div" },
   useAnimate: () => [React.createRef(), jest.fn()],
+  useReducedMotion: () => false,
 }));
 
 test("title updates based on selection", () => {
@@ -72,8 +73,10 @@ test("opens and closes list", async () => {
     />
   );
   expect(screen.queryByTestId("list")).not.toBeInTheDocument();
-  await user.click(screen.getByRole("button"));
+  const trigger = screen.getByRole("button");
+  expect(trigger).not.toHaveAttribute("aria-haspopup");
+  await user.click(trigger);
   expect(screen.getByTestId("list")).toBeInTheDocument();
-  await user.click(screen.getByRole("button"));
+  await user.click(trigger);
   expect(screen.queryByTestId("list")).not.toBeInTheDocument();
 });

@@ -49,6 +49,11 @@ jest.mock("@/components/the-memes/MemePageArt", () => ({
   __esModule: true,
   MemePageArt: (...args: unknown[]) => mockMemePageArt(...args),
 }));
+jest.mock("@/contexts/SeizeSettingsContext", () => ({
+  useSeizeSettings: () => ({
+    seizeSettings: { memes_wave_id: "main-stage-wave" },
+  }),
+}));
 jest.mock("@/components/nft-image/RememeImage", () => ({
   __esModule: true,
   default: () => <div data-testid="rememe-image" />,
@@ -93,6 +98,9 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn((opts: { endpoint: string }) => {
     if (opts.endpoint === "policies/country-check") {
       return Promise.resolve({ is_eu: false, country: "US" });
+    }
+    if (opts.endpoint === "meme-cards/5/drop") {
+      return Promise.resolve({ meme_card_id: 5, drop_id: "drop-5" });
     }
     return Promise.reject(new Error("Unknown endpoint"));
   }),
@@ -455,7 +463,7 @@ describe("MemePageLiveRightMenu distribution link", () => {
     ).toBeTruthy();
     expect(
       collectorsLabel.parentElement?.parentElement?.parentElement
-    ).toHaveClass("tw-flex", "tw-flex-wrap");
+    ).toHaveClass("tw-grid", "tw-grid-cols-2", "lg:tw-grid-cols-3");
   });
 
   it("uses ranked collection size for live rank totals when provided", () => {
@@ -479,7 +487,7 @@ describe("MemePageLiveRightMenu distribution link", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows unranked rank pills and pending TDH for memes not recorded in TDH", () => {
+  it("shows one unranked status and pending TDH for memes not recorded in TDH", () => {
     render(
       <MemePageLiveRightMenu
         show
@@ -495,12 +503,16 @@ describe("MemePageLiveRightMenu distribution link", () => {
       />
     );
 
-    expect(screen.getAllByText("Unranked")).toHaveLength(3);
+    expect(screen.getAllByText("Unranked")).toHaveLength(1);
     expect(screen.getByLabelText("Edition size: Unranked")).toBeInTheDocument();
-    expect(
-      screen.getByLabelText("ex. 6529 museum: Unranked")
-    ).toBeInTheDocument();
-    expect(screen.getByLabelText("Collectors: Unranked")).toBeInTheDocument();
+    const exMuseumMetric =
+      screen.getByText("ex. 6529 museum").parentElement?.parentElement;
+    const collectorsMetric =
+      screen.getByText("Collectors").parentElement?.parentElement;
+    expect(exMuseumMetric).toHaveTextContent(/ex\. 6529 museum\s*100/);
+    expect(exMuseumMetric).not.toHaveTextContent(/Rank|Unranked/);
+    expect(collectorsMetric).toHaveTextContent(/Collectors\s*0/);
+    expect(collectorsMetric).not.toHaveTextContent(/Rank|Unranked/);
     expect(screen.getByText("Pending")).toBeInTheDocument();
     expect(screen.queryByText("22.65")).not.toBeInTheDocument();
   });
@@ -559,9 +571,6 @@ describe("MemePageLiveRightMenu distribution link", () => {
         formatNumber("de-DE", nft.market_cap, { maximumFractionDigits: 2 })
       )
     ).toBeInTheDocument();
-    expect(
-      screen.getByText(t("de-DE", "theMemes.detail.live.market.title"))
-    ).toBeInTheDocument();
   });
 
   it("formats collector percentages with the selected locale", () => {
@@ -595,6 +604,14 @@ describe("MemePageLiveRightMenu distribution link", () => {
     });
     const link = screen.getByRole("link", { name: /distribution plan/i });
     expect(link).toHaveAttribute("href", `/the-memes/5/distribution`);
+    const submissionLink = await screen.findByRole("link", {
+      name: "Main Stage Submission",
+    });
+    expect(submissionLink).toHaveAttribute(
+      "href",
+      "/waves/main-stage-wave?drop=drop-5"
+    );
+    expect(submissionLink.parentElement).toBe(link.parentElement);
   });
 
   it("preserves locale in distribution plan links", async () => {
@@ -664,6 +681,7 @@ describe("MemePageLiveSubMenu details", () => {
     expect(
       screen.getByRole("button", { name: /additional details/i })
     ).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByTestId("meme-page-art")).not.toBeInTheDocument();
 
     rerender(
       <MemePageLiveSubMenu
@@ -679,6 +697,7 @@ describe("MemePageLiveSubMenu details", () => {
         screen.getByRole("button", { name: /additional details/i })
       ).toHaveAttribute("aria-expanded", "true")
     );
+    expect(screen.getByTestId("meme-page-art")).toBeInTheDocument();
   });
 
   it("passes locale into additional details content", () => {

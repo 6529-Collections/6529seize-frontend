@@ -15,6 +15,7 @@ import type { RefObject } from "react";
 import { memo, useCallback, useMemo, useState } from "react";
 import BoostedDropCardHome from "@/components/home/boosted/BoostedDropCardHome";
 import BoostedDropCompactChatItem from "@/components/home/boosted/BoostedDropCompactChatItem";
+import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 import HighlightDropWrapper from "./HighlightDropWrapper";
 import UnreadDivider from "./UnreadDivider";
 import {
@@ -54,12 +55,13 @@ interface DropsListProps {
     | BoostedDropsDisplayPreference
     | undefined;
   readonly onBoostedDropClick?: ((serialNo: number) => void) | undefined;
-  readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
   readonly suspendLightDropHydration?: boolean | undefined;
+  readonly virtualScrollRootMargin?: string | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
+  readonly moderationPresentation?: "default" | "profile-activity" | undefined;
 }
 
 const MemoizedDrop = memo(Drop);
@@ -84,12 +86,13 @@ const DropsList = memo(
     boostedDrops,
     boostedDropsDisplayPreference = DEFAULT_BOOSTED_DROPS_DISPLAY_PREFERENCE,
     onBoostedDropClick,
-    autoCollapseSerials,
     suspendLightDropHydration = false,
+    virtualScrollRootMargin,
     winningThreshold,
     winningThresholdMinDurationMs,
     isVotingClosed = false,
     isVotingControlsLocked = false,
+    moderationPresentation = "default",
   }: DropsListProps) => {
     const handleReply = useCallback<DropActionHandler>(
       ({ drop, partId }) => onReply({ drop, partId }),
@@ -232,19 +235,21 @@ const DropsList = memo(
                 : "tw-px-3 tw-py-3 sm:tw-px-4"
             }
           >
-            {isCompact ? (
-              <BoostedDropCompactChatItem
-                drop={boostedDrop}
-                onClick={onClick}
-              />
-            ) : (
-              <BoostedDropCardHome
-                drop={boostedDrop}
-                variant="chat"
-                rank={boostedIndex + 1}
-                onClick={onClick}
-              />
-            )}
+            <ContentModerationDropGate drop={boostedDrop} compact>
+              {isCompact ? (
+                <BoostedDropCompactChatItem
+                  drop={boostedDrop}
+                  onClick={onClick}
+                />
+              ) : (
+                <BoostedDropCardHome
+                  drop={boostedDrop}
+                  variant="chat"
+                  rank={boostedIndex + 1}
+                  onClick={onClick}
+                />
+              )}
+            </ContentModerationDropGate>
           </div>
         );
       },
@@ -297,6 +302,7 @@ const DropsList = memo(
               }
               isVotingClosed={getItemData.isVotingClosed}
               isVotingControlsLocked={getItemData.isVotingControlsLocked}
+              moderationPresentation={moderationPresentation}
             />
           ) : (
             <MemoizedLightDrop drop={drop} />
@@ -306,6 +312,7 @@ const DropsList = memo(
           <HighlightDropWrapper
             key={drop.stableKey}
             id={`drop-${drop.serial_no}`}
+            serialNo={drop.serial_no}
             waveDropId={
               drop.type === DropSize.FULL ? drop.stableHash : undefined
             }
@@ -326,10 +333,8 @@ const DropsList = memo(
               dropSerialNo={drop.serial_no}
               waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
               type={drop.type}
-              suspendLightDropHydration={
-                suspendLightDropHydration ||
-                (autoCollapseSerials?.has(drop.serial_no) ?? false)
-              }
+              suspendLightDropHydration={suspendLightDropHydration}
+              rootMargin={virtualScrollRootMargin}
             >
               {dropContent}
             </VirtualScrollWrapper>
@@ -340,12 +345,13 @@ const DropsList = memo(
       });
     }, [
       orderedDrops,
-      autoCollapseSerials,
       getItemData,
       location,
       renderBoostCard,
       renderUnreadDivider,
       suspendLightDropHydration,
+      virtualScrollRootMargin,
+      moderationPresentation,
     ]);
 
     return (

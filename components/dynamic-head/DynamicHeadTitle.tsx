@@ -1,12 +1,18 @@
 "use client";
 
 import { DEFAULT_TITLE, useTitle } from "@/contexts/TitleContext";
+import { STREAM_INDEX_ROUTES } from "@/contexts/title.helpers";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
+
+function normalizeDocumentTitle(title: string): string {
+  return title.replace(/\s+/g, " ").trim();
+}
 
 export default function DynamicHeadTitle() {
   const { title, isTitleOwned, titlePathname } = useTitle();
   const pathname = usePathname();
+  const normalizedTitle = normalizeDocumentTitle(title);
   const shouldApplyDefaultTitle = pathname === "/" && title === DEFAULT_TITLE;
   const isTitleForCurrentRoute = titlePathname === pathname;
   const previousObservationRef = useRef<{
@@ -17,7 +23,7 @@ export default function DynamicHeadTitle() {
   useEffect(() => {
     const previousObservation = previousObservationRef.current;
     if (isTitleForCurrentRoute) {
-      previousObservationRef.current = { title, pathname };
+      previousObservationRef.current = { title: normalizedTitle, pathname };
     }
 
     // Route-default placeholders must not beat the route's server metadata
@@ -32,19 +38,25 @@ export default function DynamicHeadTitle() {
         isTitleForCurrentRoute &&
         previousObservation !== null &&
         previousObservation.pathname === pathname &&
-        previousObservation.title !== title;
-      if (!document.title || isSameRouteTransition) {
-        document.title = title;
+        previousObservation.title !== normalizedTitle;
+      const isStreamIndex = STREAM_INDEX_ROUTES.includes(pathname);
+      const isStreamDeselectionTransition =
+        isTitleForCurrentRoute &&
+        isStreamIndex &&
+        previousObservation !== null &&
+        previousObservation.pathname?.startsWith(`${pathname}/`) === true &&
+        previousObservation.title !== normalizedTitle;
+      if (
+        !normalizeDocumentTitle(document.title) ||
+        isSameRouteTransition ||
+        isStreamDeselectionTransition
+      ) {
+        document.title = normalizedTitle;
       }
       return;
     }
 
-    document.title = title;
-
-    const head = document.head;
-    if (!head) {
-      return;
-    }
+    document.title = normalizedTitle;
 
     // The App Router commits the route's server metadata <title> after
     // hydration/streaming settles, silently overwriting titles set from
@@ -63,14 +75,14 @@ export default function DynamicHeadTitle() {
       if (window.location.pathname !== ownedLocationPathname) {
         return;
       }
-      if (document.title !== title) {
-        document.title = title;
+      if (normalizeDocumentTitle(document.title) !== normalizedTitle) {
+        document.title = normalizedTitle;
       }
     };
 
     const textObserver = new MutationObserver(reassertTitle);
     const observeTitleNode = () => {
-      const titleElement = head.querySelector("title");
+      const titleElement = document.head.querySelector("title");
       if (titleElement) {
         textObserver.observe(titleElement, {
           characterData: true,
@@ -86,7 +98,7 @@ export default function DynamicHeadTitle() {
       observeTitleNode();
       reassertTitle();
     });
-    headObserver.observe(head, { childList: true });
+    headObserver.observe(document.head, { childList: true });
 
     return () => {
       headObserver.disconnect();
@@ -96,8 +108,8 @@ export default function DynamicHeadTitle() {
     isTitleForCurrentRoute,
     isTitleOwned,
     pathname,
+    normalizedTitle,
     shouldApplyDefaultTitle,
-    title,
   ]);
 
   return null;

@@ -45,6 +45,7 @@ export default function MaxVotesPerIdentityInput({
       }
       inputId={inputId}
       label="Vote cap per identity"
+      surface="plain"
     >
       <input
         type="number"

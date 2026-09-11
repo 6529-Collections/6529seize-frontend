@@ -77,6 +77,22 @@ is blocked.
 
 ## Posting and Submission Checks
 
+- Pin or unpin asks you to reconnect, or your saved pins are unavailable:
+  reconnect the wallet for the selected profile, then retry. Public waves can
+  remain readable while your session is expired; this does not pin them. See
+  [Pinned Wave Controls](sidebars/feature-pinned-wave-controls.md#failure-and-recovery).
+- Post waits for a session check, then shows a connection or timeout error:
+  the draft stays in the composer. Wait for the loading state to finish, check
+  your connection, complete sign-in if prompted, then retry Post. A stalled
+  session check expires so a later attempt can check the session again; the
+  failed attempt does not automatically post your draft.
+- Post asks you to reconnect, or reactions show `Please reconnect your wallet`:
+  a saved profile can remain visible after its session can no longer renew.
+  Reconnect that profile using the
+  [wallet account controls](../navigation/feature-wallet-account-controls.md#failure-and-recovery),
+  then retry the action. Post keeps the draft when authentication fails; save
+  it before logging out or reloading. Reactions are not automatically retried
+  after signing in.
 - Footer shows `Connect your wallet to participate in this wave`:
   both chat and submission are blocked because the current viewer is signed out.
 - Footer shows `Create a profile to participate in this wave`:
@@ -98,8 +114,11 @@ is blocked.
   `Submissions haven't started yet`, `Submission period has ended`, or
   `You have reached the maximum number of drops allowed`.
 - Memes submission cannot continue:
-  upload artwork, complete required fields, fix inline validation errors, then
-  submit again.
+  upload artwork in a supported format, keep uploaded files at or below
+  `250 MB`, complete required fields, fix inline validation errors, then
+  submit again. Interactive model uploads must be binary `.glb` files; JSON
+  `.gltf` files are not accepted, and renamed or malformed `.glb` files fail
+  binary-header validation before upload.
 
 ## Quick Vote Checks
 

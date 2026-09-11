@@ -1,11 +1,15 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAccountsUnreadNotifications";
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
+import { setNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
 
 const useQueryMock = jest.fn();
 const getQueryDataMock = jest.fn();
 const commonApiFetchMock = jest.fn();
 const isAuthJwtUsableMock = jest.fn();
+const createQueryContext = (signal = new AbortController().signal) => ({
+  signal,
+});
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: (params: unknown) => useQueryMock(params),
@@ -29,6 +33,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
 
 describe("useConnectedAccountsUnreadNotifications", () => {
   beforeEach(() => {
+    setNotificationRealtimeState(false);
     useQueryMock.mockReset();
     getQueryDataMock.mockReset();
     commonApiFetchMock.mockReset();
@@ -64,6 +69,40 @@ describe("useConnectedAccountsUnreadNotifications", () => {
     );
   });
 
+  it("uses only a five-minute reconciliation poll when every account is synced", () => {
+    setNotificationRealtimeState(true, ["profile-1"]);
+    useQueryMock.mockReturnValue({ data: {} });
+
+    renderHook(() =>
+      useConnectedAccountsUnreadNotifications([
+        {
+          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          refreshToken: "refresh-token",
+          role: null,
+          jwt: "jwt-token",
+          profileId: "profile-1",
+          profileHandle: "alice",
+        },
+        {
+          address: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+          refreshToken: "refresh-token-2",
+          role: null,
+          jwt: "jwt-token-2",
+          profileId: "profile-2",
+          profileHandle: "bob",
+        },
+      ])
+    );
+
+    expect(useQueryMock.mock.calls.at(-1)?.[0].refetchInterval).toBe(15000);
+
+    act(() => {
+      setNotificationRealtimeState(true, ["profile-1", "profile-2"]);
+    });
+
+    expect(useQueryMock.mock.calls.at(-1)?.[0].refetchInterval).toBe(300000);
+  });
+
   it("does not enable polling for accounts without usable JWTs", () => {
     isAuthJwtUsableMock.mockReturnValue(false);
     useQueryMock.mockReturnValue({ data: {} });
@@ -94,7 +133,7 @@ describe("useConnectedAccountsUnreadNotifications", () => {
     );
   });
 
-  it("does not retry unauthorized connected-account notification failures", () => {
+  it("does not retry terminal connected-account notification failures", () => {
     useQueryMock.mockReturnValue({ data: {} });
 
     renderHook(() =>
@@ -112,10 +151,12 @@ describe("useConnectedAccountsUnreadNotifications", () => {
 
     const queryOptions = useQueryMock.mock.calls[0]?.[0];
     expect(queryOptions.retry(0, { status: 401 })).toBe(false);
+    expect(queryOptions.retry(0, { status: 403 })).toBe(false);
+    expect(queryOptions.retry(0, { status: 503 })).toBe(true);
   });
 
-  it("surfaces unauthorized connected-account failures instead of hiding them as successful polling", async () => {
-    commonApiFetchMock.mockRejectedValue({ status: 401 });
+  it("surfaces terminal connected-account failures instead of hiding them as successful polling", async () => {
+    commonApiFetchMock.mockRejectedValue({ status: 403 });
     useQueryMock.mockReturnValue({ data: {} });
 
     renderHook(() =>
@@ -132,7 +173,197 @@ describe("useConnectedAccountsUnreadNotifications", () => {
     );
 
     const queryOptions = useQueryMock.mock.calls[0]?.[0];
-    await expect(queryOptions.queryFn()).rejects.toMatchObject({ status: 401 });
+    await expect(
+      queryOptions.queryFn(createQueryContext())
+    ).rejects.toMatchObject({
+      status: 403,
+      terminalNotificationAuth: true,
+    });
+  });
+
+  it("keeps transient connected-account failures best-effort", async () => {
+    commonApiFetchMock.mockRejectedValue({ status: 503 });
+    getQueryDataMock.mockReturnValue({
+      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": 4,
+    });
+    useQueryMock.mockReturnValue({ data: {} });
+
+    renderHook(() =>
+      useConnectedAccountsUnreadNotifications([
+        {
+          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          refreshToken: "refresh-token",
+          role: null,
+          jwt: "jwt-token",
+          profileId: null,
+          profileHandle: "alice",
+        },
+      ])
+    );
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    await expect(queryOptions.queryFn(createQueryContext())).resolves.toEqual({
+      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": 4,
+    });
+  });
+
+  it("forwards one query AbortSignal to separate per-account requests", async () => {
+    commonApiFetchMock.mockResolvedValue({ unread_count: 1 });
+    useQueryMock.mockReturnValue({ data: {} });
+    const signal = new AbortController().signal;
+
+    renderHook(() =>
+      useConnectedAccountsUnreadNotifications([
+        {
+          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          refreshToken: "refresh-token-a",
+          role: null,
+          jwt: "jwt-a",
+          profileId: "profile-1",
+          profileHandle: "alice",
+        },
+        {
+          address: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+          refreshToken: "refresh-token-b",
+          role: null,
+          jwt: "jwt-b",
+          profileId: "profile-2",
+          profileHandle: "bob",
+        },
+      ])
+    );
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    await expect(
+      queryOptions.queryFn(createQueryContext(signal))
+    ).resolves.toEqual({
+      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": 1,
+      "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": 1,
+    });
+
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+    expect(commonApiFetchMock).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        headers: { Authorization: "Bearer jwt-a" },
+        signal,
+      })
+    );
+    expect(commonApiFetchMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        headers: { Authorization: "Bearer jwt-b" },
+        signal,
+      })
+    );
+  });
+
+  it("preserves per-account counts when the shared query signal aborts", async () => {
+    const previousCounts = {
+      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": 4,
+      "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": 2,
+    };
+    getQueryDataMock.mockReturnValue(previousCounts);
+    commonApiFetchMock.mockImplementation(
+      ({ signal }: { readonly signal: AbortSignal }) =>
+        new Promise((_, reject) => {
+          const rejectWithAbort = () => {
+            reject(new DOMException("The operation was aborted", "AbortError"));
+          };
+          if (signal.aborted) {
+            rejectWithAbort();
+            return;
+          }
+          signal.addEventListener("abort", rejectWithAbort, { once: true });
+        })
+    );
+    useQueryMock.mockReturnValue({ data: {} });
+    const abortController = new AbortController();
+
+    renderHook(() =>
+      useConnectedAccountsUnreadNotifications([
+        {
+          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          refreshToken: "refresh-token-a",
+          role: null,
+          jwt: "jwt-a",
+          profileId: "profile-1",
+          profileHandle: "alice",
+        },
+        {
+          address: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+          refreshToken: "refresh-token-b",
+          role: null,
+          jwt: "jwt-b",
+          profileId: "profile-2",
+          profileHandle: "bob",
+        },
+      ])
+    );
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    const queryPromise = queryOptions.queryFn(
+      createQueryContext(abortController.signal)
+    );
+    abortController.abort();
+
+    await expect(queryPromise).resolves.toEqual(previousCounts);
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("blocks only the failed account until that account gets a new token", async () => {
+    const accounts = [
+      {
+        address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        refreshToken: "refresh-token-a",
+        role: null,
+        jwt: "jwt-a",
+        profileId: null,
+        profileHandle: "alice",
+      },
+      {
+        address: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        refreshToken: "refresh-token-b",
+        role: null,
+        jwt: "jwt-b",
+        profileId: null,
+        profileHandle: "bob",
+      },
+    ];
+    commonApiFetchMock
+      .mockRejectedValueOnce({ status: 403 })
+      .mockResolvedValueOnce({ unread_count: 2 });
+    useQueryMock.mockReturnValue({ data: {} });
+
+    const { rerender } = renderHook(
+      ({ connectedAccounts }) =>
+        useConnectedAccountsUnreadNotifications(connectedAccounts),
+      { initialProps: { connectedAccounts: accounts } }
+    );
+
+    const firstQueryOptions = useQueryMock.mock.calls[0]?.[0];
+    const terminalError = await firstQueryOptions
+      .queryFn(createQueryContext())
+      .catch((error: unknown) => error);
+    act(() => {
+      expect(firstQueryOptions.retry(0, terminalError)).toBe(false);
+    });
+
+    expect(useQueryMock.mock.calls.at(-1)?.[0].queryKey.at(-1)).toEqual([
+      "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    ]);
+
+    rerender({
+      connectedAccounts: [
+        { ...accounts[0], jwt: "jwt-a-after-reauth" },
+        accounts[1],
+      ],
+    });
+
+    expect(useQueryMock.mock.calls.at(-1)?.[0].queryKey.at(-1)).toEqual([
+      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    ]);
   });
 
   it("blocks connected-account fetches when the JWT expires between renders", async () => {
@@ -153,7 +384,9 @@ describe("useConnectedAccountsUnreadNotifications", () => {
     );
 
     const queryOptions = useQueryMock.mock.calls[0]?.[0];
-    await expect(queryOptions.queryFn()).rejects.toMatchObject({ status: 401 });
+    await expect(
+      queryOptions.queryFn(createQueryContext())
+    ).rejects.toMatchObject({ status: 401 });
     expect(commonApiFetchMock).not.toHaveBeenCalled();
   });
 });

@@ -16,6 +16,10 @@ const DEFAULT_COLLATOR_OPTIONS = {
   sensitivity: "base",
   numeric: true,
 } satisfies Intl.CollatorOptions;
+const DEFAULT_LIST_FORMAT_OPTIONS = {
+  style: "long",
+  type: "conjunction",
+} satisfies Intl.ListFormatOptions;
 
 function toFiniteNumber(value: number | null | undefined): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
@@ -41,6 +45,66 @@ export function formatNumber(
   }
 
   return new Intl.NumberFormat(locale, options).format(numberValue);
+}
+
+export function formatDecimalString(
+  locale: SupportedLocale,
+  value: string | null | undefined
+): string {
+  if (value === null || value === undefined || value.trim().length === 0) {
+    return "—";
+  }
+
+  const normalized = value.trim();
+  const firstCharacter = normalized[0];
+  const sign =
+    firstCharacter === "+" || firstCharacter === "-" ? firstCharacter : "";
+  const unsigned = sign ? normalized.slice(1) : normalized;
+  const decimalIndex = unsigned.indexOf(".");
+  const hasOneDecimalPoint =
+    decimalIndex === unsigned.lastIndexOf(".") && decimalIndex >= 0;
+  const integerPart = hasOneDecimalPoint
+    ? unsigned.slice(0, decimalIndex)
+    : unsigned;
+  const fractionPart = hasOneDecimalPoint
+    ? unsigned.slice(decimalIndex + 1)
+    : undefined;
+  const isDigits = (part: string): boolean =>
+    part.length > 0 &&
+    [...part].every((character) => character >= "0" && character <= "9");
+  if (
+    !isDigits(integerPart) ||
+    (fractionPart !== undefined && !isDigits(fractionPart))
+  ) {
+    return normalized;
+  }
+
+  const integerFormatter = new Intl.NumberFormat(locale, {
+    maximumFractionDigits: 0,
+    useGrouping: true,
+  });
+  const groupedInteger = integerFormatter.format(BigInt(integerPart));
+  const decimalSeparator =
+    new Intl.NumberFormat(locale)
+      .formatToParts(1.1)
+      .find((part) => part.type === "decimal")?.value ?? ".";
+  const signedFormatter = new Intl.NumberFormat(locale, {
+    signDisplay: "always",
+    useGrouping: false,
+  });
+  let signValue = "";
+  if (sign) {
+    const signNumber = sign === "-" ? -1 : 1;
+    const signPartType = sign === "-" ? "minusSign" : "plusSign";
+    signValue =
+      signedFormatter
+        .formatToParts(signNumber)
+        .find((part) => part.type === signPartType)?.value ?? sign;
+  }
+  const fractionSuffix =
+    fractionPart === undefined ? "" : `${decimalSeparator}${fractionPart}`;
+
+  return `${signValue}${groupedInteger}${fractionSuffix}`;
 }
 
 export function formatInteger(
@@ -105,6 +169,14 @@ export function compareLocalized(
   options: Intl.CollatorOptions = DEFAULT_COLLATOR_OPTIONS
 ): number {
   return new Intl.Collator(locale, options).compare(left, right);
+}
+
+export function formatList(
+  locale: SupportedLocale,
+  values: readonly string[],
+  options: Intl.ListFormatOptions = DEFAULT_LIST_FORMAT_OPTIONS
+): string {
+  return new Intl.ListFormat(locale, options).format(values);
 }
 
 export function roundTo(value: number, fractionDigits: number): number {

@@ -4,7 +4,7 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { getCopiedDropLink } from "@/helpers/waves/drop-copy-link.helpers";
 import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import React, { useState } from "react";
-import { Tooltip } from "react-tooltip";
+import DropActionTooltip from "./DropActionTooltip";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 
@@ -69,6 +69,10 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
 
   const isDisabled = isTemporaryDrop(drop);
   const iconSizeClass = size === "compact" ? "tw-h-4 tw-w-4" : "tw-h-5 tw-w-5";
+  const buttonSizeClass =
+    size === "compact"
+      ? "tw-h-full tw-w-full tw-justify-center tw-px-0 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
+      : "tw-size-7 tw-justify-center tw-p-0 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200";
 
   const getLinkText = () => {
     if (isDisabled) return "Unavailable";
@@ -107,15 +111,17 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
   }
 
   return (
-    <>
+    <DropActionTooltip
+      content={<span className="tw-text-xs">{getLinkText()}</span>}
+      disabled={isDisabled}
+    >
       <button
-        className={`icon tw-group tw-flex tw-h-full tw-items-center tw-gap-x-2 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-[0.8125rem] tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out ${
+        className={`icon tw-group tw-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-full tw-border-0 tw-bg-transparent tw-text-[0.8125rem] tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${buttonSizeClass} ${
           isDisabled ? "tw-cursor-default tw-opacity-50" : "tw-cursor-pointer"
         }`}
         onClick={copyToClipboard}
         disabled={isDisabled}
         aria-label="Copy link"
-        {...(!isDisabled ? { "data-tooltip-id": `copy-link-${drop.id}` } : {})}
       >
         <svg
           className={`${iconSizeClass} tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out`}
@@ -132,28 +138,7 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
           />
         </svg>
       </button>
-      {!isDisabled && (
-        <Tooltip
-          id={`copy-link-${drop.id}`}
-          place="top"
-          offset={8}
-          opacity={1}
-          style={{
-            padding: "4px 8px",
-            background: "#37373E",
-            color: "white",
-            fontSize: "13px",
-            fontWeight: 500,
-            borderRadius: "6px",
-            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-            zIndex: 99999,
-            pointerEvents: "none",
-          }}
-        >
-          <span className="tw-text-xs">{getLinkText()}</span>
-        </Tooltip>
-      )}
-    </>
+    </DropActionTooltip>
   );
 };
 

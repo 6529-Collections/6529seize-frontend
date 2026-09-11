@@ -1,0 +1,246 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "production_support_library",
+    "classificationReason": "First-party protocol library outside the production contract catalog.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "IMMEDIATE_TIGHTENING",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 2173,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernanceExecutor.sol#L73",
+            "lineEnd": 73,
+            "lineStart": 73,
+            "snippetSha256": "sha256:7ff8fc91026996032f2dcf7cd7131a9a2808b62767375f0ac1eb88408bc15d26",
+            "sourceSha256": "sha256:50a345c89cb5bd91322d37cbc7a30f13b12592ac1a32cdd812ded87e65213d77"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2220,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernanceExecutor.sol#L73",
+            "lineEnd": 73,
+            "lineStart": 73,
+            "snippetSha256": "sha256:5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+            "sourceSha256": "sha256:50a345c89cb5bd91322d37cbc7a30f13b12592ac1a32cdd812ded87e65213d77"
+          },
+          "valueSource": "0",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "DELAYED_LOOSENING",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 2227,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernanceExecutor.sol#L74",
+            "lineEnd": 74,
+            "lineStart": 74,
+            "snippetSha256": "sha256:fc4129e52895c6d573081da086b0303468e4ebd503a44c3a2c2f8c40e698dca8",
+            "sourceSha256": "sha256:50a345c89cb5bd91322d37cbc7a30f13b12592ac1a32cdd812ded87e65213d77"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2271,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernanceExecutor.sol#L74",
+            "lineEnd": 74,
+            "lineStart": 74,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:50a345c89cb5bd91322d37cbc7a30f13b12592ac1a32cdd812ded87e65213d77"
+          },
+          "valueSource": "1",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TERMINAL_FREEZE",
+          "natspec": "",
+          "range": {
+            "byteLength": 43,
+            "byteStart": 2278,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernanceExecutor.sol#L75",
+            "lineEnd": 75,
+            "lineStart": 75,
+            "snippetSha256": "sha256:1e2754db84f4ea501e16907748c80584f4a86892cb98f061884f5311e5a1f74e",
+            "sourceSha256": "sha256:50a345c89cb5bd91322d37cbc7a30f13b12592ac1a32cdd812ded87e65213d77"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2320,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernanceExecutor.sol#L75",
+            "lineEnd": 75,
+            "lineStart": 75,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:50a345c89cb5bd91322d37cbc7a30f13b12592ac1a32cdd812ded87e65213d77"
+          },
+          "valueSource": "2",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "POINTER_REPLACEMENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 2327,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernanceExecutor.sol#L76",
+            "lineEnd": 76,
+            "lineStart": 76,
+            "snippetSha256": "sha256:80591a67a953f9bd9881a32c883dceec8bdfdd51f80ba5dec02cae5f42cf88d7",
+            "sourceSha256": "sha256:50a345c89cb5bd91322d37cbc7a30f13b12592ac1a32cdd812ded87e65213d77"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2373,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernanceExecutor.sol#L76",
+            "lineEnd": 76,
+            "lineStart": 76,
+            "snippetSha256": "sha256:4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+            "sourceSha256": "sha256:50a345c89cb5bd91322d37cbc7a30f13b12592ac1a32cdd812ded87e65213d77"
+          },
+          "valueSource": "3",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "FUNDS_RECOVERY",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 2380,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernanceExecutor.sol#L77",
+            "lineEnd": 77,
+            "lineStart": 77,
+            "snippetSha256": "sha256:70b7ed25e49060602294876d339efbed5653ade40ee22dbdf958c56707c031b8",
+            "sourceSha256": "sha256:50a345c89cb5bd91322d37cbc7a30f13b12592ac1a32cdd812ded87e65213d77"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2421,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernanceExecutor.sol#L77",
+            "lineEnd": 77,
+            "lineStart": 77,
+            "snippetSha256": "sha256:4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+            "sourceSha256": "sha256:50a345c89cb5bd91322d37cbc7a30f13b12592ac1a32cdd812ded87e65213d77"
+          },
+          "valueSource": "4",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SUCCESSOR_DECLARATION",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 2428,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernanceExecutor.sol#L78",
+            "lineEnd": 78,
+            "lineStart": 78,
+            "snippetSha256": "sha256:87650d54631d67b1f11bdd414740a87f312f4d49a4006c7603bc0e55f49b1a09",
+            "sourceSha256": "sha256:50a345c89cb5bd91322d37cbc7a30f13b12592ac1a32cdd812ded87e65213d77"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2476,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernanceExecutor.sol#L78",
+            "lineEnd": 78,
+            "lineStart": 78,
+            "snippetSha256": "sha256:ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d",
+            "sourceSha256": "sha256:50a345c89cb5bd91322d37cbc7a30f13b12592ac1a32cdd812ded87e65213d77"
+          },
+          "valueSource": "5",
+          "visibility": "internal"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamGovernanceExecutor.sol:StreamGovernanceActionClasses",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3Iuc29sOlN0cmVhbUdvdmVybmFuY2VBY3Rpb25DbGFzc2Vz",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamGovernanceExecutor.sol:StreamGovernanceActionClasses"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGovernanceActionClasses",
+    "natspec": "@notice Launch-v1 governance action classes as rebaselined by ADR 0017.\n @dev Numeric IDs are append-only. ID 6 is retired pre-genesis, forbidden,\n      and must never be reassigned.",
+    "range": {
+      "byteLength": 351,
+      "byteStart": 2129,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamGovernanceExecutor.sol#L72-L79",
+      "lineEnd": 79,
+      "lineStart": 72,
+      "snippetSha256": "sha256:b0843c0e3f68e409c1009719cfde26a846356a3baacfe57f9912026106d2071f",
+      "sourceSha256": "sha256:50a345c89cb5bd91322d37cbc7a30f13b12592ac1a32cdd812ded87e65213d77"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamGovernanceExecutor.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

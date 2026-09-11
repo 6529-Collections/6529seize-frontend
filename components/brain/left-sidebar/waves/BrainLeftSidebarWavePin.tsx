@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { Tooltip } from "react-tooltip";
 import { useAuth } from "@/components/auth/Auth";
 import {
@@ -11,6 +10,9 @@ import {
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 
 interface BrainLeftSidebarWavePinProps {
   readonly waveId: string;
@@ -53,11 +55,12 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   compact = false,
   className,
 }) => {
-  const { waves } = useMyStream();
-  const { pinnedIds, isOperationInProgress, canPinWave } =
+  const { pinnedIds, isOperationInProgress, canPinWave, pinWave, unpinWave } =
     usePinnedWavesServer();
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const isTouchDevice = useIsTouchDevice();
+  const locale = useBrowserLocale();
+  const pinLimit = formatInteger(locale, MAX_PINNED_WAVES);
   const [maxLimitTooltipRequest, setMaxLimitTooltipRequest] =
     useState<MaxLimitTooltipRequest | null>(null);
 
@@ -96,18 +99,20 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
 
     try {
       if (isPinned) {
-        waves.removePinnedWave(waveId);
+        await unpinWave(waveId);
         setMaxLimitTooltipRequest(null);
       } else {
         const canPin = canPinWave(waveId);
 
         if (canPin) {
-          waves.addPinnedWave(waveId);
+          await pinWave(waveId);
         } else {
           setMaxLimitTooltipRequest({ waveId, pinnedIdsKey });
           setToast({
             type: "error",
-            message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
+            message: t(locale, "waves.sidebar.pinControl.limitMessage", {
+              count: pinLimit,
+            }),
           });
         }
       }
@@ -116,10 +121,13 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
 
       setToast({
         type: "error",
-        title: isPinned
-          ? "Couldn't unpin this wave."
-          : "Couldn't pin this wave.",
-        description: "Please try again.",
+        title: t(
+          locale,
+          isPinned
+            ? "waves.sidebar.pinControl.unpinErrorTitle"
+            : "waves.sidebar.pinControl.pinErrorTitle"
+        ),
+        description: t(locale, "waves.sidebar.pinControl.retryDescription"),
         details: getToastErrorDetails(error),
       });
     }
@@ -128,16 +136,19 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   // Desktop rows reveal the pin on row hover or direct keyboard focus.
   const getOpacityClass = () => {
     if (isTouchDevice) return "tw-opacity-100";
-    return "tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 focus-visible:tw-opacity-100";
+    return "tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 focus-visible:tw-opacity-100 touch-only:tw-opacity-100";
   };
   const opacityClass = getOpacityClass();
 
   // Only show max-limit guidance for the keyed request window after a failed pin.
   const getTooltipContent = () => {
-    if (isPinned) return "Unpin";
-    if (canPinCurrentWave) return "Pin";
+    if (isPinned) return t(locale, "waves.sidebar.pinControl.unpinTooltip");
+    if (canPinCurrentWave)
+      return t(locale, "waves.sidebar.pinControl.pinTooltip");
     if (showMaxLimitTooltip) {
-      return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
+      return t(locale, "waves.sidebar.pinControl.limitTooltip", {
+        count: pinLimit,
+      });
     }
     return null;
   };
@@ -151,14 +162,19 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   };
 
   const getAriaLabel = () => {
-    return isPinned ? "Unpin wave" : "Pin wave";
+    return t(
+      locale,
+      isPinned
+        ? "waves.sidebar.pinControl.unpinAriaLabel"
+        : "waves.sidebar.pinControl.pinAriaLabel"
+    );
   };
 
   const positionClasses = compact ? "" : "-tw-mr-2 tw-mt-0.5";
   const getSizeClasses = () => {
     if (!compact) return "tw-size-7 sm:tw-size-6";
     if (isTouchDevice) return "tw-size-7";
-    return "tw-h-7 tw-w-0 desktop-hover:group-hover:tw-w-7 focus-visible:tw-w-7";
+    return "tw-h-7 tw-w-0 desktop-hover:group-hover:tw-w-7 focus-visible:tw-w-7 touch-only:tw-w-7";
   };
   const sizeClasses = getSizeClasses();
   const iconSizeClasses = compact ? "tw-size-3.5" : "tw-size-4";

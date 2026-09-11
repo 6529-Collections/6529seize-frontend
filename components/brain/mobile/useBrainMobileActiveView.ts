@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReadonlyURLSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { BrainView } from "./brainMobileViews";
 
@@ -35,6 +35,7 @@ interface UseBrainMobileActiveViewParams {
   readonly searchParams: ReadonlyURLSearchParams;
   readonly wave: ApiWave | null | undefined;
   readonly waveId: string | null;
+  readonly restoredView?: BrainView | null | undefined;
 }
 
 interface UseBrainMobileActiveViewResult {
@@ -243,11 +244,13 @@ export function useBrainMobileActiveView({
   searchParams,
   wave,
   waveId,
+  restoredView = null,
 }: UseBrainMobileActiveViewParams): UseBrainMobileActiveViewResult {
   const [selection, setSelection] = useState<ActiveViewSelection | null>(null);
   const hasWave = Boolean(waveId);
   const viewParam = searchParams.get("view");
   const createParam = searchParams.get("create");
+  const serialNoParam = searchParams.get("serialNo");
   const routeDefaultView = getRouteDefaultView({
     createParam,
     isApp,
@@ -256,7 +259,10 @@ export function useBrainMobileActiveView({
     waveId,
   });
   const shellContextKey = `shell:${pathname}:${viewParam ?? ""}`;
-  const currentContextKey = waveId ? `wave:${waveId}` : shellContextKey;
+  const chatTargetKey = serialNoParam === null ? "" : `serial:${serialNoParam}`;
+  const currentContextKey = waveId
+    ? `wave:${waveId}:${chatTargetKey}`
+    : shellContextKey;
   const currentContextToken = useMemo(
     () => Symbol(currentContextKey),
     [currentContextKey]
@@ -268,18 +274,25 @@ export function useBrainMobileActiveView({
     isCompleted,
     isRankWave,
   });
-  const baseView = hasWave
-    ? waveDefaultView
-    : (routeDefaultView ?? BrainView.DEFAULT);
+  let baseView = routeDefaultView ?? BrainView.DEFAULT;
+  if (hasWave) {
+    baseView =
+      serialNoParam !== null
+        ? BrainView.DEFAULT
+        : (restoredView ?? waveDefaultView);
+  }
   const candidateView =
     selection?.contextToken === currentContextToken ? selection.view : baseView;
 
-  const onViewChange = (view: BrainView) => {
-    setSelection({
-      contextToken: currentContextToken,
-      view,
-    });
-  };
+  const onViewChange = useCallback(
+    (view: BrainView) => {
+      setSelection({
+        contextToken: currentContextToken,
+        view,
+      });
+    },
+    [currentContextToken]
+  );
 
   const activeView = normalizeActiveView({
     activeView: candidateView,

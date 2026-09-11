@@ -31,7 +31,7 @@ export default function UserPageStatsActivityWalletTable({
             locale
           )}
         </caption>
-        <tbody className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
+        <tbody className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06]">
           {transactions.map((transaction) => (
             <UserPageStatsActivityWalletTableRow
               key={`${transaction.from_address}-${transaction.to_address}-${transaction.transaction}-${transaction.token_id}`}
@@ -40,6 +40,7 @@ export default function UserPageStatsActivityWalletTable({
               memes={memes}
               memeLab={memeLab}
               nextgenCollections={nextgenCollections}
+              locale={locale}
             />
           ))}
         </tbody>

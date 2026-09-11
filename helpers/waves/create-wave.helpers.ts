@@ -6,6 +6,8 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeSubType } from "@/generated/models/ApiWaveOutcomeSubType";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
+import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from "@/generated/models/ApiWaveParticipationIdentitySubmissionAllowDuplicates";
+import type { ApiWaveParticipationSubmissionStrategy } from "@/generated/models/ApiWaveParticipationSubmissionStrategy";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { normalizeWaveCustomRules } from "@/helpers/waves/wave-metadata.helpers";
@@ -93,10 +95,15 @@ const isPositiveWholeNumber = (
 export const getCreateWaveNextStep = ({
   step,
   waveType,
+  ongoingRanking = false,
 }: {
   readonly step: CreateWaveStep;
   readonly waveType: ApiWaveType;
+  readonly ongoingRanking?: boolean;
 }): CreateWaveStep | null => {
+  // Perpetual rank waves never award outcomes, so their flow skips the
+  // Outcomes step entirely.
+  const skipsOutcomes = waveType === ApiWaveType.Rank && ongoingRanking;
   switch (step) {
     case CreateWaveStep.OVERVIEW:
       return CreateWaveStep.GROUPS;
@@ -108,25 +115,21 @@ export const getCreateWaveNextStep = ({
     case CreateWaveStep.DATES:
       return CreateWaveStep.DROPS;
     case CreateWaveStep.DROPS:
-      if (waveType === ApiWaveType.Chat) {
-        return CreateWaveStep.VOTING;
-      }
-      return CreateWaveStep.RULES;
-    case CreateWaveStep.RULES:
-      if (waveType === ApiWaveType.Chat) {
-        return CreateWaveStep.DESCRIPTION;
-      }
       return CreateWaveStep.VOTING;
+    case CreateWaveStep.RULES:
+      return CreateWaveStep.DESCRIPTION;
     case CreateWaveStep.VOTING:
-      if (waveType === ApiWaveType.Chat) {
-        return CreateWaveStep.DESCRIPTION;
+      if (waveType === ApiWaveType.Chat || skipsOutcomes) {
+        return CreateWaveStep.RULES;
       }
       return CreateWaveStep.OUTCOMES;
     case CreateWaveStep.APPROVAL:
       return CreateWaveStep.OUTCOMES;
     case CreateWaveStep.OUTCOMES:
-      return CreateWaveStep.DESCRIPTION;
+      return CreateWaveStep.RULES;
     case CreateWaveStep.DESCRIPTION:
+      return CreateWaveStep.REVIEW;
+    case CreateWaveStep.REVIEW:
       return null;
     default:
       assertUnreachable(step);
@@ -137,10 +140,13 @@ export const getCreateWaveNextStep = ({
 export const getCreateWavePreviousStep = ({
   step,
   waveType,
+  ongoingRanking = false,
 }: {
   readonly step: CreateWaveStep;
   readonly waveType: ApiWaveType;
+  readonly ongoingRanking?: boolean;
 }): CreateWaveStep | null => {
+  const skipsOutcomes = waveType === ApiWaveType.Rank && ongoingRanking;
   switch (step) {
     case CreateWaveStep.OVERVIEW:
       return null;
@@ -157,21 +163,20 @@ export const getCreateWavePreviousStep = ({
       if (waveType === ApiWaveType.Chat) {
         return CreateWaveStep.GROUPS;
       }
-      return CreateWaveStep.DROPS;
-    case CreateWaveStep.VOTING:
-      if (waveType !== ApiWaveType.Chat) {
-        return CreateWaveStep.RULES;
+      if (skipsOutcomes) {
+        return CreateWaveStep.VOTING;
       }
+      return CreateWaveStep.OUTCOMES;
+    case CreateWaveStep.VOTING:
       return CreateWaveStep.DROPS;
     case CreateWaveStep.APPROVAL:
       return CreateWaveStep.VOTING;
     case CreateWaveStep.OUTCOMES:
       return CreateWaveStep.VOTING;
+    case CreateWaveStep.REVIEW:
+      return CreateWaveStep.DESCRIPTION;
     case CreateWaveStep.DESCRIPTION:
-      if (waveType === ApiWaveType.Chat) {
-        return CreateWaveStep.RULES;
-      }
-      return CreateWaveStep.OUTCOMES;
+      return CreateWaveStep.RULES;
     default:
       assertUnreachable(step);
       return null;
@@ -412,7 +417,45 @@ export const getCreateWaveEndDate = ({
     return config.dates.endDate;
   }
 
+  // Ongoing (perpetual) Rank waves never end: no decision schedule, no end
+  // date. Only Rank reaches this point, but the explicit type gate keeps the
+  // guarantee local rather than positional.
+  if (
+    config.overview.type === ApiWaveType.Rank &&
+    config.dates.ongoingRanking
+  ) {
+    return null;
+  }
+
   return calculateRankEndDate(config.dates);
+};
+
+const getSubmissionStrategyForWave = ({
+  submissionStrategy,
+  isPerpetualRank,
+}: {
+  readonly submissionStrategy: ApiWaveParticipationSubmissionStrategy;
+  readonly isPerpetualRank: boolean;
+}): ApiWaveParticipationSubmissionStrategy => {
+  // A perpetual rank wave never announces winners, so "resubmit after a win"
+  // could never unlock; it is behaviorally identical to "never again", and
+  // the UI blocks it, but normalize here too in case validation was bypassed.
+  if (
+    isPerpetualRank &&
+    submissionStrategy.config.duplicates ===
+      ApiWaveParticipationIdentitySubmissionAllowDuplicates.AllowAfterWin
+  ) {
+    return {
+      ...submissionStrategy,
+      config: {
+        ...submissionStrategy.config,
+        duplicates:
+          ApiWaveParticipationIdentitySubmissionAllowDuplicates.NeverAllow,
+      },
+    };
+  }
+
+  return submissionStrategy;
 };
 
 export const getCreateNewWaveBody = ({
@@ -433,6 +476,9 @@ export const getCreateNewWaveBody = ({
     : null;
   const signatureRequired =
     config.drops.signatureRequired && Boolean(participationTerms);
+  const isPerpetualRank =
+    config.overview.type === ApiWaveType.Rank &&
+    Boolean(config.dates.ongoingRanking);
 
   return {
     name: config.overview.name,
@@ -488,7 +534,10 @@ export const getCreateNewWaveBody = ({
       terms: signatureRequired ? participationTerms : null,
       ...(config.drops.submissionStrategy
         ? {
-            submission_strategy: config.drops.submissionStrategy,
+            submission_strategy: getSubmissionStrategyForWave({
+              submissionStrategy: config.drops.submissionStrategy,
+              isPerpetualRank,
+            }),
           }
         : {}),
     },
@@ -520,7 +569,7 @@ export const getCreateNewWaveBody = ({
         group_id: config.groups.admin,
       },
       decisions_strategy:
-        config.overview.type === ApiWaveType.Rank
+        config.overview.type === ApiWaveType.Rank && !isPerpetualRank
           ? {
               first_decision_time: config.dates.firstDecisionTime,
               subsequent_decisions: config.dates.subsequentDecisions,
@@ -528,6 +577,9 @@ export const getCreateNewWaveBody = ({
             }
           : null,
     },
-    outcomes: getOutcomes({ config }),
+    // Ongoing rank waves never announce winners, so outcome awards would be
+    // dead config; the live leaderboard is the outcome. Type-gated so a stray
+    // flag can never strip outcomes from other wave types.
+    outcomes: isPerpetualRank ? [] : getOutcomes({ config }),
   };
 };

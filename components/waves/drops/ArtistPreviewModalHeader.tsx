@@ -53,9 +53,8 @@ export const ArtistPreviewModalHeader: React.FC<
           </div>
 
           <div className="tw-relative tw-text-left">
-            {/* Title with subtle golden gradient for winners */}
             <div
-              className={`tw-mb-1 tw-text-xl tw-font-semibold tw-tracking-tight tw-transition-all tw-duration-300 sm:tw-text-2xl ${
+              className={`tw-mb-1 tw-text-xl tw-font-semibold tw-tracking-tight sm:tw-text-[1.375rem] sm:tw-leading-7 ${
                 currentContentType === "winners"
                   ? "tw-bg-gradient-to-r tw-from-amber-100 tw-via-yellow-50 tw-to-amber-100 tw-bg-clip-text tw-text-transparent"
                   : "tw-text-iron-100"
@@ -64,7 +63,7 @@ export const ArtistPreviewModalHeader: React.FC<
               {getTitle()}
             </div>
 
-            <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-white/50 tw-transition-colors tw-duration-300">
+            <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-normal tw-text-iron-500">
               <span>{getCurrentCount()}</span>
               <span className="tw-h-1 tw-w-1 tw-rounded-full tw-bg-white/40" />
               <span>The Memes Collection</span>
@@ -85,23 +84,5 @@ export const ArtistPreviewModalHeader: React.FC<
     </div>
   );
 
-  return currentContentType === "winners" ? (
-    <div className="tw-relative tw-overflow-hidden">
-      {/* warm top band (softer, spreads less) */}
-      <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-h-14 tw-bg-[linear-gradient(180deg,rgba(234,223,191,0.045),rgba(0,0,0,0)_80%)]" />
-
-      {/* diagonal gallery-light streak (barely there) */}
-      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-[linear-gradient(115deg,rgba(234,223,191,0.04)_0%,transparent_40%)]" />
-
-      {/* bottom vignette to ease into content */}
-      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-[radial-gradient(120%_140%_at_50%_120%,rgba(0,0,0,0.22),transparent_45%)]" />
-
-      {/* hairline */}
-      <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-px tw-bg-white/10" />
-
-      {HeaderInner}
-    </div>
-  ) : (
-    HeaderInner
-  );
+  return HeaderInner;
 };

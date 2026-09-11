@@ -45,8 +45,11 @@ describe("WebSidebarSubmenu", () => {
 
     expect(screen.getAllByText("Open Data")).toHaveLength(2);
     expect(screen.getByText("Other Tools")).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: "Team" })).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: "API" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("navigation", { name: "Tools sub-navigation" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Team" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "API" })).toBeInTheDocument();
   });
 
   it("closes after navigation", () => {
@@ -60,7 +63,7 @@ describe("WebSidebarSubmenu", () => {
       />
     );
 
-    fireEvent.click(screen.getByRole("menuitem", { name: "API" }));
+    fireEvent.click(screen.getByRole("link", { name: "API" }));
 
     expect(onClose).toHaveBeenCalledTimes(1);
   });
@@ -89,7 +92,69 @@ describe("WebSidebarSubmenu", () => {
     );
 
     expect(
-      screen.getByRole("menuitem", { name: "Definitions" })
+      screen.getByRole("link", { name: "Definitions" })
     ).not.toHaveAttribute("aria-current");
+  });
+
+  it("repeats keyboard focus requests while the same flyout stays open", () => {
+    const onClose = jest.fn();
+    const { rerender } = render(
+      <WebSidebarSubmenu
+        section={section}
+        pathname="/open-data/team"
+        onClose={onClose}
+        focusRequest={1}
+      />
+    );
+
+    const firstLink = screen.getByRole("link", { name: "API" });
+    expect(firstLink).toHaveFocus();
+
+    screen.getByRole("link", { name: "Team" }).focus();
+    expect(onClose).not.toHaveBeenCalled();
+    rerender(
+      <WebSidebarSubmenu
+        section={section}
+        pathname="/open-data/team"
+        onClose={onClose}
+        focusRequest={2}
+      />
+    );
+
+    expect(firstLink).toHaveFocus();
+  });
+
+  it("moves focus to the next sidebar control when tabbing out", () => {
+    const sidebar = document.createElement("div");
+    sidebar.dataset.sidebarScroll = "true";
+    const trigger = document.createElement("button");
+    const nextControl = document.createElement("button");
+    trigger.textContent = "Open tools";
+    nextControl.textContent = "Next control";
+    sidebar.append(trigger, nextControl);
+    document.body.prepend(sidebar);
+    const onClose = jest.fn();
+
+    try {
+      render(
+        <WebSidebarSubmenu
+          section={section}
+          pathname="/open-data/team"
+          onClose={onClose}
+          triggerElement={trigger}
+        />
+      );
+
+      const links = screen.getAllByRole("link");
+      const lastLink = links.at(-1);
+      expect(lastLink).toBeDefined();
+      lastLink?.focus();
+      fireEvent.keyDown(lastLink as HTMLElement, { key: "Tab" });
+
+      expect(nextControl).toHaveFocus();
+      expect(onClose).toHaveBeenCalledTimes(1);
+    } finally {
+      sidebar.remove();
+    }
   });
 });

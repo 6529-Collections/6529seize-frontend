@@ -1,6 +1,7 @@
 "use client";
 
 import React, { forwardRef, useCallback, useRef, useState } from "react";
+import { WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE } from "@/helpers/waves/wave-visible-serial.helpers";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
 
 const TOP_SENTINEL_ROOT_MARGIN = "200px 0px 0px 0px";
@@ -11,6 +12,7 @@ interface WaveDropsReverseContainerProps {
   readonly isFetchingNextPage: boolean;
   readonly hasNextPage: boolean;
   readonly bottomPaddingClassName?: string | undefined;
+  readonly bottomPaddingStyle?: React.CSSProperties | undefined;
   readonly containerClassName?: string | undefined;
 }
 
@@ -25,6 +27,7 @@ export const WaveDropsReverseContainer = forwardRef<
       isFetchingNextPage,
       hasNextPage,
       bottomPaddingClassName,
+      bottomPaddingStyle,
       containerClassName,
     },
     ref
@@ -72,9 +75,11 @@ export const WaveDropsReverseContainer = forwardRef<
       <div
         ref={handleScrollContainerRef}
         data-mobile-bottom-nav-scroll-target="true"
+        {...{ [WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE]: "true" }}
         className={`tw-min-h-0 tw-flex-1 ${
           bottomPaddingClassName ?? "tw-pb-6"
-        } no-scrollbar tw-flex tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-bg-iron-950 tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 lg:tw-scrollbar-thin ${containerClassName ?? ""}`}
+        } tw-no-scrollbar lg:tw-[scrollbar-gutter:stable] tw-flex tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-bg-iron-950 tw-transition-[padding-bottom] tw-duration-300 tw-ease-out tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 motion-reduce:tw-transition-none hover:tw-scrollbar-thumb-iron-300 lg:tw-pr-2 lg:tw-scrollbar-thin ${containerClassName ?? ""}`}
+        style={bottomPaddingStyle}
       >
         <div className="tw-flex tw-flex-col">
           {hasNextPage && isFetchingNextPage && (

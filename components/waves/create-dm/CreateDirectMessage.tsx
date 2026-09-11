@@ -3,10 +3,8 @@
 import { useState } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
 import GroupCreateIdentitiesSelect from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSelect";
+import Button from "@/components/utils/button/Button";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";
@@ -14,6 +12,8 @@ import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
@@ -28,6 +28,7 @@ export default function CreateDirectMessage({
   readonly onSuccess?: (() => void) | undefined;
 }) {
   const [isCreating, setIsCreating] = useState(false);
+  const locale = useBrowserLocale();
   const router = useRouter();
   const { isApp } = useDeviceInfo();
 
@@ -81,11 +82,12 @@ export default function CreateDirectMessage({
       navigateToDirectMessage({ waveId: wave.id, router, isApp });
     } catch (error) {
       console.error(error);
+      const errorMessage = getToastErrorDetails(error);
       setToast({
         type: "error",
         title: "Couldn't create this direct message.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
+        description:
+          errorMessage ?? t(locale, "profilePreferences.dm.createRetry"),
       });
       setIsCreating(false);
     }
@@ -93,30 +95,33 @@ export default function CreateDirectMessage({
 
   return (
     <CreateWaveFlow onBack={onBack} title="Create Direct Message">
-      <div className="tw-mt-4 tw-text-sm tw-text-iron-400">
+      <div className="tw-text-sm tw-text-iron-400">
         <GroupCreateIdentitiesSelect
           onIdentitySelect={onIdentitySelect}
           selectedIdentities={selectedIdentities}
           selectedWallets={[]}
           onRemove={onRemove}
+          appearance="modal"
+          resultsLayout="inline"
+          sort="level"
         />
-      </div>
-      <div className="tw-mt-4 tw-flex tw-justify-end">
-        <button
-          disabled={selectedIdentities.length === 0 || isCreating}
-          onClick={onCreateDirectMessage}
-          type="button"
-          className="tw-flex tw-items-center tw-gap-x-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-shadow-sm tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-600 hover:tw-bg-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 disabled:tw-cursor-not-allowed disabled:tw-border-gray-300 disabled:tw-bg-gray-300 disabled:tw-text-gray-500 disabled:hover:tw-bg-gray-300"
-        >
-          {isCreating ? (
-            <CircleLoader size={CircleLoaderSize.MEDIUM} />
-          ) : (
-            <FontAwesomeIcon icon={faPaperPlane} className="tw-h-5 tw-w-5" />
-          )}
-          <span className="tw-text-lg">
-            {isCreating ? "Creating..." : "Create"}
-          </span>
-        </button>
+        <div className="tw-mt-3 tw-flex tw-justify-end">
+          <Button
+            disabled={selectedIdentities.length === 0 || isCreating}
+            onClick={onCreateDirectMessage}
+            loading={isCreating}
+            variant="action"
+            size="md"
+          >
+            {!isCreating && (
+              <FontAwesomeIcon
+                icon={faPaperPlane}
+                className="-tw-ml-0.5 tw-size-3 tw-flex-shrink-0"
+              />
+            )}
+            <span>{isCreating ? "Creating..." : "Create"}</span>
+          </Button>
+        </div>
       </div>
     </CreateWaveFlow>
   );

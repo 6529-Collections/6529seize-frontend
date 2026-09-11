@@ -101,10 +101,13 @@ describe("WaveHeader", () => {
     const editPicture = screen.getByLabelText("Edit wave picture");
     expect(editPicture).toBeInTheDocument();
     expect(screen.getAllByLabelText("Edit wave picture")).toHaveLength(1);
+    expect(editPicture).toHaveAttribute("aria-haspopup", "dialog");
     expect(editPicture).toHaveClass(
-      "tw-hidden",
-      "desktop-hover:group-hover:tw-flex",
-      "touch-only:tw-flex"
+      "tw-flex",
+      "tw-opacity-0",
+      "focus-visible:tw-opacity-100",
+      "desktop-hover:group-hover:tw-opacity-100",
+      "touch-only:tw-opacity-100"
     );
   });
 
@@ -152,7 +155,7 @@ describe("WaveHeader", () => {
     expect(screen.queryByTestId("wave-header-pin")).toBeNull();
   });
 
-  it("only mounts create-subwave options for eligible top-level waves", () => {
+  it("does not mount owner options for admin-eligible non-owner waves", () => {
     wrapper(
       {
         ...baseWave,
@@ -165,13 +168,10 @@ describe("WaveHeader", () => {
       { connectedProfile: { handle: "alice" } }
     );
 
-    expect(screen.getByTestId("wave-header-options")).toHaveAttribute(
-      "data-show-owner",
-      "false"
-    );
+    expect(screen.queryByTestId("wave-header-options")).toBeNull();
   });
 
-  it("does not mount create-subwave options for eligible subwaves", () => {
+  it("does not mount owner options for admin-eligible subwaves when not owner", () => {
     wrapper(
       {
         ...baseWave,
@@ -204,7 +204,7 @@ describe("WaveHeader", () => {
     );
     expect(
       screen.getByTestId("wave-header-options").parentElement?.className
-    ).toContain("tw-mt-[22px]");
+    ).toContain("tw-mt-3.5");
     expect(screen.queryByTestId("wave-header-pin")).toBeNull();
   });
 

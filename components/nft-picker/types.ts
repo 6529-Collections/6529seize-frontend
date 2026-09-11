@@ -68,7 +68,6 @@ export type NftPickerProps = {
     | undefined;
   readonly chain?: SupportedChain | undefined;
   readonly outputMode?: OutputMode | undefined;
-  readonly hideSpam?: boolean | undefined;
   readonly allowAll?: boolean | undefined;
   readonly allowRanges?: boolean | undefined;
   readonly fixedContract?: ContractOverview | undefined;
@@ -78,6 +77,7 @@ export type NftPickerProps = {
   readonly overscan?: number | undefined;
   readonly placeholder?: string | undefined;
   readonly className?: string | undefined;
+  readonly hideSelectionSummaryWhenEmpty?: boolean | undefined;
   readonly renderTokenExtra?:
     | ((tokenId: bigint, metadata?: TokenMetadata) => ReactNode)
     | undefined;

@@ -2,21 +2,16 @@
 
 import {
   Bars3Icon,
-  ChatBubbleLeftIcon,
-  EllipsisHorizontalIcon,
-  Squares2X2Icon,
-  LinkIcon,
-  CheckIcon,
+  EllipsisVerticalIcon,
+  LockClosedIcon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
-import { PlusIcon } from "@heroicons/react/24/solid";
-import { faShare } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
+import { useState, type ReactNode } from "react";
+import { CompactMenu } from "@/components/compact-menu";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
@@ -29,7 +24,6 @@ import { capitalizeEveryWord, formatAddress } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useWave } from "@/hooks/useWave";
-import { useWaveById } from "@/hooks/useWaveById";
 import { useWaveViewMode } from "@/hooks/useWaveViewMode";
 import { useAuth } from "../auth/Auth";
 import { getConnectionProfileIndicator } from "../auth/connection-state-indicator";
@@ -39,17 +33,38 @@ import Spinner from "../utils/Spinner";
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import HeaderPageShareButton from "./share/HeaderPageShareButton";
+import { isPageShareSupported } from "./share/page-share-support";
 import HeaderActionButtons from "./HeaderActionButtons";
 import NetworkHealthCTA from "./NetworkHealthCTA";
-import PrimaryButton from "../utils/button/PrimaryButton";
+import Button from "../utils/button/Button";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
 import WavePicture from "@/components/waves/WavePicture";
 import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
+import {
+  getProfileCollectedTokenReturnContext,
+  PROFILE_COLLECTED_RETURN_PARAM,
+} from "@/helpers/profile-collected-navigation";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import {
+  isProfilePreferencesEntry,
+  PREFERENCES_ENTRY_SOURCE_PARAM,
+} from "@/helpers/preferences-navigation";
+import {
+  getAppHeaderMoreMenuItems,
+  type HeaderMoreMenuItem,
+} from "./app-header-more-menu-items";
+import {
+  type HeaderWavePreview,
+  useHeaderActiveWave,
+} from "./app-header-wave-preview";
+import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRestrictionButton";
+import WaveParentNavigation from "@/components/waves/header/WaveParentNavigation";
+import MainStageNominationPopover from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
+import { useProfileDoubleActivate } from "./useProfileDoubleActivate";
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -57,22 +72,25 @@ const COLLECTION_TITLES: Record<string, string> = {
   "meme-lab": "Meme Lab",
   nextgen: "NextGen",
 };
-const PROFILE_DOUBLE_ACTIVATE_DELAY_MS = 280;
+const HEADER_RESTRICTION_BUTTON_CLASS =
+  "tw-size-9 tw-min-w-9 tw-rounded-lg tw-border-0 tw-bg-black tw-p-0 tw-text-iron-300 tw-shadow-sm desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50";
 
 interface HeaderConnectedAccount {
   readonly address: string;
   readonly isActive: boolean;
 }
 
-interface HeaderTimeoutRef {
-  current: ReturnType<typeof setTimeout> | null;
+interface HeaderProfileSource {
+  readonly pfp?: string | null;
 }
 
-type HeaderMoreMenuItem = CompactMenuItem & {
-  readonly renderAsDirectButton?: boolean | undefined;
-  readonly directIcon?: ReactNode | undefined;
-  readonly directActionActive?: boolean | undefined;
-};
+interface HeaderActiveProfileProxySource {
+  readonly created_by: HeaderProfileSource;
+}
+
+interface HeaderConnectedProfileSource {
+  readonly pfp?: string | null;
+}
 
 const sliceString = (str: string, length: number): string => {
   if (str.length <= length) return str;
@@ -120,34 +138,6 @@ const getDropForgeTitle = (pathSegments: string[]): string | null => {
   return null;
 };
 
-const shouldShowHeaderPageShareAction = ({
-  activeView,
-  isCapacitor,
-  pathname,
-}: {
-  readonly activeView: string | null;
-  readonly isCapacitor: boolean;
-  readonly pathname: string;
-}): boolean => {
-  if (!isCapacitor) {
-    return false;
-  }
-
-  if (
-    pathname === "/" ||
-    pathname === "/waves" ||
-    pathname.startsWith("/waves/") ||
-    pathname === "/messages" ||
-    pathname.startsWith("/messages/") ||
-    pathname === "/notifications" ||
-    pathname.startsWith("/notifications/")
-  ) {
-    return false;
-  }
-
-  return activeView !== "waves" && activeView !== "messages";
-};
-
 const getHeaderTitle = ({
   pathname,
   waveId,
@@ -190,74 +180,111 @@ const getHeaderTitle = ({
   return sliceString(capitalizeEveryWord(pageTitle), 20);
 };
 
+const getHeaderProfilePfp = ({
+  activeProfileProxy,
+  profile,
+}: {
+  readonly activeProfileProxy:
+    | HeaderActiveProfileProxySource
+    | null
+    | undefined;
+  readonly profile: HeaderConnectedProfileSource | null | undefined;
+}): string | null => {
+  if (activeProfileProxy) {
+    return activeProfileProxy.created_by.pfp ?? null;
+  }
+
+  return profile?.pfp ?? null;
+};
+
+const getHasUnreadOnOtherConnectedProfiles = ({
+  connectedAccounts,
+  connectedAccountUnreadNotifications,
+}: {
+  readonly connectedAccounts: readonly HeaderConnectedAccount[];
+  readonly connectedAccountUnreadNotifications: Readonly<
+    Record<string, number>
+  >;
+}): boolean =>
+  connectedAccounts.some(
+    (account) =>
+      !account.isActive &&
+      (connectedAccountUnreadNotifications[account.address.toLowerCase()] ??
+        0) > 0
+  );
+
 const HeaderTitleContent = ({
+  displayWave,
   activeWave,
-  isWaveResolving,
   isDm,
   directMessageProfileHref,
   previewText,
   finalTitle,
 }: {
+  readonly displayWave: HeaderWavePreview | null;
   readonly activeWave: ApiWave | null;
-  readonly isWaveResolving: boolean;
   readonly isDm: boolean;
   readonly directMessageProfileHref: string | null;
   readonly previewText: string | null;
   readonly finalTitle: ReactNode;
 }) => {
-  if (activeWave === null || isWaveResolving) {
+  if (displayWave === null) {
     return <span className="tw-text-sm tw-font-semibold">{finalTitle}</span>;
   }
 
-  const wavePictureContributors = activeWave.contributors_overview.map((c) => ({
-    pfp: c.contributor_pfp,
-    identity: c.contributor_identity,
-  }));
   const wavePicture = (
-    <div className="tw-size-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-ring-1 tw-ring-white/30">
+    <div className="tw-size-9 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-ring-1 tw-ring-white/30">
       <WavePicture
-        name={activeWave.name}
-        picture={activeWave.picture ?? null}
-        contributors={wavePictureContributors}
+        name={displayWave.name}
+        picture={displayWave.picture}
+        contributors={displayWave.contributors}
       />
     </div>
   );
+  const directMessageProfileLink =
+    activeWave !== null && isDm ? directMessageProfileHref : null;
 
   return (
     <div className="tw-flex tw-min-w-0 tw-max-w-[min(62vw,28rem)] tw-items-center tw-gap-2">
-      {isDm && directMessageProfileHref !== null ? (
+      {directMessageProfileLink !== null ? (
         <Link
-          href={directMessageProfileHref}
-          aria-label={`View ${activeWave.name}'s profile`}
+          href={directMessageProfileLink}
+          aria-label={`View ${displayWave.name}'s profile`}
           className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-iron-50 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-white"
         >
           {wavePicture}
           <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
-            {activeWave.name}
+            {displayWave.name}
           </span>
         </Link>
       ) : (
         <>
           {wavePicture}
-          {!isDm && previewText !== null ? (
-            <WaveDescriptionPopover
-              wave={activeWave}
-              align="center"
-              ariaLabel="Show wave description"
-              triggerClassName="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
-            >
-              <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
-                {activeWave.name}
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-start">
+            <WaveParentNavigation
+              parentWave={activeWave?.parent_wave}
+              variant="compact-header"
+            />
+            {activeWave !== null && !isDm && previewText !== null ? (
+              <WaveDescriptionPopover
+                wave={activeWave}
+                align="left"
+                ariaLabel="Show wave description"
+                triggerClassName="tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+              >
+                <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
+                  {displayWave.name}
+                </span>
+                <span className="tw-hidden tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-block">
+                  {previewText}
+                </span>
+              </WaveDescriptionPopover>
+            ) : (
+              <span className="tw-w-full tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
+                {displayWave.name}
               </span>
-              <span className="tw-hidden tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-block">
-                {previewText}
-              </span>
-            </WaveDescriptionPopover>
-          ) : (
-            <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
-              {activeWave.name}
-            </span>
-          )}
+            )}
+          </div>
         </>
       )}
     </div>
@@ -275,21 +302,49 @@ const HeaderDropActionButton = ({
 
   const title = action.restrictionMessage ?? action.label;
 
+  if (!action.canOpen) {
+    if (action.restrictionKind === "memes-nomination") {
+      return (
+        <MainStageNominationPopover>
+          <button
+            type="button"
+            aria-label={action.label}
+            aria-haspopup="dialog"
+            className={clsx(
+              "tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-transition tw-duration-150 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
+              HEADER_RESTRICTION_BUTTON_CLASS
+            )}
+          >
+            <LockClosedIcon className="tw-size-5 tw-flex-shrink-0" />
+            <span className="tw-sr-only">{action.compactLabel}</span>
+          </button>
+        </MainStageNominationPopover>
+      );
+    }
+
+    return (
+      <WaveHeaderRestrictionButton
+        label={action.label}
+        reason={title}
+        className={HEADER_RESTRICTION_BUTTON_CLASS}
+      >
+        <LockClosedIcon className="tw-size-5 tw-flex-shrink-0" />
+        <span className="tw-sr-only">{action.compactLabel}</span>
+      </WaveHeaderRestrictionButton>
+    );
+  }
+
   return (
-    <PrimaryButton
-      loading={false}
-      disabled={!action.canOpen}
-      onClicked={action.onOpen}
-      padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
+    <Button
+      onClick={action.onOpen}
+      size={null}
       title={title}
-      ariaLabel={action.label}
-      className="tw-h-10 tw-min-w-10 sm:tw-h-auto sm:tw-min-w-0"
+      aria-label={action.label}
+      className="tw-size-9 tw-min-w-9 tw-p-0"
     >
-      <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 sm:-tw-ml-1" />
-      <span className="tw-sr-only sm:tw-not-sr-only sm:tw-inline">
-        {action.compactLabel}
-      </span>
-    </PrimaryButton>
+      <PlusIcon className="tw-size-5 tw-flex-shrink-0" />
+      <span className="tw-sr-only">{action.compactLabel}</span>
+    </Button>
   );
 };
 
@@ -333,7 +388,7 @@ const HeaderMoreMenu = ({
         disabled={onlyItem.disabled}
         aria-busy={onlyItem.directActionActive ? "true" : undefined}
         className={clsx(
-          "tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
+          "tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
           onlyItem.directActionActive
             ? "tw-scale-95 tw-bg-iron-800 tw-text-iron-50 tw-ring-1 tw-ring-primary-400"
             : "tw-bg-black tw-text-iron-300 hover:tw-text-iron-50"
@@ -349,11 +404,11 @@ const HeaderMoreMenu = ({
       aria-label="More header actions"
       className="tw-flex-shrink-0"
       unstyledTrigger
-      triggerClassName="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+      triggerClassName="tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
       trigger={
         <>
           <span className="tw-sr-only">More header actions</span>
-          <EllipsisHorizontalIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
+          <EllipsisVerticalIcon className="tw-size-5 tw-flex-shrink-0" />
         </>
       }
       items={items}
@@ -409,38 +464,6 @@ const switchToNextConnectedAccount = ({
   }
 };
 
-const handleProfileActivate = ({
-  address,
-  profileClickTimeoutRef,
-  openMenu,
-  switchConnectedAccount,
-}: {
-  readonly address: string | null | undefined;
-  readonly profileClickTimeoutRef: HeaderTimeoutRef;
-  readonly openMenu: () => void;
-  readonly switchConnectedAccount: () => boolean;
-}) => {
-  if (!address) {
-    openMenu();
-    return;
-  }
-
-  if (profileClickTimeoutRef.current) {
-    clearTimeout(profileClickTimeoutRef.current);
-    profileClickTimeoutRef.current = null;
-
-    if (!switchConnectedAccount()) {
-      openMenu();
-    }
-    return;
-  }
-
-  profileClickTimeoutRef.current = setTimeout(() => {
-    profileClickTimeoutRef.current = null;
-    openMenu();
-  }, PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
-};
-
 export default function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const myStream = useMyStreamOptional();
@@ -450,15 +473,12 @@ export default function AppHeader() {
   const searchParams = useSearchParams();
   const {
     address,
-    hasValidWalletAuth: isAuthenticated,
+    hasValidWalletAuth,
     isConnected,
     connectedAccounts,
     connectedAccountUnreadNotifications,
     seizeSwitchConnectedAccount,
   } = useSeizeConnectContext();
-  const profileClickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
   const { connectedProfile, activeProfileProxy } = useAuth();
   const pathname = usePathname();
   const params = useParams();
@@ -468,32 +488,19 @@ export default function AppHeader() {
     initialProfile: null,
   });
 
-  useEffect(
-    () => () => {
-      if (profileClickTimeoutRef.current) {
-        clearTimeout(profileClickTimeoutRef.current);
-      }
-    },
-    []
-  );
-
-  const pfp = (() => {
-    if (activeProfileProxy) return activeProfileProxy.created_by.pfp;
-    return profile?.pfp ?? null;
-  })();
+  const pfp = getHeaderProfilePfp({ activeProfileProxy, profile });
   const resolvedPfp = pfp ? resolveIpfsUrlSync(pfp) : null;
   const menuAvatarSrc = resolvedPfp ?? DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP;
 
   const connectionIndicator = getConnectionProfileIndicator({
-    isAuthenticated,
+    isAuthenticated: hasValidWalletAuth,
     isConnected,
   });
-  const hasUnreadOnOtherConnectedProfiles = connectedAccounts.some(
-    (account) =>
-      !account.isActive &&
-      (connectedAccountUnreadNotifications[account.address.toLowerCase()] ??
-        0) > 0
-  );
+  const hasUnreadOnOtherConnectedProfiles =
+    getHasUnreadOnOtherConnectedProfiles({
+      connectedAccounts,
+      connectedAccountUnreadNotifications,
+    });
 
   const pathSegments = pathname.split("/").filter(Boolean);
   const basePath = pathSegments[0] ?? "";
@@ -503,9 +510,8 @@ export default function AppHeader() {
       ?.replaceAll(/[-_]/g, " ")
       .replace(/^./, (c) => c.toUpperCase()) ?? "Home";
 
-  const waveId = myStream?.activeWave.id ?? null;
-  const { wave, isLoading, isFetching } = useWaveById(waveId);
-  const activeWave = waveId && wave?.id === waveId ? wave : null;
+  const { activeWave, headerWavePreview, isWaveResolving, waveId } =
+    useHeaderActiveWave(myStream);
   const headerDropAction = getHeaderDropAction({ activeWave, waveDropAction });
 
   const { viewMode, toggleViewMode } = useWaveViewMode(waveId ?? "");
@@ -516,8 +522,9 @@ export default function AppHeader() {
     connectedProfile,
     activeProfileProxyCreatedBy: activeProfileProxy?.created_by,
   });
-  const showGalleryToggle =
-    !!waveId && !isRankWave && !isApproveWave && !isMemesWave && !isDm;
+  const showGalleryToggle = Boolean(
+    activeWave && !isRankWave && !isApproveWave && !isMemesWave && !isDm
+  );
   const showWaveLinkAction = Boolean(activeWave && !isDm);
   const previewText = getWaveDescriptionPreviewText(activeWave);
   const {
@@ -532,31 +539,6 @@ export default function AppHeader() {
     isDirectMessage: activeWave ? isDm : false,
     showShareFeedback: !isCapacitor,
   });
-  const renderWaveLinkActionIcon = ({
-    direct = false,
-  }: {
-    readonly direct?: boolean | undefined;
-  } = {}) => {
-    let waveLinkActionIconColor = "tw-text-emerald-300";
-    if (direct && isWaveLinkSharing) {
-      waveLinkActionIconColor = "tw-text-iron-50";
-    } else if (waveLinkActionFeedbackState === "idle") {
-      waveLinkActionIconColor = "tw-text-iron-300";
-    }
-    const iconSizeClassName = direct ? "tw-h-6 tw-w-6" : "tw-h-4 tw-w-4";
-    const iconClassName = `${iconSizeClassName} ${waveLinkActionIconColor}`;
-
-    if (waveLinkActionFeedbackState !== "idle") {
-      return <CheckIcon className={iconClassName} />;
-    }
-
-    if (waveLinkActionMode === "share") {
-      return <FontAwesomeIcon icon={faShare} className={iconClassName} />;
-    }
-
-    return <LinkIcon className={iconClassName} />;
-  };
-
   const isWavesRoute = pathname === "/waves" || pathname.startsWith("/waves/");
   const isMessagesRoute =
     pathname === "/messages" || pathname.startsWith("/messages/");
@@ -570,19 +552,40 @@ export default function AppHeader() {
     activeWaveId: waveParam,
     searchParams,
   });
-  const showPageShareAction = shouldShowHeaderPageShareAction({
-    activeView,
-    isCapacitor,
-    pathname,
-  });
+  const isProfileWavesFeedView =
+    isCapacitor &&
+    pathname === "/waves" &&
+    !waveParam &&
+    searchParams.get("view") === "profile-feed";
+  const showPageShareAction =
+    isCapacitor &&
+    !isInsideWave &&
+    isPageShareSupported({ activeView, pathname, surface: "mobile" });
 
   const isProfilePage = typeof params["user"] === "string";
+  const preferencesProfileReturnTo =
+    isCapacitor &&
+    pathname === "/preferences" &&
+    isProfilePreferencesEntry(
+      searchParams.get(PREFERENCES_ENTRY_SOURCE_PARAM)
+    ) &&
+    connectedProfile?.handle
+      ? `/${encodeURIComponent(connectedProfile.handle)}`
+      : null;
+  const profileCollectedReturnContext = isCapacitor
+    ? getProfileCollectedTokenReturnContext({
+        pathname,
+        returnTo: searchParams.get(PROFILE_COLLECTED_RETURN_PARAM),
+      })
+    : null;
 
   const showBackButton =
-    isInsideWave || isCreateRoute || (isProfilePage && canGoBack);
-  const isWaveResolving =
-    !!waveId && (isLoading || isFetching || wave?.id !== waveId);
-
+    isInsideWave ||
+    isCreateRoute ||
+    isProfileWavesFeedView ||
+    preferencesProfileReturnTo !== null ||
+    profileCollectedReturnContext !== null ||
+    (isProfilePage && canGoBack);
   const pfpImage = (
     <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0">
       <div
@@ -620,28 +623,26 @@ export default function AppHeader() {
   );
   const hasMultipleConnectedAccounts = connectedAccounts.length > 1;
   const openMenu = () => setMenuOpen(true);
-  const onProfileActivate = () =>
-    handleProfileActivate({
-      address,
-      profileClickTimeoutRef,
-      openMenu,
-      switchConnectedAccount: () =>
-        switchToNextConnectedAccount({
-          connectedAccounts,
-          seizeSwitchConnectedAccount,
-          onFailure: (error) => {
-            console.error(
-              "Failed to switch connected account from header",
-              error
-            );
-          },
-        }),
+  const closeMenu = () => setMenuOpen(false);
+  const switchConnectedAccount = () =>
+    switchToNextConnectedAccount({
+      connectedAccounts,
+      seizeSwitchConnectedAccount,
+      onFailure: (error) => {
+        console.error("Failed to switch connected account from header", error);
+      },
     });
+  const { onProfileActivate, profileButtonRef } = useProfileDoubleActivate({
+    canSwitchAccount: hasMultipleConnectedAccounts,
+    openMenu,
+    closeMenu,
+    switchConnectedAccount,
+  });
 
   const finalTitle = getHeaderTitle({
     pathname,
     waveId,
-    wave,
+    wave: headerWavePreview,
     isWaveResolving,
     isWavesRoute,
     isMessagesRoute,
@@ -649,45 +650,34 @@ export default function AppHeader() {
     pageTitle,
     pathSegments,
   });
-  const galleryToggleLabel =
-    viewMode === "chat" ? "Switch to gallery view" : "Switch to chat view";
-  const appHeaderMoreMenuItems: HeaderMoreMenuItem[] = [];
-
-  if (showGalleryToggle) {
-    appHeaderMoreMenuItems.push({
-      id: "toggle-view-mode",
-      label: galleryToggleLabel,
-      icon:
-        viewMode === "chat" ? (
-          <Squares2X2Icon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-        ) : (
-          <ChatBubbleLeftIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-        ),
-      onSelect: toggleViewMode,
-    });
-  }
-
-  if (showWaveLinkAction) {
-    appHeaderMoreMenuItems.push({
-      id: "wave-link",
-      label: waveLinkActionLabel,
-      ariaLabel: waveLinkActionLabel,
-      icon: renderWaveLinkActionIcon(),
-      directIcon: renderWaveLinkActionIcon({ direct: true }),
-      onSelect: handleWaveLinkActionClick,
-      renderAsDirectButton: true,
-      directActionActive: isWaveLinkSharing,
-    });
-  }
+  const appHeaderMoreMenuItems = getAppHeaderMoreMenuItems({
+    handleWaveLinkActionClick,
+    isWaveLinkSharing,
+    showGalleryToggle,
+    showWaveLinkAction,
+    toggleViewMode,
+    viewMode,
+    waveLinkActionFeedbackState,
+    waveLinkActionLabel,
+    waveLinkActionMode,
+  });
 
   return (
     <div className="tw-w-full tw-bg-black tw-pt-[env(safe-area-inset-top,0px)] tw-text-iron-50">
       <div className="tw-flex tw-h-16 tw-items-center tw-justify-between tw-gap-x-2 tw-px-4">
         <div className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center">
           {showBackButton ? (
-            <BackButton />
+            <BackButton
+              key={`${pathname}?${searchParams.toString()}`}
+              returnTo={
+                preferencesProfileReturnTo ??
+                profileCollectedReturnContext?.href ??
+                (isProfileWavesFeedView ? "/waves" : undefined)
+              }
+            />
           ) : (
             <button
+              ref={profileButtonRef}
               type="button"
               aria-label={
                 hasMultipleConnectedAccounts
@@ -701,19 +691,28 @@ export default function AppHeader() {
             </button>
           )}
         </div>
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center tw-gap-2">
+        <div
+          className={clsx(
+            "tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2",
+            isInsideWave ? "tw-justify-start" : "tw-justify-center"
+          )}
+        >
           <HeaderTitleContent
+            displayWave={headerWavePreview}
             activeWave={activeWave}
-            isWaveResolving={isWaveResolving}
             isDm={isDm}
             directMessageProfileHref={directMessageProfileHref}
             previewText={previewText}
             finalTitle={finalTitle}
           />
         </div>
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-x-1">
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-x-0.5">
           <HeaderDropActionButton action={headerDropAction} />
-          {isHomeRoute && <NetworkHealthCTA className="md:tw-hidden" />}
+          {isHomeRoute && (
+            <NetworkHealthCTA
+              className={isCapacitor ? undefined : "md:tw-hidden"}
+            />
+          )}
           <div className="tw-flex-shrink-0">
             <HeaderActionButtons />
           </div>
@@ -722,15 +721,17 @@ export default function AppHeader() {
               <HeaderPageShareButton isCapacitor={isCapacitor} />
             </div>
           )}
-          <div className="tw-flex-shrink-0">
-            <HeaderSearchButton
-              wave={
-                isInsideWave && (isWavesRoute || isMessagesRoute)
-                  ? (wave ?? null)
-                  : null
-              }
-            />
-          </div>
+          {!isCreateRoute && (
+            <div className="tw-flex-shrink-0">
+              <HeaderSearchButton
+                wave={
+                  isInsideWave && (isWavesRoute || isMessagesRoute)
+                    ? activeWave
+                    : null
+                }
+              />
+            </div>
+          )}
           <HeaderMoreMenu items={appHeaderMoreMenuItems} />
         </div>
       </div>

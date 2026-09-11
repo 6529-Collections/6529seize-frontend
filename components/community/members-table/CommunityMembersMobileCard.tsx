@@ -31,7 +31,7 @@ export default function CommunityMembersMobileCard({
   return (
     <Link
       href={path}
-      className="tw-flex tw-flex-col tw-gap-y-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/80 tw-p-3 tw-no-underline tw-shadow-sm tw-shadow-black/20 tw-backdrop-blur-md tw-transition-all tw-duration-200 active:tw-bg-iron-800"
+      className="tw-flex tw-flex-col tw-gap-y-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-no-underline tw-transition-colors tw-duration-200 active:tw-bg-iron-900"
     >
       <div className="tw-flex tw-w-full tw-justify-between">
         <div className="tw-flex tw-items-center tw-gap-x-2">

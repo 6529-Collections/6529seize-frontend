@@ -1,0 +1,240 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient#function:0xcd129822",
+          "declaringDefinitionId": "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract StreamDrops",
+              "name": "drops",
+              "type": "address"
+            }
+          ],
+          "name": "withdrawFixedPriceCredit",
+          "outputs": [],
+          "selector": "0xcd129822",
+          "signature": "withdrawFixedPriceCredit(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient#function:0x4cd50cd8",
+          "declaringDefinitionId": "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract StreamDrops",
+              "name": "drops",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address payable",
+              "name": "recipient",
+              "type": "address"
+            }
+          ],
+          "name": "withdrawFixedPriceCreditTo",
+          "outputs": [],
+          "selector": "0x4cd50cd8",
+          "signature": "withdrawFixedPriceCreditTo(address,address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "receive()",
+          "functionKind": "receive",
+          "id": "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient#function:receive()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUGF5bWVudHMudC5zb2w6UmVqZWN0aW5nRml4ZWRQcmljZVJlY2lwaWVudCNmdW5jdGlvbjpyZWNlaXZlKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 20409,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPricePayments.t.sol#L406-L408",
+            "lineEnd": 408,
+            "lineStart": 406,
+            "snippetSha256": "sha256:5af2087cadb2eb80c43063d69d46c9a2d99fd9eeda0e031b2de64675411dad43",
+            "sourceSha256": "sha256:e4a59529a870ab1717615dc9a6fa2ef7584389eaab1b7fa2640cb2727ad7329a"
+          },
+          "selector": null,
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "withdrawFixedPriceCredit(address)",
+          "displaySignature": "withdrawFixedPriceCredit(StreamDrops)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient#function:0xcd129822",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "drops",
+              "type": "StreamDrops"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUGF5bWVudHMudC5zb2w6UmVqZWN0aW5nRml4ZWRQcmljZVJlY2lwaWVudCNmdW5jdGlvbjoweGNkMTI5ODIy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "withdrawFixedPriceCredit",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 111,
+            "byteStart": 20479,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPricePayments.t.sol#L410-L412",
+            "lineEnd": 412,
+            "lineStart": 410,
+            "snippetSha256": "sha256:1618e93e7fa072eeff45080aaea7d23096f9ad641ff0a2c6a658655147efc82a",
+            "sourceSha256": "sha256:e4a59529a870ab1717615dc9a6fa2ef7584389eaab1b7fa2640cb2727ad7329a"
+          },
+          "selector": "0xcd129822",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "withdrawFixedPriceCreditTo(address,address)",
+          "displaySignature": "withdrawFixedPriceCreditTo(StreamDrops,address payable)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient#function:0x4cd50cd8",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "drops",
+              "type": "StreamDrops"
+            },
+            {
+              "index": 1,
+              "name": "recipient",
+              "type": "address payable"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUGF5bWVudHMudC5zb2w6UmVqZWN0aW5nRml4ZWRQcmljZVJlY2lwaWVudCNmdW5jdGlvbjoweDRjZDUwY2Q4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "withdrawFixedPriceCreditTo",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 151,
+            "byteStart": 20596,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPricePayments.t.sol#L414-L416",
+            "lineEnd": 416,
+            "lineStart": 414,
+            "snippetSha256": "sha256:f575bae9583a456c741e7c7aa59a17847085c825374247a6ee38e10a66ebf8f2",
+            "sourceSha256": "sha256:e4a59529a870ab1717615dc9a6fa2ef7584389eaab1b7fa2640cb2727ad7329a"
+          },
+          "selector": "0x4cd50cd8",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUGF5bWVudHMudC5zb2w6UmVqZWN0aW5nRml4ZWRQcmljZVJlY2lwaWVudA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RejectingFixedPriceRecipient",
+    "natspec": "",
+    "range": {
+      "byteLength": 384,
+      "byteStart": 20365,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPricePayments.t.sol#L405-L417",
+      "lineEnd": 417,
+      "lineStart": 405,
+      "snippetSha256": "sha256:705f2f72c65664e6ef84c00ac7599798ac174368e9d510c4ae124c16ea90ab24",
+      "sourceSha256": "sha256:e4a59529a870ab1717615dc9a6fa2ef7584389eaab1b7fa2640cb2727ad7329a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamFixedPricePayments.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient#function:0x4cd50cd8",
+      "definitionId": "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient#function:0xcd129822",
+      "definitionId": "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient#function:receive()",
+      "definitionId": "test/StreamFixedPricePayments.t.sol:RejectingFixedPriceRecipient",
+      "severity": "advisory"
+    }
+  ]
+}

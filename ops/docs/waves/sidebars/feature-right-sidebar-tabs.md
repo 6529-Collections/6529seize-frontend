@@ -2,8 +2,10 @@
 
 ## Overview
 
-Wave threads show a right-sidebar tab row so users can switch sidebar sections
-without leaving the current thread route.
+Wave threads expose shared information sections so users can inspect the active
+wave without leaving the current thread route. Desktop renders them in the
+right sidebar; the native app renders their navigation in the contextual row
+beneath the main tabs and their content in the main `About` view.
 
 This page owns tab-shell behavior only. Section rendering is documented in the
 linked section pages.
@@ -11,56 +13,132 @@ linked section pages.
 ## Location in the Site
 
 - `/waves/{waveId}` and `/messages/{waveId}`
-- Right sidebar open (`inline` on large web layouts, `overlay` on smaller ones)
+- Desktop right sidebar open (`inline` on large web layouts, `overlay` on
+  smaller ones)
+- Native app main `About` view
 - All wave types render base sidebar tabs
 - Hidden while full drop overlay is open (`drop={dropId}`)
 - Tab row renders only after wave data is available
 
 ## Entry Points
 
-- Open a wave thread.
-- Open the right sidebar.
-- Select a tab button, or open `More` and select an overflow tab.
+- Desktop: open a wave thread, open the right sidebar, and select a tab.
+- Compact web layouts: select the `Wave details` button beside the wave-search
+  action. It opens the same information sidebar as the desktop control without
+  requiring the `More wave actions` menu.
+- Native app: open an active wave, select the main `About` tab, and select an
+  information pill. The information pills replace the subwave pills while
+  `About` is active; selecting another main tab restores the subwave pills.
 
 ## Tab Availability and Order
 
-- Base tab order for all waves: `About`, `Rules`, `REP`, `Settings`.
-- `Rank` and `Approve` waves add `Voters` and `Activity` after `Settings`.
-- `Rules` shows automatic wave rules plus optional creator rules.
+- Base section order for all waves: `About`, `REP`, `Configuration`.
+- `Configuration` is the consolidated rules and settings experience, starting with the
+  wave type and access configuration sections. Perpetual ranking waves are
+  labeled `Perpetual Rank` instead of the generic `Rank`. Access groups show
+  their member count and criteria; viewers who can administer the wave also see
+  a gear menu for reconfiguring each applicable group. For Rank and Approve waves,
+  Configuration shows chat status even when chat is disabled; wave
+  administrators can use its row gear to enable or disable chat. When chat is
+  enabled, Configuration also summarizes link availability and slow mode, with
+  administrator-only row gears for changing either setting. Rank and Approve
+  wave administrators also see Display controls for the submission button and
+  outcome visibility; the entire Display section is hidden from
+  non-administrators. All change controls in Configuration use gear icons.
+  Competition waves then show Schedule, Submissions, and Voting summaries to
+  every viewer. Approve waves place an Approval section directly after Schedule:
+  every viewer can read Approve after, Hold time, Max approved drops, and the
+  Approval window; administrators get gears only for Approve after and Hold
+  time. The remaining summary values never show edit controls. Guidelines and
+  acceptance-required Rules follow those summaries and show the full authored
+  copy and signature note. Wave administrators see a
+  gear beside each section for editing it; other viewers see the content without
+  gears. Immediately before the personal Boosted drops preference, wave
+  administrators also get proposal-card display settings, Approvals/Approved tab
+  labels on Approve waves, and curation creation, editing, deletion, and ordering
+  controls. Those shared controls are completely hidden from non-administrators.
+  When chat is enabled, Your display lets each viewer choose how boosted-drop
+  cards appear for them, with an explanatory tooltip. Switch between curations
+  from the [wave content tabs](../chat/feature-content-tabs.md).
+- `Rank` and `Approve` waves add `Voters` and `Activity` after `Configuration`.
+- For `Rank` and `Approve` waves, participants still review and sign
+  acceptance-required rules in the submit terms modal.
+- Desktop labels the first section `About` because it is a standalone sidebar
+  tab.
+- Native app labels the same first section `Overview` because it is nested
+  inside the main `About` view. It shows compact `Overview`, `REP`, and
+  `Configuration` pills. For Rank and Approve waves, `More` contains `Voters`
+  and `Activity`. When one is selected, the trigger displays that section name
+  and uses the selected pill treatment.
 
 ## Overflow and Keyboard Behavior
 
-- The first three available tabs render as visible buttons.
-- When more than three tabs are available, remaining tabs move into `More`.
-- If the active tab is in overflow, the `More` trigger label switches to that
-  active tab name.
-- Visible tabs support `ArrowLeft`, `ArrowRight`, `Home`, and `End`.
-- `More` options are keyboard accessible.
+- Desktop Chat waves show all three base sections in the scroll-safe tab strip.
+  Rank and Approve waves keep `About`, `REP`, `Configuration`, and `Voters`
+  visible and move `Activity` into `More`, so the fixed-width panel never clips
+  a section label.
+- Native keeps three compact pills visible and moves remaining sections into
+  `More`, avoiding a compressed desktop-style tab row on narrow phones.
+- The contextual row and every section share the same panel canvas, including
+  the native app where the surrounding wave view uses a different background.
+- The native information and subwave bars use the same height, background,
+  responsive insets, pill height, and label size, so switching the contextual
+  row does not shift the content below it. Active information pills use a
+  semibold label; inactive pills use medium weight.
+- The tab strip stays within the panel width. It does not widen the panel or
+  make the panel body horizontally scrollable.
+- The tab row remains fixed at the top while the active section scrolls
+  vertically below it.
+- Switching tabs never carries a horizontal scroll offset into the next
+  section, including in narrow overlay layouts.
+- Tabs support `ArrowLeft`, `ArrowRight`, `Home`, and `End`.
 
 ## User Journey
 
 1. Open a wave thread on `/waves/{waveId}` or `/messages/{waveId}`.
-2. Open the right sidebar.
-3. Select a visible tab, or open `More` and pick an overflow tab.
-4. Sidebar content switches in place without route navigation.
+2. Open the right sidebar from the desktop sidebar control or the compact
+   `Wave details` header button.
+3. Select a desktop tab or native information pill. Use `More` for the
+   remaining sections.
+4. Sidebar content switches in place without route navigation. On native,
+   selecting another main tab swaps the contextual row back to subwave pills.
 
 ## State Changes and Recovery
 
 - If the active tab is no longer available for the current wave type, the
   sidebar automatically returns to `About`.
-- Closing `More` without a selection keeps the current tab.
 - Tab choice is in-session UI state, not a URL tab parameter.
 - Closing and reopening the sidebar keeps the current tab choice unless wave
   state rules make that tab unavailable.
+- Native keeps the selected information section while switching main tabs for
+  the same wave. A selection saved for one wave is not applied to another
+  active wave.
 - If wave data does not load, the tab row does not appear and the sidebar can
   stay blank.
 
 ## Limitations / Notes
 
 - Tab order is fixed by wave-state rules; users cannot reorder tabs.
-- This page does not own section rendering behavior for `About`, `Rules`,
-  `REP`, `Settings`, `Voters`, or `Activity`.
+- This page does not own section rendering behavior for `About`, `REP`,
+  `Configuration`, `Voters`, or `Activity`.
 - `Trending` behavior is part of `About` content and is documented separately.
+
+### Localization fallback debt
+
+- Surface: `/waves/{waveId}` and `/messages/{waveId}` right-sidebar sections.
+- Current behavior: panel navigation, section labels, accessible names, and
+  empty/loading states use the `en-US` message catalog. Supported locales that
+  do not yet provide these keys fall back to `en-US`.
+- Locale resolution is intentionally uniform across the panel: components use
+  the source catalog until locale-specific right-panel entries are enabled,
+  avoiding a partially translated sidebar during the progressive migration.
+- Remaining debt: rule values produced by the wave-rule helpers and legacy
+  voting-unit labels still come from English domain constants.
+- User impact: non-English locales can see English fallback copy within an
+  otherwise functional panel.
+- Owner/follow-up: Waves frontend maintainers should migrate the remaining
+  rule and voting constants when locale-specific catalogs are enabled for this
+  surface.
 
 ## Related Pages
 

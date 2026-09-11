@@ -1,29 +1,33 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserSettingsClassification from "@/components/user/settings/UserSettingsClassification";
-import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
+import Button from "@/components/utils/button/Button";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
-import { useContext, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { useClickAway, useKeyPressEvent } from "react-use";
+import { useContext, useState } from "react";
+import { getUserProfileHeaderMessage } from "../../user-page-header.messages";
 export default function UserPageHeaderEditClassification({
   profile,
+  embedded = false,
+  isOpen = true,
+  onAfterLeave,
+  onBack,
   onClose,
 }: {
   readonly profile: ApiIdentity;
+  readonly embedded?: boolean;
+  readonly isOpen?: boolean;
+  readonly onAfterLeave?: (() => void) | undefined;
+  readonly onBack?: (() => void) | undefined;
   readonly onClose: () => void;
 }) {
-  const modalRef = useRef<HTMLDivElement>(null);
-  useClickAway(modalRef, onClose);
-  useKeyPressEvent("Escape", onClose);
-
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
 
@@ -32,11 +36,7 @@ export default function UserPageHeaderEditClassification({
       profile.classification ?? ApiProfileClassification.Pseudonym
     );
 
-  const [haveChanges, setHaveChanges] = useState<boolean>(false);
-
-  useEffect(() => {
-    setHaveChanges(classification !== profile.classification);
-  }, [classification]);
+  const haveChanges = classification !== profile.classification;
 
   const [mutating, setMutating] = useState<boolean>(false);
 
@@ -104,34 +104,62 @@ export default function UserPageHeaderEditClassification({
     await updateUser.mutateAsync(body);
   };
 
-  if (typeof document === "undefined") {
-    return null;
+  const form = (
+    <form
+      onSubmit={onSubmit}
+      className="tw-flex tw-flex-col tw-gap-y-5 tw-px-4 sm:tw-px-6"
+    >
+      <UserSettingsClassification
+        selected={classification}
+        onSelect={setClassification}
+        inlineOptions
+      />
+
+      <div className="tw-flex tw-flex-col tw-gap-2 md:tw-flex-row-reverse md:tw-justify-start">
+        <Button
+          type="submit"
+          variant="action"
+          size="lg"
+          loading={mutating}
+          disabled={!haveChanges}
+          fullWidth
+          className="md:tw-w-auto"
+        >
+          Save
+        </Button>
+        <Button
+          variant="secondary"
+          size="lg"
+          disabled={mutating}
+          onClick={onClose}
+          fullWidth
+          className="tw-hidden md:tw-inline-flex md:tw-w-auto"
+        >
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+
+  if (embedded) {
+    return form;
   }
 
-  return createPortal(
-    <div className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1100] tw-cursor-default">
-      <button
-        type="button"
-        aria-label="Close edit classification modal"
-        className="tw-absolute tw-inset-0 tw-cursor-pointer tw-border-none tw-bg-gray-600 tw-bg-opacity-50 tw-p-0 tw-backdrop-blur-sm"
-        onClick={onClose}
-      />
-      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-y-auto tw-p-2 lg:tw-p-4">
-        <div
-          ref={modalRef}
-          className="tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 md:tw-max-w-xl lg:tw-p-8"
-        >
-          <form onSubmit={onSubmit} className="tw-flex tw-flex-col tw-gap-y-6">
-            <UserSettingsClassification
-              selected={classification}
-              onSelect={setClassification}
-            />
-
-            <UserSettingsSave loading={mutating} disabled={!haveChanges} />
-          </form>
-        </div>
-      </div>
-    </div>,
-    document.body
+  return (
+    <MobileWrapperDialog
+      title={getUserProfileHeaderMessage(
+        "user.profileHeader.edit.classification"
+      )}
+      isOpen={isOpen}
+      onClose={onClose}
+      onBack={onBack}
+      onAfterLeave={onAfterLeave}
+      tabletModal
+      showHeaderCloseButton
+      showHeaderDivider
+      maxWidthClass="md:tw-max-w-xl"
+    >
+      {form}
+    </MobileWrapperDialog>
   );
 }

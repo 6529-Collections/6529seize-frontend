@@ -1,10 +1,21 @@
 "use client";
 
+import { ABOUT_PAGE_HORIZONTAL_PADDING_CLASS_NAME } from "@/components/about/AboutLayout";
 import DatePickerModal from "@/components/datePickerModal/DatePickerModal";
 import DownloadUrlWidget from "@/components/downloadUrlWidget/DownloadUrlWidget";
+import {
+  DATA_TABLE_HEADER_TEXT_CLASS_NAME,
+  DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME,
+} from "@/components/utils/table/tableStyles";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { publicEnv } from "@/config/env";
 import type { ApiArtistNameItem } from "@/generated/models/ApiArtistNameItem";
 import { getDateFilters } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t, type MessageKey } from "@/i18n/messages";
+import type { SupportedLocale } from "@/i18n/locales";
 import { fetchUrl } from "@/services/6529api";
 import {
   DateIntervalsSelection,
@@ -14,11 +25,91 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import DotLoader from "../dotLoader/DotLoader";
-import styles from "./GasRoyalties.module.css";
+
+export const GAS_ROYALTIES_PAGE_CONTAINER_CLASS_NAME = `tailwind-scope tw-container tw-mx-auto ${ABOUT_PAGE_HORIZONTAL_PADDING_CLASS_NAME}`;
+
+export const GAS_ROYALTIES_TABLE_CLASS_NAME =
+  "tw-mb-4 tw-min-w-full tw-border-collapse";
+
+export const GAS_ROYALTIES_TABLE_HEADER_CELL_CLASS_NAME = `tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-align-middle tw-font-semibold tw-text-iron-400 md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`;
+
+export const GAS_ROYALTIES_TABLE_CELL_CLASS_NAME =
+  "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-align-middle tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-100 md:tw-px-4 md:tw-py-3 md:tw-text-sm";
+
+export const GAS_ROYALTIES_TABLE_ROW_CLASS_NAME = `tw-group ${DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME}`;
+
+const GAS_ROYALTIES_INFO_ICON_CLASS_NAME =
+  "tw-h-[18px] tw-cursor-pointer tw-text-iron-400 tw-transition-colors hover:tw-text-iron-50";
+
+const PRIMARY_SALES_SELECTION = "Primary Sales";
+const CUSTOM_BLOCKS_SELECTION = "Custom Blocks";
+
+const DATE_SELECTION_MESSAGE_KEYS: Record<DateIntervalsSelection, MessageKey> =
+  {
+    [DateIntervalsSelection.TODAY]: "memeData.filters.date.today",
+    [DateIntervalsSelection.YESTERDAY]: "memeData.filters.date.yesterday",
+    [DateIntervalsSelection.LAST_7]: "memeData.filters.date.lastSevenDays",
+    [DateIntervalsSelection.THIS_MONTH]: "memeData.filters.date.monthToDate",
+    [DateIntervalsSelection.PREVIOUS_MONTH]: "memeData.filters.date.lastMonth",
+    [DateIntervalsSelection.YEAR_TO_DATE]: "memeData.filters.date.yearToDate",
+    [DateIntervalsSelection.LAST_YEAR]: "memeData.filters.date.lastYear",
+    [DateIntervalsSelection.ALL]: "memeData.filters.date.all",
+    [DateIntervalsSelection.CUSTOM_DATES]: "memeData.filters.date.customDates",
+  };
+
+const PAGE_HEADING_MESSAGE_KEYS: Partial<Record<string, MessageKey>> = {
+  Accounting: "memeData.heading.accounting",
+  Gas: "memeData.heading.gas",
+};
+
+type DateFilterSelection =
+  | DateIntervalsSelection
+  | typeof PRIMARY_SALES_SELECTION
+  | typeof CUSTOM_BLOCKS_SELECTION;
+
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getPageHeading(locale: SupportedLocale, title: string): string {
+  const messageKey = PAGE_HEADING_MESSAGE_KEYS[title];
+  return messageKey === undefined ? title : t(locale, messageKey);
+}
+
+function getCustomDateSelectionLabel(
+  locale: SupportedLocale,
+  fromDate?: Date,
+  toDate?: Date
+) {
+  const formattedFromDate = fromDate ? formatLocalDate(fromDate) : undefined;
+  const formattedToDate = toDate ? formatLocalDate(toDate) : undefined;
+  if (formattedFromDate && formattedToDate) {
+    return t(locale, "memeData.filters.dates.both", {
+      from: formattedFromDate,
+      to: formattedToDate,
+    });
+  }
+  if (formattedFromDate) {
+    return t(locale, "memeData.filters.dates.from", {
+      from: formattedFromDate,
+    });
+  }
+  if (formattedToDate) {
+    return t(locale, "memeData.filters.dates.to", {
+      to: formattedToDate,
+    });
+  }
+  return t(
+    locale,
+    DATE_SELECTION_MESSAGE_KEYS[DateIntervalsSelection.CUSTOM_DATES]
+  );
+}
 
 interface HeaderProps {
   title: string;
@@ -37,153 +128,6 @@ interface HeaderProps {
   setDateSelection: (dateSelection: DateIntervalsSelection) => void;
   setDates: (fromDate: Date, toDate: Date) => void;
   setBlocks: (fromBlock: number, toBlock: number) => void;
-}
-
-type FilterDropdownItem =
-  | {
-      type: "item";
-      key: string;
-      label: ReactNode;
-      onSelect: () => void;
-    }
-  | {
-      type: "divider";
-      key: string;
-    }
-  | {
-      type: "header";
-      key: string;
-      label: ReactNode;
-    };
-
-function GasRoyaltiesFilterDropdown({
-  label,
-  ariaLabel,
-  disabled,
-  items,
-}: Readonly<{
-  label: ReactNode;
-  ariaLabel: string;
-  disabled: boolean;
-  items: FilterDropdownItem[];
-}>) {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (disabled) {
-      setIsOpen(false);
-    }
-  }, [disabled]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
-      if (
-        event.target instanceof Node &&
-        dropdownRef.current?.contains(event.target)
-      ) {
-        return;
-      }
-
-      setIsOpen(false);
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("touchstart", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("touchstart", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen]);
-
-  return (
-    <div
-      ref={dropdownRef}
-      className="tailwind-scope tw-relative tw-inline-flex"
-    >
-      <button
-        type="button"
-        disabled={disabled}
-        aria-haspopup="true"
-        aria-expanded={isOpen}
-        aria-label={ariaLabel}
-        onClick={() => setIsOpen((current) => !current)}
-        className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-lg tw-font-bold tw-text-iron-400 tw-shadow-none tw-transition tw-duration-200 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
-      >
-        <span className="tw-min-w-0 tw-truncate">{label}</span>
-        <svg
-          className={`tw-h-4 tw-w-4 tw-shrink-0 tw-transition-transform tw-duration-200 ${
-            isOpen ? "tw-rotate-180" : ""
-          }`}
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M6 9L12 15L18 9"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-      {isOpen && (
-        <div className="tw-absolute tw-right-0 tw-top-full tw-z-[999] tw-mt-2 tw-min-w-[14rem] tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10">
-          <ul className="tw-mx-0 tw-mb-0 tw-max-h-80 tw-list-none tw-overflow-y-auto tw-overflow-x-hidden tw-px-2 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-600">
-            {items.map((item) => {
-              if (item.type === "divider") {
-                return (
-                  <li key={item.key} aria-hidden="true">
-                    <hr className="tw-my-1 tw-h-px tw-border-0 tw-bg-white/10" />
-                  </li>
-                );
-              }
-
-              if (item.type === "header") {
-                return (
-                  <li key={item.key}>
-                    <div className="tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
-                      {item.label}
-                    </div>
-                  </li>
-                );
-              }
-
-              return (
-                <li key={item.key}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      item.onSelect();
-                      setIsOpen(false);
-                    }}
-                    className="tw-block tw-w-full tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-transition tw-duration-200 hover:tw-bg-iron-800 hover:tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-                  >
-                    {item.label}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
 }
 
 function getUrlParams(
@@ -219,11 +163,14 @@ function getUrlParams(
     collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
       ? "memelab"
       : "memes";
-  const artistFilter = selectedArtist ? `&artist=${selectedArtist}` : "";
+  const artistFilter = selectedArtist
+    ? `&artist=${encodeURIComponent(selectedArtist)}`
+    : "";
   return `${publicEnv.API_ENDPOINT}/api/${apiPath}/collection/${collection}?${filters}${artistFilter}`;
 }
 
 export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
+  const locale = useBrowserLocale();
   const router = useRouter();
   const pathname = usePathname();
   const [artists, setArtists] = useState<ApiArtistNameItem[]>([]);
@@ -244,31 +191,32 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
     });
   }, [props.focus]);
 
+  const getDateFilterLabel = (dateSelection: DateIntervalsSelection) =>
+    t(locale, DATE_SELECTION_MESSAGE_KEYS[dateSelection]);
+
   function getDateSelectionLabel() {
     if (props.is_primary) {
-      return "Primary Sales";
+      return t(locale, "memeData.filters.primarySales");
     }
     if (props.is_custom_blocks) {
-      return (
-        [
-          fromBlock !== undefined ? `from block: ${fromBlock}` : undefined,
-          toBlock !== undefined ? `to block: ${toBlock}` : undefined,
-        ]
-          .filter(Boolean)
-          .join(" ") || "Custom Blocks"
-      );
+      if (fromBlock !== undefined && toBlock !== undefined) {
+        return t(locale, "memeData.filters.blocks.both", {
+          from: fromBlock,
+          to: toBlock,
+        });
+      }
+      if (fromBlock !== undefined) {
+        return t(locale, "memeData.filters.blocks.from", { from: fromBlock });
+      }
+      if (toBlock !== undefined) {
+        return t(locale, "memeData.filters.blocks.to", { to: toBlock });
+      }
+      return t(locale, "memeData.filters.customBlocks");
     }
     if (props.date_selection === DateIntervalsSelection.CUSTOM_DATES) {
-      return (
-        [
-          fromDate ? `from: ${fromDate.toISOString().slice(0, 10)}` : undefined,
-          toDate ? `to: ${toDate.toISOString().slice(0, 10)}` : undefined,
-        ]
-          .filter(Boolean)
-          .join(" ") || DateIntervalsSelection.CUSTOM_DATES
-      );
+      return getCustomDateSelectionLabel(locale, fromDate, toDate);
     }
-    return props.date_selection;
+    return getDateFilterLabel(props.date_selection);
   }
 
   function getFileName() {
@@ -280,155 +228,151 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
     } else if (props.is_custom_blocks) {
       filters = `blocks_${fromBlock}-${toBlock}`;
     } else if (props.date_selection === DateIntervalsSelection.CUSTOM_DATES) {
-      filters = `dates_${fromDate?.toISOString().slice(0, 10)}-${toDate
-        ?.toISOString()
-        .slice(0, 10)}`;
+      const formattedFromDate = fromDate
+        ? formatLocalDate(fromDate)
+        : undefined;
+      const formattedToDate = toDate ? formatLocalDate(toDate) : undefined;
+      filters = `dates_${formattedFromDate ?? ""}-${formattedToDate ?? ""}`;
     } else {
       filters = `${props.date_selection.toLowerCase().replaceAll(" ", "-")}`;
     }
     return `${title}_${focus}_${filters}.csv`;
   }
 
-  const artistItems: FilterDropdownItem[] = [
+  const artistItems: CommonSelectItem<string>[] = [
     {
-      type: "item",
       key: "artist-all",
-      label: "All",
-      onSelect: () => {
-        props.setSelectedArtist("");
-      },
+      label: t(locale, "memeData.filters.all"),
+      value: "",
     },
     ...artists.map((a) => ({
-      type: "item" as const,
-      key: `artist-${a.name.replaceAll(" ", "-")}`,
+      key: `artist-${encodeURIComponent(a.name)}`,
       label: a.name,
-      onSelect: () => {
-        props.setSelectedArtist(a.name);
-      },
+      value: a.name,
     })),
   ];
 
-  const dateItems: FilterDropdownItem[] = [
+  const collectionFocusItems: CommonSelectItem<GasRoyaltiesCollectionFocus>[] =
+    [
+      {
+        key: "collection-the-memes",
+        label: t(locale, "memeData.collection.theMemes"),
+        value: GasRoyaltiesCollectionFocus.MEMES,
+      },
+      {
+        key: "collection-meme-lab",
+        label: t(locale, "memeData.collection.memeLab"),
+        value: GasRoyaltiesCollectionFocus.MEMELAB,
+      },
+    ];
+
+  let activeDateSelection: DateFilterSelection = props.date_selection;
+  if (props.is_primary) {
+    activeDateSelection = PRIMARY_SALES_SELECTION;
+  } else if (props.is_custom_blocks) {
+    activeDateSelection = CUSTOM_BLOCKS_SELECTION;
+  }
+  const dateItems: CommonSelectItem<DateFilterSelection>[] = [
     {
-      type: "item",
       key: "primary-sales",
-      label: "Primary Sales",
-      onSelect: () => props.setIsPrimary(true),
-    },
-    {
-      type: "divider",
-      key: "secondary-sales-divider",
-    },
-    {
-      type: "header",
-      key: "secondary-sales-header",
-      label: "Secondary Sales",
+      label: t(locale, "memeData.filters.primarySales"),
+      value: PRIMARY_SALES_SELECTION,
     },
     ...Object.values(DateIntervalsSelection).map((dateSelection) => ({
-      type: "item" as const,
-      key: dateSelection,
-      label: dateSelection,
-      onSelect: () => {
-        if (dateSelection === DateIntervalsSelection.CUSTOM_DATES) {
-          setShowDatePicker(true);
-        } else {
-          props.setDateSelection(dateSelection);
-        }
-      },
+      key: `date-${dateSelection}`,
+      label:
+        dateSelection === activeDateSelection
+          ? getDateSelectionLabel()
+          : getDateFilterLabel(dateSelection),
+      value: dateSelection,
     })),
     {
-      type: "item",
       key: "custom-blocks",
-      label: "Custom Blocks",
-      onSelect: () => {
-        setShowBlockPicker(true);
-      },
+      label:
+        activeDateSelection === CUSTOM_BLOCKS_SELECTION
+          ? getDateSelectionLabel()
+          : t(locale, "memeData.filters.customBlocks"),
+      value: CUSTOM_BLOCKS_SELECTION,
     },
   ];
-  const dateSelectionLabel = getDateSelectionLabel();
+
+  const setDateFilter = (dateFilter: DateFilterSelection) => {
+    if (dateFilter === PRIMARY_SALES_SELECTION) {
+      props.setIsPrimary(true);
+    } else if (dateFilter === CUSTOM_BLOCKS_SELECTION) {
+      setShowBlockPicker(true);
+    } else if (dateFilter === DateIntervalsSelection.CUSTOM_DATES) {
+      setShowDatePicker(true);
+    } else {
+      props.setDateSelection(dateFilter);
+    }
+  };
 
   return (
     <>
-      <div className="tailwind-scope tw-container tw-mx-auto tw-px-3 tw-pt-4">
-        <div className="tw-flex tw-items-center">
-          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-            <span className="tw-flex tw-items-center tw-gap-2">
-              <h1 className="tw-mb-0 tw-flex tw-items-center tw-gap-2 tw-text-xl tw-font-bold tw-text-white">
-                Meme {props.title} {props.fetching && <DotLoader />}
-              </h1>
-            </span>
-            <span className="tw-flex tw-items-center tw-gap-3">
-              <button
-                type="button"
-                className={`tw-border-0 tw-bg-transparent tw-p-0 tw-text-lg tw-font-bold tw-text-iron-400 tw-transition tw-duration-200 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 ${
-                  props.focus === GasRoyaltiesCollectionFocus.MEMES
-                    ? styles["collectionFocusActive"]
-                    : styles["collectionFocus"]
-                }`}
-                onClick={() => {
-                  router.push(
-                    `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMES}`
-                  );
+      <div className={`${GAS_ROYALTIES_PAGE_CONTAINER_CLASS_NAME} tw-pt-4`}>
+        <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-5">
+          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
+            <h1 className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+              {getPageHeading(locale, props.title)}{" "}
+              {props.fetching && <DotLoader />}
+            </h1>
+            <div className="tw-w-fit tw-min-w-0 tw-max-w-full">
+              <CommonTabs
+                items={collectionFocusItems}
+                activeItem={props.focus}
+                setSelected={(focus) => {
+                  router.push(`${pathname}?focus=${focus}`);
                 }}
-                aria-label="The Memes"
-                aria-pressed={props.focus === GasRoyaltiesCollectionFocus.MEMES}
-              >
-                The Memes
-              </button>
-              <button
-                type="button"
-                className={`tw-border-0 tw-bg-transparent tw-p-0 tw-text-lg tw-font-bold tw-text-iron-400 tw-transition tw-duration-200 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 ${
-                  props.focus === GasRoyaltiesCollectionFocus.MEMELAB
-                    ? styles["collectionFocusActive"]
-                    : styles["collectionFocus"]
-                }`}
-                onClick={() =>
-                  router.push(
-                    `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMELAB}`
-                  )
-                }
-                aria-label="Meme Lab"
-                aria-pressed={
-                  props.focus === GasRoyaltiesCollectionFocus.MEMELAB
-                }
-              >
-                Meme Lab
-              </button>
-            </span>
+                filterLabel={t(locale, "memeData.collection.label")}
+                fill={false}
+                size="sm"
+              />
+            </div>
+          </div>
+          <div className="tw-flex tw-w-full tw-justify-start sm:tw-w-auto">
+            <div className="tw-flex tw-w-full tw-flex-col tw-items-start tw-gap-y-3 sm:tw-w-auto sm:tw-flex-row sm:tw-items-center sm:tw-gap-x-5">
+              <div className="tw-no-scrollbar tw-flex tw-max-w-full tw-flex-nowrap tw-items-start tw-gap-x-5 tw-overflow-x-auto tw-pb-1">
+                <CommonDropdown
+                  filterLabel={t(locale, "memeData.filters.artist")}
+                  disabled={props.fetching}
+                  items={artistItems}
+                  activeItem={props.selected_artist}
+                  setSelected={props.setSelectedArtist}
+                  size="sm"
+                  variant="editorial"
+                  showFilterLabel
+                  menuMinWidth={224}
+                />
+                <CommonDropdown
+                  filterLabel={t(locale, "memeData.filters.period")}
+                  disabled={props.fetching}
+                  items={dateItems}
+                  activeItem={activeDateSelection}
+                  setSelected={setDateFilter}
+                  size="sm"
+                  variant="editorial"
+                  showFilterLabel
+                  menuMinWidth={224}
+                />
+              </div>
+              {!props.fetching && props.results_count > 0 && (
+                <div className="tw-flex-none [&>button]:tw-rounded-md [&>button]:tw-px-0.5 [&>button]:tw-py-1 [&>button]:tw-text-sm [&>button]:tw-font-semibold [&>button]:!tw-text-iron-300 hover:[&>button]:!tw-text-iron-100 focus-visible:[&>button]:tw-outline focus-visible:[&>button]:tw-outline-2 focus-visible:[&>button]:tw-outline-primary-400 [&_svg]:!tw-w-4 [&_svg]:!tw-text-current">
+                  <DownloadUrlWidget
+                    preview={t(locale, "memeData.download")}
+                    name={getFileName()}
+                    url={`${props.getUrl()}&download=true`}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
         {props.description && (
-          <div className="tw-pt-3">
-            <div>{props.description}</div>
-          </div>
+          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+            {props.description}
+          </p>
         )}
-        <div className="tw-pt-3">
-          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-4">
-            <span className="tw-min-h-6">
-              {!props.fetching && props.results_count > 0 && (
-                <DownloadUrlWidget
-                  preview="Download"
-                  name={getFileName()}
-                  url={`${props.getUrl()}&download=true`}
-                />
-              )}
-            </span>
-            <span className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-4 sm:tw-gap-12">
-              <GasRoyaltiesFilterDropdown
-                label={`Artist: ${props.selected_artist || "All"}`}
-                ariaLabel={`Artist: ${props.selected_artist || "All"}`}
-                disabled={props.fetching}
-                items={artistItems}
-              />
-              <GasRoyaltiesFilterDropdown
-                label={dateSelectionLabel}
-                ariaLabel={`Date selection: ${dateSelectionLabel}`}
-                disabled={props.fetching}
-                items={dateItems}
-              />
-            </span>
-          </div>
-        </div>
       </div>
       <DatePickerModal
         mode="date"
@@ -472,8 +416,9 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
       href={`/${props.path}/${props.token_id}`}
       target="_blank"
       rel="noopener noreferrer"
+      className="tw-block tw-w-fit tw-rounded-sm tw-text-iron-50 tw-no-underline tw-transition tw-duration-200 group-focus-within:tw-text-iron-300 group-hover:tw-text-iron-300 hover:tw-text-iron-300 hover:tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
     >
-      <span className="tailwind-scope tw-flex tw-items-center tw-justify-center tw-gap-3">
+      <span className="tailwind-scope tw-flex tw-items-center tw-justify-start tw-gap-3">
         <span>{props.token_id} -</span>
         <Image
           unoptimized
@@ -483,13 +428,13 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
           style={{ width: "auto", height: "40px" }}
           src={props.thumbnail}
           alt={props.name}
-          className={styles["nftImage"]}
+          className="tw-block tw-max-w-16 tw-object-contain"
           data-tooltip-id={`token-image-${props.token_id}`}
         />
         {props.note && (
           <span>
             <FontAwesomeIcon
-              className={styles["infoIcon"]}
+              className={GAS_ROYALTIES_INFO_ICON_CLASS_NAME}
               icon={faInfoCircle}
               data-tooltip-id={`token-info-${props.token_id}`}
             />

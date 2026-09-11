@@ -1,6 +1,9 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiCreateWaveMetadataRequest } from "@/generated/models/ApiCreateWaveMetadataRequest";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
+import type { ApiProfileWaveActivity } from "@/generated/models/ApiProfileWaveActivity";
+import type { ApiProfileWaveActivityPage } from "@/generated/models/ApiProfileWaveActivityPage";
+import type { ApiProfileWaveActivityType } from "@/generated/models/ApiProfileWaveActivityType";
 import type { ApiWaveMetadata } from "@/generated/models/ApiWaveMetadata";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import type { ApiWaveOverviewPage } from "@/generated/models/ApiWaveOverviewPage";
@@ -12,6 +15,10 @@ import { ApiWavesV2ListType } from "@/generated/models/ApiWavesV2ListType";
 import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import type { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
 import type { SidebarWave, SidebarWavesPage } from "@/types/waves.types";
+import type {
+  ProfileWaveActivitySidebarItem,
+  ProfileWaveActivitySidebarPage,
+} from "@/types/profile-wave-activity.types";
 import {
   commonApiDelete,
   commonApiFetch,
@@ -46,6 +53,14 @@ interface FetchWaveSubwavesPageProps {
   readonly page?: number | undefined;
   readonly pageSize?: number | undefined;
   readonly sort?: ApiSubwavesSort | undefined;
+}
+
+interface FetchProfileWaveActivityPageProps {
+  readonly identity: string;
+  readonly activityType: ApiProfileWaveActivityType;
+  readonly limit: number;
+  readonly cursor?: string | null | undefined;
+  readonly signal?: AbortSignal | undefined;
 }
 
 export interface WaveSubwavesQueryKeyParams {
@@ -140,7 +155,7 @@ export function getWavesV2OverviewQueryKeyParams({
 const getWaveOverviewContext = (wave: ApiWaveOverview) =>
   wave.context_profile_context;
 
-const mapApiWaveOverviewToSidebarWave = (
+export const mapApiWaveOverviewToSidebarWave = (
   wave: ApiWaveOverview
 ): SidebarWave => {
   const context = getWaveOverviewContext(wave);
@@ -175,8 +190,10 @@ const mapApiWaveOverviewToSidebarWave = (
       context?.first_hidden_followed_subwave_unread_drop_serial_no ?? null,
     unreadDropsCount: context?.unread_drops ?? 0,
     followedSubwavesCount: context?.followed_subwaves_count ?? 0,
-    unreadFollowedSubwaveDrops:
-      context?.hidden_followed_subwave_unread_drops ?? 0,
+    unreadSubwaveDrops:
+      context?.subwave_unread_drops ??
+      context?.hidden_followed_subwave_unread_drops ??
+      0,
     latestReadTimestamp: 0,
     pinned: context?.pinned ?? false,
     muted: context?.muted ?? false,
@@ -185,6 +202,17 @@ const mapApiWaveOverviewToSidebarWave = (
     waveScore: wave.wave_score ?? null,
   };
 };
+
+const mapApiProfileWaveActivityToSidebarItem = (
+  wave: ApiProfileWaveActivity
+): ProfileWaveActivitySidebarItem => ({
+  id: wave.wave_id,
+  name: wave.wave_name,
+  picture: wave.wave_picture,
+  isPrivate: wave.is_private,
+  totalDropsCount: wave.total_drops_count,
+  latestPostTimestamp: wave.latest_post_timestamp,
+});
 
 const getApiWaveDescriptionDrop = (
   wave: ApiWave
@@ -231,7 +259,7 @@ export const mapApiWaveToSidebarWave = (wave: ApiWave): SidebarWave => {
     firstUnreadFollowedSubwaveDropSerialNo: null,
     unreadDropsCount: wave.metrics.your_unread_drops_count,
     followedSubwavesCount: 0,
-    unreadFollowedSubwaveDrops: 0,
+    unreadSubwaveDrops: 0,
     latestReadTimestamp: wave.metrics.your_latest_read_timestamp,
     pinned: wave.pinned,
     muted: wave.metrics.muted,
@@ -343,6 +371,34 @@ export async function fetchWavesV2Page({
   };
 }
 
+export async function fetchProfileWaveActivityPage({
+  identity,
+  activityType,
+  limit,
+  cursor,
+  signal,
+}: FetchProfileWaveActivityPageProps): Promise<ProfileWaveActivitySidebarPage> {
+  const params: Record<string, string> = {
+    activity_type: activityType,
+    limit: `${limit}`,
+  };
+
+  if (cursor) {
+    params["cursor"] = cursor;
+  }
+
+  const response = await commonApiFetch<ApiProfileWaveActivityPage>({
+    endpoint: `v2/waves/profile-activity/${encodeURIComponent(identity)}`,
+    params,
+    signal,
+  });
+
+  return {
+    waves: response.data.map(mapApiProfileWaveActivityToSidebarItem),
+    nextCursor: response.next_cursor,
+  };
+}
+
 export async function fetchWaveById({
   waveId,
   headers,
@@ -396,7 +452,10 @@ async function searchLegacyWavesByName({
     headers,
   });
 
-  return waves.map(mapApiWaveToSidebarWave);
+  return waves.map((wave) => ({
+    ...mapApiWaveToSidebarWave(wave),
+    creator: wave.author,
+  }));
 }
 
 const WAVE_SEARCH_UNAVAILABLE_MESSAGE =

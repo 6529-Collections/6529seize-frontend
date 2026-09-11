@@ -87,6 +87,7 @@ const STATIC_PATHS = new Set<string>([
   "/llms.txt",
   "/glossary.json",
 ]);
+const STREAM_REVIEW_DATA_PREFIX = "/review-data/6529-stream/";
 const STATIC_PATH_SUFFIXES = [
   "favicon.ico",
   ".jpg",
@@ -96,6 +97,14 @@ const STATIC_PATH_SUFFIXES = [
   ".svg",
   ".webp",
 ] as const;
+
+function isPublicStreamReviewDataPath(req: NextRequest, pathname: string) {
+  const rawPathname = new URL(req.url).pathname;
+  return (
+    rawPathname === pathname &&
+    pathname.startsWith(STREAM_REVIEW_DATA_PREFIX)
+  );
+}
 
 function stripTrailingSlashes(value: string): string {
   let end = value.length;
@@ -321,6 +330,7 @@ export default async function proxy(req: NextRequest) {
 
     if (
       STATIC_PATHS.has(normalizedPathname) ||
+      isPublicStreamReviewDataPath(req, pathname) ||
       STATIC_PATH_PREFIXES.some((prefix) =>
         normalizedPathname.startsWith(prefix)
       ) ||

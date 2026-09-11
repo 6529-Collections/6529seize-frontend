@@ -30,4 +30,14 @@ describe("HeroHeader", () => {
 
     expect(healthLink).toHaveAttribute("href", "/network/health");
   });
+
+  it("hides the fixed health link inside the native app shell", () => {
+    render(<HeroHeader />);
+
+    expect(
+      screen.getByRole("link", {
+        name: "Open network health dashboard",
+      })
+    ).toHaveClass("[.capacitor-native_&]:tw-hidden");
+  });
 });

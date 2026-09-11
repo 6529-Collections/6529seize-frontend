@@ -2,37 +2,22 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
-import { ActivityTypeItems } from "@/components/latest-activity/ActivityFilters";
-import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
-import MemeLabLeaderboard from "@/components/leaderboard/MemeLabLeaderboard";
-import { MemeLabOverviewDetails } from "@/components/memelab/MemeLabAdditionalDetails";
+import { getActivityTypeItems } from "@/components/latest-activity/ActivityFilters";
 import { getMemeLabRouteHrefWithLocale } from "@/components/memelab/memeLabRouteParams";
-import {
-  MEME_LAB_STATS_ROW_CLASS,
-  MemeLabCardVolumes,
-  MemeLabStaticCardHeader,
-  MemeLabStatMetric,
-} from "@/components/memelab/MemeLabCardHeader";
-import {
-  MemeLabYourCardsPanel,
-  MemeLabYourTransactionsTable,
-} from "@/components/memelab/MemeLabYourCards";
+import { MemeLabCardVolumes } from "@/components/memelab/MemeLabCardHeader";
+import { MemeLabYourTransactionsTable } from "@/components/memelab/MemeLabYourCards";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
-import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
-import Pagination from "@/components/pagination/Pagination";
-import { printMemeReferences } from "@/components/rememes/RememePage";
+import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
+import NftMarketActivity from "@/components/nft-market-activity/NftMarketActivity";
 import {
   MemePageNavigationSkeleton,
   MemePageSkeleton,
   MemePageTitleSkeleton,
 } from "@/components/the-memes/MemePageSkeleton";
-import { MEME_FOCUS, MEME_TABS } from "@/components/the-memes/MemeShared";
-import Timeline from "@/components/timeline/Timeline";
+import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
+import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
@@ -40,9 +25,12 @@ import type { DBResponse } from "@/entities/IDBResponse";
 import type { LabExtendedData, LabNFT, NFT, NFTHistory } from "@/entities/INFT";
 import type { Transaction } from "@/entities/ITransaction";
 import { areEqualAddresses } from "@/helpers/Helpers";
-import { TypeFilter } from "@/hooks/useActivityData";
+import {
+  getProfileCollectedReturnContext,
+  PROFILE_COLLECTED_RETURN_PARAM,
+} from "@/helpers/profile-collected-navigation";
+import { getNftActivityFilter, TypeFilter } from "@/hooks/useActivityData";
 import useCapacitor from "@/hooks/useCapacitor";
-import { formatInteger, formatPercent } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
@@ -50,212 +38,26 @@ import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-
-const ACTIVITY_PAGE_SIZE = 25;
-const MEME_LAB_TAB_FOCUSES = [
-  MEME_FOCUS.LIVE,
-  MEME_FOCUS.COLLECTORS,
-  MEME_FOCUS.HISTORY,
-  MEME_FOCUS.REFERENCES,
-] as const;
-const MEME_LAB_FOCUS_VALUES = new Set<MEME_FOCUS>(MEME_LAB_TAB_FOCUSES);
-const isMemeLabFocus = (focus: MEME_FOCUS): boolean =>
-  MEME_LAB_FOCUS_VALUES.has(focus);
-const MEME_LAB_TABS = MEME_LAB_TAB_FOCUSES.map((focus) =>
-  MEME_TABS.find((tab) => tab.focus === focus)
-).filter((tab): tab is (typeof MEME_TABS)[number] => tab !== undefined);
-
-enum MEME_LAB_HISTORY_TAB {
-  ACTIVITY = "activity",
-  YOUR_TRANSACTIONS = "your-transactions",
-  TIMELINE = "timeline",
-}
-
-const MEME_LAB_HISTORY_TABS: {
-  readonly focus: MEME_LAB_HISTORY_TAB;
-}[] = [
-  { focus: MEME_LAB_HISTORY_TAB.ACTIVITY },
-  { focus: MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS },
-  { focus: MEME_LAB_HISTORY_TAB.TIMELINE },
-];
-
-function parseMemeLabFocus(focus: string | null): MEME_FOCUS | undefined {
-  if (focus === MEME_FOCUS.THE_ART) {
-    return MEME_FOCUS.LIVE;
-  }
-
-  if (
-    focus === MEME_FOCUS.ACTIVITY ||
-    focus === MEME_FOCUS.YOUR_TRANSACTIONS ||
-    focus === MEME_FOCUS.TIMELINE
-  ) {
-    return MEME_FOCUS.HISTORY;
-  }
-
-  const resolvedFocus = Object.values(MEME_FOCUS).find(
-    (candidate) => candidate === focus
-  );
-  if (resolvedFocus === undefined || !isMemeLabFocus(resolvedFocus)) {
-    return undefined;
-  }
-
-  return resolvedFocus;
-}
-
-function getMemeLabHistoryTabForFocus(
-  focus: string | null
-): MEME_LAB_HISTORY_TAB {
-  if (focus === MEME_FOCUS.TIMELINE) {
-    return MEME_LAB_HISTORY_TAB.TIMELINE;
-  }
-
-  if (focus === MEME_FOCUS.YOUR_TRANSACTIONS) {
-    return MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS;
-  }
-
-  return MEME_LAB_HISTORY_TAB.ACTIVITY;
-}
-
-function getMemeLabRouteFocus(
-  activeTab: MEME_FOCUS,
-  activeHistoryTab: MEME_LAB_HISTORY_TAB
-): MEME_FOCUS {
-  if (activeTab !== MEME_FOCUS.HISTORY) {
-    return activeTab;
-  }
-
-  if (activeHistoryTab === MEME_LAB_HISTORY_TAB.TIMELINE) {
-    return MEME_FOCUS.TIMELINE;
-  }
-
-  if (activeHistoryTab === MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS) {
-    return MEME_FOCUS.YOUR_TRANSACTIONS;
-  }
-
-  return MEME_FOCUS.ACTIVITY;
-}
-
-const isAbortError = (error: unknown): boolean => {
-  if (error instanceof DOMException) {
-    return error.name === "AbortError";
-  }
-  return error instanceof Error && error.name === "AbortError";
-};
-
-const MEME_LAB_TAB_BUTTON_BASE_CLASS_NAME =
-  "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
-
-function getMemeLabTabButtonClassName(isActive: boolean) {
-  return `${MEME_LAB_TAB_BUTTON_BASE_CLASS_NAME} ${
-    isActive
-      ? "tw-pointer-events-none tw-border-primary-400 tw-text-iron-100"
-      : "tw-cursor-pointer tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100"
-  }`;
-}
-
-function MemeLabPageTabButton({
-  title,
-  isActive,
-  onClick,
-}: {
-  readonly title: string;
-  readonly isActive: boolean;
-  readonly onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={isActive}
-      className={getMemeLabTabButtonClassName(isActive)}
-      onClick={onClick}
-    >
-      {title}
-    </button>
-  );
-}
-
-function getMemeLabDetailTabLabel(
-  focus: MEME_FOCUS,
-  locale: SupportedLocale
-): string {
-  switch (focus) {
-    case MEME_FOCUS.LIVE:
-      return t(locale, "memeLab.detail.tabs.overview");
-    case MEME_FOCUS.REFERENCES:
-      return t(locale, "memeLab.detail.tabs.references");
-    case MEME_FOCUS.COLLECTORS:
-      return t(locale, "memeLab.detail.tabs.collectors");
-    case MEME_FOCUS.HISTORY:
-      return t(locale, "memeLab.detail.tabs.history");
-    default:
-      return t(locale, "memeLab.detail.tabs.overview");
-  }
-}
-
-function getMemeLabHistoryTabLabel(
-  focus: MEME_LAB_HISTORY_TAB,
-  locale: SupportedLocale
-): string {
-  switch (focus) {
-    case MEME_LAB_HISTORY_TAB.ACTIVITY:
-      return t(locale, "memeLab.detail.tabs.cardActivity");
-    case MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS:
-      return t(locale, "memeLab.detail.tabs.yourTransactions");
-    case MEME_LAB_HISTORY_TAB.TIMELINE:
-      return t(locale, "memeLab.detail.tabs.timeline");
-  }
-}
-
-function getMemeLabRouteFocusLabel(
-  focus: MEME_FOCUS,
-  locale: SupportedLocale
-): string {
-  if (focus === MEME_FOCUS.ACTIVITY) {
-    return t(locale, "memeLab.detail.tabs.cardActivity");
-  }
-
-  if (focus === MEME_FOCUS.YOUR_TRANSACTIONS) {
-    return t(locale, "memeLab.detail.tabs.yourTransactions");
-  }
-
-  if (focus === MEME_FOCUS.TIMELINE) {
-    return t(locale, "memeLab.detail.tabs.timeline");
-  }
-
-  return getMemeLabDetailTabLabel(parseMemeLabFocus(focus) ?? focus, locale);
-}
-
-function getMemeLabBrowserTitle({
-  nft,
-  nftId,
-  routeFocus,
-  locale,
-}: {
-  readonly nft: LabNFT | undefined;
-  readonly nftId: string;
-  readonly routeFocus: MEME_FOCUS;
-  readonly locale: SupportedLocale;
-}): string {
-  const title = nft
-    ? t(locale, "memeLab.detail.browserTitle", {
-        name: nft.name,
-        tokenId: nft.id,
-      })
-    : t(locale, "memeLab.detail.heading.card", { tokenId: nftId });
-
-  if (routeFocus === MEME_FOCUS.LIVE) {
-    return title;
-  }
-
-  return t(locale, "memeLab.detail.browserTitleWithTab", {
-    title,
-    tab: getMemeLabRouteFocusLabel(routeFocus, locale),
-  });
-}
-
-function formatMemeLabPercent(value: number, locale: SupportedLocale) {
-  return formatPercent(locale, value);
-}
+import {
+  ACTIVITY_PAGE_SIZE,
+  getMemeLabBrowserTitle,
+  getMemeLabHistoryTabForFocus,
+  getMemeLabHistoryTabLabel,
+  getMemeLabRouteFocus,
+  isAbortError,
+  MEME_LAB_HISTORY_TAB,
+  MEME_LAB_HISTORY_TABS,
+  parseMemeLabFocus,
+  runAfterCriticalWork,
+} from "./MemeLabPage.utils";
+import { MemeLabPageTabs } from "./MemeLabPageTabs";
+import {
+  MemeLabCollectors,
+  MemeLabOverview,
+  MemeLabReferences,
+  MemeLabStaticHeader,
+  MemeLabTimeline,
+} from "./MemeLabPage.view";
 
 export default function MemeLabPageComponent({
   nftId,
@@ -266,6 +68,9 @@ export default function MemeLabPageComponent({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const returnContext = getProfileCollectedReturnContext(
+    searchParams.get(PROFILE_COLLECTED_RETURN_PARAM)
+  );
   const pathname = usePathname();
   const capacitor = useCapacitor();
 
@@ -280,7 +85,7 @@ export default function MemeLabPageComponent({
     [searchParams]
   );
   const routeTab = parseMemeLabFocus(focusParam) ?? MEME_FOCUS.LIVE;
-  const activitySectionRef = useRef<HTMLElement | null>(null);
+  const loadedHistoryNftIdRef = useRef<string | null>(null);
 
   const [nft, setNft] = useState<LabNFT>();
   const [originalMemes, setOriginalMemes] = useState<NFT[]>([]);
@@ -288,20 +93,15 @@ export default function MemeLabPageComponent({
   const [nftLoading, setNftLoading] = useState(true);
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [activity, setActivity] = useState<Transaction[]>([]);
 
   const [userLoaded, setUserLoaded] = useState(false);
   const [originalMemesLoaded, setOriginalMemesLoaded] = useState(false);
-
-  const [activityPage, setActivityPage] = useState(1);
-  const [activityTotalResults, setActivityTotalResults] = useState(0);
 
   const [nftHistory, setNftHistory] = useState<NFTHistory[]>([]);
 
   const [activityTypeFilter, setActivityTypeFilter] = useState<TypeFilter>(
     TypeFilter.ALL
   );
-  const [activityLoading, setActivityLoading] = useState(false);
   const hasUserCards = userLoaded && nftBalance > 0;
   const hasOwnershipContext = hasUserCards;
   const hasUserTransactions =
@@ -315,7 +115,6 @@ export default function MemeLabPageComponent({
     !hasUserTransactions
       ? MEME_LAB_HISTORY_TAB.ACTIVITY
       : requestedHistoryTab;
-  const visibleMemeLabTabs = MEME_LAB_TABS;
   const visibleHistoryTabItems = useMemo(
     () =>
       MEME_LAB_HISTORY_TABS.filter(
@@ -408,34 +207,6 @@ export default function MemeLabPageComponent({
       return undefined;
     };
 
-    const loadOriginalMemes = async (fetchedNft?: LabNFT) => {
-      if (!fetchedNft?.meme_references?.length) {
-        setOriginalMemesState([]);
-        return;
-      }
-
-      try {
-        const referencesResponse = await fetchUrl<DBResponse<NFT>>(
-          `${
-            publicEnv.API_ENDPOINT
-          }/api/nfts?sort_direction=asc&contract=${MEMES_CONTRACT}&id=${fetchedNft.meme_references.join(
-            ","
-          )}`,
-          { signal }
-        );
-        if (cancelled) {
-          return;
-        }
-        setOriginalMemesState(referencesResponse.data);
-      } catch (error) {
-        if (cancelled || isAbortError(error)) {
-          return;
-        }
-        console.error("Failed to fetch referenced memes", error);
-        setOriginalMemesState([]);
-      }
-    };
-
     const loadNft = async () => {
       try {
         const metaResponse = await fetchUrl<DBResponse<LabExtendedData>>(
@@ -479,8 +250,6 @@ export default function MemeLabPageComponent({
 
         setNft(fetchedNft);
         setNftLoading(false);
-
-        await loadOriginalMemes(fetchedNft);
       } catch (error) {
         if (cancelled || isAbortError(error)) {
           return;
@@ -497,6 +266,50 @@ export default function MemeLabPageComponent({
       abortController.abort();
     };
   }, [nftId]);
+
+  useEffect(() => {
+    if (activeTab !== MEME_FOCUS.REFERENCES || !nft || originalMemesLoaded) {
+      return;
+    }
+
+    if (!nft.meme_references?.length) {
+      setOriginalMemes([]);
+      setOriginalMemesLoaded(true);
+      return;
+    }
+
+    let cancelled = false;
+    const abortController = new AbortController();
+
+    fetchUrl<DBResponse<NFT>>(
+      `${
+        publicEnv.API_ENDPOINT
+      }/api/nfts?sort_direction=asc&contract=${MEMES_CONTRACT}&id=${nft.meme_references.join(
+        ","
+      )}`,
+      { signal: abortController.signal }
+    )
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
+        setOriginalMemes(response.data);
+        setOriginalMemesLoaded(true);
+      })
+      .catch((error: unknown) => {
+        if (cancelled || isAbortError(error)) {
+          return;
+        }
+        console.error("Failed to fetch referenced memes", error);
+        setOriginalMemes([]);
+        setOriginalMemesLoaded(true);
+      });
+
+    return () => {
+      cancelled = true;
+      abortController.abort();
+    };
+  }, [activeTab, nft, originalMemesLoaded]);
 
   useEffect(() => {
     const walletObjects = connectedProfile?.wallets ?? [];
@@ -555,147 +368,59 @@ export default function MemeLabPageComponent({
   }, [nftId, connectedProfile]);
 
   useEffect(() => {
-    setActivity([]);
-    setActivityTotalResults(0);
-
-    if (!nftId) {
+    if (!nftId || loadedHistoryNftIdRef.current === nftId) {
       return;
-    }
-
-    setActivityLoading(true);
-    let url = `${publicEnv.API_ENDPOINT}/api/transactions_memelab?id=${nftId}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
-    switch (activityTypeFilter) {
-      case TypeFilter.SALES:
-        url += `&filter=sales`;
-        break;
-      case TypeFilter.TRANSFERS:
-        url += `&filter=transfers`;
-        break;
-      case TypeFilter.AIRDROPS:
-        url += `&filter=airdrops`;
-        break;
-      case TypeFilter.MINTS:
-        url += `&filter=mints`;
-        break;
-      case TypeFilter.BURNS:
-        url += `&filter=burns`;
-        break;
     }
 
     let cancelled = false;
     const abortController = new AbortController();
-    const { signal } = abortController;
-
-    fetchUrl(url, { signal })
-      .then((response: DBResponse<Transaction>) => {
-        if (cancelled) {
-          return;
-        }
-        setActivityTotalResults(response.count);
-        setActivity(response.data);
-      })
-      .catch((error) => {
-        if (cancelled || isAbortError(error)) {
-          return;
-        }
-        console.error(`Failed to fetch Meme Lab activity for ${nftId}`, error);
-        setActivityTotalResults(0);
-        setActivity([]);
-      })
-      .finally(() => {
-        setActivityLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-      abortController.abort();
-    };
-  }, [nftId, activityPage, activityTypeFilter]);
-
-  useEffect(() => {
-    setNftHistory([]);
-
-    let cancelled = false;
-    const abortController = new AbortController();
-    const { signal } = abortController;
-
-    async function fetchHistory(url: string) {
-      try {
-        const response = await fetchAllPages<NFTHistory>(url, { signal });
-        if (!cancelled) {
-          setNftHistory(response);
-        }
-      } catch (error) {
-        if (cancelled || isAbortError(error)) {
-          return;
-        }
-        console.error(
-          `Failed to fetch NFT history for Meme Lab ${nftId}`,
-          error
-        );
-        setNftHistory([]);
-      }
-    }
-
-    if (!nftId) {
-      return;
-    }
-
     const initialUrlHistory = `${publicEnv.API_ENDPOINT}/api/nft_history/${MEMELAB_CONTRACT}/${nftId}`;
-    fetchHistory(initialUrlHistory);
+
+    const loadHistory = () => {
+      if (cancelled) {
+        return;
+      }
+
+      setNftHistory([]);
+      fetchAllPages<NFTHistory>(initialUrlHistory, {
+        signal: abortController.signal,
+      })
+        .then((response) => {
+          if (cancelled) {
+            return;
+          }
+          setNftHistory(response);
+          loadedHistoryNftIdRef.current = nftId;
+        })
+        .catch((error: unknown) => {
+          if (cancelled || isAbortError(error)) {
+            return;
+          }
+          console.error(
+            `Failed to fetch NFT history for Meme Lab ${nftId}`,
+            error
+          );
+          setNftHistory([]);
+          loadedHistoryNftIdRef.current = nftId;
+        });
+    };
+
+    const timelineIsVisible =
+      activeTab === MEME_FOCUS.HISTORY &&
+      activeHistoryTab === MEME_LAB_HISTORY_TAB.TIMELINE;
+    let cancelScheduledLoad: () => void = () => undefined;
+    if (timelineIsVisible) {
+      loadHistory();
+    } else {
+      cancelScheduledLoad = runAfterCriticalWork(loadHistory);
+    }
 
     return () => {
       cancelled = true;
+      cancelScheduledLoad();
       abortController.abort();
     };
-  }, [nftId]);
-
-  const activityContent = useMemo(() => {
-    if (activity.length > 0) {
-      return (
-        <div className="tw-overflow-x-auto">
-          <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
-            <tbody>
-              {activity.map((tr) => (
-                <LatestActivityRow
-                  tr={tr}
-                  nft={nft}
-                  variant="tailwind"
-                  rowStyle="striped"
-                  key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
-    }
-
-    if (activityLoading) {
-      return (
-        <div className="tw-flex tw-items-center tw-justify-center tw-py-4">
-          <CircleLoader size={CircleLoaderSize.LARGE} />
-        </div>
-      );
-    }
-
-    if (activity.length === 0) {
-      return (
-        <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-py-2">
-          <NothingHereYetSummer />
-        </div>
-      );
-    }
-    return;
-  }, [activity, activityLoading, nft]);
-
-  function handleActivityPageChange(newPage: number) {
-    setActivityPage(newPage);
-    activitySectionRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }
+  }, [activeHistoryTab, activeTab, nftId]);
 
   function printHistoryTabs() {
     if (!nft || activeTab !== MEME_FOCUS.HISTORY) {
@@ -722,20 +447,40 @@ export default function MemeLabPageComponent({
 
   function printContent() {
     if (activeTab === MEME_FOCUS.COLLECTORS) {
-      return printHodlers();
+      return (
+        <MemeLabCollectors
+          nft={nft}
+          nftId={nftId}
+          nftMeta={nftMeta}
+          locale={locale}
+        />
+      );
     }
 
     if (activeTab === MEME_FOCUS.REFERENCES) {
-      return printReferences();
+      return (
+        <MemeLabReferences
+          originalMemes={originalMemes}
+          originalMemesLoaded={originalMemesLoaded}
+          locale={locale}
+        />
+      );
     }
 
     if (activeTab === MEME_FOCUS.LIVE) {
-      return printOverview();
+      return (
+        <MemeLabOverview
+          nft={nft}
+          defaultAdditionalDetailsOpen={defaultAdditionalDetailsOpen}
+        />
+      );
     }
 
     if (activeTab === MEME_FOCUS.HISTORY) {
       if (activeHistoryTab === MEME_LAB_HISTORY_TAB.TIMELINE) {
-        return printTimeline();
+        return (
+          <MemeLabTimeline nft={nft} nftHistory={nftHistory} locale={locale} />
+        );
       }
 
       if (activeHistoryTab === MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS) {
@@ -748,146 +493,6 @@ export default function MemeLabPageComponent({
     return null;
   }
 
-  function printOverview() {
-    if (!nft) {
-      return null;
-    }
-
-    return (
-      <MemeLabOverviewDetails
-        nft={nft}
-        defaultAdditionalDetailsOpen={defaultAdditionalDetailsOpen}
-      />
-    );
-  }
-
-  function printReferences() {
-    return (
-      <section
-        aria-labelledby="meme-lab-references-heading"
-        className="tw-pb-3"
-      >
-        <h2
-          id="meme-lab-references-heading"
-          className="tw-mb-4 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100"
-        >
-          {t(locale, "memeLab.detail.references.title")}
-        </h2>
-        {printMemeReferences(
-          originalMemes,
-          "the-memes",
-          originalMemesLoaded,
-          true,
-          locale
-        )}
-      </section>
-    );
-  }
-
-  function printStaticCardHeader() {
-    if (!nft || !nftMeta) {
-      return null;
-    }
-
-    return (
-      <MemeLabStaticCardHeader
-        nft={nft}
-        nftMeta={nftMeta}
-        showMarketplaceLinks={!capacitor.isIos || country === "US"}
-        locale={locale}
-        artworkFooter={
-          hasOwnershipContext ? (
-            <MemeLabYourCardsPanel nft={nft} nftBalance={nftBalance} />
-          ) : undefined
-        }
-      />
-    );
-  }
-
-  function printCollectorsStatsMetrics() {
-    if (!nftMeta) {
-      return null;
-    }
-
-    return (
-      <div className={MEME_LAB_STATS_ROW_CLASS}>
-        <MemeLabStatMetric
-          label={t(locale, "memeLab.detail.collectors.collectors")}
-          value={formatInteger(locale, nftMeta.hodlers)}
-          rank={nftMeta.hodlers_rank}
-          total={nftMeta.collection_size}
-        />
-        <MemeLabStatMetric
-          label={t(locale, "memeLab.detail.collectors.museum")}
-          value={formatInteger(locale, nftMeta.museum_holdings)}
-          rank={nftMeta.museum_holdings_rank}
-          total={nftMeta.collection_size}
-        />
-        <MemeLabStatMetric
-          label={t(locale, "memeLab.detail.collectors.unique")}
-          value={formatMemeLabPercent(nftMeta.percent_unique, locale)}
-          rank={nftMeta.percent_unique_rank}
-          total={nftMeta.collection_size}
-        />
-        {nftMeta.burnt > 0 && (
-          <MemeLabStatMetric
-            label={t(locale, "memeLab.detail.collectors.uniqueExBurnt")}
-            value={formatMemeLabPercent(
-              nftMeta.percent_unique_not_burnt,
-              locale
-            )}
-            rank={nftMeta.percent_unique_not_burnt_rank}
-            total={nftMeta.collection_size}
-          />
-        )}
-        <MemeLabStatMetric
-          label={t(
-            locale,
-            nftMeta.burnt > 0
-              ? "memeLab.detail.collectors.uniqueExBurntAndMuseum"
-              : "memeLab.detail.collectors.uniqueExMuseum"
-          )}
-          value={formatMemeLabPercent(nftMeta.percent_unique_cleaned, locale)}
-          rank={nftMeta.percent_unique_cleaned_rank}
-          total={nftMeta.collection_size}
-        />
-      </div>
-    );
-  }
-
-  function printHodlers() {
-    if (nft && nftId) {
-      return (
-        <section
-          aria-label={t(locale, "memeLab.detail.collectors.leaderboard")}
-          className="tw-py-2"
-        >
-          {printCollectorsStatsMetrics()}
-          <div className="tw-pt-3">
-            <MemeLabLeaderboard
-              contract={nft.contract}
-              nftId={parseInt(nftId)}
-            />
-          </div>
-        </section>
-      );
-    }
-    return;
-  }
-
-  function printTimeline() {
-    return (
-      <section
-        aria-label={t(locale, "memeLab.detail.timeline.region")}
-        className="tw-pb-5 tw-pt-3"
-      >
-        <div className="tw-mx-auto tw-w-full md:tw-w-10/12">
-          {nft && <Timeline nft={nft} steps={nftHistory} locale={locale} />}
-        </div>
-      </section>
-    );
-  }
-
   function printActivity() {
     return (
       <section
@@ -896,44 +501,39 @@ export default function MemeLabPageComponent({
       >
         {nft && <MemeLabCardVolumes nft={nft} />}
         <section
-          ref={activitySectionRef}
           aria-labelledby="meme-lab-card-activity-heading"
           className="tw-scroll-mt-24"
         >
           <div className="tw-mb-4 tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
             <h3
               id="meme-lab-card-activity-heading"
-              className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200"
+              className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-200 sm:tw-text-lg"
             >
               {t(locale, "memeLab.detail.tabs.cardActivity")}
             </h3>
             <div className="tw-w-full tw-shrink-0 md:tw-w-72">
               <CommonDropdown
-                items={ActivityTypeItems}
+                items={getActivityTypeItems(locale)}
                 activeItem={activityTypeFilter}
                 filterLabel={t(
                   locale,
                   "memeLab.detail.activity.transactionType"
                 )}
                 setSelected={(filter) => {
-                  setActivityPage(1);
                   setActivityTypeFilter(filter);
                 }}
               />
             </div>
           </div>
-          {activityContent}
+          <NftMarketActivity
+            contract={MEMELAB_CONTRACT}
+            tokenId={nftId}
+            filter={getNftActivityFilter(activityTypeFilter)}
+            pageSize={ACTIVITY_PAGE_SIZE}
+            compact
+            locale={locale}
+          />
         </section>
-        {activity.length > 0 && !activityLoading && (
-          <div className="tw-flex tw-justify-center tw-pb-3 tw-pt-4">
-            <Pagination
-              page={activityPage}
-              pageSize={ACTIVITY_PAGE_SIZE}
-              totalResults={activityTotalResults}
-              setPage={handleActivityPageChange}
-            />
-          </div>
-        )}
       </section>
     );
   }
@@ -943,8 +543,18 @@ export default function MemeLabPageComponent({
       <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
         <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">
-            <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
-              <div className="tw-mb-0 tw-flex tw-items-center">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
+              <ProfileCollectedReturnLink
+                locale={locale}
+                returnTo={returnContext?.href}
+              />
+              <div
+                className={`tw-mb-0 tw-items-center ${
+                  returnContext && !capacitor.isCapacitor
+                    ? "tw-hidden md:tw-flex"
+                    : "tw-flex"
+                }`}
+              >
                 <Link
                   href={getMemeLabRouteHrefWithLocale({
                     href: "/meme-lab",
@@ -955,7 +565,7 @@ export default function MemeLabPageComponent({
                 >
                   <ArrowLeftIcon
                     aria-hidden="true"
-                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
+                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform tw-duration-150 group-hover:-tw-translate-x-0.5 motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
                   />
                   {t(locale, "memeLab.detail.backLink.label")}
                 </Link>
@@ -974,7 +584,7 @@ export default function MemeLabPageComponent({
                 </div>
                 <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
                   <h1
-                    className="tw-mb-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0"
+                    className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-y-1 md:tw-flex-nowrap"
                     aria-label={t(locale, "memeLab.detail.heading.ariaLabel", {
                       tokenId: nft.id,
                       name: nft.name,
@@ -987,7 +597,7 @@ export default function MemeLabPageComponent({
                     </span>
                     <span
                       aria-hidden="true"
-                      className="tw-mx-3 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6"
+                      className="tw-mx-2.5 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6 md:tw-mx-3"
                     />
                     <span className="tw-mb-0 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl md:tw-truncate">
                       {nft.name}
@@ -1018,24 +628,25 @@ export default function MemeLabPageComponent({
         {isLoadingNft && <MemePageSkeleton />}
         {nftMeta && nft && (
           <>
-            {printStaticCardHeader()}
-            <nav
-              aria-label={t(locale, "memeLab.detail.sections.tabs")}
-              className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
-            >
-              <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
-                <div className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4">
-                  {visibleMemeLabTabs.map((tab) => (
-                    <MemeLabPageTabButton
-                      key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
-                      title={getMemeLabDetailTabLabel(tab.focus, locale)}
-                      isActive={activeTab === tab.focus}
-                      onClick={() => setActiveMemeLabTab(tab.focus)}
-                    />
-                  ))}
-                </div>
-              </div>
-            </nav>
+            <MemeLabStaticHeader
+              nft={nft}
+              nftMeta={nftMeta}
+              showMarketplaceLinks={!capacitor.isIos || country === "US"}
+              locale={locale}
+              hasOwnershipContext={hasOwnershipContext}
+              nftBalance={nftBalance}
+            />
+            <MarketDepthPanel
+              contract={MEMELAB_CONTRACT}
+              tokenId={nft.id}
+              locale={locale}
+            />
+            <MemeLabPageTabs
+              nft={nft}
+              activeTab={activeTab}
+              locale={locale}
+              onSelectTab={setActiveMemeLabTab}
+            />
             {printHistoryTabs()}
             {printContent()}
           </>

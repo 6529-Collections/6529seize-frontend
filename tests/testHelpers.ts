@@ -34,7 +34,6 @@ async function installStagingAccessUnlock(page: Page) {
   };
 
   page.goto = gotoWithAccessUnlock as Page["goto"];
-  await gotoWithAccessUnlock("/", { waitUntil: "domcontentloaded" });
 }
 
 async function seedStagingAccessCookie(

@@ -17,7 +17,7 @@ beforeEach(() => {
 });
 
 describe("CreateDropWaveWrapper", () => {
-  it("uses iOS max-height class", () => {
+  it("uses the layout viewport and keyboard inset for iOS max-height", () => {
     mockIos = true;
     const {
       CreateDropWaveWrapper,
@@ -28,7 +28,9 @@ describe("CreateDropWaveWrapper", () => {
       </CreateDropWaveWrapper>
     );
     const div = screen.getByText("child").parentElement as HTMLElement;
-    expect(div.className).toContain("tw-max-h-[calc(100vh-14.7rem)]");
+    expect(div.className).toContain(
+      "tw-max-h-[calc(var(--layout-viewport-height)-var(--native-keyboard-inset-bottom,0px)-14.7rem)]"
+    );
   });
 
   it("uses default classes when not ios", () => {

@@ -5,7 +5,6 @@ import type {
   ComponentPropsWithoutRef,
   ReactNode,
 } from "react";
-import styles from "./NextGenAdmin.module.css";
 
 const adminPrimaryButtonClassName =
   "tw-bg-[#267c93] tw-text-white hover:tw-bg-[#20697d]";
@@ -297,7 +296,7 @@ export function NextGenAdminHeadingRow(
           <b>{props.title.toUpperCase()}</b>
         </h3>
         <FontAwesomeIcon
-          className={styles["closeIcon"]}
+          className="tw-h-[30px] tw-cursor-pointer tw-text-white hover:tw-text-iron-200"
           icon={faTimesCircle}
           onClick={() => {
             props.close();
@@ -319,7 +318,6 @@ export function NextGenCollectionIdFormGroup(
     <Form.Group className="tw-mb-4">
       <Form.Label>Collection ID</Form.Label>
       <Form.Select
-        className={`${styles["formInput"]}`}
         value={props.collection_id}
         onChange={(e) => {
           props.onChange(e.target.value);

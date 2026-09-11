@@ -55,11 +55,7 @@ const getUnreadSubwaveDropsCount = (
     0
   );
 
-  if (wave.unreadFollowedSubwaveDrops > 0) {
-    return wave.unreadFollowedSubwaveDrops;
-  }
-
-  return loadedSubwaveUnreadCount;
+  return Math.max(wave.unreadSubwaveDrops, loadedSubwaveUnreadCount);
 };
 
 const normalizeParentIds = (value: unknown): readonly string[] => {
@@ -104,6 +100,21 @@ const writeExpansionState = (state: SidebarWaveTreeExpansionState) => {
   } catch {
     // Losing this preference is non-critical; route state still works.
   }
+};
+
+/**
+ * Parents the user left expanded (and did not later collapse), as persisted
+ * across a same-tab reload. Used to eagerly re-fetch their subwaves after a
+ * reload so the remembered expansion is visible again — expansion rendering
+ * requires the subwaves to be loaded, and they are otherwise only fetched on
+ * click.
+ */
+export const readPersistedExpandedParentIds = (): readonly string[] => {
+  const state = readExpansionState();
+  const collapsedParentIds = new Set(state.collapsedParentIds);
+  return state.expandedParentIds.filter(
+    (waveId) => !collapsedParentIds.has(waveId)
+  );
 };
 
 const buildSubwavesByParentId = (waves: readonly MinimalWave[]) => {
@@ -300,13 +311,15 @@ export function useSidebarWaveTree({
 
   const getIsExpanded = useCallback(
     (waveId: string) => {
+      if (resolvedActiveParentWaveId === waveId) {
+        return true;
+      }
+
       if (collapsedParentIds.has(waveId)) {
         return false;
       }
 
-      return (
-        expandedParentIds.has(waveId) || resolvedActiveParentWaveId === waveId
-      );
+      return expandedParentIds.has(waveId);
     },
     [collapsedParentIds, resolvedActiveParentWaveId, expandedParentIds]
   );
@@ -314,7 +327,7 @@ export function useSidebarWaveTree({
   const getHasUnreadSubwaves = useCallback(
     (wave: MinimalWave) =>
       !wave.isMuted &&
-      (wave.unreadFollowedSubwaveDrops > 0 ||
+      (wave.unreadSubwaveDrops > 0 ||
         (subwavesByParentId.get(wave.id) ?? []).some(hasUnreadDrops)),
     [subwavesByParentId]
   );

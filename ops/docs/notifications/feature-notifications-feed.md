@@ -6,7 +6,7 @@ Parent: [Notifications Index](README.md)
 
 `/notifications` is the My Stream activity feed for the connected profile.
 It resolves auth/profile prerequisites first, then shows a reverse-scroll list
-with cause filters, grouped reactions, and inline drop previews.
+with a multi-select cause filter, grouped reactions, and inline drop previews.
 
 ## Location in the Site
 
@@ -23,12 +23,17 @@ with cause filters, grouped reactions, and inline drop previews.
 
 ## Before Rows Render
 
-- Wallet missing: `Connect your wallet to view notifications.` with
-  `Reconnect wallet`.
+- Wallet session restoration or connection: a centered loading indicator
+  remains visible while the site restores an existing wallet in a new tab or
+  completes an active connect/reconnect attempt. The disconnected wallet prompt
+  is shown only after that process finishes without valid auth.
+- Wallet missing: `This content is only available to connected wallets.` with
+  `Connect your wallet to continue.` and the wallet connect action.
+- Wallet connected without a profile:
+  `You need to set up a profile to continue.` with
+  `Create a profile to access notifications.` and `Create profile`. The action
+  opens the connected wallet's profile setup route.
 - Profile loading: `Loading profile...`.
-- Handle resolution failure:
-  `We couldn't determine your profile handle. Please reconnect to continue.`
-  with `Reconnect wallet`.
 - Proxy profile active:
   `Notifications are not available while you are using a profile proxy.` with
   `Switch to primary profile`.
@@ -42,8 +47,32 @@ with cause filters, grouped reactions, and inline drop previews.
 
 ## Feed Filters
 
-- Cause filters are horizontal chips:
-  `All`, `Mentions`, `Replies`, `Identity`, `Reactions`, `Invites`.
+- On native iOS when the detected country is not `US` or is unknown, subscription
+  coverage alerts, the Subscriptions filter, and the device's Subscription
+  Coverage settings entry are hidden. Social follow notifications remain
+  available. This concerns the app feed and controls, not previously delivered
+  system push notifications.
+
+- The app header supplies the visible `Notifications` title. Desktop and mobile
+  web show the title beside the filter; the app keeps that page heading
+  available to screen readers without repeating it visually.
+- The filter presentation follows the app layout boundary:
+  - mobile-layout viewports open `Filter notifications` in a bottom sheet;
+  - wider viewports keep the compact anchored dropdown.
+- Both presentations support selecting multiple notification categories at
+  once and apply changes immediately. The mobile sheet stays open while users
+  combine categories and provides a visible close action.
+- The trigger defaults to `All`; one selected category shows its name, and
+  multiple selected categories show the selected count. Closing and reopening
+  the filter preserves the current selection. `All` clears category filters
+  and returns to the complete feed.
+- Escape from a desktop filter option closes the menu and returns keyboard
+  focus to the trigger.
+- The mobile sheet traps focus, blocks background feed interaction and
+  scrolling, supports Escape/backdrop/close-button dismissal, restores focus
+  to the trigger, scrolls internally on short viewports, and includes bottom
+  safe-area padding. Resizing across the layout boundary closes the active
+  presentation instead of opening a second filter surface.
 - Filter mapping:
   - `All`: all notification causes, including priority alerts, all-drops rows,
     and unknown causes.
@@ -51,20 +80,41 @@ with cause filters, grouped reactions, and inline drop previews.
   - `Replies`: reply notifications.
   - `Identity`: new followers and REP/NIC updates.
   - `Reactions`: voted, reacted, and boosted drop notifications.
-  - `Invites`: wave invite notifications.
+  - `Invites`: wave-created notifications, including standard waves the user
+    can access and direct-message waves started with the user.
+  - `Subscriptions`: coverage alerts as a profile moves into plan-a-top-up,
+    running-low, or action-required state.
 
 ## Row and Action Behavior
 
+- Notifications are separated by spacing, and timestamps use secondary emphasis.
+- Long profile names, wave names, rating categories, and fallback details wrap
+  within the row. Keyboard focus visibly identifies profile and wave links and
+  the `Show full drop` action.
 - Drop-linked rows show inline drop context with reply/quote actions.
+- Drop previews use the same solid dark card surface as My Stream and profile
+  streams. Wave names appear below the author.
 - Long drop previews can collapse and show `Show full drop`.
 - Repeated `DROP_REACTED` notifications on one drop are grouped into one
   `New reactions` row with grouped avatars and reaction badges.
 - Grouped reactions rows include batch follow action:
   `Follow All` or `Following All`.
+- Header actions stay beside notification text when both remain readable and
+  wrap below it when the available width is too narrow.
+- Multi-actor reaction summaries keep their heading at the row edge while the
+  batch action follows the same scan line as actor-notification actions.
 - Priority alerts show `sent a priority alert 🚨` as:
   - header-only rows (no related drop), or
   - header plus first related drop preview.
-- Invite rows can include both identity follow and wave follow controls.
+- Standard wave-created rows say the creator made a wave the user can access
+  and can include `Join wave` plus `Follow creator` controls.
+- Direct-message wave-created rows say the creator started a DM with the user
+  and expose `Open DM` instead of the wave join control.
+- Subscription coverage rows show the severity, consecutive funded runway,
+  funded-through or next-unfunded Meme context, an authoritative deadline when
+  available, and an exact minimum top-up action when supplied.
+- Coverage alerts are transition-based so routine balance recalculation does
+  not repeatedly nag the user without a meaningful risk-state change.
 - Unknown causes render a generic row (formatted cause/context) instead of
   failing feed render.
 
@@ -72,6 +122,9 @@ with cause filters, grouped reactions, and inline drop previews.
 
 - Opening `/notifications` marks notifications read for the active authenticated
   profile.
+- Rows still reported as unread show an `Unread` label and dot. A grouped
+  reaction row is unread while any of its notifications is unread. The label
+  disappears when refreshed notification data confirms they are read.
 - When the active identity changes (for example after account/profile switch),
   the feed query does not reuse previous-profile rows as placeholder data.
 - During switch-account handoff between already known connected accounts,
@@ -93,10 +146,33 @@ with cause filters, grouped reactions, and inline drop previews.
 ## Limits and Notes
 
 - Notifications are unavailable while users are in profile-proxy mode.
-- `PRIORITY_ALERT` and `ALL_DROPS` rows stay under `All` (no dedicated chip).
+- While the authenticated websocket is healthy, recipient-scoped invalidation
+  events refresh the active notification feed and unread indicators without
+  waiting for the previous 30-second poll. The event contains only the target
+  profile ID; notification rows remain REST-authoritative.
+- Connected secondary accounts subscribe with their own stored JWTs and refresh
+  only when the backend acknowledges those profile subscriptions.
+- REST polling remains as a 30-second active-profile / 15-second
+  connected-account fallback while realtime coverage is disconnected or
+  unconfirmed. Covered profiles use a five-minute REST reconciliation poll to
+  recover from any missed event.
+- `PRIORITY_ALERT` and `ALL_DROPS` rows stay under `All` (no dedicated filter).
 - Cause filters only affect `/notifications` results.
 - If auth expires, the page can trigger one re-auth request automatically after
   an unauthorized notifications error.
+
+### Localization fallback debt
+
+- Route or component: `/notifications` wallet connection loader.
+- Untranslated surface: the loader's accessible status label.
+- Current fallback behavior: all supported locales use the canonical `en-US`
+  `Loading notifications` status while this route has no local message family.
+- User impact: the loading state remains accessible and functional, but its
+  announcement is English-only.
+- Owner or follow-up issue: frontend i18n backlog.
+- Expected remediation path: move the notifications loading and recovery copy,
+  including accessible names, into one shared message family and verify its
+  fallback behavior across all supported locales.
 
 ## Related Pages
 

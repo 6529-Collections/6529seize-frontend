@@ -1,79 +1,142 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import NextGenTokenProvenance from '@/components/nextGen/collections/nextgenToken/NextGenTokenProvenance';
-import type { NextGenCollection } from '@/entities/INextgen';
+import NextGenTokenProvenance from "@/components/nextGen/collections/nextgenToken/NextGenTokenProvenance";
+import { NEXTGEN_CONTRACT } from "@/constants/constants";
+import type { NextGenCollection } from "@/entities/INextgen";
+import { commonApiFetch } from "@/services/api/common-api";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
-jest.mock('@/services/api/common-api', () => ({
-  commonApiFetch: jest.fn(),
+jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
+jest.mock("@/components/nft-market-activity/NftMarketActivity", () => ({
+  __esModule: true,
+  default: ({ contract, tokenId }: { contract: string; tokenId: string }) => (
+    <div
+      data-testid="nft-market-activity"
+      data-contract={contract}
+      data-token-id={tokenId}
+    />
+  ),
 }));
-
-jest.mock('@/components/latest-activity/LatestActivityRow', () => (props: any) => (
-  <tr data-testid="activity-row">{props.tr.id}</tr>
-));
-
-jest.mock('@/components/nextGen/collections/collectionParts/NextGenCollectionProvenance', () => ({
-  NextGenCollectionProvenanceRow: (props: any) => (
-    <div data-testid="log-row">{props.log.id}</div>
+jest.mock(
+  "@/components/nextGen/collections/collectionParts/NextGenCollectionProvenance",
+  () => ({
+    NextGenCollectionProvenanceRow: ({ log }: { log: { id: string } }) => (
+      <tr data-testid="log-row">
+        <td>{log.id}</td>
+      </tr>
+    ),
+  })
+);
+jest.mock("@/components/pagination/Pagination", () => ({
+  __esModule: true,
+  default: ({
+    page,
+    setPage,
+  }: {
+    page: number;
+    setPage: (page: number) => void;
+  }) => (
+    <button type="button" onClick={() => setPage(page + 1)}>
+      next
+    </button>
   ),
 }));
 
-jest.mock('@/components/pagination/Pagination', () => (props: any) => (
-  <div data-testid="pagination">
-    <button onClick={() => props.setPage(props.page + 1)}>next</button>
-  </div>
-));
+const mockFetch = commonApiFetch as jest.MockedFunction<typeof commonApiFetch>;
+const collection = { id: 1, name: "Test Collection" } as NextGenCollection;
+const log = { id: "l1", block: 1 };
 
-const { commonApiFetch } = require('@/services/api/common-api');
-
-const collection: NextGenCollection = { id: 1 } as any;
-const transaction = { id: 't1', from_address: 'a', to_address: 'b', transaction: 'tx', token_id: 7 } as any;
-const log = { id: 'l1', block: 1 } as any;
-
-function setup() {
-  (commonApiFetch as jest.Mock).mockResolvedValue({ count: 26, data: [transaction] });
-  return render(<NextGenTokenProvenance collection={collection} token_id={7} />);
-}
-
-describe('NextGenTokenProvenance', () => {
-  beforeEach(() => jest.clearAllMocks());
+describe("NextGenTokenProvenance", () => {
   beforeAll(() => {
-    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
       value: jest.fn(),
       configurable: true,
     });
   });
 
-  it('fetches provenance data and paginates', async () => {
-    setup();
-    expect(commonApiFetch.mock.calls[0][0]).toEqual({
-      endpoint: `nextgen/tokens/7/transactions?page_size=25&page=1`,
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockFetch.mockResolvedValue({ count: 26, data: [log] });
+  });
+
+  it("renders merged token activity and collection provenance", async () => {
+    render(<NextGenTokenProvenance collection={collection} token_id={7} />);
+
     expect(
-      commonApiFetch.mock.calls.some(
-        (c: any) => c[0].endpoint ===
-        `nextgen/collections/1/logs/7?page_size=25&page=1`
-      )
-    ).toBe(true);
-
-    await screen.findByTestId('activity-row');
-    await screen.findByTestId('log-row');
-
-    await userEvent.click(screen.getAllByText('next')[0]);
-    await userEvent.click(screen.getAllByText('next')[1]);
-
-    await waitFor(() => {
-      expect(
-        commonApiFetch.mock.calls.some(
-          (c: any) => c[0].endpoint ===
-          `nextgen/tokens/7/transactions?page_size=25&page=2`
-        )
-      ).toBe(true);
-      expect(
-        commonApiFetch.mock.calls.some(
-          (c: any) => c[0].endpoint ===
-          `nextgen/collections/1/logs/7?page_size=25&page=2`
-        )
-      ).toBe(true);
+      screen.getByRole("heading", { name: "Card Activity" })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("nft-market-activity")).toHaveAttribute(
+      "data-contract",
+      NEXTGEN_CONTRACT
+    );
+    expect(screen.getByTestId("nft-market-activity")).toHaveAttribute(
+      "data-token-id",
+      "7"
+    );
+    expect(await screen.findByTestId("log-row")).toHaveTextContent("l1");
+    expect(mockFetch).toHaveBeenCalledWith({
+      endpoint: "nextgen/collections/1/logs/7?page_size=25&page=1",
     });
+  });
+
+  it("paginates collection provenance independently", async () => {
+    render(<NextGenTokenProvenance collection={collection} token_id={7} />);
+    await screen.findByTestId("log-row");
+    await userEvent.click(screen.getByRole("button", { name: "next" }));
+
+    await waitFor(() =>
+      expect(mockFetch).toHaveBeenCalledWith({
+        endpoint: "nextgen/collections/1/logs/7?page_size=25&page=2",
+      })
+    );
+  });
+
+  it("ignores stale log responses after the token changes", async () => {
+    const resolvers: Record<string, (value: unknown) => void> = {};
+    mockFetch.mockImplementation(
+      ({ endpoint }) =>
+        new Promise((resolve) => {
+          resolvers[endpoint] = resolve;
+        })
+    );
+
+    const { rerender } = render(
+      <NextGenTokenProvenance collection={collection} token_id={7} />
+    );
+    rerender(
+      <NextGenTokenProvenance
+        collection={{ ...collection, id: 2 }}
+        token_id={8}
+      />
+    );
+
+    await act(async () => {
+      resolvers["nextgen/collections/2/logs/8?page_size=25&page=1"]?.({
+        count: 1,
+        data: [{ ...log, id: "l8" }],
+      });
+    });
+    expect(await screen.findByText("l8")).toBeInTheDocument();
+
+    await act(async () => {
+      resolvers["nextgen/collections/1/logs/7?page_size=25&page=1"]?.({
+        count: 1,
+        data: [{ ...log, id: "l7" }],
+      });
+    });
+    expect(screen.queryByText("l7")).not.toBeInTheDocument();
+  });
+
+  it("shows a retryable collection provenance error", async () => {
+    const consoleError = jest.spyOn(console, "error").mockImplementation();
+    mockFetch.mockRejectedValueOnce(new Error("offline"));
+    render(<NextGenTokenProvenance collection={collection} token_id={7} />);
+
+    expect(
+      await screen.findByText("Unable to load collection provenance.")
+    ).toBeInTheDocument();
+    mockFetch.mockResolvedValueOnce({ count: 1, data: [log] });
+    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(await screen.findByTestId("log-row")).toBeInTheDocument();
+    consoleError.mockRestore();
   });
 });

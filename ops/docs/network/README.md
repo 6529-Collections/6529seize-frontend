@@ -14,8 +14,8 @@ reference routes.
 - Utility route: `/network/prenodes`.
 - Group scope behavior: `/network` owns scope controls; `/network/activity`
   has no scope controls but can consume active group scope.
-- `/network/groups` behavior is owned by the Groups docs area. This area owns
-  the handoff into network-scoped views.
+- Saved groups can be searched, created, and applied inline from `/network`
+  `Filter`; there is no standalone Network Groups page.
 
 ## Features
 
@@ -55,8 +55,7 @@ reference routes.
 ## Related Areas
 
 - [Docs Home](../README.md)
-- [Groups Index](../groups/README.md)
-- [Groups List, Create, and Network Scope Flow](../groups/flow-groups-list-create-and-network-scope.md)
+- [Wave Creation Group Access and Permissions](../waves/create/feature-groups-step.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
 - [Profiles Index](../profiles/README.md)
 - [NFT Activity Feed](../realtime/feature-nft-activity-feed.md)

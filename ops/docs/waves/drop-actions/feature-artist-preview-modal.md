@@ -75,7 +75,7 @@ Badge state decides which section opens first.
   prevote-card lookups fail.
 - If no minted-memes cards are renderable, the modal shows `No minted memes
   found.`.
-- On desktop web, `Esc` does not close this modal.
+- On desktop web, `Esc` closes this modal.
 - Header subtitle is fixed to `The Memes Collection`.
 
 ## Failure and Recovery

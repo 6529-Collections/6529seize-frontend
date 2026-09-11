@@ -1,234 +1,165 @@
 "use client";
 
-import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
-import { NETWORK_REFERENCE_PAGE_CLASSES } from "@/components/network/networkPageLayoutClasses";
-import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
+import { useEffect } from "react";
+import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
+import {
+  NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
+  NETWORK_REFERENCE_PAGE_CLASSES,
+} from "@/components/network/networkPageLayoutClasses";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import TDHCalculationDetails from "./TDHCalculationDetails";
+import TDHCurrentRules from "./TDHCurrentRules";
+import TDHExample from "./TDHExample";
+import TDHProfile from "./TDHProfile";
+import TDHSection, { TDH_FOCUS, TDH_PANEL, TDH_TEXT } from "./TDHSection";
 
-const BUTTON_LINK_CLASSES =
-  "tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium tw-border-solid tw-border-[#222] hover:tw-bg-[#ddd] hover:tw-text-black tw-px-4 tw-py-2 tw-no-underline";
+const NAVIGATION = [
+  { id: "tdh-reference", key: "reference" },
+  { id: "tdh-example", key: "example" },
+  { id: "tdh-profile", key: "profile" },
+  { id: "tdh-1-4", key: "rules" },
+  { id: "tdh-exact", key: "details" },
+] as const;
+const STEPS = ["days", "weight", "boost"] as const;
+const RELATED = [
+  { href: "/network/health/network-tdh", key: "stats" },
+  { href: "/network/levels", key: "levels" },
+] as const;
 
 export default function TDHMainPage() {
-  useSetTitle("TDH | Network");
+  const locale = useBrowserLocale();
+  useSetTitle(t(locale, "network.tdh.explainer.pageTitle"));
+
+  useEffect(() => {
+    const focusAnchor = () => {
+      const id = globalThis.location.hash.slice(1);
+      if (!NAVIGATION.some((item) => item.id === id)) return;
+      globalThis.requestAnimationFrame(() => {
+        globalThis.document
+          .getElementById(id)
+          ?.scrollIntoView({ block: "start" });
+        globalThis.document
+          .getElementById(`${id}-heading`)
+          ?.focus({ preventScroll: true });
+      });
+    };
+    focusAnchor();
+    globalThis.addEventListener("hashchange", focusAnchor);
+    return () => globalThis.removeEventListener("hashchange", focusAnchor);
+  }, []);
 
   return (
-    <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
-      <AboutContentsDropdown currentHref="/network/tdh" />
-      <h1>TDH</h1>
-      <p className="tw-mt-2">
-        TDH (Total Days Held) is our time-weighted holding metric. Each NFT you
-        hold contributes its days-held to your total. We then multiply by
-        edition-size weights and apply collection &quot;boosters&quot; based on
-        what you hold.
-      </p>
-
-      <div className="tw-mt-8 tw-space-y-2">
-        <h2>How TDH is computed</h2>
-        <ol className="tw-ml-6 tw-list-decimal tw-space-y-2">
-          <li>
-            <span className="tw-font-medium">Unweighted days:</span> each NFT
-            contributes 1 per day it&apos;s held.
-          </li>
-          <li>
-            <span className="tw-font-medium">Edition weighting:</span> we scale
-            by edition size with FirstGM (3,941) as 1.
-            <br />
-            Examples:
-            <ul className="tw-ml-6 tw-list-disc tw-space-y-1">
-              <li>SeizingJPG (Edition Size 1,000) = 3.941</li>
-              <li>Nakamoto Freedom (Edition Size 300) = 13.136</li>
-              <li>Gradients (Edition Size 101) = 39.020</li>
-            </ul>
-          </li>
-          <li>
-            <span className="tw-font-medium">Boosts:</span> we multiply by the{" "}
-            <span className="tw-font-medium">higher</span> of Category A or B,
-            then add Category C. (Details below.)
-          </li>
-        </ol>
-        <p className="tw-pt-3">* Calculated daily at 00:00 UTC.</p>
-      </div>
-
-      {/* TDH 1.4 */}
-      <div
-        id="tdh-1-4"
-        className="tw-mt-10 tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#222] tw-bg-[#0c0c0d] tw-p-6"
-      >
-        <h3>TDH 1.4 (October 10, 2025 — present)</h3>
-        <p className="tw-mt-4">
-          Higher of <b>Category A</b> and <b>Category B</b> boosters, plus{" "}
-          <b>Category C</b> boosters.
-        </p>
-
-        <div className="tw-mt-6">
-          <h4>Category A</h4>
-          <ul className="tw-ml-6 tw-list-disc tw-space-y-1">
-            <li>
-              A complete set of all Meme Cards:{" "}
-              <span className="tw-font-mono tw-font-medium">1.60x</span>
-            </li>
-          </ul>
-
-          <p className="tw-mt-3">
-            Additional complete sets add to the <b>total TDH</b> (no cap):
+    <div className={NETWORK_REFERENCE_PAGE_CLASSES}>
+      <AboutContentsDropdown
+        className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
+        currentHref="/network/tdh"
+        desktopFlush
+        withDivider
+      />
+      <article className="tw-mx-auto tw-max-w-6xl tw-pb-8 tw-pt-7 sm:tw-pt-10">
+        <header className="tw-pb-8 sm:tw-pb-10">
+          <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
+            {t(locale, "network.tdh.explainer.title")}
+          </h1>
+          <p className="tw-mb-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-200">
+            {t(locale, "network.tdh.explainer.intro")}
           </p>
-          <p className="tw-mt-1">
-            Additional Set Boost ={" "}
-            <span className="tw-font-mono tw-font-medium">
-              0.05 &times; (0.6529)<sup>(n-1)</sup>
-            </span>
+          <p className={`${TDH_TEXT} tw-mt-3 tw-max-w-3xl`}>
+            {t(locale, "network.tdh.explainer.eligible")}
           </p>
-          <div className="tw-mt-2">
-            <p className="tw-font-medium">Examples:</p>
-            <ul className="tw-ml-6 tw-space-y-1">
-              <li>
-                1st additional set:{" "}
-                <span className="tw-font-mono tw-font-medium">0.05</span>
-              </li>
-              <li>
-                2nd additional set:{" "}
-                <span className="tw-font-mono tw-font-medium">
-                  0.05 &times; 0.6529 = 0.032645
-                </span>
-              </li>
-              <li>
-                3rd additional set:{" "}
-                <span className="tw-font-mono tw-font-medium">
-                  0.05 &times; 0.6529<sup>2</sup> = 0.021314
-                </span>
-              </li>
-              <li>
-                5th additional set:{" "}
-                <span className="tw-font-mono tw-font-medium">
-                  0.05 &times; 0.6529<sup>4</sup> = 0.009086
-                </span>
-              </li>
-              <li>
-                10th additional set:{" "}
-                <span className="tw-font-mono tw-font-medium">
-                  0.05 &times; 0.6529<sup>9</sup> = 0.001078
-                </span>
-              </li>
-            </ul>
+          <nav
+            aria-label={t(locale, "network.tdh.explainer.nav")}
+            className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-2"
+          >
+            {NAVIGATION.map(({ id, key }) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                className={`tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3 tw-py-2.5 tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline hover:tw-bg-iron-800 hover:tw-text-iron-50 ${TDH_FOCUS}`}
+              >
+                {t(locale, `network.tdh.explainer.nav.${key}`)}
+              </a>
+            ))}
+          </nav>
+        </header>
+        <TDHSection
+          id="tdh-reference"
+          title={t(locale, "network.tdh.explainer.reference.title")}
+        >
+          <div className={`${TDH_PANEL} tw-space-y-4 tw-p-5`}>
+            <p className={TDH_TEXT}>
+              {t(locale, "network.tdh.explainer.reference.body")}
+            </p>
+            <p className="tw-m-0 tw-font-mono tw-text-base tw-font-medium tw-leading-7 tw-text-iron-100">
+              {t(locale, "network.tdh.explainer.reference.unit")}
+            </p>
+            <p className={TDH_TEXT}>
+              {t(locale, "network.tdh.explainer.reference.weight")}
+            </p>
           </div>
-          <p className="tw-mt-3">
-            Maximum theoretical Category A boost (infinite sets):{" "}
-            <span className="tw-font-mono">
-              {"0.60 + 0.05 / (1 - 0.6529) = 0.744051"}
+        </TDHSection>
+        <HowTDHWorks locale={locale} />
+        <TDHExample locale={locale} />
+        <TDHProfile locale={locale} />
+        <TDHCurrentRules locale={locale} />
+        <TDHCalculationDetails locale={locale} />
+        <TDHSection
+          id="tdh-explore"
+          title={t(locale, "network.tdh.explainer.related")}
+        >
+          <div className="tw-grid tw-gap-4 sm:tw-grid-cols-2">
+            {RELATED.map(({ href, key }) => (
+              <Link
+                key={href}
+                href={href}
+                className={`${TDH_PANEL} tw-block tw-p-5 tw-no-underline hover:tw-border-iron-600 ${TDH_FOCUS}`}
+              >
+                <span className="tw-block tw-text-base tw-font-medium tw-text-iron-100">
+                  {t(locale, `network.tdh.related.${key}.title`)}
+                </span>
+                <span className="tw-mt-2 tw-block tw-text-sm tw-leading-6 tw-text-iron-400">
+                  {t(locale, `network.tdh.related.${key}.description`)}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </TDHSection>
+      </article>
+    </div>
+  );
+}
+
+function HowTDHWorks({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <TDHSection id="tdh-how" title={t(locale, "network.tdh.explainer.how")}>
+      <ol className="tw-m-0 tw-list-none tw-space-y-6 tw-p-0">
+        {STEPS.map((step, index) => (
+          <li
+            key={step}
+            className="tw-grid tw-grid-cols-[2rem_minmax(0,1fr)] tw-gap-3"
+          >
+            <span className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-sm tw-font-medium tw-text-iron-200">
+              {formatInteger(locale, index + 1)}
             </span>
-          </p>
-        </div>
-
-        <div className="tw-mt-8">
-          <h4>Category B</h4>
-          <p className="tw-mt-1">
-            Applied to the <b>total TDH</b>, not just that season&apos;s TDH:
-          </p>
-          <ul className="tw-ml-6 tw-space-y-1">
-            <li>
-              SZN1:
-              <ul className="tw-ml-4 tw-space-y-1">
-                <li>
-                  Complete Set:{" "}
-                  <span className="tw-font-mono tw-font-medium">1.05x</span> or
-                </li>
-                <li>
-                  Genesis Set:{" "}
-                  <span className="tw-font-mono tw-font-medium">1.01x</span> and
-                </li>
-                <li>
-                  Nakamoto Set:{" "}
-                  <span className="tw-font-mono tw-font-medium">1.01x</span>
-                </li>
-              </ul>
-            </li>
-            <li>
-              SZN2: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN3: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN4: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN5: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN6: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN7: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN8: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN9: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN10: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN11: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-            <li>
-              SZN12: <span className="tw-font-mono tw-font-medium">1.05x</span>
-            </li>
-          </ul>
-        </div>
-
-        <div className="tw-mt-8">
-          <h4>Category C</h4>
-          <ul className="tw-ml-6 tw-space-y-1">
-            <li>
-              Gradient:{" "}
-              <span className="tw-font-mono tw-font-medium">1.02x</span> per
-              Gradient (up to a maximum of{" "}
-              <span className="tw-font-mono tw-font-medium">5</span>)
-            </li>
-          </ul>
-        </div>
-
-        <div className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-3">
-          <Link
-            href="/network/tdh/historic-boosts"
-            className={BUTTON_LINK_CLASSES}
-          >
-            View Historic Boosts
-          </Link>
-          <Link href="/network/definitions" className={BUTTON_LINK_CLASSES}>
-            Definitions
-          </Link>
-        </div>
-      </div>
-
-      {/* Cross-links */}
-      <div className="tw-mt-10 tw-grid tw-gap-6 md:tw-grid-cols-2">
-        <div className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#222] tw-bg-[#0c0c0d] tw-p-6">
-          <h3>Network TDH Stats</h3>
-          <p className="tw-mt-1">
-            Aggregate community activity, holdings, trading, and time-based
-            metrics across the network.
-          </p>
-          <Link
-            href="/network/health/network-tdh"
-            className={BUTTON_LINK_CLASSES}
-          >
-            View Network TDH Stats
-          </Link>
-        </div>
-        <div className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-[#222] tw-bg-[#0c0c0d] tw-p-6">
-          <h3>Levels</h3>
-          <p className="tw-mt-1">
-            Our integrated progression that combines <b>TDH</b> with <b>Rep</b>{" "}
-            (peer-given reputation points).
-          </p>
-          <Link href="/network/levels" className={BUTTON_LINK_CLASSES}>
-            View Levels
-          </Link>
-        </div>
-      </div>
-    </main>
+            <div>
+              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-7 tw-text-iron-100">
+                {t(locale, `network.tdh.explainer.step.${step}.title`)}
+              </h3>
+              <p className={`${TDH_TEXT} tw-mt-1`}>
+                {t(locale, `network.tdh.explainer.step.${step}.body`)}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <p className="tw-mb-0 tw-mt-6 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+        {t(locale, "network.tdh.explainer.snapshot")}
+      </p>
+    </TDHSection>
   );
 }

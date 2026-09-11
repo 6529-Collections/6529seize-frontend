@@ -5,7 +5,8 @@ import { ActiveDropAction } from '@/types/dropInteractionTypes';
 
 jest.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: any) => <div>{children}</div>,
-  motion: { div: ({ children, ...p }: any) => <div {...p}>{children}</div> }
+  motion: { div: ({ children, ...p }: any) => <div {...p}>{children}</div> },
+  useReducedMotion: () => false
 }));
 
 jest.mock('@/components/waves/CreateDropReplying', () => ({ __esModule: true, default: (p: any) => <div data-testid="child" data-disabled={p.disabled} /> }));

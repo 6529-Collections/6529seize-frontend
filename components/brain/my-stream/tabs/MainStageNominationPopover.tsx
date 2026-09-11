@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, type ReactElement, type ReactNode } from "react";
-import Link from "next/link";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
 import PermissionIcon from "@/components/utils/icons/PermissionIcon";
 import CircleLoader, {
@@ -37,15 +37,15 @@ function RepStatusCard({
   return (
     <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/5 tw-p-4">
       {title && (
-        <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-tracking-wider tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-0 tw-text-xs tw-font-semibold tw-tracking-wider tw-text-iron-400">
           {title}
         </p>
       )}
       <p
         className={
           title
-            ? "tw-mb-0 tw-mt-2 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-500"
-            : "tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400"
+            ? "tw-mb-0 tw-mt-2 tw-text-pretty tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-500"
+            : "tw-mb-0 tw-mt-0 tw-text-pretty tw-text-xs tw-font-medium tw-text-iron-400"
         }
       >
         {children}
@@ -183,11 +183,11 @@ function MainStageNominationPopoverContent() {
     useMemesNomineeProgress();
 
   return (
-    <div className="tw-w-[min(88vw,20rem)]">
+    <div className="tw-w-[min(88vw,20rem)] tw-pt-1">
       <div className="tw-mb-5 tw-flex tw-flex-col tw-items-start">
         <div className="tw-mb-2 tw-flex tw-items-center tw-gap-2">
           <PermissionIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400" />
-          <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100">
+          <p className="tw-mb-0 tw-mt-0 tw-text-sm tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100">
             Unlock submissions
           </p>
         </div>
@@ -208,13 +208,15 @@ function MainStageNominationPopoverContent() {
         />
       </div>
 
-      <Link
+      <ButtonLink
         href={SEEKING_NOMINATION_ROUTE}
-        className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-white tw-no-underline tw-shadow-sm tw-ring-1 tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 desktop-hover:hover:tw-border-primary-600 desktop-hover:hover:tw-bg-primary-600 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-ring-primary-600"
+        variant="action"
+        size="sm"
+        fullWidth
       >
         Get nominated
         <ArrowRightIcon className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-opacity-70" />
-      </Link>
+      </ButtonLink>
     </div>
   );
 }
@@ -231,6 +233,7 @@ export default function MainStageNominationPopover({
       delayHide={0}
       offset={12}
       openOnClick={true}
+      triggerDisplay="inline-flex"
     >
       {children}
     </HoverCard>

@@ -1,0 +1,3005 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x8835d324",
+          "declaringDefinitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuctionCancellationBeforeArrngFulfillmentPreservesPosterAndRequestBinding",
+          "outputs": [],
+          "selector": "0x8835d324",
+          "signature": "testAuctionCancellationBeforeArrngFulfillmentPreservesPosterAndRequestBinding()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x8d13492f",
+          "declaringDefinitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuctionDropPendingArrngRequestBlocksRandomizerMigrationWithoutAuctionDrift",
+          "outputs": [],
+          "selector": "0x8d13492f",
+          "signature": "testAuctionDropPendingArrngRequestBlocksRandomizerMigrationWithoutAuctionDrift()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x498d10ae",
+          "declaringDefinitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuctionNoBidSettlementBeforeArrngFulfillmentPreservesPosterAndRequestBinding",
+          "outputs": [],
+          "selector": "0x498d10ae",
+          "signature": "testAuctionNoBidSettlementBeforeArrngFulfillmentPreservesPosterAndRequestBinding()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x1b430a57",
+          "declaringDefinitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuctionSettlementBeforeArrngFulfillmentPreservesWinnerCreditsAndRequestBinding",
+          "outputs": [],
+          "selector": "0x1b430a57",
+          "signature": "testAuctionSettlementBeforeArrngFulfillmentPreservesWinnerCreditsAndRequestBinding()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x26a5f683",
+          "declaringDefinitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testBurnedSettledAuctionPendingArrngFulfillmentPreservesProceedsAndFreeze",
+          "outputs": [],
+          "selector": "0x26a5f683",
+          "signature": "testBurnedSettledAuctionPendingArrngFulfillmentPreservesProceedsAndFreeze()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0xe89f9d44",
+          "declaringDefinitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCancelledAuctionAuthorizationDoesNotMintRegisterAuctionOrRequestRandomness",
+          "outputs": [],
+          "selector": "0xe89f9d44",
+          "signature": "testCancelledAuctionAuthorizationDoesNotMintRegisterAuctionOrRequestRandomness()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0xb36083ee",
+          "declaringDefinitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testContractPosterNoBidPendingClaimSurvivesArrngFulfillmentAndCompletes",
+          "outputs": [],
+          "selector": "0xb36083ee",
+          "signature": "testContractPosterNoBidPendingClaimSurvivesArrngFulfillmentAndCompletes()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0xdfd00b20",
+          "declaringDefinitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDuplicateArrngRequestIdRejectsAuctionDropWithoutConsumingOrRegistering",
+          "outputs": [],
+          "selector": "0xdfd00b20",
+          "signature": "testDuplicateArrngRequestIdRejectsAuctionDropWithoutConsumingOrRegistering()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x7d0d4552",
+          "declaringDefinitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPausedRandomnessRequestRejectsAuctionDropWithoutConsumingAuthorization",
+          "outputs": [],
+          "selector": "0x7d0d4552",
+          "signature": "testPausedRandomnessRequestRejectsAuctionDropWithoutConsumingAuthorization()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x6748ed0e",
+          "declaringDefinitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPostExecutionSignerEpochCannotReplayCancelOrBreakAuctionLifecycle",
+          "outputs": [],
+          "selector": "0x6748ed0e",
+          "signature": "testPostExecutionSignerEpochCannotReplayCancelOrBreakAuctionLifecycle()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0xf48ad930",
+          "declaringDefinitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSignerRotationAndDropPauseAfterAuctionDropDoNotBlockExistingLifecycle",
+          "outputs": [],
+          "selector": "0xf48ad930",
+          "signature": "testSignerRotationAndDropPauseAfterAuctionDropDoNotBlockExistingLifecycle()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testPausedRandomnessRequestRejectsAuctionDropWithoutConsumingAuthorization()",
+          "displaySignature": "testPausedRandomnessRequestRejectsAuctionDropWithoutConsumingAuthorization()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x7d0d4552",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4N2QwZDQ1NTI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPausedRandomnessRequestRejectsAuctionDropWithoutConsumingAuthorization",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2638,
+            "byteStart": 3161,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L80-L118",
+            "lineEnd": 118,
+            "lineStart": 80,
+            "snippetSha256": "sha256:5ec90d381b0d7a9d4fcf2359f1b2657ab8f8bee3a2ca785e23f4701f056942f0",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": "0x7d0d4552",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuctionDropPendingArrngRequestBlocksRandomizerMigrationWithoutAuctionDrift()",
+          "displaySignature": "testAuctionDropPendingArrngRequestBlocksRandomizerMigrationWithoutAuctionDrift()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x8d13492f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4OGQxMzQ5MmY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuctionDropPendingArrngRequestBlocksRandomizerMigrationWithoutAuctionDrift",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1163,
+            "byteStart": 5805,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L120-L144",
+            "lineEnd": 144,
+            "lineStart": 120,
+            "snippetSha256": "sha256:f2106139bc370c32b92696a7ce97c0b72b07e2882cf8b9e7f3ec9c2c58b15fd4",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": "0x8d13492f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuctionSettlementBeforeArrngFulfillmentPreservesWinnerCreditsAndRequestBinding()",
+          "displaySignature": "testAuctionSettlementBeforeArrngFulfillmentPreservesWinnerCreditsAndRequestBinding()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x1b430a57",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4MWI0MzBhNTc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuctionSettlementBeforeArrngFulfillmentPreservesWinnerCreditsAndRequestBinding",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1570,
+            "byteStart": 6974,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L146-L173",
+            "lineEnd": 173,
+            "lineStart": 146,
+            "snippetSha256": "sha256:9d8bc508cebc5f06e133770ac9921e9ba2af14ea1298aff0cac0de1b0ac390b4",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": "0x1b430a57",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuctionNoBidSettlementBeforeArrngFulfillmentPreservesPosterAndRequestBinding()",
+          "displaySignature": "testAuctionNoBidSettlementBeforeArrngFulfillmentPreservesPosterAndRequestBinding()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x498d10ae",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4NDk4ZDEwYWU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuctionNoBidSettlementBeforeArrngFulfillmentPreservesPosterAndRequestBinding",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2368,
+            "byteStart": 8550,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L175-L215",
+            "lineEnd": 215,
+            "lineStart": 175,
+            "snippetSha256": "sha256:c2ed8beef3a520d095949424342f44168482ad222d7a7969bd5521837cd6d314",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": "0x498d10ae",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testContractPosterNoBidPendingClaimSurvivesArrngFulfillmentAndCompletes()",
+          "displaySignature": "testContractPosterNoBidPendingClaimSurvivesArrngFulfillmentAndCompletes()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0xb36083ee",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4YjM2MDgzZWU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testContractPosterNoBidPendingClaimSurvivesArrngFulfillmentAndCompletes",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2799,
+            "byteStart": 10924,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L217-L260",
+            "lineEnd": 260,
+            "lineStart": 217,
+            "snippetSha256": "sha256:fedcf89673f9dc4576a005cce956d6069991c3d05f16fea0e42c37a829fb98dd",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": "0xb36083ee",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuctionCancellationBeforeArrngFulfillmentPreservesPosterAndRequestBinding()",
+          "displaySignature": "testAuctionCancellationBeforeArrngFulfillmentPreservesPosterAndRequestBinding()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x8835d324",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4ODgzNWQzMjQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuctionCancellationBeforeArrngFulfillmentPreservesPosterAndRequestBinding",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2717,
+            "byteStart": 13729,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L262-L313",
+            "lineEnd": 313,
+            "lineStart": 262,
+            "snippetSha256": "sha256:c16127bf54670620610e819311c1cb630c654c10384091d4bef3c2fd6345cbc2",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": "0x8835d324",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCancelledAuctionAuthorizationDoesNotMintRegisterAuctionOrRequestRandomness()",
+          "displaySignature": "testCancelledAuctionAuthorizationDoesNotMintRegisterAuctionOrRequestRandomness()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0xe89f9d44",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4ZTg5ZjlkNDQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCancelledAuctionAuthorizationDoesNotMintRegisterAuctionOrRequestRandomness",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2114,
+            "byteStart": 16452,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L315-L345",
+            "lineEnd": 345,
+            "lineStart": 315,
+            "snippetSha256": "sha256:91785cb77867aaa76c556f15bdefca7d5b932626005fa79e506ff49a0346b4cf",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": "0xe89f9d44",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDuplicateArrngRequestIdRejectsAuctionDropWithoutConsumingOrRegistering()",
+          "displaySignature": "testDuplicateArrngRequestIdRejectsAuctionDropWithoutConsumingOrRegistering()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0xdfd00b20",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4ZGZkMDBiMjA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDuplicateArrngRequestIdRejectsAuctionDropWithoutConsumingOrRegistering",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3362,
+            "byteStart": 18572,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L347-L397",
+            "lineEnd": 397,
+            "lineStart": 347,
+            "snippetSha256": "sha256:9fe5bf5b1a34dd6b64c9531e4f97cb4e2dc92b7c233bbe0e49a4211c188d0142",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": "0xdfd00b20",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testBurnedSettledAuctionPendingArrngFulfillmentPreservesProceedsAndFreeze()",
+          "displaySignature": "testBurnedSettledAuctionPendingArrngFulfillmentPreservesProceedsAndFreeze()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x26a5f683",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4MjZhNWY2ODM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testBurnedSettledAuctionPendingArrngFulfillmentPreservesProceedsAndFreeze",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3100,
+            "byteStart": 21940,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L399-L449",
+            "lineEnd": 449,
+            "lineStart": 399,
+            "snippetSha256": "sha256:06691e6c93821139c9919a9a1a39a1ad308af22474a4ba7f245c367259c9a132",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": "0x26a5f683",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPostExecutionSignerEpochCannotReplayCancelOrBreakAuctionLifecycle()",
+          "displaySignature": "testPostExecutionSignerEpochCannotReplayCancelOrBreakAuctionLifecycle()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x6748ed0e",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4Njc0OGVkMGU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPostExecutionSignerEpochCannotReplayCancelOrBreakAuctionLifecycle",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2292,
+            "byteStart": 25046,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L451-L491",
+            "lineEnd": 491,
+            "lineStart": 451,
+            "snippetSha256": "sha256:7c7acf6212ca4f746407f336aef213c4292e9f51842765f3e50f2c371a8f951c",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": "0x6748ed0e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSignerRotationAndDropPauseAfterAuctionDropDoNotBlockExistingLifecycle()",
+          "displaySignature": "testSignerRotationAndDropPauseAfterAuctionDropDoNotBlockExistingLifecycle()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0xf48ad930",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4ZjQ4YWQ5MzA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSignerRotationAndDropPauseAfterAuctionDropDoNotBlockExistingLifecycle",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2205,
+            "byteStart": 27344,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L493-L531",
+            "lineEnd": 531,
+            "lineStart": 493,
+            "snippetSha256": "sha256:ebb2abf5852f27ec2da894b241637e358d84077037dcb4dc9902853c5eba6bc4",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": "0xf48ad930",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deployComposition()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_deployComposition()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9kZXBsb3lDb21wb3NpdGlvbigp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deployComposition",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            }
+          ],
+          "range": {
+            "byteLength": 913,
+            "byteStart": 29555,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L533-L550",
+            "lineEnd": 550,
+            "lineStart": 533,
+            "snippetSha256": "sha256:8320f4dd01e5758b506ba3bf1caea53c552d8a9b519526cca3fc10bb09b77fad",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintAuctionDrop(CompositionSetup,string,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_mintAuctionDrop(CompositionSetup,string,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "nonce",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9taW50QXVjdGlvbkRyb3AoQ29tcG9zaXRpb25TZXR1cCxzdHJpbmcsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintAuctionDrop",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "auctionEndTime",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 400,
+            "byteStart": 30474,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L552-L562",
+            "lineEnd": 562,
+            "lineStart": 552,
+            "snippetSha256": "sha256:049ca8347e8f4fdc0fe7d209896cdabb585dd7fd883ab278edf4a27b76b13996",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintAuctionDropForPoster(CompositionSetup,address,string,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_mintAuctionDropForPoster(CompositionSetup,address,string,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "poster",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 3,
+              "name": "nonce",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9taW50QXVjdGlvbkRyb3BGb3JQb3N0ZXIoQ29tcG9zaXRpb25TZXR1cCxhZGRyZXNzLHN0cmluZyx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintAuctionDropForPoster",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "auctionEndTime",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 480,
+            "byteStart": 30880,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L564-L579",
+            "lineEnd": 579,
+            "lineStart": 564,
+            "snippetSha256": "sha256:a3aeafcc49a3f62d462d4183e38a79da8ec5d45170e6408cd8b199c4960e6adc",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintAuctionDropWithSignature(CompositionSetup,string,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_mintAuctionDropWithSignature(CompositionSetup,string,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "nonce",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9taW50QXVjdGlvbkRyb3BXaXRoU2lnbmF0dXJlKENvbXBvc2l0aW9uU2V0dXAsc3RyaW5nLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintAuctionDropWithSignature",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "auctionEndTime",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 447,
+            "byteStart": 31366,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L581-L595",
+            "lineEnd": 595,
+            "lineStart": 581,
+            "snippetSha256": "sha256:c9ea1495f5a6c96b00d2aa8ed3d1219703179bde47a83ba8046647493397d9b6",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintAuctionDropWithSignatureForPoster(CompositionSetup,address,string,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_mintAuctionDropWithSignatureForPoster(CompositionSetup,address,string,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "poster",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 3,
+              "name": "nonce",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9taW50QXVjdGlvbkRyb3BXaXRoU2lnbmF0dXJlRm9yUG9zdGVyKENvbXBvc2l0aW9uU2V0dXAsYWRkcmVzcyxzdHJpbmcsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintAuctionDropWithSignatureForPoster",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "auctionEndTime",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 1250,
+            "byteStart": 31819,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L597-L625",
+            "lineEnd": 625,
+            "lineStart": 597,
+            "snippetSha256": "sha256:e643da39248dcc6331417b0419eb35a239b814497a59f93517fc13044a0a6ab2",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_buildSignedAuctionAuthorization(CompositionSetup,string,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_buildSignedAuctionAuthorization(CompositionSetup,string,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "auctionEndTime",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9idWlsZFNpZ25lZEF1Y3Rpb25BdXRob3JpemF0aW9uKENvbXBvc2l0aW9uU2V0dXAsc3RyaW5nLHVpbnQyNTYsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_buildSignedAuctionAuthorization",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 404,
+            "byteStart": 33075,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L627-L636",
+            "lineEnd": 636,
+            "lineStart": 627,
+            "snippetSha256": "sha256:f64c047560b69ca89335be198331c3924eec41aedb15df9b9329ae8e6dd464fa",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_buildSignedAuctionAuthorizationForPoster(CompositionSetup,address,string,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_buildSignedAuctionAuthorizationForPoster(CompositionSetup,address,string,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "poster",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 3,
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "auctionEndTime",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9idWlsZFNpZ25lZEF1Y3Rpb25BdXRob3JpemF0aW9uRm9yUG9zdGVyKENvbXBvc2l0aW9uU2V0dXAsYWRkcmVzcyxzdHJpbmcsdWludDI1Nix1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_buildSignedAuctionAuthorizationForPoster",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 704,
+            "byteStart": 33485,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L638-L658",
+            "lineEnd": 658,
+            "lineStart": 638,
+            "snippetSha256": "sha256:490edf60f71e73202e943bfe713ff013c836b740d3ab4fac27b5041ff754875e",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_bid(StreamAuctions,uint256,address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_bid(StreamAuctions,uint256,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "auctions",
+              "type": "StreamAuctions"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "bidder",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9iaWQoU3RyZWFtQXVjdGlvbnMsdWludDI1NixhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_bid",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 447,
+            "byteStart": 34195,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L660-L669",
+            "lineEnd": 669,
+            "lineStart": 660,
+            "snippetSha256": "sha256:a0e17565e0df7582ae22a08302cf8bbe9a20e43d2f57dc4bd52d60677fc9ff11",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setPaused(CompositionSetup,bytes32,bool)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_setPaused(CompositionSetup,bytes32,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "domain",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "paused",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9zZXRQYXVzZWQoQ29tcG9zaXRpb25TZXR1cCxieXRlczMyLGJvb2wp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setPaused",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 378,
+            "byteStart": 34648,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L671-L678",
+            "lineEnd": 678,
+            "lineStart": 671,
+            "snippetSha256": "sha256:5fd80036824f8b3b6e8a888b4f9fcb42ccd8b384b6cdd56ef3437bc3bc400730",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_snapshot(CompositionSetup,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_snapshot(CompositionSetup,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9zbmFwc2hvdChDb21wb3NpdGlvblNldHVwLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_snapshot",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "snapshot",
+              "storageLocation": "memory",
+              "type": "AuctionSnapshot"
+            }
+          ],
+          "range": {
+            "byteLength": 1449,
+            "byteStart": 35032,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L680-L705",
+            "lineEnd": 705,
+            "lineStart": 680,
+            "snippetSha256": "sha256:c96a46e4b715952424b5afbc25d6e40894705b75bd850b0b9d16ae0fe73666a1",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_snapshotAuctionAccounting(CompositionSetup)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_snapshotAuctionAccounting(CompositionSetup)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9zbmFwc2hvdEF1Y3Rpb25BY2NvdW50aW5nKENvbXBvc2l0aW9uU2V0dXAp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_snapshotAuctionAccounting",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "snapshot",
+              "storageLocation": "memory",
+              "type": "AuctionAccountingSnapshot"
+            }
+          ],
+          "range": {
+            "byteLength": 633,
+            "byteStart": 36487,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L707-L720",
+            "lineEnd": 720,
+            "lineStart": 707,
+            "snippetSha256": "sha256:5ad83e7376c69658549fc9f92d27c80a4f087606086e3bf8c5089de34a36c1b8",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_fulfillRandomnessAndAssertBinding(CompositionSetup,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_fulfillRandomnessAndAssertBinding(CompositionSetup,uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "word",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9mdWxmaWxsUmFuZG9tbmVzc0FuZEFzc2VydEJpbmRpbmcoQ29tcG9zaXRpb25TZXR1cCx1aW50MjU2LHVpbnQyNTYsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_fulfillRandomnessAndAssertBinding",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "expectedSeed",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 1473,
+            "byteStart": 37126,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L722-L748",
+            "lineEnd": 748,
+            "lineStart": 722,
+            "snippetSha256": "sha256:9e171ed11003ab4ee09ca66a2e2c0009b7a524c2b18cab565297e6f2582a843e",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertBurnedAudit(CompositionSetup,uint256,address,bytes32,bytes32,bool)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_assertBurnedAudit(CompositionSetup,uint256,address,bytes32,bytes32,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "tokenHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "postBurnRandomnessHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "postBurnRecorded",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9hc3NlcnRCdXJuZWRBdWRpdChDb21wb3NpdGlvblNldHVwLHVpbnQyNTYsYWRkcmVzcyxieXRlczMyLGJ5dGVzMzIsYm9vbCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertBurnedAudit",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1813,
+            "byteStart": 38605,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L750-L794",
+            "lineEnd": 794,
+            "lineStart": 750,
+            "snippetSha256": "sha256:b281109989a293186fc331dbeb218fc752833a6565879bdbb6f77f4892c8019b",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_warpPastFinalSupplyWindow()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_warpPastFinalSupplyWindow()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl93YXJwUGFzdEZpbmFsU3VwcGx5V2luZG93KCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_warpPastFinalSupplyWindow",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 101,
+            "byteStart": 40424,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L796-L798",
+            "lineEnd": 798,
+            "lineStart": 796,
+            "snippetSha256": "sha256:82a6688bff813f04a0b4678165717eac2ee27e3657eac19a004bc225f1440737",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_countTopic(Vm.Log[],bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_countTopic(Vm.Log[],bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "topic",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9jb3VudFRvcGljKFZtLkxvZ1tdLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_countTopic",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "count",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 278,
+            "byteStart": 40531,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L800-L806",
+            "lineEnd": 806,
+            "lineStart": 800,
+            "snippetSha256": "sha256:04f769c4de94a6a1ec988fd10f94987b5a4ee4e0908c2270b5865d5d533bfb15",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertAuctionAccountingSnapshot(CompositionSetup,AuctionAccountingSnapshot,string)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_assertAuctionAccountingSnapshot(CompositionSetup,AuctionAccountingSnapshot,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "snapshot",
+              "storageLocation": "memory",
+              "type": "AuctionAccountingSnapshot"
+            },
+            {
+              "index": 2,
+              "name": "label",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9hc3NlcnRBdWN0aW9uQWNjb3VudGluZ1NuYXBzaG90KENvbXBvc2l0aW9uU2V0dXAsQXVjdGlvbkFjY291bnRpbmdTbmFwc2hvdCxzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertAuctionAccountingSnapshot",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 721,
+            "byteStart": 40815,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L808-L819",
+            "lineEnd": 819,
+            "lineStart": 808,
+            "snippetSha256": "sha256:1359a7c004a5de8d1f2816942639a07dee5dbf58fb67dd83909f9f0dfdbd11ee",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertZeroAuctionAccounting(CompositionSetup,uint256,address,string)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_assertZeroAuctionAccounting(CompositionSetup,uint256,address,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "poster",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "label",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9hc3NlcnRaZXJvQXVjdGlvbkFjY291bnRpbmcoQ29tcG9zaXRpb25TZXR1cCx1aW50MjU2LGFkZHJlc3Msc3RyaW5nKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertZeroAuctionAccounting",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1022,
+            "byteStart": 41542,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L821-L839",
+            "lineEnd": 839,
+            "lineStart": 821,
+            "snippetSha256": "sha256:40e60b46fe2f243a68d13a62ecd61b322a97165e5d2785bdbbc6ab3853f75be4",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertPendingRequest(CompositionSetup,uint256,uint256,string)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_assertPendingRequest(CompositionSetup,uint256,uint256,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "label",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9hc3NlcnRQZW5kaW5nUmVxdWVzdChDb21wb3NpdGlvblNldHVwLHVpbnQyNTYsdWludDI1NixzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertPendingRequest",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 589,
+            "byteStart": 42570,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L841-L852",
+            "lineEnd": 852,
+            "lineStart": 841,
+            "snippetSha256": "sha256:36f39e7da7fb851b4e3cde6647af8068fb6eb0429a932e02a751aee322dbb7e1",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertSnapshot(CompositionSetup,uint256,AuctionSnapshot,string)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_assertSnapshot(CompositionSetup,uint256,AuctionSnapshot,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "beforeSnapshot",
+              "storageLocation": "memory",
+              "type": "AuctionSnapshot"
+            },
+            {
+              "index": 3,
+              "name": "label",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9hc3NlcnRTbmFwc2hvdChDb21wb3NpdGlvblNldHVwLHVpbnQyNTYsQXVjdGlvblNuYXBzaG90LHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertSnapshot",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2075,
+            "byteStart": 43165,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L854-L887",
+            "lineEnd": 887,
+            "lineStart": 854,
+            "snippetSha256": "sha256:7dcd557f072bcbdb5694ff00b10f174177cd17dcca425da0e160ba29c4da6e14",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_callClaimAuction(CompositionSetup,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_callClaimAuction(CompositionSetup,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9jYWxsQ2xhaW1BdWN0aW9uKENvbXBvc2l0aW9uU2V0dXAsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_callClaimAuction",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 304,
+            "byteStart": 45246,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L889-L895",
+            "lineEnd": 895,
+            "lineStart": 889,
+            "snippetSha256": "sha256:ebfae8d00d8852593b6f101ef3fe6bda61498c9549a1fe0d171863d7d68e2c61",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_callCancelAuctionAs(CompositionSetup,uint256,address)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_callCancelAuctionAs(CompositionSetup,uint256,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "caller",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9jYWxsQ2FuY2VsQXVjdGlvbkFzKENvbXBvc2l0aW9uU2V0dXAsdWludDI1NixhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_callCancelAuctionAs",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 350,
+            "byteStart": 45556,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L897-L904",
+            "lineEnd": 904,
+            "lineStart": 897,
+            "snippetSha256": "sha256:82251a8ca9214153c327731e939006f9a3377b58de785dc5b1933a36e8199aa3",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_callBid(CompositionSetup,uint256,address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_callBid(CompositionSetup,uint256,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "bidder",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9jYWxsQmlkKENvbXBvc2l0aW9uU2V0dXAsdWludDI1NixhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_callBid",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 402,
+            "byteStart": 45912,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L906-L917",
+            "lineEnd": 917,
+            "lineStart": 906,
+            "snippetSha256": "sha256:facb974940a822047709e318ac33a11cd58d0572b007e9aaff603dcef11868e3",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_callMintDrop(CompositionSetup,StreamDrops.DropAuthorization,string,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_callMintDrop(CompositionSetup,StreamDrops.DropAuthorization,string,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 2,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 3,
+              "name": "signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9jYWxsTWludERyb3AoQ29tcG9zaXRpb25TZXR1cCxTdHJlYW1Ecm9wcy5Ecm9wQXV0aG9yaXphdGlvbixzdHJpbmcsYnl0ZXMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_callMintDrop",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 506,
+            "byteStart": 46320,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L919-L931",
+            "lineEnd": 931,
+            "lineStart": 919,
+            "snippetSha256": "sha256:00b0b2792ec201d162a6cd35cdcbce8608d96dab93968baec8048661e5b35d81",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_callCancelDrop(CompositionSetup,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_callCancelDrop(CompositionSetup,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "dropId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9jYWxsQ2FuY2VsRHJvcChDb21wb3NpdGlvblNldHVwLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_callCancelDrop",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 310,
+            "byteStart": 46832,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L933-L939",
+            "lineEnd": 939,
+            "lineStart": 933,
+            "snippetSha256": "sha256:3eab0aeefb203b3e96434bb20ebd6e8ff7759c61d22dbfaec9b27312ac759756",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertRevertedWithMessage(bool,bytes,string)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_assertRevertedWithMessage(bool,bytes,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "expectedMessage",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9hc3NlcnRSZXZlcnRlZFdpdGhNZXNzYWdlKGJvb2wsYnl0ZXMsc3RyaW5nKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertRevertedWithMessage",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 792,
+            "byteStart": 47148,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L941-L955",
+            "lineEnd": 955,
+            "lineStart": 941,
+            "snippetSha256": "sha256:24bff8ddd6aa88028a2f25dfa3fc099f743b42a80225fb9efc3adecd714c5978",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_decodeErrorString(bytes)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_decodeErrorString(bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9kZWNvZGVFcnJvclN0cmluZyhieXRlcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_decodeErrorString",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 398,
+            "byteStart": 47946,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L957-L964",
+            "lineEnd": 964,
+            "lineStart": 957,
+            "snippetSha256": "sha256:0bcfc2702b25ecc4ea143a39b1d6378a53235b1beee19148107f94fef585f090",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_words(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_words(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "word",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl93b3Jkcyh1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_words",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "words",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "range": {
+            "byteLength": 142,
+            "byteStart": 48350,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L966-L969",
+            "lineEnd": 969,
+            "lineStart": 966,
+            "snippetSha256": "sha256:d6af2cee67be55b91c46afe15a3baa95954c87ee2bc75d3203858594f9faf5ad",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_expectedSeed(address,uint256,uint256,uint256,uint256[])",
+          "functionKind": "function",
+          "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:_expectedSeed(address,uint256,uint256,uint256,uint256[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "words",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9leHBlY3RlZFNlZWQoYWRkcmVzcyx1aW50MjU2LHVpbnQyNTYsdWludDI1Nix1aW50MjU2W10p",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_expectedSeed",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 514,
+            "byteStart": 48498,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L971-L989",
+            "lineEnd": 989,
+            "lineStart": 971,
+            "snippetSha256": "sha256:5673ecba73de6890f7aeed719cb92ff22ea5b40962e8202cbf20f5735960e310",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 766,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 807,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RESERVE_PRICE",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 814,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:5d220cdbd734b87afbb29e781ce1a0927c3f4a7259c1d16b10ddb926f6ededa1",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 855,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:89d2e8f6fbb5823cc4c82092cd5b652e6504bca12f3a7e4bf6dd158f7e1bd67a",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "5 ether",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SECOND_BID",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 868,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:d6e7e28579e1cfed0eb06d7e93683d0533231202e1e1dc27df10fc976d030145",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 906,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:a073dd9f791dbcff86197a52bb8aac26d3cc467e5138fdf43027e9abf73fe25e",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "6 ether",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "POSTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 919,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:695a59e12d896c6e13bf8a41a7b87f2dbedaa0e769d3f48d88cfb58046e19145",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 953,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:0ab9e750f7c6ea7ca35cb67c84e1deac4cd43cc2a6a45b284817308c28bdf2a2",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "address(0x1001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYOUT",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 974,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:d899e00d2b9ba56b581169c7f20b579dccbb4b324bfd90e911b8d4849dd60cee",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1008,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:8c262acd027cd04362ad0bf925e100df0730a67a3bc00162d96b74c991167c42",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "address(0x2001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CURATORS_POOL",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 1029,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:508390a93da89fbc1eb146fadb02b85cd94580e212dfe68fb7f662405c500766",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1070,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:a41fc240d38b7cdcdce6a559175b4b6958a7128a899e99f41eca3bed02bf0f77",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "address(0x3001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "FIRST_BIDDER",
+          "natspec": "",
+          "range": {
+            "byteLength": 55,
+            "byteStart": 1091,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:2760745b05156066e8fb6cc1fbf0035d27e65efb24c35186531e658059b9cfdf",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1131,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:a9dac33b00de468df5e9b3ff103d11732592c79ac7f237c6e12b8bbd34148312",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "address(0x4001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SECOND_BIDDER",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 1152,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:4d6b46b7b0a9e47865a94429b6e23aa3ebdf438e6d8a3cff6804eb041aa9893e",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1193,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:425d803f9388f47af4943d2513735331f06b9df85d257b877e5caa6c22d13e49",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "address(0x4002)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "EMERGENCY_RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 62,
+            "byteStart": 1214,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:88de66f60770c03bb0de8c24c90919c4ee6171275aaf37e5484dd17179aebabd",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1261,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:07d94250e37a5d2ba7ad11906ccb75be32b87f6edb26a22bbe16e75ea92d1426",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "address(0x5001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "NO_BID_RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 59,
+            "byteStart": 1282,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:645d4c9e55c130e72b8e4f7094557fe454bda9cf6a8b836ff5ff96879cf5ae59",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1326,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:410a0ba944aa1eb7e5fd3043721656e53b589d86c442604655354ee5daad37f7",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "address(0x6001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAUSE_REASON",
+          "natspec": "",
+          "range": {
+            "byteLength": 83,
+            "byteStart": 1347,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:bb6eb604ad0b4b480f494ff9de102a4deda8f3252328caa9a16cd99dead754b2",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 43,
+            "byteStart": 1387,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:2b00b8fafd7ffcaedc5e125c49ab0be0d3c9e0041a9a52d12e103bd4c1af308a",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "keccak256(\"auction-randomizer-composition\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RANDOMNESS_SEED_TYPEHASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 222,
+            "byteStart": 1436,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L33-L35",
+            "lineEnd": 35,
+            "lineStart": 33,
+            "snippetSha256": "sha256:4b8afb9e13e39343c91a17ac2d52a6c8cd68207384bfddc9f4a82ed25084df86",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 170,
+            "byteStart": 1488,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L33-L35",
+            "lineEnd": 35,
+            "lineStart": 33,
+            "snippetSha256": "sha256:66a4b794c26192e8ab011adf04443fc22cfc01ca8e9468b8313b0430f2c80cca",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "keccak256(\n        \"6529StreamRandomnessSeed(address provider,uint256 requestId,uint256 collectionId,uint256 tokenId,uint256 randomizerEpoch,bytes32 rawOutputHash)\"\n    )",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "METADATA_UPDATE_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 85,
+            "byteStart": 1664,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:bed32f9fe7984bc07db2c5f9ec8d9ba88c5fb3db95d8bd8e8aef91d02393de7e",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 36,
+            "byteStart": 1713,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:2826f0dbf8eb545c8c9b7de48ad0ba4b2e55328e87a7f33b0b2c75ad9ccbd0ee",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "keccak256(\"MetadataUpdate(uint256)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "BURNED_TOKEN_RANDOMNESS_RECORDED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 179,
+            "byteStart": 1755,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L37-L39",
+            "lineEnd": 39,
+            "lineStart": 37,
+            "snippetSha256": "sha256:c39370e2519a8c9c163ff821dc9f4d13ef525ad0b3ea2b20481a4d31ae69785c",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 113,
+            "byteStart": 1821,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L37-L39",
+            "lineEnd": 39,
+            "lineStart": 37,
+            "snippetSha256": "sha256:79d950919161235f7a2c6c3a6f996b11057b40acc39c944b20829343200c0f1b",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "keccak256(\n        \"BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)\"\n    )",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RANDOMNESS_FULFILLED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 151,
+            "byteStart": 1940,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L40-L41",
+            "lineEnd": 41,
+            "lineStart": 40,
+            "snippetSha256": "sha256:5df8556d4e8437be4633a9674c410b83b2f1cb1a5d70c0edc1d460ffe370cb3e",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 89,
+            "byteStart": 2002,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L41",
+            "lineEnd": 41,
+            "lineStart": 41,
+            "snippetSha256": "sha256:30bdab029d766f0a14552be6367ea7120c977e74fbbf73b35c9a2af0e5b21056",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "keccak256(\"RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ERROR_STRING_SELECTOR",
+          "natspec": "",
+          "range": {
+            "byteLength": 82,
+            "byteStart": 2097,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L42",
+            "lineEnd": 42,
+            "lineStart": 42,
+            "snippetSha256": "sha256:6d360a41c9c4d9bb602417872810343b68000b7179c6999c974f9bf2a5664e9a",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": {
+            "byteLength": 34,
+            "byteStart": 2145,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L42",
+            "lineEnd": 42,
+            "lineStart": 42,
+            "snippetSha256": "sha256:ff066fd84e2e90cdc62fe611f91c42bb927893bba3429b6a76e7fe90e1709bd3",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          },
+          "valueSource": "bytes4(keccak256(\"Error(string)\"))",
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 2220,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L45",
+                "lineEnd": 45,
+                "lineStart": 45,
+                "snippetSha256": "sha256:67cd5d2d923d960771e4de7c95f232699d5ce27f40fe1105c89e6a57535a802e",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "DeployedStream",
+              "typeString": "struct StreamFixture.DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "auctions",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 2253,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L46",
+                "lineEnd": 46,
+                "lineStart": 46,
+                "snippetSha256": "sha256:a3b7196e6549c4e665308750d1c91c4b213c8bb4ead75bdaf415a72abb8c6668",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "StreamAuctions",
+              "typeString": "contract StreamAuctions"
+            },
+            {
+              "index": 2,
+              "name": "randomizer",
+              "natspec": "",
+              "range": {
+                "byteLength": 31,
+                "byteStart": 2286,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L47",
+                "lineEnd": 47,
+                "lineStart": 47,
+                "snippetSha256": "sha256:7810e1c4f33229fbfab23adea736baf407203b43a9468a4f10d6e18ff8cca974",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "NextGenRandomizerRNG",
+              "typeString": "contract NextGenRandomizerRNG"
+            },
+            {
+              "index": 3,
+              "name": "controller",
+              "natspec": "",
+              "range": {
+                "byteLength": 37,
+                "byteStart": 2327,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L48",
+                "lineEnd": 48,
+                "lineStart": 48,
+                "snippetSha256": "sha256:5b7032efdb830557a4a9b6ec10f058dfb88bf1434ce332e9a27223363497dbce",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "CompositionArrngController",
+              "typeString": "contract CompositionArrngController"
+            }
+          ],
+          "name": "CompositionSetup",
+          "natspec": "",
+          "range": {
+            "byteLength": 185,
+            "byteStart": 2186,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L44-L49",
+            "lineEnd": 49,
+            "lineStart": 44,
+            "snippetSha256": "sha256:8bca9d609e07310aeda06c802c811fb6d9a3b92ff71214d679eb7139691d5a1b",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "status",
+              "natspec": "",
+              "range": {
+                "byteLength": 14,
+                "byteStart": 2410,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L52",
+                "lineEnd": 52,
+                "lineStart": 52,
+                "snippetSha256": "sha256:a5d887ba4c4d1f394d607b25fd25599966129dce3cddec9a5173a92224698cb3",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "owner",
+              "natspec": "",
+              "range": {
+                "byteLength": 13,
+                "byteStart": 2434,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L53",
+                "lineEnd": 53,
+                "lineStart": 53,
+                "snippetSha256": "sha256:8a244f16ba6f8d35d410e961effc10adbeb921976956c62be3d0e0b1efde76bb",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 2,
+              "name": "highestBid",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 2457,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L54",
+                "lineEnd": 54,
+                "lineStart": 54,
+                "snippetSha256": "sha256:28f94f17d7394823aaa3c88d6521cbf7f5906d34e7c53a468d6791f9fdce4f01",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "highestBidder",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 2485,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L55",
+                "lineEnd": 55,
+                "lineStart": 55,
+                "snippetSha256": "sha256:7385afc9e9e25b4df8561f57dbaa7cb0a0bdd16d1094004d053054c0e1deb634",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 4,
+              "name": "totalBidderOwed",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 2516,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L56",
+                "lineEnd": 56,
+                "lineStart": 56,
+                "snippetSha256": "sha256:d3807b5bff5317323cea4afd2f4729626ac531d82d1646eba74706c1be65c16f",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "totalAuctionBidEscrow",
+              "natspec": "",
+              "range": {
+                "byteLength": 29,
+                "byteStart": 2549,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L57",
+                "lineEnd": 57,
+                "lineStart": 57,
+                "snippetSha256": "sha256:9830dc992e0eec54836b8250b5479836e459514ed95ff50109d026f4bed01653",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "totalProceedsOwed",
+              "natspec": "",
+              "range": {
+                "byteLength": 25,
+                "byteStart": 2588,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L58",
+                "lineEnd": 58,
+                "lineStart": 58,
+                "snippetSha256": "sha256:6ff639d6171e2ba044aa0386a02e55c7ada8c3129da04ac16936b374bc310abc",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 7,
+              "name": "totalOwed",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 2623,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L59",
+                "lineEnd": 59,
+                "lineStart": 59,
+                "snippetSha256": "sha256:555146ae7deba284debcb5a2582367764509b11a57d1dba32541ae89740a1760",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 8,
+              "name": "balance",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 2650,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L60",
+                "lineEnd": 60,
+                "lineStart": 60,
+                "snippetSha256": "sha256:05b79612708198460920e1a79099cff33f47d24fd37cdcf16c6f11270f48c64f",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 9,
+              "name": "pendingNoBidClaimant",
+              "natspec": "",
+              "range": {
+                "byteLength": 28,
+                "byteStart": 2675,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L61",
+                "lineEnd": 61,
+                "lineStart": 61,
+                "snippetSha256": "sha256:40d2cd6794d612599d9df60f55848724e809b0476fbd255ed04a4142ba4a0e23",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 10,
+              "name": "noBidClaimantAlias",
+              "natspec": "",
+              "range": {
+                "byteLength": 26,
+                "byteStart": 2713,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L62",
+                "lineEnd": 62,
+                "lineStart": 62,
+                "snippetSha256": "sha256:3fd310e6e26742f62b8b40ca1c211f5aa45cb107f6ae5fde839a4bf630adebb9",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 11,
+              "name": "auctionClaim",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 2749,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L63",
+                "lineEnd": 63,
+                "lineStart": 63,
+                "snippetSha256": "sha256:4ab6e278b2605f9d962366b5f91d2358d1fd7b2b87532f812b754e5880790f49",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "bool",
+              "typeString": "bool"
+            },
+            {
+              "index": 12,
+              "name": "pendingRequests",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 2776,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L64",
+                "lineEnd": 64,
+                "lineStart": 64,
+                "snippetSha256": "sha256:61c70112ff83359814676954747c594f2afe000a023ea149c17bd4d5315bf5c7",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 13,
+              "name": "randomizerEpoch",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 2809,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L65",
+                "lineEnd": 65,
+                "lineStart": 65,
+                "snippetSha256": "sha256:550552d2f417f7119e59fc932efdc40f17c847ec31e8b5a1cc1f0c4617540359",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 14,
+              "name": "collectionRandomizer",
+              "natspec": "",
+              "range": {
+                "byteLength": 28,
+                "byteStart": 2842,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L66",
+                "lineEnd": 66,
+                "lineStart": 66,
+                "snippetSha256": "sha256:047e9c0e94361378048d68db6fc1a523d33ec1fdad107ff8bd0ba5c0ffe1464d",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 15,
+              "name": "tokenRequest",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 2880,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L67",
+                "lineEnd": 67,
+                "lineStart": 67,
+                "snippetSha256": "sha256:322f2aea0213e290c642f9a3a733c31c8151a952ed611ce3caa31cf133362b94",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 16,
+              "name": "tokenHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 2910,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L68",
+                "lineEnd": 68,
+                "lineStart": 68,
+                "snippetSha256": "sha256:2801b40f49f19252ed74acdbbfe4eb3f1910c9632036c21d54695d7f5c02ed20",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "AuctionSnapshot",
+          "natspec": "",
+          "range": {
+            "byteLength": 557,
+            "byteStart": 2377,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L51-L69",
+            "lineEnd": 69,
+            "lineStart": 51,
+            "snippetSha256": "sha256:57c8acf2baba4130c4bbc45e34795d93bf72ef03e33462f69b1febff2e016c0e",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "bidderCredit",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 2983,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L72",
+                "lineEnd": 72,
+                "lineStart": 72,
+                "snippetSha256": "sha256:bc9652781b3571cfee06bebf5aa22d6e460fb97376cada784bffe1c60dda5aed",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "posterCredit",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 3013,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L73",
+                "lineEnd": 73,
+                "lineStart": 73,
+                "snippetSha256": "sha256:a20fd9584ef3d84f52012798896bb4f1d8d595fb573d96c061ff363337dc77f0",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "protocolCredit",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 3043,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L74",
+                "lineEnd": 74,
+                "lineStart": 74,
+                "snippetSha256": "sha256:f3b49d5f863cf06dfec0e7e19359ef907605b2bb803de12ec125493d972e0cdb",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "curatorCredit",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 3075,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L75",
+                "lineEnd": 75,
+                "lineStart": 75,
+                "snippetSha256": "sha256:a37f159cc50e2a2c0ced0d45ba31a7b1e43851c6862a9fc7e409dea50911d8a8",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "totalOwed",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 3106,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L76",
+                "lineEnd": 76,
+                "lineStart": 76,
+                "snippetSha256": "sha256:555146ae7deba284debcb5a2582367764509b11a57d1dba32541ae89740a1760",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "balance",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 3133,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L77",
+                "lineEnd": 77,
+                "lineStart": 77,
+                "snippetSha256": "sha256:05b79612708198460920e1a79099cff33f47d24fd37cdcf16c6f11270f48c64f",
+                "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            }
+          ],
+          "name": "AuctionAccountingSnapshot",
+          "natspec": "",
+          "range": {
+            "byteLength": 215,
+            "byteStart": 2940,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L71-L78",
+            "lineEnd": 78,
+            "lineStart": 71,
+            "snippetSha256": "sha256:6379e8a6345fbcce8cbb149e99d39a0402649b2ce91afc1242137e056fcc4ec2",
+            "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+        "name": "DropAuthTestHelper"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1BdWN0aW9uUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUF1Y3Rpb25SYW5kb21pemVyQ29tcG9zaXRpb25UZXN0",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamAuctionRandomizerCompositionTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 48506,
+      "byteStart": 508,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionRandomizerComposition.t.sol#L15-L990",
+      "lineEnd": 990,
+      "lineStart": 15,
+      "snippetSha256": "sha256:2f23e871b92fefdf1f0edcd4303e333672de5677569d9441130d707e603a66b4",
+      "sourceSha256": "sha256:dabc1488ee8362cc08bec1bbd67c9a125ceb8642c3e092c1598e600ca91b0c11"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamAuctionRandomizerComposition.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 12
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 11
+    },
+    "totalCount": 12
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x1b430a57",
+      "definitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x26a5f683",
+      "definitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x498d10ae",
+      "definitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x6748ed0e",
+      "definitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x7d0d4552",
+      "definitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x8835d324",
+      "definitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0x8d13492f",
+      "definitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0xb36083ee",
+      "definitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0xdfd00b20",
+      "definitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0xe89f9d44",
+      "definitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest#function:0xf48ad930",
+      "definitionId": "test/StreamAuctionRandomizerComposition.t.sol:StreamAuctionRandomizerCompositionTest",
+      "severity": "advisory"
+    }
+  ]
+}

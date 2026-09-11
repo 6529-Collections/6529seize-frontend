@@ -42,6 +42,10 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { WalletValidationError } from "@/errors/wallet";
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import { hasPendingInlineImageUploadMarkdown } from "@/helpers/waves/inline-image-upload.helpers";
+import {
+  MAX_DROP_STORM_UTF16_UNITS,
+  isDropPartWithinLimits,
+} from "@/helpers/waves/drop-content-limits";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -49,7 +53,7 @@ export enum CreateDropScreenType {
 }
 
 export interface CreateDropWrapperHandles {
-  requestDrop: () => CreateDropConfig;
+  requestDrop: () => CreateDropConfig | null;
   getDropSnapshot: () => CreateDropConfig;
 }
 
@@ -78,6 +82,12 @@ interface CreateDropWrapperProps {
   readonly showDropError?: boolean | undefined;
   readonly wave: CreateDropWrapperWaveProps | null;
   readonly waveId: string | null;
+  /**
+   * Pins the rendering branch regardless of breakpoint. Embedded usages
+   * (the create-wave Description step) must stay inline (DESKTOP): the
+   * MOBILE branch is a modal sheet that cannot host a page-flow step.
+   */
+  readonly forceScreenType?: CreateDropScreenType | undefined;
   readonly children: React.ReactNode;
   readonly setIsStormMode: (isStormMode: boolean) => void;
   readonly setViewType: (newV: CreateDropViewType) => void;
@@ -137,6 +147,7 @@ const CreateDropWrapper = forwardRef<
       showDropError = false,
       wave: waveProps,
       waveId,
+      forceScreenType,
       children,
       setIsStormMode,
       setViewType,
@@ -169,16 +180,16 @@ const CreateDropWrapper = forwardRef<
         );
       }
     }, [hasValidWalletAuth, address]);
-    const [screenType, setScreenType] = useState<CreateDropScreenType>(
-      CreateDropScreenType.DESKTOP
-    );
-    useEffect(() => {
-      if (breakpoint === "LG") {
-        setScreenType(CreateDropScreenType.DESKTOP);
-      } else {
-        setScreenType(CreateDropScreenType.MOBILE);
-      }
-    }, [breakpoint]);
+    // Derived straight from the breakpoint (and the optional pin), so compute
+    // it during render rather than mirroring it into state via an effect.
+    // Embedded usages (the create-wave Description step) pin the inline
+    // rendering: the MOBILE branch wraps the editor in a modal sheet, which
+    // cannot host a page-flow step (dismissing it would kill the step).
+    const screenType: CreateDropScreenType =
+      forceScreenType ??
+      (breakpoint === "LG"
+        ? CreateDropScreenType.DESKTOP
+        : CreateDropScreenType.MOBILE);
 
     const prevWaveIdRef = useRef<string | null>(waveProps?.id ?? null);
     const isWaveSwitch = prevWaveIdRef.current !== (waveProps?.id ?? null);
@@ -392,9 +403,21 @@ const CreateDropWrapper = forwardRef<
       return true;
     };
 
+    const getIsDropLimit = () =>
+      (drop?.parts.reduce(
+        (acc, part) => acc + (part.content?.length ?? 0),
+        getMarkdown()?.length ?? 0
+      ) ?? 0) > MAX_DROP_STORM_UTF16_UNITS;
+
+    const getIsPartLimit = () =>
+      !isDropPartWithinLimits(getMarkdown() ?? "") ||
+      !!drop?.parts.some((part) => !isDropPartWithinLimits(part.content ?? ""));
+
     const getCanSubmit = () =>
       !!(!!getMarkdown() || !!files.length || !!drop?.parts.length) &&
       !getHasPendingInlineImageUpload() &&
+      !getIsDropLimit() &&
+      !getIsPartLimit() &&
       !missingMedia.length &&
       !missingMetadata.length &&
       !!(drop?.parts.length ? getCanSubmitStorm() : true);
@@ -402,25 +425,11 @@ const CreateDropWrapper = forwardRef<
     const [canSubmit, setCanSubmit] = useState(getCanSubmit());
 
     const getHaveMarkdownOrFile = () => !!getMarkdown() || !!files.length;
-    const getIsDropLimit = () =>
-      (drop?.parts.reduce(
-        (acc, part) => acc + (part.content?.length ?? 0),
-        getMarkdown()?.length ?? 0
-      ) ?? 0) >= 24000;
-
-    const getIsCharsLimit = () => {
-      const markDown = getMarkdown();
-      if (!!markDown?.length && markDown.length > 240) {
-        return true;
-      }
-      return false;
-    };
-
     const getCanAddPart = () =>
       getHaveMarkdownOrFile() &&
       !getHasPendingInlineImageUpload() &&
       !getIsDropLimit() &&
-      !getIsCharsLimit();
+      !getIsPartLimit();
     const [canAddPart, setCanAddPart] = useState(getCanAddPart());
     useEffect(() => {
       setCanSubmit(getCanSubmit());
@@ -553,12 +562,15 @@ const CreateDropWrapper = forwardRef<
       };
     };
 
-    const onDropPart = (): CreateDropConfig => {
+    const onDropPart = (): CreateDropConfig | null => {
       if (loading) {
         return getDropSnapshot();
       }
       if (getHasPendingInlineImageUpload()) {
         return getDropSnapshot();
+      }
+      if (getIsDropLimit() || getIsPartLimit()) {
+        return null;
       }
       const currentDrop = getDropSnapshot();
       setDrop(currentDrop);
@@ -573,6 +585,9 @@ const CreateDropWrapper = forwardRef<
         return;
       }
       const currentDrop = onDropPart();
+      if (!currentDrop) {
+        return;
+      }
       onSubmitDrop(currentDrop);
     };
 
@@ -583,11 +598,14 @@ const CreateDropWrapper = forwardRef<
       if (getHasPendingInlineImageUpload()) {
         return getDropSnapshot();
       }
+      if (getIsDropLimit() || getIsPartLimit()) {
+        return null;
+      }
       setIsStormMode(true);
       return onDropPart();
     };
 
-    const requestDrop = (): CreateDropConfig => onDropPart();
+    const requestDrop = (): CreateDropConfig | null => onDropPart();
 
     useImperativeHandle(ref, () => ({
       getDropSnapshot,
@@ -598,7 +616,6 @@ const CreateDropWrapper = forwardRef<
       [CreateDropViewType.COMPACT]: (
         <CreateDropCompact
           ref={createDropContendCompactRef}
-          screenType={screenType}
           editorState={editorState}
           files={files}
           canSubmit={canSubmit}

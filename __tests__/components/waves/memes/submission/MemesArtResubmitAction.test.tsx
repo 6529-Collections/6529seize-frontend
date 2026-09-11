@@ -102,6 +102,11 @@ describe("MemesArtResubmitAction", () => {
     await userEvent.click(screen.getByRole("button", { name: /resubmit/i }));
 
     expect(onOpenModal).not.toHaveBeenCalled();
+    expect(
+      screen.getByText(
+        "Resubmit creates a new submission before deleting the original, so it is unavailable after reaching the submission limit."
+      )
+    ).toBeVisible();
   });
 
   it("keeps the internal modal path and forwards source-delete callbacks", async () => {

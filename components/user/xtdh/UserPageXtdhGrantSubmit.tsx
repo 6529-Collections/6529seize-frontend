@@ -1,5 +1,5 @@
-import clsx from "clsx";
 import { isAddress } from "viem";
+import Button from "@/components/utils/button/Button";
 import type {
   ContractOverview,
   NftPickerChange,
@@ -109,19 +109,16 @@ export default function UserPageXtdhGrantSubmit({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
-      <button
-        type="button"
+      <Button
+        variant="action"
+        size="lg"
+        fullWidth
         onClick={onSubmitClick}
         disabled={disabled}
-        className={clsx(
-          "tw-w-full tw-rounded-lg tw-border tw-border-transparent tw-py-3 tw-text-sm tw-font-semibold tw-shadow-sm tw-transition tw-duration-200 tw-ease-out",
-          disabled
-            ? "tw-cursor-not-allowed tw-border-iron-600 tw-bg-iron-700 tw-text-iron-200 tw-shadow-none"
-            : "tw-bg-primary-500 tw-text-black hover:tw-border-primary-300 hover:tw-bg-primary-400"
-        )}
+        loading={isSubmitting}
       >
-        {isSubmitting ? "Submitting..." : "Submit grant"}
-      </button>
+        Submit grant
+      </Button>
 
       {isAmountExceeded && (
         <p

@@ -88,8 +88,7 @@ const CONTENT_ROUTES: RouteExpectation[] = [
   },
   {
     path: "/author/ladysabrina/",
-    text: /ladysabrina/i,
-    links: ["/blog/from-fibonacci-to-fidenza/"],
+    text: "Sabrina Khan",
   },
 ];
 

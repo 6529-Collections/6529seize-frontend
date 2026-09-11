@@ -1,0 +1,389 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "toString(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/Strings.sol:Strings#function:toString(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmluZ3Muc29sOlN0cmluZ3MjZnVuY3Rpb246dG9TdHJpbmcodWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "toString",
+          "natspec": "@dev Converts a `uint256` to its ASCII `string` decimal representation.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 696,
+            "byteStart": 438,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Strings.sol#L20-L40",
+            "lineEnd": 40,
+            "lineStart": 20,
+            "snippetSha256": "sha256:8db1d849e265d9d514697b4da7d49d9c63c73cdfad489fff43460546339edfec",
+            "sourceSha256": "sha256:fd2b96feacea647d67a888537b75c4673c4193f444faae892634e5fc11c922d2"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "toString(int256)",
+          "functionKind": "function",
+          "id": "smart-contracts/Strings.sol:Strings#function:toString(int256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "int256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmluZ3Muc29sOlN0cmluZ3MjZnVuY3Rpb246dG9TdHJpbmcoaW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "toString",
+          "natspec": "@dev Converts a `int256` to its ASCII `string` decimal representation.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 173,
+            "byteStart": 1234,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Strings.sol#L45-L47",
+            "lineEnd": 47,
+            "lineStart": 45,
+            "snippetSha256": "sha256:370bde4634b9545ba87c500be66ef4549a35b21c9791546d82d91b9a6162600d",
+            "sourceSha256": "sha256:fd2b96feacea647d67a888537b75c4673c4193f444faae892634e5fc11c922d2"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "toHexString(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/Strings.sol:Strings#function:toHexString(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmluZ3Muc29sOlN0cmluZ3MjZnVuY3Rpb246dG9IZXhTdHJpbmcodWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "toHexString",
+          "natspec": "@dev Converts a `uint256` to its ASCII `string` hexadecimal representation.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 174,
+            "byteStart": 1512,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Strings.sol#L52-L56",
+            "lineEnd": 56,
+            "lineStart": 52,
+            "snippetSha256": "sha256:fa281d289cae9822c806399dcaaaaa3a45b69aa6b8457a3a960f654b82146165",
+            "sourceSha256": "sha256:fd2b96feacea647d67a888537b75c4673c4193f444faae892634e5fc11c922d2"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "toHexString(uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/Strings.sol:Strings#function:toHexString(uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "length",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmluZ3Muc29sOlN0cmluZ3MjZnVuY3Rpb246dG9IZXhTdHJpbmcodWludDI1Nix1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "toHexString",
+          "natspec": "@dev Converts a `uint256` to its ASCII `string` hexadecimal representation with fixed length.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 437,
+            "byteStart": 1809,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Strings.sol#L61-L71",
+            "lineEnd": 71,
+            "lineStart": 61,
+            "snippetSha256": "sha256:d759d77c23a8d2b4ae9e90a47f906d84f031c309e7d3a17092181fa90a227a6a",
+            "sourceSha256": "sha256:fd2b96feacea647d67a888537b75c4673c4193f444faae892634e5fc11c922d2"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "toHexString(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/Strings.sol:Strings#function:toHexString(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "addr",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmluZ3Muc29sOlN0cmluZ3MjZnVuY3Rpb246dG9IZXhTdHJpbmcoYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "toHexString",
+          "natspec": "@dev Converts an `address` with fixed length of 20 bytes to its not checksummed ASCII `string` hexadecimal representation.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 149,
+            "byteStart": 2398,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Strings.sol#L76-L78",
+            "lineEnd": 78,
+            "lineStart": 76,
+            "snippetSha256": "sha256:640bb50d7d2b5a7bce5b21fe5f43e2bb6ac0dd7b4bce9f948ee6e8812bc6a732",
+            "sourceSha256": "sha256:fd2b96feacea647d67a888537b75c4673c4193f444faae892634e5fc11c922d2"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "equal(string,string)",
+          "functionKind": "function",
+          "id": "smart-contracts/Strings.sol:Strings#function:equal(string,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "a",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 1,
+              "name": "b",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmluZ3Muc29sOlN0cmluZ3MjZnVuY3Rpb246ZXF1YWwoc3RyaW5nLHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "equal",
+          "natspec": "@dev Returns true if the two strings are equal.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 144,
+            "byteStart": 2624,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Strings.sol#L83-L85",
+            "lineEnd": 85,
+            "lineStart": 83,
+            "snippetSha256": "sha256:9d7489f3171b2a3c7f2a7abc2a2089e2f895ed245c221e8af2b34784f49b10b9",
+            "sourceSha256": "sha256:fd2b96feacea647d67a888537b75c4673c4193f444faae892634e5fc11c922d2"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_SYMBOLS",
+          "natspec": "",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 233,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Strings.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:7a7d146c830fd8075a8799891f2e6df0f946395c475224bf1a040b645bea2b3d",
+            "sourceSha256": "sha256:fd2b96feacea647d67a888537b75c4673c4193f444faae892634e5fc11c922d2"
+          },
+          "selector": null,
+          "type": "bytes16",
+          "typeString": "bytes16",
+          "valueRange": {
+            "byteLength": 18,
+            "byteStart": 269,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Strings.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:67d40172a07dbd066f22b12ba0b2736948c5f2b8e02389b661850efc947cbc40",
+            "sourceSha256": "sha256:fd2b96feacea647d67a888537b75c4673c4193f444faae892634e5fc11c922d2"
+          },
+          "valueSource": "\"0123456789abcdef\"",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_ADDRESS_LENGTH",
+          "natspec": "",
+          "range": {
+            "byteLength": 43,
+            "byteStart": 293,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Strings.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:0513d164f09772022189e0f3a2e692fc55c9fc1e24c53c6cf17569413f8fda2e",
+            "sourceSha256": "sha256:fd2b96feacea647d67a888537b75c4673c4193f444faae892634e5fc11c922d2"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 2,
+            "byteStart": 334,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Strings.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:f5ca38f748a1d6eaf726b8a42fb575c3c71f1864a8143301782de13da2d9202b",
+            "sourceSha256": "sha256:fd2b96feacea647d67a888537b75c4673c4193f444faae892634e5fc11c922d2"
+          },
+          "valueSource": "20",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/Strings.sol:Strings",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmluZ3Muc29sOlN0cmluZ3M",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "smart-contracts/Strings.sol:Strings"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "Strings",
+    "natspec": "",
+    "range": {
+      "byteLength": 2559,
+      "byteStart": 211,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Strings.sol#L13-L86",
+      "lineEnd": 86,
+      "lineStart": 13,
+      "snippetSha256": "sha256:9e08209aa2c00a8c00bbd337be090e5a7dc8e66f75811c681f8a3b9bc28f017c",
+      "sourceSha256": "sha256:fd2b96feacea647d67a888537b75c4673c4193f444faae892634e5fc11c922d2"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/Strings.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/Strings.sol:Strings",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -1,0 +1,458 @@
+{
+  "manifestVersion": "museum-research-editorial-media.v1",
+  "assets": [
+    {
+      "id": "museum-research-rights-printmaking-workshop",
+      "files": ["rights-800.webp", "rights-1600.webp"],
+      "mediaType": "image/webp",
+      "preservationStatus": "retained_verified",
+      "title": "The Printmaking Workshop",
+      "creator": "Pellegrino dal Colle, after Francesco Maggiotto",
+      "date": "1750–1800",
+      "institution": "The Metropolitan Museum of Art",
+      "objectRecord": "https://www.metmuseum.org/art/collection/search/415528",
+      "sourceImage": "https://images.metmuseum.org/CRDImages/dp/original/DP876292.jpg",
+      "rights": "Public Domain",
+      "rightsUri": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "derivatives": [
+        {
+          "file": "rights-800.webp",
+          "sha256": "b99cde0087644bfb510c72be6bcbdd148415a99ac6acffffa41f80c7e8bf2e05",
+          "width": 800,
+          "height": 655
+        },
+        {
+          "file": "rights-1600.webp",
+          "sha256": "96cfe2ea8107c047196257109a4a6e20471115a413a26124146f2d939b6704c7",
+          "width": 1600,
+          "height": 1309
+        }
+      ],
+      "role": "external_public_domain_editorial_illustration",
+      "collectionMembership": false
+    },
+    {
+      "id": "museum-research-data-architecture-groundplan",
+      "files": ["data-architecture-800.webp", "data-architecture-1600.webp"],
+      "mediaType": "image/webp",
+      "preservationStatus": "retained_verified",
+      "title": "Groundplan of the Church of Saint John in 's-Hertogenbosch",
+      "creator": "Pieter Jansz. Saenredam",
+      "date": "1632",
+      "institution": "The Metropolitan Museum of Art",
+      "objectRecord": "https://www.metmuseum.org/art/collection/search/419541",
+      "sourceImage": "https://images.metmuseum.org/CRDImages/dp/original/DP826266.jpg",
+      "rights": "Public Domain",
+      "rightsUri": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "derivatives": [
+        {
+          "file": "data-architecture-800.webp",
+          "sha256": "92ffbec9c106a12521dccf0270be8a9bf5183979a18df5565639329ed8b767e3",
+          "width": 800,
+          "height": 542
+        },
+        {
+          "file": "data-architecture-1600.webp",
+          "sha256": "44e732f99674bbbfa47bfe8b8cf5ae671a7ea6e4a449dea83f4a1b831a2538e3",
+          "width": 1600,
+          "height": 1084
+        }
+      ],
+      "role": "external_public_domain_editorial_illustration",
+      "collectionMembership": false
+    },
+    {
+      "id": "museum-research-sources-chronology-scholar",
+      "files": [
+        "sources-and-chronology-800.webp",
+        "sources-and-chronology-1600.webp"
+      ],
+      "mediaType": "image/webp",
+      "preservationStatus": "retained_verified",
+      "title": "A Scholar in His Study ('Faust')",
+      "creator": "Rembrandt van Rijn",
+      "date": "c. 1652",
+      "institution": "The Metropolitan Museum of Art",
+      "objectRecord": "https://www.metmuseum.org/art/collection/search/373045",
+      "sourceImage": "https://images.metmuseum.org/CRDImages/dp/original/DP814791.jpg",
+      "rights": "Public Domain",
+      "rightsUri": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "derivatives": [
+        {
+          "file": "sources-and-chronology-800.webp",
+          "sha256": "79798d440ca88668da98e2b2fc423930782279959bfb5a862864ab6f8d3093f0",
+          "width": 609,
+          "height": 800
+        },
+        {
+          "file": "sources-and-chronology-1600.webp",
+          "sha256": "dcdfbeaa5a6a7322380c3f8138755fc239c5c5775fa4826834833b17e55610b5",
+          "width": 1218,
+          "height": 1600
+        }
+      ],
+      "role": "external_public_domain_editorial_illustration",
+      "collectionMembership": false
+    },
+    {
+      "id": "museum-research-museums-to-learn",
+      "files": ["museums-to-learn-800.webp", "museums-to-learn-1600.webp"],
+      "mediaType": "image/webp",
+      "preservationStatus": "retained_verified",
+      "title": "Gallery of Art, Smithsonian Institution Building",
+      "creator": "United States National Museum Photographic Laboratory",
+      "date": "1857",
+      "institution": "Smithsonian Institution Archives",
+      "objectRecord": "https://siarchives.si.edu/collections/siris_arc_401640",
+      "sourceImage": "https://ids.si.edu/ids/iiif/SIA-SIA_000095_B41_F11_002/full/full/0/default.jpg",
+      "rights": "CC0 1.0",
+      "rightsUri": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "derivatives": [
+        {
+          "file": "museums-to-learn-800.webp",
+          "sha256": "6a3ba3591e08cf79a0536237d9431191a8806286f886bd7840b84c5131bca5a5",
+          "width": 800,
+          "height": 638
+        },
+        {
+          "file": "museums-to-learn-1600.webp",
+          "sha256": "fcb4a01976632105f7f5e39201149ee4dc66b373d399795364322fcff997ed1f",
+          "width": 1600,
+          "height": 1275
+        }
+      ],
+      "role": "external_public_domain_editorial_illustration",
+      "collectionMembership": false
+    },
+    {
+      "id": "museum-research-scholarship-writing",
+      "files": [
+        "scholarship-and-writing-800.webp",
+        "scholarship-and-writing-1600.webp"
+      ],
+      "mediaType": "image/webp",
+      "preservationStatus": "retained_verified",
+      "title": "Woman Reading a Letter",
+      "creator": "Johannes Vermeer",
+      "date": "c. 1663",
+      "institution": "Rijksmuseum",
+      "objectRecord": "https://www.rijksmuseum.nl/en/collection/object/Woman-Reading-a-Letter--8e9e02c8045362ffb2171b2fb52953ba",
+      "sourceImage": "https://iiif.micr.io/aehHx/full/max/0/default.jpg",
+      "rights": "Public Domain Mark 1.0",
+      "rightsUri": "https://creativecommons.org/publicdomain/mark/1.0/",
+      "derivatives": [
+        {
+          "file": "scholarship-and-writing-800.webp",
+          "sha256": "41dee0987b3108b20731217393308257ba27f9f05b3e41d37bb3b8b603867be5",
+          "width": 800,
+          "height": 955
+        },
+        {
+          "file": "scholarship-and-writing-1600.webp",
+          "sha256": "5b4ec99aef4ef10eab7ec48b89d9dd0409b17de052e4dc800cdd70f677e92b34",
+          "width": 1600,
+          "height": 1911
+        }
+      ],
+      "role": "external_public_domain_editorial_illustration",
+      "collectionMembership": false
+    },
+    {
+      "id": "museum-research-open-museum",
+      "files": ["open-museum-800.webp", "open-museum-1600.webp"],
+      "mediaType": "image/webp",
+      "preservationStatus": "retained_verified",
+      "title": "The Museum, Great Hall, Smithsonian Institution Building",
+      "creator": "United States National Museum Photographic Laboratory",
+      "date": "1857",
+      "institution": "Smithsonian Institution Archives",
+      "objectRecord": "https://siarchives.si.edu/collections/siris_arc_401663",
+      "sourceImage": "https://ids.si.edu/ids/iiif/SIA-SIA_000095_B41_F15_015/full/full/0/default.jpg",
+      "rights": "CC0 1.0",
+      "rightsUri": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "derivatives": [
+        {
+          "file": "open-museum-800.webp",
+          "sha256": "cb793f82001bcde6d1ca9ffcce4966df2db871f10fa5d95df92c69ee1487fc50",
+          "width": 800,
+          "height": 612
+        },
+        {
+          "file": "open-museum-1600.webp",
+          "sha256": "d0179cddd6042c87b4dc159ea1edb3e83de240f8f1ed4897781ebd1eb4bbead9",
+          "width": 1600,
+          "height": 1224
+        }
+      ],
+      "role": "external_public_domain_editorial_illustration",
+      "collectionMembership": false
+    },
+    {
+      "id": "museum-research-conflict-w-0024",
+      "files": [
+        "magnum/6529NM-W-0024-640.webp",
+        "magnum/6529NM-W-0024-1280.webp"
+      ],
+      "mediaType": "image/webp",
+      "preservationStatus": "retained_verified",
+      "sourceWorkId": "6529NM-W-0024",
+      "sourceImage": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0024/65abf8b6a182bb641787a43b40d10f0b6471357e5c90777aacccf9eb73ea1453/webp-v2-q82-m6-fixed-icc/1280.webp",
+      "derivatives": [
+        {
+          "file": "magnum/6529NM-W-0024-640.webp",
+          "sha256": "e9581c1dcf487d78bd22eddee27671ea938e712242e04f72895e608e19cca60d",
+          "width": 640,
+          "height": 963
+        },
+        {
+          "file": "magnum/6529NM-W-0024-1280.webp",
+          "sha256": "042f239d5b6147fd7cb61557a38a96615a9c1a4962dbfe66fb6a79190e0a0365",
+          "width": 1280,
+          "height": 1927
+        }
+      ],
+      "rights": "All Rights Reserved",
+      "displayBasis": "Museum collection display",
+      "role": "museum_local_display_copy_of_governed_accession_media",
+      "collectionMembership": true
+    },
+    {
+      "id": "museum-research-conflict-w-0025",
+      "files": [
+        "magnum/6529NM-W-0025-640.webp",
+        "magnum/6529NM-W-0025-1280.webp"
+      ],
+      "mediaType": "image/webp",
+      "preservationStatus": "retained_verified",
+      "sourceWorkId": "6529NM-W-0025",
+      "sourceImage": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0025/e60f2d2c56b702981597606315c6c77e07dedf4dd9a95804ae2da720d0f5bcee/webp-v2-q82-m6-fixed-icc/1280.webp",
+      "derivatives": [
+        {
+          "file": "magnum/6529NM-W-0025-640.webp",
+          "sha256": "0cdab53aeaddd9c5396a023330def5f6a395a2514fc0d36864433dc9a87f1a88",
+          "width": 640,
+          "height": 429
+        },
+        {
+          "file": "magnum/6529NM-W-0025-1280.webp",
+          "sha256": "3b6e75ae41658576728eb1978362bbd01b5d63c5e43b53c18cfbc64000063d89",
+          "width": 1280,
+          "height": 858
+        }
+      ],
+      "rights": "All Rights Reserved",
+      "displayBasis": "Museum collection display",
+      "role": "museum_local_display_copy_of_governed_accession_media",
+      "collectionMembership": true
+    },
+    {
+      "id": "museum-research-conflict-w-0026",
+      "files": [
+        "magnum/6529NM-W-0026-640.webp",
+        "magnum/6529NM-W-0026-1280.webp"
+      ],
+      "mediaType": "image/webp",
+      "preservationStatus": "retained_verified",
+      "sourceWorkId": "6529NM-W-0026",
+      "sourceImage": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0026/a59d8624c8da11758c5f1c0b64484229e4ffb68167b8e5783cdbafa9628b74df/webp-v2-q82-m6-fixed-icc/1280.webp",
+      "derivatives": [
+        {
+          "file": "magnum/6529NM-W-0026-640.webp",
+          "sha256": "309c2e6c1596e24b80c724fb6e2efc8559af407b73bed69739f42308c9aeda21",
+          "width": 640,
+          "height": 421
+        },
+        {
+          "file": "magnum/6529NM-W-0026-1280.webp",
+          "sha256": "6b1d0ff6dba21cab172942980d750071651afde187681686986c594a59afff47",
+          "width": 1280,
+          "height": 843
+        }
+      ],
+      "rights": "All Rights Reserved",
+      "displayBasis": "Museum collection display",
+      "role": "museum_local_display_copy_of_governed_accession_media",
+      "collectionMembership": true
+    },
+    {
+      "id": "museum-research-conflict-w-0027",
+      "files": [
+        "magnum/6529NM-W-0027-640.webp",
+        "magnum/6529NM-W-0027-1280.webp"
+      ],
+      "mediaType": "image/webp",
+      "preservationStatus": "retained_verified",
+      "sourceWorkId": "6529NM-W-0027",
+      "sourceImage": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0027/cf1ec75dc4e3de3bcd85cffd9954c75395d9af2bff38374468440e403352b816/webp-v2-q82-m6-fixed-icc/1280.webp",
+      "derivatives": [
+        {
+          "file": "magnum/6529NM-W-0027-640.webp",
+          "sha256": "07ca71fb0b6efab5b64a644e08380476d341725fe64338ceeffedae13fac34b2",
+          "width": 640,
+          "height": 427
+        },
+        {
+          "file": "magnum/6529NM-W-0027-1280.webp",
+          "sha256": "63bb715f267d29d0a23e3b99585c7e9c6fd0c9778ff986b0771e7af9c20fcafd",
+          "width": 1280,
+          "height": 853
+        }
+      ],
+      "rights": "All Rights Reserved",
+      "displayBasis": "Museum collection display",
+      "role": "museum_local_display_copy_of_governed_accession_media",
+      "collectionMembership": true
+    },
+    {
+      "id": "museum-research-conflict-w-0028",
+      "files": [
+        "magnum/6529NM-W-0028-640.webp",
+        "magnum/6529NM-W-0028-1280.webp"
+      ],
+      "mediaType": "image/webp",
+      "preservationStatus": "retained_verified",
+      "sourceWorkId": "6529NM-W-0028",
+      "sourceImage": "https://d3lqz0a4bldqgf.cloudfront.net/museum/accessions/6529NM.2026.002/6529NM-W-0028/49c45762f344fcc058a1f1167b01e9c298b1f4cff5e200e9033577f9c1023ad2/webp-v2-q82-m6-fixed-icc/1280.webp",
+      "derivatives": [
+        {
+          "file": "magnum/6529NM-W-0028-640.webp",
+          "sha256": "717f96e39da429b7633fedaa293c8befbace1590b83d734a7bcd55396f115bd7",
+          "width": 640,
+          "height": 512
+        },
+        {
+          "file": "magnum/6529NM-W-0028-1280.webp",
+          "sha256": "6e8cbeca51dc4cc75cf220053e140dca939be4c2e8d863e1cd0f2af7662707e7",
+          "width": 1280,
+          "height": 1023
+        }
+      ],
+      "rights": "All Rights Reserved",
+      "displayBasis": "Museum collection display",
+      "role": "museum_local_display_copy_of_governed_accession_media",
+      "collectionMembership": true
+    },
+    {
+      "id": "museum-research-inside-system",
+      "files": ["inside-system.svg"],
+      "mediaType": "image/svg+xml",
+      "preservationStatus": "retained_verified",
+      "title": "Inside the System",
+      "creator": "6529 Network Museum",
+      "date": "2026",
+      "institution": "6529 Network Museum",
+      "rights": "CC0 1.0",
+      "rightsUri": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "derivatives": [
+        {
+          "file": "inside-system.svg",
+          "sha256": "3d28d7ef5e012f06d4037375801db0ffb70a8a66e4a4a47afeb3c121f9463432",
+          "width": 1600,
+          "height": 1000
+        }
+      ],
+      "role": "museum_original_editorial_illustration",
+      "collectionMembership": false
+    },
+    {
+      "id": "museum-research-rights-and-licenses",
+      "files": ["rights-and-licenses.svg"],
+      "mediaType": "image/svg+xml",
+      "preservationStatus": "retained_verified",
+      "title": "Rights are specific",
+      "creator": "6529 Network Museum",
+      "date": "2026",
+      "institution": "6529 Network Museum",
+      "rights": "CC0 1.0",
+      "rightsUri": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "derivatives": [
+        {
+          "file": "rights-and-licenses.svg",
+          "sha256": "ab9ee74201377b616b3fefb596e28daae504cb0eb801d429e60bbcf4bc3a786a",
+          "width": 1600,
+          "height": 1000
+        }
+      ],
+      "role": "museum_original_editorial_illustration",
+      "collectionMembership": false
+    },
+    {
+      "id": "museum-research-public-record-architecture",
+      "files": ["public-record-architecture.svg"],
+      "mediaType": "image/svg+xml",
+      "preservationStatus": "retained_verified",
+      "title": "A record is a relationship",
+      "creator": "6529 Network Museum",
+      "date": "2026",
+      "institution": "6529 Network Museum",
+      "rights": "CC0 1.0",
+      "rightsUri": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "derivatives": [
+        {
+          "file": "public-record-architecture.svg",
+          "sha256": "3d7f70949d21e3400a5922d723f783e750f02e0dccc18364fc8f8b9d1165e456",
+          "width": 1600,
+          "height": 1000
+        }
+      ],
+      "role": "museum_original_editorial_illustration",
+      "collectionMembership": false
+    },
+    {
+      "id": "museum-research-generative-method",
+      "files": ["generative-method.svg", "generative-method-mobile.svg"],
+      "mediaType": "image/svg+xml",
+      "preservationStatus": "retained_verified",
+      "title": "Generative method",
+      "creator": "6529 Network Museum",
+      "date": "2026",
+      "institution": "6529 Network Museum",
+      "rights": "CC0 1.0",
+      "rightsUri": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "derivatives": [
+        {
+          "file": "generative-method.svg",
+          "sha256": "df26b0968de521da2634703ced571db8c510207b222edfb5131c8f4750e16c00",
+          "width": 1600,
+          "height": 1000
+        },
+        {
+          "file": "generative-method-mobile.svg",
+          "sha256": "d46fc09e737eb1ae403b90ef9bfc238ed606b9dbe75e1f5c49a05d0b7c83b991",
+          "width": 640,
+          "height": 1560
+        }
+      ],
+      "role": "museum_original_editorial_illustration",
+      "collectionMembership": false
+    },
+    {
+      "id": "museum-research-repository-to-chain",
+      "files": ["repository-to-chain.svg", "repository-to-chain-mobile.svg"],
+      "mediaType": "image/svg+xml",
+      "preservationStatus": "retained_verified",
+      "title": "Repository to chain",
+      "creator": "6529 Network Museum",
+      "date": "2026",
+      "institution": "6529 Network Museum",
+      "rights": "CC0 1.0",
+      "rightsUri": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "derivatives": [
+        {
+          "file": "repository-to-chain.svg",
+          "sha256": "072de653f8d79713b554373376e4da8d9a9a1618557529e5c14d22eb479e5e5d",
+          "width": 1600,
+          "height": 1000
+        },
+        {
+          "file": "repository-to-chain-mobile.svg",
+          "sha256": "a0a451fe559279eb6454e90b799edbca2f52809aaf611504554a99c51cbd5a6d",
+          "width": 640,
+          "height": 1840
+        }
+      ],
+      "role": "museum_original_editorial_illustration",
+      "collectionMembership": false
+    }
+  ]
+}

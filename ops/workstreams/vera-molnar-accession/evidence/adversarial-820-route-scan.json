@@ -1,0 +1,86 @@
+{
+  "generatedAt": "2026-08-23T18:29:54.348Z",
+  "results": [
+    {
+      "route": "/museum/network",
+      "status": 200,
+      "clientWidth": 820,
+      "scrollWidth": 820,
+      "height": 8937,
+      "imageCount": 10,
+      "errors": []
+    },
+    {
+      "route": "/museum/network/collection",
+      "status": 200,
+      "clientWidth": 820,
+      "scrollWidth": 820,
+      "height": 10915,
+      "imageCount": 35,
+      "errors": []
+    },
+    {
+      "route": "/museum/network/artists",
+      "status": 200,
+      "clientWidth": 820,
+      "scrollWidth": 820,
+      "height": 5938,
+      "imageCount": 26,
+      "errors": []
+    },
+    {
+      "route": "/museum/network/artists/vera-molnar",
+      "status": 200,
+      "clientWidth": 820,
+      "scrollWidth": 820,
+      "height": 5402,
+      "imageCount": 4,
+      "errors": []
+    },
+    {
+      "route": "/museum/network/artists/martin-grasser",
+      "status": 200,
+      "clientWidth": 820,
+      "scrollWidth": 820,
+      "height": 3802,
+      "imageCount": 4,
+      "errors": []
+    },
+    {
+      "route": "/museum/network/projects/themes-and-variations",
+      "status": 200,
+      "clientWidth": 820,
+      "scrollWidth": 820,
+      "height": 5662,
+      "imageCount": 4,
+      "errors": []
+    },
+    {
+      "route": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "status": 200,
+      "clientWidth": 820,
+      "scrollWidth": 820,
+      "height": 11007,
+      "imageCount": 5,
+      "errors": []
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0029",
+      "status": 200,
+      "clientWidth": 820,
+      "scrollWidth": 820,
+      "height": 4367,
+      "imageCount": 4,
+      "errors": []
+    },
+    {
+      "route": "/museum/network/research",
+      "status": 200,
+      "clientWidth": 820,
+      "scrollWidth": 820,
+      "height": 12564,
+      "imageCount": 30,
+      "errors": []
+    }
+  ]
+}

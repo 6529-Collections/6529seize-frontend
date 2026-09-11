@@ -2,10 +2,26 @@ import React, { createRef } from "react";
 import { render, act } from "@testing-library/react";
 import NewMentionsPlugin, {
   MentionTypeaheadOption,
+  type NewMentionsPluginHandles,
 } from "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin";
+import { MentionSearchScopeProvider } from "@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext";
+
+let mockEditorText = "";
+const mockEditorState = {
+  read: (callback: () => unknown) => callback(),
+};
+const mockEditor = {
+  getEditorState: () => mockEditorState,
+  update: (callback: () => void) => callback(),
+};
 
 jest.mock("@lexical/react/LexicalComposerContext", () => ({
-  useLexicalComposerContext: () => [{ update: (fn: any) => fn() }],
+  useLexicalComposerContext: () => [mockEditor],
+}));
+
+jest.mock("lexical", () => ({
+  ...jest.requireActual("lexical"),
+  $getRoot: () => ({ getTextContent: () => mockEditorText }),
 }));
 
 let capturedProps: any;
@@ -15,19 +31,29 @@ jest.mock("@lexical/react/LexicalTypeaheadMenuPlugin", () => ({
     return <div data-testid="typeahead" />;
   },
   MenuOption: class {},
-  useBasicTypeaheadTriggerMatch: () => jest.fn(),
+  useBasicTypeaheadTriggerMatch: () => jest.fn(() => null),
 }));
 
 jest.mock("@/hooks/useIdentitiesSearch", () => ({
   IDENTITY_SEARCH_MIN_HANDLE_LENGTH: 3,
   useIdentitiesSearch: jest.fn(),
 }));
+jest.mock("@/hooks/useMentionAliases", () => ({
+  useMentionAliases: jest.fn(),
+}));
+jest.mock(
+  "@/components/drops/create/lexical/utils/codeContextDetection",
+  () => ({
+    isInCodeContext: jest.fn(() => false),
+  })
+);
 
 jest.mock("@/components/drops/create/lexical/nodes/MentionNode", () => ({
   $createMentionNode: jest.fn(() => ({
     replace: jest.fn(),
     select: jest.fn(),
   })),
+  $isMentionNode: jest.fn(() => false),
 }));
 jest.mock("@/components/drops/create/lexical/nodes/GroupMentionNode", () => ({
   $createGroupMentionNode: jest.fn(() => ({
@@ -37,6 +63,7 @@ jest.mock("@/components/drops/create/lexical/nodes/GroupMentionNode", () => ({
 }));
 
 const { useIdentitiesSearch } = require("@/hooks/useIdentitiesSearch");
+const { useMentionAliases } = require("@/hooks/useMentionAliases");
 const {
   $createMentionNode,
 } = require("@/components/drops/create/lexical/nodes/MentionNode");
@@ -45,6 +72,44 @@ const {
 } = require("@/components/drops/create/lexical/nodes/GroupMentionNode");
 
 describe("MentionsPlugin", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockEditorText = "";
+    (useMentionAliases as jest.Mock).mockReturnValue({
+      aliases: [],
+      enabled: true,
+      isFetched: true,
+      isError: false,
+      refetch: jest.fn(),
+    });
+  });
+
+  it("does not block plain text on an unavailable Quick Tags request", async () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+    const refetch = jest
+      .fn()
+      .mockResolvedValue({ error: new Error("offline") });
+    (useMentionAliases as jest.Mock).mockReturnValue({
+      aliases: [],
+      enabled: true,
+      isFetched: false,
+      isError: true,
+      refetch,
+    });
+    mockEditorText = "hi";
+    const ref = createRef<NewMentionsPluginHandles>();
+
+    render(<NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={ref} />);
+
+    let result: { completed: boolean } | undefined;
+    await act(async () => {
+      result = await ref.current?.expandMentionAliases();
+    });
+
+    expect(result?.completed).toBe(true);
+    expect(refetch).not.toHaveBeenCalled();
+  });
+
   it("builds options from identities and exposes open state", () => {
     (useIdentitiesSearch as jest.Mock).mockReturnValue({
       identities: [{ id: "1", handle: "alice", display: "Alice", pfp: null }],
@@ -53,6 +118,7 @@ describe("MentionsPlugin", () => {
     render(<NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={ref} />);
     expect(capturedProps.options).toHaveLength(1);
     expect(capturedProps.options[0]).toBeInstanceOf(MentionTypeaheadOption);
+    expect(capturedProps.anchorClassName).toBe("tailwind-scope tw-z-[1020]");
 
     act(() => {
       capturedProps.onOpen();
@@ -62,6 +128,37 @@ describe("MentionsPlugin", () => {
       capturedProps.onClose();
     });
     expect(ref.current.isMentionsOpen()).toBe(false);
+  });
+
+  it.each([
+    ["@alice", 0, "alice", "@alice"],
+    ["hello @alice", 6, "alice", "@alice"],
+    ["hello (@alice", 7, "alice", "@alice"],
+    ["@alice.smith", 0, "alice.smith", "@alice.smith"],
+    ["@alice smith", 0, "alice smith", "@alice smith"],
+  ])(
+    "matches mention query %s",
+    (text, leadOffset, matchingString, replaceableString) => {
+      (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+      render(
+        <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+      );
+
+      expect(capturedProps.triggerFn(text)).toEqual({
+        leadOffset,
+        matchingString,
+        replaceableString,
+      });
+    }
+  );
+
+  it("does not match an at-sign in the middle of a word", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+    render(
+      <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+    );
+
+    expect(capturedProps.triggerFn("email@example")).toBeNull();
   });
 
   it("calls onSelect with mention info", () => {
@@ -77,12 +174,78 @@ describe("MentionsPlugin", () => {
     act(() => {
       capturedProps.onSelectOption(option, null, close);
     });
-    expect($createMentionNode).toHaveBeenCalledWith(`@${option.handle}`);
+    expect($createMentionNode).toHaveBeenCalledWith(
+      `@${option.handle}`,
+      option.id
+    );
     expect(onSelect).toHaveBeenCalledWith({
       mentioned_profile_id: option.id,
       handle_in_content: option.handle,
     });
     expect(close).toHaveBeenCalled();
+  });
+
+  it("passes the draft visibility group to identity search", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+
+    render(
+      <MentionSearchScopeProvider visibilityGroupId="visibility-group">
+        <NewMentionsPlugin
+          waveId={null}
+          onSelect={jest.fn()}
+          ref={createRef()}
+        />
+      </MentionSearchScopeProvider>
+    );
+
+    expect(useIdentitiesSearch).toHaveBeenCalledWith({
+      draftScope: {
+        kind: "group",
+        visibilityGroupId: "visibility-group",
+      },
+      handle: "",
+      waveId: null,
+    });
+  });
+
+  it("uses an explicit disabled draft scope without a provider", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+
+    render(
+      <NewMentionsPlugin waveId={null} onSelect={jest.fn()} ref={createRef()} />
+    );
+
+    expect(useIdentitiesSearch).toHaveBeenCalledWith({
+      draftScope: { kind: "disabled" },
+      handle: "",
+      waveId: null,
+    });
+  });
+
+  it("renders the menu wrapper on the raised typeahead layer", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({
+      identities: [{ id: "1", handle: "alice", display: "Alice", pfp: null }],
+    });
+
+    render(
+      <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+    );
+
+    const portal = capturedProps.menuRenderFn(
+      { current: document.createElement("div") },
+      {
+        selectedIndex: null,
+        selectOptionAndCleanUp: jest.fn(),
+        setHighlightedIndex: jest.fn(),
+      }
+    ) as React.ReactPortal | null;
+    const wrapper = portal?.children;
+
+    expect(React.isValidElement<{ className: string }>(wrapper)).toBe(true);
+    if (!React.isValidElement<{ className: string }>(wrapper)) {
+      throw new Error("Expected mention typeahead menu wrapper element");
+    }
+    expect(wrapper.props.className).toContain("tw-z-[1020]");
   });
 
   it("adds @all option for admins and emits group mention", () => {
@@ -125,5 +288,131 @@ describe("MentionsPlugin", () => {
     expect($createGroupMentionNode).toHaveBeenCalledWith("@all");
     expect(onSelectGroupMention).toHaveBeenCalledWith("ALL");
     expect(close).toHaveBeenCalled();
+  });
+
+  it("adds @contributors option for admins and emits group mention", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+    const onSelectGroupMention = jest.fn();
+    render(
+      <NewMentionsPlugin
+        waveId="w1"
+        onSelect={jest.fn()}
+        onSelectGroupMention={onSelectGroupMention}
+        canMentionAll={true}
+        ref={createRef()}
+      />
+    );
+
+    act(() => capturedProps.onQueryChange("CON"));
+    const option = capturedProps.options[0];
+    act(() => capturedProps.onSelectOption(option, null, jest.fn()));
+
+    expect(option.handle).toBe("@contributors");
+    expect($createGroupMentionNode).toHaveBeenCalledWith("@contributors");
+    expect(onSelectGroupMention).toHaveBeenCalledWith("CONTRIBUTORS");
+  });
+
+  it("does not offer @contributors to non-admin chat participants", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+    render(
+      <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+    );
+
+    act(() => capturedProps.onQueryChange("CON"));
+
+    expect(capturedProps.options).toEqual([]);
+  });
+
+  it.each([
+    ["ADM", "@admins", "ADMINS"],
+    ["DEV", "@devs6529", "DEVS_6529"],
+  ])(
+    "offers %s escalation mentions to chat participants",
+    (query, token, group) => {
+      (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+      const onSelectGroupMention = jest.fn();
+      render(
+        <NewMentionsPlugin
+          waveId="w1"
+          onSelect={jest.fn()}
+          onSelectGroupMention={onSelectGroupMention}
+          ref={createRef()}
+        />
+      );
+
+      act(() => capturedProps.onQueryChange(query));
+      const option = capturedProps.options[0];
+      act(() => capturedProps.onSelectOption(option, null, jest.fn()));
+
+      expect(option.handle).toBe(token);
+      expect($createGroupMentionNode).toHaveBeenCalledWith(token);
+      expect(onSelectGroupMention).toHaveBeenCalledWith(group);
+    }
+  );
+
+  it("adds case-insensitive personal shortcut options", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+    (useMentionAliases as jest.Mock).mockReturnValue({
+      aliases: [
+        {
+          id: "alias-1",
+          alias: "frens",
+          members: [
+            { profile_id: "1", handle: "alice", pfp: null },
+            { profile_id: "2", handle: "bob", pfp: null },
+          ],
+        },
+      ],
+    });
+
+    render(
+      <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+    );
+    expect(capturedProps.options).toHaveLength(0);
+
+    act(() => capturedProps.onQueryChange("FRE"));
+
+    expect(capturedProps.options).toHaveLength(1);
+    expect(capturedProps.options[0]).toEqual(
+      expect.objectContaining({
+        type: "alias",
+        handle: "@frens",
+        display: "Quick tag · 2 profiles",
+      })
+    );
+  });
+
+  it("keeps an exact profile match visible when its handle collides with an alias", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({
+      identities: [
+        { id: "1", handle: "frens-one", display: null, pfp: null },
+        { id: "2", handle: "frens-two", display: null, pfp: null },
+        { id: "3", handle: "frens-three", display: null, pfp: null },
+        { id: "4", handle: "frens-four", display: null, pfp: null },
+        { id: "5", handle: "frens", display: "Exact profile", pfp: null },
+      ],
+    });
+    (useMentionAliases as jest.Mock).mockReturnValue({
+      aliases: [
+        {
+          id: "alias-1",
+          alias: "frens",
+          members: [{ profile_id: "6", handle: "alice", pfp: null }],
+        },
+      ],
+    });
+
+    render(
+      <NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={createRef()} />
+    );
+    act(() => capturedProps.onQueryChange("FRENS"));
+
+    expect(capturedProps.options).toHaveLength(5);
+    expect(capturedProps.options[0]).toEqual(
+      expect.objectContaining({ type: "alias", handle: "@frens" })
+    );
+    expect(capturedProps.options[1]).toEqual(
+      expect.objectContaining({ type: "identity", handle: "frens" })
+    );
   });
 });

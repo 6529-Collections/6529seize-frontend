@@ -7,7 +7,7 @@ export default async function GroupsPage({
 }) {
   const resolvedParams = params ? await params : undefined;
   const user = resolvedParams?.user;
-  if (!user) {
+  if (!user || user.toLowerCase() === "network") {
     notFound();
   }
   redirect(`/${user}`);

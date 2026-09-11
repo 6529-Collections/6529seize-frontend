@@ -1,0 +1,138 @@
+{
+  "schemaVersion": "public-review.solidity-source.v1",
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "source": {
+    "repository": "6529-Collections/6529Stream",
+    "commit": "92ea123380917032f01aae09691141a2a72df935",
+    "tree": "20be8c00f7acec0e2e645ca9dfcd0575753d6bbd",
+    "compilerVersion": "0.8.19+commit.7dd6d404",
+    "evmVersion": "paris",
+    "viaIR": true,
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "roots": [
+      {
+        "path": "script",
+        "scope": "script"
+      },
+      {
+        "path": "smart-contracts",
+        "scope": "protocol"
+      },
+      {
+        "path": "test",
+        "scope": "test"
+      }
+    ]
+  },
+  "releaseArtifacts": [
+    {
+      "path": "release-artifacts/contracts.json",
+      "schemaVersion": "6529stream.release-artifact-contracts.v1"
+    },
+    {
+      "path": "release-artifacts/genesis-deployment-profile.json",
+      "schemaVersion": "6529stream.genesis-deployment-profile.v2"
+    },
+    {
+      "path": "release-artifacts/governed-parameter-inventory.json",
+      "schemaVersion": "6529stream.governed-parameter-inventory.v1"
+    },
+    {
+      "path": "release-artifacts/record-family-authorization-source-catalog.json",
+      "schemaVersion": "6529stream.record-family-authorization-source-catalog.v1"
+    },
+    {
+      "path": "release-artifacts/latest/abi-checksums.json",
+      "schemaVersion": "6529stream.abi-checksums.v1"
+    },
+    {
+      "path": "release-artifacts/latest/custom-error-catalog.json",
+      "schemaVersion": "6529stream.custom-error-catalog.v1"
+    },
+    {
+      "path": "release-artifacts/latest/event-topic-catalog.json",
+      "schemaVersion": "6529stream.event-topic-catalog.v1"
+    },
+    {
+      "path": "release-artifacts/latest/interface-ids.json",
+      "schemaVersion": "6529stream.interface-ids.v1"
+    },
+    {
+      "path": "release-artifacts/latest/protocol-surface-report.json",
+      "schemaVersion": "6529stream.protocol-surface-report.v1"
+    },
+    {
+      "path": "release-artifacts/latest/release-artifact-manifest.json",
+      "schemaVersion": "6529stream.release-artifact-manifest.v1"
+    },
+    {
+      "path": "release-artifacts/latest/release-manifest.json",
+      "schemaVersion": "6529stream.release-manifest.v1"
+    },
+    {
+      "path": "release-artifacts/latest/public-beta-evidence.json",
+      "schemaVersion": "6529stream.public-beta-evidence.v1"
+    },
+    {
+      "path": "release-artifacts/latest/risk-register.json",
+      "schemaVersion": "6529stream.risk-register.v1"
+    },
+    {
+      "path": "release-artifacts/latest/source-verification-inputs.json",
+      "schemaVersion": "6529stream.source-verification-inputs.v1"
+    },
+    {
+      "path": "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
+      "schemaVersion": "6529stream.natspec-coverage-baseline.v1"
+    }
+  ],
+  "classification": {
+    "vendoredSourcePaths": [
+      "smart-contracts/vendor/openzeppelin/Address.sol",
+      "smart-contracts/integrations/arrng/ArrngConsumer.sol",
+      "smart-contracts/vendor/openzeppelin/Base64.sol",
+      "smart-contracts/libraries/Bytes32Strings.sol",
+      "smart-contracts/vendor/openzeppelin/Context.sol",
+      "smart-contracts/vendor/openzeppelin/ERC165.sol",
+      "smart-contracts/vendor/openzeppelin/ERC2981.sol",
+      "smart-contracts/vendor/openzeppelin/ERC721.sol",
+      "smart-contracts/integrations/arrng/IArrngConsumer.sol",
+      "smart-contracts/integrations/arrng/IArrngController.sol",
+      "smart-contracts/vendor/openzeppelin/IERC165.sol",
+      "smart-contracts/vendor/openzeppelin/IERC2981.sol",
+      "smart-contracts/vendor/openzeppelin/IERC721.sol",
+      "smart-contracts/vendor/openzeppelin/IERC721Metadata.sol",
+      "smart-contracts/vendor/openzeppelin/IERC721Receiver.sol",
+      "smart-contracts/vendor/openzeppelin/Math.sol",
+      "smart-contracts/vendor/openzeppelin/MerkleProof.sol",
+      "smart-contracts/vendor/openzeppelin/Ownable.sol",
+      "smart-contracts/vendor/openzeppelin/ReentrancyGuard.sol",
+      "smart-contracts/vendor/openzeppelin/SignedMath.sol",
+      "smart-contracts/vendor/openzeppelin/Strings.sol",
+      "smart-contracts/vendor/chainlink/VRFConsumerBaseV2.sol",
+      "smart-contracts/vendor/chainlink/VRFCoordinatorV2Interface.sol"
+    ],
+    "legacySourcePaths": [],
+    "excludedDefinitions": []
+  },
+  "output": {
+    "directory": "public/review-data/6529-stream/versions/2026-09-09.1",
+    "retainedVersions": [
+      "2026-07-26.1",
+      "2026-07-27.1",
+      "2026-07-28.1",
+      "2026-07-28.2",
+      "2026-07-30.1",
+      "2026-08-01.1",
+      "2026-09-09.1"
+    ],
+    "bundleFile": "reference-manifest.json",
+    "definitionsDirectory": "definitions",
+    "sourcesDirectory": "sources",
+    "indexFile": "public/review-data/6529-stream/index.json"
+  }
+}

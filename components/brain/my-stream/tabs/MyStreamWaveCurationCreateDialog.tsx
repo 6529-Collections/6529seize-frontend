@@ -6,10 +6,11 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
-import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import Button from "@/components/utils/button/Button";
 import SelectGroupModalSearchName from "@/components/utils/select-group/SelectGroupModalSearchName";
 import { getWaveCurationsQueryKey } from "@/hooks/waves/useWaveCurations";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
@@ -60,6 +61,7 @@ interface MyStreamWaveCurationCreateDialogProps {
   readonly showSuccessToast?: boolean | undefined;
   readonly curation?: ApiWaveCuration | null | undefined;
   readonly initialGroup?: ApiGroupFull | null | undefined;
+  readonly permissionMode?: "standard" | "profile" | undefined;
 }
 
 const getWaveAdminGroupId = (
@@ -252,7 +254,7 @@ function CurationGroupRow({
           )}
         </div>
         <div className="tw-min-w-0 tw-flex-1">
-          <p className="tw-mb-1 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50">
+          <p className="tw-mb-1 tw-mt-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50">
             {group.name}
           </p>
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-text-[11px]">
@@ -445,13 +447,14 @@ function CurationGroupSummaryState({
       <CurationGroupRow
         group={selectedGroup}
         trailingContent={
-          <SecondaryButton
-            onClicked={onOpenGroupSearch}
-            size="sm"
+          <Button
+            onClick={onOpenGroupSearch}
+            variant="secondary"
+            size="xs"
             className="tw-whitespace-nowrap"
           >
             Change group
-          </SecondaryButton>
+          </Button>
         }
       />
     );
@@ -463,13 +466,14 @@ function CurationGroupSummaryState({
         <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
           No group selected yet.
         </p>
-        <SecondaryButton
-          onClicked={onOpenGroupSearch}
-          size="sm"
+        <Button
+          onClick={onOpenGroupSearch}
+          variant="secondary"
+          size="xs"
           className="tw-whitespace-nowrap"
         >
           Choose group
-        </SecondaryButton>
+        </Button>
       </div>
     </div>
   );
@@ -483,8 +487,10 @@ export default function MyStreamWaveCurationCreateDialog({
   showSuccessToast = true,
   curation,
   initialGroup,
+  permissionMode = "standard",
 }: MyStreamWaveCurationCreateDialogProps) {
   const queryClient = useQueryClient();
+  const locale = useBrowserLocale();
   const { requestAuth, setToast } = useAuth();
   const isEditMode = !!curation;
   const initialName = curation?.name ?? "";
@@ -698,7 +704,7 @@ export default function MyStreamWaveCurationCreateDialog({
       tabletModal={true}
       tall={true}
       maxWidthClass="md:tw-max-w-lg"
-      headerClassName="tw-mb-0 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/[0.06] tw-pb-4 tw-pt-6"
+      headerClassName="tw-mb-0 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/[0.06] tw-py-4"
     >
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
         <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
@@ -739,6 +745,7 @@ export default function MyStreamWaveCurationCreateDialog({
                   type="text"
                   value={name}
                   onChange={handleNameChange}
+                  maxLength={50}
                   autoComplete="off"
                   placeholder="Create your own custom..."
                   className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-sm placeholder:tw-text-iron-500 hover:tw-ring-iron-650 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
@@ -746,31 +753,44 @@ export default function MyStreamWaveCurationCreateDialog({
               </div>
             </div>
 
-            <div className="tw-space-y-4">
-              <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-300">
-                Who can curate?
-              </span>
-              <div className="tw-space-y-3.5">{groupPickerContent}</div>
-            </div>
+            {permissionMode === "profile" ? (
+              <details className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/60 tw-px-4 tw-py-3">
+                <summary className="tw-cursor-pointer tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400">
+                  {t(locale, "profileCuration.permissions.advanced")}
+                </summary>
+                <div className="tw-mt-4 tw-space-y-4">
+                  <p className="tw-mb-0 tw-text-xs tw-leading-5 tw-text-iron-500">
+                    {t(locale, "profileCuration.permissions.description")}
+                  </p>
+                  <div className="tw-space-y-3.5">{groupPickerContent}</div>
+                </div>
+              </details>
+            ) : (
+              <div className="tw-space-y-4">
+                <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-300">
+                  Who can curate?
+                </span>
+                <div className="tw-space-y-3.5">{groupPickerContent}</div>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-5 tw-py-5 sm:tw-px-6">
           <div className="tw-flex tw-justify-end tw-gap-3">
-            <SecondaryButton
-              onClicked={onClose}
-              className="tw-border-white/[0.06] tw-bg-transparent tw-text-iron-400 tw-ring-0 desktop-hover:hover:tw-border-white/[0.06] desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-iron-100"
-            >
+            <Button onClick={onClose} variant="tertiary" size="md">
               Cancel
-            </SecondaryButton>
-            <PrimaryButton
+            </Button>
+            <Button
               loading={saveMutation.isPending}
               disabled={isSubmitDisabled}
-              onClicked={handleSubmit}
-              padding="tw-px-6 tw-py-2.5"
+              onClick={handleSubmit}
+              variant="primary"
+              size="md"
+              className="tw-px-6"
             >
               {submitButtonLabel}
-            </PrimaryButton>
+            </Button>
           </div>
         </div>
       </div>

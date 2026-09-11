@@ -1,0 +1,325 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset#function:0x70a08231",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x70a08231",
+          "signature": "balanceOf(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset#function:0xa9059cbb",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "transfer",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xa9059cbb",
+          "signature": "transfer(address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset#function:0x23b872dd",
+          "declaringDefinitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "transferFrom",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x23b872dd",
+          "signature": "transferFrom(address,address,uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "balanceOf(address)",
+          "displaySignature": "balanceOf(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset#function:0x70a08231",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6SUVSQzIwUHJpbWFyeVNldHRsZW1lbnRBc3NldCNmdW5jdGlvbjoweDcwYTA4MjMx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "balanceOf",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 68,
+            "byteStart": 284,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:7a9cdf099db2241a909d1a400a56960a5d33ee5889266d5f29c6dfa382355da4",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x70a08231",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "transfer(address,uint256)",
+          "displaySignature": "transfer(address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset#function:0xa9059cbb",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6SUVSQzIwUHJpbWFyeVNldHRsZW1lbnRBc3NldCNmdW5jdGlvbjoweGE5MDU5Y2Ji",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transfer",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 77,
+            "byteStart": 357,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:8c0ba06110ab9168fe01876cfc2b0e5854572193857173d705104f44e848f76e",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0xa9059cbb",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "transferFrom(address,address,uint256)",
+          "displaySignature": "transferFrom(address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset#function:0x23b872dd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6SUVSQzIwUHJpbWFyeVNldHRsZW1lbnRBc3NldCNmdW5jdGlvbjoweDIzYjg3MmRk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transferFrom",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 97,
+            "byteStart": 439,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L13",
+            "lineEnd": 13,
+            "lineStart": 13,
+            "snippetSha256": "sha256:14dbeddc3d970550060204479626ba13c5184ab30c0ef09cf0225f96c8e6eb9a",
+            "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+          },
+          "selector": "0x23b872dd",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVByaW1hcnlTYWxlU2V0dGxlbWVudC5zb2w6SUVSQzIwUHJpbWFyeVNldHRsZW1lbnRBc3NldA",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IERC20PrimarySettlementAsset",
+    "natspec": "",
+    "range": {
+      "byteLength": 299,
+      "byteStart": 239,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPrimarySaleSettlement.sol#L10-L14",
+      "lineEnd": 14,
+      "lineStart": 10,
+      "snippetSha256": "sha256:8caef032ca10e128c8a3a90fc51b8fa8d7bb00dad11cc35dcd85632828ed0498",
+      "sourceSha256": "sha256:94b772f2825808cfcc100d3c01fec76ff619bdea0db07e3b9ca76280684126d0"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamPrimarySaleSettlement.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset#function:0x23b872dd",
+      "definitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset#function:0x70a08231",
+      "definitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset#function:0xa9059cbb",
+      "definitionId": "smart-contracts/StreamPrimarySaleSettlement.sol:IERC20PrimarySettlementAsset",
+      "severity": "advisory"
+    }
+  ]
+}

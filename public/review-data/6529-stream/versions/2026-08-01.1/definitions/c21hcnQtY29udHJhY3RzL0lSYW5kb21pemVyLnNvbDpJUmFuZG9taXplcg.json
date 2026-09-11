@@ -1,0 +1,220 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IRandomizer.sol:IRandomizer#function:0xbf1b89d3",
+          "declaringDefinitionId": "smart-contracts/IRandomizer.sol:IRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "_mintIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "_saltfun_o",
+              "type": "uint256"
+            }
+          ],
+          "name": "calculateTokenHash",
+          "outputs": [],
+          "selector": "0xbf1b89d3",
+          "signature": "calculateTokenHash(uint256,uint256,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IRandomizer.sol:IRandomizer#function:0x4cf0c697",
+          "declaringDefinitionId": "smart-contracts/IRandomizer.sol:IRandomizer",
+          "inherited": false,
+          "inputs": [],
+          "name": "isRandomizerContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x4cf0c697",
+          "signature": "isRandomizerContract()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "displaySignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IRandomizer.sol:IRandomizer#function:0xbf1b89d3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_collectionID",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "_mintIndex",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "_saltfun_o",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lSYW5kb21pemVyLnNvbDpJUmFuZG9taXplciNmdW5jdGlvbjoweGJmMWI4OWQz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "calculateTokenHash",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 108,
+            "byteStart": 174,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IRandomizer.sol#L7-L8",
+            "lineEnd": 8,
+            "lineStart": 7,
+            "snippetSha256": "sha256:4d331279c72fc75e284aaf56f0ba84d239c1352d760eb0ddbc7a20091f2f3e27",
+            "sourceSha256": "sha256:41cd86209b53ff346e65cc5e0bbf606ed0de981be2289af0020635a7806f2190"
+          },
+          "selector": "0xbf1b89d3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isRandomizerContract()",
+          "displaySignature": "isRandomizerContract()",
+          "functionKind": "function",
+          "id": "smart-contracts/IRandomizer.sol:IRandomizer#function:0x4cf0c697",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lSYW5kb21pemVyLnNvbDpJUmFuZG9taXplciNmdW5jdGlvbjoweDRjZjBjNjk3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isRandomizerContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 61,
+            "byteStart": 326,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IRandomizer.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:a634fc4d8ccc03dfff80476205ca0a6cb2eec5ae057f7c411b6edacebfaa8df5",
+            "sourceSha256": "sha256:41cd86209b53ff346e65cc5e0bbf606ed0de981be2289af0020635a7806f2190"
+          },
+          "selector": "0x4cf0c697",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IRandomizer.sol:IRandomizer",
+    "inheritance": [],
+    "interface": {
+      "abiSha256": "sha256:69476ee0c7139c273afae875e9349fbeb34e9ae9fd314d45c888450b762ab7a4",
+      "interfaceId": "0xf3eb4f44",
+      "interfaceIdSource": "selector_xor",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lSYW5kb21pemVyLnNvbDpJUmFuZG9taXplcg",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IRandomizer.sol:IRandomizer"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IRandomizer",
+    "natspec": "",
+    "range": {
+      "byteLength": 330,
+      "byteStart": 59,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IRandomizer.sol#L5-L12",
+      "lineEnd": 12,
+      "lineStart": 5,
+      "snippetSha256": "sha256:7af7eb3d0d34062b5df0fff0152a2f8cdf0955978c078d4d75a736b9e29a2f4f",
+      "sourceSha256": "sha256:41cd86209b53ff346e65cc5e0bbf606ed0de981be2289af0020635a7806f2190"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IRandomizer.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/IRandomizer.sol:IRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IRandomizer.sol:IRandomizer#function:0x4cf0c697",
+      "definitionId": "smart-contracts/IRandomizer.sol:IRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IRandomizer.sol:IRandomizer#function:0xbf1b89d3",
+      "definitionId": "smart-contracts/IRandomizer.sol:IRandomizer",
+      "severity": "advisory"
+    }
+  ]
+}

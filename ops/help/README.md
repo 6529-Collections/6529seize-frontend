@@ -25,15 +25,28 @@ Each record should be short, factual, and linkable:
 - `related_paths` should include only useful fallback or adjacent destinations.
 - `source_refs` should point to the frontend docs, components, or route files
   that justify the record.
+- `environments` may contain `local`, `staging`, and `production` for records
+  whose routes or controls are available only in selected environments. Omit
+  it for records that are valid everywhere.
 - Do not index migrated legacy WordPress pages. The sync script rejects records
   whose canonical or related paths resolve to WordPress-migrated `page.tsx`
   files, or whose `source_refs` point at those files.
 
-Run this after editing:
+Run both sync steps after editing:
 
 ```bash
 ./bin/6529 run help-index:sync
+./bin/6529 run agent-files:sync
 ```
 
-The sync step validates record shape, required V1 records, source refs, and
-internal route paths, then writes `public/help-index.json`.
+`help-index:sync` validates record shape, required V1 records, source refs, and
+internal route paths, then filters environment-scoped records using
+`BASE_ENDPOINT` and writes `public/help-index.json`. Missing or unrecognized
+endpoints fail closed to the production corpus. `agent-files:sync` regenerates
+`public/glossary.json` and `public/llms.txt` from that published,
+environment-matching corpus and `ops/help/llms.txt.template`.
+
+Commit the regenerated `public/` artifacts with the corpus change. PR CI runs
+`__tests__/scripts/sync-agent-files.test.ts` (the "Verify agent files sync"
+step) whenever these files change and fails if the committed artifacts drift
+from the corpus.

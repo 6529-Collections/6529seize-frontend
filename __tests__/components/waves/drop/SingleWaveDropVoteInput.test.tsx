@@ -200,7 +200,7 @@ describe("SingleWaveDropVoteInput", () => {
     expect(activePercentageButton).toBeUndefined();
     expect(
       percentageButtons.every((button) =>
-        button.className.includes("tw-bg-[#26272B]")
+        button.className.includes("tw-bg-iron-800")
       )
     ).toBe(true);
   });

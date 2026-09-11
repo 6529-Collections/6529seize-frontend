@@ -7,6 +7,8 @@ Parent: [Network Index](README.md)
 `/network/levels` is the reference page for Level thresholds.
 It maps combined `TDH + Rep` to Levels and shows the full threshold table.
 The current table covers Level `0` through `100` (max threshold `25,000,000`).
+When a signed-in active profile is available, the page also summarizes that
+profile's current Level and progress toward the next Level.
 
 ## Location in the Site
 
@@ -30,17 +32,23 @@ The current table covers Level `0` through `100` (max threshold `25,000,000`).
 ## What You See
 
 - A `TDH + Rep` progression chart across Levels.
-- Summary bullets that define how Levels work.
-- A full table with `Level` and `TDH + Rep` thresholds.
-- A sticky table header on scroll.
+- Explanatory text that defines how Levels work.
+- For a signed-in active profile, a compact `Your Level` summary with the
+  current Level, combined `TDH + Rep`, next Level, and additional amount needed,
+  positioned directly above the table.
+- A full-width table with all `Level` and `TDH + Rep` thresholds.
+- Table headings that remain visible while the table is scrolled.
 
 ## User Journey
 
 1. Open `/network/levels`.
-2. Review the summary bullets for how Levels are defined.
-3. Review the `TDH + Rep` progression chart for trend and scale.
-4. Hover chart points to inspect exact threshold tooltips.
-5. Use the table for exact thresholds by Level (`0` through `100`).
+2. Review the `TDH + Rep` progression chart for trend and scale.
+3. Review the explanatory text above the threshold table.
+4. If signed in, review the active profile's `Your Level` summary directly
+   above the table. When a profile proxy is active, the summary reflects that
+   proxy profile.
+5. Use the table for exact thresholds by Level (`0` through `100`). Pointer
+   users can also hover chart points for threshold tooltips.
 
 ## Common Scenarios
 
@@ -53,15 +61,28 @@ The current table covers Level `0` through `100` (max threshold `25,000,000`).
 - No query params, filters, sorting, or pagination.
 - Thresholds are static app data (no route-level API request).
 - No route-level loading, empty, or retry state.
-- Content is the same for signed-in and signed-out users.
+- Signed-out users see the normal chart, explanation, and complete reference
+  table without a personalized empty state or sign-in prompt.
+- The `Your Level` summary uses profile data already loaded by the app. It is
+  omitted while profile data is loading or unavailable.
+- An active profile proxy takes precedence over the connected wallet profile.
+- The current Level is the active profile's assigned Level. The next target and
+  remaining amount use the reference thresholds shown on the page.
 - The chart uses a logarithmic y-axis to handle wide threshold ranges.
+- The chart has an accessible description, and every exact threshold is also
+  available in the semantic table rather than only through hover or color.
 - If reduced motion is enabled in OS/browser settings, chart animation is
   disabled.
 
 ## Edge Cases
 
-- On touch or no-hover devices, chart tooltip access can be limited.
-- On narrow screens, the table scrolls horizontally.
+- A real Level `0` profile is shown as Level `0`; loading or missing data does
+  not produce a placeholder Level.
+- At Level `100`, the summary reports that the profile has reached the highest
+  Level instead of showing a nonexistent next Level.
+- On touch or no-hover devices, use the table for exact chart values.
+- On narrow screens, the chart, summary, explanation, and table remain in one
+  vertical page flow. The table container can scroll when needed.
 - If a `Level` indicator is rendered as plain text in a surface, it will not
   open this route.
 
@@ -74,7 +95,8 @@ The current table covers Level `0` through `100` (max threshold `25,000,000`).
 
 ## Limitations / Notes
 
-- The page is reference-only and does not calculate wallet-specific progression.
+- The page does not accept manual scores or simulate Levels. Personalized
+  progress is shown only from a real signed-in active profile.
 - Threshold changes require an app deploy with an updated Level table.
 
 ## Related Pages

@@ -97,8 +97,10 @@ describe("verify-deployment-version", () => {
       endpoint_path: "/api/version",
       expected_version: EXPECTED_SHA,
       actual_version: EXPECTED_SHA,
+      consecutive_matches: 1,
       matched: true,
       no_store: true,
+      required_matches: 1,
       status: 200,
     });
   });
@@ -130,6 +132,60 @@ describe("verify-deployment-version", () => {
     expect(fetchImpl).toHaveBeenCalledTimes(2);
     expect(sleep).toHaveBeenCalledWith(1);
     expect(result.evidence.attempt).toBe(2);
+  });
+
+  it("requires consecutive live HTTP version matches when requested", async () => {
+    const clock = deterministicClock();
+    const sleep = jest.fn().mockResolvedValue(undefined);
+    const fetchImpl = jest
+      .fn()
+      .mockResolvedValueOnce(response())
+      .mockResolvedValueOnce(
+        response({
+          body: { version: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" },
+        })
+      )
+      .mockResolvedValueOnce(response())
+      .mockResolvedValueOnce(response());
+
+    const result = await verifyDeploymentVersion({
+      baseUrl: "https://6529.io",
+      expectedVersion: EXPECTED_SHA,
+      attempts: 4,
+      requiredMatches: 2,
+      delayMs: 1,
+      timeoutMs: 100,
+      fetchImpl,
+      sleep,
+      ...clock,
+    });
+
+    expect(result.ok).toBe(true);
+    expect(fetchImpl).toHaveBeenCalledTimes(4);
+    expect(result.evidence).toMatchObject({
+      attempt: 4,
+      consecutive_matches: 2,
+      required_matches: 2,
+    });
+  });
+
+  it("rejects impossible consecutive match requirements", async () => {
+    const fetchImpl = jest.fn();
+
+    await expect(
+      verifyDeploymentVersion({
+        baseUrl: "https://6529.io",
+        expectedVersion: EXPECTED_SHA,
+        attempts: 1,
+        requiredMatches: 2,
+        delayMs: 1,
+        timeoutMs: 100,
+        fetchImpl,
+        sleep: jest.fn(),
+      })
+    ).rejects.toThrow("--required-matches cannot exceed --attempts");
+
+    expect(fetchImpl).not.toHaveBeenCalled();
   });
 
   it("fails when the version never matches", async () => {

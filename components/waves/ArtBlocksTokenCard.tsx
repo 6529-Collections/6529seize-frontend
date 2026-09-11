@@ -10,6 +10,8 @@ import {
   type ReactNode,
 } from "react";
 
+import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import {
   fetchArtBlocksMeta,
   inferSeries,
@@ -20,6 +22,13 @@ import {
   buildMediaUrl,
   type ArtBlocksTokenIdentifier,
 } from "@/services/artblocks/url";
+import { bucketMs } from "@/utils/monitoring/mobileLaunchTimingBuckets";
+
+export const ART_BLOCKS_SIGNAL_NAMES = {
+  impression: "ab_card_impression",
+  linkOut: "ab_card_link_out",
+  liveOpen: "ab_card_live_open",
+} as const;
 
 interface ArtBlocksTokenCardProps {
   readonly href: string;
@@ -50,7 +59,13 @@ const recordArtBlocksEvent = (
 
   const rum = (
     window as unknown as {
-      awsRum?: { recordEvent?: Function | undefined } | undefined;
+      awsRum?:
+        | {
+            recordEvent?:
+              | ((eventName: string, detail: Record<string, unknown>) => void)
+              | undefined;
+          }
+        | undefined;
     }
   ).awsRum;
   if (rum && typeof rum.recordEvent === "function") {
@@ -76,14 +91,11 @@ export default function ArtBlocksTokenCard({
   const lastTriggerRef = useRef<HTMLElement | null>(null);
   const openedAtRef = useRef<number | null>(null);
 
-  const eventPayload = useMemo(
-    () => ({ href, tokenId: id.tokenId, contract: id.contract }),
-    [href, id.contract, id.tokenId]
-  );
-
   useEffect(() => {
-    recordArtBlocksEvent("ab_card_impression", eventPayload);
-  }, [eventPayload]);
+    recordArtBlocksEvent(ART_BLOCKS_SIGNAL_NAMES.impression, {
+      surface: "wave_artblocks_card",
+    });
+  }, [href, id.contract, id.tokenId]);
 
   useEffect(() => {
     setMeta(null);
@@ -157,9 +169,8 @@ export default function ArtBlocksTokenCard({
       typeof openedAt === "number" ? Math.max(Date.now() - openedAt, 0) : 0;
     openedAtRef.current = null;
 
-    recordArtBlocksEvent("ab_card_live_open", {
-      ...eventPayload,
-      dwell_ms: dwell,
+    recordArtBlocksEvent(ART_BLOCKS_SIGNAL_NAMES.liveOpen, {
+      dwell_bucket: bucketMs(dwell),
     });
 
     const focusTarget = lastTriggerRef.current;
@@ -167,7 +178,7 @@ export default function ArtBlocksTokenCard({
     if (focusTarget) {
       focusTarget.focus();
     }
-  }, [eventPayload, showLive]);
+  }, [showLive]);
 
   const openLiveViewer = useCallback(
     (trigger: HTMLElement | null) => {
@@ -181,13 +192,12 @@ export default function ArtBlocksTokenCard({
       }
 
       openedAtRef.current = Date.now();
-      recordArtBlocksEvent("ab_card_link_out", {
-        ...eventPayload,
+      recordArtBlocksEvent(ART_BLOCKS_SIGNAL_NAMES.linkOut, {
         target: "viewer",
       });
       setShowLive(true);
     },
-    [eventPayload, handleCloseLive, showLive]
+    [handleCloseLive, showLive]
   );
 
   useEffect(() => {
@@ -224,11 +234,10 @@ export default function ArtBlocksTokenCard({
   );
 
   const handleAnchorClick = useCallback(() => {
-    recordArtBlocksEvent("ab_card_link_out", {
-      ...eventPayload,
+    recordArtBlocksEvent(ART_BLOCKS_SIGNAL_NAMES.linkOut, {
       target: "artblocks",
     });
-  }, [eventPayload]);
+  }, []);
 
   return (
     <div
@@ -325,25 +334,27 @@ export default function ArtBlocksTokenCard({
       </div>
 
       <div className="tw-mt-auto tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-3">
-        <button
+        <Button
           type="button"
-          className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition hover:tw-bg-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300"
+          variant="action"
+          size="sm"
           aria-label="View live render on Art Blocks"
           aria-expanded={showLive}
           onClick={(event) => openLiveViewer(event.currentTarget)}
         >
           View live
-        </button>
-        <a
+        </Button>
+        <ButtonLink
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-iron-700 tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition hover:tw-border-primary-400 hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+          variant="tertiary"
+          size="sm"
           aria-label="Open this token on Art Blocks"
           onClick={handleAnchorClick}
         >
           Open on Art Blocks
-        </a>
+        </ButtonLink>
       </div>
 
       {showLive && (

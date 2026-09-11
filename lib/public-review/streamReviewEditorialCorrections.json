@@ -1,0 +1,196 @@
+{
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-09-09.1",
+  "source": {
+    "repository": "6529-Collections/6529Stream",
+    "commit": "92ea123380917032f01aae09691141a2a72df935"
+  },
+  "pages": {
+    "overview": {
+      "sha256": "47dc8f2c748abc5c809607b79b67f35936bafdf5e3b9bdf7efba64093e090f36",
+      "replacements": [
+        [
+          "Parts of that journey are built. The permanent Core and manager mint path exist. Full artist authority and the complete launch sale and payment connections still need work. The retained signed-sale rehearsal uses a test-only legacy Core; it is not proof that the whole journey is connected to the permanent Core.",
+          "publicReview.corrections.overviewMint"
+        ],
+        [
+          "identity, supply, and the built mint path.",
+          "publicReview.corrections.overviewMintLink"
+        ]
+      ]
+    },
+    "artwork-lifecycle": {
+      "sha256": "4b9a92182e79eb50fac0974bf4f0cb0b509dbd703ad6859d8bd6051145e57a9e",
+      "replacements": [
+        [
+          "The permanent Core, mint manager, and ledger are built.",
+          "publicReview.corrections.mintComponents"
+        ],
+        [
+          "In the built permanent-Core path, the registered mint manager validates its phase and gates, consumes allowance and replay records in the ledger, then asks Core to mint.",
+          "publicReview.corrections.mintExecution"
+        ],
+        [
+          "Burn blocking is a separate irreversible step after closure. Core freeze then requires closure and burn blocking in an earlier block. Freeze locks the Core collection boundary; it does not by itself freeze every external artwork record or keep a file online.",
+          "publicReview.corrections.lifecycleFreeze"
+        ]
+      ]
+    },
+    "for-artists": {
+      "sha256": "efdefc20a44350421ed31d32202e5c09698e9ea0621f76303cda92aafc9d2f60",
+      "replacements": [
+        [
+          "The permanent Core reads royalty information from a configured resolver. This is information for marketplaces; it cannot force a marketplace to pay.",
+          "publicReview.corrections.artistRoyalties"
+        ]
+      ]
+    },
+    "roles-and-trust": {
+      "sha256": "86d08d4c80b7e07e92dee00c809ca5b4d576f41542280e44660c2d368020f919",
+      "replacements": [
+        [
+          "Stream distributes responsibilities across contracts and people.",
+          "publicReview.corrections.roleIntroduction"
+        ],
+        [
+          "The current registered manager can ask the permanent Core to mint. It checks phase policy and uses the ledger.",
+          "publicReview.corrections.managerRole"
+        ],
+        [
+          "The newer artist archive stores evidence and the registry directory identifies contracts. Neither is the completed authority system. ADR 0023's division of artist responsibilities remains proposed.",
+          "publicReview.corrections.artistConnection"
+        ]
+      ]
+    },
+    "curation-and-tdh-authorization": {
+      "sha256": "dc1cf47694f9f8377490999af4073f0b3ac790629e98364d4e47c36b7eb1c03e",
+      "replacements": [
+        [
+          "TDH scoring and community selection are offchain decisions.",
+          "publicReview.corrections.curationIntroduction"
+        ],
+        [
+          "The older Drop path checks a signer epoch, expiry, cancellation, and consumed authorization identity. Changing the epoch invalidates old permissions.",
+          "publicReview.corrections.signerEpoch"
+        ]
+      ]
+    },
+    "tokens-collections-and-minting": {
+      "sha256": "eea08bd091bbf2f936e780720ed24555547d9acb73c58fa01281b21dea7984f9",
+      "replacements": [
+        ["## The built manager path", "publicReview.corrections.mintHeading"],
+        [
+          "[accepted mint specification]",
+          "publicReview.corrections.mintSpecificationLink"
+        ],
+        [
+          "The registered manager checks the phase, caller, token batch, and required gates.",
+          "publicReview.corrections.managerChecks"
+        ],
+        [
+          "The presence of working manager, ledger, and Core functions does not establish a completed artist-consent check or paid sale.",
+          "publicReview.corrections.mintRemaining"
+        ]
+      ]
+    },
+    "freezing-preservation-and-artwork-finality": {
+      "sha256": "156d08fb75364ea4d84c3c6985aad3eb83ab7e29ba38817ea3cfb84605d02fbe",
+      "replacements": [
+        [
+          "Burn blocking is a separate irreversible action after closure. Core freeze requires the collection to be closed and burns to have been blocked in an earlier block. This ordering gives a distinct boundary between ending minting, stopping destruction, and freezing the Core collection state.",
+          "publicReview.corrections.freezeOrder"
+        ],
+        [
+          "The source contains a finality registry and a read adapter that combines Core facts with collection metadata. The registry checks the expected components and manifest, schedules terminal actions, supports a guardian veto, and rechecks conditions at execution.",
+          "publicReview.corrections.finalityConnection"
+        ]
+      ]
+    },
+    "revenue-splits-and-royalties": {
+      "sha256": "400cad1fa43123f04cc085524204adb87944e6b2c59bea04cddd7d2762f7ed18",
+      "replacements": [
+        [
+          "**Built in the permanent Core:** `royaltyInfo` asks the configured royalty resolver for a receiver and rate. If the configured pointer is not live, it returns no receiver and zero royalty. Resolver failures are handled by the bounded external-read code. Do not describe this Core as reporting a universal fixed 6.9% royalty; that belongs to the legacy Core.",
+          "publicReview.corrections.royaltyLookup"
+        ],
+        [
+          "Fixed-price and auction credits are separate balances in separate contracts. Recipients withdraw what they are owed. A failed withdrawal rolls back that attempt and leaves the credit available; it does not make the payment disappear. Auction bidder refunds are also accounted for separately from seller proceeds.",
+          "publicReview.corrections.withdrawalLimits"
+        ],
+        [
+          "The split factory and wallets represent fixed recipients and shares. The resolver selects revenue policies, and the settlement contract provides a separate payment entry point. These components need to be connected to the actual sale path; merely deploying a wallet does not route sale money into it.",
+          "publicReview.corrections.assetDeprecation"
+        ]
+      ]
+    },
+    "fixed-price-sales-and-auctions": {
+      "sha256": "17560ca34d8001c534ad64084d37916261a738d3e1b521e996df5251af55233f",
+      "replacements": [
+        [
+          "If there are no bids, the token returns to an ordinary poster wallet. A contract poster receives a claim right so it can choose a receiving address. Cancellation is limited to the pre-bid case and the permitted poster/admin callers. A failed safe transfer rolls back that cancellation.",
+          "publicReview.corrections.auctionLimits"
+        ]
+      ]
+    },
+    "randomness": {
+      "sha256": "e23aa9686f24c9e6811eca81052568ec2e3e0398ec7fd3664ed53a1c37b52c91",
+      "replacements": [
+        [
+          "**Built in the permanent Core:** the token records the entropy coordinator selected at mint and a mint commitment. **Agreed but unfinished:** the complete coordinator, reveal-fee, provider, and recovery path needs its own implementation and launch evidence. Core hooks alone do not prove that service exists.",
+          "publicReview.corrections.randomnessCommitment"
+        ],
+        [
+          "These integrations belong to the older Core flow. The retained sale rehearsal uses a test-only legacy Core and wires those randomizers there. A passing legacy callback is not proof of a complete reveal connection for the permanent Core.",
+          "publicReview.corrections.randomnessGas"
+        ]
+      ]
+    },
+    "metadata-scripts-and-dependencies": {
+      "sha256": "3572fc15778cb550b1cc1b0f19d7b175faf7e90b0fb5145e78a8ecfe038b8fa2",
+      "replacements": [
+        [
+          "The permanent Core records token identity and immutable token data. Artwork presentation belongs to surrounding metadata contracts and the configured router.",
+          "publicReview.corrections.metadataIntroduction"
+        ],
+        [
+          "## Refresh events are now built",
+          "publicReview.corrections.metadataHeading"
+        ]
+      ]
+    },
+    "governance-pausing-and-successors": {
+      "sha256": "ac679aae5d615c45a4dec9b701e06745e48a1f203425cd110eacdffd1ab5785b",
+      "replacements": [
+        [
+          "The permanent Core is not an upgradeable proxy. Surrounding contracts can be replaced through governed references.",
+          "publicReview.corrections.governanceIntroduction"
+        ],
+        [
+          "Core pointer changes check the registered target and its expected identity. Pointer freezing is separate from collection freezing.",
+          "publicReview.corrections.governancePointers"
+        ]
+      ]
+    },
+    "security-testing-and-known-limitations": {
+      "sha256": "029a863a9eaa4c66eb60bc1c0a5ede814a4aceb6726b62f5a1e880c7dd02b6b3",
+      "replacements": [
+        [
+          "The accepted design requires artist acceptance and consent, collaborator and estate protections, exact paid-mint settlement, complete launch component bindings, and evidence that replacement contracts preserve obligations and history.",
+          "publicReview.corrections.readinessSpecifications"
+        ],
+        [
+          "- The manager and ledger implement ADR 0018's batch operation roots, per-token identities, and replay accounting.",
+          "publicReview.corrections.readinessMint"
+        ],
+        [
+          "- Core reads royalty information from a resolver and has restricted metadata refresh helpers.",
+          "publicReview.corrections.readinessRoyalty"
+        ],
+        [
+          "Trace one complete artist-approved paid mint. Check rollback and replay across manager, ledger, payment, and Core. Check the boundary between legacy rehearsals and permanent-Core evidence. Exercise collection closure, burn blocking, finality, emergency stops, and module replacement with their exact authorities.",
+          "publicReview.corrections.readinessPriority"
+        ]
+      ]
+    }
+  }
+}

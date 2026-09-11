@@ -1,13 +1,11 @@
 "use client";
 
-import { MagnifyingGlassIcon, UserIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useKey } from "react-use";
 import BellIcon from "@/components/common/icons/BellIcon";
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -49,14 +47,11 @@ function WebSidebar({
   });
   const { haveUnreadNotifications } = useUnreadNotifications(
     hasValidWalletAuth ? (connectedProfile?.handle ?? null) : null,
-    { enabled: hasValidWalletAuth }
+    {
+      enabled: hasValidWalletAuth,
+      profileId: connectedProfile?.id,
+    }
   );
-  const profilePath = useMemo(() => {
-    if (connectedProfile?.handle) return `/${connectedProfile.handle}`;
-    if (address) return `/${address}`;
-    return null;
-  }, [connectedProfile?.handle, address]);
-
   const isTouchScreen = useIsTouchDevice();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -162,7 +157,7 @@ function WebSidebar({
             />
 
             <div
-              className="no-scrollbar tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+              className="tw-no-scrollbar tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
               data-sidebar-scroll="true"
             >
               <div className="tw-flex-1">
@@ -184,6 +179,8 @@ function WebSidebar({
                 </div>
               )}
 
+              <HeaderShare isCollapsed={shouldShowCollapsed} />
+
               {address && (
                 <div
                   className={showDesktopSearch ? "tw-px-3" : "tw-px-3 tw-pt-2"}
@@ -199,21 +196,6 @@ function WebSidebar({
                 </div>
               )}
 
-              {profilePath && (
-                <div className="tw-px-3">
-                  <WebSidebarNavItem
-                    href={profilePath}
-                    icon={UserIcon}
-                    iconSizeClass="tw-h-6 tw-w-6"
-                    active={pathname === profilePath}
-                    collapsed={shouldShowCollapsed}
-                    label="Profile"
-                  />
-                </div>
-              )}
-
-              {!address && <HeaderShare isCollapsed={shouldShowCollapsed} />}
-
               <WebSidebarUser
                 isCollapsed={shouldShowCollapsed}
                 profile={profile}
@@ -222,21 +204,9 @@ function WebSidebar({
           </div>
         </div>
       </div>
-      <CommonAnimationWrapper mode="sync" initial>
-        {isSearchOpen && (
-          <CommonAnimationOpacity
-            key="search-modal"
-            elementClasses="tw-fixed tw-inset-0 tw-z-50"
-            elementRole="dialog"
-            onClicked={(event) => event.stopPropagation()}
-          >
-            <HeaderSearchModal
-              onClose={() => setIsSearchOpen(false)}
-              wave={null}
-            />
-          </CommonAnimationOpacity>
-        )}
-      </CommonAnimationWrapper>
+      {isSearchOpen && (
+        <HeaderSearchModal onClose={() => setIsSearchOpen(false)} wave={null} />
+      )}
       {!isTouchScreen && (
         <ReactTooltip
           id="sidebar-tooltip"

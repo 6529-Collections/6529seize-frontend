@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import YAML from "yaml";
 
 const SCRIPT_PATH = path.join(process.cwd(), "scripts", "coverage-floor.cjs");
 
@@ -117,5 +118,92 @@ describe("coverage-floor check mode", () => {
     const check = runFloor(root);
     expect(check.status).toBe(1);
     expect(check.stderr).toContain("Baseline not found");
+  });
+});
+
+describe("coverage-floor workflow", () => {
+  const workflow = YAML.parse(
+    fs.readFileSync(".github/workflows/coverage-floor.yml", "utf8")
+  );
+
+  it("names both checks and preserves their failures", () => {
+    expect(workflow.name).toBe("Full Jest suite and coverage");
+    const steps = workflow.jobs["coverage-floor"].steps;
+    for (const id of ["jest", "coverage"]) {
+      const step = steps.find(
+        (candidate: { id?: string }) => candidate.id === id
+      );
+      expect(step).toBeDefined();
+      expect(step).not.toHaveProperty("continue-on-error");
+    }
+  });
+
+  it.each([
+    ["failure", "success", "The Jest step failed."],
+    ["success", "failure", "The coverage floor step failed."],
+    ["failure", "skipped", "no coverage summary was produced"],
+    ["skipped", "skipped", "The Jest suite did not run."],
+    ["success", "success", "| Coverage floor | success |"],
+  ])(
+    "summarizes Jest %s and coverage %s independently",
+    (jestOutcome, coverageOutcome, message) => {
+      const step = workflow.jobs["coverage-floor"].steps.find(
+        (candidate: { name?: string }) =>
+          candidate.name === "Summarize test and coverage outcomes"
+      );
+      expect(step.if).toBe("always()");
+      expect(step.env).toEqual({
+        JEST_OUTCOME: "${{ steps.jest.outcome }}",
+        COVERAGE_OUTCOME: "${{ steps.coverage.outcome }}",
+      });
+      const root = fs.mkdtempSync(
+        path.join(os.tmpdir(), "coverage-step-summary-")
+      );
+      const summaryPath = path.join(root, "summary.md");
+      try {
+        const result = spawnSync(
+          "bash",
+          ["-e", "-o", "pipefail", "-c", step.run],
+          {
+            encoding: "utf8",
+            env: {
+              ...process.env,
+              JEST_OUTCOME: jestOutcome,
+              COVERAGE_OUTCOME: coverageOutcome,
+              GITHUB_STEP_SUMMARY: summaryPath,
+            },
+          }
+        );
+        expect(result.status).toBe(0);
+        const summary = fs.readFileSync(summaryPath, "utf8");
+        expect(summary).toContain(`| Full Jest suite | ${jestOutcome} |`);
+        expect(summary).toContain(`| Coverage floor | ${coverageOutcome} |`);
+        expect(summary).toContain(message);
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    }
+  );
+
+  it("reports the coverage result when a failing suite still writes a summary", () => {
+    const workflow = YAML.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), ".github/workflows/coverage-floor.yml"),
+        "utf8"
+      )
+    ) as {
+      jobs: {
+        "coverage-floor": {
+          steps: Array<{ name?: string; if?: string }>;
+        };
+      };
+    };
+    const step = workflow.jobs["coverage-floor"].steps.find(
+      ({ name }) => name === "Check coverage against baseline"
+    );
+
+    expect(step?.if).toBe(
+      "always() && hashFiles('coverage/coverage-summary.json') != ''"
+    );
   });
 });

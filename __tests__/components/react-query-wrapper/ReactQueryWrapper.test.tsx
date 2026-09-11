@@ -169,13 +169,13 @@ describe("ReactQueryWrapper context", () => {
     });
   });
 
-  it("invalidateNotifications invalidates notification queries", () => {
+  it("invalidateNotifications leaves other connected accounts cached", () => {
     const { client, ctx } = createTestSetup();
     act(() => ctx.invalidateNotifications());
     expect(client.invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
     });
-    expect(client.invalidateQueries).toHaveBeenCalledWith({
+    expect(client.invalidateQueries).not.toHaveBeenCalledWith({
       queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
     });
     expect(client.invalidateQueries).toHaveBeenCalledWith({
@@ -265,6 +265,7 @@ it("invalidateAll calls queryClient.invalidateQueries with no args", () => {
 
 it("invalidates auth-sensitive queries without clearing unrelated cache", () => {
   const { client, ctx } = createTestSetup();
+  jest.spyOn(client, "removeQueries");
   client.setQueryData([QueryKey.PROFILE, "alice"], { handle: "alice" });
   client.setQueryData([QueryKey.WAVES_V2, { viewer_identity: "0x1" }], []);
   client.setQueryData([QueryKey.WAVES_PUBLIC, { name: "memes" }], []);
@@ -273,8 +274,33 @@ it("invalidates auth-sensitive queries without clearing unrelated cache", () => 
     []
   );
   client.setQueryData([QueryKey.GLOBAL_TDH_STATS], { total: 1 });
+  const curationsKey = [QueryKey.COMMUNITY_CURATIONS_DROPS, { limit: 20 }];
+  client.setQueryData(curationsKey, {
+    pages: [
+      {
+        data: [
+          { id: "drop-1", context_profile_context: { reaction: ":wave:" } },
+        ],
+      },
+    ],
+    pageParams: [1],
+  });
 
   act(() => ctx.invalidateAuthSensitiveQueries());
+
+  expect(client.removeQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.DROPS],
+  });
+  expect(client.removeQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.DROP],
+  });
+  expect(client.removeQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.COMMUNITY_CURATIONS_DROPS],
+  });
+  expect(client.getQueryData(curationsKey)).toBeUndefined();
+  expect(client.getQueryData([QueryKey.GLOBAL_TDH_STATS])).toEqual({
+    total: 1,
+  });
 
   expect(client.invalidateQueries).toHaveBeenCalledWith({
     predicate: expect.any(Function),
@@ -285,6 +311,7 @@ it("invalidates auth-sensitive queries without clearing unrelated cache", () => 
     predicate: (query: { queryKey: readonly unknown[] }) => boolean;
   };
   expect(predicate({ queryKey: [QueryKey.PROFILE, "alice"] })).toBe(true);
+  expect(predicate({ queryKey: curationsKey })).toBe(true);
   expect(
     predicate({ queryKey: [QueryKey.WAVES_V2, { viewer_identity: "0x1" }] })
   ).toBe(true);

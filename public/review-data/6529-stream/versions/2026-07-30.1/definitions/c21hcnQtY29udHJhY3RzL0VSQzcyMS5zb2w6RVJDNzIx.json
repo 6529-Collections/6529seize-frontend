@@ -1,0 +1,1929 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#event:Approval(address,address,uint256)",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "approved",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "Approval",
+          "signature": "Approval(address,address,uint256)",
+          "topic0": "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#event:ApprovalForAll(address,address,bool)",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "approved",
+              "type": "bool"
+            }
+          ],
+          "name": "ApprovalForAll",
+          "signature": "ApprovalForAll(address,address,bool)",
+          "topic0": "0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#event:Transfer(address,address,uint256)",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "Transfer",
+          "signature": "Transfer(address,address,uint256)",
+          "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/ERC721.sol:ERC721#function:0x095ea7b3",
+          "declaringDefinitionId": "smart-contracts/ERC721.sol:ERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "approve",
+          "outputs": [],
+          "selector": "0x095ea7b3",
+          "signature": "approve(address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/ERC721.sol:ERC721#function:0x70a08231",
+          "declaringDefinitionId": "smart-contracts/ERC721.sol:ERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x70a08231",
+          "signature": "balanceOf(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/ERC721.sol:ERC721#function:0x081812fc",
+          "declaringDefinitionId": "smart-contracts/ERC721.sol:ERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "getApproved",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x081812fc",
+          "signature": "getApproved(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/ERC721.sol:ERC721#function:0xe985e9c5",
+          "declaringDefinitionId": "smart-contracts/ERC721.sol:ERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "name": "isApprovedForAll",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xe985e9c5",
+          "signature": "isApprovedForAll(address,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/ERC721.sol:ERC721#function:0x06fdde03",
+          "declaringDefinitionId": "smart-contracts/ERC721.sol:ERC721",
+          "inherited": false,
+          "inputs": [],
+          "name": "name",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x06fdde03",
+          "signature": "name()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/ERC721.sol:ERC721#function:0x6352211e",
+          "declaringDefinitionId": "smart-contracts/ERC721.sol:ERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "ownerOf",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x6352211e",
+          "signature": "ownerOf(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/ERC721.sol:ERC721#function:0x42842e0e",
+          "declaringDefinitionId": "smart-contracts/ERC721.sol:ERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "safeTransferFrom",
+          "outputs": [],
+          "selector": "0x42842e0e",
+          "signature": "safeTransferFrom(address,address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/ERC721.sol:ERC721#function:0xb88d4fde",
+          "declaringDefinitionId": "smart-contracts/ERC721.sol:ERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "name": "safeTransferFrom",
+          "outputs": [],
+          "selector": "0xb88d4fde",
+          "signature": "safeTransferFrom(address,address,uint256,bytes)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/ERC721.sol:ERC721#function:0xa22cb465",
+          "declaringDefinitionId": "smart-contracts/ERC721.sol:ERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "approved",
+              "type": "bool"
+            }
+          ],
+          "name": "setApprovalForAll",
+          "outputs": [],
+          "selector": "0xa22cb465",
+          "signature": "setApprovalForAll(address,bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/ERC721.sol:ERC721#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/ERC721.sol:ERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/ERC721.sol:ERC721#function:0x95d89b41",
+          "declaringDefinitionId": "smart-contracts/ERC721.sol:ERC721",
+          "inherited": false,
+          "inputs": [],
+          "name": "symbol",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x95d89b41",
+          "signature": "symbol()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/ERC721.sol:ERC721#function:0xc87b56dd",
+          "declaringDefinitionId": "smart-contracts/ERC721.sol:ERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenURI",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0xc87b56dd",
+          "signature": "tokenURI(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/ERC721.sol:ERC721#function:0x23b872dd",
+          "declaringDefinitionId": "smart-contracts/ERC721.sol:ERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "transferFrom",
+          "outputs": [],
+          "selector": "0x23b872dd",
+          "signature": "transferFrom(address,address,uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(string,string)",
+          "functionKind": "constructor",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:constructor(string,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "name_",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 1,
+              "name": "symbol_",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOmNvbnN0cnVjdG9yKHN0cmluZyxzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "@dev Initializes the contract by setting a `name` and a `symbol` to the token collection.",
+          "outputs": [],
+          "range": {
+            "byteLength": 113,
+            "byteStart": 1326,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L45-L48",
+            "lineEnd": 48,
+            "lineStart": 45,
+            "snippetSha256": "sha256:358584d95ebece245d234a5407f5552c1c6f100382112fb1f03f7fd1308accfa",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOjB4MDFmZmM5YTc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "@dev See {IERC165-supportsInterface}.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 300,
+            "byteStart": 1506,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L53-L58",
+            "lineEnd": 58,
+            "lineStart": 53,
+            "snippetSha256": "sha256:b1d830826416350c26f2d717716de10df59fd1c54b8bc1fb7616661e5efeb3d5",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "balanceOf(address)",
+          "displaySignature": "balanceOf(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:0x70a08231",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOjB4NzBhMDgyMzE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "balanceOf",
+          "natspec": "@dev See {IERC721-balanceOf}.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 204,
+            "byteStart": 1865,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L63-L66",
+            "lineEnd": 66,
+            "lineStart": 63,
+            "snippetSha256": "sha256:addc7490b6a35956008c2a20e90a1f2082825ce38b26f38345f415e5bd8830ee",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": "0x70a08231",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "ownerOf(uint256)",
+          "displaySignature": "ownerOf(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:0x6352211e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOjB4NjM1MjIxMWU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "ownerOf",
+          "natspec": "@dev See {IERC721-ownerOf}.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 219,
+            "byteStart": 2126,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L71-L75",
+            "lineEnd": 75,
+            "lineStart": 71,
+            "snippetSha256": "sha256:b3ce102c2e4893f2b368b9bb0dc28840ed2a1f4f1346cd3a5aad2599148a3845",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": "0x6352211e",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "name()",
+          "displaySignature": "name()",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:0x06fdde03",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOjB4MDZmZGRlMDM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "name",
+          "natspec": "@dev See {IERC721Metadata-name}.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 98,
+            "byteStart": 2407,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L80-L82",
+            "lineEnd": 82,
+            "lineStart": 80,
+            "snippetSha256": "sha256:b6c0a6f08e1f6b3446ab122464431f007d3461fadd3fa5683bc950df42756904",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": "0x06fdde03",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "symbol()",
+          "displaySignature": "symbol()",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:0x95d89b41",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOjB4OTVkODliNDE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "symbol",
+          "natspec": "@dev See {IERC721Metadata-symbol}.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 102,
+            "byteStart": 2569,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L87-L89",
+            "lineEnd": 89,
+            "lineStart": 87,
+            "snippetSha256": "sha256:239f4ed8512c2974c84069538de3b55ba32bb601a4bef28553fe7727cd258f31",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": "0x95d89b41",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "tokenURI(uint256)",
+          "displaySignature": "tokenURI(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:0xc87b56dd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOjB4Yzg3YjU2ZGQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "tokenURI",
+          "natspec": "@dev See {IERC721Metadata-tokenURI}.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 276,
+            "byteStart": 2737,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L94-L99",
+            "lineEnd": 99,
+            "lineStart": 94,
+            "snippetSha256": "sha256:33ad46f8c61cd801f18d2f900c2fbe0e80c69148b18691ac49392ded2246c46a",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": "0xc87b56dd",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_baseURI()",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_baseURI()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9iYXNlVVJJKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_baseURI",
+          "natspec": "@dev Base URI for computing {tokenURI}. If set, the resulting URI for each\n token will be the concatenation of the `baseURI` and the `tokenId`. Empty\n by default, can be overridden in child contracts.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 92,
+            "byteStart": 3255,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L106-L108",
+            "lineEnd": 108,
+            "lineStart": 106,
+            "snippetSha256": "sha256:6ea55c83c030f5670de36f17b7a7e3c17045190ecc91246b728ed4210ad8621f",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": "approve(address,uint256)",
+          "displaySignature": "approve(address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:0x095ea7b3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOjB4MDk1ZWE3YjM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "approve",
+          "natspec": "@dev See {IERC721-approve}.",
+          "outputs": [],
+          "range": {
+            "byteLength": 406,
+            "byteStart": 3404,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L113-L123",
+            "lineEnd": 123,
+            "lineStart": 113,
+            "snippetSha256": "sha256:8b1e89b8cdb5dc234ed0d63b1efa6482b6b81e1ed2142e06bc36eaa4b5c8a85e",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": "0x095ea7b3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "getApproved(uint256)",
+          "displaySignature": "getApproved(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:0x081812fc",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOjB4MDgxODEyZmM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getApproved",
+          "natspec": "@dev See {IERC721-getApproved}.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 167,
+            "byteStart": 3871,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L128-L132",
+            "lineEnd": 132,
+            "lineStart": 128,
+            "snippetSha256": "sha256:c95b300edc0c588e1d89591561abbe8c922ef9a1c0b7b2b6fdf4dbdf321dadae",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": "0x081812fc",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "setApprovalForAll(address,bool)",
+          "displaySignature": "setApprovalForAll(address,bool)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:0xa22cb465",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "approved",
+              "type": "bool"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOjB4YTIyY2I0NjU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setApprovalForAll",
+          "natspec": "@dev See {IERC721-setApprovalForAll}.",
+          "outputs": [],
+          "range": {
+            "byteLength": 153,
+            "byteStart": 4105,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L137-L139",
+            "lineEnd": 139,
+            "lineStart": 137,
+            "snippetSha256": "sha256:e51422259a3724d476c9837f42949b4e6689b52a439b7338dbe7debfb13802f2",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": "0xa22cb465",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "isApprovedForAll(address,address)",
+          "displaySignature": "isApprovedForAll(address,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:0xe985e9c5",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOjB4ZTk4NWU5YzU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isApprovedForAll",
+          "natspec": "@dev See {IERC721-isApprovedForAll}.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 162,
+            "byteStart": 4324,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L144-L146",
+            "lineEnd": 146,
+            "lineStart": 144,
+            "snippetSha256": "sha256:0ff3930cc24dcdd4517bb8d02cce7ba4aa4cf08f99cc5a4378b3bf3b774dbd8c",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": "0xe985e9c5",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "transferFrom(address,address,uint256)",
+          "displaySignature": "transferFrom(address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:0x23b872dd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOjB4MjNiODcyZGQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transferFrom",
+          "natspec": "@dev See {IERC721-transferFrom}.",
+          "outputs": [],
+          "range": {
+            "byteLength": 296,
+            "byteStart": 4548,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L151-L156",
+            "lineEnd": 156,
+            "lineStart": 151,
+            "snippetSha256": "sha256:b8b6b8be11255efb142f123f76f2d1ba27158038f5fa9c5ba0e1011240e219e8",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": "0x23b872dd",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "safeTransferFrom(address,address,uint256)",
+          "displaySignature": "safeTransferFrom(address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:0x42842e0e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOjB4NDI4NDJlMGU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "safeTransferFrom",
+          "natspec": "@dev See {IERC721-safeTransferFrom}.",
+          "outputs": [],
+          "range": {
+            "byteLength": 149,
+            "byteStart": 4910,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L161-L163",
+            "lineEnd": 163,
+            "lineStart": 161,
+            "snippetSha256": "sha256:e243b4db49df3c53edbeac3b8104239e4115b028e6ccb2156905d57f7d25b42a",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": "0x42842e0e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "safeTransferFrom(address,address,uint256,bytes)",
+          "displaySignature": "safeTransferFrom(address,address,uint256,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:0xb88d4fde",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOjB4Yjg4ZDRmZGU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "safeTransferFrom",
+          "natspec": "@dev See {IERC721-safeTransferFrom}.",
+          "outputs": [],
+          "range": {
+            "byteLength": 276,
+            "byteStart": 5125,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L168-L171",
+            "lineEnd": 171,
+            "lineStart": 168,
+            "snippetSha256": "sha256:78297cf10904c4206c15f1c2f8320cb24ad6a60e700c21b1c06a040613560921",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": "0xb88d4fde",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_safeTransfer(address,address,uint256,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_safeTransfer(address,address,uint256,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9zYWZlVHJhbnNmZXIoYWRkcmVzcyxhZGRyZXNzLHVpbnQyNTYsYnl0ZXMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_safeTransfer",
+          "natspec": "@dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients\n are aware of the ERC721 protocol to prevent tokens from being forever locked.\n `data` is additional data, it has no specified format and it is sent in call to `to`.\n This internal function is equivalent to {safeTransferFrom}, and can be used to e.g.\n implement alternative mechanisms to perform token transfer, such as signature-based.\n Requirements:\n - `from` cannot be the zero address.\n - `to` cannot be the zero address.\n - `tokenId` token must exist and be owned by `from`.\n - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.\n Emits a {Transfer} event.",
+          "outputs": [],
+          "range": {
+            "byteLength": 267,
+            "byteStart": 6262,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L191-L194",
+            "lineEnd": 194,
+            "lineStart": 191,
+            "snippetSha256": "sha256:7f9b524e7a70f201d4f52b1036724ca5188c691a955621d20ab6e3154df4c3d0",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_ownerOf(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_ownerOf(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9vd25lck9mKHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_ownerOf",
+          "natspec": "@dev Returns the owner of the `tokenId`. Does NOT revert if token doesn't exist",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 115,
+            "byteStart": 6638,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L199-L201",
+            "lineEnd": 201,
+            "lineStart": 199,
+            "snippetSha256": "sha256:f0b32c87960a15f428d0b854ecf6a82709505a0f986d4170e5dcf7136c6e4e44",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_exists(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_exists(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9leGlzdHModWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_exists",
+          "natspec": "@dev Returns whether `tokenId` exists.\n Tokens can be managed by their owner or approved accounts via {approve} or {setApprovalForAll}.\n Tokens start existing when they are minted (`_mint`),\n and stop existing when they are burned (`_burn`).",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 126,
+            "byteStart": 7056,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L211-L213",
+            "lineEnd": 213,
+            "lineStart": 211,
+            "snippetSha256": "sha256:72365a78c95a435b42b34bb3b562f6b38d1e6500e8efcf59416203cf660cbf97",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_isApprovedOrOwner(address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_isApprovedOrOwner(address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9pc0FwcHJvdmVkT3JPd25lcihhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_isApprovedOrOwner",
+          "natspec": "@dev Returns whether `spender` is allowed to manage `tokenId`.\n Requirements:\n - `tokenId` must exist.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 261,
+            "byteStart": 7340,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L222-L225",
+            "lineEnd": 225,
+            "lineStart": 222,
+            "snippetSha256": "sha256:47b82875c8b0a3c940350e4024c9062a1cbb7ac1ceb0d9599e56062808455872",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_safeMint(address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_safeMint(address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9zYWZlTWludChhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_safeMint",
+          "natspec": "@dev Safely mints `tokenId` and transfers it to `to`.\n Requirements:\n - `tokenId` must not exist.\n - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.\n Emits a {Transfer} event.",
+          "outputs": [],
+          "range": {
+            "byteLength": 108,
+            "byteStart": 7931,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L237-L239",
+            "lineEnd": 239,
+            "lineStart": 237,
+            "snippetSha256": "sha256:f92d2a614398e614c1053ba5e09d4a979b7e099ee6c913592f3259fe81046563",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_safeMint(address,uint256,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_safeMint(address,uint256,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9zYWZlTWludChhZGRyZXNzLHVpbnQyNTYsYnl0ZXMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_safeMint",
+          "natspec": "@dev Same as {xref-ERC721-_safeMint-address-uint256-}[`_safeMint`], with an additional `data` parameter which is\n forwarded in {IERC721Receiver-onERC721Received} to contract recipients.",
+          "outputs": [],
+          "range": {
+            "byteLength": 279,
+            "byteStart": 8260,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L245-L251",
+            "lineEnd": 251,
+            "lineStart": 245,
+            "snippetSha256": "sha256:f1fffff0abccb075b97c10ca271567a8bc006cc470040dd33ff29adbdbf8ab97",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mint(address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_mint(address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9taW50KGFkZHJlc3MsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mint",
+          "natspec": "@dev Mints `tokenId` and transfers it to `to`.\n WARNING: Usage of this method is discouraged, use {_safeMint} whenever possible\n Requirements:\n - `tokenId` must not exist.\n - `to` cannot be the zero address.\n Emits a {Transfer} event.",
+          "outputs": [],
+          "range": {
+            "byteLength": 920,
+            "byteStart": 8861,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L265-L287",
+            "lineEnd": 287,
+            "lineStart": 265,
+            "snippetSha256": "sha256:dd4bd8c94cc6fbe9566101ef3edc225dd8870513a781c77e481d3562b9a0f48f",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_burn(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_burn(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9idXJuKHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_burn",
+          "natspec": "@dev Destroys `tokenId`.\n The approval is cleared when the token is burned.\n This is an internal function that does not check if the sender is authorized to operate on the token.\n Requirements:\n - `tokenId` must exist.\n Emits a {Transfer} event.",
+          "outputs": [],
+          "range": {
+            "byteLength": 762,
+            "byteStart": 10107,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L300-L321",
+            "lineEnd": 321,
+            "lineStart": 300,
+            "snippetSha256": "sha256:6f2457f8de8e9572508cb454a29bba41ad6fcfc3100d69169c3568ad95f17fd0",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_transfer(address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_transfer(address,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl90cmFuc2ZlcihhZGRyZXNzLGFkZHJlc3MsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_transfer",
+          "natspec": "@dev Transfers `tokenId` from `from` to `to`.\n  As opposed to {transferFrom}, this imposes no restrictions on msg.sender.\n Requirements:\n - `to` cannot be the zero address.\n - `tokenId` token must be owned by `from`.\n Emits a {Transfer} event.",
+          "outputs": [],
+          "range": {
+            "byteLength": 1203,
+            "byteStart": 11193,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L334-L360",
+            "lineEnd": 360,
+            "lineStart": 334,
+            "snippetSha256": "sha256:36fc1bba68644500919ccbddf4713f8beea8438bde0b5324684d64630be0486d",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_approve(address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_approve(address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9hcHByb3ZlKGFkZHJlc3MsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_approve",
+          "natspec": "@dev Approve `to` to operate on `tokenId`\n Emits an {Approval} event.",
+          "outputs": [],
+          "range": {
+            "byteLength": 171,
+            "byteStart": 12508,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L367-L370",
+            "lineEnd": 370,
+            "lineStart": 367,
+            "snippetSha256": "sha256:c79ce538206260b36a2cbe60578620a3ee21f82d6fde2a3e0b8b37ae8168cf92",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setApprovalForAll(address,address,bool)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_setApprovalForAll(address,address,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "approved",
+              "type": "bool"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9zZXRBcHByb3ZhbEZvckFsbChhZGRyZXNzLGFkZHJlc3MsYm9vbCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setApprovalForAll",
+          "natspec": "@dev Approve `operator` to operate on all of `owner` tokens\n Emits an {ApprovalForAll} event.",
+          "outputs": [],
+          "range": {
+            "byteLength": 277,
+            "byteStart": 12815,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L377-L381",
+            "lineEnd": 381,
+            "lineStart": 377,
+            "snippetSha256": "sha256:39e870cc06e2f3d70a16c8506ddd9b4166cbe442f24294070846d17cd21853d9",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_requireMinted(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_requireMinted(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9yZXF1aXJlTWludGVkKHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_requireMinted",
+          "natspec": "@dev Reverts if the `tokenId` has not been minted yet.",
+          "outputs": [],
+          "range": {
+            "byteLength": 133,
+            "byteStart": 13176,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L386-L388",
+            "lineEnd": 388,
+            "lineStart": 386,
+            "snippetSha256": "sha256:62f3eb5b3c18a16f3eef0de84d35611a0e911b8a44eb51003eae64f0da86c0d3",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_checkOnERC721Received(address,address,uint256,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_checkOnERC721Received(address,address,uint256,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9jaGVja09uRVJDNzIxUmVjZWl2ZWQoYWRkcmVzcyxhZGRyZXNzLHVpbnQyNTYsYnl0ZXMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_checkOnERC721Received",
+          "natspec": "@dev Internal function to invoke {IERC721Receiver-onERC721Received} on a target address.\n The call is not executed if the target address is not a contract.\n @param from address representing the previous owner of the given token ID\n @param to target address that will receive the tokens\n @param tokenId uint256 ID of the token to be transferred\n @param data bytes optional data to send along with the call\n @return bool whether the call correctly returned the expected magic value",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 831,
+            "byteStart": 13861,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L400-L422",
+            "lineEnd": 422,
+            "lineStart": 400,
+            "snippetSha256": "sha256:b1f6b2295799d0376139b5b2fc188ddb2415e597c6b97b38c53455e0bcf2b7a5",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_beforeTokenTransfer(address,address,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_beforeTokenTransfer(address,address,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "firstTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "batchSize",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9iZWZvcmVUb2tlblRyYW5zZmVyKGFkZHJlc3MsYWRkcmVzcyx1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_beforeTokenTransfer",
+          "natspec": "@dev Hook that is called before any token transfer. This includes minting and burning. If {ERC721Consecutive} is\n used, the hook may be called as part of a consecutive (batch) mint, as indicated by `batchSize` greater than 1.\n Calling conditions:\n - When `from` and `to` are both non-zero, ``from``'s tokens will be transferred to `to`.\n - When `from` is zero, the tokens will be minted for `to`.\n - When `to` is zero, ``from``'s tokens will be burned.\n - `from` and `to` are never both zero.\n - `batchSize` is non-zero.\n To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].",
+          "outputs": [],
+          "range": {
+            "byteLength": 116,
+            "byteStart": 15408,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L438",
+            "lineEnd": 438,
+            "lineStart": 438,
+            "snippetSha256": "sha256:8f0bd57dfb10c0e64c4727b53d9872318dedbe5fadfb96cc71caea137eef18d0",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_afterTokenTransfer(address,address,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:_afterTokenTransfer(address,address,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "firstTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "batchSize",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9hZnRlclRva2VuVHJhbnNmZXIoYWRkcmVzcyxhZGRyZXNzLHVpbnQyNTYsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_afterTokenTransfer",
+          "natspec": "@dev Hook that is called after any token transfer. This includes minting and burning. If {ERC721Consecutive} is\n used, the hook may be called as part of a consecutive (batch) mint, as indicated by `batchSize` greater than 1.\n Calling conditions:\n - When `from` and `to` are both non-zero, ``from``'s tokens were transferred to `to`.\n - When `from` is zero, the tokens were minted for `to`.\n - When `to` is zero, ``from``'s tokens were burned.\n - `from` and `to` are never both zero.\n - `batchSize` is non-zero.\n To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].",
+          "outputs": [],
+          "range": {
+            "byteLength": 115,
+            "byteStart": 16230,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L454",
+            "lineEnd": 454,
+            "lineStart": 454,
+            "snippetSha256": "sha256:a9694c44db17a3b28510b2c3c6c510af61e2304e067ea6c5ea175843b45ffc59",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "__unsafe_increaseBalance(address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC721.sol:ERC721#function:__unsafe_increaseBalance(address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIxI2Z1bmN0aW9uOl9fdW5zYWZlX2luY3JlYXNlQmFsYW5jZShhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "__unsafe_increaseBalance",
+          "natspec": "@dev Unsafe write access to the balances, used by extensions that \"mint\" tokens using an {ownerOf} override.\n WARNING: Anyone calling this MUST ensure that the balances remain consistent with the ownership. The invariant\n being that for any address `a` the value returned by `balanceOf(a)` must be equal to the number of tokens such\n that `ownerOf(tokenId)` is `a`.",
+          "outputs": [],
+          "range": {
+            "byteLength": 121,
+            "byteStart": 16818,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L464-L466",
+            "lineEnd": 466,
+            "lineStart": 464,
+            "snippetSha256": "sha256:4131b2636a04c0b3ffd4589dee44a5c5f43c13de12336ec54c15301b4a7f22fe",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_name",
+          "natspec": "",
+          "range": {
+            "byteLength": 20,
+            "byteStart": 712,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:ba735044bb6823009002bed6208aa9ee1c391a3de1d5855a9eeaea27b9045a22",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "type": "string",
+          "typeString": "string",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_symbol",
+          "natspec": "",
+          "range": {
+            "byteLength": 22,
+            "byteStart": 759,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:6147e8c309e4abcadd4af780b2ed228861aca43594706738ef4b5709a7e6ecaf",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "type": "string",
+          "typeString": "string",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_owners",
+          "natspec": "",
+          "range": {
+            "byteLength": 43,
+            "byteStart": 834,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:6213927b02c849eebd4dba3a69093166a3f0f3187573c8d53e6f9ae9489cbc58",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => address)",
+          "typeString": "mapping(uint256 => address)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_balances",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 928,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:de2a2edad95b876e70ed4e6a863bed608470b7f0bce7f1439d4523860a995db7",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "type": "mapping(address => uint256)",
+          "typeString": "mapping(address => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_tokenApprovals",
+          "natspec": "",
+          "range": {
+            "byteLength": 51,
+            "byteStart": 1029,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L37",
+            "lineEnd": 37,
+            "lineStart": 37,
+            "snippetSha256": "sha256:e5688b62e15f665617fd12365e4de1edb5f046d5617e31bdc0c53b6c9f6c7477",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => address)",
+          "typeString": "mapping(uint256 => address)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_operatorApprovals",
+          "natspec": "",
+          "range": {
+            "byteLength": 71,
+            "byteStart": 1135,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L40",
+            "lineEnd": 40,
+            "lineStart": 40,
+            "snippetSha256": "sha256:b030161dfcc7da7a92dcd0413da4a8f7a3242891fd40e83f228314b535c262ff",
+            "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+          },
+          "selector": null,
+          "type": "mapping(address => mapping(address => bool))",
+          "typeString": "mapping(address => mapping(address => bool))",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/ERC721.sol:ERC721",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/Context.sol:Context",
+        "name": "Context"
+      },
+      {
+        "definitionId": "smart-contracts/ERC165.sol:ERC165",
+        "name": "ERC165"
+      },
+      {
+        "definitionId": "smart-contracts/IERC721.sol:IERC721",
+        "name": "IERC721"
+      },
+      {
+        "definitionId": "smart-contracts/IERC721Metadata.sol:IERC721Metadata",
+        "name": "IERC721Metadata"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0VSQzcyMS5zb2w6RVJDNzIx",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/ERC721.sol:ERC721",
+      "smart-contracts/IERC721Metadata.sol:IERC721Metadata",
+      "smart-contracts/IERC721.sol:IERC721",
+      "smart-contracts/ERC165.sol:ERC165",
+      "smart-contracts/IERC165.sol:IERC165",
+      "smart-contracts/Context.sol:Context"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ERC721",
+    "natspec": "",
+    "range": {
+      "byteLength": 16377,
+      "byteStart": 564,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC721.sol#L20-L467",
+      "lineEnd": 467,
+      "lineStart": 20,
+      "snippetSha256": "sha256:2c5b7aa7f7dad5afae728d0d0e6068a42b71679d50b4743a28043668e0ba93c0",
+      "sourceSha256": "sha256:fa0c5df5a970fb5ba26dc1d01640b3303e3f40bb1832515d2a05e6203dbac702"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/ERC721.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/ERC721.sol:ERC721",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -4,12 +4,16 @@ import {
   screen,
   fireEvent,
   waitFor,
+  within,
 } from "@testing-library/react";
 import React from "react";
 import AppHeader from "@/components/header/AppHeader";
+import { PROFILE_DOUBLE_ACTIVATE_DELAY_MS } from "@/components/header/profile-activation.constants";
 
 const mockShare = jest.fn();
+const mockNativeCanShare = jest.fn();
 const mockNativeShare = jest.fn();
+const mockShowAppToast = jest.fn();
 const mockWriteText = jest.fn();
 const mockCopyToClipboard = jest.fn();
 const mockCapacitorIsNativePlatform = jest.fn();
@@ -21,7 +25,9 @@ jest.mock("@/components/header/AppSidebar", () => ({
 }));
 jest.mock("@/components/header/header-search/HeaderSearchButton", () => ({
   __esModule: true,
-  default: () => <div data-testid="search" />,
+  default: ({ wave }: { wave: { id: string } | null }) => (
+    <div data-testid="search" data-wave-id={wave?.id ?? ""} />
+  ),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
@@ -42,7 +48,9 @@ jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
 jest.mock("@/hooks/useWaveViewMode", () => ({ useWaveViewMode: jest.fn() }));
 jest.mock("@/components/navigation/BackButton", () => ({
   __esModule: true,
-  default: () => <div data-testid="back" />,
+  default: ({ returnTo }: { readonly returnTo?: string }) => (
+    <div data-return-to={returnTo ?? ""} data-testid="back" />
+  ),
 }));
 jest.mock("@/components/utils/Spinner", () => ({
   __esModule: true,
@@ -52,14 +60,24 @@ jest.mock("@/components/header/HeaderActionButtons", () => ({
   __esModule: true,
   default: () => <div data-testid="actions" />,
 }));
+jest.mock("@/components/common/icons/ShareArrowIcon", () => ({
+  __esModule: true,
+  default: ({ className }: { readonly className?: string | undefined }) => (
+    <svg data-testid="share-arrow-icon" className={className} />
+  ),
+}));
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
 jest.mock("@capacitor/share", () => ({
   Share: {
+    canShare: (...args: unknown[]) => mockNativeCanShare(...args),
     share: (...args: unknown[]) => mockNativeShare(...args),
   },
+}));
+jest.mock("@/components/utils/toast/AppToast", () => ({
+  showAppToast: (...args: unknown[]) => mockShowAppToast(...args),
 }));
 jest.mock("@capacitor/core", () => ({
   Capacitor: {
@@ -82,8 +100,12 @@ jest.mock("@/components/waves/header/WaveDescriptionPopover", () => ({
 }));
 jest.mock("@/components/waves/WavePicture", () => ({
   __esModule: true,
-  default: ({ name }: { name: string }) => (
-    <div data-testid="wave-picture" data-name={name} />
+  default: ({ name, picture }: { name: string; picture: string | null }) => (
+    <div
+      data-testid="wave-picture"
+      data-name={name}
+      data-picture={picture ?? ""}
+    />
   ),
 }));
 jest.mock("@/contexts/NavigationHistoryContext", () => ({
@@ -144,6 +166,8 @@ function setup(opts: any) {
     isAuthenticated: opts.isAuthenticated ?? false,
     isConnected: opts.isConnected ?? false,
     connectedAccounts: opts.connectedAccounts ?? [],
+    connectedAccountUnreadNotifications:
+      opts.connectedAccountUnreadNotifications ?? {},
     seizeSwitchConnectedAccount: opts.seizeSwitchConnectedAccount ?? jest.fn(),
   });
   (useAuth as jest.Mock).mockReturnValue({
@@ -152,9 +176,19 @@ function setup(opts: any) {
   });
   (useIdentity as jest.Mock).mockReturnValue({ profile: opts.profile });
   (useMyStreamOptional as jest.Mock).mockReturnValue(
-    activeWaveId
-      ? { activeWave: { id: activeWaveId } }
-      : { activeWave: { id: null } }
+    Object.prototype.hasOwnProperty.call(opts, "myStream")
+      ? opts.myStream
+      : activeWaveId
+        ? {
+            activeWave: { id: activeWaveId },
+            waves: { list: opts.wavesList ?? [] },
+            directMessages: { list: opts.directMessagesList ?? [] },
+          }
+        : {
+            activeWave: { id: null },
+            waves: { list: opts.wavesList ?? [] },
+            directMessages: { list: opts.directMessagesList ?? [] },
+          }
   );
   (useWaveById as jest.Mock).mockReturnValue({
     wave,
@@ -203,11 +237,13 @@ describe("AppHeader", () => {
 
   beforeEach(() => {
     mockShare.mockReset();
+    mockNativeCanShare.mockReset();
     mockNativeShare.mockReset();
     mockWriteText.mockReset();
     mockCopyToClipboard.mockReset();
     mockCapacitorIsNativePlatform.mockReset();
     mockShare.mockResolvedValue(undefined);
+    mockNativeCanShare.mockResolvedValue({ value: true });
     mockNativeShare.mockResolvedValue(undefined);
     mockCapacitorIsNativePlatform.mockReturnValue(false);
     mockWriteText.mockResolvedValue(undefined);
@@ -219,7 +255,10 @@ describe("AppHeader", () => {
     document.title = "6529";
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.clearAllMocks();
+  });
 
   it("shows menu icon on root page even with history", () => {
     setup({ address: null, asPath: "/notifications", canGoBack: true });
@@ -227,6 +266,143 @@ describe("AppHeader", () => {
     expect(
       screen.getByRole("button", { name: "Open menu" })
     ).toBeInTheDocument();
+  });
+
+  it("keeps network health in the native header action row at tablet widths", () => {
+    setup({ address: null, asPath: "/" });
+
+    const healthLink = screen.getByRole("link", {
+      name: "Open network health dashboard",
+    });
+    const search = screen.getByTestId("search");
+
+    expect(healthLink).not.toHaveClass("md:tw-hidden");
+    expect(healthLink.parentElement).toContainElement(search);
+    expect(healthLink.parentElement).toHaveClass("tw-flex", "tw-items-center");
+  });
+
+  it("keeps network health hidden at tablet widths outside Capacitor", () => {
+    useCapacitor.mockReturnValue({ isCapacitor: false });
+    setup({ address: null, asPath: "/" });
+
+    expect(
+      screen.getByRole("link", {
+        name: "Open network health dashboard",
+      })
+    ).toHaveClass("md:tw-hidden");
+  });
+
+  it("opens the account menu immediately when only one profile is connected", () => {
+    const seizeSwitchConnectedAccount = jest.fn();
+    setup({
+      address: "0xabc",
+      asPath: "/",
+      profile: { pfp: "/pfp.png" },
+      connectedAccounts: [{ address: "0xabc", isActive: true }],
+      seizeSwitchConnectedAccount,
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
+
+    expect(screen.getByTestId("sidebar")).toHaveAttribute("open");
+    expect(seizeSwitchConnectedAccount).not.toHaveBeenCalled();
+  });
+
+  it("switches when the second tap lands on the drawer over the profile button", () => {
+    jest.useFakeTimers();
+    const seizeSwitchConnectedAccount = jest.fn();
+    setup({
+      address: "0xabc",
+      asPath: "/",
+      profile: { pfp: "/pfp.png" },
+      connectedAccounts: [
+        { address: "0xabc", isActive: true },
+        { address: "0xdef", isActive: false },
+      ],
+      seizeSwitchConnectedAccount,
+    });
+
+    const profileButton = screen.getByRole("button", {
+      name: "Open menu (double-click to switch accounts)",
+    });
+    jest.spyOn(profileButton, "getBoundingClientRect").mockReturnValue({
+      bottom: 50,
+      height: 40,
+      left: 10,
+      right: 50,
+      top: 10,
+      width: 40,
+      x: 10,
+      y: 10,
+      toJSON: () => ({}),
+    });
+    fireEvent.click(profileButton);
+
+    expect(screen.getByTestId("sidebar")).toHaveAttribute("open");
+    expect(seizeSwitchConnectedAccount).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId("sidebar"), {
+      clientX: 30,
+      clientY: 30,
+      detail: 1,
+    });
+
+    expect(seizeSwitchConnectedAccount).toHaveBeenCalledWith("0xdef");
+    expect(screen.getByTestId("sidebar")).not.toHaveAttribute("open");
+    jest.useRealTimers();
+  });
+
+  it("switches on repeated keyboard activation", () => {
+    jest.useFakeTimers();
+    const seizeSwitchConnectedAccount = jest.fn();
+    setup({
+      address: "0xabc",
+      asPath: "/",
+      profile: { pfp: "/pfp.png" },
+      connectedAccounts: [
+        { address: "0xabc", isActive: true },
+        { address: "0xdef", isActive: false },
+      ],
+      seizeSwitchConnectedAccount,
+    });
+
+    const profileButton = screen.getByRole("button", {
+      name: "Open menu (double-click to switch accounts)",
+    });
+    fireEvent.click(profileButton, { detail: 0 });
+    fireEvent.click(profileButton, { detail: 0 });
+
+    expect(seizeSwitchConnectedAccount).toHaveBeenCalledWith("0xdef");
+    expect(screen.getByTestId("sidebar")).not.toHaveAttribute("open");
+    jest.useRealTimers();
+  });
+
+  it("opens the account menu immediately and retains the shared tap window", () => {
+    jest.useFakeTimers();
+    setup({
+      address: "0xabc",
+      asPath: "/",
+      profile: { pfp: "/pfp.png" },
+      connectedAccounts: [
+        { address: "0xabc", isActive: true },
+        { address: "0xdef", isActive: false },
+      ],
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Open menu (double-click to switch accounts)",
+      })
+    );
+
+    expect(screen.getByTestId("sidebar")).toHaveAttribute("open");
+    act(() => {
+      jest.advanceTimersByTime(PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
+    });
+
+    expect(PROFILE_DOUBLE_ACTIVATE_DELAY_MS).toBe(400);
+    expect(screen.getByTestId("sidebar")).toHaveAttribute("open");
+    jest.useRealTimers();
   });
 
   it("shows back button on profile page when canGoBack is true", () => {
@@ -252,6 +428,53 @@ describe("AppHeader", () => {
     ).toBeInTheDocument();
   });
 
+  it("uses the native back button for a collected token origin", () => {
+    const returnTo =
+      "/Shelby/collected?collection=memelab#collected-card-memelab-65";
+    setup({
+      address: "0xabc",
+      asPath: "/meme-lab/65",
+      query: { returnTo },
+      params: { id: "65" },
+      canGoBack: false,
+    });
+
+    expect(screen.getByTestId("back")).toHaveAttribute(
+      "data-return-to",
+      returnTo
+    );
+  });
+
+  it("does not add the native back button to web token headers", () => {
+    useCapacitor.mockReturnValue({ isCapacitor: false });
+    setup({
+      address: "0xabc",
+      asPath: "/meme-lab/65",
+      query: {
+        returnTo:
+          "/Shelby/collected?collection=memelab#collected-card-memelab-65",
+      },
+      params: { id: "65" },
+      canGoBack: false,
+    });
+
+    expect(screen.queryByTestId("back")).not.toBeInTheDocument();
+  });
+
+  it("keeps the native menu action on a direct token visit", () => {
+    setup({
+      address: "0xabc",
+      asPath: "/meme-lab/65",
+      params: { id: "65" },
+      canGoBack: false,
+    });
+
+    expect(screen.queryByTestId("back")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Open menu" })
+    ).toBeInTheDocument();
+  });
+
   it("shows back button inside wave regardless of canGoBack", () => {
     const wave = {
       id: "w1",
@@ -269,6 +492,32 @@ describe("AppHeader", () => {
     expect(screen.getByText("WaveOne")).toBeInTheDocument();
   });
 
+  it("shows a linked parent wave for an active subwave", () => {
+    const wave = {
+      id: "child-wave",
+      name: "CI-PRODUCTION",
+      parent_wave: { id: "parent-wave", name: "Follow The Repo" },
+      chat: { scope: { group: { is_direct_message: false } } },
+    };
+    setup({
+      wave,
+      asPath: "/waves/child-wave",
+      waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
+    });
+
+    expect(
+      screen.getByRole("navigation", { name: "Wave hierarchy" })
+    ).toHaveTextContent(/Subwave of\s*Follow The Repo/);
+    const parentLink = screen.getByRole("link", {
+      name: "Subwave of Follow The Repo",
+    });
+    expect(parentLink).toHaveAttribute(
+      "title",
+      "Open parent wave: Follow The Repo"
+    );
+    expect(parentLink).toHaveAttribute("href", "/waves/parent-wave");
+  });
+
   it("shows profile image on waves root page", () => {
     setup({
       address: "0xabc",
@@ -278,6 +527,25 @@ describe("AppHeader", () => {
     });
     const img = screen.getByRole("img", { name: "pfp" });
     expect(img).toBeInTheDocument();
+  });
+
+  it("uses the fallback avatar when an active proxy has no creator pfp", () => {
+    setup({
+      address: "0xabc",
+      profile: { pfp: "/connected-wallet.png" },
+      proxy: { created_by: { pfp: null } },
+      asPath: "/waves",
+    });
+
+    const img = screen.getByRole("img", { name: "pfp" });
+    expect(img).toHaveAttribute(
+      "src",
+      expect.stringContaining("intern-no-bg.png")
+    );
+    expect(img).not.toHaveAttribute(
+      "src",
+      expect.stringContaining("connected-wallet.png")
+    );
   });
 
   it("formats meme titles from path", () => {
@@ -332,10 +600,7 @@ describe("AppHeader", () => {
     ).not.toBeInTheDocument();
 
     const shareWaveButton = screen.getByRole("button", { name: "Share wave" });
-    expect(shareWaveButton.querySelector("svg")).toHaveClass(
-      "tw-h-6",
-      "tw-w-6"
-    );
+    expect(shareWaveButton.querySelector("svg")).toHaveClass("tw-size-5");
 
     fireEvent.click(shareWaveButton);
 
@@ -504,6 +769,128 @@ describe("AppHeader", () => {
     expect(
       screen.queryByRole("button", { name: /copy wave link|share wave/i })
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "More header actions" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("search")).toHaveAttribute("data-wave-id", "");
+  });
+
+  it("handles a missing stream context without throwing", () => {
+    setup({
+      myStream: undefined,
+      wave: undefined,
+      isLoading: true,
+      isFetching: true,
+      asPath: "/waves/missing-stream",
+    });
+
+    expect(screen.getByText("Waves")).toBeInTheDocument();
+    expect(screen.getByTestId("search")).toHaveAttribute("data-wave-id", "");
+  });
+
+  it("shows active wave title and avatar from the waves list while the full wave loads", () => {
+    setup({
+      activeWaveId: "w-preview",
+      wave: undefined,
+      isLoading: true,
+      isFetching: true,
+      asPath: "/waves/w-preview",
+      wavesList: [
+        {
+          id: "w-preview",
+          name: "Preview Wave",
+          picture: "/preview-wave.png",
+          contributors: [{ pfp: "/c1.png", identity: "alice" }],
+        },
+      ],
+      waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
+    });
+
+    expect(screen.queryByTestId("spinner")).not.toBeInTheDocument();
+    expect(screen.getByText("Preview Wave")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-picture")).toHaveAttribute(
+      "data-name",
+      "Preview Wave"
+    );
+    expect(screen.getByTestId("wave-picture")).toHaveAttribute(
+      "data-picture",
+      "/preview-wave.png"
+    );
+    expect(
+      screen.queryByRole("button", { name: "Show wave description" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /copy wave link|share wave/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "More header actions" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("search")).toHaveAttribute("data-wave-id", "");
+  });
+
+  it("shows active DM title and avatar from the direct messages list while the full wave loads", () => {
+    setup({
+      activeWaveId: "dm-preview",
+      wave: undefined,
+      isLoading: true,
+      isFetching: true,
+      asPath: "/messages/dm-preview",
+      directMessagesList: [
+        {
+          id: "dm-preview",
+          name: "Preview DM",
+          picture: "/preview-dm.png",
+          contributors: [{ pfp: "/dm-c1.png", identity: "bob" }],
+        },
+      ],
+      waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
+    });
+
+    expect(screen.queryByTestId("spinner")).not.toBeInTheDocument();
+    expect(screen.getByText("Preview DM")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-picture")).toHaveAttribute(
+      "data-name",
+      "Preview DM"
+    );
+    expect(screen.getByTestId("wave-picture")).toHaveAttribute(
+      "data-picture",
+      "/preview-dm.png"
+    );
+    expect(
+      screen.queryByRole("link", { name: "View Preview DM's profile" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps full active wave title and avatar visible during background refetch", () => {
+    const wave = {
+      id: "w-loaded",
+      name: "Loaded Wave",
+      picture: "/loaded-wave.png",
+      contributors_overview: [{ contributor_pfp: "/c1.png" }],
+      chat: { scope: { group: { is_direct_message: false } } },
+    };
+
+    setup({
+      wave,
+      isFetching: true,
+      asPath: "/waves/w-loaded",
+      waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
+    });
+
+    expect(screen.queryByTestId("spinner")).not.toBeInTheDocument();
+    expect(screen.getByText("Loaded Wave")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-picture")).toHaveAttribute(
+      "data-name",
+      "Loaded Wave"
+    );
+    expect(screen.getByTestId("wave-picture")).toHaveAttribute(
+      "data-picture",
+      "/loaded-wave.png"
+    );
+    expect(screen.getByTestId("search")).toHaveAttribute(
+      "data-wave-id",
+      "w-loaded"
+    );
   });
 
   it("copies wave link in app header when copy mode is active", () => {
@@ -563,7 +950,7 @@ describe("AppHeader", () => {
     expect(screen.getByTestId("wave-picture")).toBeInTheDocument();
   });
 
-  it("shares the exact current app URL from non-wave app pages", async () => {
+  it("shares the exact public page URL directly from non-wave app pages", async () => {
     window.history.pushState(
       {},
       "",
@@ -581,9 +968,10 @@ describe("AppHeader", () => {
         url: "https://test.6529.io/the-memes/123?foo=bar&view=exact#details",
       })
     );
+    expect(screen.queryByTestId("header-share-modal")).not.toBeInTheDocument();
   });
 
-  it("shows the page share button as active while the share sheet is open", async () => {
+  it("shows the page-share button as busy while the native share sheet is open", async () => {
     let resolveShare: (value: unknown) => void = () => undefined;
     mockNativeShare.mockReturnValueOnce(
       new Promise((resolve) => {
@@ -593,16 +981,15 @@ describe("AppHeader", () => {
 
     setup({ address: "0x1", asPath: "/open-data" });
 
-    const sharePageButton = screen.getByRole("button", { name: "Share page" });
-
-    fireEvent.click(sharePageButton);
+    const shareButton = screen.getByRole("button", { name: "Share page" });
+    fireEvent.click(shareButton);
 
     await waitFor(() =>
-      expect(sharePageButton).toHaveAttribute("aria-busy", "true")
+      expect(shareButton).toHaveAttribute("aria-busy", "true")
     );
-    expect(sharePageButton).toBeDisabled();
+    expect(shareButton).toBeDisabled();
 
-    fireEvent.click(sharePageButton);
+    fireEvent.click(shareButton);
 
     expect(mockNativeShare).toHaveBeenCalledTimes(1);
 
@@ -611,13 +998,27 @@ describe("AppHeader", () => {
       await Promise.resolve();
     });
 
-    await waitFor(() =>
-      expect(sharePageButton).not.toHaveAttribute("aria-busy")
-    );
-    expect(sharePageButton).not.toBeDisabled();
+    await waitFor(() => expect(shareButton).not.toHaveAttribute("aria-busy"));
+    expect(shareButton).not.toBeDisabled();
   });
 
-  it("copies the exact current app URL when native page share fails", async () => {
+  it("shows feedback when native system sharing is unavailable", async () => {
+    mockNativeCanShare.mockResolvedValue({ value: false });
+
+    setup({ address: "0x1", asPath: "/open-data" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Share page" }));
+
+    await waitFor(() =>
+      expect(mockShowAppToast).toHaveBeenCalledWith({
+        type: "error",
+        message: "System sharing is unavailable.",
+      })
+    );
+    expect(mockNativeShare).not.toHaveBeenCalled();
+  });
+
+  it("shows unavailable feedback without copying when native page share fails", async () => {
     mockNativeShare.mockRejectedValueOnce(new Error("Native share failed"));
     window.history.pushState({}, "", "/open-data?tab=artists#chart");
 
@@ -626,10 +1027,12 @@ describe("AppHeader", () => {
     fireEvent.click(screen.getByRole("button", { name: "Share page" }));
 
     await waitFor(() =>
-      expect(mockWriteText).toHaveBeenCalledWith(
-        "https://test.6529.io/open-data?tab=artists#chart"
-      )
+      expect(mockShowAppToast).toHaveBeenCalledWith({
+        type: "error",
+        message: "System sharing is unavailable.",
+      })
     );
+    expect(mockWriteText).not.toHaveBeenCalled();
   });
 
   it("does not copy the current app URL when native page share is cancelled", async () => {
@@ -640,16 +1043,17 @@ describe("AppHeader", () => {
 
     setup({ address: "0x1", asPath: "/open-data" });
 
-    fireEvent.click(screen.getByRole("button", { name: "Share page" }));
+    const shareButton = screen.getByRole("button", { name: "Share page" });
+    fireEvent.click(shareButton);
 
     await waitFor(() => expect(mockNativeShare).toHaveBeenCalledTimes(1));
     expect(mockWriteText).not.toHaveBeenCalled();
+    expect(mockShowAppToast).not.toHaveBeenCalled();
+    expect(shareButton).toBeInTheDocument();
   });
 
   it.each([
     "/",
-    "/waves",
-    "/waves/w1",
     "/messages",
     "/messages/w1",
     "/notifications",
@@ -662,16 +1066,32 @@ describe("AppHeader", () => {
     ).not.toBeInTheDocument();
   });
 
-  it.each(["waves", "messages"])(
-    "hides page share while app is showing %s query context",
-    (view) => {
-      setup({ asPath: "/", query: { view } });
+  it.each(["/waves", "/waves/w1"])(
+    "shows page share on supported wave route %s",
+    (asPath) => {
+      setup({ asPath });
 
       expect(
-        screen.queryByRole("button", { name: "Share page" })
-      ).not.toBeInTheDocument();
+        screen.getByRole("button", { name: "Share page" })
+      ).toBeInTheDocument();
     }
   );
+
+  it("shows page share while the app is showing the waves query context", () => {
+    setup({ asPath: "/alice", query: { view: "waves" } });
+
+    expect(
+      screen.getByRole("button", { name: "Share page" })
+    ).toBeInTheDocument();
+  });
+
+  it("hides page share while the app is showing the messages query context", () => {
+    setup({ asPath: "/alice", query: { view: "messages" } });
+
+    expect(
+      screen.queryByRole("button", { name: "Share page" })
+    ).not.toBeInTheDocument();
+  });
 
   it("hides page share outside Capacitor", () => {
     useCapacitor.mockReturnValue({ isCapacitor: false });
@@ -749,7 +1169,7 @@ describe("AppHeader", () => {
     expect(screen.getByTestId("wave-picture")).toBeInTheDocument();
   });
 
-  it("shows gallery toggle in eligible wave context and toggles view mode", () => {
+  it("keeps wave sharing in the overflow and toggles gallery view", () => {
     const toggleViewMode = jest.fn();
     const wave = {
       id: "w4",
@@ -758,6 +1178,7 @@ describe("AppHeader", () => {
       contributors_overview: [{ contributor_pfp: "/c1.png" }],
       chat: { scope: { group: { is_direct_message: false } } },
     };
+    useCapacitor.mockReturnValue({ isCapacitor: true });
     setup({
       wave,
       asPath: "/waves/w4",
@@ -766,9 +1187,16 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
+    expect(
+      screen.queryByRole("button", { name: "Share page" })
+    ).not.toBeInTheDocument();
+
     fireEvent.click(
       screen.getByRole("button", { name: "More header actions" })
     );
+
+    const shareWave = screen.getByRole("menuitem", { name: "Share wave" });
+    expect(within(shareWave).getByTestId("share-arrow-icon")).toBeVisible();
 
     const galleryToggle = screen.getByRole("menuitem", {
       name: "Switch to gallery view",

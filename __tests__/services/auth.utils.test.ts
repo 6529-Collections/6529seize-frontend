@@ -12,6 +12,7 @@ import {
   getStagingAuth,
   getWalletAddress,
   hasActiveSessionV2Auth,
+  invalidateAuthSessionForAddress,
   isAuthAddressAuthorized,
   PROFILE_SWITCHED_EVENT,
   removeAuthJwt,
@@ -464,6 +465,39 @@ describe("auth.utils", () => {
     const remainingAccounts = getConnectedWalletAccounts();
     expect(remainingAccounts).toHaveLength(1);
     expect(remainingAccounts[0]?.address).toBe("0x111");
+  });
+
+  it("invalidates one session without disconnecting its profile", async () => {
+    const {
+      removeNativeRefreshToken,
+    } = require("@/services/auth/native-refresh-token-storage");
+    const storage = setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0xAaA", "jwt-a", "refresh-a", "role-a", {
+      authSessionVersion: "v2",
+    });
+    syncConnectedWalletProfile("0xAaA", "profile-1", "alice");
+    setAgentLoginActiveAddress("0xaaa");
+
+    await expect(invalidateAuthSessionForAddress("0xaaa")).resolves.toBe(true);
+
+    expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xAaA");
+    expect(getWalletAddress()).toBe("0xAaA");
+    expect(storage.get("6529-wallet-active-address")).toBe("0xAaA");
+    expect(getConnectedWalletAccounts()).toEqual([
+      expect.objectContaining({
+        address: "0xAaA",
+        jwt: null,
+        refreshToken: null,
+        role: "role-a",
+        profileId: "profile-1",
+        profileHandle: "alice",
+        authSessionVersion: null,
+      }),
+    ]);
+    expect(getAgentLoginActiveAddress()).toBeNull();
   });
 
   it("emits a profile switched event when removing auth promotes another account", async () => {

@@ -18,7 +18,16 @@ describe("ProfileActivityLogItemValueWithCopy", () => {
     // Initially should show the title
     expect(screen.getByText("Address")).toBeInTheDocument();
 
-    await fireEvent.click(screen.getByRole("button"));
+    const copyButton = screen.getByRole("button", { name: "Copy" });
+    expect(copyButton).toHaveClass(
+      "tw-opacity-0",
+      "desktop-hover:group-hover:tw-opacity-100",
+      "focus-visible:tw-opacity-100",
+      "touch-only:tw-opacity-100"
+    );
+    expect(copyButton).not.toHaveClass("group-hover:tw-opacity-100");
+
+    await fireEvent.click(copyButton);
     expect(copy).toHaveBeenCalledWith("0x1");
     expect(screen.getByText("Copied!")).toBeInTheDocument();
   });

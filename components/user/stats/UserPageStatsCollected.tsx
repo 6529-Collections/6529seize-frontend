@@ -3,11 +3,20 @@ import type { MemeSeason } from "@/entities/ISeason";
 import { formatInteger, formatPercent } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { Fragment, type ReactNode } from "react";
-import styles from "./UserPageStats.module.css";
+import type { ReactNode } from "react";
 import {
+  STATS_SECTION_HEADING_CLASS,
+  STATS_TABLE_CLASS,
+  STATS_TABLE_GROUP_START_ROW_CLASS,
+  STATS_TABLE_HEADER_CELL_CLASS,
+  STATS_TABLE_HEAD_CLASS,
+  STATS_TABLE_MUTED_VALUE_CELL_CLASS,
+  STATS_TABLE_ROW_CLASS,
+  STATS_TABLE_ROW_HEADER_CLASS,
+  STATS_TABLE_VALUE_CELL_CLASS,
+  UserPageStatsDisclosure,
   UserPageStatsTableHead,
-  UserPageStatsTableHr,
+  UserPageStatsTableScroll,
 } from "./UserPageStatsTableShared";
 
 function getRankDisplay(
@@ -27,35 +36,6 @@ function getRankDisplay(
   }
   return `#${formatInteger(locale, rank)}`;
 }
-
-const VALUE_CELL_CLASS = "tw-text-right !tw-text-[#fff]";
-const MUTED_VALUE_CELL_CLASS = "tw-text-right !tw-text-[#93939f]";
-const ROW_HEADER_CLASS = "!tw-text-[#93939f]";
-
-function className(...classNames: readonly (string | undefined)[]): string {
-  return classNames
-    .filter((value): value is string => value !== undefined && value !== "")
-    .join(" ");
-}
-
-const STATS_DISCLOSURE_SUMMARY_CLASS = className(
-  styles["collectedAccordionButton"],
-  "tw-flex tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-py-4 tw-text-left tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden"
-);
-const STATS_DISCLOSURE_CARET_CLASS =
-  "tw-h-2 tw-w-2 tw-shrink-0 tw-rotate-45 tw-border-b-2 tw-border-r-2 tw-border-iron-400 tw-transition-transform tw-duration-200 group-open:tw-rotate-[225deg]";
-const STATS_DISCLOSURE_BODY_CLASS = className(
-  styles["collectedAccordionBody"],
-  "tw-px-5 tw-py-4"
-);
-const STATS_SCROLL_CONTAINER_CLASS = className(
-  "tw-py-2",
-  styles["scrollContainer"]
-);
-const STATS_TABLE_CLASS = className(
-  "tw-w-full",
-  styles["collectedAccordionTable"]
-);
 
 type TotalsColumnConfig = readonly [
   key: string,
@@ -112,7 +92,11 @@ function NumberCell({
   readonly value: number | null | undefined;
   readonly locale: SupportedLocale;
 }) {
-  return <td className={VALUE_CELL_CLASS}>{formatInteger(locale, value)}</td>;
+  return (
+    <td className={STATS_TABLE_VALUE_CELL_CLASS}>
+      {formatInteger(locale, value)}
+    </td>
+  );
 }
 
 function RankCell({
@@ -125,20 +109,20 @@ function RankCell({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <td className={VALUE_CELL_CLASS}>
+    <td className={STATS_TABLE_VALUE_CELL_CLASS}>
       {getRankDisplay(locale, balance, rank)}
     </td>
   );
 }
 
 function MutedCell({ children }: { readonly children: ReactNode }) {
-  return <td className={MUTED_VALUE_CELL_CLASS}>{children}</td>;
+  return <td className={STATS_TABLE_MUTED_VALUE_CELL_CLASS}>{children}</td>;
 }
 
 function RowHeader({ children }: { readonly children: ReactNode }) {
   return (
-    <th scope="row" className={ROW_HEADER_CLASS}>
-      <b>{children}</b>
+    <th scope="row" className={STATS_TABLE_ROW_HEADER_CLASS}>
+      {children}
     </th>
   );
 }
@@ -159,26 +143,26 @@ export default function UserPageStatsCollected({
   readonly locale?: SupportedLocale | undefined;
 }) {
   return (
-    <div className="tw-py-2">
-      <div className="tw-flex tw-py-2">
-        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-          {t(locale, "user.collected.stats.details.collected.title")}
-        </h3>
-      </div>
-      <div className="tw-py-2">
-        <UserPageStatsCollectedTotals
-          ownerBalance={ownerBalance}
-          locale={locale}
-        />
-      </div>
-      <div className="tw-py-2">
-        <UserPageStatsCollectedMemes
-          balanceMemes={balanceMemes}
-          seasons={seasons}
-          locale={locale}
-        />
-      </div>
-    </div>
+    <section
+      aria-labelledby="collected-details-heading"
+      className="tw-space-y-3"
+    >
+      <h3
+        className={STATS_SECTION_HEADING_CLASS}
+        id="collected-details-heading"
+      >
+        {t(locale, "user.collected.stats.details.collected.title")}
+      </h3>
+      <UserPageStatsCollectedTotals
+        ownerBalance={ownerBalance}
+        locale={locale}
+      />
+      <UserPageStatsCollectedMemes
+        balanceMemes={balanceMemes}
+        seasons={seasons}
+        locale={locale}
+      />
+    </section>
   );
 }
 
@@ -189,6 +173,10 @@ function UserPageStatsCollectedTotals({
   readonly ownerBalance: OwnerBalance | undefined;
   readonly locale: SupportedLocale;
 }) {
+  const caption = t(
+    locale,
+    "user.collected.stats.details.tables.overviewCaption"
+  );
   const totalColumns = TOTALS_COLUMN_CONFIG.map(
     ([key, balanceKey, balanceRankKey, tdhKey, tdhRankKey]) => ({
       key,
@@ -201,89 +189,77 @@ function UserPageStatsCollectedTotals({
   );
 
   return (
-    <details className="tw-group" open>
-      <summary className={STATS_DISCLOSURE_SUMMARY_CLASS}>
-        <b>{t(locale, "user.collected.stats.details.overview")}</b>
-        <span aria-hidden="true" className={STATS_DISCLOSURE_CARET_CLASS} />
-      </summary>
-      <div className={STATS_DISCLOSURE_BODY_CLASS}>
-        <div className={STATS_SCROLL_CONTAINER_CLASS}>
-          <table className={STATS_TABLE_CLASS}>
-            <UserPageStatsTableHead
-              locale={locale}
-              caption={t(
-                locale,
-                "user.collected.stats.details.tables.overviewCaption"
-              )}
-            />
-            <tbody>
-              <UserPageStatsTableHr span={6} />
-              <tr>
-                <RowHeader>
-                  {t(locale, "user.collected.stats.details.rows.cards")}
-                </RowHeader>
-                {totalColumns.map((column) => (
+    <UserPageStatsDisclosure
+      title={t(locale, "user.collected.stats.details.overview")}
+    >
+      <UserPageStatsTableScroll label={caption}>
+        <table className={`${STATS_TABLE_CLASS} tw-min-w-[46rem]`}>
+          <UserPageStatsTableHead locale={locale} caption={caption} />
+          <tbody>
+            <tr className={STATS_TABLE_ROW_CLASS}>
+              <RowHeader>
+                {t(locale, "user.collected.stats.details.rows.cards")}
+              </RowHeader>
+              {totalColumns.map((column) => (
+                <NumberCell
+                  key={column.key}
+                  value={column.balance}
+                  locale={locale}
+                />
+              ))}
+            </tr>
+            <tr className={STATS_TABLE_ROW_CLASS}>
+              <RowHeader>
+                {t(locale, "user.collected.stats.details.rows.rank")}
+              </RowHeader>
+              {totalColumns.map((column) => (
+                <RankCell
+                  key={column.key}
+                  balance={column.balance}
+                  rank={column.balanceRank}
+                  locale={locale}
+                />
+              ))}
+            </tr>
+            <tr className={STATS_TABLE_GROUP_START_ROW_CLASS}>
+              <RowHeader>
+                {t(locale, "user.collected.stats.details.rows.tdh")}
+              </RowHeader>
+              {totalColumns.map((column) =>
+                column.hasTdh ? (
                   <NumberCell
                     key={column.key}
-                    value={column.balance}
+                    value={roundedTdhValue(column.tdh, !!ownerBalance)}
                     locale={locale}
                   />
-                ))}
-              </tr>
-              <tr>
-                <RowHeader>
-                  {t(locale, "user.collected.stats.details.rows.rank")}
-                </RowHeader>
-                {totalColumns.map((column) => (
+                ) : (
+                  <MutedCell key={column.key}>*</MutedCell>
+                )
+              )}
+            </tr>
+            <tr className={STATS_TABLE_ROW_CLASS}>
+              <RowHeader>
+                {t(locale, "user.collected.stats.details.rows.rank")}
+              </RowHeader>
+              {totalColumns.map((column) =>
+                column.hasTdh ? (
                   <RankCell
                     key={column.key}
-                    balance={column.balance}
-                    rank={column.balanceRank}
+                    balance={column.tdh}
+                    rank={column.tdhRank}
                     locale={locale}
                   />
-                ))}
-              </tr>
-              <UserPageStatsTableHr span={6} />
-              <tr>
-                <RowHeader>
-                  {t(locale, "user.collected.stats.details.rows.tdh")}
-                </RowHeader>
-                {totalColumns.map((column) =>
-                  column.hasTdh ? (
-                    <NumberCell
-                      key={column.key}
-                      value={roundedTdhValue(column.tdh, !!ownerBalance)}
-                      locale={locale}
-                    />
-                  ) : (
-                    <MutedCell key={column.key}>*</MutedCell>
-                  )
-                )}
-              </tr>
-              <tr>
-                <RowHeader>
-                  {t(locale, "user.collected.stats.details.rows.rank")}
-                </RowHeader>
-                {totalColumns.map((column) =>
-                  column.hasTdh ? (
-                    <RankCell
-                      key={column.key}
-                      balance={column.tdh}
-                      rank={column.tdhRank}
-                      locale={locale}
-                    />
-                  ) : (
-                    <MutedCell key={column.key}>
-                      {t(locale, "user.collected.stats.details.rows.noTdh")}
-                    </MutedCell>
-                  )
-                )}
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </details>
+                ) : (
+                  <MutedCell key={column.key}>
+                    {t(locale, "user.collected.stats.details.rows.noTdh")}
+                  </MutedCell>
+                )
+              )}
+            </tr>
+          </tbody>
+        </table>
+      </UserPageStatsTableScroll>
+    </UserPageStatsDisclosure>
   );
 }
 
@@ -296,6 +272,10 @@ function UserPageStatsCollectedMemes({
   readonly seasons: MemeSeason[];
   readonly locale: SupportedLocale;
 }) {
+  const caption = t(
+    locale,
+    "user.collected.stats.details.tables.memesBySeasonCaption"
+  );
   const memeColumns = [
     t(locale, "user.collected.stats.details.tables.column.total"),
     t(locale, "user.collected.stats.details.tables.column.unique"),
@@ -327,7 +307,7 @@ function UserPageStatsCollectedMemes({
     return (
       <>
         {formatInteger(locale, value)}{" "}
-        <span className="!tw-text-[#93939f]">
+        <span className="tw-text-iron-500">
           (#{formatInteger(locale, rank)})
         </span>
       </>
@@ -341,22 +321,26 @@ function UserPageStatsCollectedMemes({
     if (!seasonBalance) {
       return formatInteger(locale, balanceMeme.unique);
     }
+
+    const held =
+      Number.isFinite(balanceMeme.unique) && balanceMeme.unique > 0
+        ? balanceMeme.unique
+        : 0;
+    const total =
+      Number.isFinite(seasonBalance.count) && seasonBalance.count > 0
+        ? seasonBalance.count
+        : 0;
+    const completion = total > 0 ? held / total : 0;
+
     return (
       <>
         {t(locale, "user.collected.stats.details.uniqueProgress", {
-          held:
-            Number.isFinite(balanceMeme.unique) && balanceMeme.unique !== 0
-              ? formatInteger(locale, balanceMeme.unique)
-              : "0",
-          total: formatInteger(locale, seasonBalance.count),
+          held: formatInteger(locale, held),
+          total: formatInteger(locale, total),
         })}{" "}
-        <span className="!tw-text-[#93939f]">
+        <span className="tw-text-iron-500">
           {t(locale, "user.collected.stats.details.uniqueProgressPercent", {
-            percent: formatPercent(
-              locale,
-              balanceMeme.unique / seasonBalance.count,
-              0
-            ),
+            percent: formatPercent(locale, completion, 0),
           })}
         </span>
       </>
@@ -364,28 +348,29 @@ function UserPageStatsCollectedMemes({
   }
 
   return (
-    <details className="tw-group" open>
-      <summary className={STATS_DISCLOSURE_SUMMARY_CLASS}>
-        <b>{t(locale, "user.collected.stats.details.memesBySeason")}</b>
-        <span aria-hidden="true" className={STATS_DISCLOSURE_CARET_CLASS} />
-      </summary>
-      <div className={STATS_DISCLOSURE_BODY_CLASS}>
-        <div className={STATS_SCROLL_CONTAINER_CLASS}>
-          <table className={STATS_TABLE_CLASS}>
-            <caption className="tw-sr-only">
-              {t(
-                locale,
-                "user.collected.stats.details.tables.memesBySeasonCaption"
-              )}
-            </caption>
-            <thead>
+    <UserPageStatsDisclosure
+      title={t(locale, "user.collected.stats.details.memesBySeason")}
+    >
+      {balanceMemes.length > 0 ? (
+        <UserPageStatsTableScroll label={caption}>
+          <table className={`${STATS_TABLE_CLASS} tw-min-w-[42rem]`}>
+            <caption className="tw-sr-only">{caption}</caption>
+            <thead className={STATS_TABLE_HEAD_CLASS}>
               <tr>
-                <th colSpan={2} aria-hidden="true"></th>
+                <th
+                  scope="col"
+                  className={`${STATS_TABLE_HEADER_CELL_CLASS} tw-sticky tw-left-0 tw-z-[2] tw-bg-iron-900 tw-text-left`}
+                >
+                  {t(
+                    locale,
+                    "user.collected.stats.details.tables.column.season"
+                  )}
+                </th>
                 {memeColumns.map((label) => (
                   <th
                     key={label}
                     scope="col"
-                    className="tw-text-right !tw-text-[#93939f]"
+                    className={`${STATS_TABLE_HEADER_CELL_CLASS} tw-text-right`}
                   >
                     {label}
                   </th>
@@ -394,39 +379,43 @@ function UserPageStatsCollectedMemes({
             </thead>
             <tbody>
               {balanceMemes.map((balanceMeme) => (
-                <Fragment key={`stats-collected-memes-${balanceMeme.season}`}>
-                  <UserPageStatsTableHr span={6} />
-                  <tr>
-                    <th scope="row" colSpan={2} className="!tw-text-[#93939f]">
-                      {t(locale, "user.collected.stats.details.seasonLabel", {
-                        seasonNumber: balanceMeme.season,
-                      })}
-                    </th>
-                    <td className="tw-text-right !tw-text-[#fff]">
-                      {getDisplayWithValueAndRank(
-                        balanceMeme.balance,
-                        balanceMeme.rank
-                      )}
-                    </td>
-                    <td className="tw-text-right !tw-text-[#fff]">
-                      {getUniqueDisplay(balanceMeme)}
-                    </td>
-                    <td className="tw-text-right !tw-text-[#fff]">
-                      {formatInteger(locale, balanceMeme.sets)}
-                    </td>
-                    <td className="tw-text-right !tw-text-[#fff]">
-                      {getDisplayWithValueAndRank(
-                        balanceMeme.boosted_tdh,
-                        balanceMeme.tdh_rank
-                      )}
-                    </td>
-                  </tr>
-                </Fragment>
+                <tr
+                  key={`stats-collected-memes-${balanceMeme.season}`}
+                  className={STATS_TABLE_ROW_CLASS}
+                >
+                  <th scope="row" className={STATS_TABLE_ROW_HEADER_CLASS}>
+                    {t(locale, "user.collected.stats.details.seasonLabel", {
+                      seasonNumber: balanceMeme.season,
+                    })}
+                  </th>
+                  <td className={STATS_TABLE_VALUE_CELL_CLASS}>
+                    {getDisplayWithValueAndRank(
+                      balanceMeme.balance,
+                      balanceMeme.rank
+                    )}
+                  </td>
+                  <td className={STATS_TABLE_VALUE_CELL_CLASS}>
+                    {getUniqueDisplay(balanceMeme)}
+                  </td>
+                  <td className={STATS_TABLE_VALUE_CELL_CLASS}>
+                    {formatInteger(locale, balanceMeme.sets)}
+                  </td>
+                  <td className={STATS_TABLE_VALUE_CELL_CLASS}>
+                    {getDisplayWithValueAndRank(
+                      balanceMeme.boosted_tdh,
+                      balanceMeme.tdh_rank
+                    )}
+                  </td>
+                </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-    </details>
+        </UserPageStatsTableScroll>
+      ) : (
+        <p className="tw-mb-0 tw-px-4 tw-py-5 tw-text-sm tw-text-iron-500">
+          {t(locale, "user.collected.stats.details.tables.memesBySeasonEmpty")}
+        </p>
+      )}
+    </UserPageStatsDisclosure>
   );
 }

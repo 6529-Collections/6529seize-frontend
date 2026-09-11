@@ -1,6 +1,7 @@
 import {
   compareLocalized,
   formatDate,
+  formatDecimalString,
   formatInteger,
   formatNumber,
   formatRelativeTime,
@@ -12,7 +13,37 @@ import {
   isSupportedLocale,
   normalizeLocale,
 } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, tRich } from "@/i18n/messages";
+import { DE_DE_MESSAGES } from "@/i18n/messages/de-DE";
+import { EN_GB_MESSAGES } from "@/i18n/messages/en-GB";
+import { EN_US_MESSAGES } from "@/i18n/messages/en-US";
+import { ES_ES_MESSAGES } from "@/i18n/messages/es-ES";
+import { FR_FR_MESSAGES } from "@/i18n/messages/fr-FR";
+
+const PROFILE_WAVE_FEED_MESSAGE_KEYS = [
+  "waves.profileFeed.title",
+  "waves.profileFeed.description",
+  "waves.profileFeed.errorTitle",
+  "waves.profileFeed.errorDescription",
+  "waves.profileFeed.emptyTitle",
+  "waves.profileFeed.emptyDescription",
+] as const;
+
+const PROFILE_WAVE_FEED_DICTIONARIES = [
+  EN_US_MESSAGES,
+  EN_GB_MESSAGES,
+  FR_FR_MESSAGES,
+  ES_ES_MESSAGES,
+  DE_DE_MESSAGES,
+] as const;
+
+const WAVE_POSTING_LABELS = [
+  ["en-US", "Posting"],
+  ["en-GB", "Posting"],
+  ["fr-FR", "Publication en cours"],
+  ["es-ES", "Publicando"],
+  ["de-DE", "Beitrag wird veröffentlicht"],
+] as const;
 
 const NEW_VERSION_TOAST_LOCALE_MESSAGES = [
   {
@@ -58,6 +89,18 @@ const FILE_KIND_MESSAGE_KEYS = [
 ] as const;
 
 describe("frontend i18n helpers", () => {
+  it("keeps rich values in the message-defined order", () => {
+    const artistLink = { type: "artist-link" } as const;
+
+    expect(
+      tRich("en-US", "about.gradient.design.artist", { artistLink })
+    ).toEqual([
+      "It is the artist's (",
+      artistLink,
+      ") preferred interpretation of his work and his vision for it in its purest form. It reminds us of the Chromie Squiggles Perfect Spectrums - much less flashy than the HyperRainbows, but it is an iykyk choice.",
+    ]);
+  });
+
   it("defines the initial supported locale set", () => {
     expect(DEFAULT_LOCALE).toBe("en-US");
     expect(SUPPORTED_LOCALES).toEqual([
@@ -84,6 +127,17 @@ describe("frontend i18n helpers", () => {
       })
     ).toBe("Voir Meme, carte n° 1");
     expect(t("de-DE", "theMemes.documentTitle")).toBe("The Memes | Sammlungen");
+    expect(t("en-US", "theMemes.mint.transaction.confirmWallet")).toBe(
+      "Confirm in your wallet"
+    );
+    expect(t("fr-FR", "theMemes.mint.transaction.submitted")).toBe(
+      "Transaction Submitted - SEIZING"
+    );
+    expect(
+      t("de-DE", "theMemes.mint.transaction.errorDetails", {
+        message: "Wallet rejected",
+      })
+    ).toBe("Wallet rejected");
     expect(t("en-US", "media.video.playPreview")).toBe("Play video preview");
     expect(t("en-US", "media.video.player")).toBe("Video player");
     expect(t("en-US", "media.video.seek")).toBe("Seek video");
@@ -93,6 +147,29 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "media.video.unsupported")).toBe(
       "Ihr Browser unterstuetzt das Video-Tag nicht."
     );
+    expect(t("fr-FR", "waves.leaderboard.timeline.nextWinner")).toBe(
+      "Prochain gagnant"
+    );
+    expect(t("en-GB", "theMemes.detail.live.artwork.mintDateLabel")).toBe(
+      "Mint date:"
+    );
+    expect(t("fr-FR", "theMemes.detail.live.artwork.mintDateLabel")).toBe(
+      "Date de mint :"
+    );
+    expect(t("es-ES", "theMemes.detail.live.artwork.mintDateLabel")).toBe(
+      "Fecha de mint:"
+    );
+    expect(t("de-DE", "theMemes.detail.live.artwork.mintDateLabel")).toBe(
+      "Mint-Datum:"
+    );
+    expect(t("es-ES", "waves.leaderboard.timeline.status.completed")).toBe(
+      "Completado"
+    );
+    expect(
+      t("de-DE", "waves.leaderboard.timeline.unit.second.other", {
+        count: 3,
+      })
+    ).toBe("3 Sekunden");
     for (const messages of NEW_VERSION_TOAST_LOCALE_MESSAGES) {
       expect(t(messages.locale, "newVersionToast.refreshAction")).toBe(
         messages.refreshAction
@@ -264,9 +341,6 @@ describe("frontend i18n helpers", () => {
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );
-    expect(t("de-DE", "theMemes.detail.live.market.title")).toBe(
-      t("en-US", "theMemes.detail.live.market.title")
-    );
     expect(
       t("fr-FR", "theMemes.detail.live.rank", {
         rank: "1",
@@ -390,6 +464,33 @@ describe("frontend i18n helpers", () => {
     );
   });
 
+  it("backs NextGen navigation and home copy with source-locale fallbacks", () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      expect(t(locale, "nextgen.navigation.featured")).toBe("Featured");
+      expect(t(locale, "nextgen.navigation.sectionsAriaLabel")).toBe(
+        "NextGen sections"
+      );
+      expect(
+        t(locale, "nextgen.home.exploreNamedCollection", {
+          collectionName: "Pebbles",
+        })
+      ).toBe("Explore Pebbles");
+    }
+  });
+
+  it("falls back consistently for wave voter connect copy", () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      expect(t(locale, "waves.sidebar.rightPanel.voters.connectTitle")).toBe(
+        t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.voters.connectTitle")
+      );
+      expect(
+        t(locale, "waves.sidebar.rightPanel.voters.connectDescription")
+      ).toBe(
+        t(DEFAULT_LOCALE, "waves.sidebar.rightPanel.voters.connectDescription")
+      );
+    }
+  });
+
   it("formats locale-sensitive values through Intl helpers", () => {
     expect(formatNumber("de-DE", 1234.5, { maximumFractionDigits: 1 })).toBe(
       "1.234,5"
@@ -406,6 +507,50 @@ describe("frontend i18n helpers", () => {
     expect(formatTime("en-US", null)).toBe("");
   });
 
+  it("formats exact decimal strings without losing digits", () => {
+    expect(
+      formatDecimalString("en-US", "12345678901234567890.000000000000000001")
+    ).toBe("12,345,678,901,234,567,890.000000000000000001");
+    expect(formatDecimalString("de-DE", "-0.000000000000000001")).toBe(
+      "-0,000000000000000001"
+    );
+    expect(formatDecimalString("en-US", "+0")).toBe("+0");
+    expect(formatDecimalString("en-US", null)).toBe("—");
+  });
+
+  it("backs title-context copy with messages and locale-formatted counts", () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      const count = formatInteger(locale, 1234);
+      expect(t(locale, "titleContext.routes.messages")).toBe(
+        "Messages | Brain"
+      );
+      expect(
+        t(locale, "titleContext.wave.newMessages.other", {
+          count,
+          waveName: "Wave One",
+        })
+      ).toBe(`(${count} new messages) Wave One | Brain`);
+      expect(
+        t(locale, "titleContext.notifications.other", {
+          count,
+          title: t(locale, "titleContext.routes.waves"),
+        })
+      ).toBe(`(${count} notifications) Waves | Brain`);
+    }
+    expect(
+      t("en-US", "titleContext.wave.newMessages.one", {
+        count: formatInteger("en-US", 1),
+        waveName: "Wave One",
+      })
+    ).toBe("(1 new message) Wave One | Brain");
+    expect(
+      t("en-US", "titleContext.notifications.one", {
+        count: formatInteger("en-US", 1),
+        title: "Waves | Brain",
+      })
+    ).toBe("(1 notification) Waves | Brain");
+  });
+
   it("translates the wave drop copy action messages", () => {
     expect(t("en-US", "waves.drop.actions.copyFailed")).toBe("Copy failed");
     expect(t("en-GB", "waves.drop.actions.copyFailed")).toBe("Copy failed");
@@ -417,6 +562,97 @@ describe("frontend i18n helpers", () => {
     );
     expect(t("de-DE", "waves.drop.actions.copyFailed")).toBe(
       "Kopieren fehlgeschlagen"
+    );
+  });
+
+  it.each(WAVE_POSTING_LABELS)(
+    "translates the Wave posting label for %s",
+    (locale, expected) => {
+      expect(t(locale, "waves.header.postLabel.inProgress")).toBe(expected);
+    }
+  );
+
+  it("backs curation removal controls with source-locale fallbacks", () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      expect(t(locale, "waves.myStream.curation.remove")).toBe("Remove");
+      expect(t(locale, "waves.myStream.curation.removing")).toBe("Removing");
+      expect(t(locale, "waves.myStream.curation.removeAriaLabel")).toBe(
+        "Remove drop from this curation"
+      );
+      expect(t(locale, "waves.myStream.curation.removingAriaLabel")).toBe(
+        "Removing drop from this curation"
+      );
+      expect(t(locale, "waves.myStream.curation.removeTitle")).toBe(
+        "Remove from curation"
+      );
+    }
+  });
+
+  it("translates the chronological Profile Wave feed framing", () => {
+    for (const messages of PROFILE_WAVE_FEED_DICTIONARIES) {
+      for (const key of PROFILE_WAVE_FEED_MESSAGE_KEYS) {
+        expect(messages[key]).toEqual(expect.any(String));
+        expect(messages[key]).not.toBe("");
+      }
+    }
+
+    expect(t("en-US", "waves.profileFeed.title")).toBe(
+      "Latest From Profile Waves"
+    );
+    expect(t("en-US", "waves.profileFeed.description")).toBe(
+      "See what the community is sharing in Profile Waves."
+    );
+    expect(t("en-US", "waves.profileFeed.errorTitle")).toBe(
+      "Couldn’t load profile posts"
+    );
+    expect(t("en-US", "waves.profileFeed.errorDescription")).toBe(
+      "Refresh this view to try again."
+    );
+    expect(t("en-US", "waves.profileFeed.emptyTitle")).toBe(
+      "No profile posts yet"
+    );
+    expect(t("en-US", "waves.profileFeed.emptyDescription")).toBe(
+      "New posts from members’ Profile Waves will appear here."
+    );
+
+    expect(t("fr-FR", "waves.profileFeed.title")).toBe(
+      "Dernières publications des Profile Waves"
+    );
+    expect(t("es-ES", "waves.profileFeed.title")).toBe(
+      "Últimas publicaciones de Profile Waves"
+    );
+    expect(t("de-DE", "waves.profileFeed.title")).toBe(
+      "Neueste Beiträge aus Profile Waves"
+    );
+  });
+
+  it("keeps shared search control copy namespaced", () => {
+    expect(EN_US_MESSAGES["headerSearch.clear"]).toBe("Clear search");
+    expect(EN_US_MESSAGES["headerSearch.clearShort"]).toBe("Clear");
+    expect(EN_US_MESSAGES["headerSearch.close"]).toBe("Close search");
+    expect(EN_US_MESSAGES["waves.drops.searchModal.clear"]).toBe(
+      "Clear search"
+    );
+    expect(EN_US_MESSAGES["waves.drops.searchModal.clearShort"]).toBe("Clear");
+    expect(EN_US_MESSAGES["waves.drops.searchModal.close"]).toBe(
+      "Close search"
+    );
+    expect(EN_US_MESSAGES).not.toHaveProperty("clear");
+    expect(EN_US_MESSAGES).not.toHaveProperty("clearShort");
+    expect(EN_US_MESSAGES).not.toHaveProperty("close");
+  });
+
+  it("keeps Museum program copy in sentence case", () => {
+    expect(t("en-US", "museum.network.programs.description")).toBe(
+      "Curatorial pathways through which the Museum considers and selects works."
+    );
+    expect(
+      t("en-US", "museum.network.artwork.viewWorkNamed", {
+        title: "CENTURY #31",
+      })
+    ).toBe("View work: CENTURY #31");
+    expect(t("en-US", "museum.network.programs.status.selectionComplete")).toBe(
+      "Selection complete"
     );
   });
 

@@ -6,6 +6,7 @@ import {
   subscribeToTouchFirstChanges,
 } from "@/helpers/touch-first.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useCapacitor from "@/hooks/useCapacitor";
 import useHasTouchInput from "@/hooks/useHasTouchInput";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -34,17 +35,23 @@ const useHasHoverInput = (): boolean =>
   );
 
 export default function useDropActionInteractionMode(): DropActionInteractionMode {
+  const { isCapacitor } = useCapacitor();
   const isMobileDevice = useIsMobileDevice();
   const isTouchDevice = useIsTouchDevice();
   const hasTouchInput = useHasTouchInput();
   const hasHoverActionInput = useHasHoverInput();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
-  // Raw touch capability only counts when no hover input exists — otherwise
-  // hybrid devices (touch-screen laptops) would lose desktop hover actions.
+  // Native mobile apps always need touch-reachable actions, even when their
+  // WebView reports hover. On the web, raw touch capability only counts when
+  // no hover input exists so hybrid laptops keep desktop hover actions.
   const hasTouchActionInput =
-    isMobileDevice || isTouchDevice || (hasTouchInput && !hasHoverActionInput);
+    isCapacitor ||
+    isMobileDevice ||
+    isTouchDevice ||
+    (hasTouchInput && !hasHoverActionInput);
   const canUseTouchActionSheet =
-    hasTouchActionInput && (isMobileLayoutViewport || !hasHoverActionInput);
+    isCapacitor ||
+    (hasTouchActionInput && (isMobileLayoutViewport || !hasHoverActionInput));
 
   return {
     hasTouchActionInput,

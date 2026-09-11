@@ -1,0 +1,124 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedRefundingMock#function:0x590e1ae3",
+          "declaringDefinitionId": "test/StreamGovernanceExecutor.t.sol:GovernedRefundingMock",
+          "inherited": false,
+          "inputs": [],
+          "name": "refund",
+          "outputs": [],
+          "selector": "0x590e1ae3",
+          "signature": "refund()",
+          "stateMutability": "payable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "refund()",
+          "displaySignature": "refund()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceExecutor.t.sol:GovernedRefundingMock#function:0x590e1ae3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRSZWZ1bmRpbmdNb2NrI2Z1bmN0aW9uOjB4NTkwZTFhZTM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "refund",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 85,
+            "byteStart": 1644,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L59-L61",
+            "lineEnd": 61,
+            "lineStart": 59,
+            "snippetSha256": "sha256:e5d74a55b7136cfa8ee2549a24bb77768740b7141c57e408e105e12463b1f598",
+            "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+          },
+          "selector": "0x590e1ae3",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamGovernanceExecutor.t.sol:GovernedRefundingMock",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlRXhlY3V0b3IudC5zb2w6R292ZXJuZWRSZWZ1bmRpbmdNb2Nr",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamGovernanceExecutor.t.sol:GovernedRefundingMock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "GovernedRefundingMock",
+    "natspec": "",
+    "range": {
+      "byteLength": 124,
+      "byteStart": 1607,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceExecutor.t.sol#L58-L62",
+      "lineEnd": 62,
+      "lineStart": 58,
+      "snippetSha256": "sha256:f64d894a2b0c974684ddd1c7a611100bc0d437c60e4e4f8f8854e6c719f74b40",
+      "sourceSha256": "sha256:e0b5a7d27bccd35d177aec3d1afc55ab84bec0087e615fecf1f9a85c40938df6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamGovernanceExecutor.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedRefundingMock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceExecutor.t.sol:GovernedRefundingMock#function:0x590e1ae3",
+      "definitionId": "test/StreamGovernanceExecutor.t.sol:GovernedRefundingMock",
+      "severity": "advisory"
+    }
+  ]
+}

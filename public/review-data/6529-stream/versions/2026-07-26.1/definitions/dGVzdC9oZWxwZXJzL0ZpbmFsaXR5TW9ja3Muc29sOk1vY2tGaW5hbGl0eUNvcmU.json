@@ -1,0 +1,2001 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x5923b379",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionBurnsBlocked",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x5923b379",
+          "signature": "collectionBurnsBlocked(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x185153c3",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionExists",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x185153c3",
+          "signature": "collectionExists(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x2ed330f7",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionFreezeStatus",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x2ed330f7",
+          "signature": "collectionFreezeStatus(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x36180788",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionHasMaxSupply",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x36180788",
+          "signature": "collectionHasMaxSupply(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x43567a66",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionMaxSupply",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x43567a66",
+          "signature": "collectionMaxSupply(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0xd1b08e67",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionMintedEver",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xd1b08e67",
+          "signature": "collectionMintedEver(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x382f4a13",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionNextSerial",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x382f4a13",
+          "signature": "collectionNextSerial(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x1ea5ea29",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionStatus",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x1ea5ea29",
+          "signature": "collectionStatus(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x61f2d35c",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionSupplyMode",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x61f2d35c",
+          "signature": "collectionSupplyMode(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x17037934",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "blocked",
+              "type": "bool"
+            }
+          ],
+          "name": "setBurnsBlocked",
+          "outputs": [],
+          "selector": "0x17037934",
+          "signature": "setBurnsBlocked(uint256,bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0xf5c87fee",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "name": "setCollectionExists",
+          "outputs": [],
+          "selector": "0xf5c87fee",
+          "signature": "setCollectionExists(uint256,bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x7b861d6f",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "struct StreamCoreCollectionFinalityFacts",
+              "name": "facts",
+              "type": "(bool,bool,uint8,uint8,uint256,uint256,uint256,uint256,bytes32)"
+            }
+          ],
+          "name": "setCollectionFacts",
+          "outputs": [],
+          "selector": "0x7b861d6f",
+          "signature": "setCollectionFacts(uint256,(bool,bool,uint8,uint8,uint256,uint256,uint256,uint256,bytes32))",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x31319894",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            }
+          ],
+          "name": "setCollectionFrozen",
+          "outputs": [],
+          "selector": "0x31319894",
+          "signature": "setCollectionFrozen(uint256,bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x68abd161",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            }
+          ],
+          "name": "setCollectionStatus",
+          "outputs": [],
+          "selector": "0x68abd161",
+          "signature": "setCollectionStatus(uint256,uint8)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0xa8b959d6",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "hasMaxSupply",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "internalType": "uint8",
+              "name": "supplyMode",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "maxSupply",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "internalType": "uint256",
+              "name": "mintedSupply",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "internalType": "uint256",
+              "name": "nextCollectionSerial",
+              "type": "uint256"
+            }
+          ],
+          "name": "setCollectionSupply",
+          "outputs": [],
+          "selector": "0xa8b959d6",
+          "signature": "setCollectionSupply(uint256,bool,uint8,uint256,uint256,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x26ce55e7",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "liveSupply",
+              "type": "uint256"
+            }
+          ],
+          "name": "setLiveSupply",
+          "outputs": [],
+          "selector": "0x26ce55e7",
+          "signature": "setLiveSupply(uint256,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x2e392079",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "mappingExists",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "collectionSerial",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "internalType": "bool",
+              "name": "burned",
+              "type": "bool"
+            }
+          ],
+          "name": "setTokenIdentity",
+          "outputs": [],
+          "selector": "0x2e392079",
+          "signature": "setTokenIdentity(uint256,bool,uint256,uint256,bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x78d64cc1",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "lifecycle",
+              "type": "uint8"
+            }
+          ],
+          "name": "setTokenLifecycle",
+          "outputs": [],
+          "selector": "0x78d64cc1",
+          "signature": "setTokenLifecycle(uint256,uint8)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0xa6b638c9",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenCollectionIdentity",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "mappingExists",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "collectionSerial",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bool",
+              "name": "burned",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xa6b638c9",
+          "signature": "tokenCollectionIdentity(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x8c46d901",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenLifecycle",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x8c46d901",
+          "signature": "tokenLifecycle(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0xf18332dd",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "totalSupplyOfCollection",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xf18332dd",
+          "signature": "totalSupplyOfCollection(uint256)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setCollectionFacts(uint256,(bool,bool,uint8,uint8,uint256,uint256,uint256,uint256,bytes32))",
+          "displaySignature": "setCollectionFacts(uint256,StreamCoreCollectionFinalityFacts)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x7b861d6f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "facts",
+              "storageLocation": "calldata",
+              "type": "StreamCoreCollectionFinalityFacts"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHg3Yjg2MWQ2Zg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setCollectionFacts",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 661,
+            "byteStart": 2282,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L65-L77",
+            "lineEnd": 77,
+            "lineStart": 65,
+            "snippetSha256": "sha256:a3cd4b78a4981c3987ff3d26f337411a7a3ea833a60f01328e4131928f8381bf",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x7b861d6f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setCollectionExists(uint256,bool)",
+          "displaySignature": "setCollectionExists(uint256,bool)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0xf5c87fee",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHhmNWM4N2ZlZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setCollectionExists",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 130,
+            "byteStart": 2949,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L79-L81",
+            "lineEnd": 81,
+            "lineStart": 79,
+            "snippetSha256": "sha256:42e1f808081e65da149efa80943e7ca7a1b405b7c0d7c1e6bde0925135be5bc0",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0xf5c87fee",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setCollectionStatus(uint256,uint8)",
+          "displaySignature": "setCollectionStatus(uint256,uint8)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x68abd161",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "status",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHg2OGFiZDE2MQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setCollectionStatus",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 131,
+            "byteStart": 3085,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L83-L85",
+            "lineEnd": 85,
+            "lineStart": 83,
+            "snippetSha256": "sha256:033b23eff81e111aefbf1a877a53be1035333cb37c19f22698f2b213e5bc0099",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x68abd161",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setCollectionSupply(uint256,bool,uint8,uint256,uint256,uint256)",
+          "displaySignature": "setCollectionSupply(uint256,bool,uint8,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0xa8b959d6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "hasMaxSupply",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "supplyMode",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "name": "maxSupply",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "mintedSupply",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "nextCollectionSerial",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHhhOGI5NTlkNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setCollectionSupply",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 533,
+            "byteStart": 3222,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L87-L100",
+            "lineEnd": 100,
+            "lineStart": 87,
+            "snippetSha256": "sha256:937c049a393df89658fb8efe9de22bf354e1c88b8cfdbc581478543598b1d178",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0xa8b959d6",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setLiveSupply(uint256,uint256)",
+          "displaySignature": "setLiveSupply(uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x26ce55e7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "liveSupply",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHgyNmNlNTVlNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setLiveSupply",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 129,
+            "byteStart": 3761,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L102-L104",
+            "lineEnd": 104,
+            "lineStart": 102,
+            "snippetSha256": "sha256:3199d57f3fc28c2e3a3f5020fa0092ec8cb4d8122a9175bceb287bea32a17ea2",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x26ce55e7",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setBurnsBlocked(uint256,bool)",
+          "displaySignature": "setBurnsBlocked(uint256,bool)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x17037934",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "blocked",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHgxNzAzNzkzNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setBurnsBlocked",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 124,
+            "byteStart": 3896,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L106-L108",
+            "lineEnd": 108,
+            "lineStart": 106,
+            "snippetSha256": "sha256:767b234d58b3653e2ef6cb9eb6c8835345aa516941cde25614d5c937c18044e2",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x17037934",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setCollectionFrozen(uint256,bool)",
+          "displaySignature": "setCollectionFrozen(uint256,bool)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x31319894",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "frozen",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHgzMTMxOTg5NA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setCollectionFrozen",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 130,
+            "byteStart": 4026,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L110-L112",
+            "lineEnd": 112,
+            "lineStart": 110,
+            "snippetSha256": "sha256:91d914ae20a7b29a7e47630c4dd9e3cce83acf6dee8c5c4c5a444ee132c9adbf",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x31319894",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setTokenIdentity(uint256,bool,uint256,uint256,bool)",
+          "displaySignature": "setTokenIdentity(uint256,bool,uint256,uint256,bool)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x2e392079",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "mappingExists",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "collectionSerial",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "burned",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHgyZTM5MjA3OQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setTokenIdentity",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 314,
+            "byteStart": 4162,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L114-L124",
+            "lineEnd": 124,
+            "lineStart": 114,
+            "snippetSha256": "sha256:0cb26b162ca6f6923362c63516430484e24b1b95110d1797546536dea0230f79",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x2e392079",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setTokenLifecycle(uint256,uint8)",
+          "displaySignature": "setTokenLifecycle(uint256,uint8)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x78d64cc1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "lifecycle",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHg3OGQ2NGNjMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setTokenLifecycle",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 124,
+            "byteStart": 4482,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L126-L128",
+            "lineEnd": 128,
+            "lineStart": 126,
+            "snippetSha256": "sha256:5b23fe78ec880338a26f07559c975b30c6dcb587ae80a81e7554f789be8f311b",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x78d64cc1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionExists(uint256)",
+          "displaySignature": "collectionExists(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x185153c3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHgxODUxNTNjMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionExists",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 132,
+            "byteStart": 4612,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L130-L132",
+            "lineEnd": 132,
+            "lineStart": 130,
+            "snippetSha256": "sha256:f66b7b6b7cf9ae1c0a6e27a05c19cdc63e059f116950d845e6cd8a2ef56ac8f2",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x185153c3",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionHasMaxSupply(uint256)",
+          "displaySignature": "collectionHasMaxSupply(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x36180788",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHgzNjE4MDc4OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionHasMaxSupply",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 144,
+            "byteStart": 4750,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L134-L136",
+            "lineEnd": 136,
+            "lineStart": 134,
+            "snippetSha256": "sha256:5546281b86b02ed2408d78ed1ec369be327059044bb4e184ed6d7d3dda44ebb0",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x36180788",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionStatus(uint256)",
+          "displaySignature": "collectionStatus(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x1ea5ea29",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHgxZWE1ZWEyOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionStatus",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 133,
+            "byteStart": 4900,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L138-L140",
+            "lineEnd": 140,
+            "lineStart": 138,
+            "snippetSha256": "sha256:00af69b4ef291e1913ca6d86d5208c31c63c50fefc05bc170308db707d836275",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x1ea5ea29",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionSupplyMode(uint256)",
+          "displaySignature": "collectionSupplyMode(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x61f2d35c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHg2MWYyZDM1Yw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionSupplyMode",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 141,
+            "byteStart": 5039,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L142-L144",
+            "lineEnd": 144,
+            "lineStart": 142,
+            "snippetSha256": "sha256:c848b4c78be0ee3ad4515c1e569ab61c5c8abf2f23daaed3975ebfee130b72bc",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x61f2d35c",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionMaxSupply(uint256)",
+          "displaySignature": "collectionMaxSupply(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x43567a66",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHg0MzU2N2E2Ng",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionMaxSupply",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 141,
+            "byteStart": 5186,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L146-L148",
+            "lineEnd": 148,
+            "lineStart": 146,
+            "snippetSha256": "sha256:d3ef39083124a6915879f93863433d5f341452c6b9511ac9c0adba6ba4ac415a",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x43567a66",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionMintedEver(uint256)",
+          "displaySignature": "collectionMintedEver(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0xd1b08e67",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHhkMWIwOGU2Nw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionMintedEver",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 143,
+            "byteStart": 5333,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L150-L152",
+            "lineEnd": 152,
+            "lineStart": 150,
+            "snippetSha256": "sha256:78bd58db31ba38c8ce218bdc1874f17d9dd7ffe87d31fe3b13ebc0faa8e7fced",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0xd1b08e67",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionNextSerial(uint256)",
+          "displaySignature": "collectionNextSerial(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x382f4a13",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHgzODJmNGExMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionNextSerial",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 143,
+            "byteStart": 5482,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L154-L156",
+            "lineEnd": 156,
+            "lineStart": 154,
+            "snippetSha256": "sha256:f872f92d5ecb2157c651e62e7a5d1b595557c6d3027a498f8c8ea90098dbe2ec",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x382f4a13",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "totalSupplyOfCollection(uint256)",
+          "displaySignature": "totalSupplyOfCollection(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0xf18332dd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHhmMTgzMzJkZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalSupplyOfCollection",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 136,
+            "byteStart": 5631,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L158-L160",
+            "lineEnd": 160,
+            "lineStart": 158,
+            "snippetSha256": "sha256:b44b73076ef0329202cb221785e2a63758e7bc363da036d9218677bdacefa51c",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0xf18332dd",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "tokenCollectionIdentity(uint256)",
+          "displaySignature": "tokenCollectionIdentity(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0xa6b638c9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHhhNmI2MzhjOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "tokenCollectionIdentity",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "mappingExists",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "collectionSerial",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "burned",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 422,
+            "byteStart": 5773,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L162-L174",
+            "lineEnd": 174,
+            "lineStart": 162,
+            "snippetSha256": "sha256:1dc93294ce40488eef013b3eeff597bbcd2ad6a3a4cd02c5bf2b0fd22c4840b9",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0xa6b638c9",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "tokenLifecycle(uint256)",
+          "displaySignature": "tokenLifecycle(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x8c46d901",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHg4YzQ2ZDkwMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "tokenLifecycle",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 120,
+            "byteStart": 6201,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L176-L178",
+            "lineEnd": 178,
+            "lineStart": 176,
+            "snippetSha256": "sha256:e102dce2ebfd30dde3faaec03f42436ffa89bf23a3b7eb4069d8bd3ac33288da",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x8c46d901",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionBurnsBlocked(uint256)",
+          "displaySignature": "collectionBurnsBlocked(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x5923b379",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHg1OTIzYjM3OQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionBurnsBlocked",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 134,
+            "byteStart": 6327,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L180-L182",
+            "lineEnd": 182,
+            "lineStart": 180,
+            "snippetSha256": "sha256:b3918b32bcffad289d7f981670a6415731ef3dffce5b1b2e2a230ae4a21dbb98",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x5923b379",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionFreezeStatus(uint256)",
+          "displaySignature": "collectionFreezeStatus(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x2ed330f7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmUjZnVuY3Rpb246MHgyZWQzMzBmNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionFreezeStatus",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 138,
+            "byteStart": 6467,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L184-L186",
+            "lineEnd": 186,
+            "lineStart": 184,
+            "snippetSha256": "sha256:97aac3ff8dbee5166dd88102aff712898fb6138d07fd3156be1e23ebf904fb54",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x2ed330f7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_collectionExists",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 1576,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L52",
+            "lineEnd": 52,
+            "lineStart": 52,
+            "snippetSha256": "sha256:5de0c3b5b28ffbb7c9f763a13a22492a72c333beef634f6f991c49954198d8b0",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => bool)",
+          "typeString": "mapping(uint256 => bool)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_collectionHasMaxSupply",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 1632,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L53",
+            "lineEnd": 53,
+            "lineStart": 53,
+            "snippetSha256": "sha256:ab2f421807a4635ffb33b25459db8879fbe99c6934ecdae3446cc9cffa46b2b7",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => bool)",
+          "typeString": "mapping(uint256 => bool)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_collectionStatus",
+          "natspec": "",
+          "range": {
+            "byteLength": 51,
+            "byteStart": 1694,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L54",
+            "lineEnd": 54,
+            "lineStart": 54,
+            "snippetSha256": "sha256:1c689f755c3f0bb14e4fbfc7e20b79af4d6a69bef05be5ff50677176901d84b0",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => uint8)",
+          "typeString": "mapping(uint256 => uint8)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_collectionSupplyMode",
+          "natspec": "",
+          "range": {
+            "byteLength": 55,
+            "byteStart": 1751,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L55",
+            "lineEnd": 55,
+            "lineStart": 55,
+            "snippetSha256": "sha256:3e663844bed60500787049475a831c4623cfc1b37f31ec7c62f74b4cea792a81",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => uint8)",
+          "typeString": "mapping(uint256 => uint8)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_collectionMaxSupply",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 1812,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L56",
+            "lineEnd": 56,
+            "lineStart": 56,
+            "snippetSha256": "sha256:4bdfdc193a7cd9962aefd2ef4895c50d0c854ab4d8ce1cbc1023126ee6e41e07",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => uint256)",
+          "typeString": "mapping(uint256 => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_collectionMintedEver",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 1874,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L57",
+            "lineEnd": 57,
+            "lineStart": 57,
+            "snippetSha256": "sha256:2ca00a78cac162f49bfc19047479d32cc0da18c8386ded97a672a214a68fc51a",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => uint256)",
+          "typeString": "mapping(uint256 => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_collectionNextSerial",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 1937,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L58",
+            "lineEnd": 58,
+            "lineStart": 58,
+            "snippetSha256": "sha256:1d8877456fd3434a974f9bccafabe6ba00edb97661141366028e3403f68dd899",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => uint256)",
+          "typeString": "mapping(uint256 => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_liveSupply",
+          "natspec": "",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 2000,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L59",
+            "lineEnd": 59,
+            "lineStart": 59,
+            "snippetSha256": "sha256:8187761c6d160637fe139f709b4a99765f5828e4cfae604c7ca61d40872de978",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => uint256)",
+          "typeString": "mapping(uint256 => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_burnsBlocked",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 2053,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L60",
+            "lineEnd": 60,
+            "lineStart": 60,
+            "snippetSha256": "sha256:885e6cd0da6fbcf22e6ba7e858bd615dd9780b8c4ce1073acb67884a00b58a49",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => bool)",
+          "typeString": "mapping(uint256 => bool)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_collectionFrozen",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 2105,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L61",
+            "lineEnd": 61,
+            "lineStart": 61,
+            "snippetSha256": "sha256:2a9d3e24d6d78fb4b36f06f615707b172d663f6be9128f00a4a543c2ad0bf9cd",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => bool)",
+          "typeString": "mapping(uint256 => bool)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_tokenIdentities",
+          "natspec": "",
+          "range": {
+            "byteLength": 58,
+            "byteStart": 2161,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L62",
+            "lineEnd": 62,
+            "lineStart": 62,
+            "snippetSha256": "sha256:3f703ef0e1c30ef8f482ecf258464c658ee75dd416aed8c25e592f826badd9a8",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => TokenIdentity)",
+          "typeString": "mapping(uint256 => struct MockFinalityCore.TokenIdentity)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_tokenLifecycles",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 2225,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L63",
+            "lineEnd": 63,
+            "lineStart": 63,
+            "snippetSha256": "sha256:b21a7c743a1f73b2f9acd3aaae55c47e642e6fa700f8d6026e631d6a12b43e30",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => uint8)",
+          "typeString": "mapping(uint256 => uint8)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "mappingExists",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 1460,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L46",
+                "lineEnd": 46,
+                "lineStart": 46,
+                "snippetSha256": "sha256:d41b7c5cc56673aae3479e6496668cc91986d19c22e148ab24a5c74d0ca76d70",
+                "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+              },
+              "type": "bool",
+              "typeString": "bool"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 1488,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L47",
+                "lineEnd": 47,
+                "lineStart": 47,
+                "snippetSha256": "sha256:59d930bd0f2dfed41bacd10f1ff469fcacef2b565f94ee3556e462d42461f316",
+                "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "collectionSerial",
+              "natspec": "",
+              "range": {
+                "byteLength": 24,
+                "byteStart": 1518,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L48",
+                "lineEnd": 48,
+                "lineStart": 48,
+                "snippetSha256": "sha256:19d95555d9cb48db30e0e406a48acf4e1e75320f0d0b8b0289f0f5a04df80f6a",
+                "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "burned",
+              "natspec": "",
+              "range": {
+                "byteLength": 11,
+                "byteStart": 1552,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L49",
+                "lineEnd": 49,
+                "lineStart": 49,
+                "snippetSha256": "sha256:371662036df19d40ce1e2e221d08265851a3dee71c6e81308a7a730f67d2daf0",
+                "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+              },
+              "type": "bool",
+              "typeString": "bool"
+            }
+          ],
+          "name": "TokenIdentity",
+          "natspec": "",
+          "range": {
+            "byteLength": 141,
+            "byteStart": 1429,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L45-L50",
+            "lineEnd": 50,
+            "lineStart": 45,
+            "snippetSha256": "sha256:c82b3e903d631a095c6ccffb3b9746f53cded0e0808b8dd5786c0ac8a7990bc3",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUNvcmU",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/helpers/FinalityMocks.sol:MockFinalityCore"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MockFinalityCore",
+    "natspec": "@notice Granular target-Core mock consumed by StreamCoreFinalityAdapter.",
+    "range": {
+      "byteLength": 5210,
+      "byteStart": 1397,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L44-L187",
+      "lineEnd": 187,
+      "lineStart": 44,
+      "snippetSha256": "sha256:3d1b834568d857426235af5ca7b7272f1aad5b8ae59e1d2a0a3c6ecb7c7af2b5",
+      "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/FinalityMocks.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 21
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 21
+    },
+    "totalCount": 21
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x17037934",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x185153c3",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x1ea5ea29",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x26ce55e7",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x2e392079",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x2ed330f7",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x31319894",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x36180788",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x382f4a13",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x43567a66",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x5923b379",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x61f2d35c",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x68abd161",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x78d64cc1",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x7b861d6f",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0x8c46d901",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0xa6b638c9",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0xa8b959d6",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0xd1b08e67",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0xf18332dd",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityCore#function:0xf5c87fee",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityCore",
+      "severity": "advisory"
+    }
+  ]
+}

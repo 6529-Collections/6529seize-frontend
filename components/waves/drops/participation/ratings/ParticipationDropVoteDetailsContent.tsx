@@ -12,6 +12,7 @@ import {
   ParticipationDropVoteDetailsLogRow,
   ParticipationDropVoteDetailsVoterRow,
 } from "./ParticipationDropVoteDetailsRows";
+import Button from "@/components/utils/button/Button";
 
 type VoteDetailsTab = "voters" | "logs";
 
@@ -65,16 +66,16 @@ function VoteDetailsErrorState({
       <span className="tw-text-center tw-text-sm tw-font-medium tw-text-rose-300">
         {label}
       </span>
-      <button
-        type="button"
+      <Button
         onClick={(event) => {
           event.stopPropagation();
           onRetry();
         }}
-        className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition-colors desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
+        variant="tertiary"
+        size="xs"
       >
         Try again
-      </button>
+      </Button>
     </div>
   );
 }
@@ -97,13 +98,21 @@ function TabButton({
         event.stopPropagation();
         onClick();
       }}
-      className={`tw-flex-1 tw-rounded-md tw-border-0 tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition-colors ${
+      className={`tw-relative tw-flex tw-flex-1 tw-items-center tw-justify-center tw-rounded-t-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-0 tw-text-sm tw-font-medium tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${
         active
-          ? "tw-bg-iron-700 tw-text-white"
-          : "tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200"
+          ? "tw-text-iron-50"
+          : "tw-text-iron-500 desktop-hover:hover:tw-bg-white/[0.025] desktop-hover:hover:tw-text-iron-200"
       }`}
     >
-      {children}
+      <span
+        className={`tw-relative tw-inline-flex tw-py-3 ${
+          active
+            ? "after:tw-absolute after:tw-inset-x-0 after:-tw-bottom-px after:tw-h-px after:tw-bg-primary-400 after:tw-content-['']"
+            : ""
+        }`}
+      >
+        {children}
+      </span>
     </button>
   );
 }
@@ -168,7 +177,7 @@ export function ParticipationDropVoteDetailsContent({
     }
 
     return (
-      <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
+      <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06]">
         {votersQuery.voters.map((voter) => (
           <ParticipationDropVoteDetailsVoterRow
             key={voter.voter.id}
@@ -201,7 +210,7 @@ export function ParticipationDropVoteDetailsContent({
     }
 
     return (
-      <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
+      <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06]">
         {logsQuery.logs.map((log) => (
           <ParticipationDropVoteDetailsLogRow
             key={log.id}
@@ -224,16 +233,10 @@ export function ParticipationDropVoteDetailsContent({
       onClick={(event) => event.stopPropagation()}
     >
       {showHeader && (
-        <div className="tw-flex tw-items-start tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3">
-          <div className="tw-min-w-0">
-            <h3 className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-50">
-              Votes
-            </h3>
-            <p className="tw-mb-0 tw-mt-0.5 tw-text-xs tw-text-iron-500">
-              {formatNumberWithCommas(drop.raters_count)}{" "}
-              {drop.raters_count === 1 ? "voter" : "voters"}
-            </p>
-          </div>
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-px-4 tw-pb-0 tw-pt-2">
+          <h3 className="tw-mb-0 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-50">
+            Votes
+          </h3>
           <button
             type="button"
             aria-label="Close votes"
@@ -241,20 +244,22 @@ export function ParticipationDropVoteDetailsContent({
               event.stopPropagation();
               onClose();
             }}
-            className="tw-flex tw-size-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-white"
+            className="tw-flex tw-size-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-white"
           >
             <XMarkIcon className="tw-size-4" />
           </button>
         </div>
       )}
 
-      <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-font-medium tw-text-iron-500">
+      <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-4 tw-pt-2">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
           <span>
             {formatNumberWithCommas(drop.raters_count)}{" "}
             {drop.raters_count === 1 ? "voter" : "voters"}
           </span>
-          <span aria-hidden="true">/</span>
+          <span aria-hidden="true" className="tw-text-iron-700">
+            /
+          </span>
           <span>
             {getVoteValueLabel(drop.rating)} {creditLabel} total
           </span>
@@ -262,7 +267,7 @@ export function ParticipationDropVoteDetailsContent({
         <div
           role="tablist"
           aria-label="Vote details"
-          className="tw-mt-3 tw-flex tw-rounded-lg tw-bg-iron-900 tw-p-1"
+          className="tw-mt-2 tw-flex"
         >
           <TabButton
             active={activeTab === "voters"}
@@ -279,7 +284,7 @@ export function ParticipationDropVoteDetailsContent({
         </div>
       </div>
 
-      <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 desktop-hover:hover:tw-scrollbar-thumb-iron-400">
+      <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
         {activeTab === "voters" ? renderVoters() : renderLogs()}
         {isLoadingMore && <LoadingBar />}
         <div ref={intersectionElementRef} />

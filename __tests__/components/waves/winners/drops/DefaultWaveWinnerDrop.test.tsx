@@ -44,8 +44,25 @@ jest.mock("@/components/waves/winners/identity/WaveWinnerIdentity", () => ({
   WaveWinnerIdentity: () => <div data-testid="identity" />,
 }));
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
-  <div data-testid="actions" />
+  <button
+    type="button"
+    data-testid="desktop-open-action"
+    onClick={(event) => event.stopPropagation()}
+  >
+    Open drop
+  </button>
 ));
+jest.mock(
+  "@/components/content-moderation/ContentModerationDropActions",
+  () => ({
+    __esModule: true,
+    default: () => null,
+  })
+);
+jest.mock("@/components/content-moderation/ReportDropModal", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => ({
   __esModule: true,
   default: (props: { onOpenChange: () => void }) => (
@@ -114,6 +131,21 @@ describe("DefaultWaveWinnerDrop", () => {
     render(<DefaultWaveWinnersDrop winner={winner} onDropClick={jest.fn()} />);
 
     expect(screen.getByTestId("identity")).toBeInTheDocument();
+    expect(screen.getByTestId("desktop-open-action")).toBeInTheDocument();
+    expect(screen.queryByTestId("more-actions")).not.toBeInTheDocument();
+  });
+
+  it("opens from the direct action without triggering the winner card", async () => {
+    const user = userEvent.setup();
+    const onDropClick = jest.fn();
+
+    render(
+      <DefaultWaveWinnersDrop winner={winner} onDropClick={onDropClick} />
+    );
+
+    await user.click(screen.getByTestId("desktop-open-action"));
+
+    expect(onDropClick).not.toHaveBeenCalled();
   });
 
   it("forwards content presentation to drop content", () => {
@@ -144,6 +176,22 @@ describe("DefaultWaveWinnerDrop", () => {
     expect(screen.getByTestId("voters")).not.toHaveAttribute(
       "data-is-approval-wave"
     );
+  });
+
+  it("top-aligns approval identity and content with the author image", () => {
+    render(
+      <DefaultWaveWinnersDrop
+        winner={winner}
+        onDropClick={jest.fn()}
+        isApprovalWave={true}
+      />
+    );
+
+    const contentColumn = screen.getByTestId("header").parentElement;
+    const identityRow = contentColumn?.parentElement;
+
+    expect(contentColumn).toHaveClass("tw-gap-y-2");
+    expect(identityRow).toHaveClass("tw-items-start", "tw-gap-x-3", "tw-pb-3");
   });
 
   it("keeps native tap behavior for touch long-press handlers", () => {

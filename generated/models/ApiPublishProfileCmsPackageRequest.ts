@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
  * 6529.io API
- * This is the API interface description. Brief terminology overview and an authentication example can be found at <a href=\"https://6529.io/about/api\">https://6529.io/about/api</a>.
+ * JSON REST API for 6529.io. New here? A terminology overview and a step-by-step authentication walkthrough (guides &amp; auth) live at <a href=\"https://6529.io/tools/api\">https://6529.io/tools/api</a>. The raw machine-readable spec is downloadable at <a href=\"/openapi.yaml\">/openapi.yaml</a> and <a href=\"/openapi.json\">/openapi.json</a>.
  *
  * OpenAPI spec version: 1.0.0
  * 
@@ -14,6 +14,11 @@
 import { HttpFile } from '../http/http';
 
 export class ApiPublishProfileCmsPackageRequest {
+    /**
+    * Omit or pass null only when no current primary is expected.
+    */
+    'expected_current_package_id'?: string | null;
+    'expected_current_package_hash'?: string;
     'expected_package_hash'?: string;
     'expected_payload_hash'?: string;
     /**
@@ -46,6 +51,18 @@ export class ApiPublishProfileCmsPackageRequest {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "expected_current_package_id",
+            "baseName": "expected_current_package_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "expected_current_package_hash",
+            "baseName": "expected_current_package_hash",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "expected_package_hash",
             "baseName": "expected_package_hash",

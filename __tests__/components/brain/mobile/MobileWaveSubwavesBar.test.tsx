@@ -187,7 +187,7 @@ describe("MobileWaveSubwavesBar", () => {
 
     expect(screen.getByRole("button", { name: "Open Main" })).toHaveAttribute(
       "aria-current",
-      "page"
+      "true"
     );
     expect(
       screen.getByRole("button", { name: "Open Alpha" })
@@ -203,7 +203,28 @@ describe("MobileWaveSubwavesBar", () => {
     });
   });
 
-  it("keeps Main visible while subwaves are still loading", () => {
+  it("shows a stable loading row instead of an incomplete Main tab", () => {
+    render(
+      <MobileWaveSubwavesBar wave={createApiWave({ hasSubwaves: true })} />
+    );
+
+    expect(screen.getByRole("status")).toHaveTextContent("Loading subwaves");
+    expect(
+      screen.queryByRole("button", { name: "Open Main" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps cached subwaves visible during a background refresh", () => {
+    mockSubwavesByParentId = new Map([
+      [
+        "root-wave",
+        {
+          subwaves: [createSubwave("child-1", { name: "Cached Child" })],
+          isFetching: true,
+        },
+      ],
+    ]);
+
     render(
       <MobileWaveSubwavesBar wave={createApiWave({ hasSubwaves: true })} />
     );
@@ -211,6 +232,10 @@ describe("MobileWaveSubwavesBar", () => {
     expect(
       screen.getByRole("button", { name: "Open Main" })
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Open Cached Child" })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("renders a subwave fallback when the active subwave is missing from loaded siblings", () => {
@@ -243,7 +268,7 @@ describe("MobileWaveSubwavesBar", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Open Active Child" })
-    ).toHaveAttribute("aria-current", "page");
+    ).toHaveAttribute("aria-current", "true");
   });
 
   it("clicks only inactive pills", async () => {
@@ -272,9 +297,7 @@ describe("MobileWaveSubwavesBar", () => {
       />
     );
 
-    await user.click(
-      screen.getByRole("button", { name: "Open Active Child" })
-    );
+    await user.click(screen.getByRole("button", { name: "Open Active Child" }));
     expect(mockSetActiveWave).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("button", { name: "Open Main" }));
@@ -321,10 +344,7 @@ describe("MobileWaveSubwavesBar", () => {
       <MobileWaveSubwavesBar wave={createApiWave({ hasSubwaves: true })} />
     );
 
-    expect(setItem).not.toHaveBeenCalledWith(
-      "pinnedWave",
-      expect.any(String)
-    );
+    expect(setItem).not.toHaveBeenCalledWith("pinnedWave", expect.any(String));
     setItem.mockRestore();
   });
 });

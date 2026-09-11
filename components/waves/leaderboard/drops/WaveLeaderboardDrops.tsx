@@ -2,14 +2,27 @@
 
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
-import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
-import React from "react";
+import {
+  useWaveDropsLeaderboard,
+  WAVE_DROPS_LEADERBOARD_MAX_PAGES,
+} from "@/hooks/useWaveDropsLeaderboard";
+import React, { useMemo } from "react";
+import {
+  useLeaderboardLeadingItemCount,
+  WaveLeaderboardVirtualizedRows,
+} from "../WaveLeaderboardVirtualizedRows";
+import {
+  useWaveLeaderboardVotingModal,
+  WaveLeaderboardVotingModal,
+} from "../WaveLeaderboardVotingModal";
 import { WaveLeaderboardDrop } from "./WaveLeaderboardDrop";
 import { WaveLeaderboardEmptyState } from "./WaveLeaderboardEmptyState";
 import { WaveLeaderboardLoading } from "./WaveLeaderboardLoading";
-import { WaveLeaderboardLoadingBar } from "./WaveLeaderboardLoadingBar";
+import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
+import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+
+const PROPOSAL_CARD_ROW_ESTIMATE_PX = 360;
 
 interface WaveLeaderboardDropsProps {
   readonly wave: ApiWave;
@@ -21,7 +34,10 @@ interface WaveLeaderboardDropsProps {
   readonly minPrice?: number | undefined;
   readonly maxPrice?: number | undefined;
   readonly priceCurrency?: string | undefined;
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 }
+
+const getDropId = (drop: ExtendedDrop): string => drop.id;
 
 export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   wave,
@@ -33,34 +49,49 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   minPrice,
   maxPrice,
   priceCurrency,
+  scrollContainerRef,
 }) => {
   const {
     drops,
+    pageMetadata,
+    queryWindowKey,
     fetchNextPage,
+    fetchPreviousPage,
     hasNextPage,
+    hasPreviousPage,
     isFetching,
     isFetchingNextPage,
+    isFetchingPreviousPage,
+    isFetchNextPageError,
+    isFetchPreviousPageError,
     refetch,
   } = useWaveDropsLeaderboard({
     waveId: wave.id,
     sort,
+    maxPages: WAVE_DROPS_LEADERBOARD_MAX_PAGES,
     minPrice,
     maxPrice,
     priceCurrency,
   });
+  const visibleDropIds = useMemo(
+    () => new Set(drops.map((drop) => drop.id)),
+    [drops]
+  );
+  const leadingItemCount = useLeaderboardLeadingItemCount({
+    pageMetadata,
+    visibleItemIds: visibleDropIds,
+    windowKey: queryWindowKey,
+  });
+  const { votingDrop, openVotingModal, closeVotingModal } =
+    useWaveLeaderboardVotingModal(drops, scrollContainerRef);
+  const contentPresentation = useWaveProposalCardPresentation(wave.id);
+  const { isQuorumWave } = useSeizeSettings();
+  const usesCompactRows =
+    contentPresentation === "proposalCard" || isQuorumWave(wave.id);
 
   const handleSourceDropDeleted = React.useCallback(() => {
     void refetch();
   }, [refetch]);
-
-  const handleIntersection = React.useCallback(() => {
-    if (!hasNextPage || isFetching || isFetchingNextPage) {
-      return;
-    }
-
-    Promise.resolve(fetchNextPage()).catch(() => undefined);
-  }, [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]);
-  const intersectionElementRef = useIntersectionObserver(handleIntersection);
 
   if (isFetching && drops.length === 0) {
     return <WaveLeaderboardLoading />;
@@ -73,20 +104,43 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   }
 
   return (
-    <div className="tw-space-y-4">
-      {drops.map((drop) => (
-        <WaveLeaderboardDrop
-          key={drop.id}
-          drop={drop}
-          wave={wave}
-          onDropClick={onDropClick}
-          onSourceDropDeleted={handleSourceDropDeleted}
-          isVotingClosed={isVotingClosed}
-          isVotingControlsLocked={isVotingControlsLocked}
-        />
-      ))}
-      {isFetchingNextPage && <WaveLeaderboardLoadingBar />}
-      <div ref={intersectionElementRef}></div>
-    </div>
+    <>
+      <WaveLeaderboardVirtualizedRows
+        items={drops}
+        getItemId={getDropId}
+        leadingItemCount={leadingItemCount}
+        windowKey={queryWindowKey}
+        layout="list"
+        scrollContainerRef={scrollContainerRef}
+        fetchNextPage={fetchNextPage}
+        fetchPreviousPage={fetchPreviousPage}
+        hasNextPage={hasNextPage}
+        hasPreviousPage={hasPreviousPage}
+        isFetchingNextPage={isFetchingNextPage}
+        isFetchingPreviousPage={isFetchingPreviousPage}
+        isFetchNextPageError={isFetchNextPageError}
+        isFetchPreviousPageError={isFetchPreviousPageError}
+        autoLoadNext
+        estimatedRowHeight={
+          usesCompactRows ? PROPOSAL_CARD_ROW_ESTIMATE_PX : undefined
+        }
+        measureLoadedRowsAtNaturalHeight
+        renderItem={(drop) => (
+          <WaveLeaderboardDrop
+            drop={drop}
+            wave={wave}
+            onDropClick={onDropClick}
+            onVoteClick={openVotingModal}
+            onSourceDropDeleted={handleSourceDropDeleted}
+            isVotingClosed={isVotingClosed}
+            isVotingControlsLocked={isVotingControlsLocked}
+          />
+        )}
+      />
+      <WaveLeaderboardVotingModal
+        drop={votingDrop}
+        onClose={closeVotingModal}
+      />
+    </>
   );
 };

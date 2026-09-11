@@ -10,13 +10,12 @@
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-left-width: 4px;
-  border-radius: 8px;
+  border-radius: 12px;
   background: rgba(18, 20, 24, 0.96);
   color: #f5f5f5;
   box-shadow:
     0 18px 44px rgba(0, 0, 0, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(16px);
 }
 
 .toastBody {
@@ -31,24 +30,24 @@
 
 .toastContent {
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
   padding: 13px 14px 13px 13px;
 }
 
 .icon {
   display: inline-flex;
-  width: 22px;
-  height: 22px;
-  margin-top: 1px;
+  width: 20px;
+  height: 20px;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
 }
 
 .icon svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 .text {
@@ -59,7 +58,7 @@
   color: #f8fafc;
   font-size: 0.93rem;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.25rem;
 }
 
 .description {
@@ -97,11 +96,17 @@
   color: white;
 }
 
+.action:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid #84adff;
+  outline-offset: 3px;
+}
+
 .closeButton {
   display: inline-flex;
-  width: 28px;
-  height: 28px;
-  margin: 8px 8px 0 0;
+  width: 40px;
+  height: 40px;
+  margin: 3px 3px 0 0;
   cursor: pointer;
   align-items: center;
   justify-content: center;
@@ -114,6 +119,11 @@
 .closeButton:hover {
   background: #1f2937;
   color: #ffffff;
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid #84adff;
+  outline-offset: 2px;
 }
 
 .closeButton svg {
@@ -183,7 +193,7 @@
   gap: 12px;
   border: 1px solid rgba(132, 173, 255, 0.24);
   border-left: 4px solid #84adff;
-  border-radius: 8px;
+  border-radius: 12px;
   background: rgba(18, 20, 24, 0.96);
   padding: 12px 14px;
   color: #f8fafc;
@@ -191,7 +201,6 @@
   box-shadow:
     0 18px 44px rgba(0, 0, 0, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(16px);
 }
 
 .newVersionTitle {
@@ -227,5 +236,12 @@
 
   .newVersionButton {
     margin-inline: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toastContainer :global(.Toastify__toast) {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

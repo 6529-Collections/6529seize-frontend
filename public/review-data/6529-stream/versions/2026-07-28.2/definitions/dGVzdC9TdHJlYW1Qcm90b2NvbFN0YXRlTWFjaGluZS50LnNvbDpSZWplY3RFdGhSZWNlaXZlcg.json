@@ -1,0 +1,112 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "receive()",
+          "functionKind": "receive",
+          "id": "test/StreamProtocolStateMachine.t.sol:RejectEthReceiver#function:receive()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpSZWplY3RFdGhSZWNlaXZlciNmdW5jdGlvbjpyZWNlaXZlKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 60,
+            "byteStart": 16523,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamProtocolStateMachine.t.sol#L331-L333",
+            "lineEnd": 333,
+            "lineStart": 331,
+            "snippetSha256": "sha256:8cd762fba3f0f2c4633511159b24a71c368e8f39cf9a267a20856ad773fc0c3c",
+            "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+          },
+          "selector": null,
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamProtocolStateMachine.t.sol:RejectEthReceiver",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Qcm90b2NvbFN0YXRlTWFjaGluZS50LnNvbDpSZWplY3RFdGhSZWNlaXZlcg",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamProtocolStateMachine.t.sol:RejectEthReceiver"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RejectEthReceiver",
+    "natspec": "",
+    "range": {
+      "byteLength": 95,
+      "byteStart": 16490,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamProtocolStateMachine.t.sol#L330-L334",
+      "lineEnd": 334,
+      "lineStart": 330,
+      "snippetSha256": "sha256:ee8e38a4cb217749512e4fe6e6dce70ca8014c3121fbcb2ec615511242f59b9a",
+      "sourceSha256": "sha256:4d3183830f542def916421013d4c95cc8538ae3c50df5ad1f6149708344c990e"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamProtocolStateMachine.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamProtocolStateMachine.t.sol:RejectEthReceiver",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamProtocolStateMachine.t.sol:RejectEthReceiver#function:receive()",
+      "definitionId": "test/StreamProtocolStateMachine.t.sol:RejectEthReceiver",
+      "severity": "advisory"
+    }
+  ]
+}

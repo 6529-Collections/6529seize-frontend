@@ -18,13 +18,15 @@ describe("MemeCalendar controls", () => {
   it("exposes named zoom, guide, navigation, and jump controls", () => {
     render(<MemeCalendar displayTz="utc" locale="de-DE" />);
 
-    const rangeGroup = screen.getByRole("group", { name: "Calendar range" });
+    const rangeGroup = screen.getByRole("tablist", {
+      name: "Calendar range",
+    });
     expect(
-      within(rangeGroup).getByRole("button", { name: "SZN 14" })
-    ).toHaveAttribute("aria-pressed", "true");
+      within(rangeGroup).getByRole("tab", { name: "SZN 14" })
+    ).toHaveAttribute("aria-selected", "true");
     expect(
-      within(rangeGroup).getByRole("button", { name: "Year 4" })
-    ).toHaveAttribute("aria-pressed", "false");
+      within(rangeGroup).getByRole("tab", { name: "Year 4" })
+    ).toHaveAttribute("aria-selected", "false");
 
     expect(
       screen.getByRole("button", { name: "Previous SZN" })
@@ -69,8 +71,10 @@ describe("MemeCalendar controls", () => {
   it("names drilldown cards with titles, ranges, and mint counts", () => {
     render(<MemeCalendar displayTz="utc" locale="de-DE" />);
 
-    const rangeGroup = screen.getByRole("group", { name: "Calendar range" });
-    fireEvent.click(within(rangeGroup).getByRole("button", { name: "Year 4" }));
+    const rangeGroup = screen.getByRole("tablist", {
+      name: "Calendar range",
+    });
+    fireEvent.click(within(rangeGroup).getByRole("tab", { name: "Year 4" }));
 
     expect(
       screen.getByRole("button", {
@@ -78,9 +82,7 @@ describe("MemeCalendar controls", () => {
       })
     ).toHaveTextContent("SZN #14");
 
-    fireEvent.click(
-      within(rangeGroup).getByRole("button", { name: "Epoch 1" })
-    );
+    fireEvent.click(within(rangeGroup).getByRole("tab", { name: "Epoch 1" }));
 
     expect(
       screen.getByRole("button", {

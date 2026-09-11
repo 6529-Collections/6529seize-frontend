@@ -1,56 +1,40 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageIdentityStatementsAddButton from "../add/UserPageIdentityStatementsAddButton";
 import { createPossessionStr } from "@/helpers/Helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function UserPageIdentityAddStatementsHeader({
   profile,
 }: {
   readonly profile: ApiIdentity;
 }) {
+  const locale = useBrowserLocale();
   const account = useSeizeConnectContext();
   const { activeProfileProxy } = useContext(AuthContext);
-  const [isMyProfile, setIsMyProfile] = useState<boolean>(false);
-
-  const getCanEdit = (): boolean =>
-    isMyProfile && !activeProfileProxy && !!profile?.handle;
-  const [canEdit, setCanEdit] = useState<boolean>(getCanEdit());
-  useEffect(() => setCanEdit(getCanEdit()), [isMyProfile, activeProfileProxy]);
-
-  useEffect(() => {
-    if (!account.address) {
-      setIsMyProfile(false);
-      return;
-    }
-    setIsMyProfile(
-      (profile.wallets ?? []).some(
-        (wallet) =>
-          wallet.wallet.toLowerCase() === account.address!.toLowerCase()
-      )
+  const normalizedAddress = account.address?.toLowerCase();
+  const isMyProfile =
+    !!normalizedAddress &&
+    (profile.wallets ?? []).some(
+      (wallet) => wallet.wallet.toLowerCase() === normalizedAddress
     );
-  }, [account, profile]);
-
-  const [possessionName, setPossessionName] = useState<string>(
-    createPossessionStr(profile?.handle ?? null)
-  );
-
-  useEffect(() => {
-    setPossessionName(createPossessionStr(profile?.handle ?? null));
-  }, [profile]);
+  const canEdit = isMyProfile && !activeProfileProxy && !!profile.handle;
+  const possessionName = createPossessionStr(profile.handle ?? null);
 
   return (
     <div>
-      <div className="tw-hidden lg:tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-w-full">
-        <h3 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-100">
-          {possessionName} ID Statements
+      <div className="tw-hidden tw-w-full tw-items-center tw-justify-between tw-gap-x-3 lg:tw-flex">
+        <h3 className="tw-mb-0 tw-mt-0 tw-text-xl tw-font-semibold tw-text-iron-100">
+          {t(locale, "user.profile.identity.statements.heading", {
+            name: possessionName,
+          })}
         </h3>
-        {canEdit && (
-          <UserPageIdentityStatementsAddButton profile={profile} />
-        )}
+        {canEdit && <UserPageIdentityStatementsAddButton profile={profile} />}
       </div>
     </div>
   );

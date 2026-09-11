@@ -1,0 +1,951 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0x5c825261",
+          "declaringDefinitionId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCrossFamilyGrantProviderRotationAndRevocationFailClosed",
+          "outputs": [],
+          "selector": "0x5c825261",
+          "signature": "testCrossFamilyGrantProviderRotationAndRevocationFailClosed()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0xd2eeb072",
+          "declaringDefinitionId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testExactCatalogRejectsUnknownFamiliesClassesAndRecordTypes",
+          "outputs": [],
+          "selector": "0xd2eeb072",
+          "signature": "testExactCatalogRejectsUnknownFamiliesClassesAndRecordTypes()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0xc2137ff1",
+          "declaringDefinitionId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGlobalAndFunctionAdminsCannotCrossIntoArtistLane",
+          "outputs": [],
+          "selector": "0xc2137ff1",
+          "signature": "testGlobalAndFunctionAdminsCannotCrossIntoArtistLane()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0xe7c6df71",
+          "declaringDefinitionId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMalformedProviderReturnFailsClosed",
+          "outputs": [],
+          "selector": "0xe7c6df71",
+          "signature": "testMalformedProviderReturnFailsClosed()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0xccd02c61",
+          "declaringDefinitionId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSnapshotPayloadMustUseSnapshotFamily",
+          "outputs": [],
+          "selector": "0xccd02c61",
+          "signature": "testSnapshotPayloadMustUseSnapshotFamily()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0xf261fcfa",
+          "declaringDefinitionId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSnapshotRequiresStrictDeclaredAllFamilyIntersection",
+          "outputs": [],
+          "selector": "0xf261fcfa",
+          "signature": "testSnapshotRequiresStrictDeclaredAllFamilyIntersection()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testExactCatalogRejectsUnknownFamiliesClassesAndRecordTypes()",
+          "displaySignature": "testExactCatalogRejectsUnknownFamiliesClassesAndRecordTypes()",
+          "functionKind": "function",
+          "id": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0xd2eeb072",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlN0cmVhbVJlY29yZEZhbWlseUF1dGhvcml6YXRpb25UZXN0I2Z1bmN0aW9uOjB4ZDJlZWIwNzI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testExactCatalogRejectsUnknownFamiliesClassesAndRecordTypes",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1531,
+            "byteStart": 2270,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L66-L104",
+            "lineEnd": 104,
+            "lineStart": 66,
+            "snippetSha256": "sha256:e5b56777aa325a705d53cf269f3b500081d89c22dfc869863329e9db11f25732",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": "0xd2eeb072",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGlobalAndFunctionAdminsCannotCrossIntoArtistLane()",
+          "displaySignature": "testGlobalAndFunctionAdminsCannotCrossIntoArtistLane()",
+          "functionKind": "function",
+          "id": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0xc2137ff1",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlN0cmVhbVJlY29yZEZhbWlseUF1dGhvcml6YXRpb25UZXN0I2Z1bmN0aW9uOjB4YzIxMzdmZjE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGlobalAndFunctionAdminsCannotCrossIntoArtistLane",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1015,
+            "byteStart": 3807,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L106-L129",
+            "lineEnd": 129,
+            "lineStart": 106,
+            "snippetSha256": "sha256:924b3d0749d2370be0d43921781a79225ecb1697f78ff3cc1dc4085f04cf0321",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": "0xc2137ff1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCrossFamilyGrantProviderRotationAndRevocationFailClosed()",
+          "displaySignature": "testCrossFamilyGrantProviderRotationAndRevocationFailClosed()",
+          "functionKind": "function",
+          "id": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0x5c825261",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlN0cmVhbVJlY29yZEZhbWlseUF1dGhvcml6YXRpb25UZXN0I2Z1bmN0aW9uOjB4NWM4MjUyNjE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCrossFamilyGrantProviderRotationAndRevocationFailClosed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1985,
+            "byteStart": 4828,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L131-L172",
+            "lineEnd": 172,
+            "lineStart": 131,
+            "snippetSha256": "sha256:1b7e7f827d35e016e53ccac94744fe90142eaff777af8249f6edebd78996bc8d",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": "0x5c825261",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSnapshotRequiresStrictDeclaredAllFamilyIntersection()",
+          "displaySignature": "testSnapshotRequiresStrictDeclaredAllFamilyIntersection()",
+          "functionKind": "function",
+          "id": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0xf261fcfa",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlN0cmVhbVJlY29yZEZhbWlseUF1dGhvcml6YXRpb25UZXN0I2Z1bmN0aW9uOjB4ZjI2MWZjZmE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSnapshotRequiresStrictDeclaredAllFamilyIntersection",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2105,
+            "byteStart": 6819,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L174-L225",
+            "lineEnd": 225,
+            "lineStart": 174,
+            "snippetSha256": "sha256:46aca0fdaa2abd9469bb416c864f7636529c11518a1cbcd41d7de32083d7efa2",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": "0xf261fcfa",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSnapshotPayloadMustUseSnapshotFamily()",
+          "displaySignature": "testSnapshotPayloadMustUseSnapshotFamily()",
+          "functionKind": "function",
+          "id": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0xccd02c61",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlN0cmVhbVJlY29yZEZhbWlseUF1dGhvcml6YXRpb25UZXN0I2Z1bmN0aW9uOjB4Y2NkMDJjNjE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSnapshotPayloadMustUseSnapshotFamily",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 665,
+            "byteStart": 8930,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L227-L243",
+            "lineEnd": 243,
+            "lineStart": 227,
+            "snippetSha256": "sha256:4adf1668a05a0e9989d7f6c815b08f54f85ebee206106360fcc2d2dc8c5c67e6",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": "0xccd02c61",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMalformedProviderReturnFailsClosed()",
+          "displaySignature": "testMalformedProviderReturnFailsClosed()",
+          "functionKind": "function",
+          "id": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0xe7c6df71",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlN0cmVhbVJlY29yZEZhbWlseUF1dGhvcml6YXRpb25UZXN0I2Z1bmN0aW9uOjB4ZTdjNmRmNzE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMalformedProviderReturnFailsClosed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 533,
+            "byteStart": 9601,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L245-L258",
+            "lineEnd": 258,
+            "lineStart": 245,
+            "snippetSha256": "sha256:70bafb3b99d1781e50490c85e095a2d9aed4fd26cce22ec223c6bd99a1f848d8",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": "0xe7c6df71",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setup()",
+          "functionKind": "function",
+          "id": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:_setup()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlN0cmVhbVJlY29yZEZhbWlseUF1dGhvcml6YXRpb25UZXN0I2Z1bmN0aW9uOl9zZXR1cCgp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setup",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "Setup"
+            }
+          ],
+          "range": {
+            "byteLength": 1236,
+            "byteStart": 10140,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L260-L286",
+            "lineEnd": 286,
+            "lineStart": 260,
+            "snippetSha256": "sha256:9e597a8ccaa7c4f6ab0e2c1ca0c528224da10be300b73f62bb9ef7c77b4441fb",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_record(bytes32,string)",
+          "functionKind": "function",
+          "id": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:_record(bytes32,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "uri",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlN0cmVhbVJlY29yZEZhbWlseUF1dGhvcml6YXRpb25UZXN0I2Z1bmN0aW9uOl9yZWNvcmQoYnl0ZXMzMixzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_record",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "IStreamCollectionMetadata.CollectionMetadataRecord"
+            }
+          ],
+          "range": {
+            "byteLength": 509,
+            "byteStart": 11382,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L288-L301",
+            "lineEnd": 301,
+            "lineStart": 288,
+            "snippetSha256": "sha256:d376e763beeeda3ab94fd9515f689ad6f9ab0ec728b5a7e2b1e1e6294c17f2e3",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_unauthorized(address,bytes32,bytes32,uint16)",
+          "functionKind": "function",
+          "id": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:_unauthorized(address,bytes32,bytes32,uint16)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "mask",
+              "type": "uint16"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlN0cmVhbVJlY29yZEZhbWlseUF1dGhvcml6YXRpb25UZXN0I2Z1bmN0aW9uOl91bmF1dGhvcml6ZWQoYWRkcmVzcyxieXRlczMyLGJ5dGVzMzIsdWludDE2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_unauthorized",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 367,
+            "byteStart": 11897,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L303-L315",
+            "lineEnd": 315,
+            "lineStart": 303,
+            "snippetSha256": "sha256:dbe614647490d099fe14b38a88027e44b5bdaedc4af39a289c1f23f48566993d",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_sortedPair(bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:_sortedPair(bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "left",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "right",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlN0cmVhbVJlY29yZEZhbWlseUF1dGhvcml6YXRpb25UZXN0I2Z1bmN0aW9uOl9zb3J0ZWRQYWlyKGJ5dGVzMzIsYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_sortedPair",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "values",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            }
+          ],
+          "range": {
+            "byteLength": 344,
+            "byteStart": 12270,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L317-L330",
+            "lineEnd": 330,
+            "lineStart": 317,
+            "snippetSha256": "sha256:627679d7085645251ad4856b17c1f8f33229a39861a83c2eb1f8ea8ccc1273b9",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 1398,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L47",
+            "lineEnd": 47,
+            "lineStart": 47,
+            "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1439,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L47",
+            "lineEnd": 47,
+            "lineStart": 47,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ARTIST",
+          "natspec": "",
+          "range": {
+            "byteLength": 51,
+            "byteStart": 1446,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L48",
+            "lineEnd": 48,
+            "lineStart": 48,
+            "snippetSha256": "sha256:15b6b041881d3bf97ce5d6ac3f944853369d7a0c50ccb9c5b1d3aeeca108024f",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 17,
+            "byteStart": 1480,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L48",
+            "lineEnd": 48,
+            "lineStart": 48,
+            "snippetSha256": "sha256:20d716cbcb455f74d8048c95f0e757885235aff70a16f32810c949b47df14599",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "valueSource": "address(0xA47157)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "OTHER",
+          "natspec": "",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 1503,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L49",
+            "lineEnd": 49,
+            "lineStart": 49,
+            "snippetSha256": "sha256:812a33401fa99f89bf35df2be8cf8d44058ede8355d69f751ba6961cbe8eff9c",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 14,
+            "byteStart": 1536,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L49",
+            "lineEnd": 49,
+            "lineStart": 49,
+            "snippetSha256": "sha256:709352300061ce078029f9ba1b4b1f3253093f688f2a601206cfbad2795a3d6a",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "valueSource": "address(0xB0B)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ARTIST_TYPE",
+          "natspec": "",
+          "range": {
+            "byteLength": 65,
+            "byteStart": 1556,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L50",
+            "lineEnd": 50,
+            "lineStart": 50,
+            "snippetSha256": "sha256:6863cb7b1a47e8c2bbacf1079822c13a93b1365a0bf0e9b38e9aff8b92cd2800",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 26,
+            "byteStart": 1595,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L50",
+            "lineEnd": 50,
+            "lineStart": 50,
+            "snippetSha256": "sha256:5cc5eac3b04f0999f8a80312f3a40d86d82828fe8bb3e6327878cc85b11178a2",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "valueSource": "keccak256(\"ARTIST_INTENT\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RIGHTS_TYPE",
+          "natspec": "",
+          "range": {
+            "byteLength": 68,
+            "byteStart": 1627,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L51",
+            "lineEnd": 51,
+            "lineStart": 51,
+            "snippetSha256": "sha256:9bbc7b9382860362dae1336be3f124eac58bfc1b30c1fc1093896d2bf9b54494",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 29,
+            "byteStart": 1666,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L51",
+            "lineEnd": 51,
+            "lineStart": 51,
+            "snippetSha256": "sha256:c6f37c459d0f1054252e331a000f7d1f4f8ea2d29d12f6cd82e9820f40655911",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "valueSource": "keccak256(\"RIGHTS_STATEMENT\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SNAPSHOT_TYPE",
+          "natspec": "",
+          "range": {
+            "byteLength": 71,
+            "byteStart": 1701,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L52",
+            "lineEnd": 52,
+            "lineStart": 52,
+            "snippetSha256": "sha256:1a41d509049751bfbf5e3987be0592c5f550777a3f9fecdbaa1befcb2cf3c679",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 30,
+            "byteStart": 1742,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L52",
+            "lineEnd": 52,
+            "lineStart": 52,
+            "snippetSha256": "sha256:5aec435e4b2c4ac2f5e28b3ec4ba02234127344aed6dc037f2cdbaa0470883c9",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "valueSource": "keccak256(\"SNAPSHOT_MANIFEST\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "UNKNOWN_TYPE",
+          "natspec": "",
+          "range": {
+            "byteLength": 70,
+            "byteStart": 1778,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L53",
+            "lineEnd": 53,
+            "lineStart": 53,
+            "snippetSha256": "sha256:d69aed4129db68f5dced5dccef7e8ff70ef4b5f0cf79144c33950875bff42a1f",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 30,
+            "byteStart": 1818,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L53",
+            "lineEnd": 53,
+            "lineStart": 53,
+            "snippetSha256": "sha256:e290649d46cf8b2ad87d704258e6fdbc64938ea24ccf7e8e2afcd5e18f0f84ae",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "valueSource": "keccak256(\"UNDECLARED_FAMILY\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SCHEMA_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 75,
+            "byteStart": 1854,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L54",
+            "lineEnd": 54,
+            "lineStart": 54,
+            "snippetSha256": "sha256:21f779da12a47dfb88acf40e0b1ff3608f8023583bd1138ec5141cba654333d6",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 38,
+            "byteStart": 1891,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L54",
+            "lineEnd": 54,
+            "lineStart": 54,
+            "snippetSha256": "sha256:b3a0ea8582893a5787ac50d161ffb497d59f2c4687c5fc770ba5ae76f27652a1",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "valueSource": "keccak256(\"record-family-test-schema\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ARTIST_CLASS",
+          "natspec": "",
+          "range": {
+            "byteLength": 39,
+            "byteStart": 1935,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L55",
+            "lineEnd": 55,
+            "lineStart": 55,
+            "snippetSha256": "sha256:9878addd0d9dd9755a9a24ac1cac2a980d7354cafa61d921cc8328c87c2254f3",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1973,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L55",
+            "lineEnd": 55,
+            "lineStart": 55,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "METADATA_CLASS",
+          "natspec": "",
+          "range": {
+            "byteLength": 41,
+            "byteStart": 1980,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L56",
+            "lineEnd": 56,
+            "lineStart": 56,
+            "snippetSha256": "sha256:e5f735b24fd8794cb89599c0051f028d4956754c0a24ccd21640c2aaadcc3437",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2020,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L56",
+            "lineEnd": 56,
+            "lineStart": 56,
+            "snippetSha256": "sha256:7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "valueSource": "7",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "GLOBAL_CLASS",
+          "natspec": "",
+          "range": {
+            "byteLength": 39,
+            "byteStart": 2027,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L57",
+            "lineEnd": 57,
+            "lineStart": 57,
+            "snippetSha256": "sha256:bc47a157b71b47be5601003323b21c72c3e4c136e2d731b3ad8d84eb94bbcee6",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2065,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L57",
+            "lineEnd": 57,
+            "lineStart": 57,
+            "snippetSha256": "sha256:2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          },
+          "valueSource": "8",
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 2096,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L60",
+                "lineEnd": 60,
+                "lineStart": 60,
+                "snippetSha256": "sha256:67cd5d2d923d960771e4de7c95f232699d5ce27f40fe1105c89e6a57535a802e",
+                "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+              },
+              "type": "DeployedStream",
+              "typeString": "struct StreamFixture.DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "registry",
+              "natspec": "",
+              "range": {
+                "byteLength": 33,
+                "byteStart": 2129,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L61",
+                "lineEnd": 61,
+                "lineStart": 61,
+                "snippetSha256": "sha256:e4a3acddf74d967381fd8c049328fc45b98e50c9d6200fa1f785b70678ac90de",
+                "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+              },
+              "type": "StreamCollectionMetadata",
+              "typeString": "contract StreamCollectionMetadata"
+            },
+            {
+              "index": 2,
+              "name": "metadata",
+              "natspec": "",
+              "range": {
+                "byteLength": 33,
+                "byteStart": 2172,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L62",
+                "lineEnd": 62,
+                "lineStart": 62,
+                "snippetSha256": "sha256:bce63a57a9c23e131e06ceffe0ed09943ec742ad59642964406808e7166a55d7",
+                "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+              },
+              "type": "StreamCollectionMetadata",
+              "typeString": "contract StreamCollectionMetadata"
+            },
+            {
+              "index": 3,
+              "name": "provider",
+              "natspec": "",
+              "range": {
+                "byteLength": 42,
+                "byteStart": 2215,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L63",
+                "lineEnd": 63,
+                "lineStart": 63,
+                "snippetSha256": "sha256:4773dbb811e781a84f3269731694050a45c220da78cc59814e2436b5167b3b3c",
+                "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+              },
+              "type": "RecordFamilyAuthorityProviderMock",
+              "typeString": "contract RecordFamilyAuthorityProviderMock"
+            }
+          ],
+          "name": "Setup",
+          "natspec": "",
+          "range": {
+            "byteLength": 191,
+            "byteStart": 2073,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L59-L64",
+            "lineEnd": 64,
+            "lineStart": 59,
+            "snippetSha256": "sha256:95d7a4d274399824dac2cf6c04fdcd88a66f79708ef10e40d5f50071cf618aa3",
+            "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpemF0aW9uLnQuc29sOlN0cmVhbVJlY29yZEZhbWlseUF1dGhvcml6YXRpb25UZXN0",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamRecordFamilyAuthorizationTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 11412,
+      "byteStart": 1204,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRecordFamilyAuthorization.t.sol#L42-L331",
+      "lineEnd": 331,
+      "lineStart": 42,
+      "snippetSha256": "sha256:fbf7e9046db16b6a6783a0678b486e77fb8c29d3a8ed62399cfa671cad7a4ffb",
+      "sourceSha256": "sha256:5dc8b6399ac82e02f882c019cc4dcfd698eae03230a1c40e58c7a9f88cdfcfda"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamRecordFamilyAuthorization.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 7
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 7
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0x5c825261",
+      "definitionId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0xc2137ff1",
+      "definitionId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0xccd02c61",
+      "definitionId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0xd2eeb072",
+      "definitionId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0xe7c6df71",
+      "definitionId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest#function:0xf261fcfa",
+      "definitionId": "test/StreamRecordFamilyAuthorization.t.sol:StreamRecordFamilyAuthorizationTest",
+      "severity": "advisory"
+    }
+  ]
+}

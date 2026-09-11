@@ -18,18 +18,19 @@ import { LeaderboardCollector } from "./LeaderboardCollector";
 import LeaderboardFooter from "./LeaderboardDownload";
 import LeaderboardSort from "./LeaderboardSort";
 import LeaderboardTableScrollShell from "./LeaderboardTableScrollShell";
+import {
+  LEADERBOARD_BODY_CELL_CLASS_NAME as BODY_CELL_CLASS_NAME,
+  LEADERBOARD_HEADER_CELL_CLASS_NAME as HEADER_CELL_CLASS_NAME,
+  LEADERBOARD_HEADER_CONTENT_CLASS_NAME as HEADER_CONTENT_CLASS_NAME,
+  LEADERBOARD_ROW_CLASS_NAME as ROW_CLASS_NAME,
+  LEADERBOARD_TABLE_CLASS_NAME as TABLE_CLASS_NAME,
+} from "./leaderboardTableStyles";
 
 const PAGE_SIZE = 50;
-const TABLE_CLASS_NAME = "tw-mb-0 tw-w-full tw-border-collapse tw-text-white";
-const ROW_CLASS_NAME = "odd:tw-bg-[#1e1e1e] even:tw-bg-transparent";
-const HEADER_CELL_CLASS_NAME =
-  "tw-whitespace-nowrap tw-p-2 tw-align-middle tw-font-semibold tw-leading-7 tw-text-white";
-const BODY_CELL_CLASS_NAME =
-  "tw-whitespace-nowrap tw-p-2 tw-align-middle tw-leading-10 tw-text-white";
-const HEADER_CONTENT_CLASS_NAME = "tw-flex tw-items-center tw-justify-center";
-const RANK_CELL_CLASS_NAME = "tw-w-[4%] tw-text-center";
+const RANK_CELL_CLASS_NAME =
+  "tw-w-[4%] tw-text-center tw-font-semibold tw-tabular-nums";
 const COLLECTOR_CELL_CLASS_NAME = "tw-max-w-0 tw-w-[28%] tw-text-left";
-const METRIC_CELL_CLASS_NAME = "tw-w-[9.7143%] tw-text-center";
+const METRIC_CELL_CLASS_NAME = "tw-w-[9.7143%] tw-text-center tw-tabular-nums";
 
 function getLeaderboardRowKey(lead: LeaderboardMetrics) {
   return (

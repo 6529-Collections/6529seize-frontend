@@ -1,0 +1,1257 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/IStreamAssetPolicyRegistry.sol:IStreamAssetPolicyRegistry#error:0xd1ccd55e",
+          "declaringDefinitionId": "smart-contracts/IStreamAssetPolicyRegistry.sol:IStreamAssetPolicyRegistry",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "AssetPolicyUnchanged",
+          "selector": "0xd1ccd55e",
+          "signature": "AssetPolicyUnchanged(address,uint8,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamAssetPolicyRegistry.sol:IStreamAssetPolicyRegistry#error:0x6f79c78a",
+          "declaringDefinitionId": "smart-contracts/IStreamAssetPolicyRegistry.sol:IStreamAssetPolicyRegistry",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidAsset",
+          "selector": "0x6f79c78a",
+          "signature": "InvalidAsset(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamAssetPolicyRegistry.sol:IStreamAssetPolicyRegistry#error:0x0548647a",
+          "declaringDefinitionId": "smart-contracts/IStreamAssetPolicyRegistry.sol:IStreamAssetPolicyRegistry",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidAssetPolicyHash",
+          "selector": "0x0548647a",
+          "signature": "InvalidAssetPolicyHash(address,uint8,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamAssetPolicyRegistry.sol:IStreamAssetPolicyRegistry#error:0x2fd5f330",
+          "declaringDefinitionId": "smart-contracts/IStreamAssetPolicyRegistry.sol:IStreamAssetPolicyRegistry",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            }
+          ],
+          "name": "InvalidAssetStatus",
+          "selector": "0x2fd5f330",
+          "signature": "InvalidAssetStatus(uint8)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamAssetPolicyRegistry.sol:IStreamAssetPolicyRegistry#event:AssetPolicyUpdated(address,uint8,uint8,bytes32,bytes32,address)",
+          "declaringDefinitionId": "smart-contracts/IStreamAssetPolicyRegistry.sol:IStreamAssetPolicyRegistry",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint8",
+              "name": "previousStatus",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "previousPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "AssetPolicyUpdated",
+          "signature": "AssetPolicyUpdated(address,uint8,uint8,bytes32,bytes32,address)",
+          "topic0": "0xd47a9f3b84f5291e19cb6998543f12324e072f6f32456d4585ce2a3e7e7403ab"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/Ownable.sol:Ownable#event:OwnershipTransferred(address,address)",
+          "declaringDefinitionId": "smart-contracts/Ownable.sol:Ownable",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "signature": "OwnershipTransferred(address,address)",
+          "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0xefb1a4dc",
+          "declaringDefinitionId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "ASSET_STATUS_ACTIVE",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0xefb1a4dc",
+          "signature": "ASSET_STATUS_ACTIVE()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x9ae3d73c",
+          "declaringDefinitionId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "ASSET_STATUS_DEPRECATED",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x9ae3d73c",
+          "signature": "ASSET_STATUS_DEPRECATED()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0xc4eda4b7",
+          "declaringDefinitionId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "ASSET_STATUS_INACTIVE",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0xc4eda4b7",
+          "signature": "ASSET_STATUS_INACTIVE()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0xe1472690",
+          "declaringDefinitionId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "ASSET_STATUS_UNKNOWN",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0xe1472690",
+          "signature": "ASSET_STATUS_UNKNOWN()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x81524ec8",
+          "declaringDefinitionId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "ASSET_STATUS_UNSUPPORTED",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x81524ec8",
+          "signature": "ASSET_STATUS_UNSUPPORTED()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0xc9528b36",
+          "declaringDefinitionId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "assetPolicy",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "uint64",
+              "name": "effectiveAt",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0xc9528b36",
+          "signature": "assetPolicy(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x2d82f47b",
+          "declaringDefinitionId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "assetPolicyEffectiveAt",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x2d82f47b",
+          "signature": "assetPolicyEffectiveAt(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x6373ab9f",
+          "declaringDefinitionId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "assetPolicyHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x6373ab9f",
+          "signature": "assetPolicyHash(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x76057d1a",
+          "declaringDefinitionId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "assetStatus",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x76057d1a",
+          "signature": "assetStatus(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0xa2fa0157",
+          "declaringDefinitionId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "isAssetActive",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xa2fa0157",
+          "signature": "isAssetActive(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x99ce40d6",
+          "declaringDefinitionId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamAssetPolicyRegistry",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x99ce40d6",
+          "signature": "isStreamAssetPolicyRegistry()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/Ownable.sol:Ownable#function:0x8da5cb5b",
+          "declaringDefinitionId": "smart-contracts/Ownable.sol:Ownable",
+          "inherited": true,
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x8da5cb5b",
+          "signature": "owner()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/Ownable.sol:Ownable#function:0x715018a6",
+          "declaringDefinitionId": "smart-contracts/Ownable.sol:Ownable",
+          "inherited": true,
+          "inputs": [],
+          "name": "renounceOwnership",
+          "outputs": [],
+          "selector": "0x715018a6",
+          "signature": "renounceOwnership()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x410ff0d8",
+          "declaringDefinitionId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "setAssetStatus",
+          "outputs": [],
+          "selector": "0x410ff0d8",
+          "signature": "setAssetStatus(address,uint8,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/Ownable.sol:Ownable#function:0xf2fde38b",
+          "declaringDefinitionId": "smart-contracts/Ownable.sol:Ownable",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "transferOwnership",
+          "outputs": [],
+          "selector": "0xf2fde38b",
+          "signature": "transferOwnership(address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "production_release_contract",
+    "classificationReason": "Listed in release-artifacts/contracts.json production_contracts.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "ASSET_STATUS_UNKNOWN()",
+          "displaySignature": "ASSET_STATUS_UNKNOWN()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0xe1472690",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkuc29sOlN0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkjZnVuY3Rpb246MHhlMTQ3MjY5MA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "ASSET_STATUS_UNKNOWN",
+          "natspec": "@notice Default-deny status for unknown or cleared assets.",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 55,
+            "byteStart": 354,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L10",
+            "lineEnd": 10,
+            "lineStart": 10,
+            "snippetSha256": "sha256:e440dd223120d4875e0fe6cbaf52d5c3bcef5a1a186bb0127006ccb2da4f87d3",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0xe1472690",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "ASSET_STATUS_ACTIVE()",
+          "displaySignature": "ASSET_STATUS_ACTIVE()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0xefb1a4dc",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkuc29sOlN0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkjZnVuY3Rpb246MHhlZmIxYTRkYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "ASSET_STATUS_ACTIVE",
+          "natspec": "@notice Status for approved standard ERC-20 assets that may be synced and released.",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 54,
+            "byteStart": 507,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:2d6ff7721a7d0e2a4540eef5313e38cf6a8ab496ea9939b6bd9c1c45b7ec311b",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0xefb1a4dc",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "ASSET_STATUS_INACTIVE()",
+          "displaySignature": "ASSET_STATUS_INACTIVE()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0xc4eda4b7",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkuc29sOlN0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkjZnVuY3Rpb246MHhjNGVkYTRiNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "ASSET_STATUS_INACTIVE",
+          "natspec": "@notice Status for reviewed assets that are not currently accepted by split wallets.",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 56,
+            "byteStart": 660,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:57af179e449103761da3025c466eb8494fd6d254079d3133a2a155299259ed3d",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0xc4eda4b7",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "ASSET_STATUS_DEPRECATED()",
+          "displaySignature": "ASSET_STATUS_DEPRECATED()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x9ae3d73c",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkuc29sOlN0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkjZnVuY3Rpb246MHg5YWUzZDczYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "ASSET_STATUS_DEPRECATED",
+          "natspec": "@notice Status for previously approved assets that are disabled for sync and release.",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 58,
+            "byteStart": 816,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:3f08071ca1d6b12872c6daa6479b9ea6319d732d9b2977d4105d0e6e245a8936",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0x9ae3d73c",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "ASSET_STATUS_UNSUPPORTED()",
+          "displaySignature": "ASSET_STATUS_UNSUPPORTED()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x81524ec8",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkuc29sOlN0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkjZnVuY3Rpb246MHg4MTUyNGVjOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "ASSET_STATUS_UNSUPPORTED",
+          "natspec": "@notice Status for explicitly unsupported assets.",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 59,
+            "byteStart": 938,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:bea4e47e9c5506fc38684c60afb180f48232239d7af890a3bc49fadb50453d5a",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0x81524ec8",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "assetStatus(address)",
+          "displaySignature": "assetStatus(address)",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x76057d1a",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkuc29sOlN0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkjZnVuY3Rpb246MHg3NjA1N2QxYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "assetStatus",
+          "natspec": "@notice Current policy status by asset address.",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 53,
+            "byteStart": 1060,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:a95da20729c9ed78f0ab3556a6bbc770a48d7e3211dbd6ce51ba511ba2d4dd53",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0x76057d1a",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "assetPolicyHash(address)",
+          "displaySignature": "assetPolicyHash(address)",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x6373ab9f",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkuc29sOlN0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkjZnVuY3Rpb246MHg2MzczYWI5Zg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "assetPolicyHash",
+          "natspec": "@notice Evidence hash for the current policy status by asset address.",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 59,
+            "byteStart": 1197,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:fb5e65afcc9259e860d52b9cd8f324e4f8284647fcb618ee93400ce86f20ddef",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0x6373ab9f",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "assetPolicyEffectiveAt(address)",
+          "displaySignature": "assetPolicyEffectiveAt(address)",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x2d82f47b",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkuc29sOlN0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkjZnVuY3Rpb246MHgyZDgyZjQ3Yg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "assetPolicyEffectiveAt",
+          "natspec": "@notice Timestamp when the current policy status became effective.",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 65,
+            "byteStart": 1337,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:9750c65241dc5d8cc94454403169d952014c449dcf942420d543eba27d752647",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0x2d82f47b",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "isStreamAssetPolicyRegistry()",
+          "displaySignature": "isStreamAssetPolicyRegistry()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x99ce40d6",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkuc29sOlN0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkjZnVuY3Rpb246MHg5OWNlNDBkNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamAssetPolicyRegistry",
+          "natspec": "@notice Returns true for the canonical 6529Stream asset policy registry.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 105,
+            "byteStart": 1490,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L28-L30",
+            "lineEnd": 30,
+            "lineStart": 28,
+            "snippetSha256": "sha256:13630faaef39d5258fcacd424b8de2d43ffa4867f552d5508d084e621a467b62",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0x99ce40d6",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isAssetActive(address)",
+          "displaySignature": "isAssetActive(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0xa2fa0157",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkuc29sOlN0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkjZnVuY3Rpb246MHhhMmZhMDE1Nw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isAssetActive",
+          "natspec": "@notice Returns true when an asset is currently active for split-wallet sync and release.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 141,
+            "byteStart": 1699,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L33-L35",
+            "lineEnd": 35,
+            "lineStart": 33,
+            "snippetSha256": "sha256:53a632b682280beab895e90cca580913703b7d214e3aec05a951a926e9fea286",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0xa2fa0157",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "assetPolicy(address)",
+          "displaySignature": "assetPolicy(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0xc9528b36",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkuc29sOlN0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkjZnVuY3Rpb246MHhjOTUyOGIzNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "assetPolicy",
+          "natspec": "@notice Returns the current status, evidence hash, and effective timestamp for an asset.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "effectiveAt",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 257,
+            "byteStart": 1943,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L38-L45",
+            "lineEnd": 45,
+            "lineStart": 38,
+            "snippetSha256": "sha256:020a8a0065ac43916ba3498113f7b14c157abfb39ed9d2262204848a2e3abda6",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0xc9528b36",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setAssetStatus(address,uint8,bytes32)",
+          "displaySignature": "setAssetStatus(address,uint8,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x410ff0d8",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkuc29sOlN0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkjZnVuY3Rpb246MHg0MTBmZjBkOA",
+          "kind": "function",
+          "modifiers": [
+            "onlyOwner"
+          ],
+          "name": "setAssetStatus",
+          "natspec": "@notice Sets an asset policy status and evidence hash.",
+          "outputs": [],
+          "range": {
+            "byteLength": 1360,
+            "byteStart": 2269,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L48-L82",
+            "lineEnd": 82,
+            "lineStart": 48,
+            "snippetSha256": "sha256:2639e969b158f7c91e463822199e585e0a3307625751cdfa5ef78b52720c20a2",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0x410ff0d8",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0xe1472690",
+          "immutable": false,
+          "name": "ASSET_STATUS_UNKNOWN",
+          "natspec": "@notice Default-deny status for unknown or cleared assets.",
+          "range": {
+            "byteLength": 55,
+            "byteStart": 354,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L10",
+            "lineEnd": 10,
+            "lineStart": 10,
+            "snippetSha256": "sha256:e440dd223120d4875e0fe6cbaf52d5c3bcef5a1a186bb0127006ccb2da4f87d3",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0xe1472690",
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 408,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L10",
+            "lineEnd": 10,
+            "lineStart": 10,
+            "snippetSha256": "sha256:5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "valueSource": "0",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0xefb1a4dc",
+          "immutable": false,
+          "name": "ASSET_STATUS_ACTIVE",
+          "natspec": "@notice Status for approved standard ERC-20 assets that may be synced and released.",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 507,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:2d6ff7721a7d0e2a4540eef5313e38cf6a8ab496ea9939b6bd9c1c45b7ec311b",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0xefb1a4dc",
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 560,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "valueSource": "1",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0xc4eda4b7",
+          "immutable": false,
+          "name": "ASSET_STATUS_INACTIVE",
+          "natspec": "@notice Status for reviewed assets that are not currently accepted by split wallets.",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 660,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:57af179e449103761da3025c466eb8494fd6d254079d3133a2a155299259ed3d",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0xc4eda4b7",
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 715,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "valueSource": "2",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x9ae3d73c",
+          "immutable": false,
+          "name": "ASSET_STATUS_DEPRECATED",
+          "natspec": "@notice Status for previously approved assets that are disabled for sync and release.",
+          "range": {
+            "byteLength": 58,
+            "byteStart": 816,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:3f08071ca1d6b12872c6daa6479b9ea6319d732d9b2977d4105d0e6e245a8936",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0x9ae3d73c",
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 873,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "valueSource": "3",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x81524ec8",
+          "immutable": false,
+          "name": "ASSET_STATUS_UNSUPPORTED",
+          "natspec": "@notice Status for explicitly unsupported assets.",
+          "range": {
+            "byteLength": 59,
+            "byteStart": 938,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:bea4e47e9c5506fc38684c60afb180f48232239d7af890a3bc49fadb50453d5a",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0x81524ec8",
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 996,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "valueSource": "4",
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x76057d1a",
+          "immutable": false,
+          "name": "assetStatus",
+          "natspec": "@notice Current policy status by asset address.",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 1060,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:a95da20729c9ed78f0ab3556a6bbc770a48d7e3211dbd6ce51ba511ba2d4dd53",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0x76057d1a",
+          "type": "mapping(address => uint8)",
+          "typeString": "mapping(address => uint8)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x6373ab9f",
+          "immutable": false,
+          "name": "assetPolicyHash",
+          "natspec": "@notice Evidence hash for the current policy status by asset address.",
+          "range": {
+            "byteLength": 59,
+            "byteStart": 1197,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:fb5e65afcc9259e860d52b9cd8f324e4f8284647fcb618ee93400ce86f20ddef",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0x6373ab9f",
+          "type": "mapping(address => bytes32)",
+          "typeString": "mapping(address => bytes32)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry#function:0x2d82f47b",
+          "immutable": false,
+          "name": "assetPolicyEffectiveAt",
+          "natspec": "@notice Timestamp when the current policy status became effective.",
+          "range": {
+            "byteLength": 65,
+            "byteStart": 1337,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:9750c65241dc5d8cc94454403169d952014c449dcf942420d543eba27d752647",
+            "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+          },
+          "selector": "0x2d82f47b",
+          "type": "mapping(address => uint64)",
+          "typeString": "mapping(address => uint64)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IStreamAssetPolicyRegistry.sol:IStreamAssetPolicyRegistry",
+        "name": "IStreamAssetPolicyRegistry"
+      },
+      {
+        "definitionId": "smart-contracts/Ownable.sol:Ownable",
+        "name": "Ownable"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnkuc29sOlN0cmVhbUFzc2V0UG9saWN5UmVnaXN0cnk",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+      "smart-contracts/Ownable.sol:Ownable",
+      "smart-contracts/Context.sol:Context",
+      "smart-contracts/IStreamAssetPolicyRegistry.sol:IStreamAssetPolicyRegistry"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": true,
+      "releaseCatalog": "production_contract"
+    },
+    "name": "StreamAssetPolicyRegistry",
+    "natspec": "@notice Deployment-wide allowlist for approved standard ERC-20 split assets.",
+    "range": {
+      "byteLength": 3424,
+      "byteStart": 207,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamAssetPolicyRegistry.sol#L8-L83",
+      "lineEnd": 83,
+      "lineStart": 8,
+      "snippetSha256": "sha256:f18cff866f440aa1478d4067bde9425ab2d23100871c58dbdf7bfdcea1ded516",
+      "sourceSha256": "sha256:885d4ae66a47d75ae79708208df4f36674dd0994d661ae256756d83bae9faab2"
+    },
+    "release": {
+      "abiSha256": "sha256:082fd9e9f3e061b4740f5e82b6f338fa2f6c8821bd5d7fd1dcf503beec7c597d",
+      "bytecodeSha256": "sha256:84f272972214fad13c1bccea90a1782b1276ff0f1f29cc723286b654a6051abf",
+      "deployedBytecodeSha256": "sha256:c7de8e8dcba09321cc8f043c84796bfa77c13e0964afbcd0471ad0e300119057",
+      "deployedBytecodeSizeBytes": 1671,
+      "summary": {
+        "custom_error_count": 4,
+        "event_count": 2,
+        "function_count": 15,
+        "payable_function_count": 0,
+        "read_function_count": 12,
+        "write_function_count": 3
+      },
+      "tracked": true
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamAssetPolicyRegistry.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

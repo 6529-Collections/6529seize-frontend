@@ -10,6 +10,8 @@
 //   node scripts/debt-ratchet.cjs --json     -> print actual counts as JSON
 //   node scripts/debt-ratchet.cjs --details <metric>
 //                                            -> per-file counts for one metric
+//      --ignore-wordpress-migrated           -> hide WP-migrated files from
+//                                                details output only
 //
 // Rules enforced by the check:
 //   - A count above its baseline fails the check.
@@ -19,20 +21,24 @@
 //     the baseline in the same PR with `--update` so the improvement sticks.
 //
 // Counting semantics (deliberate trade-offs):
-//   - Metrics are textual heuristics, not AST analysis: the `any` and
-//     TODO/FIXME/HACK regexes also match inside strings, comments, and JSDoc.
-//     Counts are symmetric between baseline and actuals, so the ratchet
-//     still moves in the right direction; do not read them as exact.
+//   - The `any_casts` metric is syntax-aware and counts direct `: any`-style
+//     annotations, `as any`, valid TypeScript `<any>` assertions, and each
+//     `any` keyword inside a generic type argument. Invalid TSX angle-bracket
+//     syntax fails parsing instead of silently undercounting.
+//   - The `test_generic_any` metric applies the same generic-argument rule to
+//     test source while leaving pre-existing direct test annotations and casts
+//     outside this workstream's scope.
+//   - Task-marker regexes match inside strings, comments, and JSDoc. Counts are
+//     symmetric between baseline and actuals, so the ratchet still moves in the
+//     right direction; do not read them as exact.
 //   - The oversized grandfather list keys on exact relative paths. Renaming
 //     or moving a grandfathered file makes it count as a NEW oversized file
 //     (fail-closed); run `--update` in the same PR to re-grandfather the new
 //     path, or use the move as the moment to split the file.
 //
-// The script is dependency-free on purpose so CI can run it on a bare
-// checkout without installing node_modules.
-
 const fs = require("node:fs");
 const path = require("node:path");
+const ts = require("typescript");
 
 // DEBT_RATCHET_ROOT is a test seam; production runs use the repo root.
 const REPO_ROOT = process.env["DEBT_RATCHET_ROOT"]
@@ -63,8 +69,10 @@ const SCAN_DIRS = [
   "utils",
   "wagmiConfig",
 ];
+const TEST_SCAN_DIRS = ["__tests__", "__mocks__", "tests", "e2e"];
 
 const EXCLUDED_DIR_NAMES = new Set(["__tests__", "__mocks__", "node_modules"]);
+const TEST_EXCLUDED_DIR_NAMES = new Set(["node_modules"]);
 const EXCLUDED_FILE_PATTERNS = [
   /\.test\.[cm]?[jt]sx?$/,
   /\.spec\.[cm]?[jt]sx?$/,
@@ -82,12 +90,34 @@ const CODE_EXTENSIONS = new Set([
 ]);
 const TYPESCRIPT_EXTENSIONS = new Set([".ts", ".tsx", ".cts", ".mts"]);
 const STYLE_EXTENSIONS = new Set([".css", ".scss"]);
+const WORDPRESS_MIGRATED_DETAILS_FLAGS = new Set([
+  "--ignore-wordpress-migrated",
+  "--ignore-wp-migrated",
+]);
+const WORDPRESS_MIGRATED_SOURCE_PATTERNS = [
+  /WordPressLegacyAssets/,
+  /Yoast SEO plugin/i,
+  /wp-content\/uploads/i,
+  /\/wp-json\/wp\/v2\//i,
+  /\bfusion[-_](?:builder|wrapper|row|column|text|title|image|fullwidth)/i,
+  /\bwp-image-\d+\b/i,
+];
+const LEGACY_WORDPRESS_RUNTIME_PATTERNS = [
+  /WordPressLegacyAssets/,
+  /\bpostJsonHref\b/,
+  /\/wp-json\/wp\/v2\//i,
+  /legacy-wordpress\/WordPressLegacyAssets/,
+];
 
 const METRIC_DEFINITIONS = {
   any_casts: {
     description:
-      "`: any` and `as any` occurrences in TypeScript source (tests excluded)",
+      "`: any`, `as any`, and generic-argument `any` occurrences in TypeScript source (tests excluded)",
     hint: "Replace `any` with a real type or `unknown` plus narrowing.",
+  },
+  test_generic_any: {
+    description: "generic-argument `any` occurrences in TypeScript test source",
+    hint: "Give the test helper, mock, or API call a truthful concrete type.",
   },
   todo_comments: {
     description: "TODO/FIXME/HACK markers in source and style files",
@@ -96,6 +126,10 @@ const METRIC_DEFINITIONS = {
   oversized_files: {
     description: `source files over ${MAX_SOURCE_FILE_LINES} lines`,
     hint: "Split the file into smaller, single-concern modules.",
+  },
+  legacy_wordpress_runtime: {
+    description: "old live WordPress runtime markers in app source",
+    hint: "Use extracted migrated WordPress content instead of WordPressLegacyAssets/postJsonHref.",
   },
   bootstrap_imports: {
     description: "bootstrap / react-bootstrap import statements",
@@ -115,7 +149,9 @@ const METRIC_DEFINITIONS = {
 const isExcludedFile = (fileName) =>
   EXCLUDED_FILE_PATTERNS.some((pattern) => pattern.test(fileName));
 
-function walkFiles(absoluteDir, relativeDir, collected) {
+function walkFiles(absoluteDir, relativeDir, collected, options = {}) {
+  const excludedDirNames = options.excludedDirNames ?? EXCLUDED_DIR_NAMES;
+  const excludeTestFiles = options.excludeTestFiles ?? true;
   let entries;
   try {
     entries = fs.readdirSync(absoluteDir, { withFileTypes: true });
@@ -130,12 +166,14 @@ function walkFiles(absoluteDir, relativeDir, collected) {
       : entry.name;
 
     if (entry.isDirectory()) {
-      if (EXCLUDED_DIR_NAMES.has(entry.name)) continue;
-      walkFiles(absolutePath, relativePath, collected);
+      if (excludedDirNames.has(entry.name)) continue;
+      walkFiles(absolutePath, relativePath, collected, options);
       continue;
     }
 
-    if (!entry.isFile() || isExcludedFile(entry.name)) continue;
+    if (!entry.isFile() || (excludeTestFiles && isExcludedFile(entry.name))) {
+      continue;
+    }
     collected.push(relativePath);
   }
 }
@@ -146,6 +184,37 @@ function listSourceFiles() {
     walkFiles(path.join(REPO_ROOT, dir), dir, files);
   }
   return files.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+}
+
+function isNestedTestSource(relativePath) {
+  const segments = relativePath.split("/");
+  return (
+    segments.some(
+      (segment) => segment === "__tests__" || segment === "__mocks__"
+    ) || isExcludedFile(path.basename(relativePath))
+  );
+}
+
+function listTestFiles() {
+  // Root test directories also contain support files without `.test`/`.spec`
+  // names. Source directories need a separate walk for co-located test files
+  // and nested test folders; the Set keeps the combined inventory unique.
+  const files = new Set();
+  const collect = (dir, filter) => {
+    const candidates = [];
+    walkFiles(path.join(REPO_ROOT, dir), dir, candidates, {
+      excludedDirNames: TEST_EXCLUDED_DIR_NAMES,
+      excludeTestFiles: false,
+    });
+    for (const candidate of candidates) {
+      if (!filter || filter(candidate)) files.add(candidate);
+    }
+  };
+
+  for (const dir of TEST_SCAN_DIRS) collect(dir);
+  for (const dir of SCAN_DIRS) collect(dir, isNestedTestSource);
+
+  return [...files].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
 function countMatches(content, pattern) {
@@ -174,6 +243,209 @@ function countImportStatements(content, packageNames) {
   return count;
 }
 
+function formatParseDiagnostic(diagnostic, sourceFile, filePath) {
+  const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, " ");
+  const position = diagnostic.start ?? 0;
+  const { line, character } =
+    sourceFile.getLineAndCharacterOfPosition(position);
+  return `${filePath}:${line + 1}:${character + 1}: ${message}`;
+}
+
+function normalizeProgramFilePath(filePath) {
+  return path.normalize(filePath);
+}
+
+function createAnyCastProgram(files) {
+  const compilerOptions = {
+    allowJs: true,
+    checkJs: false,
+    jsx: ts.JsxEmit.Preserve,
+    noLib: true,
+    noResolve: true,
+    target: ts.ScriptTarget.Latest,
+  };
+  const fileContents = new Map(
+    files.map(({ filePath, content }) => [
+      normalizeProgramFilePath(filePath),
+      content,
+    ])
+  );
+  const compilerHost = ts.createCompilerHost(compilerOptions, true);
+  const sourceFiles = new Map();
+  const isTargetFile = (requestedFilePath) =>
+    fileContents.has(normalizeProgramFilePath(requestedFilePath));
+  const defaultFileExists = compilerHost.fileExists.bind(compilerHost);
+  const defaultReadFile = compilerHost.readFile.bind(compilerHost);
+
+  compilerHost.fileExists = (requestedFilePath) =>
+    isTargetFile(requestedFilePath) || defaultFileExists(requestedFilePath);
+  compilerHost.readFile = (requestedFilePath) =>
+    isTargetFile(requestedFilePath)
+      ? fileContents.get(normalizeProgramFilePath(requestedFilePath))
+      : defaultReadFile(requestedFilePath);
+
+  const program = ts.createProgram(
+    files.map(({ filePath }) => filePath),
+    compilerOptions,
+    compilerHost
+  );
+  const programSourceFiles = program.getSourceFiles();
+
+  for (const { filePath } of files) {
+    const normalizedFilePath = normalizeProgramFilePath(filePath);
+    const sourceFile =
+      program.getSourceFile(filePath) ??
+      programSourceFiles.find(
+        (candidate) =>
+          normalizeProgramFilePath(candidate.fileName) === normalizedFilePath
+      );
+
+    if (!sourceFile) {
+      throw new Error(
+        `Unable to parse ${filePath} while counting any_casts: source file was not created`
+      );
+    }
+
+    sourceFiles.set(normalizedFilePath, sourceFile);
+  }
+
+  return { program, sourceFiles };
+}
+
+function getAnyCastSourceFile(sourceFiles, filePath) {
+  return sourceFiles.get(normalizeProgramFilePath(filePath));
+}
+
+function throwOnSyntacticDiagnostics(program, sourceFile, filePath) {
+  const syntacticDiagnostics = program.getSyntacticDiagnostics(sourceFile);
+
+  if (syntacticDiagnostics.length > 0) {
+    throw new Error(
+      `Unable to parse ${filePath} while counting any_casts: ` +
+        formatParseDiagnostic(syntacticDiagnostics[0], sourceFile, filePath)
+    );
+  }
+}
+
+function hasDirectAnyType(typeNode) {
+  if (typeNode.kind === ts.SyntaxKind.AnyKeyword) return true;
+
+  if (ts.isParenthesizedTypeNode(typeNode)) {
+    return hasDirectAnyType(typeNode.type);
+  }
+
+  if (ts.isArrayTypeNode(typeNode)) {
+    return hasDirectAnyType(typeNode.elementType);
+  }
+
+  if (ts.isTypeOperatorNode(typeNode)) {
+    return (
+      typeNode.operator === ts.SyntaxKind.ReadonlyKeyword &&
+      hasDirectAnyType(typeNode.type)
+    );
+  }
+
+  if (ts.isUnionTypeNode(typeNode) || ts.isIntersectionTypeNode(typeNode)) {
+    return typeNode.types.some(hasDirectAnyType);
+  }
+
+  if (ts.isTupleTypeNode(typeNode)) {
+    return typeNode.elements.some(hasDirectAnyType);
+  }
+
+  if (ts.isRestTypeNode(typeNode)) {
+    return hasDirectAnyType(typeNode.type);
+  }
+
+  if (ts.isNamedTupleMember(typeNode)) {
+    return hasDirectAnyType(typeNode.type);
+  }
+
+  return false;
+}
+
+function getCountedTypeNode(node) {
+  if (ts.isAsExpression(node) || ts.isTypeAssertionExpression(node)) {
+    return node.type;
+  }
+
+  if (
+    ts.isVariableDeclaration(node) ||
+    ts.isParameter(node) ||
+    ts.isPropertyDeclaration(node) ||
+    ts.isPropertySignature(node) ||
+    ts.isMethodDeclaration(node) ||
+    ts.isMethodSignature(node) ||
+    ts.isFunctionDeclaration(node) ||
+    ts.isFunctionExpression(node) ||
+    ts.isArrowFunction(node) ||
+    ts.isGetAccessorDeclaration(node) ||
+    ts.isSetAccessorDeclaration(node) ||
+    ts.isCallSignatureDeclaration(node) ||
+    ts.isConstructSignatureDeclaration(node) ||
+    ts.isIndexSignatureDeclaration(node) ||
+    ts.isMappedTypeNode(node)
+  ) {
+    return node.type;
+  }
+
+  return undefined;
+}
+
+function countGenericAnyTypeArgumentsInSourceFile(sourceFile) {
+  let count = 0;
+
+  const visit = (node, insideTypeArgument) => {
+    if (insideTypeArgument && node.kind === ts.SyntaxKind.AnyKeyword) {
+      count += 1;
+    }
+
+    const typeArguments = node.typeArguments;
+    ts.forEachChild(node, (child) => {
+      const childIsTypeArgument =
+        typeArguments?.some((typeArgument) => typeArgument === child) ?? false;
+      visit(child, insideTypeArgument || childIsTypeArgument);
+    });
+  };
+
+  visit(sourceFile, false);
+  return count;
+}
+
+function countAnyCastsInSourceFile(sourceFile) {
+  let directCount = 0;
+
+  const visit = (node) => {
+    const typeNode = getCountedTypeNode(node);
+    if (typeNode && hasDirectAnyType(typeNode)) {
+      directCount += 1;
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return directCount + countGenericAnyTypeArgumentsInSourceFile(sourceFile);
+}
+
+function countAnyCasts(content, filePath = "source.ts") {
+  const { program, sourceFiles } = createAnyCastProgram([
+    { filePath, content },
+  ]);
+  const sourceFile = getAnyCastSourceFile(sourceFiles, filePath);
+  throwOnSyntacticDiagnostics(program, sourceFile, filePath);
+  return countAnyCastsInSourceFile(sourceFile);
+}
+
+function countGenericAnyTypeArguments(content, filePath = "source.ts") {
+  const { program, sourceFiles } = createAnyCastProgram([
+    { filePath, content },
+  ]);
+  const sourceFile = getAnyCastSourceFile(sourceFiles, filePath);
+  throwOnSyntacticDiagnostics(program, sourceFile, filePath);
+  return countGenericAnyTypeArgumentsInSourceFile(sourceFile);
+}
+
 function countLines(content) {
   if (content.length === 0) return 0;
   let newlines = 0;
@@ -181,6 +453,18 @@ function countLines(content) {
     if (content[index] === "\n") newlines += 1;
   }
   return content.endsWith("\n") ? newlines : newlines + 1;
+}
+
+function isWordPressMigratedSource(content) {
+  return WORDPRESS_MIGRATED_SOURCE_PATTERNS.some((pattern) =>
+    pattern.test(content)
+  );
+}
+
+function isLegacyWordPressRuntimeSource(content) {
+  return LEGACY_WORDPRESS_RUNTIME_PATTERNS.some((pattern) =>
+    pattern.test(content)
+  );
 }
 
 function countPagesRouterFiles() {
@@ -194,11 +478,16 @@ function countPagesRouterFiles() {
 function computeActuals() {
   const perFile = {
     any_casts: new Map(),
+    test_generic_any: new Map(),
     todo_comments: new Map(),
+    legacy_wordpress_runtime: new Map(),
     bootstrap_imports: new Map(),
     redux_imports: new Map(),
   };
   const oversizedFiles = [];
+  const wordpressMigratedFiles = new Set();
+  const anyCastInputs = [];
+  const testGenericAnyInputs = [];
 
   for (const relativePath of listSourceFiles()) {
     const extension = path.extname(relativePath);
@@ -207,6 +496,12 @@ function computeActuals() {
     if (!isCode && !isStyle) continue;
 
     const content = fs.readFileSync(path.join(REPO_ROOT, relativePath), "utf8");
+    if (isWordPressMigratedSource(content)) {
+      wordpressMigratedFiles.add(relativePath);
+    }
+    if (isLegacyWordPressRuntimeSource(content)) {
+      perFile.legacy_wordpress_runtime.set(relativePath, 1);
+    }
 
     const todoCount = countMatches(content, /\b(?:TODO|FIXME|HACK)\b/g);
     if (todoCount > 0) perFile.todo_comments.set(relativePath, todoCount);
@@ -224,8 +519,7 @@ function computeActuals() {
     if (!isCode) continue;
 
     if (TYPESCRIPT_EXTENSIONS.has(extension)) {
-      const anyCount = countMatches(content, /:\s*any\b|\bas\s+any\b/g);
-      if (anyCount > 0) perFile.any_casts.set(relativePath, anyCount);
+      anyCastInputs.push({ filePath: relativePath, content });
     }
 
     const reduxCount = countImportStatements(content, [
@@ -240,19 +534,63 @@ function computeActuals() {
     }
   }
 
+  for (const relativePath of listTestFiles()) {
+    // Parsed generic type arguments are TypeScript syntax. JavaScript test
+    // files remain outside this metric, just as they are outside `any_casts`.
+    if (!TYPESCRIPT_EXTENSIONS.has(path.extname(relativePath))) continue;
+    testGenericAnyInputs.push({
+      filePath: relativePath,
+      content: fs.readFileSync(path.join(REPO_ROOT, relativePath), "utf8"),
+    });
+  }
+
+  const anyCastProgram = createAnyCastProgram([
+    ...anyCastInputs,
+    ...testGenericAnyInputs,
+  ]);
+  for (const { filePath: relativePath } of anyCastInputs) {
+    const sourceFile = getAnyCastSourceFile(
+      anyCastProgram.sourceFiles,
+      relativePath
+    );
+    throwOnSyntacticDiagnostics(
+      anyCastProgram.program,
+      sourceFile,
+      relativePath
+    );
+    const anyCount = countAnyCastsInSourceFile(sourceFile);
+    if (anyCount > 0) perFile.any_casts.set(relativePath, anyCount);
+  }
+  for (const { filePath: relativePath } of testGenericAnyInputs) {
+    const sourceFile = getAnyCastSourceFile(
+      anyCastProgram.sourceFiles,
+      relativePath
+    );
+    throwOnSyntacticDiagnostics(
+      anyCastProgram.program,
+      sourceFile,
+      relativePath
+    );
+    const anyCount = countGenericAnyTypeArgumentsInSourceFile(sourceFile);
+    if (anyCount > 0) perFile.test_generic_any.set(relativePath, anyCount);
+  }
+
   const sum = (map) => [...map.values()].reduce((total, n) => total + n, 0);
 
   return {
     counts: {
       any_casts: sum(perFile.any_casts),
+      test_generic_any: sum(perFile.test_generic_any),
       todo_comments: sum(perFile.todo_comments),
       oversized_files: oversizedFiles.length,
+      legacy_wordpress_runtime: sum(perFile.legacy_wordpress_runtime),
       bootstrap_imports: sum(perFile.bootstrap_imports),
       redux_imports: sum(perFile.redux_imports),
       pages_router_files: countPagesRouterFiles(),
     },
     oversizedFiles,
     perFile,
+    wordpressMigratedFiles,
   };
 }
 
@@ -296,6 +634,39 @@ function appendStepSummary(lines) {
   fs.appendFileSync(summaryPath, `${lines.join("\n")}\n`);
 }
 
+function getCountStatus(baselineCount, actualCount) {
+  if (actualCount > baselineCount) return "RISE";
+  if (actualCount < baselineCount) return "stale baseline";
+  return "ok";
+}
+
+function getReportColumnWidths(rows) {
+  const dataRows = rows.filter((row) => row.kind !== "label");
+  const maxWidth = (selectValue) =>
+    Math.max(1, ...dataRows.map((row) => String(selectValue(row)).length));
+
+  return {
+    metric: maxWidth((row) => row.metric),
+    baseline: maxWidth((row) => row.baseline),
+    actual: maxWidth((row) => row.actual),
+  };
+}
+
+function formatReportRow(row, widths) {
+  if (row.kind === "label") return row.metric;
+
+  const countColumns =
+    `${row.metric.padEnd(widths.metric)}  ` +
+    `baseline ${String(row.baseline).padStart(widths.baseline)}  ` +
+    `actual ${String(row.actual).padStart(widths.actual)}`;
+  return row.status ? `${countColumns}  ${row.status}` : countColumns;
+}
+
+function formatSummaryRow(row) {
+  if (row.kind === "label") return `| ${row.metric.trim()} | | | |`;
+  return `| ${row.metric} | ${row.baseline} | ${row.actual} | ${row.status ?? ""} |`;
+}
+
 function runCheck() {
   const baseline = readBaseline();
   const actuals = computeActuals();
@@ -313,15 +684,13 @@ function runCheck() {
       continue;
     }
 
-    let status = "ok";
-    if (actualCount > baselineCount) {
-      status = "RISE";
+    const status = getCountStatus(baselineCount, actualCount);
+    if (status === "RISE") {
       failures.push(
         `${metric} rose from ${baselineCount} to ${actualCount} ` +
           `(${definition.description}). ${definition.hint}`
       );
-    } else if (actualCount < baselineCount) {
-      status = "stale baseline";
+    } else if (status === "stale baseline") {
       warnings.push(
         `${metric} dropped from ${baselineCount} to ${actualCount}. ` +
           "Lock in the improvement: run `node scripts/debt-ratchet.cjs --update` " +
@@ -356,11 +725,10 @@ function runCheck() {
 
   console.log("Debt ratchet report");
   console.log("===================");
-  for (const row of rows) {
-    console.log(
-      `${row.metric.padEnd(20)} baseline ${String(row.baseline).padStart(5)} ` +
-        `actual ${String(row.actual).padStart(5)}  ${row.status}`
-    );
+  const reportRows = rows;
+  const reportColumnWidths = getReportColumnWidths(reportRows);
+  for (const row of reportRows) {
+    console.log(formatReportRow(row, reportColumnWidths));
   }
 
   for (const warning of warnings) {
@@ -377,10 +745,7 @@ function runCheck() {
     "",
     "| Metric | Baseline | Actual | Status |",
     "| --- | ---: | ---: | --- |",
-    ...rows.map(
-      (row) =>
-        `| ${row.metric} | ${row.baseline} | ${row.actual} | ${row.status} |`
-    ),
+    ...reportRows.map(formatSummaryRow),
     ...(failures.length > 0
       ? ["", "**Failures**", ...failures.map((failure) => `- ${failure}`)]
       : []),
@@ -414,10 +779,27 @@ function runUpdate() {
   }
 }
 
-function runDetails(metric) {
+function getDetailsOptions(args) {
+  return {
+    ignoreWordPressMigrated: args.some((arg) =>
+      WORDPRESS_MIGRATED_DETAILS_FLAGS.has(arg)
+    ),
+  };
+}
+
+function shouldPrintDetailsFile(file, actuals, options) {
+  return (
+    !options.ignoreWordPressMigrated ||
+    !actuals.wordpressMigratedFiles.has(file)
+  );
+}
+
+function runDetails(metric, options = {}) {
   const actuals = computeActuals();
   if (metric === "oversized_files") {
-    for (const file of actuals.oversizedFiles) console.log(file);
+    for (const file of actuals.oversizedFiles) {
+      if (shouldPrintDetailsFile(file, actuals, options)) console.log(file);
+    }
     return;
   }
   const perFile = actuals.perFile[metric];
@@ -428,9 +810,9 @@ function runDetails(metric) {
     );
     process.exit(1);
   }
-  const sorted = [...perFile.entries()].sort(
-    (a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1)
-  );
+  const sorted = [...perFile.entries()]
+    .filter(([file]) => shouldPrintDetailsFile(file, actuals, options))
+    .sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1));
   for (const [file, count] of sorted) {
     console.log(`${String(count).padStart(5)}  ${file}`);
   }
@@ -454,7 +836,7 @@ function main() {
       console.error("Usage: node scripts/debt-ratchet.cjs --details <metric>");
       process.exit(1);
     }
-    runDetails(metric);
+    runDetails(metric, getDetailsOptions(args));
     return;
   }
   runCheck();
@@ -468,6 +850,10 @@ module.exports = {
   MAX_SOURCE_FILE_LINES,
   SCAN_DIRS,
   countImportStatements,
+  countAnyCasts,
+  countGenericAnyTypeArguments,
   countLines,
   countMatches,
+  isLegacyWordPressRuntimeSource,
+  isWordPressMigratedSource,
 };

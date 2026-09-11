@@ -6,6 +6,7 @@ import {
   delegationContentManifest,
   fetchDelegationArticleHtml,
   getDelegationArticle,
+  loadDelegationArticleHtml,
   MAX_DELEGATION_ARTICLE_BYTES,
   resolveDelegationArticleAssetUrls,
 } from "@/components/delegation/html/delegationContent";
@@ -312,5 +313,28 @@ describe("delegationContent", () => {
     await expect(
       fetchDelegationArticleHtml("delegation-faq", fetchArticle)
     ).rejects.toThrow("Unable to load delegation article delegation-faq");
+  });
+
+  it("deduplicates and caches verified article loads", async () => {
+    const article = getDelegationArticle("view-delegations");
+    const html = await readFile(getReviewedArticlePath(article!), "utf8");
+    const fetchArticle = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve(html),
+    });
+
+    const [first, second] = await Promise.all([
+      loadDelegationArticleHtml("view-delegations", fetchArticle),
+      loadDelegationArticleHtml("view-delegations", fetchArticle),
+    ]);
+    const third = await loadDelegationArticleHtml(
+      "view-delegations",
+      fetchArticle
+    );
+
+    expect(fetchArticle).toHaveBeenCalledTimes(1);
+    expect(second).toBe(first);
+    expect(third).toBe(first);
   });
 });

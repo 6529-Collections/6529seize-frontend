@@ -11,9 +11,9 @@ import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 const SYNTHETIC_EMPTY_WALLET = "0x000000000000000000000000000000000000dEaD";
 
 const DELEGATION_ACTIONS = [
-  "Register Delegation",
-  "Register Consolidation",
-  "Register Delegation Manager",
+  "Delegation",
+  "Consolidation",
+  "Delegation Manager",
 ] as const;
 
 const ARTICLE_ROUTES = [
@@ -146,7 +146,10 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
       if (article.path.includes("/delegation-faq/")) {
         await expect(
           page.getByRole("navigation", { name: "Breadcrumb" })
-        ).toBeVisible();
+        ).toHaveCount(0);
+        await expect(
+          page.getByRole("link", { name: "All FAQ topics" })
+        ).toHaveAttribute("href", "/delegation/delegation-faq");
       }
       await expectHeading(page, article.heading);
       await expect(
@@ -188,11 +191,13 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     await expect(page.getByText("Checking delegation records...")).toBeHidden({
       timeout: 20000,
     });
+    // The loading indicator may not have appeared yet when the assertion above
+    // runs, so give the delegation lookup the same budget here.
     await expect(
       page.getByText(
         "No delegation, delegation manager, or consolidation records found for this wallet."
       )
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 20000 });
     await expect(
       page.getByRole("heading", { name: "Delegations (0)" })
     ).toBeVisible();

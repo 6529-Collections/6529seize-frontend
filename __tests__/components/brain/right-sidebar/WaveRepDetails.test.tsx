@@ -293,6 +293,89 @@ describe("WaveRepDetails", () => {
     expect(await screen.findByText("helpful")).toBeInTheDocument();
   });
 
+  it("searches all category pages before showing no matches", async () => {
+    commonApiFetchMock.mockImplementation(
+      ({
+        endpoint,
+        params,
+      }: {
+        endpoint: string;
+        params?: { page?: string };
+      }) => {
+        if (endpoint === "waves/wave-1/rep/overview") {
+          return Promise.resolve({
+            total_rep: 42,
+            positive_rep: 47,
+            negative_rep: -5,
+            authenticated_user_contribution: 7,
+            contributor_count: 1,
+            contributors: { data: [], page: 1, next: false },
+          });
+        }
+
+        if (endpoint === "waves/wave-1/rep/categories") {
+          if (params?.page === "2") {
+            return Promise.resolve({
+              data: [
+                {
+                  category: "helpful",
+                  total_rep: 9,
+                  contributor_count: 1,
+                  authenticated_user_contribution: null,
+                  top_contributors: [],
+                },
+              ],
+              page: 2,
+              next: false,
+            });
+          }
+
+          return Promise.resolve({
+            data: [
+              {
+                category: "quality",
+                total_rep: 30,
+                contributor_count: 1,
+                authenticated_user_contribution: 7,
+                top_contributors: [],
+              },
+            ],
+            page: 1,
+            next: true,
+          });
+        }
+
+        return Promise.reject(new Error(`Unexpected endpoint ${endpoint}`));
+      }
+    );
+
+    renderDetails();
+
+    fireEvent.change(
+      await screen.findByRole("searchbox", {
+        name: "Search Wave REP categories",
+      }),
+      { target: { value: "helpful" } }
+    );
+
+    const searchMoreButton = await screen.findByRole("button", {
+      name: "Search more categories",
+    });
+    expect(screen.queryByText("No matching categories")).toBeNull();
+    fireEvent.click(searchMoreButton);
+
+    await waitFor(() =>
+      expect(commonApiFetchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: "waves/wave-1/rep/categories",
+          params: { page: "2", page_size: "100" },
+        })
+      )
+    );
+    expect(await screen.findByText("helpful")).toBeInTheDocument();
+    expect(screen.queryByText("No matching categories")).toBeNull();
+  });
+
   it("loads more all-contributor pages", async () => {
     commonApiFetchMock.mockImplementation(
       ({
@@ -455,7 +538,7 @@ describe("WaveRepDetails", () => {
       )
     ).toBe(false);
 
-    fireEvent.click(screen.getByRole("tab", { name: "Activity" }));
+    fireEvent.click(screen.getByRole("button", { name: "Activity" }));
 
     expect(await screen.findByText("Wave REP activity")).toBeInTheDocument();
     expect(await screen.findByText("(+20)")).toBeInTheDocument();
@@ -532,7 +615,7 @@ describe("WaveRepDetails", () => {
 
     renderDetails();
 
-    fireEvent.click(screen.getByRole("tab", { name: "Activity" }));
+    fireEvent.click(screen.getByRole("button", { name: "Activity" }));
 
     const unknownRater = await screen.findByText("Unknown");
     expect(unknownRater.closest("a")).toBeNull();
@@ -569,7 +652,7 @@ describe("WaveRepDetails", () => {
     expect(await screen.findByText("No Wave REP yet.")).toBeInTheDocument();
     expect(screen.getByText("No REP categories yet.")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("tab", { name: "Activity" }));
+    fireEvent.click(screen.getByRole("button", { name: "Activity" }));
 
     expect(
       await screen.findByText("No Wave REP activity yet.")
@@ -600,7 +683,7 @@ describe("WaveRepDetails", () => {
       await screen.findByText("Could not load categories.")
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("tab", { name: "Activity" }));
+    fireEvent.click(screen.getByRole("button", { name: "Activity" }));
 
     expect(
       await screen.findByText("Could not load Wave REP activity.")

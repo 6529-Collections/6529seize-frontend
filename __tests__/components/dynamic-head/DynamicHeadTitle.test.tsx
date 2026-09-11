@@ -137,7 +137,7 @@ describe("DynamicHeadTitle", () => {
     mockIsTitleOwned = true;
     mockTitlePathname = "/messages";
     mockPathname = "/messages";
-    document.title = "Messages";
+    document.title = "Messages | Brain";
 
     const view = render(<DynamicHeadTitle />);
     expect(document.title).toBe("Wave One | Brain");
@@ -174,12 +174,27 @@ describe("DynamicHeadTitle", () => {
     );
   });
 
+  it("normalizes owned title whitespace before observing browser title writes", async () => {
+    mockTitle = "Mint #519 | The Loom  | The Memes";
+    mockIsTitleOwned = true;
+    mockTitlePathname = "/the-memes/mint";
+    mockPathname = "/the-memes/mint";
+    document.title = "Mint | The Memes";
+
+    render(<DynamicHeadTitle />);
+    expect(document.title).toBe("Mint #519 | The Loom | The Memes");
+
+    document.title = "Mint #519 | The Loom | The Memes";
+    await flushObservers();
+    expect(document.title).toBe("Mint #519 | The Loom | The Memes");
+  });
+
   it("does not let a stale observer fight the next route's metadata commit", async () => {
     mockTitle = "Wave One | Brain";
     mockIsTitleOwned = true;
     mockTitlePathname = "/messages";
     mockPathname = "/messages";
-    document.title = "Messages";
+    document.title = "Messages | Brain";
 
     render(<DynamicHeadTitle />);
     expect(document.title).toBe("Wave One | Brain");

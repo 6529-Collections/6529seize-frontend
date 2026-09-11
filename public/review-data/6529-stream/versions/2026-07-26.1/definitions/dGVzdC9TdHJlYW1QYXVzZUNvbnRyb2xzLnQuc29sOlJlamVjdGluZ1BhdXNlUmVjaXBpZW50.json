@@ -1,0 +1,112 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "receive()",
+          "functionKind": "receive",
+          "id": "test/StreamPauseControls.t.sol:RejectingPauseRecipient#function:receive()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlJlamVjdGluZ1BhdXNlUmVjaXBpZW50I2Z1bmN0aW9uOnJlY2VpdmUoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 28713,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L627-L629",
+            "lineEnd": 629,
+            "lineStart": 627,
+            "snippetSha256": "sha256:5af2087cadb2eb80c43063d69d46c9a2d99fd9eeda0e031b2de64675411dad43",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamPauseControls.t.sol:RejectingPauseRecipient",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlJlamVjdGluZ1BhdXNlUmVjaXBpZW50",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamPauseControls.t.sol:RejectingPauseRecipient"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RejectingPauseRecipient",
+    "natspec": "",
+    "range": {
+      "byteLength": 105,
+      "byteStart": 28674,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L626-L630",
+      "lineEnd": 630,
+      "lineStart": 626,
+      "snippetSha256": "sha256:f3b1990b087c12748111391eb8bfa6f7c3f02ae13a45d06ab9d2ca5ec9de9682",
+      "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamPauseControls.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamPauseControls.t.sol:RejectingPauseRecipient",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:RejectingPauseRecipient#function:receive()",
+      "definitionId": "test/StreamPauseControls.t.sol:RejectingPauseRecipient",
+      "severity": "advisory"
+    }
+  ]
+}

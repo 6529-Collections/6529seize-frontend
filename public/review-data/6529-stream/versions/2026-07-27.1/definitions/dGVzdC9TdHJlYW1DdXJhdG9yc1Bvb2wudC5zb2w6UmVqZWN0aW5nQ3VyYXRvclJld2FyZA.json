@@ -1,0 +1,263 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamCuratorsPool.t.sol:RejectingCuratorReward#function:0x172bd6de",
+          "declaringDefinitionId": "test/StreamCuratorsPool.t.sol:RejectingCuratorReward",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract StreamCuratorsPool",
+              "name": "pool",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32[]",
+              "name": "proof",
+              "type": "bytes32[]"
+            }
+          ],
+          "name": "claim",
+          "outputs": [],
+          "selector": "0x172bd6de",
+          "signature": "claim(address,uint256,uint256,bytes32[])",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCuratorsPool.t.sol:RejectingCuratorReward#function:0x51cff8d9",
+          "declaringDefinitionId": "test/StreamCuratorsPool.t.sol:RejectingCuratorReward",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract StreamCuratorsPool",
+              "name": "pool",
+              "type": "address"
+            }
+          ],
+          "name": "withdraw",
+          "outputs": [],
+          "selector": "0x51cff8d9",
+          "signature": "withdraw(address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "receive()",
+          "functionKind": "receive",
+          "id": "test/StreamCuratorsPool.t.sol:RejectingCuratorReward#function:receive()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1DdXJhdG9yc1Bvb2wudC5zb2w6UmVqZWN0aW5nQ3VyYXRvclJld2FyZCNmdW5jdGlvbjpyZWNlaXZlKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 21154,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCuratorsPool.t.sol#L486-L488",
+            "lineEnd": 488,
+            "lineStart": 486,
+            "snippetSha256": "sha256:5af2087cadb2eb80c43063d69d46c9a2d99fd9eeda0e031b2de64675411dad43",
+            "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+          },
+          "selector": null,
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "claim(address,uint256,uint256,bytes32[])",
+          "displaySignature": "claim(StreamCuratorsPool,uint256,uint256,bytes32[])",
+          "functionKind": "function",
+          "id": "test/StreamCuratorsPool.t.sol:RejectingCuratorReward#function:0x172bd6de",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pool",
+              "type": "StreamCuratorsPool"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "proof",
+              "storageLocation": "calldata",
+              "type": "bytes32[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1DdXJhdG9yc1Bvb2wudC5zb2w6UmVqZWN0aW5nQ3VyYXRvclJld2FyZCNmdW5jdGlvbjoweDE3MmJkNmRl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "claim",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 226,
+            "byteStart": 21224,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCuratorsPool.t.sol#L490-L497",
+            "lineEnd": 497,
+            "lineStart": 490,
+            "snippetSha256": "sha256:efe9bc82ca1cb1c5b5a399c8323bc3a9d478a2855d879ea283c37ad4b41fad1c",
+            "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+          },
+          "selector": "0x172bd6de",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "withdraw(address)",
+          "displaySignature": "withdraw(StreamCuratorsPool)",
+          "functionKind": "function",
+          "id": "test/StreamCuratorsPool.t.sol:RejectingCuratorReward#function:0x51cff8d9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pool",
+              "type": "StreamCuratorsPool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1DdXJhdG9yc1Bvb2wudC5zb2w6UmVqZWN0aW5nQ3VyYXRvclJld2FyZCNmdW5jdGlvbjoweDUxY2ZmOGQ5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "withdraw",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 97,
+            "byteStart": 21456,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCuratorsPool.t.sol#L499-L501",
+            "lineEnd": 501,
+            "lineStart": 499,
+            "snippetSha256": "sha256:c3b2181b076862c7d5bfc53e917c1e1e3273ad9a0638f92c12a209ddfc201f59",
+            "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+          },
+          "selector": "0x51cff8d9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamCuratorsPool.t.sol:RejectingCuratorReward",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1DdXJhdG9yc1Bvb2wudC5zb2w6UmVqZWN0aW5nQ3VyYXRvclJld2FyZA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamCuratorsPool.t.sol:RejectingCuratorReward"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RejectingCuratorReward",
+    "natspec": "",
+    "range": {
+      "byteLength": 439,
+      "byteStart": 21116,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCuratorsPool.t.sol#L485-L502",
+      "lineEnd": 502,
+      "lineStart": 485,
+      "snippetSha256": "sha256:0648f364d8cc51d1a86823509f2b6126c877d7e1d8f2a2cea7dff601a4249310",
+      "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamCuratorsPool.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamCuratorsPool.t.sol:RejectingCuratorReward",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCuratorsPool.t.sol:RejectingCuratorReward#function:0x172bd6de",
+      "definitionId": "test/StreamCuratorsPool.t.sol:RejectingCuratorReward",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCuratorsPool.t.sol:RejectingCuratorReward#function:0x51cff8d9",
+      "definitionId": "test/StreamCuratorsPool.t.sol:RejectingCuratorReward",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCuratorsPool.t.sol:RejectingCuratorReward#function:receive()",
+      "definitionId": "test/StreamCuratorsPool.t.sol:RejectingCuratorReward",
+      "severity": "advisory"
+    }
+  ]
+}

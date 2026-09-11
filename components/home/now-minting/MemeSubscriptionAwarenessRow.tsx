@@ -1,7 +1,7 @@
 "use client";
 
 import DotLoader from "@/components/dotLoader/DotLoader";
-import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
+import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatNumber } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -11,11 +11,9 @@ import {
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
+import { Tooltip } from "react-tooltip";
 import { ABOUT_SUBSCRIPTIONS_HREF } from "../../user/subscriptions/subscriptionNavigation";
-
-const SUBSCRIPTION_ROW_CLASS_NAME =
-  "tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/45 tw-bg-primary-500/10 tw-px-3 tw-py-3 md:tw-px-4";
 
 function ReadonlySubscriptionToggle({
   checked,
@@ -24,41 +22,48 @@ function ReadonlySubscriptionToggle({
   checked: boolean;
   tooltipLabel: string;
 }>) {
+  const tooltipId = buildTooltipId("readonly-subscription-toggle", useId());
+
   return (
     <>
-      <CustomTooltip
-        content={tooltipLabel}
-        placement="top"
-        delayShow={150}
-        offset={12}
-        showArrow={false}
+      <span
+        aria-label={tooltipLabel}
+        data-testid="readonly-subscription-toggle-trigger"
+        data-tooltip-id={tooltipId}
+        data-tooltip-content={tooltipLabel}
+        role="img"
+        tabIndex={0}
+        className="tw-inline-flex tw-shrink-0 tw-cursor-help tw-rounded-full focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
       >
         <span
-          data-testid="readonly-subscription-toggle-trigger"
-          className="tw-inline-flex tw-shrink-0 tw-cursor-default tw-rounded-full"
+          aria-hidden="true"
+          data-checked={checked ? "true" : "false"}
+          data-testid="readonly-subscription-toggle-visual"
+          className={clsx(
+            "tw-pointer-events-none tw-inline-flex tw-h-5 tw-w-9 tw-items-center tw-rounded-full tw-p-0.5 tw-ring-1 tw-ring-inset tw-transition-colors",
+            checked
+              ? "tw-bg-primary-500 tw-shadow-[0_0_14px_rgba(64,106,254,0.35)] tw-ring-primary-300/70"
+              : "tw-bg-black/35 tw-ring-primary-400/30"
+          )}
         >
           <span
-            aria-hidden="true"
-            data-checked={checked ? "true" : "false"}
-            data-testid="readonly-subscription-toggle-visual"
+            data-testid="readonly-subscription-toggle-thumb"
             className={clsx(
-              "tw-pointer-events-none tw-inline-flex tw-h-5 tw-w-10 tw-items-center tw-rounded-full tw-p-0.5 tw-ring-1 tw-ring-inset tw-transition-colors md:tw-h-6 md:tw-w-12",
+              "tw-size-3.5 tw-rounded-full tw-ring-1 tw-ring-inset tw-transition-transform",
               checked
-                ? "tw-bg-primary-500 tw-shadow-[0_0_14px_rgba(74,119,255,0.45)] tw-ring-primary-300"
-                : "tw-bg-black/35 tw-opacity-80 tw-ring-primary-400/25"
+                ? "tw-translate-x-4 tw-bg-white tw-shadow-[0_1px_4px_rgba(0,0,0,0.55)] tw-ring-black/[15%]"
+                : "tw-translate-x-0 tw-bg-iron-400 tw-shadow-sm tw-ring-black/10"
             )}
-          >
-            <span
-              className={clsx(
-                "tw-size-4 tw-rounded-full tw-shadow-sm tw-transition-transform md:tw-size-5",
-                checked
-                  ? "tw-translate-x-5 tw-bg-white md:tw-translate-x-6"
-                  : "tw-translate-x-0 tw-bg-iron-500"
-              )}
-            />
-          </span>
+          />
         </span>
-      </CustomTooltip>
+      </span>
+      <Tooltip
+        id={tooltipId}
+        place="top"
+        delayShow={150}
+        offset={12}
+        style={TOOLTIP_STYLES}
+      />
       <output
         data-testid="readonly-subscription-toggle-status"
         className="tw-sr-only"
@@ -83,7 +88,7 @@ function SubscriptionAction({
   onClick?: (() => void | Promise<void>) | undefined;
 }>) {
   const className =
-    "tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-text-xs tw-font-semibold tw-leading-none tw-text-primary-300 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-primary-200 disabled:tw-cursor-wait disabled:tw-opacity-60 md:tw-text-sm";
+    "tw-group/action tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-text-[10.5px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-[0.14em] tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black disabled:tw-cursor-wait disabled:tw-opacity-60 motion-reduce:tw-transition-none";
   const handleClick = () => {
     Promise.resolve(onClick?.()).catch((error: unknown) => {
       console.error("Failed to open profile subscriptions", error);
@@ -120,35 +125,51 @@ function SubscriptionInfoLink({
   href: string;
   label: string;
 }>) {
+  const tooltipId = buildTooltipId("meme-subscription-info", useId());
+
   return (
-    <Link
-      href={href}
-      aria-label={label}
-      className="tw-inline-flex tw-size-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-text-primary-300 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-primary-400"
-    >
-      {children}
-    </Link>
+    <>
+      <Link
+        href={href}
+        aria-label={label}
+        data-tooltip-id={tooltipId}
+        data-tooltip-content={label}
+        className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-size-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-text-primary-300/70 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
+      >
+        {children}
+      </Link>
+      <Tooltip
+        id={tooltipId}
+        place="top"
+        delayShow={250}
+        offset={10}
+        style={TOOLTIP_STYLES}
+      />
+    </>
   );
 }
 
-function SubscribersCountText({
+function SubscriptionsCountText({
   loading,
-  safeSubscribersCount,
+  safeSubscriptionsCount,
 }: Readonly<{
   loading?: boolean | undefined;
-  safeSubscribersCount?: number | undefined;
+  safeSubscriptionsCount?: number | undefined;
 }>) {
   const locale = useBrowserLocale();
-  const loadingText = t(locale, "home.mintSubscriptions.subscribersLoading");
+  const loadingText = t(locale, "home.mintSubscriptions.subscriptionsLoading");
 
-  if (safeSubscribersCount !== undefined) {
+  if (safeSubscriptionsCount !== undefined) {
     return (
       <>
-        {t(locale, "home.mintSubscriptions.subscribersCount", {
-          count: formatNumber(locale, safeSubscribersCount, {
-            maximumFractionDigits: 0,
-          }),
-        })}
+        {safeSubscriptionsCount === 0
+          ? t(locale, "home.mintSubscriptions.subscriptionsCount.none")
+          : t(locale, "home.mintSubscriptions.subscriptionsCount.value", {
+              count: formatNumber(locale, safeSubscriptionsCount, {
+                maximumFractionDigits: 0,
+              }),
+              pluralSuffix: safeSubscriptionsCount > 1 ? "s" : "",
+            })}
       </>
     );
   }
@@ -176,21 +197,25 @@ function SubscribersCountText({
 
 export default function MemeSubscriptionAwarenessRow({
   onProfileSubscriptionsAction,
+  profileCoverageSummary,
+  profileSubscriptionsActionLabel,
   profileSubscriptionsActionPending,
   profileSubscriptionsHref,
   subscribed,
   subscribedCount,
-  subscribersCount,
-  subscribersCountLoading,
+  subscriptionsCount,
+  subscriptionsCountLoading,
   tooltipLabel,
 }: Readonly<{
   onProfileSubscriptionsAction?: (() => void | Promise<void>) | undefined;
+  profileCoverageSummary?: string | undefined;
+  profileSubscriptionsActionLabel?: string | undefined;
   profileSubscriptionsActionPending?: boolean | undefined;
   profileSubscriptionsHref?: string | undefined;
   subscribed: boolean;
   subscribedCount?: number | undefined;
-  subscribersCount?: number | undefined;
-  subscribersCountLoading?: boolean | undefined;
+  subscriptionsCount?: number | undefined;
+  subscriptionsCountLoading?: boolean | undefined;
   tooltipLabel: string;
 }>) {
   const locale = useBrowserLocale();
@@ -198,22 +223,27 @@ export default function MemeSubscriptionAwarenessRow({
     subscribed && Number.isFinite(subscribedCount) && (subscribedCount ?? 0) > 0
       ? subscribedCount
       : undefined;
-  const safeSubscribersCount =
-    Number.isFinite(subscribersCount) && (subscribersCount ?? -1) >= 0
-      ? subscribersCount
+  const safeSubscriptionsCount =
+    Number.isFinite(subscriptionsCount) && (subscriptionsCount ?? -1) >= 0
+      ? subscriptionsCount
       : undefined;
-  const actionLabel = t(
-    locale,
-    subscribed
-      ? "home.mintSubscriptions.action.manage"
-      : "home.mintSubscriptions.action.setUp"
-  );
-
+  const actionLabel =
+    profileSubscriptionsActionLabel ??
+    t(
+      locale,
+      subscribed
+        ? "home.mintSubscriptions.action.manage"
+        : "home.mintSubscriptions.action.setUp"
+    );
   return (
-    <div className={SUBSCRIPTION_ROW_CLASS_NAME}>
-      <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-4 tw-gap-y-3">
+    <div className="tw-group tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-500/10 tw-p-5 tw-shadow-[0_15px_40px_rgba(0,0,0,0.38)]">
+      <span
+        aria-hidden="true"
+        className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-primary-400/[0.045] tw-opacity-0 tw-transition-opacity tw-duration-500 tw-ease-[cubic-bezier(0.22,1,0.36,1)] group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 motion-reduce:tw-transition-none"
+      />
+      <div className="tw-relative tw-z-10 tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-4 tw-gap-y-3">
         <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-          <div className="tw-text-sm tw-font-semibold tw-leading-none tw-text-primary-300 md:tw-text-base">
+          <div className="tw-text-sm tw-font-semibold tw-leading-none tw-tracking-[-0.01em] tw-text-primary-300">
             {t(locale, "home.mintSubscriptions.awarenessLabel")}
           </div>
           <ReadonlySubscriptionToggle
@@ -221,7 +251,7 @@ export default function MemeSubscriptionAwarenessRow({
             tooltipLabel={tooltipLabel}
           />
           {safeSubscribedCount !== undefined && (
-            <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-leading-none tw-text-primary-300/75 md:tw-text-sm">
+            <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-leading-none tw-text-primary-300/70">
               x
               {formatNumber(locale, safeSubscribedCount, {
                 maximumFractionDigits: 0,
@@ -237,13 +267,28 @@ export default function MemeSubscriptionAwarenessRow({
           onClick={onProfileSubscriptionsAction}
         >
           <span aria-hidden="true">{actionLabel}</span>
-          <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
+          <ArrowRightIcon
+            className="tw-size-4 tw-transform-gpu tw-transition-transform tw-duration-300 tw-ease-out desktop-hover:group-hover/action:tw-translate-x-0.5 motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+            aria-hidden="true"
+          />
         </SubscriptionAction>
 
-        <div className="tw-flex tw-min-h-7 tw-min-w-0 tw-items-center tw-text-xs tw-leading-4 tw-text-primary-300/70 md:tw-text-sm">
-          <SubscribersCountText
-            loading={subscribersCountLoading}
-            safeSubscribersCount={safeSubscribersCount}
+        <div className="tw-flex tw-min-h-7 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-xs tw-font-medium tw-leading-4 tw-text-primary-300/70">
+          {profileCoverageSummary ? (
+            <span className="tw-font-semibold tw-text-iron-200">
+              {profileCoverageSummary}
+            </span>
+          ) : null}
+          {profileCoverageSummary &&
+          (safeSubscriptionsCount !== undefined ||
+            subscriptionsCountLoading) ? (
+            <span aria-hidden="true" className="tw-text-iron-600">
+              ·
+            </span>
+          ) : null}
+          <SubscriptionsCountText
+            loading={subscriptionsCountLoading}
+            safeSubscriptionsCount={safeSubscriptionsCount}
           />
         </div>
         <div className="tw-flex tw-min-h-7 tw-items-center tw-justify-end">

@@ -1,24 +1,22 @@
 import { render } from "@testing-library/react";
-import React from "react";
 import { act } from "@testing-library/react";
+import type { ComponentProps } from "react";
 import UserPageIdentityAddStatementsNFTAccounts from "@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccounts";
+import type UserPageIdentityAddStatementsNFTAccountItems from "@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccountItems";
+import type UserPageIdentityAddStatementsForm from "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { STATEMENT_TYPE, STATEMENT_GROUP } from "@/helpers/Types";
 
-let headerProps: any;
-let itemsProps: any;
-let formProps: any;
-
-jest.mock(
-  "@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccountHeader",
-  () => (props: any) => {
-    headerProps = props;
-    return <div data-testid="header" />;
-  }
-);
+type ItemsProps = ComponentProps<
+  typeof UserPageIdentityAddStatementsNFTAccountItems
+>;
+type FormProps = ComponentProps<typeof UserPageIdentityAddStatementsForm>;
+let itemsProps: ItemsProps;
+let formProps: FormProps;
 
 jest.mock(
   "@/components/user/identity/statements/add/nft-accounts/UserPageIdentityAddStatementsNFTAccountItems",
-  () => (props: any) => {
+  () => (props: ItemsProps) => {
     itemsProps = props;
     return <div data-testid="items" />;
   }
@@ -26,28 +24,24 @@ jest.mock(
 
 jest.mock(
   "@/components/user/identity/statements/utils/UserPageIdentityAddStatementsForm",
-  () => (props: any) => {
+  () => (props: FormProps) => {
     formProps = props;
     return <div data-testid="form" />;
   }
 );
 
 describe("UserPageIdentityAddStatementsNFTAccounts", () => {
-  const profile = { query: "foo" } as any;
+  const profile = { query: "foo" } as ApiIdentity;
   const onClose = jest.fn();
-
-  beforeEach(() => {
-    headerProps = undefined;
-    itemsProps = undefined;
-    formProps = undefined;
-  });
 
   it("passes initial props to children", () => {
     render(
-      <UserPageIdentityAddStatementsNFTAccounts onClose={onClose} profile={profile} />
+      <UserPageIdentityAddStatementsNFTAccounts
+        onClose={onClose}
+        profile={profile}
+      />
     );
 
-    expect(headerProps.onClose).toBe(onClose);
     expect(itemsProps.activeType).toBe(STATEMENT_TYPE.SUPER_RARE);
     expect(typeof itemsProps.setType).toBe("function");
 
@@ -59,7 +53,10 @@ describe("UserPageIdentityAddStatementsNFTAccounts", () => {
 
   it("updates active type when setType called", () => {
     render(
-      <UserPageIdentityAddStatementsNFTAccounts onClose={onClose} profile={profile} />
+      <UserPageIdentityAddStatementsNFTAccounts
+        onClose={onClose}
+        profile={profile}
+      />
     );
 
     act(() => {
@@ -69,5 +66,20 @@ describe("UserPageIdentityAddStatementsNFTAccounts", () => {
     expect(itemsProps.activeType).toBe(STATEMENT_TYPE.FOUNDATION);
     expect(formProps.activeType).toBe(STATEMENT_TYPE.FOUNDATION);
   });
-});
 
+  it("supports the custom Other link type", () => {
+    render(
+      <UserPageIdentityAddStatementsNFTAccounts
+        onClose={onClose}
+        profile={profile}
+      />
+    );
+
+    act(() => {
+      itemsProps.setType(STATEMENT_TYPE.LINK);
+    });
+
+    expect(formProps.activeType).toBe(STATEMENT_TYPE.LINK);
+    expect(formProps.group).toBe(STATEMENT_GROUP.NFT_ACCOUNTS);
+  });
+});

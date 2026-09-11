@@ -1,10 +1,9 @@
-import styles from "@/styles/Home.module.css";
-
 import About from "@/components/about/About";
 import { getAboutSectionDocumentTitle } from "@/components/about/about.routes";
 import {
   AboutCol as Col,
   AboutContainer as Container,
+  ABOUT_PAGE_SURFACE_CLASS_NAME,
   AboutRow as Row,
 } from "@/components/about/AboutLayout";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -28,15 +27,22 @@ export default async function AboutPage(props: Readonly<Props>) {
     notFound();
   }
 
+  const aboutSection = section as AboutSection;
+  const isMemes = aboutSection === AboutSection.MEMES;
+
   return (
-    <main className={`${styles["main"]} tailwind-scope`}>
-      <Container fluid className="tw-pt-4">
-        <Row>
-          <Col>
-            <About section={section as AboutSection} />
-          </Col>
-        </Row>
-      </Container>
+    <main className={`tailwind-scope ${ABOUT_PAGE_SURFACE_CLASS_NAME}`}>
+      {isMemes ? (
+        <About section={AboutSection.MEMES} />
+      ) : (
+        <Container fluid className="tw-pt-4">
+          <Row>
+            <Col>
+              <About section={aboutSection} />
+            </Col>
+          </Row>
+        </Container>
+      )}
     </main>
   );
 }

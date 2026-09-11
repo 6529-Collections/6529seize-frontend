@@ -36,8 +36,12 @@ import {
   getUserPageTabByRoute,
 } from "./userTabs.config";
 import { shouldHideSubscriptions } from "./userPageVisibility";
-import { shouldDelayUserPageBrainRedirect } from "./userPageBrainAccess";
+import {
+  shouldDelayUserPageBrainRedirect,
+  shouldDelayUserPageOwnerTabRedirect,
+} from "./userPageBrainAccess";
 import { getUserProfileTabsMessage } from "./user-tabs.messages";
+import { useUserPageTabIndicator } from "./useUserPageTabIndicator";
 
 const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
 const subscribeToClientRender = () => () => undefined;
@@ -121,6 +125,8 @@ export default function UserPageTabs({
   const contentContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const { activeIndicator, updateActiveIndicator } =
+    useUserPageTabIndicator(contentContainerRef);
   const isClientHydrated = useSyncExternalStore(
     subscribeToClientRender,
     getClientRenderSnapshot,
@@ -132,11 +138,6 @@ export default function UserPageTabs({
     [pathname]
   );
 
-  const preserveProxyTabWhileOwnershipLoads =
-    fetchingProfile &&
-    !connectedProfile &&
-    resolvedTabFromPath === USER_PAGE_TAB_IDS.PROXY;
-
   const shouldSuppressBrainRedirect =
     resolvedTabFromPath === USER_PAGE_TAB_IDS.BRAIN &&
     shouldDelayUserPageBrainRedirect({
@@ -147,13 +148,24 @@ export default function UserPageTabs({
       isClientHydrated,
     });
   const preserveBrainTabWhileAccessLoads = shouldSuppressBrainRedirect;
+  const resolvedTabNeedsOwnership =
+    resolvedTabFromPath === USER_PAGE_TAB_IDS.PROXY;
+  const shouldSuppressOwnerTabRedirect =
+    resolvedTabNeedsOwnership &&
+    shouldDelayUserPageOwnerTabRedirect({
+      connectedProfile,
+      connectionState,
+      fetchingProfile,
+      isClientHydrated,
+    });
+  const preserveOwnerTabWhileOwnershipLoads = shouldSuppressOwnerTabRedirect;
 
   const visibleTabs = useMemo(
     () =>
       USER_PAGE_TABS.filter((tab) => {
         if (
-          preserveProxyTabWhileOwnershipLoads &&
-          tab.id === USER_PAGE_TAB_IDS.PROXY
+          preserveOwnerTabWhileOwnershipLoads &&
+          tab.id === resolvedTabFromPath
         ) {
           return true;
         }
@@ -169,7 +181,8 @@ export default function UserPageTabs({
       }),
     [
       preserveBrainTabWhileAccessLoads,
-      preserveProxyTabWhileOwnershipLoads,
+      preserveOwnerTabWhileOwnershipLoads,
+      resolvedTabFromPath,
       visibilityContext,
     ]
   );
@@ -192,14 +205,15 @@ export default function UserPageTabs({
 
   // Redirect to the first visible tab whenever the resolved tab becomes
   // hidden because the visibility context changed (country, feature flags,
-  // etc.). When loading `/brain` directly, delay the redirect until the client
-  // has mounted and wallet/profile restoration has settled.
+  // etc.). For access-dependent tabs, delay the redirect until the client has
+  // mounted and wallet/profile restoration has settled.
   useEffect(() => {
     if (
       !visibleTabs.length ||
       resolvedTabIsVisible ||
       !handleOrWallet ||
-      shouldSuppressBrainRedirect
+      shouldSuppressBrainRedirect ||
+      shouldSuppressOwnerTabRedirect
     ) {
       return;
     }
@@ -228,6 +242,7 @@ export default function UserPageTabs({
     router,
     searchString,
     shouldSuppressBrainRedirect,
+    shouldSuppressOwnerTabRedirect,
     visibleTabs,
   ]);
 
@@ -246,14 +261,17 @@ export default function UserPageTabs({
     if (!container) return;
 
     checkScroll();
+    updateActiveIndicator();
+    const updateTabsLayout = () => {
+      checkScroll();
+      updateActiveIndicator();
+    };
     container.addEventListener("scroll", checkScroll, { passive: true });
-    window.addEventListener("resize", checkScroll);
+    window.addEventListener("resize", updateTabsLayout);
 
     let resizeObserver: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined") {
-      resizeObserver = new ResizeObserver(() => {
-        checkScroll();
-      });
+      resizeObserver = new ResizeObserver(updateTabsLayout);
 
       resizeObserver.observe(container);
       if (contentContainer) {
@@ -263,10 +281,10 @@ export default function UserPageTabs({
 
     return () => {
       container.removeEventListener("scroll", checkScroll);
-      window.removeEventListener("resize", checkScroll);
+      window.removeEventListener("resize", updateTabsLayout);
       resizeObserver?.disconnect();
     };
-  }, [checkScroll]);
+  }, [checkScroll, updateActiveIndicator]);
 
   useEffect(() => {
     if (!visibleTabs.length) return;
@@ -274,9 +292,10 @@ export default function UserPageTabs({
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         checkScroll();
+        updateActiveIndicator();
       });
     });
-  }, [checkScroll, visibleTabs]);
+  }, [activeTab, checkScroll, updateActiveIndicator, visibleTabs]);
 
   const scrollLeft = () => {
     const container = scrollContainerRef.current;
@@ -299,52 +318,60 @@ export default function UserPageTabs({
     >
       <div
         ref={scrollContainerRef}
+        data-profile-tabs-scroll
         className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden"
       >
         <div
           ref={contentContainerRef}
-          className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4"
+          className="tw-relative -tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4"
         >
           {visibleTabs.map((tabConfig) => (
             <UserPageTab
               key={tabConfig.id}
               tab={tabConfig}
               activeTabId={activeTab}
-              parentRef={scrollContainerRef}
             />
           ))}
+          <span
+            aria-hidden="true"
+            className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-h-0.5 tw-w-px tw-origin-left tw-bg-primary-400 tw-transition-[transform,opacity] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none"
+            style={{
+              opacity: activeIndicator.visible ? 1 : 0,
+              transform: `translate3d(${activeIndicator.left}px, 0, 0) scaleX(${activeIndicator.width})`,
+            }}
+          />
         </div>
       </div>
       {canScrollLeft && (
         <>
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-10 tw-w-24 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
+          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-10 tw-w-16 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
           <button
             onClick={scrollLeft}
             aria-label={getUserProfileTabsMessage(
               "user.profile.tabs.scrollLeft"
             )}
-            className="tw-group tw-absolute tw-left-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-start tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
+            className="tw-group tw-absolute tw-left-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-8 tw--translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-border-none tw-bg-transparent tw-p-0 tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
           >
             <FontAwesomeIcon
               icon={faChevronLeft}
-              className="tw-h-6 tw-w-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-300"
+              className="tw-h-3.5 tw-w-3.5 tw-text-iron-400 tw-transition-colors tw-duration-150 tw-ease-out group-hover:tw-text-iron-200"
             />
           </button>
         </>
       )}
       {canScrollRight && (
         <>
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-z-10 tw-w-24 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
+          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-z-10 tw-w-16 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
           <button
             onClick={scrollRight}
             aria-label={getUserProfileTabsMessage(
               "user.profile.tabs.scrollRight"
             )}
-            className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-end tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
+            className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-8 tw--translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-border-none tw-bg-transparent tw-p-0 tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
           >
             <FontAwesomeIcon
               icon={faChevronRight}
-              className="tw-h-6 tw-w-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-300"
+              className="tw-h-3.5 tw-w-3.5 tw-text-iron-400 tw-transition-colors tw-duration-150 tw-ease-out group-hover:tw-text-iron-200"
             />
           </button>
         </>

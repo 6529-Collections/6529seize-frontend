@@ -7,7 +7,7 @@ jest.mock("@/components/about/about.helpers", () => ({
 }));
 
 describe("AboutGDRC1", () => {
-  const html = '<div data-testid="content">Charter Content</div>';
+  const html = "<p>Charter Content</p>";
 
   beforeEach(() => {
     (fetchAboutSectionFile as jest.Mock).mockResolvedValue(html);
@@ -26,6 +26,19 @@ describe("AboutGDRC1", () => {
 
   it("renders provided html", async () => {
     render(<AboutGDRC1 />);
-    expect(await screen.findByTestId("content")).toBeInTheDocument();
+    expect(await screen.findByText("Charter Content")).toBeInTheDocument();
+  });
+
+  it("sanitizes fetched html", async () => {
+    (fetchAboutSectionFile as jest.Mock).mockResolvedValue(
+      '<div onclick="alert(1)"><p>Safe content</p><script>alert(1)</script><a href="javascript:alert(1)">Unsafe link</a></div>'
+    );
+
+    render(<AboutGDRC1 />);
+
+    const safeContent = await screen.findByText("Safe content");
+    expect(safeContent.parentElement).not.toHaveAttribute("onclick");
+    expect(document.querySelector("script")).not.toBeInTheDocument();
+    expect(screen.queryByText("Unsafe link")).not.toBeInTheDocument();
   });
 });

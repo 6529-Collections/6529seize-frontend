@@ -1,0 +1,112 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "receive()",
+          "functionKind": "receive",
+          "id": "test/StreamAuctionPayments.t.sol:PassiveAuctionCuratorsPool#function:receive()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUGF5bWVudHMudC5zb2w6UGFzc2l2ZUF1Y3Rpb25DdXJhdG9yc1Bvb2wjZnVuY3Rpb246cmVjZWl2ZSgp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 30,
+            "byteStart": 31180,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionPayments.t.sol#L688",
+            "lineEnd": 688,
+            "lineStart": 688,
+            "snippetSha256": "sha256:5b6a98427c1f43e7515585164def7acd95a33725cb1caad01f96b99fb5352509",
+            "sourceSha256": "sha256:543a0698c6732c75b5b682cd5ce6a08037afd6bfc9440253f9f391e395c779e6"
+          },
+          "selector": null,
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamAuctionPayments.t.sol:PassiveAuctionCuratorsPool",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1BdWN0aW9uUGF5bWVudHMudC5zb2w6UGFzc2l2ZUF1Y3Rpb25DdXJhdG9yc1Bvb2w",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamAuctionPayments.t.sol:PassiveAuctionCuratorsPool"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "PassiveAuctionCuratorsPool",
+    "natspec": "",
+    "range": {
+      "byteLength": 74,
+      "byteStart": 31138,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionPayments.t.sol#L687-L689",
+      "lineEnd": 689,
+      "lineStart": 687,
+      "snippetSha256": "sha256:c97840e2bd3211e49a909b9e0e98789f9c271100dd2623dcf740e90696719a53",
+      "sourceSha256": "sha256:543a0698c6732c75b5b682cd5ce6a08037afd6bfc9440253f9f391e395c779e6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamAuctionPayments.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamAuctionPayments.t.sol:PassiveAuctionCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionPayments.t.sol:PassiveAuctionCuratorsPool#function:receive()",
+      "definitionId": "test/StreamAuctionPayments.t.sol:PassiveAuctionCuratorsPool",
+      "severity": "advisory"
+    }
+  ]
+}

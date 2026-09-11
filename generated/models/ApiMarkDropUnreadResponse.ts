@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
  * 6529.io API
- * This is the API interface description. Brief terminology overview and an authentication example can be found at <a href=\"https://6529.io/about/api\">https://6529.io/about/api</a>.
+ * JSON REST API for 6529.io. New here? A terminology overview and a step-by-step authentication walkthrough (guides &amp; auth) live at <a href=\"https://6529.io/tools/api\">https://6529.io/tools/api</a>. The raw machine-readable spec is downloadable at <a href=\"/openapi.yaml\">/openapi.yaml</a> and <a href=\"/openapi.json\">/openapi.json</a>.
  *
  * OpenAPI spec version: 1.0.0
  * 
@@ -11,11 +11,13 @@
  * Do not edit the class manually.
  */
 
+import { ApiDmUnreadConversationState } from '../models/ApiDmUnreadConversationState';
 import { HttpFile } from '../http/http';
 
 export class ApiMarkDropUnreadResponse {
     'your_unread_drops_count': number;
     'first_unread_drop_serial_no'?: number | null;
+    'dm_unread_state'?: ApiDmUnreadConversationState | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -32,6 +34,12 @@ export class ApiMarkDropUnreadResponse {
             "name": "first_unread_drop_serial_no",
             "baseName": "first_unread_drop_serial_no",
             "type": "number",
+            "format": ""
+        },
+        {
+            "name": "dm_unread_state",
+            "baseName": "dm_unread_state",
+            "type": "ApiDmUnreadConversationState",
             "format": ""
         }    ];
 

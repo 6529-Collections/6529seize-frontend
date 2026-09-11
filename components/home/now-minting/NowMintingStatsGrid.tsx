@@ -85,20 +85,30 @@ export default function NowMintingStatsGrid({
   );
 
   return (
-    <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4">
-      <NowMintingStatsItem label="Edition" value={editionValue} />
+    <div className="tw-grid tw-grid-cols-2 tw-gap-x-8 tw-gap-y-5">
       <NowMintingStatsItem
+        appearance="compact"
+        label="Edition"
+        value={editionValue}
+      />
+      <NowMintingStatsItem
+        appearance="compact"
         label="Status"
         value={statusLabel}
         status={statusTone}
         isLoading={isStatusLoading}
       />
       <NowMintingStatsItem
+        appearance="compact"
         label="Mint price"
         value={mintPrice}
         isLoading={isStatusLoading}
       />
-      <NowMintingStatsItem label="Floor" value={floorPrice} />
+      <NowMintingStatsItem
+        appearance="compact"
+        label="Floor"
+        value={floorPrice}
+      />
     </div>
   );
 }

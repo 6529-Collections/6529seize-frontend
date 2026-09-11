@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
  * 6529.io API
- * This is the API interface description. Brief terminology overview and an authentication example can be found at <a href=\"https://6529.io/about/api\">https://6529.io/about/api</a>.
+ * JSON REST API for 6529.io. New here? A terminology overview and a step-by-step authentication walkthrough (guides &amp; auth) live at <a href=\"https://6529.io/tools/api\">https://6529.io/tools/api</a>. The raw machine-readable spec is downloadable at <a href=\"/openapi.yaml\">/openapi.yaml</a> and <a href=\"/openapi.json\">/openapi.json</a>.
  *
  * OpenAPI spec version: 1.0.0
  * 
@@ -17,11 +17,13 @@ import { ApiDropMainType } from '../models/ApiDropMainType';
 import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadataV2 } from '../models/ApiDropMetadataV2';
+import { ApiDropModeration } from '../models/ApiDropModeration';
 import { ApiDropNftLink } from '../models/ApiDropNftLink';
 import { ApiDropPoll } from '../models/ApiDropPoll';
 import { ApiDropReactionCounter } from '../models/ApiDropReactionCounter';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropV2ContextProfileContext } from '../models/ApiDropV2ContextProfileContext';
+import { ApiDropViewerModerationContext } from '../models/ApiDropViewerModerationContext';
 import { ApiIdentityOverview } from '../models/ApiIdentityOverview';
 import { ApiMentionedWaveV2 } from '../models/ApiMentionedWaveV2';
 import { ApiReplyToDropV2 } from '../models/ApiReplyToDropV2';
@@ -54,6 +56,8 @@ export class ApiDropV2 {
     'reply_to_drop'?: ApiReplyToDropV2;
     'submission_context'?: ApiSubmissionDropContext;
     'context_profile_context'?: ApiDropV2ContextProfileContext;
+    'viewer_context'?: ApiDropViewerModerationContext;
+    'moderation'?: ApiDropModeration;
     'poll'?: ApiDropPoll;
     'wave'?: ApiWaveOverview;
 
@@ -204,6 +208,18 @@ export class ApiDropV2 {
             "name": "context_profile_context",
             "baseName": "context_profile_context",
             "type": "ApiDropV2ContextProfileContext",
+            "format": ""
+        },
+        {
+            "name": "viewer_context",
+            "baseName": "viewer_context",
+            "type": "ApiDropViewerModerationContext",
+            "format": ""
+        },
+        {
+            "name": "moderation",
+            "baseName": "moderation",
+            "type": "ApiDropModeration",
             "format": ""
         },
         {

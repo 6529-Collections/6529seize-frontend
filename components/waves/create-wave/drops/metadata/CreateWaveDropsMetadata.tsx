@@ -104,9 +104,9 @@ export default function CreateWaveDropsMetadata({
 
   return (
     <div>
-      <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
+      <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
         Required metadata
-      </p>
+      </h3>
       <div className="tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-4">
         <div className="tw-col-span-full tw-flex tw-flex-col tw-gap-y-2">
           <div className="tw-flex tw-flex-col tw-gap-y-4">

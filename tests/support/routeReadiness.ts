@@ -8,6 +8,15 @@ import {
 
 export const RESPONSE_TIMEOUT_MS = 20000;
 const TRANSIENT_DOCUMENT_STATUS_CODES = new Set([502, 503, 504]);
+// Keep these exact fixtures aligned with components/not-found/NotFound.tsx and
+// components/error/Error.tsx. Staging has returned both as HTTP 200 documents
+// for routes that passed on an immediate second navigation.
+const NOT_FOUND_DOCUMENT_TITLE = "404 | PAGE NOT FOUND";
+const ERROR_DOCUMENT_TITLE = "6529 Error";
+const RETRYABLE_DOCUMENT_TITLES = new Set([
+  NOT_FOUND_DOCUMENT_TITLE,
+  ERROR_DOCUMENT_TITLE,
+]);
 const TRANSIENT_DOCUMENT_RETRY_DELAY_MS = 1000;
 
 export type ApiResponseMatcher = (url: URL) => boolean;
@@ -27,8 +36,10 @@ export async function gotoDocumentWithTransientRetry(page: Page, path: string) {
       TRANSIENT_DOCUMENT_STATUS_CODES.has(response.status())
         ? response.status()
         : null;
+    const title = transientStatus === null ? await page.title() : "";
+    const retryableTitle = RETRYABLE_DOCUMENT_TITLES.has(title) ? title : null;
 
-    if (transientStatus === null) {
+    if (transientStatus === null && retryableTitle === null) {
       return response;
     }
 
@@ -37,8 +48,18 @@ export async function gotoDocumentWithTransientRetry(page: Page, path: string) {
       continue;
     }
 
+    if (transientStatus !== null) {
+      throw new Error(
+        `Document navigation to ${path} returned transient HTTP ${transientStatus} after retry.`
+      );
+    }
+    if (retryableTitle === NOT_FOUND_DOCUMENT_TITLE) {
+      throw new Error(
+        `Document navigation to ${path} remained on the application 404 page after retry.`
+      );
+    }
     throw new Error(
-      `Document navigation to ${path} returned transient HTTP ${transientStatus} after retry.`
+      `Document navigation to ${path} remained on the application error shell after retry.`
     );
   }
 

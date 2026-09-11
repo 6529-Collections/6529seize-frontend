@@ -1,30 +1,39 @@
 "use client";
 
-import styles from "./NextGen.module.css";
-
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t, type MessageKey } from "@/i18n/messages";
 import { NextgenView } from "@/types/enums";
 import Image from "next/image";
-import type { CSSProperties } from "react";
-import { useSyncExternalStore } from "react";
+import Link from "next/link";
 
-const MOBILE_HEADER_MAX_WIDTH = 750;
-const COMPACT_HEADER_MAX_WIDTH = 575;
-const STACKED_HEADER_MAX_WIDTH = 1199;
-
-function subscribeToHeaderResize(onStoreChange: () => void) {
-  window.addEventListener("resize", onStoreChange);
-  return () => window.removeEventListener("resize", onStoreChange);
-}
-
-function getHeaderViewportWidth() {
-  return window.innerWidth;
-}
-
-function getServerHeaderViewportWidth() {
-  return STACKED_HEADER_MAX_WIDTH + 1;
-}
+const NEXTGEN_VIEWS: ReadonlyArray<{
+  readonly href: string;
+  readonly labelKey: MessageKey;
+  readonly view: NextgenView | undefined;
+}> = [
+  {
+    href: "/nextgen",
+    labelKey: "nextgen.navigation.featured",
+    view: undefined,
+  },
+  {
+    href: "/nextgen/collections",
+    labelKey: "nextgen.navigation.collections",
+    view: NextgenView.COLLECTIONS,
+  },
+  {
+    href: "/nextgen/artists",
+    labelKey: "nextgen.navigation.artists",
+    view: NextgenView.ARTISTS,
+  },
+  {
+    href: "/nextgen/about",
+    labelKey: "nextgen.navigation.about",
+    view: NextgenView.ABOUT,
+  },
+];
 
 export default function NextGenNavigationHeader(
   props: Readonly<{
@@ -32,159 +41,95 @@ export default function NextGenNavigationHeader(
     setView?: ((view: NextgenView | undefined) => void) | undefined;
   }>
 ) {
-  const headerViewportWidth = useSyncExternalStore(
-    subscribeToHeaderResize,
-    getHeaderViewportWidth,
-    getServerHeaderViewportWidth
-  );
-  const isMobile = headerViewportWidth <= MOBILE_HEADER_MAX_WIDTH;
-  const isCompactHeader = headerViewportWidth <= COMPACT_HEADER_MAX_WIDTH;
-  const isStackedHeader = headerViewportWidth <= STACKED_HEADER_MAX_WIDTH;
-
-  function printView(v: NextgenView | undefined) {
-    let styles: CSSProperties = {
-      borderBottom: "1px solid white",
-      cursor: "default",
-    };
-    if (!props.setView || (!v && props.view) || (v && v !== props.view)) {
-      styles = {};
+  const locale = useBrowserLocale();
+  const handleNavigation = (
+    event: { preventDefault(): void },
+    view: NextgenView | undefined
+  ) => {
+    if (!props.setView) {
+      return;
     }
-    const viewHeader = (
-      <h5
-        className={`tw-mb-0 tw-select-none tw-pb-2 tw-text-white`}
-        style={styles}
-      >
-        <b>{v ?? "Featured"}</b>
-      </h5>
-    );
-    if (props.view == v && props.setView) {
-      return viewHeader;
+
+    event.preventDefault();
+    if (props.view === view) {
+      return;
     }
-    return (
-      <button
-        className="tw-cursor-pointer tw-border-0 tw-bg-transparent !tw-p-0 tw-font-[inherit] tw-text-inherit tw-no-underline tw-outline-[inherit] hover:tw-bg-transparent hover:tw-text-[#9a9a9a] focus:tw-bg-transparent focus:tw-text-[#9a9a9a] active:tw-bg-transparent active:tw-text-[#9a9a9a]"
-        onClick={() => {
-          if (props.setView) {
-            props.setView(v);
-          } else {
-            let href = "/nextgen";
-            if (v) {
-              href += `/${v.toLowerCase()}`;
-            }
-            window.location.href = href;
-          }
-        }}
-      >
-        {viewHeader}
-      </button>
-    );
-  }
 
-  let mobileLogoWidth = "250px";
-  if (isCompactHeader) {
-    mobileLogoWidth = "140px";
-  } else if (isMobile) {
-    mobileLogoWidth = "170px";
-  }
-
-  let mobileLogoMaxWidth = "85vw";
-  if (isCompactHeader) {
-    mobileLogoMaxWidth = "38vw";
-  } else if (isMobile) {
-    mobileLogoMaxWidth = "48vw";
-  }
-
-  let headerControlsClassName = "tw-gap-4 tw-flex-nowrap";
-  if (isStackedHeader) {
-    let stackedJustifyClassName = "tw-justify-start";
-    if (isCompactHeader) {
-      stackedJustifyClassName = "tw-justify-between";
-    }
-    headerControlsClassName = `tw-gap-2 tw-flex-nowrap ${stackedJustifyClassName} tw-w-full`;
-  }
-
-  let headerPaddingTop = "0";
-  if (isStackedHeader) {
-    headerPaddingTop = "10px";
-    if (isMobile) {
-      headerPaddingTop = "20px";
-    }
-  }
+    props.setView(view);
+  };
 
   return (
-    <>
-      <div
-        className={`tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] ${styles["navigationHeader"]} ${
-          isStackedHeader ? `tw-flex-col tw-gap-2` : `tw-justify-between`
-        }`}
-        style={{
-          height: isStackedHeader ? "auto" : "90px",
-          paddingTop: headerPaddingTop,
-        }}
-      >
-        <div className={`tw-flex tw-items-center ${headerControlsClassName}`}>
-          <span className="tw-shrink tw-overflow-hidden xl:tw-hidden">
+    <header className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-py-5 md:tw-px-6 md:tw-py-6 lg:tw-px-8">
+      <div className="tw-flex tw-flex-col tw-gap-4 min-[1200px]:tw-flex-row min-[1200px]:tw-items-center min-[1200px]:tw-justify-between">
+        <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 sm:tw-w-auto sm:tw-justify-start">
+          <div className="tw-min-w-0 min-[1200px]:tw-hidden">
             <CollectionsDropdown
               activePage="nextgen"
               variant="brand"
               triggerContent={
                 <Image
                   unoptimized
-                  width="0"
-                  height="0"
-                  style={{
-                    width: mobileLogoWidth,
-                    maxWidth: mobileLogoMaxWidth,
-                    height: "auto",
-                  }}
+                  width={696}
+                  height={91}
+                  className="tw-h-auto tw-w-[140px] tw-max-w-[38vw] sm:tw-w-[250px] sm:tw-max-w-[85vw]"
                   src="/nextgen-logo.png"
-                  alt="nextgen"
+                  alt={t(locale, "nextgen.brand")}
                 />
               }
             />
-          </span>
-          <Image
-            unoptimized
-            priority
-            width="0"
-            height="0"
-            className="tw-hidden tw-cursor-pointer xl:tw-block"
-            style={{
-              width: "250px",
-              maxWidth: "85vw",
-              height: "auto",
-            }}
-            src="/nextgen-logo.png"
-            alt="nextgen"
-            onClick={() => {
-              if (props.setView) {
-                props.setView(undefined);
-              } else {
-                window.location.href = "/nextgen";
-              }
-            }}
-          />
-          <span className="tw-shrink-0">
-            <LFGButton contract={"nextgen"} />
-          </span>
+          </div>
+          <Link
+            href="/nextgen"
+            scroll={false}
+            onNavigate={(event) => handleNavigation(event, undefined)}
+            aria-label={t(locale, "nextgen.navigation.featuredAriaLabel")}
+            className="tw-hidden tw-rounded-md focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 min-[1200px]:tw-block"
+          >
+            <Image
+              unoptimized
+              priority
+              width={696}
+              height={91}
+              className="tw-h-auto tw-w-[250px]"
+              src="/nextgen-logo.png"
+              alt={t(locale, "nextgen.brand")}
+            />
+          </Link>
+          <div className="tw-shrink-0">
+            <LFGButton contract="nextgen" />
+          </div>
         </div>
-        <div
-          className={`tw-flex tw-items-center ${
-            isStackedHeader
-              ? "tw-w-full tw-justify-center tw-pb-4 tw-pt-4"
-              : "tw-justify-end"
-          }`}
-        >
-          <span className="tw-flex tw-justify-center tw-gap-4 md:tw-justify-end md:tw-gap-6">
-            {printView(undefined)}
-            {printView(NextgenView.COLLECTIONS)}
-            {printView(NextgenView.ARTISTS)}
-            {printView(NextgenView.ABOUT)}
-          </span>
-        </div>
-      </div>
 
-      <hr className={styles["navigationHeaderHr"]} />
-    </>
+        <nav
+          aria-label={t(locale, "nextgen.navigation.sectionsAriaLabel")}
+          className="tw-w-full tw-overflow-x-auto min-[1200px]:tw-w-auto"
+        >
+          <ul className="tw-m-0 tw-flex tw-min-w-max tw-list-none tw-gap-1 tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-white/10">
+            {NEXTGEN_VIEWS.map((item) => {
+              const isActive =
+                Boolean(props.setView) && props.view === item.view;
+
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    scroll={false}
+                    onNavigate={(event) => handleNavigation(event, item.view)}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`tw-inline-flex tw-min-h-10 tw-items-center tw-justify-center tw-rounded-md tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-no-underline tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-px-4 ${
+                      isActive
+                        ? "tw-bg-iron-700 tw-text-white tw-shadow-sm"
+                        : "tw-text-iron-300 hover:tw-bg-iron-800 hover:tw-text-white"
+                    }`}
+                  >
+                    {t(locale, item.labelKey)}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      </div>
+    </header>
   );
 }

@@ -1,0 +1,164 @@
+"use client";
+
+import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  type SyntheticEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
+import PublicReviewFeedbackComposer from "@/components/public-review/PublicReviewFeedbackComposer";
+import { PublicReviewSelect } from "@/components/public-review/PublicReviewFormControls";
+import {
+  PublicReviewPageComments,
+  type PublicReviewCommentSection,
+} from "@/components/public-review/PublicReviewPageComments";
+import { registerWaveComposerDock } from "@/components/waves/WaveComposerDockVisibility";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import type { PublicReviewSectionDefinition } from "@/lib/public-review/publicReviewTypes";
+import type {
+  PublicReviewDiscussionDestination,
+  PublicReviewFeedbackConfig,
+  PublicReviewPageContext,
+} from "@/services/api/public-review/types";
+
+export function PublicReviewEditorialFeedback({
+  config,
+  destination,
+  page,
+  sections,
+  commentSections,
+}: {
+  readonly config: PublicReviewFeedbackConfig;
+  readonly destination: PublicReviewDiscussionDestination;
+  readonly page: PublicReviewPageContext;
+  readonly sections: readonly PublicReviewSectionDefinition[];
+  readonly commentSections?: readonly PublicReviewCommentSection[];
+}) {
+  const [sectionId, setSectionId] = useState("");
+  const composerDisclosureRef = useRef<HTMLDetailsElement>(null);
+  const selectedSection = sections.find((section) => section.id === sectionId);
+  const pageContext = useMemo<PublicReviewPageContext>(
+    () => ({
+      ...page,
+      ...(selectedSection
+        ? {
+            sectionId: selectedSection.id,
+            sectionTitle: selectedSection.title,
+          }
+        : {}),
+    }),
+    [page, selectedSection]
+  );
+
+  useEffect(() => {
+    const revealComposerForFeedbackHash = (): void => {
+      if (window.location.hash === "#public-review-feedback") {
+        composerDisclosureRef.current?.setAttribute("open", "");
+      }
+    };
+
+    const revealTimer = window.setTimeout(revealComposerForFeedbackHash, 0);
+    window.addEventListener("hashchange", revealComposerForFeedbackHash);
+    return () => {
+      window.clearTimeout(revealTimer);
+      window.removeEventListener("hashchange", revealComposerForFeedbackHash);
+    };
+  }, []);
+
+  useEffect(() => {
+    const disclosure = composerDisclosureRef.current;
+    if (!disclosure) {
+      return;
+    }
+
+    return registerWaveComposerDock(disclosure);
+  }, []);
+
+  const handleComposerToggle = (
+    event: SyntheticEvent<HTMLDetailsElement>
+  ): void => {
+    const disclosure = event.currentTarget;
+    if (event.target !== disclosure) {
+      return;
+    }
+    if (!disclosure.open) {
+      disclosure.style.removeProperty("height");
+      return;
+    }
+
+    const compactHeight = disclosure.getBoundingClientRect().height;
+    if (compactHeight > 0) {
+      disclosure.style.height = `${compactHeight}px`;
+    }
+  };
+
+  return (
+    <div className="tw-flex tw-min-h-0 tw-flex-col @[760px]:tw-h-full">
+      <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-bg-[#0B0B0E] tw-px-5 tw-py-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
+        <PublicReviewPageComments
+          config={config}
+          destination={destination}
+          locale={DEFAULT_LOCALE}
+          page={page}
+          sections={commentSections ?? sections}
+        />
+      </div>
+      <details
+        ref={composerDisclosureRef}
+        onToggle={handleComposerToggle}
+        className="tw-group tw-flex-none tw-overflow-y-auto tw-overscroll-contain tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-transparent tw-bg-[#0B0B0E] tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 open:tw-max-h-[70vh] open:tw-border-white/[0.07] open:tw-bg-[#111115] desktop-hover:hover:tw-scrollbar-thumb-iron-500"
+      >
+        <summary className="tw-mx-auto tw-mb-5 tw-mt-3 tw-flex tw-min-h-11 tw-w-fit tw-cursor-pointer tw-list-none tw-items-center tw-justify-center tw-gap-3 tw-rounded-full tw-border-0 tw-bg-primary-600 tw-px-5 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-shadow-[0_12px_28px_rgba(0,0,0,0.42)] tw-transition-[transform,box-shadow] tw-duration-200 tw-ease-out group-open:tw-mx-5 group-open:tw-mb-3 group-open:tw-mt-4 group-open:tw-w-auto group-open:tw-translate-y-0 group-open:tw-justify-between group-open:tw-rounded-none group-open:tw-bg-transparent group-open:tw-px-0 group-open:tw-py-0 group-open:tw-text-sm group-open:tw-text-iron-100 group-open:tw-shadow-none group-open:tw-transition-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300 active:tw-translate-y-0 desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-bg-primary-500 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.5)] desktop-hover:group-open:hover:tw-translate-y-0 desktop-hover:group-open:hover:tw-bg-transparent desktop-hover:group-open:hover:tw-shadow-none motion-reduce:tw-transform-none motion-reduce:tw-transition-none [&::-webkit-details-marker]:tw-hidden">
+          <span className="tw-flex tw-items-center tw-gap-2">
+            <PlusIcon
+              className="tw-size-3.5 tw-flex-none group-open:tw-hidden"
+              aria-hidden="true"
+            />
+            {t(DEFAULT_LOCALE, "publicReview.feedback.title")}
+          </span>
+          <XMarkIcon
+            className="tw-hidden tw-size-4 tw-flex-none tw-text-iron-400 group-open:tw-block"
+            aria-hidden="true"
+          />
+        </summary>
+        <div className="tw-px-5 tw-pb-5 [&>section]:tw-border-t-0 [&>section]:tw-pt-0">
+          <PublicReviewFeedbackComposer
+            locale={DEFAULT_LOCALE}
+            config={config}
+            contextControl={
+              <label
+                id="public-review-editorial-feedback-context"
+                htmlFor="public-review-feedback-section"
+                className="tw-block tw-text-[11px] tw-font-medium tw-text-iron-300"
+              >
+                <span className="tw-mb-1.5 tw-block">
+                  {t(DEFAULT_LOCALE, "publicReview.feedback.sectionSelector")}
+                </span>
+                <PublicReviewSelect
+                  id="public-review-feedback-section"
+                  value={sectionId}
+                  onChange={(event) => setSectionId(event.target.value)}
+                >
+                  <option value="">
+                    {t(DEFAULT_LOCALE, "publicReview.feedback.wholePage")}
+                  </option>
+                  {sections.map((section) => (
+                    <option key={section.id} value={section.id}>
+                      {section.title}
+                    </option>
+                  ))}
+                </PublicReviewSelect>
+              </label>
+            }
+            destination={destination}
+            page={pageContext}
+          />
+        </div>
+      </details>
+    </div>
+  );
+}

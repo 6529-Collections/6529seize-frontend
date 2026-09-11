@@ -4,9 +4,44 @@ import { WaveLeaderboardGallery } from "@/components/waves/leaderboard/gallery/W
 import { AuthContext } from "@/components/auth/Auth";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
+jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
+  __esModule: true,
+  default: ({ children }: any) => children,
+}));
+
 jest.mock("@/hooks/useWaveDropsLeaderboard", () => ({
   useWaveDropsLeaderboard: jest.fn(),
   WaveDropsLeaderboardSort: { RANK: "RANK" },
+  WAVE_DROPS_LEADERBOARD_MAX_PAGES: 10,
+}));
+jest.mock(
+  "@/components/waves/leaderboard/WaveLeaderboardVirtualizedRows",
+  () => ({
+    useLeaderboardLeadingItemCount: () => 0,
+    WaveLeaderboardVirtualizedRows: ({
+      items,
+      renderItem,
+      hasNextPage,
+      fetchNextPage,
+    }: any) => (
+      <div>
+        {items.map((item: any) => (
+          <React.Fragment key={item.id}>{renderItem(item)}</React.Fragment>
+        ))}
+        {hasNextPage ? (
+          <button onClick={fetchNextPage}>Load more drops</button>
+        ) : null}
+      </div>
+    ),
+  })
+);
+jest.mock("@/components/waves/leaderboard/WaveLeaderboardVotingModal", () => ({
+  useWaveLeaderboardVotingModal: () => ({
+    votingDrop: null,
+    openVotingModal: jest.fn(),
+    closeVotingModal: jest.fn(),
+  }),
+  WaveLeaderboardVotingModal: () => null,
 }));
 jest.mock(
   "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItem",
@@ -44,7 +79,15 @@ function renderGallery(overrides: any) {
     hasNextPage: overrides.hasNextPage || false,
     isFetching: overrides.isFetching || false,
     isFetchingNextPage: overrides.isFetchingNextPage || false,
+    isFetchingPreviousPage: false,
+    isFetchNextPageError: false,
+    isFetchPreviousPageError: false,
+    fetchPreviousPage: jest.fn(),
+    hasPreviousPage: false,
+    pageMetadata: [],
+    queryWindowKey: "test-window",
   });
+  const scrollContainerRef = React.createRef<HTMLDivElement>();
   return render(
     <AuthContext.Provider value={authValue}>
       <WaveLeaderboardGallery
@@ -53,6 +96,7 @@ function renderGallery(overrides: any) {
         isVotingClosed={overrides.isVotingClosed}
         isVotingControlsLocked={overrides.isVotingControlsLocked}
         onDropClick={overrides.onDropClick || jest.fn()}
+        scrollContainerRef={scrollContainerRef}
       />
     </AuthContext.Provider>
   );

@@ -53,17 +53,19 @@ test.describe("About Pages @smoke @medium @large", () => {
     await expect(page).toHaveTitle("Subscription Minting | About");
     await expectNoHorizontalOverflow(page);
 
-    // Look for the specific paragraph containing "Remote Minting"
-    const remoteMintingParagraph = page.getByText("Remote Minting", {
-      exact: true,
-    });
-    await expect(remoteMintingParagraph).toBeVisible();
-
-    // Additionally, check for some content specific to the Subscriptions page
-    const subscriptionContent = page.getByText(
-      "It is better to think about subscriptions as"
-    );
-    await expect(subscriptionContent).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: "Subscription Minting",
+      })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        level: 2,
+        name: "How it Works",
+      })
+    ).toBeVisible();
+    await expect(page.getByText("Fill Balance", { exact: true })).toBeVisible();
 
     await page
       .getByRole("button", { name: /Open About contents navigation/i })
@@ -78,6 +80,35 @@ test.describe("About Pages @smoke @medium @large", () => {
     await expect(
       contentsMenu.getByRole("menuitem", { name: /Go to page: GDRC/i })
     ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("should keep GDRC in view beside the narrow desktop menu", async ({
+    page,
+  }) => {
+    // Reproduce the reported failure inside the narrow desktop sidebar band.
+    await page.setViewportSize({ width: 1054, height: 900 });
+    await page.goto("/about/gdrc1", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+
+    const layoutRoot = page.locator(".layout-root");
+    await expect(layoutRoot).toHaveAttribute("data-mobile", "false");
+    await expect(layoutRoot).toHaveAttribute("data-narrow", "true");
+    await expect(layoutRoot).toHaveAttribute("data-right-open", "false");
+
+    await page.getByRole("button", { name: "Toggle right sidebar" }).click();
+    await expect(layoutRoot).toHaveAttribute("data-offcanvas", "true");
+
+    const gdrcArticle = layoutRoot.getByRole("article");
+    await expect(gdrcArticle).toHaveCount(1);
+    await expect
+      .poll(() =>
+        gdrcArticle.evaluate((article) => {
+          const { left, right } = article.getBoundingClientRect();
+          return left >= 0 && right <= document.documentElement.clientWidth;
+        })
+      )
+      .toBe(true);
     await expectNoHorizontalOverflow(page);
   });
 });

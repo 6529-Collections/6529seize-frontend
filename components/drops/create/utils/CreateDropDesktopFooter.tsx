@@ -31,7 +31,6 @@ export default function CreateDropDesktopFooter({
           onClicked={onDrop} 
           disabled={disabled} 
           loading={loading}
-          padding="tw-px-4 tw-py-2.5"
         >
           {getText()}
         </PrimaryButton>

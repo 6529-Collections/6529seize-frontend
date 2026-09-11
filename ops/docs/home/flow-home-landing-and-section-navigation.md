@@ -10,19 +10,28 @@ next route.
 ## Location in the Site
 
 - Entry route: `/`
-- Section order on `/`: `Header` -> `Latest Drop` or `Next Drop` -> mission
-  block -> `Coming up` -> `Boosted Drops` -> `Most active waves`
+- Authenticated section order on `/`: `Header` -> `Latest Drop` or `Next Drop`
+  -> mission block -> `Coming up` -> `Boosted Drops` -> `Most active waves`
+- Logged-out section order on `/`: `Header` -> compact newcomer actions ->
+  `Latest Drop` or `Next Drop` -> mission block -> `Coming up` ->
+  `Boosted Drops` -> `Most active waves`
 
 ### Route map by section
 
 - Header:
   - Health shortcut: `/network/health`
+- Logged-out newcomer actions:
+  - `Start here`: `/join-6529`
+  - `Connect wallet`: opens the wallet connection flow
 - `Latest Drop`:
   - Title: `/the-memes/{id}`
   - Artist pills: `/{handle}` (one or more)
   - `Edition Details` -> distribution link: `/the-memes/{id}/distribution`
+  - `Edition Details` -> mapped Main Stage submission:
+    `/waves/{mainStageWaveId}?drop={dropId}`
   - `Mint` action: `/the-memes/mint` (when countdown shows the button)
 - `Next Drop` (top slot replacement):
+  - Mapped Meme card pill: `/the-memes/{id}`
   - Title: `/waves?wave={waveId}&drop={dropId}`
   - Wave row: `/waves/{waveId}`
   - Artist: `/{handleOrPrimaryAddress}`
@@ -48,24 +57,30 @@ next route.
 ## User Journey
 
 1. Open `/`.
-2. Read the header and open `/network/health` from the heart shortcut when
-   needed.
-3. Wait for the top slot to resolve:
+2. If logged out, use the compact newcomer actions to either:
+   - Select `Start here` to continue through `/join-6529`.
+   - Select `Connect wallet` to begin connecting immediately.
+   - Keep browsing without a wallet and continue into current activity.
+3. Open `/network/health` from the heart shortcut when needed.
+4. Wait for the top slot to resolve:
    - `Latest Drop` when the current mint is active, or no next winner is ready.
    - `Next Drop` when the current mint has ended and a next winner exists.
-4. Continue to the mission block (informational only).
-5. Use `Coming up`:
+5. Continue to the mission block (informational only).
+6. Use `Coming up`:
    - Open ranked queue and leader cards.
    - Use `View all` to open the source wave.
-6. Continue with discovery:
+7. Continue with discovery:
    - Open `Boosted Drops` for drop-first chat entry.
    - Open `Most active waves` for wave-first entry.
-7. Use final `View all` to continue in `/waves`.
+8. Use final `View all` to continue in `/waves`.
 
 ## State and Visibility Rules
 
 - Top slot shows a loading skeleton first, then resolves to `Latest Drop`,
   `Next Drop`, or hidden when no eligible card exists.
+- The newcomer actions stay hidden while wallet state is initializing or
+  connecting. They appear when that state settles without valid authentication.
+  Authenticated visitors keep the dashboard-first order.
 - `Coming up` can show:
   - up to 3 leaderboard cards, or
   - `NEXT MINT` plus up to 2 leaderboard cards.
@@ -95,8 +110,8 @@ next route.
 
 - Home sections use independent data sources, so loading and visibility timing
   is not synchronized.
-- Home content has no auth or wallet gate, but visible cards still depend on
-  available data.
+- Public home activity has no auth or wallet gate; only the newcomer actions
+  wait for wallet-state resolution. Visible cards still depend on available data.
 
 ## Related Pages
 

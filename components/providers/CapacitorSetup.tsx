@@ -1,10 +1,12 @@
 "use client";
 
 import useCapacitor from "@/hooks/useCapacitor";
+import { Capacitor } from "@capacitor/core";
+import { Keyboard, KeyboardResize } from "@capacitor/keyboard";
 import { useEffect, useRef } from "react";
 
 export default function CapacitorSetup() {
-  const { isCapacitor } = useCapacitor();
+  const { isCapacitor, isIos } = useCapacitor();
   const originalViewport = useRef<string | null>(null);
 
   useEffect(() => {
@@ -44,6 +46,25 @@ export default function CapacitorSetup() {
       }
     };
   }, [isCapacitor]);
+
+  useEffect(() => {
+    if (!isCapacitor || !isIos || !Capacitor.isPluginAvailable("Keyboard")) {
+      return;
+    }
+
+    // The iOS plugin's native resize is delayed until after the keyboard
+    // animation; the app drives the chat inset itself for synchronized motion.
+    void (async () => {
+      try {
+        await Keyboard.setResizeMode({ mode: KeyboardResize.None });
+      } catch (error: unknown) {
+        console.error(
+          "[Capacitor Setup] Error setting keyboard resize mode:",
+          error
+        );
+      }
+    })();
+  }, [isCapacitor, isIos]);
 
   return null;
 }

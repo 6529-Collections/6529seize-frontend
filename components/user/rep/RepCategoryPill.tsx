@@ -69,9 +69,8 @@ export default function RepCategoryPill({
   });
   const detailClasses =
     "tw-inline-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2.5 tw-gap-y-1.5";
-  const contributorButtonClasses = compact
-    ? "tw-cursor-pointer tw-whitespace-nowrap tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-text-iron-400 tw-underline tw-decoration-white/20 tw-underline-offset-4 tw-transition-colors hover:tw-text-iron-200"
-    : "tw-cursor-pointer tw-whitespace-nowrap tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-text-iron-400 tw-underline tw-decoration-white/10 tw-underline-offset-4 tw-transition-[text-decoration-color] tw-transition-colors hover:tw-text-iron-200 hover:tw-decoration-white/50";
+  const contributorButtonClasses =
+    "tw-cursor-pointer tw-whitespace-nowrap tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline tw-decoration-white/30 tw-underline-offset-4 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-text-iron-200 focus-visible:tw-underline desktop-hover:hover:tw-text-iron-200 desktop-hover:hover:tw-underline";
 
   const details = (
     <>
@@ -101,18 +100,22 @@ export default function RepCategoryPill({
     </>
   );
 
-  const baseClasses = `group ${layoutClass} tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#18191B] tw-transition-all tw-duration-300 tw-ease-out ${paddingClass}`;
+  const surfaceClasses = compact
+    ? "tw-border tw-border-solid tw-border-white/[0.1] tw-bg-iron-900/60"
+    : "tw-bg-iron-900/60 tw-ring-1 tw-ring-inset tw-ring-white/[0.06]";
+  const surfaceHoverClasses = compact
+    ? "desktop-hover:hover:tw-border-white/[0.16] desktop-hover:hover:tw-bg-iron-900"
+    : "desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-ring-white/10";
+  const baseClasses = `group ${layoutClass} tw-rounded-lg ${surfaceClasses} tw-transition-colors tw-duration-200 tw-ease-out ${paddingClass}`;
 
   return (
-    <div
-      className={`${baseClasses} hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-shadow-md`}
-    >
+    <div className={`${baseClasses} ${surfaceHoverClasses}`}>
       <div className="tw-inline-flex tw-min-w-0 tw-items-center tw-gap-2">
         <button
           type="button"
           onClick={() => onOpenGlobalCategory(category.category)}
           aria-label={openGlobalAriaLabel}
-          className={`${detailClasses} tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-left`}
+          className={`${detailClasses} tw-cursor-pointer tw-rounded-sm tw-border-none tw-bg-transparent tw-p-0 tw-text-left focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
         >
           {details}
         </button>
@@ -121,7 +124,7 @@ export default function RepCategoryPill({
             type="button"
             onClick={() => onEdit(category.category)}
             aria-label={editAriaLabel}
-            className="tw-inline-flex tw-h-7 tw-w-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-p-0 tw-text-iron-400 tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] hover:tw-text-white"
+            className="tw-inline-flex tw-h-7 tw-w-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400 active:tw-bg-white/[0.04] desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-iron-200"
           >
             <PencilSquareIcon className="tw-h-4 tw-w-4" aria-hidden="true" />
           </button>

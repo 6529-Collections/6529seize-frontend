@@ -146,7 +146,7 @@ describe("getSharedAppServerSideProps", () => {
       const url = new URL(image.url);
 
       expect(metadata.title).toBe("The Memes #491 | Activity");
-      expect(metadata.description).toBe("Collections | 6529.io");
+      expect(metadata.description).toBe("Collections | test.6529.io");
       expect(image.alt).toBe("The Memes #491 | Activity social card");
       expect(url.pathname).toBe(`/api/og-metadata/nfts/${MEMES_CONTRACT}/491`);
       expect(url.searchParams.get("image")).toBeNull();

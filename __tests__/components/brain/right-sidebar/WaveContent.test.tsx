@@ -14,8 +14,8 @@ jest.mock("@/components/waves/header/WaveHeader", () => ({
 
 jest.mock("@/components/common/TabToggleWithOverflow", () => ({
   __esModule: true,
-  TabToggleWithOverflow: ({ options, activeKey }: any) => (
-    <div data-testid="tabs">
+  TabToggleWithOverflow: ({ options, activeKey, maxVisibleTabs }: any) => (
+    <div data-testid="tabs" data-max-visible-tabs={maxVisibleTabs}>
       {activeKey}-{options.map((option: any) => option.label).join(",")}
     </div>
   ),
@@ -39,17 +39,16 @@ jest.mock("@/components/brain/right-sidebar/BrainRightSidebarContent", () => ({
   __esModule: true,
   default: () => <div>content</div>,
 }));
-jest.mock("@/components/brain/right-sidebar/BrainRightSidebarSettings", () => ({
-  __esModule: true,
-  default: () => <div>settings</div>,
-}));
+jest.mock(
+  "@/components/brain/right-sidebar/BrainRightSidebarConfiguration",
+  () => ({
+    __esModule: true,
+    default: () => <div>configuration</div>,
+  })
+);
 jest.mock("@/components/brain/right-sidebar/WaveRepDetails", () => ({
   __esModule: true,
   default: () => <div>rep details</div>,
-}));
-jest.mock("@/components/waves/specs/WaveRules", () => ({
-  __esModule: true,
-  default: () => <div>rules</div>,
 }));
 jest.mock(
   "@/components/brain/right-sidebar/BrainRightSidebarFollowers",
@@ -59,8 +58,8 @@ jest.mock(
 describe("WaveContent", () => {
   const wave = { wave: { type: ApiWaveType.Chat }, name: "Wave" } as any;
 
-  it("renders normal wave with about and settings tabs", () => {
-    render(
+  it("renders a normal wave with the merged information tabs", () => {
+    const { container } = render(
       <WaveContent
         wave={wave}
         mode={Mode.CONTENT}
@@ -71,27 +70,29 @@ describe("WaveContent", () => {
     );
     expect(screen.getByTestId("header")).toBeInTheDocument();
     expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "ABOUT-About,Rules,REP,Settings"
+      "ABOUT-About,REP,Configuration"
     );
     expect(screen.getByText("content")).toBeInTheDocument();
+    expect(container.firstElementChild).toHaveClass("tw-bg-iron-950");
+    expect(container.querySelector(".tw-divide-y")).toHaveClass(
+      "tw-divide-white/5"
+    );
   });
 
-  it("renders settings tab content", () => {
+  it("can render content without its own tab row", () => {
     render(
       <WaveContent
         wave={wave}
         mode={Mode.CONTENT}
         setMode={jest.fn()}
-        activeTab={SidebarTab.SETTINGS}
+        activeTab={SidebarTab.ABOUT}
         setActiveTab={jest.fn()}
+        showTabs={false}
       />
     );
 
-    expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "SETTINGS-About,Rules,REP,Settings"
-    );
-    expect(screen.getByText("settings")).toBeInTheDocument();
-    expect(screen.queryByTestId("header")).toBeNull();
+    expect(screen.queryByTestId("tabs")).toBeNull();
+    expect(screen.getByText("content")).toBeInTheDocument();
   });
 
   it("renders REP tab content", () => {
@@ -106,7 +107,7 @@ describe("WaveContent", () => {
     );
 
     expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "REP-About,Rules,REP,Settings"
+      "REP-About,REP,Configuration"
     );
     expect(screen.getByText("rep details")).toBeInTheDocument();
     expect(screen.queryByTestId("header")).toBeNull();
@@ -124,27 +125,29 @@ describe("WaveContent", () => {
     );
 
     expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "ABOUT-About,Rules,REP,Settings"
+      "ABOUT-About,REP,Configuration"
     );
     expect(screen.getByText("content")).toBeInTheDocument();
   });
 
-  it("renders rules tab content for chat waves", () => {
+  it("renders configuration tab content", () => {
     render(
       <WaveContent
         wave={wave}
         mode={Mode.CONTENT}
         setMode={jest.fn()}
-        activeTab={SidebarTab.RULES}
+        activeTab={SidebarTab.CONFIGURATION}
         setActiveTab={jest.fn()}
       />
     );
 
     expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "RULES-About,Rules,REP,Settings"
+      "CONFIGURATION-About,REP,Configuration"
     );
-    expect(screen.getByText("rules")).toBeInTheDocument();
+    expect(screen.getByText("configuration")).toBeInTheDocument();
     expect(screen.queryByTestId("header")).toBeNull();
+    expect(screen.queryByText("content")).toBeNull();
+    expect(screen.queryByText("rep details")).toBeNull();
   });
 
   it("renders rank wave right-sidebar tabs without leaderboard or winners tabs", () => {
@@ -158,28 +161,14 @@ describe("WaveContent", () => {
       />
     );
     expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "ABOUT-About,Rules,REP,Settings,Voters,Activity"
+      "ABOUT-About,REP,Configuration,Voters,Activity"
+    );
+    expect(screen.getByTestId("tabs")).toHaveAttribute(
+      "data-max-visible-tabs",
+      "4"
     );
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Leaderboard");
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Winners");
-  });
-
-  it("renders rules tab content for rank waves", () => {
-    render(
-      <WaveContent
-        wave={{ wave: { type: ApiWaveType.Rank }, name: "Wave" } as any}
-        mode={Mode.CONTENT}
-        setMode={jest.fn()}
-        activeTab={SidebarTab.RULES}
-        setActiveTab={jest.fn()}
-      />
-    );
-
-    expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "RULES-About,Rules,REP,Settings,Voters,Activity"
-    );
-    expect(screen.getByText("rules")).toBeInTheDocument();
-    expect(screen.queryByTestId("header")).toBeNull();
   });
 
   it("renders approve wave right-sidebar tabs without approvals or approved tabs", () => {
@@ -194,7 +183,7 @@ describe("WaveContent", () => {
     );
 
     expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "ABOUT-About,Rules,REP,Settings,Voters,Activity"
+      "ABOUT-About,REP,Configuration,Voters,Activity"
     );
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Proposals");
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Approved");

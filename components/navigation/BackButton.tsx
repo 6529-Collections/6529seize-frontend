@@ -1,8 +1,8 @@
 "use client";
 
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Spinner from "../utils/Spinner";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
@@ -14,12 +14,15 @@ import {
   getWavesBaseRoute,
   getWaveHomeRoute,
 } from "@/helpers/navigation.helpers";
-import { markDropCloseNavigation } from "@/helpers/drop-close-navigation.helpers";
-import { useViewContext } from "./ViewContext";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
+import { useExitActiveWave } from "./useExitActiveWave";
 
-export default function BackButton() {
+export default function BackButton({
+  returnTo,
+}: {
+  readonly returnTo?: string | null | undefined;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -27,8 +30,8 @@ export default function BackButton() {
   const [loading, setLoading] = useState(false);
   const { isApp } = useDeviceInfo();
   const myStream = useMyStreamOptional();
-  const { clearLastVisited } = useViewContext();
-  const { goBack } = useNavigationHistoryContext();
+  const exitActiveWave = useExitActiveWave();
+  const { goBack, goBackTo } = useNavigationHistoryContext();
 
   const waveId =
     myStream?.activeWave.id ??
@@ -39,6 +42,14 @@ export default function BackButton() {
     useClosingDropId(dropIdFromUrl);
 
   const isInMessagesContext = pathname.startsWith("/messages");
+
+  useEffect(() => {
+    if (!returnTo) {
+      return;
+    }
+
+    router.prefetch(returnTo);
+  }, [returnTo, router]);
 
   // Fetch wave to determine if it is DM
   const { data: wave } = useWaveData({
@@ -60,11 +71,6 @@ export default function BackButton() {
 
   const { isDm } = useWave(wave);
 
-  // Reset loading when URL changes
-  useEffect(() => {
-    setLoading(false);
-  }, [pathname, searchParamsString]);
-
   const handleClick = () => {
     if (loading) return;
 
@@ -82,7 +88,6 @@ export default function BackButton() {
     // Drop open → close drop (remove ?drop param)
     if (dropId) {
       beginClosingDrop(dropId);
-      markDropCloseNavigation();
       const params = new URLSearchParams(searchParamsString || "");
       params.delete("drop");
       const basePath =
@@ -100,8 +105,13 @@ export default function BackButton() {
 
     // Inside a wave → go back to wave list
     if (waveId) {
-      clearLastVisited(isDm ? "dm" : "wave");
-      myStream?.activeWave.set(null, { isDirectMessage: isDm });
+      exitActiveWave(isDm);
+      return;
+    }
+
+    if (returnTo) {
+      setLoading(true);
+      goBackTo(returnTo);
       return;
     }
 
@@ -114,13 +124,18 @@ export default function BackButton() {
     <button
       type="button"
       aria-label="Back"
+      aria-busy={loading}
+      disabled={loading}
       onClick={handleClick}
-      className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-border-none tw-bg-transparent"
+      className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-border-none tw-bg-transparent disabled:tw-cursor-default"
     >
-      {loading ? (
+      {loading && !returnTo ? (
         <Spinner />
       ) : (
-        <ArrowLeftIcon className="tw-size-6 tw-flex-shrink-0 tw-text-iron-50" />
+        <ChevronLeftIcon
+          strokeWidth={2}
+          className="tw-size-6 tw-flex-shrink-0 tw-text-iron-50"
+        />
       )}
     </button>
   );

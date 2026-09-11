@@ -33,18 +33,18 @@ jest.mock("@/components/voting/VotingModalButton", () => ({
   default: (p: any) => <button data-testid="vote" onClick={p.onClick} />,
 }));
 
-jest.mock("@/components/waves/drops/WaveDropActionsOptions", () => ({
-  __esModule: true,
-  default: () => <div data-testid="options" />,
-}));
-jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => ({
-  __esModule: true,
-  default: () => <div data-testid="open" />,
-}));
-jest.mock("@/components/waves/drops/DropCurationButton", () => ({
-  __esModule: true,
-  default: () => <div data-testid="curate" />,
-}));
+jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
+  <div data-testid="desktop-open-action" />
+));
+jest.mock("@/components/waves/drops/WaveDropActionsOptions", () => () => (
+  <div data-testid="desktop-delete-action" />
+));
+jest.mock("@/components/content-moderation/ContentModerationDropActions", () =>
+  jest.fn(() => null)
+);
+jest.mock("@/components/content-moderation/ReportDropModal", () =>
+  jest.fn(() => null)
+);
 jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => ({
   __esModule: true,
   default: () => <div data-testid="mobile-open" />,
@@ -179,23 +179,6 @@ describe("DefaultWaveLeaderboardDrop", () => {
     );
 
     expect(screen.queryByTestId("vote")).toBeNull();
-  });
-
-  it("renders curation button", () => {
-    render(<DefaultWaveLeaderboardDrop drop={drop} onDropClick={jest.fn()} />);
-    expect(screen.getByTestId("curate")).toBeInTheDocument();
-  });
-
-  it("renders curation button when voting is closed", () => {
-    render(
-      <DefaultWaveLeaderboardDrop
-        drop={drop}
-        onDropClick={jest.fn()}
-        isVotingClosed={true}
-      />
-    );
-
-    expect(screen.getByTestId("curate")).toBeInTheDocument();
   });
 
   it("calls onDropClick", () => {

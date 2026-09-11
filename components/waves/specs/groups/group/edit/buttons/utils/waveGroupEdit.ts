@@ -1,4 +1,3 @@
-import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiGroup } from "@/generated/models/ApiGroup";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { WaveGroupType } from "../../../WaveGroup.types";
@@ -9,23 +8,15 @@ import {
   updateGroupIdByType,
 } from "../../utils/waveGroupUpdate";
 
-export const buildWaveUpdateBody = (
-  wave: ApiWave,
-  type: WaveGroupType,
-  groupId: string | null,
-): ApiUpdateWaveRequest => {
-  const originalBody = convertWaveToUpdateWave(wave);
-  return updateGroupIdByType(originalBody, type, groupId);
-};
-
-export const getGroupIdFromUpdateBody = (
-  body: ApiUpdateWaveRequest,
-  type: WaveGroupType,
-): string | null => getGroupIdByType(body, type);
+const VISIBILITY_DEPENDENT_GROUP_TYPES = [
+  WaveGroupType.DROP,
+  WaveGroupType.VOTE,
+  WaveGroupType.CHAT,
+] as const;
 
 export const getScopedGroup = (
   wave: ApiWave,
-  type: WaveGroupType,
+  type: WaveGroupType
 ): ApiGroup | null => {
   switch (type) {
     case WaveGroupType.VIEW:
@@ -43,34 +34,34 @@ export const getScopedGroup = (
   }
 };
 
-export const isGroupAuthor = (
-  scopedGroup: ApiGroup | null,
-  connectedProfile: ApiIdentity | null,
-): boolean => {
-  if (!scopedGroup || !connectedProfile) {
-    return false;
+const isFullyPublicExceptAdmin = (wave: ApiWave): boolean =>
+  getScopedGroup(wave, WaveGroupType.VIEW) === null &&
+  VISIBILITY_DEPENDENT_GROUP_TYPES.every(
+    (dependentType) => getScopedGroup(wave, dependentType) === null
+  );
+
+export const buildWaveUpdateBody = (
+  wave: ApiWave,
+  type: WaveGroupType,
+  groupId: string | null
+): ApiUpdateWaveRequest => {
+  const originalBody = convertWaveToUpdateWave(wave);
+  const updatedBody = updateGroupIdByType(originalBody, type, groupId);
+  if (
+    type !== WaveGroupType.VIEW ||
+    groupId === null ||
+    !isFullyPublicExceptAdmin(wave)
+  ) {
+    return updatedBody;
   }
 
-  const groupAuthorId =
-    scopedGroup.author?.id !== undefined && scopedGroup.author?.id !== null
-      ? String(scopedGroup.author.id)
-      : null;
-
-  const userId =
-    connectedProfile.id !== undefined && connectedProfile.id !== null
-      ? String(connectedProfile.id)
-      : null;
-
-  if (groupAuthorId && userId && groupAuthorId === userId) {
-    return true;
-  }
-
-  const groupAuthorHandle = scopedGroup.author?.handle?.toLowerCase();
-  const userHandle = connectedProfile.handle?.toLowerCase();
-
-  if (!groupAuthorHandle || !userHandle) {
-    return false;
-  }
-
-  return groupAuthorHandle === userHandle;
+  return VISIBILITY_DEPENDENT_GROUP_TYPES.reduce(
+    (body, dependentType) => updateGroupIdByType(body, dependentType, groupId),
+    updatedBody
+  );
 };
+
+export const getGroupIdFromUpdateBody = (
+  body: ApiUpdateWaveRequest,
+  type: WaveGroupType
+): string | null => getGroupIdByType(body, type);

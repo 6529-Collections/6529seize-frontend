@@ -1,4 +1,5 @@
 const mockIsNullAddress = jest.fn(() => false);
+const mockConnectedAddress = { value: undefined as string | undefined };
 
 jest.mock("@/helpers/Helpers", () => {
   const actual = jest.requireActual("@/helpers/Helpers");
@@ -34,7 +35,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
     isAuthenticated: false,
     seizeConnect: jest.fn(),
     seizeAcceptConnection: jest.fn(),
-    address: undefined,
+    address: mockConnectedAddress.value,
     hasInitializationError: false,
     initializationError: null,
   })),
@@ -69,6 +70,12 @@ jest.mock(
   "@/components/nextGen/collections/nextgenToken/NextGenTokenRenderCenter",
   () => () => <div data-testid="render" />
 );
+jest.mock("@/components/nft-transfer/TransferSingle", () => ({
+  __esModule: true,
+  default: ({ presentation }: { presentation?: string }) => (
+    <div data-presentation={presentation} data-testid="transfer-single" />
+  ),
+}));
 jest.mock(
   "@/components/nextGen/collections/collectionParts/NextGenCollectionHeader",
   () => ({
@@ -92,6 +99,7 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
     <svg
       data-testid={props.icon.iconName}
       style={props.style}
+      className={props.className}
       onClick={props.onClick}
       data-tooltip-id={props["data-tooltip-id"]}
     />
@@ -117,6 +125,7 @@ const baseProps = {
   tokenCount: 2,
   view: NextgenCollectionView.ABOUT,
   setView: jest.fn(),
+  returnTo: null as string | null,
 };
 
 function renderComponent(props?: Partial<typeof baseProps>) {
@@ -124,6 +133,11 @@ function renderComponent(props?: Partial<typeof baseProps>) {
 }
 
 describe("NextGenTokenPage", () => {
+  beforeEach(() => {
+    mockConnectedAddress.value = undefined;
+    mockIsNullAddress.mockReturnValue(false);
+  });
+
   describe("rendering", () => {
     it("renders token name", () => {
       renderComponent();
@@ -145,9 +159,72 @@ describe("NextGenTokenPage", () => {
       expect(screen.getByTestId("back")).toBeInTheDocument();
     });
 
+    it("returns to the originating profile collected card", () => {
+      renderComponent({
+        returnTo:
+          "/Shelby/collected?collection=nextgen&page=3#collected-card-nextgen-1",
+      });
+
+      expect(
+        screen.getByRole("link", { name: "Back to Shelby's collected" })
+      ).toHaveAttribute(
+        "href",
+        "/Shelby/collected?collection=nextgen&page=3#collected-card-nextgen-1"
+      );
+      expect(screen.getByTestId("back").parentElement).toHaveClass(
+        "tw-hidden",
+        "md:tw-block"
+      );
+    });
+
+    it("links direct visitors to the current owner's collected view", () => {
+      renderComponent({
+        token: {
+          ...baseProps.token,
+          handle: "Shelby",
+          normalised_handle: "shelby",
+        },
+      });
+
+      expect(
+        screen.getByRole("link", { name: "View Shelby's collected" })
+      ).toHaveAttribute("href", "/shelby/collected?collection=nextgen");
+    });
+
+    it("rejects an invalid return target and uses the owner fallback", () => {
+      renderComponent({
+        returnTo: "//example.com/Shelby/collected",
+        token: {
+          ...baseProps.token,
+          handle: "Shelby",
+          normalised_handle: "shelby",
+        },
+      });
+
+      expect(
+        screen.getByRole("link", { name: "View Shelby's collected" })
+      ).toHaveAttribute("href", "/shelby/collected?collection=nextgen");
+    });
+
     it("renders token art component", () => {
       renderComponent();
       expect(screen.getByTestId("art")).toBeInTheDocument();
+    });
+
+    it("renders the owner transfer action beside the About heading", () => {
+      mockConnectedAddress.value = "0x1";
+
+      renderComponent({ view: NextgenCollectionView.ABOUT });
+
+      const heading = screen.getByRole("heading", { name: "About" });
+      const transfer = screen.getByTestId("transfer-single");
+      const transferContainer = transfer.parentElement;
+      const informationCard = screen.getByTestId("nextgen-token-about-card");
+
+      expect(heading.nextElementSibling).toBe(transferContainer);
+      expect(transferContainer?.previousElementSibling).toBe(heading);
+      expect(transfer).toHaveAttribute("data-presentation", "inline");
+      expect(informationCard).not.toContainElement(transfer);
     });
   });
 
@@ -192,10 +269,8 @@ describe("NextGenTokenPage", () => {
   describe("navigation", () => {
     it("disables previous button on first token", () => {
       renderComponent({ token: { ...baseProps.token, normalised_id: 0 } });
-      const prev = screen.getByTestId("circle-chevron-left");
-      expect(prev.getAttribute("style")).toContain("color: rgb(154, 154, 154)");
-      expect(prev.getAttribute("style")).toContain("cursor: default");
-      // When disabled, no tooltip should be present
+      const prev = screen.getByRole("button", { name: "Previous token" });
+      expect(prev).toBeDisabled();
       expect(prev.getAttribute("data-tooltip-id")).toBeFalsy();
     });
 
@@ -203,12 +278,9 @@ describe("NextGenTokenPage", () => {
       renderComponent({
         token: { ...baseProps.token, normalised_id: 1, id: 2 },
       });
-      const prev = screen.getByTestId("circle-chevron-left");
-      expect(prev.getAttribute("style")).toContain("color: rgb(255, 255, 255)");
-      expect(prev.getAttribute("style")).toContain("cursor: pointer");
-      // When enabled, the icon should have a tooltip id
+      const prev = screen.getByRole("button", { name: "Previous token" });
+      expect(prev).toBeEnabled();
       expect(prev.getAttribute("data-tooltip-id")).toBeTruthy();
-      // And the tooltip should be present in the document
       expect(screen.getByTestId("tooltip-prev-token-2")).toBeInTheDocument();
     });
 
@@ -217,9 +289,8 @@ describe("NextGenTokenPage", () => {
         token: { ...baseProps.token, normalised_id: 1 },
         tokenCount: 2,
       });
-      const next = screen.getByTestId("circle-chevron-right");
-      expect(next.getAttribute("style")).toContain("color: rgb(154, 154, 154)");
-      expect(next.getAttribute("style")).toContain("cursor: default");
+      const next = screen.getByRole("button", { name: "Next token" });
+      expect(next).toBeDisabled();
       expect(next.getAttribute("data-tooltip-id")).toBeFalsy();
     });
 
@@ -228,9 +299,8 @@ describe("NextGenTokenPage", () => {
         token: { ...baseProps.token, normalised_id: 0, id: 1 },
         tokenCount: 3,
       });
-      const next = screen.getByTestId("circle-chevron-right");
-      expect(next.getAttribute("style")).toContain("color: rgb(255, 255, 255)");
-      expect(next.getAttribute("style")).toContain("cursor: pointer");
+      const next = screen.getByRole("button", { name: "Next token" });
+      expect(next).toBeEnabled();
       expect(next.getAttribute("data-tooltip-id")).toBeTruthy();
       expect(screen.getByTestId("tooltip-next-token-1")).toBeInTheDocument();
     });
@@ -241,9 +311,7 @@ describe("NextGenTokenPage", () => {
       renderComponent({ token: { ...baseProps.token, burnt: true } });
       const fireIcon = screen.getByTestId("fire");
       expect(fireIcon).toBeInTheDocument();
-      expect(fireIcon.getAttribute("style")).toContain(
-        "color: rgb(197, 29, 52)"
-      );
+      expect(fireIcon).toHaveClass("tw-text-error");
       expect(screen.getByTestId("tooltip-burnt-token-1")).toBeInTheDocument();
     });
 

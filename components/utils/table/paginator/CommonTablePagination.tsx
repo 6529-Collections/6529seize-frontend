@@ -1,3 +1,10 @@
+"use client";
+
+import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
+
 export default function CommonTablePagination({
   small,
   currentPage,
@@ -17,6 +24,9 @@ export default function CommonTablePagination({
   readonly showTopBorder?: boolean | undefined;
   readonly className?: string | undefined;
 }) {
+  const locale = useBrowserLocale();
+  const formattedCurrentPage = formatInteger(locale, currentPage);
+
   return (
     <div
       className={`${
@@ -28,7 +38,10 @@ export default function CommonTablePagination({
       <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
         {typeof totalPages === "number" ? (
           <div className="tw-mr-3 tw-text-sm tw-font-medium tw-text-iron-300">
-            Page {currentPage} of {totalPages}
+            {t(locale, "common.pagination.pageOf", {
+              current: formattedCurrentPage,
+              total: formatInteger(locale, totalPages),
+            })}
           </div>
         ) : (
           <div></div>
@@ -36,11 +49,11 @@ export default function CommonTablePagination({
 
         <span className="tw-isolate tw-inline-flex tw-gap-x-3 tw-rounded-md tw-shadow-sm">
           {currentPage > 1 && (
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setCurrentPage(currentPage - 1)}
               disabled={loading}
-              type="button"
-              className="tw-relative tw-inline-flex tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
             >
               <svg
                 className="-tw-ml-1.5 tw-h-5 tw-w-5"
@@ -54,17 +67,17 @@ export default function CommonTablePagination({
                   clipRule="evenodd"
                 />
               </svg>
-              <span>Previous</span>
-            </button>
+              <span>{t(locale, "common.pagination.previous")}</span>
+            </Button>
           )}
           {haveNextPage && (
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               disabled={loading}
               onClick={() => setCurrentPage(currentPage + 1)}
-              type="button"
-              className="tw-relative tw-inline-flex tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
             >
-              <span>Next</span>
+              <span>{t(locale, "common.pagination.next")}</span>
               <svg
                 className="-tw-mr-1.5 tw-h-5 tw-w-5"
                 viewBox="0 0 20 20"
@@ -77,7 +90,7 @@ export default function CommonTablePagination({
                   clipRule="evenodd"
                 />
               </svg>
-            </button>
+            </Button>
           )}
         </span>
       </div>

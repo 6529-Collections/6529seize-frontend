@@ -1,0 +1,332 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamPauseControls.t.sol:PauseMockArrngController#function:0x21c43217",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:PauseMockArrngController",
+          "inherited": false,
+          "inputs": [],
+          "name": "lastRefundAddress",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x21c43217",
+          "signature": "lastRefundAddress()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamPauseControls.t.sol:PauseMockArrngController#function:0x6a84a985",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:PauseMockArrngController",
+          "inherited": false,
+          "inputs": [],
+          "name": "nextRequestId",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x6a84a985",
+          "signature": "nextRequestId()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamPauseControls.t.sol:PauseMockArrngController#function:0xd4e0f337",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:PauseMockArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "refundAddress",
+              "type": "address"
+            }
+          ],
+          "name": "requestRandomWords",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xd4e0f337",
+          "signature": "requestRandomWords(uint256,address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "nextRequestId()",
+          "displaySignature": "nextRequestId()",
+          "functionKind": "getter",
+          "id": "test/StreamPauseControls.t.sol:PauseMockArrngController#function:0x6a84a985",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlBhdXNlTW9ja0Fycm5nQ29udHJvbGxlciNmdW5jdGlvbjoweDZhODRhOTg1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "nextRequestId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 32,
+            "byteStart": 28305,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L612",
+            "lineEnd": 612,
+            "lineStart": 612,
+            "snippetSha256": "sha256:c7015688cea9d50a6e063a7567b715d0c68802cb091f77014a5213efc709c785",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0x6a84a985",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "lastRefundAddress()",
+          "displaySignature": "lastRefundAddress()",
+          "functionKind": "getter",
+          "id": "test/StreamPauseControls.t.sol:PauseMockArrngController#function:0x21c43217",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlBhdXNlTW9ja0Fycm5nQ29udHJvbGxlciNmdW5jdGlvbjoweDIxYzQzMjE3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "lastRefundAddress",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 32,
+            "byteStart": 28343,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L613",
+            "lineEnd": 613,
+            "lineStart": 613,
+            "snippetSha256": "sha256:36b9dd68192ac2dd80fe32abd8795b00578fcab3736d6fc076ce7b06ce59d4bb",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0x21c43217",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "requestRandomWords(uint256,address)",
+          "displaySignature": "requestRandomWords(uint256,address)",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:PauseMockArrngController#function:0xd4e0f337",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "refundAddress",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlBhdXNlTW9ja0Fycm5nQ29udHJvbGxlciNmdW5jdGlvbjoweGQ0ZTBmMzM3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestRandomWords",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 288,
+            "byteStart": 28382,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L615-L623",
+            "lineEnd": 623,
+            "lineStart": 615,
+            "snippetSha256": "sha256:c95cb9a3a24f56e17c6f5c9013e3dc1ec17ade93504d541deb8d44eb2d4a8300",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0xd4e0f337",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamPauseControls.t.sol:PauseMockArrngController#function:0x6a84a985",
+          "immutable": false,
+          "name": "nextRequestId",
+          "natspec": "",
+          "range": {
+            "byteLength": 32,
+            "byteStart": 28305,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L612",
+            "lineEnd": 612,
+            "lineStart": 612,
+            "snippetSha256": "sha256:c7015688cea9d50a6e063a7567b715d0c68802cb091f77014a5213efc709c785",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0x6a84a985",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 28336,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L612",
+            "lineEnd": 612,
+            "lineStart": 612,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "1",
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamPauseControls.t.sol:PauseMockArrngController#function:0x21c43217",
+          "immutable": false,
+          "name": "lastRefundAddress",
+          "natspec": "",
+          "range": {
+            "byteLength": 32,
+            "byteStart": 28343,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L613",
+            "lineEnd": 613,
+            "lineStart": 613,
+            "snippetSha256": "sha256:36b9dd68192ac2dd80fe32abd8795b00578fcab3736d6fc076ce7b06ce59d4bb",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0x21c43217",
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamPauseControls.t.sol:PauseMockArrngController",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlBhdXNlTW9ja0Fycm5nQ29udHJvbGxlcg",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamPauseControls.t.sol:PauseMockArrngController"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "PauseMockArrngController",
+    "natspec": "",
+    "range": {
+      "byteLength": 407,
+      "byteStart": 28265,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L611-L624",
+      "lineEnd": 624,
+      "lineStart": 611,
+      "snippetSha256": "sha256:a946eed96cc04e26ef8052a6899a3a721a54006f759c29c4d279841c7ec923d5",
+      "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamPauseControls.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamPauseControls.t.sol:PauseMockArrngController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:PauseMockArrngController#function:0x21c43217",
+      "definitionId": "test/StreamPauseControls.t.sol:PauseMockArrngController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:PauseMockArrngController#function:0x6a84a985",
+      "definitionId": "test/StreamPauseControls.t.sol:PauseMockArrngController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:PauseMockArrngController#function:0xd4e0f337",
+      "definitionId": "test/StreamPauseControls.t.sol:PauseMockArrngController",
+      "severity": "advisory"
+    }
+  ]
+}

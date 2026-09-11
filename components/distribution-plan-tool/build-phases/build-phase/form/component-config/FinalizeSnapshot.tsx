@@ -45,7 +45,7 @@ export default function FinalizeSnapshot({
   }, [groupSnapshots, onStartAgain]);
 
   return (
-    <div className="tw-p-6">
+    <div className="tw-px-6 tw-pb-6 tw-pt-4">
       <BuildPhaseFormConfigModalTitle title={title} onClose={onClose} />
       <DistributionPlanSecondaryText>
         Here you can see your snapshot configurations.

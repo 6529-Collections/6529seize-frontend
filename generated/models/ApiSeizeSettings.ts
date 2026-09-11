@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
  * 6529.io API
- * This is the API interface description. Brief terminology overview and an authentication example can be found at <a href=\"https://6529.io/about/api\">https://6529.io/about/api</a>.
+ * JSON REST API for 6529.io. New here? A terminology overview and a step-by-step authentication walkthrough (guides &amp; auth) live at <a href=\"https://6529.io/tools/api\">https://6529.io/tools/api</a>. The raw machine-readable spec is downloadable at <a href=\"/openapi.yaml\">/openapi.yaml</a> and <a href=\"/openapi.json\">/openapi.json</a>.
  *
  * OpenAPI spec version: 1.0.0
  * 
@@ -16,7 +16,6 @@ import { HttpFile } from '../http/http';
 
 export class ApiSeizeSettings {
     'rememes_submission_tdh_threshold': number;
-    'all_drops_notifications_subscribers_limit': number;
     'memes_wave_id': string | null;
     'curation_wave_id': string | null;
     'distribution_admin_wallets': Array<string>;
@@ -33,12 +32,6 @@ export class ApiSeizeSettings {
         {
             "name": "rememes_submission_tdh_threshold",
             "baseName": "rememes_submission_tdh_threshold",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "all_drops_notifications_subscribers_limit",
-            "baseName": "all_drops_notifications_subscribers_limit",
             "type": "number",
             "format": "int64"
         },
