@@ -18193,6 +18193,19 @@ components:
         program_id:
           type: string
           nullable: true
+        owner_profile_id:
+          type: string
+        artist_display_name:
+          type: string
+          nullable: true
+        artist_preferred_credit:
+          type: string
+          nullable: true
+        source_submission:
+          nullable: true
+          allOf:
+            - $ref: >-
+                #/components/schemas/ApiArtworkDocumentationSourceSubmissionSummary
         title:
           type: string
           nullable: true
@@ -18222,6 +18235,10 @@ components:
         - id
         - work_id
         - program_id
+        - owner_profile_id
+        - artist_display_name
+        - artist_preferred_credit
+        - source_submission
         - title
         - draft_version
         - confirmation_status
@@ -18969,6 +18986,31 @@ components:
           type: string
       required:
         - drop_id
+      additionalProperties: false
+    ApiArtworkDocumentationSourceSubmissionSummary:
+      type: object
+      description: >-
+        The earliest linked submission receipt visible to this reader, separate
+        from the artist's documented title. No live submission or media lookup
+        is performed.
+      properties:
+        drop_id:
+          type: string
+        wave_id:
+          type: string
+        source_receipt_id:
+          type: string
+        title:
+          type: string
+          nullable: true
+          description: >-
+            Original receipt title; null for missing, excerpted, malformed or
+            unsupported title values.
+      required:
+        - drop_id
+        - wave_id
+        - source_receipt_id
+        - title
       additionalProperties: false
     ApiArtworkDocumentationStartUpload:
       type: object

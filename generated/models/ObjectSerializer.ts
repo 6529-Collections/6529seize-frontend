@@ -68,6 +68,7 @@ export * from '../models/ApiArtworkDocumentationSourceImportRequest';
 export * from '../models/ApiArtworkDocumentationSourceImportRequestFieldsInner';
 export * from '../models/ApiArtworkDocumentationSourceLink';
 export * from '../models/ApiArtworkDocumentationSourceLinkRequest';
+export * from '../models/ApiArtworkDocumentationSourceSubmissionSummary';
 export * from '../models/ApiArtworkDocumentationStartUpload';
 export * from '../models/ApiArtworkDocumentationThread';
 export * from '../models/ApiArtworkDocumentationThreadsResponse';
@@ -867,6 +868,7 @@ import { ApiArtworkDocumentationSourceImportRequest } from '../models/ApiArtwork
 import { ApiArtworkDocumentationSourceImportRequestFieldsInner } from '../models/ApiArtworkDocumentationSourceImportRequestFieldsInner';
 import { ApiArtworkDocumentationSourceLink } from '../models/ApiArtworkDocumentationSourceLink';
 import { ApiArtworkDocumentationSourceLinkRequest } from '../models/ApiArtworkDocumentationSourceLinkRequest';
+import { ApiArtworkDocumentationSourceSubmissionSummary } from '../models/ApiArtworkDocumentationSourceSubmissionSummary';
 import { ApiArtworkDocumentationStartUpload } from '../models/ApiArtworkDocumentationStartUpload';
 import { ApiArtworkDocumentationThread    , ApiArtworkDocumentationThreadAudienceEnum  , ApiArtworkDocumentationThreadRestrictedClassEnum       } from '../models/ApiArtworkDocumentationThread';
 import { ApiArtworkDocumentationThreadsResponse } from '../models/ApiArtworkDocumentationThreadsResponse';
@@ -1880,6 +1882,7 @@ let typeMap: {[index: string]: any} = {
     "ApiArtworkDocumentationSourceImportRequestFieldsInner": ApiArtworkDocumentationSourceImportRequestFieldsInner,
     "ApiArtworkDocumentationSourceLink": ApiArtworkDocumentationSourceLink,
     "ApiArtworkDocumentationSourceLinkRequest": ApiArtworkDocumentationSourceLinkRequest,
+    "ApiArtworkDocumentationSourceSubmissionSummary": ApiArtworkDocumentationSourceSubmissionSummary,
     "ApiArtworkDocumentationStartUpload": ApiArtworkDocumentationStartUpload,
     "ApiArtworkDocumentationThread": ApiArtworkDocumentationThread,
     "ApiArtworkDocumentationThreadsResponse": ApiArtworkDocumentationThreadsResponse,

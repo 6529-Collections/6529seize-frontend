@@ -12,12 +12,17 @@
  */
 
 import { ApiArtworkDocumentationReview } from '../models/ApiArtworkDocumentationReview';
+import { ApiArtworkDocumentationSourceSubmissionSummary } from '../models/ApiArtworkDocumentationSourceSubmissionSummary';
 import { HttpFile } from '../http/http';
 
 export class ApiArtworkDocumentationContextSummary {
     'id': string;
     'work_id': string;
     'program_id': string | null;
+    'owner_profile_id': string;
+    'artist_display_name': string | null;
+    'artist_preferred_credit': string | null;
+    'source_submission': ApiArtworkDocumentationSourceSubmissionSummary | null;
     'title': string | null;
     'draft_version': number;
     'confirmation_status': string;
@@ -49,6 +54,30 @@ export class ApiArtworkDocumentationContextSummary {
             "name": "program_id",
             "baseName": "program_id",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "owner_profile_id",
+            "baseName": "owner_profile_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "artist_display_name",
+            "baseName": "artist_display_name",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "artist_preferred_credit",
+            "baseName": "artist_preferred_credit",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "source_submission",
+            "baseName": "source_submission",
+            "type": "ApiArtworkDocumentationSourceSubmissionSummary",
             "format": ""
         },
         {

@@ -44,7 +44,6 @@ import {
   DocumentationButton,
   DocumentationNotice,
   inputClass,
-  panelClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 import DocumentationAssetDetails from "./DocumentationAssetDetails";
@@ -357,23 +356,22 @@ export default function DocumentationUpload({ context, controller }: Props) {
   };
   return (
     <section
-      className={`${panelClass} tw-space-y-4`}
+      className="tw-min-w-0 tw-space-y-6"
       aria-labelledby="documentation-upload-title"
     >
       <h3
         id="documentation-upload-title"
-        className="tw-m-0 tw-text-lg tw-font-semibold"
+        className="tw-m-0 tw-font-serif tw-text-2xl tw-font-normal"
       >
-        {msg(publicationOnly ? "publicationUpload" : "upload")}
+        {msg(canUpload ? "editorial.addFile" : "editorial.recordFiles")}
       </h3>
-      <p className="tw-m-0 tw-text-sm tw-leading-relaxed tw-text-iron-300">
-        {msg(publicationOnly ? "publicationUploadHelp" : "uploadHelp")}
-      </p>
-      <p className="tw-m-0 tw-text-xs tw-leading-relaxed tw-text-iron-400">
-        {msg(publicationOnly ? "publicationUploadStorage" : "uploadPrivacy")}
-      </p>
       {canUpload && (
-        <div className="tw-space-y-4">
+        <p className="tw-m-0 tw-max-w-prose tw-text-sm tw-leading-7 tw-text-iron-300">
+          {msg(publicationOnly ? "publicationUploadHelp" : "uploadHelp")}
+        </p>
+      )}
+      {canUpload && (
+        <div className="tw-max-w-prose tw-space-y-5">
           <label className="tw-block tw-text-sm tw-text-iron-300">
             {msg("uploadRole")}
             <select
@@ -419,7 +417,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
             {msg("uploadSelect")}
             <input
               type="file"
-              className={`${inputClass} tw-mt-2`}
+              className="tw-mt-3 tw-block tw-min-h-12 tw-w-full tw-max-w-full tw-text-sm tw-text-iron-300 file:tw-mr-4 file:tw-cursor-pointer file:tw-rounded-md file:tw-border-0 file:tw-bg-iron-800 file:tw-px-4 file:tw-py-3 file:tw-font-medium file:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
               disabled={busy}
               onChange={(event) => {
                 setFile(event.target.files?.[0] ?? null);
@@ -505,7 +503,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
       {actionError && (
         <DocumentationNotice error>{msg("error")}</DocumentationNotice>
       )}
-      <ul className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0">
+      <ul className="tw-m-0 tw-list-none tw-p-0">
         {visibleAssets.map((asset) => (
           <DocumentationAssetMutationAccess
             key={asset.id}
@@ -514,8 +512,8 @@ export default function DocumentationUpload({ context, controller }: Props) {
             session={session}
           >
             {(canMutateAsset) => (
-              <li className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-p-4">
-                <p className="tw-m-0 tw-break-all tw-text-sm tw-font-medium">
+              <li className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-6">
+                <p className="tw-m-0 tw-break-words tw-text-base tw-font-medium tw-leading-7">
                   {asset.filename}
                 </p>
                 <p className="tw-my-2 tw-text-xs tw-text-iron-400">
@@ -553,9 +551,9 @@ export default function DocumentationUpload({ context, controller }: Props) {
                           </DocumentationButton>
                         )}
                     </div>
-                    <details className="tw-mt-3 tw-text-xs tw-text-iron-400">
-                      <summary className="tw-cursor-pointer tw-py-2">
-                        {msg("fileDetails")}
+                    <details className="tw-mt-3 tw-text-sm tw-text-iron-400">
+                      <summary className="tw-min-h-11 tw-cursor-pointer tw-py-3 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+                        {msg("editorial.fileIntegrity")}
                       </summary>
                       <p className="tw-break-all">
                         {msg("fileHash")}: {asset.sha256}

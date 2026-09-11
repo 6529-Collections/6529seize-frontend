@@ -3,7 +3,6 @@
 import { useRef, useState } from "react";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import { documentationFieldLabel } from "@/i18n/messages/artwork-documentation-fields";
-import { readAnswer } from "@/lib/artwork-documentation/answers";
 import type { PendingEdit } from "@/lib/artwork-documentation/draft-controller";
 import {
   documentationExampleFields,
@@ -20,7 +19,6 @@ import {
 
 export default function DocumentationWorkedExample({
   context,
-  edits,
   section,
 }: {
   readonly context: ApiArtworkDocumentationContext;
@@ -29,14 +27,7 @@ export default function DocumentationWorkedExample({
 }) {
   const { msg } = useDocumentationMessages();
   const fields = documentationExampleFields(context.profile, section);
-  const [open, setOpen] = useState(
-    () =>
-      section !== "review" &&
-      fields.length > 0 &&
-      fields.every(
-        ({ moduleId, field }) => !readAnswer(context, moduleId, field.id, edits)
-      )
-  );
+  const [open, setOpen] = useState(false);
   const summary = useRef<HTMLElement>(null);
   const close = () => {
     setOpen(false);
@@ -50,31 +41,46 @@ export default function DocumentationWorkedExample({
     <details
       open={open}
       onToggle={(event) => setOpen(event.currentTarget.open)}
-      className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 sm:tw-p-6"
+      className="tw-min-w-0 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-5"
     >
       <summary
         ref={summary}
-        className="tw-min-h-11 tw-cursor-pointer tw-text-base tw-font-semibold tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-start tw-justify-between tw-gap-5 tw-rounded-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden"
       >
-        {msg("examples.title")}
-      </summary>
-      <div className="tw-mt-3 tw-space-y-5">
-        <DocumentationButton secondary onClick={close}>
-          {msg("examples.close")}
-        </DocumentationButton>
-        <div>
-          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-300">
+        <span className="tw-min-w-0">
+          <span className="tw-block tw-font-serif tw-text-2xl tw-font-normal tw-leading-tight">
+            {msg("examples.title")}
+          </span>
+          <span className="tw-mt-2 tw-block tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400">
             {msg("examples.fiction")}
-          </p>
-          <p className="tw-mt-3 tw-text-sm tw-leading-relaxed tw-text-iron-200">
+          </span>
+        </span>
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          className={`tw-mt-1 tw-size-5 tw-shrink-0 tw-text-iron-400 tw-transition-transform motion-reduce:tw-transition-none ${open ? "tw-rotate-180" : ""}`}
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </summary>
+      <div className="tw-mt-6 tw-space-y-8">
+        <div className="tw-max-w-prose tw-space-y-4">
+          <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
             {msg("examples.notice")}
           </p>
-          <p className="tw-m-0 tw-text-sm tw-leading-relaxed tw-text-iron-300">
+          <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-200">
             {msg("examples.scenario")}
           </p>
+          <DocumentationButton secondary onClick={close}>
+            {msg("examples.close")}
+          </DocumentationButton>
         </div>
         {section === "review" ? (
-          <p className="tw-text-sm tw-leading-relaxed tw-text-iron-200">
+          <p className="tw-max-w-prose tw-text-base tw-leading-7 tw-text-iron-200">
             {msg("examples.review")}
           </p>
         ) : (
@@ -84,14 +90,14 @@ export default function DocumentationWorkedExample({
             );
             if (!moduleFields.length) return null;
             return (
-              <section key={moduleId}>
-                <h3 className="tw-text-base tw-font-semibold tw-text-iron-100">
+              <section key={moduleId} className="tw-min-w-0 tw-max-w-prose">
+                <h3 className="tw-m-0 tw-font-serif tw-text-2xl tw-font-normal tw-leading-tight tw-text-iron-100">
                   {msg(`module.${moduleId}`)}
                 </h3>
-                <p className="tw-text-sm tw-leading-relaxed tw-text-iron-400">
+                <p className="tw-mb-6 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
                   {msg(`examples.module.${moduleId}`)}
                 </p>
-                <dl className="tw-m-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
+                <dl className="tw-m-0 tw-space-y-7">
                   {moduleFields.map(({ field }) => {
                     const key = documentationExampleKey(
                       context.profile,
@@ -112,16 +118,19 @@ export default function DocumentationWorkedExample({
                           )?.text
                         : undefined) ?? documentationFieldLabel(field.id);
                     return (
-                      <div key={field.id} className="tw-border-0 tw-py-4">
-                        <dt className="tw-text-sm tw-font-semibold tw-text-iron-100">
+                      <div key={field.id} className="tw-min-w-0">
+                        <dt className="tw-text-sm tw-font-semibold tw-leading-6 tw-text-iron-100">
                           {label}
                         </dt>
-                        <dd className="tw-m-0 tw-mt-2 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-relaxed tw-text-iron-200">
+                        <dd className="tw-m-0 tw-mt-2 tw-whitespace-pre-wrap tw-break-words tw-text-base tw-leading-7 tw-text-iron-200">
                           {msg(key)}
                         </dd>
                         {why && (
-                          <dd className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-relaxed tw-text-iron-400">
-                            {msg("examples.why")}: {msg(why)}
+                          <dd className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+                            <span className="tw-mb-1 tw-block tw-font-medium tw-text-iron-300">
+                              {msg("examples.why")}
+                            </span>
+                            {msg(why)}
                           </dd>
                         )}
                       </div>
@@ -132,7 +141,7 @@ export default function DocumentationWorkedExample({
             );
           })
         )}
-        <p className="tw-text-xs tw-leading-relaxed tw-text-iron-400">
+        <p className="tw-max-w-prose tw-text-xs tw-leading-5 tw-text-iron-400">
           {msg("examples.scope")}
         </p>
         <DocumentationButton secondary onClick={close}>

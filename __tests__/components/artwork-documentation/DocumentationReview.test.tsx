@@ -65,7 +65,7 @@ it("waits for the server public projection and never falls back to private draft
   );
   expect(screen.getByText("private@example.invalid")).toBeInTheDocument();
   fireEvent.click(
-    screen.getByRole("button", { name: "Preview future public record" })
+    screen.getByRole("button", { name: "Preview saved publication content" })
   );
   expect(screen.queryByText("private@example.invalid")).not.toBeInTheDocument();
   await waitFor(() => expect(getDocumentationPublicPreview).toHaveBeenCalled());
