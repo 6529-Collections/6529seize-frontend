@@ -14,8 +14,9 @@ foundation and one consistent content inset, but never show each other's
 controls. Page sharing on mobile web and in the native app bypasses the Share
 dialog and opens the platform share sheet directly.
 
-Individual Meme, Gradient, and NextGen pages also have a separate
-`Share artwork` dialog for credited image exports and captions. See
+Individual Meme, Gradient, and NextGen pages also have a `Share artwork` icon
+in their artwork media controls. It opens a separate dialog for credited
+image exports and captions. See
 [Artwork Sharing](../media/nft/feature-artwork-sharing.md) for that flow.
 
 ## Location in the Site
