@@ -1,5 +1,6 @@
 "use client";
 
+import { flushPendingPushLogouts } from "@/services/notifications/push-installation";
 import { Device, type DeviceInfo } from "@capacitor/device";
 import {
   PushNotifications,
@@ -115,7 +116,12 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const isRegisteredRef = useRef(false);
   const lastSuccessfulRegistrationRef =
     useRef<PushRegistrationFingerprint | null>(null);
+  const lastSuccessfulRegistrationAuthRef = useRef<string | null>(null);
   const inFlightRegistrationRef = useRef<Promise<void> | null>(null);
+  const activeProfileProxyRef = useRef(activeProfileProxy);
+  useEffect(() => {
+    activeProfileProxyRef.current = activeProfileProxy;
+  }, [activeProfileProxy]);
   const connectedProfileRef = useRef<ApiIdentity | null>(connectedProfile);
   const connectedAccountsRef = useRef(connectedAccounts);
   const activeAddressRef = useRef(address);
@@ -387,10 +393,12 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
+      const registrationAuth = getAuthTokenFingerprint(getAuthJwt());
       const previousSuccess = lastSuccessfulRegistrationRef.current;
 
       if (
         previousSuccess &&
+        lastSuccessfulRegistrationAuthRef.current === registrationAuth &&
         isSamePushRegistrationFingerprint(previousSuccess, fingerprint)
       ) {
         Sentry.addBreadcrumb({
@@ -412,6 +420,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         const latestSuccess = lastSuccessfulRegistrationRef.current;
         if (
           latestSuccess &&
+          lastSuccessfulRegistrationAuthRef.current === registrationAuth &&
           isSamePushRegistrationFingerprint(latestSuccess, fingerprint)
         ) {
           Sentry.addBreadcrumb({
@@ -430,6 +439,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       }
 
+      if (getAuthTokenFingerprint(getAuthJwt()) !== registrationAuth) return;
       const registrationTask = (async () => {
         const didRegister = await registerPushNotificationWithRetry(
           deviceId,
@@ -437,8 +447,12 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           token,
           profileId
         );
-        if (didRegister) {
+        if (
+          didRegister &&
+          getAuthTokenFingerprint(getAuthJwt()) === registrationAuth
+        ) {
           lastSuccessfulRegistrationRef.current = fingerprint;
+          lastSuccessfulRegistrationAuthRef.current = registrationAuth;
         }
       })();
 
@@ -666,6 +680,11 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     []
   );
 
+  useEffect(
+    () => () => reconcileQueue.cancel(),
+    [reconcileQueue, connectedProfile?.id, authJwt, activeProfileProxy]
+  );
+
   const reconcileProfile = useCallback(
     async (waveId?: string) => {
       const profileId = connectedProfile?.id;
@@ -683,6 +702,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         authJwt,
         ...(waveId === undefined ? {} : { waveId }),
         isCurrent: () =>
+          !activeProfileProxyRef.current &&
           connectedProfileRef.current?.id === profileId &&
           getAuthJwt() === authJwt &&
           isAuthJwtUsable(authJwt),
@@ -709,6 +729,27 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     if (isActive) void reconcileProfileDeliveredNotifications();
   }, [isActive, reconcileProfileDeliveredNotifications]);
+
+  useEffect(() => {
+    let current = true;
+    const flush = () => {
+      void (async () => {
+        const reconciled = await flushPendingPushLogouts();
+        if (reconciled && current && isCapacitor && isActive) {
+          // A fresh login may have deferred registration while logout was offline.
+          await initializeNotifications(
+            connectedProfileRef.current ?? undefined
+          );
+        }
+      })().catch(captureReconciliationFailure);
+    };
+    if (isActive) flush();
+    globalThis.addEventListener("online", flush);
+    return () => {
+      current = false;
+      globalThis.removeEventListener("online", flush);
+    };
+  }, [isActive, isCapacitor, initializeNotifications]);
 
   const value = useMemo(
     () => ({

@@ -4,37 +4,15 @@ import {
 } from "@capacitor/push-notifications";
 import type { ApiNotificationsResponseV2 } from "@/generated/models/ApiNotificationsResponseV2";
 import { commonApiFetch } from "@/services/api/common-api";
-import { toRecord } from "./notificationsPushRegistration";
+import { getNotificationData } from "./delivered-notification-data";
 
 interface CleanupScope {
   readonly profileId: string;
   readonly authJwt: string;
   readonly waveId?: string;
   readonly isCurrent: () => boolean;
+  readonly signal?: AbortSignal;
 }
-
-// Versioned Android tag mirrors the backend payload fields when native extras
-// omit custom FCM data. Unknown/legacy tags must never imply a profile.
-const getNotificationData = (
-  notification: PushNotificationSchema
-): Record<string, unknown> | null => {
-  const data = toRecord(notification.data);
-  if (typeof data?.["target_profile_id"] === "string") return data;
-  const tag: unknown = notification.tag;
-  if (typeof tag !== "string") return null;
-  const parts = tag.split(":");
-  if (parts.length !== 5 || parts[0] !== "6529" || parts[1] !== "v1")
-    return null;
-  try {
-    return {
-      target_profile_id: decodeURIComponent(parts[2] ?? ""),
-      notification_id: parts[3],
-      wave_id: decodeURIComponent(parts[4] ?? ""),
-    };
-  } catch {
-    return null;
-  }
-};
 
 const getNotificationId = (
   notification: PushNotificationSchema
@@ -54,7 +32,7 @@ const getNotificationId = (
 export async function reconcileDeliveredNotifications(
   scope: CleanupScope
 ): Promise<void> {
-  if (!scope.isCurrent()) return;
+  if (!scope.isCurrent() || scope.signal?.aborted) return;
   const { notifications } = await PushNotifications.getDeliveredNotifications();
   const candidates = notifications.filter((notification) => {
     const data = getNotificationData(notification);
@@ -70,7 +48,7 @@ export async function reconcileDeliveredNotifications(
   // Bound concurrent requests, and complete every lookup before mutating the
   // tray. Any refresh failure preserves the complete delivered snapshot.
   for (let offset = 0; offset < ids.length; offset += 4) {
-    if (!scope.isCurrent()) return;
+    if (!scope.isCurrent() || scope.signal?.aborted) return;
     const results = await Promise.allSettled(
       ids.slice(offset, offset + 4).map(async (id) => {
         if (id === null) return;
@@ -79,6 +57,7 @@ export async function reconcileDeliveredNotifications(
           params: { limit: "1", id_less_than: String(id + 1) },
           headers: { Authorization: `Bearer ${scope.authJwt}` },
           cache: "no-store",
+          signal: scope.signal,
           errorMode: "structured",
         });
         const record = response.notifications.find((item) => item.id === id);
@@ -96,7 +75,7 @@ export async function reconcileDeliveredNotifications(
     if (failed) throw failed.reason;
   }
 
-  if (!scope.isCurrent()) return;
+  if (!scope.isCurrent() || scope.signal?.aborted) return;
   const readNotifications = candidates.filter((notification) => {
     const id = getNotificationId(notification);
     return id !== null && readIds.has(id);
@@ -112,28 +91,44 @@ export async function reconcileDeliveredNotifications(
 /** Serialize native passes and retain a fresh pass for reads made in flight. */
 export function createDeliveredNotificationsReconciler(
   onError: (error: unknown) => void
-): (scope: CleanupScope) => Promise<void> {
+): ((scope: CleanupScope) => Promise<void>) & { cancel: () => void } {
   let pending: CleanupScope | undefined;
   let running: Promise<void> | undefined;
+  let active: CleanupScope | undefined;
+  let controller: AbortController | undefined;
 
   const drain = async () => {
     try {
       while (pending) {
         const scope = pending;
         pending = undefined;
+        active = scope;
+        controller = new AbortController();
         try {
-          await reconcileDeliveredNotifications(scope);
+          await reconcileDeliveredNotifications({
+            ...scope,
+            signal: controller.signal,
+          });
         } catch (error) {
-          onError(error);
+          if (!controller.signal.aborted) onError(error);
         }
       }
     } finally {
       running = undefined;
+      active = undefined;
+      controller = undefined;
     }
   };
 
-  return (scope) => {
+  const enqueue = (scope: CleanupScope) => {
     if (!scope.isCurrent()) return Promise.resolve();
+    if (
+      active &&
+      (active.profileId !== scope.profileId ||
+        active.authJwt !== scope.authJwt ||
+        !active.isCurrent())
+    )
+      controller?.abort();
     // Only the current session can enqueue. Coalesce different wave requests
     // into a profile pass so neither wave's completed read is lost.
     const waveId =
@@ -151,4 +146,10 @@ export function createDeliveredNotificationsReconciler(
     running ??= drain();
     return running;
   };
+  return Object.assign(enqueue, {
+    cancel: () => {
+      pending = undefined;
+      controller?.abort();
+    },
+  });
 }

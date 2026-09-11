@@ -1,3 +1,4 @@
+import { queueNativePushLogout } from "@/services/notifications/push-installation";
 import { Capacitor } from "@capacitor/core";
 import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
@@ -698,33 +699,8 @@ export async function logoutSessionV2({
     if (!address) {
       return;
     }
-    const nativeRefreshToken = await getNativeRefreshToken(address);
-    if (!nativeRefreshToken) {
-      return;
-    }
-    try {
-      await commonApiPost<
-        {
-          readonly client_type: RefreshTokenSessionClientType;
-          readonly client_address: string;
-          readonly native_refresh_token: string;
-          readonly all_sessions: boolean;
-        },
-        void
-      >({
-        endpoint: "auth/session-logout",
-        body: {
-          client_type: clientType,
-          client_address: address,
-          native_refresh_token: nativeRefreshToken,
-          all_sessions: allSessions,
-        },
-        credentials: "include",
-        parseJson: false,
-      });
-    } finally {
-      await removeNativeRefreshToken(address);
-    }
+    await queueNativePushLogout(address, false);
+    await removeNativeRefreshToken(address);
     return;
   }
 

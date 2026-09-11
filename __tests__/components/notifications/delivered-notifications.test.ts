@@ -298,3 +298,58 @@ it("replaces stale pending sessions and never removes their notifications", asyn
   );
   expect(remove).toHaveBeenCalledWith({ notifications: [b] });
 });
+
+it("cancels an old profile lookup so the new profile can reconcile", async () => {
+  let current = "A";
+  getDelivered.mockResolvedValue({
+    notifications: [push("A", 1), push("B", 2)],
+  });
+  fetchMock
+    .mockImplementationOnce(
+      ({ signal }) =>
+        new Promise((_resolve, reject) => {
+          signal?.addEventListener(
+            "abort",
+            () => reject(new DOMException("Cancelled", "AbortError")),
+            { once: true }
+          );
+        })
+    )
+    .mockResolvedValue(response(2, 100));
+  const onError = jest.fn();
+  const reconcile = createDeliveredNotificationsReconciler(onError);
+  const first = reconcile({ ...scope(), isCurrent: () => current === "A" });
+  await Promise.resolve();
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+  current = "B";
+  const second = reconcile({
+    profileId: "B",
+    authJwt: "jwt-B",
+    isCurrent: () => current === "B",
+  });
+  await Promise.all([first, second]);
+  expect(remove).toHaveBeenCalledWith({ notifications: [push("B", 2)] });
+  expect(onError).not.toHaveBeenCalled();
+});
+
+it("cancel aborts a proxy-invalidated pass without removing its snapshot", async () => {
+  getDelivered.mockResolvedValue({ notifications: [push("A", 1)] });
+  fetchMock.mockImplementationOnce(
+    ({ signal }) =>
+      new Promise((_resolve, reject) => {
+        signal?.addEventListener(
+          "abort",
+          () => reject(new DOMException("Cancelled", "AbortError")),
+          { once: true }
+        );
+      })
+  );
+  const onError = jest.fn();
+  const reconcile = createDeliveredNotificationsReconciler(onError);
+  const pending = reconcile(scope());
+  await Promise.resolve();
+  reconcile.cancel();
+  await pending;
+  expect(remove).not.toHaveBeenCalled();
+  expect(onError).not.toHaveBeenCalled();
+});

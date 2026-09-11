@@ -1,3 +1,7 @@
+import { queueNativePushLogout } from "@/services/notifications/push-installation";
+jest.mock("@/services/notifications/push-installation", () => ({
+  queueNativePushLogout: jest.fn().mockResolvedValue(undefined),
+}));
 import { Capacitor } from "@capacitor/core";
 import * as Sentry from "@sentry/nextjs";
 import { TokenRefreshCancelledError } from "@/errors/authentication";
@@ -233,17 +237,7 @@ describe("session-v2.utils", () => {
       address: "0xabc",
       refreshToken: "native-refresh-token",
     });
-    expect(commonApiPost).toHaveBeenCalledWith({
-      endpoint: "auth/session-logout",
-      body: {
-        client_type: "native",
-        client_address: "0xabc",
-        native_refresh_token: "native-refresh-token",
-        all_sessions: false,
-      },
-      credentials: "include",
-      parseJson: false,
-    });
+    expect(queueNativePushLogout).toHaveBeenCalledWith("0xabc", false);
     expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
   });
 
@@ -1408,33 +1402,23 @@ describe("session-v2.utils", () => {
 
     await logoutSessionV2({ address: "0xabc", allSessions: true });
 
-    expect(commonApiPost).toHaveBeenCalledWith({
-      endpoint: "auth/session-logout",
-      body: {
-        client_type: "native",
-        client_address: "0xabc",
-        native_refresh_token: "native-refresh-token",
-        all_sessions: true,
-      },
-      credentials: "include",
-      parseJson: false,
-    });
+    expect(queueNativePushLogout).toHaveBeenCalledWith("0xabc", false);
     expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
   });
 
-  it("removes the native refresh token when native logout fails", async () => {
+  it("preserves the native refresh token if durable logout queuing fails", async () => {
     const logoutError = new Error("logout failed");
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     (getNativeRefreshToken as jest.Mock).mockResolvedValue(
       "native-refresh-token"
     );
-    (commonApiPost as jest.Mock).mockRejectedValueOnce(logoutError);
+    (queueNativePushLogout as jest.Mock).mockRejectedValueOnce(logoutError);
 
     await expect(
       logoutSessionV2({ address: "0xabc", allSessions: true })
     ).rejects.toBe(logoutError);
 
-    expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
+    expect(removeNativeRefreshToken).not.toHaveBeenCalled();
   });
 
   it("attempts web session logout with credentials", async () => {

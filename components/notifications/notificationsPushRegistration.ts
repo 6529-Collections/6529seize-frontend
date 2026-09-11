@@ -7,6 +7,7 @@ import {
 } from "@capacitor/push-notifications";
 import * as Sentry from "@sentry/nextjs";
 
+import { preparePushInstallationRegistration } from "@/services/notifications/push-installation";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiPost } from "@/services/api/common-api";
 import { getAuthJwt, isAuthJwtUsable } from "@/services/auth/auth.utils";
@@ -546,9 +547,32 @@ export const registerPushNotificationWithRetry = async (
   token: string,
   profileId: string
 ): Promise<boolean> => {
+  const registrationJwt = getAuthJwt();
+  if (!isAuthJwtUsable(registrationJwt) || !registrationJwt) {
+    Sentry.addBreadcrumb({
+      category: "notifications",
+      level: "warning",
+      message: "Push registration skipped (auth token unavailable).",
+      data: {
+        component: "NotificationsProvider",
+        operation: "registerPushNotification",
+        profile_id: profileId,
+        platform: deviceInfo.platform,
+      },
+    });
+    return false;
+  }
+  const installation = await preparePushInstallationRegistration(
+    deviceId,
+    token,
+    registrationJwt
+  );
   for (let attempt = 0; attempt < PUSH_REGISTRATION_TOTAL_ATTEMPTS; attempt++) {
     const currentAuthJwt = getAuthJwt();
-    if (!isAuthJwtUsable(currentAuthJwt)) {
+    if (
+      !isAuthJwtUsable(currentAuthJwt) ||
+      currentAuthJwt !== registrationJwt
+    ) {
       console.warn(
         "Skipping push registration: auth token is missing or expired",
         {
@@ -577,7 +601,9 @@ export const registerPushNotificationWithRetry = async (
     try {
       await commonApiPost({
         endpoint: `push-notifications/register`,
+        headers: { Authorization: `Bearer ${registrationJwt}` },
         body: {
+          ...installation,
           device_id: deviceId,
           token,
           platform: deviceInfo.platform,

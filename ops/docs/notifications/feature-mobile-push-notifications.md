@@ -45,7 +45,7 @@ push to open the matching app route.
   - Retry delay uses `Retry-After` headers or retry-hint text when available;
     otherwise delay uses bounded exponential backoff with jitter.
   - Duplicate registration callbacks with the same
-    (`device_id`, token, profile) fingerprint are skipped when already
+    (`device_id`, token, profile, login session) fingerprint are skipped when already
     completed in-session or already handled by an in-flight attempt.
 - Settings modal:
   - On open, settings load for this device ID.
@@ -106,9 +106,33 @@ push to open the matching app route.
   - Android dots/counts depend on the launcher and remaining notifications;
     there is no guaranteed numeric unread badge.
 
+### Signing out on a phone
+
+- Signing out UserA removes UserA's push registration and identifiable delivered
+  entries on this phone. UserB and other phones stay connected. If another wallet
+  on this phone still connects the same profile, that profile keeps its push registration.
+- `Sign out all` requests removal of every profile's push registration for this
+  installation, including profiles missing from the phone's saved account list,
+  and clears its delivered notifications. It does not sign out other devices.
+- iOS receives an asynchronous badge correction for the profiles still registered
+  to this phone, including zero after the last profile leaves. Android keeps the
+  remaining profiles' tray entries; launcher dot/count behavior varies.
+- Offline logout stores cleanup securely before removing local credentials. The
+  app retries on activation or reconnect and before registering a fresh login.
+  Until the server accepts cleanup, pushes can still arrive. Keep the app available
+  to reconnect; deleting app data can discard pending cleanup.
+
 ## Failure and Recovery
 
 - If push permission is not granted, registration is skipped.
+- If logout cannot save cleanup securely, local account credentials are retained
+  so the action can be retried. A pending network cleanup has no separate status UI.
+- Older installations with conflicting saved push tokens cannot prove ownership
+  of every registration automatically. Cleanup stays pending; support must verify
+  the installation and reconcile those registrations. A device ID alone is not
+  enough to authorize deleting other profiles.
+- An unreadable installation credential or a changed device ID stops push
+  registration rather than replacing the credential and losing pending cleanup.
 - If secure-storage read fails with a known recoverable pattern (missing key or
   known decrypt/keystore errors), setup regenerates `device_id` and continues.
 - If secure-storage read/write fails with an unrecoverable error, that setup
