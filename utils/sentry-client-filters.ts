@@ -32,6 +32,9 @@ export {
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
 } from "./sentry-client-filters/react-dom";
+export {
+  shouldFilterReactFlightConnectionClosedError,
+} from "./sentry-client-filters/react-flight";
 export { shouldFilterInstagramPageHideBridgeError } from "./sentry-client-filters/instagram-page-hide-bridge";
 export {
   shouldFilterBrowserExtensionMessagingConnectionError,
