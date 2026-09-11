@@ -598,6 +598,32 @@ export const registerPushNotificationWithRetry = async (
   });
 };
 
+function reportUnavailablePushAuth(
+  attempt: number,
+  profileId: string,
+  platform: DeviceInfo["platform"]
+): void {
+  console.warn("Skipping push registration: auth token is missing or expired", {
+    attempt: attempt + 1,
+    maxAttempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+    profileId,
+    platform,
+  });
+  Sentry.addBreadcrumb({
+    category: "notifications",
+    level: "warning",
+    message: "Push registration skipped (auth token unavailable).",
+    data: {
+      component: "NotificationsProvider",
+      operation: "registerPushNotification",
+      attempt: attempt + 1,
+      max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+      profile_id: profileId,
+      platform,
+    },
+  });
+}
+
 const registerPreparedPushNotificationWithRetry = async ({
   deviceId,
   deviceInfo,
@@ -615,28 +641,7 @@ const registerPreparedPushNotificationWithRetry = async ({
 }): Promise<boolean> => {
   for (let attempt = 0; attempt < PUSH_REGISTRATION_TOTAL_ATTEMPTS; attempt++) {
     if (getUsablePushAuthJwt() !== registrationJwt) {
-      console.warn(
-        "Skipping push registration: auth token is missing or expired",
-        {
-          attempt: attempt + 1,
-          maxAttempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
-          profileId,
-          platform: deviceInfo.platform,
-        }
-      );
-      Sentry.addBreadcrumb({
-        category: "notifications",
-        level: "warning",
-        message: "Push registration skipped (auth token unavailable).",
-        data: {
-          component: "NotificationsProvider",
-          operation: "registerPushNotification",
-          attempt: attempt + 1,
-          max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
-          profile_id: profileId,
-          platform: deviceInfo.platform,
-        },
-      });
+      reportUnavailablePushAuth(attempt, profileId, deviceInfo.platform);
       return false;
     }
 
