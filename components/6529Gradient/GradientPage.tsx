@@ -610,14 +610,15 @@ export default function GradientPageComponent({
             <MarketDepthPanel
               contract={GRADIENT_CONTRACT}
               tokenId={nft.id}
-              actions={
+              actions={(refresh) => (
                 <CollectDetailActions
                   collection="gradients"
                   tokenId={String(nft.id)}
                   title={nft.name}
                   locale={locale}
+                  onMarketChange={refresh}
                 />
-              }
+              )}
             />
             <div ref={activitySectionRef} className="tw-min-h-px">
               {activityNearViewport && <GradientActivitySection nft={nft} />}

@@ -25,7 +25,7 @@ function legacyCollectionDestination(
     intent !== "explore" &&
     typeof token === "string" &&
     token === token.trim() &&
-    /^(0|[1-9][0-9]{0,77})$/.test(token)
+    /^(0|[1-9]\d{0,77})$/.test(token)
       ? token
       : null;
   if (tokenId === null && intent === undefined) {

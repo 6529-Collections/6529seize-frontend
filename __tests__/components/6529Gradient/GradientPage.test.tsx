@@ -6,7 +6,7 @@ import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext
 import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { fetchUrl } from "@/services/6529api";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
@@ -54,10 +54,17 @@ jest.mock("@/components/nft-market-activity/NftMarketActivity", () => ({
     />
   ),
 }));
+const mockRefreshMarket = jest.fn();
 jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
   __esModule: true,
-  default: ({ actions }: { actions?: React.ReactNode }) => (
-    <div data-testid="market-depth">{actions}</div>
+  default: ({
+    actions,
+  }: {
+    actions?: React.ReactNode | ((refresh: () => void) => React.ReactNode);
+  }) => (
+    <div data-testid="market-depth">
+      {typeof actions === "function" ? actions(mockRefreshMarket) : actions}
+    </div>
   ),
 }));
 jest.mock("@/components/collect/CollectDetailActions", () => ({
@@ -65,11 +72,17 @@ jest.mock("@/components/collect/CollectDetailActions", () => ({
   default: ({
     collection,
     tokenId,
+    onMarketChange,
   }: {
     collection: string;
     tokenId: string;
+    onMarketChange?: () => void;
   }) => (
-    <button data-family={collection} data-token={tokenId}>
+    <button
+      data-family={collection}
+      data-token={tokenId}
+      onClick={onMarketChange}
+    >
       Collect artwork
     </button>
   ),
@@ -175,6 +188,8 @@ describe("GradientPage", () => {
     expect(collecting).toHaveAttribute("data-family", "gradients");
     expect(collecting).toHaveAttribute("data-token", "1");
     expect(screen.getByTestId("market-depth")).toContainElement(collecting);
+    fireEvent.click(collecting);
+    expect(mockRefreshMarket).toHaveBeenCalledTimes(1);
   });
 
   it("returns to the originating profile collected card", async () => {

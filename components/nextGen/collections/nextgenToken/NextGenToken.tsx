@@ -146,14 +146,17 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
                 tokenId={props.token.id}
                 locale={locale}
                 actions={
-                  props.collection.id === 1 ? (
-                    <CollectDetailActions
-                      collection="pebbles"
-                      tokenId={String(props.token.id)}
-                      title={props.token.name}
-                      locale={locale}
-                    />
-                  ) : undefined
+                  props.collection.id === 1
+                    ? (refresh) => (
+                        <CollectDetailActions
+                          collection="pebbles"
+                          tokenId={String(props.token.id)}
+                          title={props.token.name}
+                          locale={locale}
+                          onMarketChange={refresh}
+                        />
+                      )
+                    : undefined
                 }
               />
             </section>

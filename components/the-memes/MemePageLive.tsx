@@ -73,14 +73,15 @@ export function MemePageLiveSubMenu(props: {
               contract={MEMES_CONTRACT}
               tokenId={props.nft.id}
               locale={locale}
-              actions={
+              actions={(refresh) => (
                 <CollectDetailActions
                   collection="memes"
                   tokenId={String(props.nft.id)}
                   title={props.nft.name}
                   locale={locale}
+                  onMarketChange={refresh}
                 />
-              }
+              )}
             />
           </>
         )}
