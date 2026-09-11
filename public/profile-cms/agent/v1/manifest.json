@@ -1,0 +1,45 @@
+{
+  "schema": "6529.cms.agent_download.v1",
+  "version": "1.0.0",
+  "mcp_protocol_versions": [
+    "2025-11-25"
+  ],
+  "node_minimum_major": 22,
+  "files": [
+    {
+      "name": "main.mjs",
+      "bytes": 921,
+      "hash": "sha256:ba5fd659c954c3b4ed3a2ef7684b94eafd06b8d00ec909ffd4eebc5239d88051"
+    },
+    {
+      "name": "api.mjs",
+      "bytes": 7106,
+      "hash": "sha256:a1b72cb4d28615d3ca963a02dd4344c73f10ed9e6c8d722866da697770f451b1"
+    },
+    {
+      "name": "tools.mjs",
+      "bytes": 5064,
+      "hash": "sha256:b00631a71c0028ef4be1fa90f32b30a7bc41c7dcfa6da61dbe318e7bfb2ad94e"
+    },
+    {
+      "name": "server.mjs",
+      "bytes": 6704,
+      "hash": "sha256:71c7ece597709beb05309d84d12a0c9fe9322d232a5485cceaa30cde2b475822"
+    },
+    {
+      "name": "README.md",
+      "bytes": 5260,
+      "hash": "sha256:26f968db196b2228ebda651d63875c36de8ad5b7871a91268f820b177483857a"
+    },
+    {
+      "name": "schemas.json",
+      "bytes": 28907,
+      "hash": "sha256:ea67061a7450432847306f9af4fc4ba7398ee0331a68e82f397f4c2e38b4fcb0"
+    }
+  ],
+  "archive": {
+    "name": "6529-cms-agent.zip",
+    "bytes": 55710,
+    "hash": "sha256:d426fce33d204aeaf32e1a67316da597438b353ddf94b9fd0432d3474d859dfa"
+  }
+}
