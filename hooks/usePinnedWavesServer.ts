@@ -24,6 +24,8 @@ import {
 import type { SidebarWave, SidebarWavesPage } from "@/types/waves.types";
 import { useOfficialWaves } from "./useOfficialWaves";
 import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 export const MAX_PINNED_WAVES = 100;
 
@@ -94,6 +96,8 @@ async function fetchPinnedWavesPages(): Promise<SidebarWave[]> {
     const confirmedPins = page.waves.filter((wave) => wave.pinned === true);
     pinnedWaves.push(...confirmedPins);
 
+    // An unconfirmed pin means the server ignored the pinned-only filter.
+    // Stop rather than walking the public overview after session expiry.
     if (
       !page.next ||
       page.waves.length === 0 ||
@@ -302,9 +306,11 @@ function createOptimisticPinnedWaves(
 async function optimisticallyPinWave(
   queryClient: QueryClient,
   queryKey: PinnedWavesQueryKey,
-  waveId: string
+  waveId: string,
+  viewerIdentityKey: string | null
 ): Promise<MutationContext> {
   await queryClient.cancelQueries({ queryKey });
+  assertCurrentPinViewer(viewerIdentityKey);
 
   const previousPinnedWaves = queryClient.getQueryData<SidebarWave[]>(queryKey);
   const waveToPin = findWaveForOptimisticPin(queryClient, waveId);
@@ -324,9 +330,11 @@ async function optimisticallyPinWave(
 async function optimisticallyUnpinWave(
   queryClient: QueryClient,
   queryKey: PinnedWavesQueryKey,
-  waveId: string
+  waveId: string,
+  viewerIdentityKey: string | null
 ): Promise<MutationContext> {
   await queryClient.cancelQueries({ queryKey });
+  assertCurrentPinViewer(viewerIdentityKey);
 
   const previousPinnedWaves = queryClient.getQueryData<SidebarWave[]>(queryKey);
 
@@ -361,7 +369,9 @@ function isCurrentPinViewer(viewerIdentityKey: string | null): boolean {
 
 function assertCurrentPinViewer(viewerIdentityKey: string | null): void {
   if (!isCurrentPinViewer(viewerIdentityKey)) {
-    throw new Error("The active profile changed. Please try again.");
+    throw new Error(
+      t(DEFAULT_LOCALE, "waves.sidebar.pinControl.viewerChanged")
+    );
   }
 }
 
@@ -382,7 +392,12 @@ function usePinnedWaveMutations(
       return pinnedWavesApi.pinWave(waveId);
     },
     onMutate: (waveId: string) =>
-      optimisticallyPinWave(queryClient, pinnedWavesQueryKey, waveId),
+      optimisticallyPinWave(
+        queryClient,
+        pinnedWavesQueryKey,
+        waveId,
+        viewerIdentityKey
+      ),
     onError: (err, _, context) => {
       restorePinnedWaves(queryClient, pinnedWavesQueryKey, context);
       console.error("Error pinning wave:", err);
@@ -396,7 +411,12 @@ function usePinnedWaveMutations(
       return pinnedWavesApi.unpinWave(waveId);
     },
     onMutate: (waveId: string) =>
-      optimisticallyUnpinWave(queryClient, pinnedWavesQueryKey, waveId),
+      optimisticallyUnpinWave(
+        queryClient,
+        pinnedWavesQueryKey,
+        waveId,
+        viewerIdentityKey
+      ),
     onError: (err, _, context) => {
       restorePinnedWaves(queryClient, pinnedWavesQueryKey, context);
       console.error("Error unpinning wave:", err);
@@ -496,9 +516,10 @@ export function usePinnedWavesServer(
 
       try {
         const { success } = await requestAuth();
-        if (!success || !isCurrentPinViewer(viewerIdentityKey)) {
+        if (!success) {
           return;
         }
+        assertCurrentPinViewer(viewerIdentityKey);
         await pinMutation.mutateAsync(waveId);
       } finally {
         ongoingOperations.current.delete(waveId);
@@ -517,9 +538,10 @@ export function usePinnedWavesServer(
 
       try {
         const { success } = await requestAuth();
-        if (!success || !isCurrentPinViewer(viewerIdentityKey)) {
+        if (!success) {
           return;
         }
+        assertCurrentPinViewer(viewerIdentityKey);
         await unpinMutation.mutateAsync(waveId);
       } finally {
         ongoingOperations.current.delete(waveId);

@@ -6,6 +6,7 @@ import {
   usePinnedWavesServer,
 } from "@/hooks/usePinnedWavesServer";
 import { useAuth } from "@/components/auth/Auth";
+import { SUPPORTED_LOCALES } from "@/i18n/locales";
 
 // Mock ResizeObserver
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -89,6 +90,30 @@ describe("BrainLeftSidebarWavePin", () => {
     localStorage.clear();
   });
 
+  it.each(SUPPORTED_LOCALES)(
+    "keeps pin labels and limit feedback available for %s",
+    async (locale) => {
+      const languages = jest
+        .spyOn(navigator, "languages", "get")
+        .mockReturnValue([locale]);
+      try {
+        setup(false, [], () => false);
+        const button = screen.getByRole("button", { name: "Pin wave" });
+        await userEvent.setup().click(button);
+        expect(button).toHaveAttribute(
+          "data-tooltip-content",
+          `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`
+        );
+        expect(setToast).toHaveBeenCalledWith({
+          type: "error",
+          message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
+        });
+      } finally {
+        languages.mockRestore();
+      }
+    }
+  );
+
   it("does not render pin button for logged-out users", () => {
     const { container } = setup(false, [], undefined, loggedOutAuth);
     expect(container.firstChild).toBeNull();
@@ -131,13 +156,11 @@ describe("BrainLeftSidebarWavePin", () => {
       try {
         (isPinned ? removePinnedWave : addPinnedWave).mockRejectedValue(error);
         setup(isPinned, isPinned ? ["1"] : []);
-        await userEvent
-          .setup()
-          .click(
-            screen.getByRole("button", {
-              name: isPinned ? "Unpin wave" : "Pin wave",
-            })
-          );
+        await userEvent.setup().click(
+          screen.getByRole("button", {
+            name: isPinned ? "Unpin wave" : "Pin wave",
+          })
+        );
         await waitFor(() =>
           expect(setToast).toHaveBeenCalledWith(
             expect.objectContaining({

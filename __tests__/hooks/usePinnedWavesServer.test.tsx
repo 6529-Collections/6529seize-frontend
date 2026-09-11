@@ -303,9 +303,12 @@ test.each(["pinWave", "unpinWave"] as const)(
       return { success: true };
     });
     const { result } = renderHook(() => usePinnedWavesServer(), { wrapper });
-    await result.current[action]("wave");
+    await expect(result.current[action]("wave")).rejects.toThrow(
+      "The active profile changed"
+    );
     expect(pinMutateAsync).not.toHaveBeenCalled();
     expect(unpinMutateAsync).not.toHaveBeenCalled();
+    expect(queryClientMock.setQueryData).not.toHaveBeenCalled();
     expect(result.current.isOperationInProgress("wave")).toBe(false);
   }
 );
@@ -340,6 +343,8 @@ test.each(["pinWave", "unpinWave"] as const)(
     await result.current[action]("wave");
     expect(pinMutateAsync).not.toHaveBeenCalled();
     expect(unpinMutateAsync).not.toHaveBeenCalled();
+    expect(queryClientMock.setQueryData).not.toHaveBeenCalled();
+    expect(result.current.isOperationInProgress("wave")).toBe(false);
   }
 );
 
@@ -351,9 +356,12 @@ test.each(["pinWave", "unpinWave"] as const)(
       return { success: true };
     });
     const { result } = renderHook(() => usePinnedWavesServer(), { wrapper });
-    await result.current[action]("wave");
+    await expect(result.current[action]("wave")).rejects.toThrow(
+      "The active profile changed"
+    );
     expect(pinMutateAsync).not.toHaveBeenCalled();
     expect(unpinMutateAsync).not.toHaveBeenCalled();
+    expect(queryClientMock.setQueryData).not.toHaveBeenCalled();
   }
 );
 
@@ -469,3 +477,39 @@ test("still enforces the cap once non-announcement pins reach the limit", async 
   );
   expect(pinMutateAsync).not.toHaveBeenCalled();
 });
+
+test.each(["pinWave", "unpinWave"] as const)(
+  "%s propagates authentication errors and releases the pending operation",
+  async (action) => {
+    requestAuth.mockRejectedValue(new Error("Authentication unavailable"));
+    const { result } = renderHook(() => usePinnedWavesServer(), { wrapper });
+    await expect(result.current[action]("wave")).rejects.toThrow(
+      "Authentication unavailable"
+    );
+    expect(pinMutateAsync).not.toHaveBeenCalled();
+    expect(unpinMutateAsync).not.toHaveBeenCalled();
+    expect(queryClientMock.setQueryData).not.toHaveBeenCalled();
+    expect(result.current.isOperationInProgress("wave")).toBe(false);
+  }
+);
+
+test.each([0, 1])(
+  "pin mutation %s rejects a viewer switch while cancelling queries before optimistic writes",
+  async (index) => {
+    let finishCancellation!: () => void;
+    queryClientMock.cancelQueries.mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        finishCancellation = resolve;
+      })
+    );
+    renderHook(() => usePinnedWavesServer(), { wrapper });
+    const { onMutate } = useMutationMock.mock.calls[index][0];
+    const operation = onMutate("wave");
+    jest.mocked(getWalletAddress).mockReturnValue("0xdef");
+    finishCancellation();
+    await expect(operation).rejects.toThrow("The active profile changed");
+    expect(queryClientMock.setQueryData).not.toHaveBeenCalled();
+    expect(pinnedWavesApi.pinWave).not.toHaveBeenCalled();
+    expect(pinnedWavesApi.unpinWave).not.toHaveBeenCalled();
+  }
+);

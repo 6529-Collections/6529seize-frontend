@@ -10,6 +10,9 @@ import {
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 
 interface BrainLeftSidebarWavePinProps {
   readonly waveId: string;
@@ -56,6 +59,8 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     usePinnedWavesServer();
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const isTouchDevice = useIsTouchDevice();
+  const locale = useBrowserLocale();
+  const pinLimit = formatInteger(locale, MAX_PINNED_WAVES);
   const [maxLimitTooltipRequest, setMaxLimitTooltipRequest] =
     useState<MaxLimitTooltipRequest | null>(null);
 
@@ -105,7 +110,9 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
           setMaxLimitTooltipRequest({ waveId, pinnedIdsKey });
           setToast({
             type: "error",
-            message: `Maximum ${MAX_PINNED_WAVES} pinned waves allowed`,
+            message: t(locale, "waves.sidebar.pinControl.limitMessage", {
+              count: pinLimit,
+            }),
           });
         }
       }
@@ -114,10 +121,13 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
 
       setToast({
         type: "error",
-        title: isPinned
-          ? "Couldn't unpin this wave."
-          : "Couldn't pin this wave.",
-        description: "Please try again.",
+        title: t(
+          locale,
+          isPinned
+            ? "waves.sidebar.pinControl.unpinErrorTitle"
+            : "waves.sidebar.pinControl.pinErrorTitle"
+        ),
+        description: t(locale, "waves.sidebar.pinControl.retryDescription"),
         details: getToastErrorDetails(error),
       });
     }
@@ -132,10 +142,13 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
 
   // Only show max-limit guidance for the keyed request window after a failed pin.
   const getTooltipContent = () => {
-    if (isPinned) return "Unpin";
-    if (canPinCurrentWave) return "Pin";
+    if (isPinned) return t(locale, "waves.sidebar.pinControl.unpinTooltip");
+    if (canPinCurrentWave)
+      return t(locale, "waves.sidebar.pinControl.pinTooltip");
     if (showMaxLimitTooltip) {
-      return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
+      return t(locale, "waves.sidebar.pinControl.limitTooltip", {
+        count: pinLimit,
+      });
     }
     return null;
   };
@@ -149,7 +162,12 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   };
 
   const getAriaLabel = () => {
-    return isPinned ? "Unpin wave" : "Pin wave";
+    return t(
+      locale,
+      isPinned
+        ? "waves.sidebar.pinControl.unpinAriaLabel"
+        : "waves.sidebar.pinControl.pinAriaLabel"
+    );
   };
 
   const positionClasses = compact ? "" : "-tw-mr-2 tw-mt-0.5";
