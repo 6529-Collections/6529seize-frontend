@@ -33,6 +33,20 @@ current pages; those guides are not invented as historical snapshot routes.
 The EMMA record covers the five fixed collection shortcuts, Memes season
 selection, Intern JPG token IDs, and the manual contract path in Create Snapshots.
 
+The profile website studio records cover 39 editable templates (23 original
+compositions and 16 credited Memes inspirations), page and menu editing, image
+uploads, indexed wallet galleries, and the profile header's published Website
+link. They describe readable custom page addresses while preserving archive
+paths, owner-only save and publish, browser recovery, wallet signing, version
+restoration, and unpublishing. Upload records explicitly state that image files
+become public before the website is published. The optional agent-file record
+covers exports and reviewed local patches, including their first-page limits;
+it does not claim a connected MCP service. These records link to the studio's
+user guide and distinguish removing the active website pointer from deleting
+immutable storage. Per-page sharing-image choices and automatic reset, search
+visibility (`noindex` pages remain public), and Apply/Discard form recovery behavior are
+also included.
+
 ## Goals
 
 - Define frontend-owned source material for 6529 Help Bot answers.
@@ -67,6 +81,16 @@ selection, Intern JPG token IDs, and the manual contract path in Create Snapshot
   prerequisite, and result.
 
 ## Source Ownership
+
+The Collect workflow record owns `/collect` and `/collect/orders`, profile-wide
+set scope, direct gift recipients, marketplace review and recovery, observed
+price/TDH coverage, and saved rules that prepare purchases for wallet approval.
+Its facts must distinguish profile collecting from wallet authority and quote
+freshness from signed-order expiry. It must never imply an unattended spending
+mandate or exhaustive marketplace coverage.
+For an uncertain wallet broadcast, the record also explains **Checking the
+outcome**, **Transaction hash from your wallet**, and **Check this transaction**.
+Recovery checks the original action and does not send a replacement transaction.
 
 The frontend should own source-of-truth records for frontend concepts and
 navigation because the frontend owns:

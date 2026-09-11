@@ -1,13 +1,58 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-11T15:43:52.000Z",
+  "generated_at": "2026-08-11T15:43:52Z",
   "commit_sha": "21d60faed6a5",
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "nft.market-depth",
+      "kind": "workflow",
+      "title": "Card market depth",
+      "aliases": [
+        "order book",
+        "market depth",
+        "asks and bids",
+        "buying pressure",
+        "sell orders"
+      ],
+      "keywords": [
+        "market",
+        "depth",
+        "OpenSea",
+        "orders",
+        "asks",
+        "bids",
+        "liquidity",
+        "price",
+        "quantity"
+      ],
+      "facts": [
+        "The Memes, Meme Lab, Gradients and NextGen card pages show captured OpenSea market depth with best quoted asks and bids, price levels, remaining quantities, cumulative quoted quantities and snapshot freshness.",
+        "Currencies are shown separately, including ETH and WETH. A unit price applies to one edition; partially filled orders contribute only their remaining quantity.",
+        "Quoted quantities are not guaranteed executable liquidity. Several listings may share seller inventory, several offers may share bidder funding, and a collection offer has one shared budget across eligible cards.",
+        "Private, inactive and expired orders do not contribute to current public depth. Trait offers whose eligibility is unverified appear separately from the price levels.",
+        "Unavailable capture differs from a completed empty snapshot. Stale data shows an older snapshot time. Retry failed requests and reload order pagination if the book changes.",
+        "Recorded marketplace actions appear alongside on-chain transactions in NFT Activity and supported card activity sections. Off-chain actions may have no Ethereum transaction hash."
+      ],
+      "canonical_path": "/the-memes/{id}",
+      "link_label": "Open the card's market depth",
+      "related_paths": [
+        "/meme-lab/{id}",
+        "/6529-gradient/{id}",
+        "/nextgen/token/{token}",
+        "/nft-activity"
+      ],
+      "tags": ["nft", "market", "memes", "gradients", "nextgen"],
+      "source_refs": [
+        "components/nft-market-depth/MarketDepthPanel.tsx",
+        "components/nft-market-activity/NftMarketActivity.tsx",
+        "ops/docs/media/feature-card-market-depth.md"
+      ]
+    },
+    {
       "id": "artwork-documentation.overview",
       "kind": "workflow",
-      "title": "Private artwork documentation",
+      "title": "Artwork documentation and publication preparation",
       "aliases": [
         "my artwork documentation",
         "artist dossier",
@@ -27,13 +72,15 @@
       ],
       "facts": [
         "When the server enables artwork documentation for a profile, My artwork documentation appears in the account menu and opens /artwork-documentation. Eligible owned artwork menus also offer Artwork documentation on desktop and mobile.",
-        "The private workspace collects artwork identity, story and process, artist credits and contributors, files, rights and people, preservation and display guidance, and an optional artist interview. Each section explains why the information matters.",
+        "New publication forms collect one artwork record: identity, story and process, public credits, final files, rights intentions, preservation and an optional interview. All answers and selected files are intended for publication with the work.",
         "Documentation can begin independently or in a supported submission form and can continue afterward. It is optional during submission. A successful artwork post is not retried when its documentation source link needs recovery.",
         "Drafts save to the database. Unsaved text is not persisted in browser local storage. Keep the window open when saving fails or authentication expires, and resolve a version conflict before continuing.",
-        "All documentation remains private in this phase. Intended for a future public record means future publication intent, not current publication. Private contacts and sensitive rights evidence remain restricted, and original archival files require explicit access.",
+        "Drafts remain stored with 6529 during preparation. New publication forms have no per-field privacy choices or private evidence uploads. Earlier records preserve their original publication choices; restricted material is never silently converted.",
         "File transfer, checksum verification, inspection and malware screening have separate statuses. Upload limits are 4 GiB per file, 20 GiB of stored and reserved files per context, 100 files and five simultaneous upload sessions per context.",
         "Only the artist can confirm a documentation revision through a direct authenticated session. Confirmation preserves a dated immutable version in the database; it is not a wallet signature, mint instruction, or automatic effect of a proposed license. Curatorial, technical and rights reviews are separate.",
         "New edits preserve earlier confirmed versions. Shared artist information is versioned and pinned per work. Keys and Gates uses a photography documentation profile; selection does not establish minting, purchase or Museum accession.",
+        "Every section offers a complete fictional worked example for The Space Between by Ari Example. Empty sections open the example; existing records can reopen it. Examples never automatically save artist facts. Selected empty narrative fields offer an unsaved writing structure; explicit Use my answer adds only the artist-reviewed answer to ordinary autosave.",
+        "Questions for the team at the end of review are a separate drafting conversation. Questions and replies are excluded from artwork answers, confirmed versions and future publication. Resolved questions remain available as drafting history and can be reopened. Resolve questions before finalizing and add relevant public answers to the artwork form.",
         "Mint preparation and on-chain, IPFS or Arweave publication are deferred. The documentation form does not perform them."
       ],
       "canonical_path": "/artwork-documentation",
@@ -1324,12 +1371,16 @@
         "On desktop web, the collapsed sidebar account avatar highlights on hover but opens its account dropdown only when activated; the dropdown stays aligned with the sidebar on centered wide-screen layouts.",
         "Sign out all clears every connected profile in one visible transition without switching through the remaining profiles.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
+        "If Post cannot finish its session check, the draft stays in the composer. Wait for loading to finish, check the connection, complete sign-in if prompted, then retry Post. A stalled session check expires so a later attempt can check again; it does not automatically post the draft.",
         "Some write actions, settings, and subscriptions require a connected profile."
       ],
       "canonical_path": "/",
       "related_paths": ["/access"],
       "tags": ["auth", "wallet", "profiles"],
-      "source_refs": ["ops/docs/navigation/feature-wallet-account-controls.md"]
+      "source_refs": [
+        "ops/docs/navigation/feature-wallet-account-controls.md",
+        "ops/docs/waves/troubleshooting-wave-navigation-and-posting.md"
+      ]
     },
     {
       "id": "wallet.connection-sharing",
@@ -4573,6 +4624,8 @@
         "Tablet-sized app viewports use a wider dock.",
         "Tap the bell at the right end of the app bottom bar to open Notifications. Its tap area includes the space around the icon in both expanded and compact states.",
         "Bottom navigation icons dim while pressed to acknowledge the touch.",
+        "If a primary tab needs more time after a tap, the destination can present a lightweight loading shell without changing the bottom-bar icon design.",
+        "Rapid primary-tab switching commits the most recently requested destination.",
         "In the Android app, bottom spacing respects the space the device reports for system navigation.",
         "Rotating a phone or tablet keeps bottom navigation visible unless a route, edit state, open drop, or real software keyboard hides it.",
         "In the native app, the new-version refresh prompt stays centered directly above the dock and follows its expanded or compact position."
@@ -5017,7 +5070,9 @@
       ],
       "facts": [
         "The NFT activity feed lives at /nft-activity.",
-        "It is a realtime-oriented feed for NFT activity browsing and pagination.",
+        "The feed combines indexed sales, mints, airdrops, transfers and burns with recorded OpenSea listings, offers, cancellations, expirations and order validity changes for The Memes, Meme Lab, Gradients and NextGen.",
+        "Choose collection and action filters and use Load more to see older activity. Changing filters starts a new result list. Empty and failed requests have clear states and a retry control.",
+        "Off-chain market actions may have no transaction hash. Market history begins with captured provider events and status observations; best-effort delivery does not guarantee every historical off-chain action.",
         "Use Network Activity for network-level activity context and /nft-activity for the dedicated NFT activity route."
       ],
       "canonical_path": "/nft-activity",
@@ -5025,6 +5080,7 @@
       "tags": ["realtime", "nft", "activity"],
       "source_refs": [
         "app/nft-activity/page.tsx",
+        "components/nft-market-activity/NftMarketActivity.tsx",
         "ops/docs/realtime/feature-nft-activity-feed.md",
         "ops/docs/realtime/flow-nft-activity-browsing.md"
       ]
@@ -5398,25 +5454,42 @@
     {
       "id": "profiles.cms-builder",
       "kind": "workflow",
-      "title": "Profile CMS builder",
+      "title": "Profile website studio",
       "aliases": [
         "profile builder",
         "cms builder",
+        "website studio",
         "edit profile site",
         "profile homepage builder"
       ],
-      "keywords": ["profile", "cms", "builder", "homepage", "edit", "agent"],
+      "keywords": [
+        "profile",
+        "cms",
+        "website",
+        "studio",
+        "builder",
+        "template",
+        "page",
+        "publish"
+      ],
       "facts": [
-        "Profile CMS builder behavior is documented under profile docs.",
-        "The builder is for profile-owned custom page/content management surfaces.",
-        "Builder access and editing depend on the connected profile and permissions."
+        "Open /{user}/cms/builder directly to build or edit a profile-owned website. A profile with an available published website shows Website in its header; that link opens the published site.",
+        "The studio has 39 complete visual templates: 23 original compositions and 16 inspired by credited CC0 cards from The Memes. Templates and point-and-click editing work without an AI agent.",
+        "Use Pages for page titles, addresses, menu labels, duplication, removal, and choosing the homepage. Use Content to edit sections and Design for site name, layout, palette, typography, spacing, and accent color.",
+        "Preview all pages in Desktop and Phone views. Review and replace sample names, writing, artwork, claims, and links before confirming the sample-content review for publication.",
+        "Saving, image upload, server validation, and publishing require the connected non-proxy owner profile. Publishing uploads content and asks the wallet to sign; saving alone does not publish.",
+        "Versions contains saved drafts and publications. Editing a publication creates a new draft when saved; the active site remains until a replacement is published. Browser recovery is local to the current browser and account context.",
+        "Restore selects a previous publication. Unpublish removes the active website pointer but does not delete immutable content, uploaded images, or version history.",
+        "More tools contains optional JSON and Agent file workflows. A connected MCP agent service is not available."
       ],
       "canonical_path": "/{user}/cms/builder",
       "related_paths": ["/{user}"],
       "tags": ["profiles", "cms"],
       "source_refs": [
         "app/[user]/cms/builder/page.tsx",
-        "ops/docs/profiles/feature-profile-cms-builder-ai-agent-affordances.md"
+        "components/profile-cms-builder/ProfileCmsBuilder.tsx",
+        "components/profile-cms-builder/studio/ProfileCmsStudioEditor.tsx",
+        "ops/docs/profiles/feature-profile-cms-builder.md"
       ]
     },
     {
@@ -7562,9 +7635,12 @@
         "capitalization"
       ],
       "facts": [
-        "Published custom profile pages use paths ending in /index.html under the profile handle.",
-        "Profile handles in custom page links are case-insensitive; page names after the handle remain case-sensitive.",
-        "If a custom page is not found, use a link from the published site and preserve its page-name capitalization."
+        "Published custom profile pages have readable addresses such as /{user}/studio and /{user}/about. The normal 6529 profile stays at /{user}.",
+        "Use the profile header Website link or the published website navigation. Existing package paths ending in /index.html remain readable, and archived HTML keeps its file paths.",
+        "The studio accepts unique lowercase page addresses made from letters, numbers, and hyphen-separated words, up to 80 characters. Existing profile routes such as brain, cms, collected, identity, and subscriptions are reserved.",
+        "Profile handles in custom page links are case-insensitive; existing imported page names after the handle remain case-sensitive. The page must exist in the active publication, not just a draft.",
+        "Show in site menu controls the menu link only. Hiding a page from navigation does not make its published address private.",
+        "Keep the signed publication manifest and recovery receipt for independent website verification and archival recovery. External media files still need their own backup."
       ],
       "canonical_path": "/{user}",
       "related_paths": ["/{user}/cms/builder"],
@@ -7572,7 +7648,235 @@
       "source_refs": [
         "app/[user]/[...cmsPath]/page.tsx",
         "lib/profile-cms/runtime/routes.ts",
-        "ops/docs/profiles/troubleshooting/troubleshooting-routes-and-tabs.md"
+        "components/user/user-page-header/UserPageHeaderClient.tsx",
+        "ops/docs/profiles/feature-profile-cms-builder.md"
+      ]
+    },
+    {
+      "id": "profiles.cms-page-sharing",
+      "kind": "ui_affordance",
+      "title": "Website page sharing images and search visibility",
+      "aliases": [
+        "website sharing image",
+        "website link preview",
+        "hide website page from search",
+        "website form changes"
+      ],
+      "keywords": [
+        "cms",
+        "page settings",
+        "sharing image",
+        "automatic image",
+        "social preview",
+        "search engines",
+        "noindex",
+        "public",
+        "apply changes",
+        "discard",
+        "autosave"
+      ],
+      "facts": [
+        "Open Page settings in /{user}/cms/builder. Sharing image selects an image from the package library for that page's link preview. Automatic image clears the explicit choice and uses an available image displayed on that page.",
+        "Choose Apply changes, then save and publish the revision to update the public page. Sharing services may keep a cached preview temporarily.",
+        "Clearing Allow search engines to index this page adds noindex after publication. The page and its media remain public and accessible by URL; search engines may take time to revisit it.",
+        "Apply changes or Discard form changes before saving, publishing, switching panels, or Undo. Unapplied page, section, and design fields are not autosaved; browser recovery keeps the applied document. Finish or cancel an image upload before leaving its panel."
+      ],
+      "canonical_path": "/{user}/cms/builder",
+      "related_paths": ["/{user}"],
+      "tags": ["profiles", "cms", "sharing", "search"],
+      "source_refs": [
+        "components/profile-cms-builder/studio/StudioPageSettings.tsx",
+        "components/profile-cms-builder/studio/StudioForm.tsx",
+        "lib/profile-cms/runtime/social-image.ts",
+        "app/[user]/[...cmsPath]/page.tsx",
+        "ops/docs/profiles/feature-profile-cms-builder.md"
+      ]
+    },
+    {
+      "id": "profiles.cms-templates",
+      "kind": "workflow",
+      "title": "Website templates and visual page editing",
+      "aliases": [
+        "artist website template",
+        "collector website template",
+        "Memes website",
+        "company website",
+        "fund website",
+        "DAO website"
+      ],
+      "keywords": [
+        "templates",
+        "Memes",
+        "artist",
+        "portfolio",
+        "exhibition",
+        "collector",
+        "organization",
+        "fund",
+        "DAO",
+        "visual editor"
+      ],
+      "facts": [
+        "Browse 39 templates in People & ideas, Collections, Artists, Organizations, Funds & collecting groups, and The Memes. Open a full example, explore its pages, then choose Use this template.",
+        "Artist examples cover studios, portfolios, exhibitions, medium studies, process journals, editions, and retrospectives. Organization examples include professional practices, nonprofits, crypto protocols, NFT projects, funds, collecting DAOs, and institutional collections.",
+        "All templates use visually editable content. Click a section or select it in Content to edit supported text, images, captions, credits, links, widths, and treatments. Add, duplicate, remove, and reorder sections with the controls.",
+        "Pages supports adding and duplicating pages, page settings, choosing the home page, showing a page in the site menu, and changing menu order. A referenced page cannot be removed until its remaining links or homepage reference are changed.",
+        "Design restyles the current site. Start a new site replaces the draft with a new template after confirmation; save or download the current draft first. This is not automatic content-preserving template conversion.",
+        "The Memes examples preserve card titles, artist credits, and source links. Static previews avoid autoplaying animated originals. Template use does not claim token ownership, authorship, or artist endorsement."
+      ],
+      "canonical_path": "/{user}/cms/builder",
+      "related_paths": ["/{user}"],
+      "tags": ["profiles", "cms", "templates"],
+      "source_refs": [
+        "lib/profile-cms/studio/templates.ts",
+        "components/profile-cms-builder/studio/StudioTemplateLibrary.tsx",
+        "components/profile-cms-builder/studio/StudioPageActions.tsx",
+        "ops/docs/profiles/feature-profile-cms-builder.md"
+      ]
+    },
+    {
+      "id": "profiles.cms-media",
+      "kind": "workflow",
+      "title": "Add images and wallet galleries to a website",
+      "aliases": [
+        "CMS upload",
+        "add my art",
+        "NFT gallery website",
+        "ENS gallery",
+        "wallet sources"
+      ],
+      "keywords": [
+        "cms",
+        "upload",
+        "image",
+        "public",
+        "gallery",
+        "wallet",
+        "ENS",
+        "NFT",
+        "snapshot"
+      ],
+      "facts": [
+        "In Add your art, upload JPEG, PNG, WebP, or GIF images up to 20 MiB with an image description and optional credit. Uploading, processing, and verification finish before the image is added to the draft.",
+        "Uploaded images become publicly accessible before the website is published. A saved draft does not make its files private. Removing an image placement or unpublishing does not delete the uploaded file.",
+        "Request snapshot requires a signed-in session and accepts up to 25 Ethereum addresses or ENS names, including other wallets. If the session cannot be verified, sign in again and retry.",
+        "The snapshot request uses the service default of 200 indexed assets. Review source wallets and incomplete or unresolved warnings; choose and order up to 50 works for one import, then enter a gallery title.",
+        "Adding a wallet selection creates gallery pages and a menu entry while preserving existing pages, site identity, and design. Source-wallet addresses are included in the record and become public with publication.",
+        "Wallet snapshots cover collections indexed by 6529 and are not a complete cross-chain NFT inventory. They are dated selections, not live holdings. Refresh to review changed holdings; a holdings import does not identify every work an artist created.",
+        "If image dimensions or media cannot be verified, an NFT record may remain without an image. Review the partial-media warning. Offline example snapshots are for preview and cannot be published as real holdings."
+      ],
+      "canonical_path": "/{user}/cms/builder",
+      "related_paths": ["/{user}/collected"],
+      "tags": ["profiles", "cms", "media"],
+      "source_refs": [
+        "components/profile-cms-builder/studio/StudioImageUpload.tsx",
+        "lib/profile-cms/studio/image-upload.ts",
+        "components/profile-cms-builder/studio/StudioWalletImport.tsx",
+        "lib/profile-cms/studio/wallet-import.ts",
+        "ops/docs/profiles/feature-profile-cms-builder.md"
+      ]
+    },
+    {
+      "id": "profiles.cms-agent-files",
+      "kind": "workflow",
+      "title": "Use your own agent through website files",
+      "aliases": [
+        "bring your own agent",
+        "CMS AI",
+        "agent patch",
+        "website JSON export",
+        "CMS MCP"
+      ],
+      "keywords": [
+        "cms",
+        "agent",
+        "AI",
+        "MCP",
+        "JSON",
+        "patch",
+        "export",
+        "import",
+        "files"
+      ],
+      "facts": [
+        "The visual website studio works without an agent. More tools opens optional JSON and Agent workspaces for users who bring their own external agent or local tool.",
+        "Download Package JSON, Source packet JSON, and Schema bundle JSON. Review their draft content and wallet-source details before sharing them with an external tool; the source packet does not replace the complete package.",
+        "Paste or upload an agent-patch JSON file up to 2 MiB, choose Review patch, inspect the changes and validation findings, then choose Apply to draft. Applying a patch is local editing and cannot save, sign, or publish.",
+        "The current patch importer edits supported first-page metadata and block fields, block additions/removals/reordering, the first menu label, and the theme accent. It is not a general multipage API; use the visual editor or full-package JSON import for broader changes.",
+        "Stale draft IDs, versions, base hashes, unsupported operations, and invalid results are rejected. Re-review against the current draft after changes.",
+        "A complete replacement package can be pasted into JSON and imported for the current profile handle. Preserve a saved or downloaded copy before broad replacement.",
+        "There is no connected MCP service, automatic agent session, or built-in paid inference provider. File exchange does not require sharing website session tokens, wallet private keys, or recovery phrases. Publication remains a separate owner-reviewed wallet-signing step."
+      ],
+      "canonical_path": "/{user}/cms/builder",
+      "related_paths": ["/{user}"],
+      "tags": ["profiles", "cms", "agents"],
+      "source_refs": [
+        "components/profile-cms-builder/ProfileCmsAgentPanel.tsx",
+        "lib/profile-cms/builder/agent-patch-operations.ts",
+        "components/profile-cms-builder/ProfileCmsBuilderJsonPanel.tsx",
+        "ops/docs/profiles/feature-profile-cms-builder-ai-agent-affordances.md"
+      ]
+    },
+    {
+      "id": "collect.overview",
+      "kind": "workflow",
+      "title": "Collect artwork and complete profile sets",
+      "aliases": [
+        "buy 6529 NFTs",
+        "sell NFTs",
+        "NFT bids",
+        "cheapest NFTs",
+        "complete a season",
+        "complete Pebbles",
+        "lowest cost TDH",
+        "gift a purchase"
+      ],
+      "keywords": [
+        "Collect",
+        "Memes",
+        "Gradient",
+        "Pebbles",
+        "season",
+        "artist",
+        "sets",
+        "marketplace",
+        "listing",
+        "offer",
+        "WETH",
+        "recipient",
+        "gifts",
+        "TDH"
+      ],
+      "facts": [
+        "Collect at /collect supports The Memes, 6529 Gradient and NextGen Pebbles. Browse artwork, compare observed low-price listings, find specific tokens, analyze season/full-set/artist/Pebbles trait goals and compare additional TDH.",
+        "All set collecting uses the profile across its confirmed consolidated wallets. Wallets identify custody, funding, signing or receipt; selecting a custody wallet does not redefine the primary collecting scope.",
+        "Purchase recipients follow minting: choose a profile wallet or enter a third-party wallet. Review the exact address. The purchase transaction delivers the NFT directly to that one recipient without a separate onward transfer. A gift outside the profile does not advance that profile’s projected completion or TDH.",
+        "Pebbles is the current NextGen project. Palette, Size, Traced and Ultimate goals extend its existing Trait Sets. Ultimate can satisfy multiple trait requirements with one token.",
+        "Completion plans show missing requirements and incomplete coverage. The initial scan checks one best exact OpenSea listing per artwork; it does not exhaust market depth. Each planned purchase gets a fresh quote and wallet approval, and several orders use separate transactions.",
+        "Supported execution uses Ethereum mainnet, exact NFTs, explicit quantities and ETH or WETH. Fixed-price offers use WETH and receive NFTs in the signing wallet. Profile consolidation and social proxy access do not grant trading authority over another wallet.",
+        "Review the total price, fees, seller net where applicable, recipient and token approval scope. New listings include configured creator support; standard offers include required provider fees; purchases and accepted offers preserve their signed fees. The 6529 platform fee is zero.",
+        "Orders at /collect/orders tracks operation recovery. Potential offer exposure begins when signable terms are revealed, even if no signature or publication is confirmed. A quote freshness timer does not expire a signed order.",
+        "If a wallet may have submitted a transaction but its hash was not returned, the review shows Checking the outcome and blocks another send for that operation across browsers. Copy the hash from wallet activity into Transaction hash from your wallet and select Check this transaction. The site verifies the exact transaction; this does not send a replacement. Approvals and recovery without local browser data use the same flow.",
+        "If publication or broadcast is uncertain, retain the order or transaction hash and reconcile it instead of sending a duplicate purchase. Cancellation can lose a race to a fill and is effective only after chain verification. Revoking an approval or pausing new trading does not permanently cancel signed orders.",
+        "TDH comparisons use a verified official snapshot and include changes to bonuses on existing holdings. The ranking is best among observed candidates, includes an estimated gas reserve, and is not a guarantee of future TDH or complete market coverage.",
+        "A Safe can receive a gift purchase. Execution from smart contract wallets and inside the native app is unavailable until those paths are supported. Programmatic preparation still requires owner review and wallet authorization; the backend does not hold user signing keys.",
+        "Saved rules freeze exact targets, funding wallet, recipient, unit and total review limits, gas reserve, expiry and action count. They prepare one ETH purchase at a time for wallet approval. Pause and expiry retain unresolved operations, and confirmed acquisitions count permanently even if the NFT is later sold or transferred. Rules do not grant unattended wallet execution authority."
+      ],
+      "canonical_path": "/collect",
+      "link_label": "Collect",
+      "related_paths": [
+        "/collect/orders",
+        "/the-memes",
+        "/6529-gradient",
+        "/nextgen"
+      ],
+      "tags": ["collections", "marketplace", "profiles", "TDH", "wallets"],
+      "source_refs": [
+        "ops/docs/media/collecting.md",
+        "app/collect/page.tsx",
+        "app/collect/orders/page.tsx",
+        "components/collect/CollectPageClient.tsx",
+        "components/collect/useMarketExecution.ts"
       ]
     }
   ]

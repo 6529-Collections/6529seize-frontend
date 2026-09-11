@@ -16,6 +16,10 @@ import { ApiArtworkDocumentationProfileModule } from '../models/ApiArtworkDocume
 import { HttpFile } from '../http/http';
 
 export class ApiArtworkDocumentationProfile {
+    /**
+    * All artwork answers and selected files are intended for public publication. Absent on legacy private-intake profiles. Team questions are separate drafting discussion and never part of the confirmed artwork record.
+    */
+    'intake_mode'?: ApiArtworkDocumentationProfileIntakeModeEnum;
     'profile_id': string;
     'version': number;
     'program_id': string | null;
@@ -37,6 +41,12 @@ export class ApiArtworkDocumentationProfile {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "intake_mode",
+            "baseName": "intake_mode",
+            "type": "ApiArtworkDocumentationProfileIntakeModeEnum",
+            "format": ""
+        },
         {
             "name": "profile_id",
             "baseName": "profile_id",
@@ -136,6 +146,9 @@ export class ApiArtworkDocumentationProfile {
     }
 }
 
+export enum ApiArtworkDocumentationProfileIntakeModeEnum {
+    PublicationOnly = 'publication_only'
+}
 export enum ApiArtworkDocumentationProfileReviewLanesEnum {
     Curatorial = 'curatorial',
     Technical = 'technical',

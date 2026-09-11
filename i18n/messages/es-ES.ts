@@ -1,3 +1,6 @@
+import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.es-ES.json";
+import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.es-ES.json";
+import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.es-ES.json";
 import { ES_ES_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { ES_ES_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { ES_ES_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
@@ -7,8 +10,131 @@ import { ES_ES_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-c
 import { ES_ES_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
+import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
 
 export const ES_ES_MESSAGES = {
+  ...profileCmsStudioMessages,
+  ...studioTemplateDescriptions,
+  ...profileCmsStudioUploadMessages,
+  ...studioWalletImportMessages,
+  "profileCms.builder.gallery.snapshot.required":
+    "Solicita y revisa una captura de las carteras antes de guardar o publicar esta galería.",
+  "profileCms.builder.publish.savedNotCurrent":
+    "Esta publicación firmada está guardada, pero no es el sitio activo. Revisa el historial de versiones antes de cambiar el sitio.",
+  "profileCms.builder.gallery.snapshot.warning.unmeasuredImages":
+    "No se han podido verificar las dimensiones de algunas imágenes. Esas obras conservan sus datos NFT sin imagen en la publicación. Actualiza la captura para reintentarlo.",
+  "profileCms.builder.json.pending":
+    "Aplica o descarta tus cambios JSON antes de guardar o publicar.",
+  "profileCms.builder.json.reviewPending": "Revisar cambios JSON",
+  "profileCms.builder.json.discardPending": "Descartar cambios JSON",
+  "profileCms.builder.history.actionFailed":
+    "No se ha podido actualizar el sitio. Actualiza el historial de versiones e inténtalo de nuevo.",
+  "profileCms.builder.gallery.snapshot.warning.unresolvedWallets":
+    "No se han podido identificar algunas carteras y no forman parte de esta captura.",
+  "profileCms.builder.gallery.snapshot.warning.truncated":
+    "La captura ha alcanzado el límite de obras; algunas obras indexadas no se muestran.",
+  "profileCms.builder.api.serverValidationInvalid":
+    "La validación del servidor ha detectado problemas que impiden publicar este paquete.",
+  "profileCms.builder.drafts.title": "Borradores guardados",
+  "profileCms.builder.drafts.refresh": "Actualizar borradores",
+  "profileCms.builder.drafts.loading": "Cargando…",
+  "profileCms.builder.drafts.failed":
+    "No se han podido cargar los borradores guardados.",
+  "profileCms.builder.drafts.empty": "Aún no hay borradores guardados.",
+  "profileCms.builder.drafts.version": "Versión {version}",
+  "profileCms.builder.drafts.load": "Cargar",
+  "profileCms.builder.drafts.status.draft": "Borrador",
+  "profileCms.builder.drafts.status.validating": "Validando",
+  "profileCms.builder.drafts.status.published": "Publicado",
+  "profileCms.builder.drafts.status.failed": "Error",
+  "profileCms.builder.drafts.status.archived": "Archivado",
+  "profileCms.builder.drafts.status.superseded": "Sustituido",
+  "profileCms.builder.drafts.loadFailed":
+    "No se ha podido cargar este borrador en el editor.",
+  "profileCms.builder.publish.title": "Publicar",
+  "profileCms.builder.publish.description":
+    "Guarda, valida, sube a un almacenamiento descentralizado, firma con tu cartera y publica este paquete como sitio principal de tu perfil.",
+  "profileCms.builder.publish.publish": "Publicar sitio web",
+  "profileCms.builder.publish.publishing": "Publicando…",
+  "profileCms.builder.publish.retry": "Reintentar",
+  "profileCms.builder.publish.reSign": "Volver a firmar",
+  "profileCms.builder.publish.walletRequired":
+    "Conecta la cartera vinculada a este perfil para firmar la publicación.",
+  "profileCms.builder.publish.safeNotice":
+    "Se ha detectado una cartera de contrato inteligente. Tu cartera debe admitir esta solicitud de firma. Si no la admite, usa otra cartera autorizada para este perfil.",
+  "profileCms.builder.publish.success":
+    "Publicado. El sitio de tu perfil ya está disponible en:",
+  "profileCms.builder.publish.step.validate": "Guardar y validar borrador",
+  "profileCms.builder.publish.step.upload": "Subir al almacenamiento",
+  "profileCms.builder.publish.step.sign": "Firmar con la cartera",
+  "profileCms.builder.publish.step.publish": "Poner el sitio en línea",
+  "profileCms.builder.publish.error.validationInvalid":
+    "La validación del servidor ha detectado problemas que impiden publicar. Corrígelos y vuelve a publicar.",
+  "profileCms.builder.publish.error.saveFailed":
+    "No se ha podido guardar el borrador antes de publicar.",
+  "profileCms.builder.publish.error.validateFailed":
+    "La solicitud de validación del servidor ha fallado.",
+  "profileCms.builder.publish.error.uploadFailed":
+    "No se ha podido subir el paquete al almacenamiento descentralizado.",
+  "profileCms.builder.publish.error.signatureRejected":
+    "Se ha cancelado la solicitud de firma en tu cartera.",
+  "profileCms.builder.publish.error.signatureFailed":
+    "La firma ha fallado. Revisa tu cartera e inténtalo de nuevo.",
+  "profileCms.builder.publish.error.deadlineExpired":
+    "La firma ha caducado antes de publicar. Vuelve a firmar para continuar.",
+  "profileCms.builder.publish.error.publishConflict":
+    "El sitio publicado ha cambiado durante este intento. Revisa el historial de versiones antes de volver a publicar.",
+  "profileCms.builder.publish.error.storagePending":
+    "El almacenamiento permanente aún está preparando tu publicación firmada. Espera un momento y reinténtalo. Se reutilizarán tu firma y la versión guardada.",
+  "profileCms.builder.publish.signedPublication": "Publicación firmada",
+  "profileCms.builder.publish.signedPublicationHash":
+    "Hash del manifiesto: {hash}",
+  "profileCms.builder.publish.error.publishFailed":
+    "La publicación ha fallado. Inténtalo de nuevo.",
+  "profileCms.builder.history.title": "Historial de versiones",
+  "profileCms.builder.history.refresh": "Actualizar",
+  "profileCms.builder.history.loading": "Cargando…",
+  "profileCms.builder.history.unavailable":
+    "Conéctate como propietario de este perfil para ver las versiones publicadas.",
+  "profileCms.builder.history.failed":
+    "No se ha podido cargar el historial de versiones.",
+  "profileCms.builder.history.empty": "Aún no hay versiones guardadas.",
+  "profileCms.builder.history.version": "Versión {version}",
+  "profileCms.builder.history.primary": "Principal",
+  "profileCms.builder.history.rollback": "Establecer como principal",
+  "profileCms.builder.history.rollbackFailed": "La restauración ha fallado.",
+  "profileCms.builder.history.confirm.title": "Confirmar restauración",
+  "profileCms.builder.history.confirm.body":
+    "¿Volver a establecer la versión {version} como sitio principal de tu perfil? Sustituirá la versión publicada actualmente.",
+  "profileCms.builder.history.confirm.confirm": "Confirmar",
+  "profileCms.builder.history.confirm.working": "Restaurando…",
+  "profileCms.builder.history.confirm.cancel": "Cancelar",
+  "profileCms.builder.history.unpublish": "Retirar sitio web",
+  "profileCms.builder.history.unpublishConfirm":
+    "¿Retirar este sitio del perfil público? Las versiones guardadas seguirán disponibles para restaurarlas.",
+  "profileCms.builder.recovery.title":
+    "Hay un borrador sin guardar en este dispositivo.",
+  "profileCms.builder.recovery.restore": "Recuperar borrador",
+  "profileCms.builder.recovery.discard": "Descartar recuperación",
+  "profileCms.builder.recovery.failed":
+    "Este navegador no ha podido guardar una copia de recuperación. Guarda un borrador o descarga el JSON antes de salir.",
+  "profileCms.builder.recovery.unsaved": "Cambios sin guardar",
+  "profileCms.builder.recovery.saved": "Todos los cambios guardados",
+  "profileCms.builder.recovery.leave":
+    "¿Salir del editor con cambios sin guardar o una operación en curso? Se conserva una copia de recuperación si el almacenamiento del navegador está disponible.",
+  "profileCms.builder.recovery.replace":
+    "¿Sustituir el contenido actual del editor? Guarda o descarga tus cambios primero.",
+  "profileCms.builder.editor.advanced":
+    "Este paquete contiene un sitio personalizado. Usa JSON o Agente para editarlo conservando todas las páginas y recursos.",
+  "profileCms.builder.history.changed":
+    "El sitio público se ha actualizado. Los visitantes pueden tardar unos segundos en ver el cambio.",
+  "profileCms.builder.publish.error.stale":
+    "El borrador o la cartera ha cambiado. Inicia la publicación de nuevo.",
+  "navigation.primary.loading.home": "Cargando inicio",
+  "navigation.primary.loading.discovery": "Cargando descubrimiento",
+  "navigation.primary.loading.network": "Cargando la red",
+  "navigation.primary.loading.collections": "Cargando colecciones",
+  "navigation.primary.loading.notifications": "Cargando notificaciones",
   "headerSearch.wave.byAuthor": "por {author}",
   "headerSearch.wave.serial": "Wave n.º {serial}",
   "headerSearch.wave.label": "Wave",
@@ -315,6 +441,10 @@ export const ES_ES_MESSAGES = {
   "profileCms.builder.gallery.review.title": "Revisión de instantánea",
   "profileCms.builder.gallery.settings": "Configuración de la galería",
   "profileCms.builder.gallery.snapshot.api": "Instantánea del servidor",
+  "profileCms.builder.gallery.snapshot.signInRequired":
+    "Inicia sesión para solicitar una instantánea de la cartera.",
+  "profileCms.builder.gallery.snapshot.sessionExpired":
+    "No se pudo verificar tu sesión. Vuelve a iniciar sesión para solicitar una instantánea de la cartera.",
   "profileCms.builder.gallery.snapshot.failed":
     "No se pudo crear la instantánea de la galería.",
   "profileCms.builder.gallery.snapshot.fixture": "Instantánea fija",
@@ -355,7 +485,7 @@ export const ES_ES_MESSAGES = {
   "profileCms.builder.publishState.packageHash": "Hash de paquete",
   "profileCms.builder.publishState.payloadHash": "Hash de carga",
   "profileCms.builder.publishState.pending":
-    "Guardar y publicar requieren los puntos finales del servidor. Esta interfaz de usuario no simulará una publicación de producción.",
+    "Guarda un borrador para conservar una versión editable. Publica cuando quieras hacer público este sitio.",
   "profileCms.builder.publishState.title": "Estado de borrador y publicación",
   "profileCms.builder.siteSettings": "Configuración del sitio",
   "profileCms.builder.tab.agent": "Agente",

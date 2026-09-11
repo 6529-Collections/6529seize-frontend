@@ -1,4 +1,8 @@
+import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.en-US.json";
+import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.en-US.json";
+import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.en-US.json";
 /* eslint max-lines: "off" */
+import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-US.json";
 
 import {
   DISTRIBUTION_MESSAGES,
@@ -6,6 +10,7 @@ import {
   MEDIA_VIDEO_MESSAGES,
   MEME_CALENDAR_MESSAGES,
   MEME_LAB_DETAIL_MESSAGES,
+  MARKET_DEPTH_MESSAGES,
   THE_MEMES_DETAIL_ACTIVITY_MESSAGES,
   THE_MEMES_DETAIL_ART_MESSAGES,
   THE_MEMES_DETAIL_LIVE_MESSAGES,
@@ -38,6 +43,7 @@ import { EULA_MESSAGES } from "@/i18n/messages/eula";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
+import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -2217,6 +2223,8 @@ const WAVE_EXPLORE_CARD_MESSAGES = objectMessages("waves.explore.card", {
   coverAlt: "{waveName} cover",
   "dropsCount.one": "{timeAgo} · {count} drop",
   "dropsCount.other": "{timeAgo} · {count} drops",
+  "dropsCountAgo.one": "{timeAgo} ago · {count} drop",
+  "dropsCountAgo.other": "{timeAgo} ago · {count} drops",
   noDropsYet: "No drops yet",
   viewAriaLabel: "View wave {waveName}",
   viewWithScoreAriaLabel: "View wave {waveName}. {scoreSummary}",
@@ -2752,7 +2760,76 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
     "Figures not easily calculable as card was sold manually",
 } as const);
 
+const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
+
 export const EN_US_MESSAGES = {
+  ...COLLECT_MESSAGES,
+  ...profileCmsStudioMessages,
+  ...studioTemplateDescriptions,
+  ...profileCmsStudioUploadMessages,
+  ...studioWalletImportMessages,
+  "nftActivity.loading": "Loading NFT activity…",
+  "nftActivity.error": "Could not load NFT activity.",
+  "nftActivity.moreError": "Could not load more NFT activity.",
+  "nftActivity.retry": "Try again",
+  "nftActivity.empty": "No NFT activity found.",
+  "nftActivity.notAvailable": "Not available",
+  "nftActivity.tableLabel": "NFT activity",
+  "nftActivity.cardTitle": "Card Activity",
+  "nftActivity.action": "Action",
+  "nftActivity.item": "Item",
+  "nftActivity.maker": "From / maker",
+  "nftActivity.recipient": "To / recipient",
+  "nftActivity.totalPrice": "Total",
+  "nftActivity.date": "Date",
+  "nftActivity.collectionWide":
+    "Collection-level order · card eligibility varies",
+  "nftActivity.quantity": "Quantity {quantity}",
+  "nftActivity.token": TOKEN_NUMBER_MESSAGE,
+  "nftActivity.observedStatus": "Observed status",
+  "nftActivity.providerEvent": "Observed provider event",
+  "nftActivity.providerStatus": "Confirmed by provider status",
+  "nftActivity.elapsedExpiry": "Expired at the stated order time",
+  "nftActivity.scrollRegion": "Scrollable NFT activity table",
+  "nftActivity.transactionLink":
+    "View transaction on Etherscan (opens in a new tab)",
+  "nftActivity.marketHistory":
+    "Marketplace actions are available from {date}; earlier on-chain history may still appear.",
+  "nftActivity.loadingMore": "Loading more…",
+  "nftActivity.loadMore": "Load more",
+  "nftActivity.collections.memes": "The Memes",
+  "nftActivity.collections.memeLab": "Meme Lab",
+  "nftActivity.collections.gradients": "6529 Gradient",
+  "nftActivity.collections.nextgen": "NextGen",
+  "nftActivity.actions.sale": "Sold",
+  "nftActivity.actions.purchase": "Purchased",
+  "nftActivity.actions.mint": "Minted",
+  "nftActivity.actions.airdrop": "Airdropped",
+  "nftActivity.actions.transfer": "Transferred",
+  "nftActivity.actions.burn": "Burned",
+  "nftActivity.actions.listing": "Listed",
+  "nftActivity.actions.offer": "Offer",
+  "nftActivity.actions.cancellation": "Cancelled",
+  "nftActivity.actions.expiration": "Expired",
+  "nftActivity.actions.invalidation": "Invalidated",
+  "nftActivity.actions.revalidation": "Revalidated",
+  "nftActivity.actions.fulfilled": "Order filled",
+  "nftActivity.actions.unknown": "Unknown action ({action})",
+  "nftActivity.filters.collection": "Collection",
+  "nftActivity.filters.type": "Activity type",
+  "nftActivity.filters.all": "All activity",
+  "nftActivity.filters.airdrops": "Airdrops",
+  "nftActivity.filters.mints": "Mints",
+  "nftActivity.filters.sales": "Sales",
+  "nftActivity.filters.purchases": "Purchases",
+  "nftActivity.filters.transfers": "Transfers",
+  "nftActivity.filters.burns": "Burns",
+  "nftActivity.filters.listings": "Listings",
+  "nftActivity.filters.offers": "Offers",
+  "nftActivity.filters.cancellations": "Cancellations",
+  "nftActivity.filters.expirations": "Expirations",
+  "nftActivity.filters.invalidations": "Invalidations",
+  "nftActivity.filters.revalidations": "Revalidations",
   "nftPicker.address.label": "Select collection",
   "nftPicker.address.placeholder": "Paste an Ethereum contract address…",
   "nftPicker.address.help":
@@ -2923,6 +3000,11 @@ export const EN_US_MESSAGES = {
   "acceptConnection.toast.acceptFailed":
     "Couldn't accept this connection. Please try again.",
   "navigation.primary.ariaLabel": "Primary navigation",
+  "navigation.primary.loading.home": "Loading home",
+  "navigation.primary.loading.discovery": "Loading discovery",
+  "navigation.primary.loading.network": "Loading network",
+  "navigation.primary.loading.collections": "Loading collections",
+  "navigation.primary.loading.notifications": "Loading notifications",
   "appWallet.validation.name.alphanumericSpaces":
     "Name can only contain alphanumeric characters and spaces",
   "appWallet.validation.password.minLength":
@@ -3386,6 +3468,7 @@ export const EN_US_MESSAGES = {
   "memeLab.sort.volume": "Volume",
   "memeLab.sort.highestOffer": "Highest Offer",
   ...MEME_LAB_DETAIL_MESSAGES,
+  ...MARKET_DEPTH_MESSAGES,
   ...DISTRIBUTION_MESSAGES,
   "rememes.documentTitle": "ReMemes | Collections",
   "rememes.title": "ReMemes",
@@ -3407,7 +3490,7 @@ export const EN_US_MESSAGES = {
   "rememes.refresh.ariaLabel": "Refresh ReMemes results",
   "rememes.refresh.tooltip": "Refresh results",
   "rememes.card.linkAriaLabel": "View {name}, ReMeme #{tokenId}",
-  "rememes.card.tokenAriaLabel": "Token #{tokenId}",
+  "rememes.card.tokenAriaLabel": TOKEN_NUMBER_MESSAGE,
   "rememes.card.replicaCount": "(x{count})",
   "user.collected.cards.listLabel": "Collected cards",
   "user.collected.navigation.backToCollected": "Back to {profile}'s collected",
@@ -3473,7 +3556,7 @@ export const EN_US_MESSAGES = {
   "profileCms.media.noCaptions":
     "No captions were provided for this media asset.",
   "profileCms.media.captionTrackLabel": "Description",
-  "profileCms.reference.tokenTitle": "Token #{tokenId}",
+  "profileCms.reference.tokenTitle": TOKEN_NUMBER_MESSAGE,
   "profileCms.reference.chain": "Chain {chainId}",
   "profileCms.walletGallery.title": "Wallet gallery",
   "profileCms.walletGallery.summary.one": "{count} wallet",
@@ -3539,6 +3622,10 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.gallery.snapshot.loading": "Requesting...",
   "profileCms.builder.gallery.snapshot.loadingDetail":
     "Collecting holdings and media candidates for review.",
+  "profileCms.builder.gallery.snapshot.signInRequired":
+    "Sign in to request a wallet snapshot.",
+  "profileCms.builder.gallery.snapshot.sessionExpired":
+    "Your session could not be verified. Sign in again to request a wallet snapshot.",
   "profileCms.builder.gallery.snapshot.failed":
     "Gallery snapshot could not be created.",
   "profileCms.builder.gallery.snapshot.fixture": "Fixture snapshot",
@@ -3703,7 +3790,7 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.publishState.packageHash": "Package hash",
   "profileCms.builder.publishState.payloadHash": "Payload hash",
   "profileCms.builder.publishState.pending":
-    "Save and publish require the backend builder endpoints. This UI will not fake a production publish.",
+    "Save a draft to keep an editable version. Publish when you are ready to make this website public.",
   "profileCms.builder.api.disabled":
     "Builder API writes are not enabled in this frontend environment.",
   "profileCms.builder.api.failed": "Builder API action failed.",
@@ -3718,6 +3805,116 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.api.serverValidationCompleted":
     "Server validation completed.",
   "profileCms.builder.api.draftSaved": "Draft saved.",
+  "profileCms.builder.gallery.snapshot.warning.unresolvedWallets":
+    "Some wallet entries could not be resolved and are not part of this snapshot.",
+  "profileCms.builder.gallery.snapshot.warning.truncated":
+    "The snapshot hit the asset limit, so some indexed works are not shown.",
+  "profileCms.builder.api.serverValidationInvalid":
+    "Server validation found blocking issues in this package.",
+  "profileCms.builder.drafts.title": "Saved drafts",
+  "profileCms.builder.drafts.refresh": "Refresh drafts",
+  "profileCms.builder.drafts.loading": "Loading...",
+  "profileCms.builder.drafts.failed": "Could not load saved drafts.",
+  "profileCms.builder.drafts.empty": "No saved drafts yet.",
+  "profileCms.builder.drafts.version": "Version {version}",
+  "profileCms.builder.drafts.load": "Load",
+  "profileCms.builder.drafts.status.draft": "Draft",
+  "profileCms.builder.drafts.status.validating": "Validating",
+  "profileCms.builder.drafts.status.published": "Published",
+  "profileCms.builder.drafts.status.failed": "Failed",
+  "profileCms.builder.drafts.status.archived": "Archived",
+  "profileCms.builder.drafts.status.superseded": "Superseded",
+  "profileCms.builder.drafts.loadFailed":
+    "This draft could not be loaded into the editor.",
+  "profileCms.builder.publish.title": "Publish",
+  "profileCms.builder.publish.description":
+    "Save, validate, upload to decentralized storage, sign with your wallet, then publish this package as your primary profile website.",
+  "profileCms.builder.publish.publish": "Publish website",
+  "profileCms.builder.publish.publishing": "Publishing...",
+  "profileCms.builder.publish.retry": "Retry",
+  "profileCms.builder.publish.reSign": "Sign again",
+  "profileCms.builder.publish.walletRequired":
+    "Connect the wallet linked to this profile to sign the publish.",
+  "profileCms.builder.publish.safeNotice":
+    "Smart-contract wallet detected. Your wallet must support this signature request. If it cannot, use another authorized wallet for this profile.",
+  "profileCms.builder.publish.success":
+    "Published. Your profile website is now live at:",
+  "profileCms.builder.publish.savedNotCurrent":
+    "This signed publication is saved but is not the active website. Review version history before changing the website.",
+  "profileCms.builder.gallery.snapshot.warning.unmeasuredImages":
+    "Some image sizes could not be verified. Those works keep their NFT details without an image in the publication. Refresh the snapshot to try again.",
+  "profileCms.builder.gallery.snapshot.required":
+    "Request and review a wallet snapshot before saving or publishing this gallery.",
+  "profileCms.builder.publish.step.validate": "Save and validate draft",
+  "profileCms.builder.publish.step.upload": "Upload to storage",
+  "profileCms.builder.publish.step.sign": "Sign with wallet",
+  "profileCms.builder.publish.step.publish": "Make website live",
+  "profileCms.builder.publish.error.validationInvalid":
+    "Server validation found blocking issues. Fix them, then publish again.",
+  "profileCms.builder.publish.error.saveFailed":
+    "Could not save the draft before publishing.",
+  "profileCms.builder.publish.error.validateFailed":
+    "The server validation request failed.",
+  "profileCms.builder.publish.error.uploadFailed":
+    "Uploading the package to decentralized storage failed.",
+  "profileCms.builder.publish.error.signatureRejected":
+    "The signature request was canceled in your wallet.",
+  "profileCms.builder.publish.error.signatureFailed":
+    "Wallet signing failed. Check your wallet and try again.",
+  "profileCms.builder.publish.error.deadlineExpired":
+    "The signature deadline expired before publishing. Sign again to continue.",
+  "profileCms.builder.publish.error.publishConflict":
+    "The published website changed during this attempt. Review version history before publishing again.",
+  "profileCms.builder.publish.error.storagePending":
+    "Permanent storage is still making your signed publication available. Wait a moment, then retry. Your signature and saved version will be reused.",
+  "profileCms.builder.publish.signedPublication": "Signed publication",
+  "profileCms.builder.publish.signedPublicationHash": "Manifest hash: {hash}",
+  "profileCms.builder.publish.error.publishFailed":
+    "Publishing failed. Please try again.",
+  "profileCms.builder.history.title": "Version history",
+  "profileCms.builder.history.refresh": "Refresh",
+  "profileCms.builder.history.loading": "Loading...",
+  "profileCms.builder.history.unavailable":
+    "Connect as this profile owner to view published versions.",
+  "profileCms.builder.history.failed": "Could not load version history.",
+  "profileCms.builder.history.actionFailed":
+    "The website could not be updated. Refresh version history and try again.",
+  "profileCms.builder.json.pending":
+    "Apply or discard your JSON changes before saving or publishing.",
+  "profileCms.builder.json.reviewPending": "Review JSON changes",
+  "profileCms.builder.json.discardPending": "Discard JSON changes",
+  "profileCms.builder.history.empty": "No saved versions yet.",
+  "profileCms.builder.history.version": "Version {version}",
+  "profileCms.builder.history.primary": "Primary",
+  "profileCms.builder.history.rollback": "Make primary",
+  "profileCms.builder.history.rollbackFailed": "Rollback failed.",
+  "profileCms.builder.history.confirm.title": "Confirm rollback",
+  "profileCms.builder.history.confirm.body":
+    "Point your primary profile website back to version {version}? This replaces the currently published version.",
+  "profileCms.builder.history.confirm.confirm": "Confirm",
+  "profileCms.builder.history.confirm.working": "Rolling back...",
+  "profileCms.builder.history.confirm.cancel": "Cancel",
+  "profileCms.builder.history.unpublish": "Unpublish website",
+  "profileCms.builder.history.unpublishConfirm":
+    "Remove this website from the public profile? Its saved versions remain available to restore.",
+  "profileCms.builder.recovery.title":
+    "An unsaved draft is available on this device.",
+  "profileCms.builder.recovery.restore": "Recover draft",
+  "profileCms.builder.recovery.discard": "Discard recovery",
+  "profileCms.builder.recovery.failed":
+    "This browser could not save a recovery copy. Save a draft or download JSON before leaving.",
+  "profileCms.builder.recovery.unsaved": "Unsaved changes",
+  "profileCms.builder.recovery.saved": "All changes saved",
+  "profileCms.builder.recovery.leave":
+    "Leave the editor with unsaved changes or an operation in progress? A recovery copy is kept when browser storage is available.",
+  "profileCms.builder.recovery.replace":
+    "Replace the current editor contents? Save or download your changes first.",
+  "profileCms.builder.editor.advanced":
+    "This package contains a custom site. Use JSON or Agent to edit it while preserving every page and asset.",
+  "profileCms.builder.history.changed":
+    "The public website was updated. It may take a few seconds for visitors to see the change.",
+  "profileCms.builder.publish.error.stale":
+    "The draft or wallet changed. Start publishing again.",
   ...USER_COLLECTED_STATS_MESSAGES,
   ...USER_BRAIN_SIDEBAR_MESSAGES,
   ...USER_COLLECTED_STATS_DETAILS_MESSAGES,
@@ -3731,7 +3928,7 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.listLabel": "Collected network cards",
   "user.collected.networkCards.empty": "No network tokens found",
   "user.collected.networkCards.defaultCollection": "Network",
-  "user.collected.networkCards.defaultTokenName": "Token #{tokenId}",
+  "user.collected.networkCards.defaultTokenName": TOKEN_NUMBER_MESSAGE,
   "user.collected.networkCards.imageAlt": "Network token image for {name}",
   "user.collected.networkCards.tokenLabel": "#{tokenId}",
   "user.collected.networkCards.xtdh": "xTDH",

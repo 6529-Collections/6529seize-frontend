@@ -1,3 +1,6 @@
+import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.de-DE.json";
+import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.de-DE.json";
+import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.de-DE.json";
 import { DE_DE_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { DE_DE_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { DE_DE_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
@@ -7,10 +10,134 @@ import { DE_DE_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-c
 import { DE_DE_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import stormComposerDeMessages from "@/i18n/messages/stormComposer.de-DE.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
+import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.json";
 
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  ...profileCmsStudioMessages,
+  ...studioTemplateDescriptions,
+  ...profileCmsStudioUploadMessages,
+  ...studioWalletImportMessages,
+  "profileCms.builder.gallery.snapshot.required":
+    "Fordere eine Wallet-Momentaufnahme an und prüfe sie, bevor du diese Galerie speicherst oder veröffentlichst.",
+  "profileCms.builder.publish.savedNotCurrent":
+    "Diese signierte Veröffentlichung ist gespeichert, aber nicht die aktive Website. Prüfe den Versionsverlauf, bevor du die Website änderst.",
+  "profileCms.builder.gallery.snapshot.warning.unmeasuredImages":
+    "Einige Bildgrößen konnten nicht geprüft werden. Diese Werke behalten ihre NFT-Details ohne Bild in der Veröffentlichung. Aktualisiere die Momentaufnahme, um es erneut zu versuchen.",
+  "profileCms.builder.json.pending":
+    "Übernimm oder verwirf deine JSON-Änderungen vor dem Speichern oder Veröffentlichen.",
+  "profileCms.builder.json.reviewPending": "JSON-Änderungen prüfen",
+  "profileCms.builder.json.discardPending": "JSON-Änderungen verwerfen",
+  "profileCms.builder.history.actionFailed":
+    "Die Website konnte nicht aktualisiert werden. Aktualisiere den Versionsverlauf und versuche es erneut.",
+  "profileCms.builder.gallery.snapshot.warning.unresolvedWallets":
+    "Einige Wallets konnten nicht zugeordnet werden und fehlen in dieser Momentaufnahme.",
+  "profileCms.builder.gallery.snapshot.warning.truncated":
+    "Die Momentaufnahme hat die Höchstzahl an Werken erreicht. Einige erfasste Werke werden nicht angezeigt.",
+  "profileCms.builder.api.serverValidationInvalid":
+    "Die Serverprüfung hat Probleme gefunden, die die Veröffentlichung dieses Pakets verhindern.",
+  "profileCms.builder.drafts.title": "Gespeicherte Entwürfe",
+  "profileCms.builder.drafts.refresh": "Entwürfe aktualisieren",
+  "profileCms.builder.drafts.loading": "Wird geladen …",
+  "profileCms.builder.drafts.failed":
+    "Gespeicherte Entwürfe konnten nicht geladen werden.",
+  "profileCms.builder.drafts.empty": "Noch keine gespeicherten Entwürfe.",
+  "profileCms.builder.drafts.version": "Version {version}",
+  "profileCms.builder.drafts.load": "Laden",
+  "profileCms.builder.drafts.status.draft": "Entwurf",
+  "profileCms.builder.drafts.status.validating": "Wird geprüft",
+  "profileCms.builder.drafts.status.published": "Veröffentlicht",
+  "profileCms.builder.drafts.status.failed": "Fehlgeschlagen",
+  "profileCms.builder.drafts.status.archived": "Archiviert",
+  "profileCms.builder.drafts.status.superseded": "Ersetzt",
+  "profileCms.builder.drafts.loadFailed":
+    "Dieser Entwurf konnte nicht in den Editor geladen werden.",
+  "profileCms.builder.publish.title": "Veröffentlichen",
+  "profileCms.builder.publish.description":
+    "Speichere und prüfe das Paket, lade es in den dezentralen Speicher hoch, signiere es mit deiner Wallet und veröffentliche es als Hauptwebsite deines Profils.",
+  "profileCms.builder.publish.publish": "Website veröffentlichen",
+  "profileCms.builder.publish.publishing": "Wird veröffentlicht …",
+  "profileCms.builder.publish.retry": "Erneut versuchen",
+  "profileCms.builder.publish.reSign": "Erneut signieren",
+  "profileCms.builder.publish.walletRequired":
+    "Verbinde die mit diesem Profil verknüpfte Wallet, um die Veröffentlichung zu signieren.",
+  "profileCms.builder.publish.safeNotice":
+    "Smart-Contract-Wallet erkannt. Deine Wallet muss diese Signaturanfrage unterstützen. Andernfalls verwende eine andere für dieses Profil autorisierte Wallet.",
+  "profileCms.builder.publish.success":
+    "Veröffentlicht. Deine Profilwebsite ist jetzt hier erreichbar:",
+  "profileCms.builder.publish.step.validate": "Entwurf speichern und prüfen",
+  "profileCms.builder.publish.step.upload": "In den Speicher hochladen",
+  "profileCms.builder.publish.step.sign": "Mit der Wallet signieren",
+  "profileCms.builder.publish.step.publish": "Website freischalten",
+  "profileCms.builder.publish.error.validationInvalid":
+    "Die Serverprüfung hat blockierende Probleme gefunden. Behebe sie und veröffentliche erneut.",
+  "profileCms.builder.publish.error.saveFailed":
+    "Der Entwurf konnte vor der Veröffentlichung nicht gespeichert werden.",
+  "profileCms.builder.publish.error.validateFailed":
+    "Die Serverprüfung ist fehlgeschlagen.",
+  "profileCms.builder.publish.error.uploadFailed":
+    "Das Paket konnte nicht in den dezentralen Speicher hochgeladen werden.",
+  "profileCms.builder.publish.error.signatureRejected":
+    "Die Signaturanfrage wurde in deiner Wallet abgebrochen.",
+  "profileCms.builder.publish.error.signatureFailed":
+    "Die Signierung ist fehlgeschlagen. Prüfe deine Wallet und versuche es erneut.",
+  "profileCms.builder.publish.error.deadlineExpired":
+    "Die Signatur ist vor der Veröffentlichung abgelaufen. Signiere erneut, um fortzufahren.",
+  "profileCms.builder.publish.error.publishConflict":
+    "Die veröffentlichte Website wurde während dieses Versuchs geändert. Prüfe den Versionsverlauf vor einer erneuten Veröffentlichung.",
+  "profileCms.builder.publish.error.storagePending":
+    "Der dauerhafte Speicher stellt deine signierte Veröffentlichung noch bereit. Warte kurz und versuche es erneut. Deine Signatur und die gespeicherte Version werden wiederverwendet.",
+  "profileCms.builder.publish.signedPublication": "Signierte Veröffentlichung",
+  "profileCms.builder.publish.signedPublicationHash": "Manifest-Hash: {hash}",
+  "profileCms.builder.publish.error.publishFailed":
+    "Die Veröffentlichung ist fehlgeschlagen. Bitte versuche es erneut.",
+  "profileCms.builder.history.title": "Versionsverlauf",
+  "profileCms.builder.history.refresh": "Aktualisieren",
+  "profileCms.builder.history.loading": "Wird geladen …",
+  "profileCms.builder.history.unavailable":
+    "Verbinde dich als Inhaber dieses Profils, um veröffentlichte Versionen anzuzeigen.",
+  "profileCms.builder.history.failed":
+    "Der Versionsverlauf konnte nicht geladen werden.",
+  "profileCms.builder.history.empty": "Noch keine gespeicherten Versionen.",
+  "profileCms.builder.history.version": "Version {version}",
+  "profileCms.builder.history.primary": "Hauptversion",
+  "profileCms.builder.history.rollback": "Als Hauptversion festlegen",
+  "profileCms.builder.history.rollbackFailed":
+    "Die Wiederherstellung ist fehlgeschlagen.",
+  "profileCms.builder.history.confirm.title": "Wiederherstellung bestätigen",
+  "profileCms.builder.history.confirm.body":
+    "Version {version} wieder als Hauptwebsite deines Profils verwenden? Sie ersetzt die aktuell veröffentlichte Version.",
+  "profileCms.builder.history.confirm.confirm": "Bestätigen",
+  "profileCms.builder.history.confirm.working": "Wird wiederhergestellt …",
+  "profileCms.builder.history.confirm.cancel": "Abbrechen",
+  "profileCms.builder.history.unpublish": "Website zurückziehen",
+  "profileCms.builder.history.unpublishConfirm":
+    "Diese Website aus dem öffentlichen Profil entfernen? Gespeicherte Versionen bleiben zur Wiederherstellung verfügbar.",
+  "profileCms.builder.recovery.title":
+    "Auf diesem Gerät ist ein ungespeicherter Entwurf verfügbar.",
+  "profileCms.builder.recovery.restore": "Entwurf wiederherstellen",
+  "profileCms.builder.recovery.discard": "Wiederherstellungskopie verwerfen",
+  "profileCms.builder.recovery.failed":
+    "Dieser Browser konnte keine Wiederherstellungskopie speichern. Speichere einen Entwurf oder lade die JSON-Datei herunter, bevor du die Seite verlässt.",
+  "profileCms.builder.recovery.unsaved": "Ungespeicherte Änderungen",
+  "profileCms.builder.recovery.saved": "Alle Änderungen gespeichert",
+  "profileCms.builder.recovery.leave":
+    "Editor mit ungespeicherten Änderungen oder während eines laufenden Vorgangs verlassen? Eine Wiederherstellungskopie bleibt erhalten, wenn der Browserspeicher verfügbar ist.",
+  "profileCms.builder.recovery.replace":
+    "Den aktuellen Editorinhalt ersetzen? Speichere oder lade deine Änderungen zuerst herunter.",
+  "profileCms.builder.editor.advanced":
+    "Dieses Paket enthält eine individuelle Website. Bearbeite sie mit JSON oder Agent, um alle Seiten und Medien zu erhalten.",
+  "profileCms.builder.history.changed":
+    "Die öffentliche Website wurde aktualisiert. Es kann einige Sekunden dauern, bis Besucher die Änderung sehen.",
+  "profileCms.builder.publish.error.stale":
+    "Der Entwurf oder die Wallet wurde geändert. Starte die Veröffentlichung erneut.",
+  "navigation.primary.loading.home": "Startseite wird geladen",
+  "navigation.primary.loading.discovery": "Entdecken wird geladen",
+  "navigation.primary.loading.network": "Netzwerk wird geladen",
+  "navigation.primary.loading.collections": "Sammlungen werden geladen",
+  "navigation.primary.loading.notifications":
+    "Benachrichtigungen werden geladen",
   "headerSearch.wave.byAuthor": "von {author}",
   "headerSearch.wave.serial": "Wave Nr. {serial}",
   "headerSearch.wave.label": "Wave",
@@ -319,6 +446,10 @@ export const DE_DE_MESSAGES = {
   "profileCms.builder.gallery.review.title": "Snapshot-Überprüfung",
   "profileCms.builder.gallery.settings": "Galerieeinstellungen",
   "profileCms.builder.gallery.snapshot.api": "Server-Snapshot",
+  "profileCms.builder.gallery.snapshot.signInRequired":
+    "Melden Sie sich an, um einen Wallet-Snapshot anzufordern.",
+  "profileCms.builder.gallery.snapshot.sessionExpired":
+    "Ihre Sitzung konnte nicht bestätigt werden. Melden Sie sich erneut an, um einen Wallet-Snapshot anzufordern.",
   "profileCms.builder.gallery.snapshot.failed":
     "Galerie-Snapshot konnte nicht erstellt werden.",
   "profileCms.builder.gallery.snapshot.fixture": "Fixture-Snapshot",
@@ -359,7 +490,7 @@ export const DE_DE_MESSAGES = {
   "profileCms.builder.publishState.packageHash": "Paket-Hash",
   "profileCms.builder.publishState.payloadHash": "Nutzlast-Hash",
   "profileCms.builder.publishState.pending":
-    "Speichern und Veröffentlichen erfordern die Backend-Builder-Endpunkte. Diese Benutzeroberfläche wird keine Produktionsveröffentlichung simulieren.",
+    "Speichere einen Entwurf, um eine bearbeitbare Version zu behalten. Veröffentliche die Website, wenn du bereit bist, sie öffentlich zu machen.",
   "profileCms.builder.publishState.title":
     "Entwurfs- und Veröffentlichungsstatus",
   "profileCms.builder.siteSettings": "Website-Einstellungen",

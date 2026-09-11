@@ -48,6 +48,8 @@ export type LabelValueRow = {
 };
 
 export type RendererContext = {
+  readonly onNavigatePage?: ((pageId: string) => void) | undefined;
+  readonly appearance?: "studio" | undefined;
   readonly cmsPackage: CmsPackageV1;
   readonly assetMap: Map<string, CmsAssetV1>;
   readonly pageMap: Map<string, CmsPageV1>;

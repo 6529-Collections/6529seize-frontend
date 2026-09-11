@@ -2,9 +2,12 @@
 
 Your work has a history. Keep it with the work.
 
-Artwork documentation brings the artist's account, credits, original files,
-rights information and display guidance together in a private workspace. It
-starts before a token exists and can grow as the artist adds information.
+Artwork documentation brings the artist's account, credits, final files,
+rights information and display guidance together in a draft workspace. The
+artwork form prepares one record intended for publication with the work.
+It starts before a token exists and can grow as the artist adds information.
+Use **Questions for the team** at the end for drafting discussion, then resolve
+uncertainties before finalizing the public account.
 
 ## Open your workspace
 
@@ -31,7 +34,8 @@ and contributors, rights and people, preservation and display, and review.
 - Choose your public artist name and preferred credit. Credit collaborators
   and describe their roles. A legal name is not required for your artist name.
 - Record the intended rights, third-party material and any depicted people.
-  Keep consent documents and sensitive details in restricted evidence.
+  Include the information you want published with the artwork. Do not upload
+  consent documents, private working files or sensitive evidence here.
 - Explain the properties that matter: crop, orientation, color, tonal balance,
   detail, scale and changes you would or would not consider acceptable.
 - Add the optional artist interview when useful. Written answers and
@@ -40,15 +44,38 @@ and contributors, rights and people, preservation and display, and review.
 Each section explains why the information matters. Required questions depend
 on the documentation profile and the answers already supplied. Recommended
 questions can add useful context without blocking review. Where a question
-allows it, record uncertainty or withhold a sensitive location instead of
-guessing.
+allows it, record uncertainty instead of guessing. A general location is
+enough; include only the location information you want published.
+
+## Start with a worked example
+
+Each section offers **See a complete example for this section**. An empty
+section opens the example so you can review a good answer before writing.
+You can close it to reach your form and reopen it after adding your answers.
+The fictional photograph *The Space Between*, by fictional artist Ari Example,
+provides a consistent account across all eight modules and the final review.
+It includes a complete caption and statement, construction and editing history,
+public credits, rights intentions and practical display guidance.
+
+**Read a worked example** beside a question shows the relevant answer. Examples
+follow the questions available in your record. They are separate from your
+artwork: reading one never adds an answer, chooses a file or confirms a fact.
+
+For selected empty narrative fields, **Adapt this writing structure** opens
+working text with `[[prompts]]` to replace. Write in your own voice and enter the
+language for a language-specific answer. **Use my answer** adds your reviewed
+text to the form, where ordinary autosave applies. Remaining double-bracket prompts,
+invalid answers and attempts to replace an existing answer are blocked. This
+working text is kept only in the current section until applied or discarded.
+Dates, identity, equipment, rights, permissions and file choices remain your
+own deliberate answers; fictional facts are never inserted for you.
 
 The Keys and Gates profile applies the commission's photography requirements
 and asks how the work connects to its theme. Selection for the program does
 not by itself mean that a work has been minted, purchased or accessioned by
 the Museum.
 
-## Saving and private files
+## Saving and artwork files
 
 Changes save to 6529's database. Check the save status before leaving. If
 saving fails or your session expires, keep the window open while you retry
@@ -68,11 +95,32 @@ context, 100 files per context and five simultaneous upload sessions. A paused
 multipart upload can require selecting the same file again so the client can
 verify its contents before resuming.
 
-All documentation stays private during this phase. **Intended for a future
-public record** records your publication intention; it does not publish the
-answer or file. Private contact information and sensitive rights evidence
-remain restricted. Original file access can reveal embedded metadata, which
-is why it requires explicit permission.
+The draft is stored with 6529 while you prepare it. Every answer and selected
+file in a new publication form is intended to become part of the public artwork
+record; there are no per-answer privacy choices. Review files for embedded
+information before adding them. A later step handles publication and minting.
+
+Earlier records keep their original publication choices and any restricted
+material. They are clearly labelled as earlier records and are not silently
+converted. Saved artist information or submission proposals containing
+incompatible material cannot be copied into a publication record. Ask the
+team before carrying information forward.
+
+## Questions before finalizing
+
+At the end of **Review and approve**, use **Questions for the team** for things
+you need to clarify. For example, ask which final file to use or how to explain
+a source. Questions are sent when you choose **Send question to the team**;
+they do not use the artwork form's autosave. If sending fails, the unsent text
+stays in the current window so you can retry.
+
+The artist and authorized reviewers can discuss and resolve each question.
+Resolved questions remain available as drafting history and can be reopened.
+This conversation is a drafting tool: questions and replies stay outside the
+artwork answers, confirmed artwork versions and future publication record.
+Resolve the discussion, then put any relevant final answer into the artwork
+form in the wording you want published. Do not use questions to deposit private
+files or create an appendix to the work.
 
 ## Confirm and review
 

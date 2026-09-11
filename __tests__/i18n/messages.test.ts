@@ -1,6 +1,7 @@
 import {
   compareLocalized,
   formatDate,
+  formatDecimalString,
   formatInteger,
   formatNumber,
   formatRelativeTime,
@@ -504,6 +505,17 @@ describe("frontend i18n helpers", () => {
     expect(formatTime("de-DE", sampleTime)).toMatch(/^\d{2}:\d{2}$/);
     expect(formatTime("en-US", Number.NaN)).toBe("");
     expect(formatTime("en-US", null)).toBe("");
+  });
+
+  it("formats exact decimal strings without losing digits", () => {
+    expect(
+      formatDecimalString("en-US", "12345678901234567890.000000000000000001")
+    ).toBe("12,345,678,901,234,567,890.000000000000000001");
+    expect(formatDecimalString("de-DE", "-0.000000000000000001")).toBe(
+      "-0,000000000000000001"
+    );
+    expect(formatDecimalString("en-US", "+0")).toBe("+0");
+    expect(formatDecimalString("en-US", null)).toBe("—");
   });
 
   it("backs title-context copy with messages and locale-formatted counts", () => {

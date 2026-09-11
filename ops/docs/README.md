@@ -29,7 +29,8 @@ March 19, 2026.
 - Open profile routes and tabs:
   [Profiles](profiles/README.md),
   [Profile Troubleshooting](profiles/troubleshooting/README.md)
-- Browse memes, collections, minting, and media actions: [Media](media/README.md)
+- Browse artwork, trade and complete profile sets: [Collect](media/collecting.md),
+  [Media](media/README.md)
 - Review a proposed permanent contract before deployment:
   [Public Contract Reviews](public-reviews/README.md)
 - Run Drop Forge craft and launch claim operations: [Drop Forge](drop-forge/README.md)
@@ -108,7 +109,8 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   `/{user}`, `/{user}/brain`, `/{user}/collected`, `/{user}/followers`,
   `/{user}/groups`, `/{user}/identity`, `/{user}/proxy`,
   `/{user}/subscriptions`, `/{user}/waves`, `/{user}/xtdh`,
-  `/{user}/cms/builder` when the profile CMS builder flag is enabled,
+  `/{user}/cms/builder` for the website studio when enabled, custom published
+  pages such as `/{user}/studio`,
   `/about/primary-address`
 - Media:
   `/the-memes`, `/the-memes/mint`, `/the-memes/{id}`,

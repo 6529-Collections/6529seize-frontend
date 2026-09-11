@@ -1,3 +1,6 @@
+import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.fr-FR.json";
+import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.fr-FR.json";
+import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.fr-FR.json";
 import { FR_FR_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
@@ -7,8 +10,133 @@ import { FR_FR_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-c
 import { FR_FR_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
+import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.json";
 
 export const FR_FR_MESSAGES = {
+  ...profileCmsStudioMessages,
+  ...studioTemplateDescriptions,
+  ...profileCmsStudioUploadMessages,
+  ...studioWalletImportMessages,
+  "profileCms.builder.gallery.snapshot.required":
+    "Demandez et vérifiez un instantané des portefeuilles avant d’enregistrer ou de publier cette galerie.",
+  "profileCms.builder.publish.savedNotCurrent":
+    "Cette publication signée est enregistrée, mais ce n’est pas le site actif. Consultez l’historique des versions avant de modifier le site.",
+  "profileCms.builder.gallery.snapshot.warning.unmeasuredImages":
+    "Les dimensions de certaines images n’ont pas pu être vérifiées. Ces œuvres conservent leurs informations NFT sans image dans la publication. Actualisez l’instantané pour réessayer.",
+  "profileCms.builder.json.pending":
+    "Appliquez ou abandonnez vos modifications JSON avant d’enregistrer ou de publier.",
+  "profileCms.builder.json.reviewPending": "Examiner les modifications JSON",
+  "profileCms.builder.json.discardPending": "Abandonner les modifications JSON",
+  "profileCms.builder.history.actionFailed":
+    "Impossible de mettre le site à jour. Actualisez l’historique des versions et réessayez.",
+  "profileCms.builder.gallery.snapshot.warning.unresolvedWallets":
+    "Certains portefeuilles n’ont pas pu être identifiés et sont exclus de cet instantané.",
+  "profileCms.builder.gallery.snapshot.warning.truncated":
+    "La limite d’œuvres de l’instantané a été atteinte. Certaines œuvres indexées ne sont pas affichées.",
+  "profileCms.builder.api.serverValidationInvalid":
+    "La validation du serveur a détecté des problèmes bloquants dans ce paquet.",
+  "profileCms.builder.drafts.title": "Brouillons enregistrés",
+  "profileCms.builder.drafts.refresh": "Actualiser les brouillons",
+  "profileCms.builder.drafts.loading": "Chargement des brouillons…",
+  "profileCms.builder.drafts.failed":
+    "Impossible de charger les brouillons enregistrés.",
+  "profileCms.builder.drafts.empty": "Aucun brouillon enregistré.",
+  "profileCms.builder.drafts.version": "Version {version}",
+  "profileCms.builder.drafts.load": "Charger",
+  "profileCms.builder.drafts.status.draft": "Brouillon",
+  "profileCms.builder.drafts.status.validating": "Validation en cours",
+  "profileCms.builder.drafts.status.published": "Publié",
+  "profileCms.builder.drafts.status.failed": "Échec",
+  "profileCms.builder.drafts.status.archived": "Archivé",
+  "profileCms.builder.drafts.status.superseded": "Remplacé",
+  "profileCms.builder.drafts.loadFailed":
+    "Impossible de charger ce brouillon dans l’éditeur.",
+  "profileCms.builder.publish.title": "Publier",
+  "profileCms.builder.publish.description":
+    "Enregistrez, validez, envoyez vers un stockage décentralisé, signez avec votre portefeuille, puis publiez ce paquet comme site principal de votre profil.",
+  "profileCms.builder.publish.publish": "Publier le site",
+  "profileCms.builder.publish.publishing": "Publication en cours…",
+  "profileCms.builder.publish.retry": "Réessayer",
+  "profileCms.builder.publish.reSign": "Signer à nouveau",
+  "profileCms.builder.publish.walletRequired":
+    "Connectez un portefeuille lié à ce profil pour signer la publication.",
+  "profileCms.builder.publish.safeNotice":
+    "Portefeuille de contrat intelligent détecté. Votre portefeuille doit prendre en charge cette demande de signature. Sinon, utilisez un autre portefeuille autorisé pour ce profil.",
+  "profileCms.builder.publish.success":
+    "Publié. Le site de votre profil est accessible ici :",
+  "profileCms.builder.publish.step.validate":
+    "Enregistrer et valider le brouillon",
+  "profileCms.builder.publish.step.upload": "Envoyer vers le stockage",
+  "profileCms.builder.publish.step.sign": "Signer avec le portefeuille",
+  "profileCms.builder.publish.step.publish": "Mettre le site en ligne",
+  "profileCms.builder.publish.error.validationInvalid":
+    "La validation du serveur a détecté des problèmes bloquants. Corrigez-les, puis publiez à nouveau.",
+  "profileCms.builder.publish.error.saveFailed":
+    "Impossible d’enregistrer le brouillon avant la publication.",
+  "profileCms.builder.publish.error.validateFailed":
+    "La demande de validation du serveur a échoué.",
+  "profileCms.builder.publish.error.uploadFailed":
+    "L’envoi du paquet vers le stockage décentralisé a échoué.",
+  "profileCms.builder.publish.error.signatureRejected":
+    "La demande de signature a été annulée dans votre portefeuille.",
+  "profileCms.builder.publish.error.signatureFailed":
+    "La signature a échoué. Vérifiez votre portefeuille et réessayez.",
+  "profileCms.builder.publish.error.deadlineExpired":
+    "La signature a expiré avant la publication. Signez à nouveau pour continuer.",
+  "profileCms.builder.publish.error.publishConflict":
+    "Le site publié a changé pendant cette tentative. Consultez l’historique des versions avant de publier à nouveau.",
+  "profileCms.builder.publish.error.storagePending":
+    "Le stockage permanent prépare encore l’accès à votre publication signée. Patientez, puis réessayez. Votre signature et la version enregistrée seront réutilisées.",
+  "profileCms.builder.publish.signedPublication": "Publication signée",
+  "profileCms.builder.publish.signedPublicationHash":
+    "Empreinte du manifeste : {hash}",
+  "profileCms.builder.publish.error.publishFailed":
+    "La publication a échoué. Veuillez réessayer.",
+  "profileCms.builder.history.title": "Historique des versions",
+  "profileCms.builder.history.refresh": "Actualiser",
+  "profileCms.builder.history.loading": "Chargement…",
+  "profileCms.builder.history.unavailable":
+    "Connectez-vous en tant que propriétaire de ce profil pour voir les versions publiées.",
+  "profileCms.builder.history.failed":
+    "Impossible de charger l’historique des versions.",
+  "profileCms.builder.history.empty": "Aucune version enregistrée.",
+  "profileCms.builder.history.version": "Version {version}",
+  "profileCms.builder.history.primary": "Principale",
+  "profileCms.builder.history.rollback": "Définir comme principale",
+  "profileCms.builder.history.rollbackFailed": "La restauration a échoué.",
+  "profileCms.builder.history.confirm.title": "Confirmer la restauration",
+  "profileCms.builder.history.confirm.body":
+    "Rétablir la version {version} comme site principal de votre profil ? Cela remplace la version actuellement publiée.",
+  "profileCms.builder.history.confirm.confirm": "Confirmer",
+  "profileCms.builder.history.confirm.working": "Restauration en cours…",
+  "profileCms.builder.history.confirm.cancel": "Annuler",
+  "profileCms.builder.history.unpublish": "Dépublier le site",
+  "profileCms.builder.history.unpublishConfirm":
+    "Retirer ce site du profil public ? Ses versions enregistrées pourront toujours être restaurées.",
+  "profileCms.builder.recovery.title":
+    "Un brouillon non enregistré est disponible sur cet appareil.",
+  "profileCms.builder.recovery.restore": "Récupérer le brouillon",
+  "profileCms.builder.recovery.discard": "Supprimer la copie de récupération",
+  "profileCms.builder.recovery.failed":
+    "Ce navigateur n’a pas pu enregistrer de copie de récupération. Enregistrez un brouillon ou téléchargez le JSON avant de quitter.",
+  "profileCms.builder.recovery.unsaved": "Modifications non enregistrées",
+  "profileCms.builder.recovery.saved":
+    "Toutes les modifications sont enregistrées",
+  "profileCms.builder.recovery.leave":
+    "Quitter l’éditeur avec des modifications non enregistrées ou une opération en cours ? Une copie de récupération est conservée si le stockage du navigateur est disponible.",
+  "profileCms.builder.recovery.replace":
+    "Remplacer le contenu actuel de l’éditeur ? Enregistrez ou téléchargez d’abord vos modifications.",
+  "profileCms.builder.editor.advanced":
+    "Ce paquet contient un site personnalisé. Utilisez JSON ou Agent pour le modifier en conservant toutes les pages et ressources.",
+  "profileCms.builder.history.changed":
+    "Le site public a été mis à jour. Les visiteurs verront le changement dans quelques secondes.",
+  "profileCms.builder.publish.error.stale":
+    "Le brouillon ou le portefeuille a changé. Relancez la publication.",
+  "navigation.primary.loading.home": "Chargement de l’accueil",
+  "navigation.primary.loading.discovery": "Chargement de la découverte",
+  "navigation.primary.loading.network": "Chargement du réseau",
+  "navigation.primary.loading.collections": "Chargement des collections",
+  "navigation.primary.loading.notifications": "Chargement des notifications",
   "headerSearch.wave.byAuthor": "par {author}",
   "headerSearch.wave.serial": "Wave nº {serial}",
   "headerSearch.wave.label": "Wave",
@@ -320,6 +448,10 @@ export const FR_FR_MESSAGES = {
   "profileCms.builder.gallery.review.title": "Examen de la copie d'écran",
   "profileCms.builder.gallery.settings": "Paramètres de la galerie",
   "profileCms.builder.gallery.snapshot.api": "Copie d'écran du serveur",
+  "profileCms.builder.gallery.snapshot.signInRequired":
+    "Connectez-vous pour demander un instantané de portefeuille.",
+  "profileCms.builder.gallery.snapshot.sessionExpired":
+    "Votre session n’a pas pu être vérifiée. Reconnectez-vous pour demander un instantané de portefeuille.",
   "profileCms.builder.gallery.snapshot.failed":
     "Impossible de créer la copie d'écran de la galerie.",
   "profileCms.builder.gallery.snapshot.fixture":
@@ -362,7 +494,7 @@ export const FR_FR_MESSAGES = {
   "profileCms.builder.publishState.packageHash": "Hash du paquet",
   "profileCms.builder.publishState.payloadHash": "Hash de la charge utile",
   "profileCms.builder.publishState.pending":
-    "L'enregistrement et la publication nécessitent les points de terminaison du serveur. Cette interface utilisateur ne simulera pas une publication de production.",
+    "Enregistrez un brouillon pour conserver une version modifiable. Publiez lorsque vous êtes prêt à rendre ce site public.",
   "profileCms.builder.publishState.title":
     "État du brouillon et de la publication",
   "profileCms.builder.siteSettings": "Paramètres du site",
