@@ -13,6 +13,7 @@
 // version, package id and draft id come from server responses (never fabricated
 // client-side); the storage receipt comes from the backend upload endpoint.
 import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
+import { getCmsPublicPath } from "@/lib/profile-cms/runtime/routes";
 import {
   getProfileCmsPackageById,
   listProfileCmsPackagesForProfile,
@@ -110,6 +111,7 @@ export type ProfileCmsPublishContext = {
   readonly payloadHash: string;
   readonly packageHash: string;
   readonly primaryPath: string;
+  readonly publicPath?: string | undefined;
   readonly receipt: ProfileCmsStorageReceipt;
   readonly expectedCurrentPackageId?: string | null | undefined;
   readonly expectedCurrentPackageHash?: string | undefined;
@@ -219,9 +221,14 @@ export function buildProfileCmsPublishTypedData(params: {
 
 export function getProfileCmsPublishedUrl(
   handle: string,
-  baseUrl: string = DEFAULT_PUBLISHED_BASE_URL
+  baseUrl: string = DEFAULT_PUBLISHED_BASE_URL,
+  publicPath?: string
 ): string {
-  return `${baseUrl}/${handle}/index.html`;
+  const profileRoot = `/${handle.toLowerCase()}/`;
+  const path = publicPath?.startsWith(profileRoot)
+    ? publicPath
+    : `${profileRoot}index.html`;
+  return new URL(path, baseUrl).href;
 }
 
 /**
@@ -432,6 +439,10 @@ async function uploadPreparedProfileCms(
   const context: ProfileCmsPublishContext = {
     ...uploadContext,
     receipt,
+    publicPath: getCmsPublicPath(
+      uploaded.cmsPackage,
+      uploaded.cmsPackage.site.base_path
+    ),
   };
 
   return { ok: true, context };
@@ -563,7 +574,11 @@ async function submitProfileCmsPublish(
       ok: true,
       published,
       isCurrent: published.isPrimary,
-      publishedUrl: getProfileCmsPublishedUrl(published.profileHandle, baseUrl),
+      publishedUrl: getProfileCmsPublishedUrl(
+        published.profileHandle,
+        baseUrl,
+        context.publicPath
+      ),
     };
   } catch (error) {
     const status = getErrorStatus(error);

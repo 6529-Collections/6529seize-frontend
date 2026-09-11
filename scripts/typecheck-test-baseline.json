@@ -372,7 +372,6 @@
     "__tests__/components/profile-activity/list/ProfileActivityLogsList.test.tsx": 1,
     "__tests__/components/profile-activity/ProfileActivityLogProxyAction.test.tsx": 1,
     "__tests__/components/profile-activity/ProfileActivityLogProxyActionChange.test.tsx": 1,
-    "__tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx": 9,
     "__tests__/components/profile-cms/CmsSiteRenderer.test.tsx": 3,
     "__tests__/components/profile-cms/CmsThreeDViewer.test.tsx": 3,
     "__tests__/components/providers/AppKitAdapterManager.test.ts": 1,

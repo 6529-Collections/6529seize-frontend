@@ -1,3 +1,6 @@
+import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.es-ES.json";
+import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.es-ES.json";
+import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.es-ES.json";
 import { ES_ES_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { ES_ES_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { ES_ES_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
@@ -7,8 +10,13 @@ import { ES_ES_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-c
 import { ES_ES_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
+import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
 
 export const ES_ES_MESSAGES = {
+  ...profileCmsStudioMessages,
+  ...studioTemplateDescriptions,
+  ...profileCmsStudioUploadMessages,
+  ...studioWalletImportMessages,
   "profileCms.builder.gallery.snapshot.required":
     "Solicita y revisa una captura de las carteras antes de guardar o publicar esta galería.",
   "profileCms.builder.publish.savedNotCurrent":

@@ -1,3 +1,6 @@
+import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.fr-FR.json";
+import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.fr-FR.json";
+import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.fr-FR.json";
 import { FR_FR_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
@@ -7,8 +10,13 @@ import { FR_FR_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-c
 import { FR_FR_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
+import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.json";
 
 export const FR_FR_MESSAGES = {
+  ...profileCmsStudioMessages,
+  ...studioTemplateDescriptions,
+  ...profileCmsStudioUploadMessages,
+  ...studioWalletImportMessages,
   "profileCms.builder.gallery.snapshot.required":
     "Demandez et vérifiez un instantané des portefeuilles avant d’enregistrer ou de publier cette galerie.",
   "profileCms.builder.publish.savedNotCurrent":

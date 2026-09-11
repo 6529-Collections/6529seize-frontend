@@ -1,4 +1,8 @@
+import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.en-US.json";
+import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.en-US.json";
+import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.en-US.json";
 /* eslint max-lines: "off" */
+import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-US.json";
 
 import {
   DISTRIBUTION_MESSAGES,
@@ -2755,6 +2759,10 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 } as const);
 
 export const EN_US_MESSAGES = {
+  ...profileCmsStudioMessages,
+  ...studioTemplateDescriptions,
+  ...profileCmsStudioUploadMessages,
+  ...studioWalletImportMessages,
   "nftPicker.address.label": "Select collection",
   "nftPicker.address.placeholder": "Paste an Ethereum contract address…",
   "nftPicker.address.help":

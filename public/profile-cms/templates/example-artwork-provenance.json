@@ -1,0 +1,33 @@
+{
+  "description": "Original demonstration images generated for the 6529 website template library. These are fictional example works, not NFTs or works attributed to a member or third-party artist.",
+  "generated_on": "2026-09-10",
+  "generator": "OpenAI image generation tool",
+  "model": null,
+  "model_note": "The tool did not expose a selectable or verifiable model identifier.",
+  "images": [
+    {
+      "title": "Quiet Signal",
+      "path": "/profile-cms/templates/quiet-signal.png",
+      "sha256": "a8f0e51f3a34136ba6633330116ca39e55ee09b4df8c67db5c17a1e8a65f02c6",
+      "width": 1536,
+      "height": 1024,
+      "design_brief": "An original wide composition of cobalt threads and a translucent ribbon above an ivory ground, with a small vermilion accent, woven paper texture and computational topography. No frame, text, logo or named-artist imitation."
+    },
+    {
+      "title": "Afterimage",
+      "path": "/profile-cms/templates/afterimage.png",
+      "sha256": "a6ba323b786759b2a33ff2b2f76cbfe52151f2ff7fc2dcee5367793efb57b5d4",
+      "width": 1122,
+      "height": 1402,
+      "design_brief": "An original vertical composition of a looping polished aluminum knot floating above a burnt-orange ground, with a cream reflection and subtle shadow. No frame, text or named-artist imitation."
+    },
+    {
+      "title": "Night Grid",
+      "path": "/profile-cms/templates/night-grid.png",
+      "sha256": "2e98427074714484fc413110198a796ddd9f9e7fa2c5e598000eb5b341bb3ac6",
+      "width": 1254,
+      "height": 1254,
+      "design_brief": "An original square composition of an imaginary black city grid with tiny gold and teal rectangles, an off-center diagonal and printed texture. No frame, text or named-artist imitation."
+    }
+  ]
+}
