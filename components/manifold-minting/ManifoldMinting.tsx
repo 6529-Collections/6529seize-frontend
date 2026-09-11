@@ -535,7 +535,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     }
 
     return (
-      <div className="tw-order-1 tw-flex tw-items-center tw-justify-center tw-pt-4 md:tw-order-2 md:tw-col-span-7 md:tw-h-screen md:tw-pt-0">
+      <div className="tw-order-1 tw-flex tw-items-center tw-justify-center tw-pt-4 md:tw-order-2 md:tw-col-span-7 md:tw-self-start md:tw-pt-8">
         <NFTImage
           nft={nftImage}
           animation={true}

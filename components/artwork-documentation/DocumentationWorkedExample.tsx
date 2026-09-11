@@ -112,7 +112,7 @@ export default function DocumentationWorkedExample({
                           )?.text
                         : undefined) ?? documentationFieldLabel(field.id);
                     return (
-                      <div key={field.id} className="tw-py-4">
+                      <div key={field.id} className="tw-border-0 tw-py-4">
                         <dt className="tw-text-sm tw-font-semibold tw-text-iron-100">
                           {label}
                         </dt>
