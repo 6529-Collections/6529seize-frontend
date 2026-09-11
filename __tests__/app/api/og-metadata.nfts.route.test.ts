@@ -32,6 +32,7 @@ jest.mock("next/server", () => ({
 jest.mock("@/config/env", () => ({
   publicEnv: {
     BASE_ENDPOINT: "https://6529.test",
+    API_ENDPOINT: "https://api.6529.test",
   },
 }));
 
@@ -40,6 +41,7 @@ jest.mock("@/app/api/og-metadata/profiles/[identity]/font", () => ({
 }));
 
 import { GET } from "@/app/api/og-metadata/nfts/[contract]/[id]/route";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import React from "react";
 
 const collectImageSrcs = (node: React.ReactNode): string[] => {
@@ -146,6 +148,77 @@ describe("/api/og-metadata/nfts/[contract]/[id]", () => {
     expect(textNodes).not.toContain("#10,000,000,042");
     expect(response).toBe(mockImageResponse.mock.results[0]?.value);
   });
+
+  it.each(["", "?format=landscape"])(
+    "resolves artwork for a token URL without display parameters (%s)",
+    async (query) => {
+      const metadata = new TextEncoder().encode(
+        JSON.stringify({
+          data: [
+            {
+              id: 542,
+              contract: MEMES_CONTRACT,
+              name: "Open Source",
+              artist: "vertigo",
+              scaled: "https://cdn.test/542.png",
+            },
+          ],
+        })
+      );
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        headers: new Headers({ "content-type": "application/json" }),
+        body: {
+          getReader: () => ({
+            read: jest
+              .fn()
+              .mockResolvedValueOnce({ done: false, value: metadata })
+              .mockResolvedValue({ done: true }),
+            releaseLock: jest.fn(),
+            cancel: jest.fn().mockResolvedValue(undefined),
+          }),
+        },
+      });
+      await GET(
+        {
+          url: `https://6529.test/api/og-metadata/nfts/${MEMES_CONTRACT}/542${query}`,
+        } as Request,
+        { params: Promise.resolve({ contract: MEMES_CONTRACT, id: "542" }) }
+      );
+      const element = mockImageResponse.mock.calls[0]?.[0] as React.ReactNode;
+      expect(collectTextNodes(element).join(" ")).toContain("Open Source");
+      expect(collectTextNodes(element).join(" ")).toContain("vertigo");
+      expect(
+        collectImageSrcs(element).some(
+          (src) =>
+            src.includes("/api/og-metadata/image?") ||
+            src.startsWith("data:image/png;base64,")
+        )
+      ).toBe(true);
+    }
+  );
+
+  it.each(["", "?format=landscape"])(
+    "preserves default fallback and explicit failure when metadata is unavailable (%s)",
+    async (query) => {
+      mockFetch.mockResolvedValueOnce({ ok: false });
+      const response = await GET(
+        {
+          url: `https://6529.test/api/og-metadata/nfts/${MEMES_CONTRACT}/542${query}`,
+        } as Request,
+        { params: Promise.resolve({ contract: MEMES_CONTRACT, id: "542" }) }
+      );
+      if (query === "") {
+        expect(mockImageResponse).toHaveBeenCalledTimes(1);
+        expect(
+          collectTextNodes(mockImageResponse.mock.calls[0]?.[0]).join(" ")
+        ).toContain("NFT #542");
+      } else {
+        expect(response.status).toBe(502);
+        expect(mockImageResponse).not.toHaveBeenCalled();
+      }
+    }
+  );
 
   it("preserves long image URLs without text truncation", async () => {
     const imageUrl = `https://cdn.test/assets/${"card-path-".repeat(

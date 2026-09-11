@@ -32,8 +32,9 @@ Parent: [NextGen Index](README.md)
 2. Review token art in `2K` mode.
 3. Switch to high-res or `Live` when needed.
 4. In high-res mode, wait for the loading overlay, then zoom/drag.
-5. Use media actions: light viewer, dark viewer, `Download`, `Open in new tab`,
-   and `Fullscreen`. Use `Share artwork` for link posts, copied captions, and
+5. Use the control strip below the artwork: light viewer, dark viewer,
+   `Download`, `Open in new tab`, and `Fullscreen`. Select the `Share artwork`
+   icon in that strip for link posts, copied captions, and
    feed/Story image exports; see [Artwork Sharing](../media/nft/feature-artwork-sharing.md).
 6. Switch token views (`About`, `Provenance`, `Display Center`, `Rarity`).
 7. If your connected wallet owns the token, use transfer controls in `About`.
@@ -52,7 +53,7 @@ Parent: [NextGen Index](README.md)
 - Slideshow and art cards open `/nextgen/token/{token}`.
 - `Live` shows iframe output only when `animation_url` exists. Otherwise, users
   stay on static image output.
-- The top media toolbar `Download` menu lists `1K`, `2K`, `4K`, `8K`, and `16K`.
+- The control strip's `Download` menu lists `1K`, `2K`, `4K`, `8K`, and `16K`.
 - `Display Center` includes rendered downloads (`1K`, `2K`, `4K`, `8K`, `16K`),
   thumbnail-use variants (`Thumbnail`, `0.5K`), and custom render launch
   options (`Animated|Static`, `Final|OG`, optional custom height).

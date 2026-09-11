@@ -498,9 +498,6 @@ export default function MemePage({
     return (
       <div className={cardHeaderClassName}>
         <div className={artworkColumnClassName}>
-          <div className="tw-mb-3 tw-flex tw-justify-end">
-            <NftArtworkShareButton nft={nft} kind="memes" locale={locale} />
-          </div>
           <div
             className={`${styles["nftImageWrapper"] ?? ""} tw-relative lg:tw-flex-1`}
           >
@@ -509,6 +506,9 @@ export default function MemePage({
               nft={nft}
               showBalance={true}
               locale={locale}
+              actions={
+                <NftArtworkShareButton nft={nft} kind="memes" locale={locale} />
+              }
             />
           </div>
           {userLoaded && (

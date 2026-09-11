@@ -587,18 +587,19 @@ export default function GradientPageComponent({
           <>
             <div className="tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-x-10 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] xl:tw-gap-x-16">
               <div className="tw-relative lg:tw-flex lg:tw-flex-col lg:tw-self-stretch">
-                <div className="tw-mb-3 tw-flex tw-justify-end">
-                  <NftArtworkShareButton
-                    nft={nft}
-                    kind="gradient"
-                    locale={locale}
-                  />
-                </div>
                 <div className="tw-relative tw-flex tw-min-w-0 tw-items-center tw-pb-5 tw-pt-2 lg:tw-flex-1">
                   <MemePageArtViewer
                     key={`${nft.contract}-${nft.id}`}
                     nft={nft}
                     showBalance={false}
+                    locale={locale}
+                    actions={
+                      <NftArtworkShareButton
+                        nft={nft}
+                        kind="gradient"
+                        locale={locale}
+                      />
+                    }
                   />
                 </div>
                 {isConnectedAddressOwner && (

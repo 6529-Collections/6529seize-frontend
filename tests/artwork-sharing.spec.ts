@@ -13,7 +13,7 @@ const FORMATS = [
   { name: "Feed · 4:5", key: "portrait", width: 1080, height: 1350 },
   { name: "Square · 1:1", key: "square", width: 1080, height: 1080 },
   { name: "Story · 9:16", key: "story", width: 1080, height: 1920 },
-  { name: "Link card · 1.91:1", key: "landscape", width: 1200, height: 630 },
+  { name: "Landscape · 1.91:1", key: "landscape", width: 1200, height: 630 },
 ] as const;
 
 const ARTWORKS = [
@@ -71,11 +71,17 @@ async function expectCanonicalShareLinks(
   const farcasterUrl = new URL((await farcaster.getAttribute("href"))!);
   expect(farcasterUrl.hostname).toBe("farcaster.xyz");
   expect(farcasterUrl.searchParams.get("embeds[]")).toBe(canonicalUrl);
+  await dialog
+    .getByRole("button", { name: "Caption and link", exact: true })
+    .click();
   await expect(
     dialog.getByRole("textbox", { name: "Caption and link" })
   ).toHaveValue(
     new RegExp(`${canonicalUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`)
   );
+  await dialog
+    .getByRole("button", { name: "Caption and link", exact: true })
+    .click();
 }
 
 test.describe("Individual artwork sharing @readonly @surface", () => {
@@ -95,7 +101,29 @@ test.describe("Individual artwork sharing @readonly @surface", () => {
       );
       const trigger = page.getByTestId("artwork-share-trigger");
       await expect(trigger).toBeVisible({ timeout: 45000 });
+      if (artwork.kind === "nextgen") {
+        const originalImage = page
+          .locator('section[aria-label$=" artwork"] img')
+          .first();
+        await expect
+          .poll(() =>
+            originalImage.evaluate(
+              (image: HTMLImageElement) =>
+                image.complete && image.naturalWidth > 0
+            )
+          )
+          .toBe(true);
+        await expect(originalImage).not.toHaveAttribute(
+          "src",
+          /pebbles-loading/
+        );
+      }
       await trigger.scrollIntoViewIfNeeded();
+      await expect(trigger).toHaveAccessibleName("Share artwork");
+      await expect(trigger).toHaveText("");
+      await page.screenshot({
+        path: testInfo.outputPath(`${artwork.kind}-artwork-controls.png`),
+      });
       await trigger.click({ trial: true });
       await expect
         .poll(() =>
@@ -123,7 +151,10 @@ test.describe("Individual artwork sharing @readonly @surface", () => {
       await expect(dialog).toBeVisible();
       await expect(close).toBeFocused();
       await expect(
-        dialog.getByRole("link", { name: "Share on X", exact: true })
+        dialog.getByRole("img", { name: /^Share image for / })
+      ).toBeInViewport();
+      await expect(
+        dialog.getByTestId("artwork-image-primary")
       ).toBeInViewport();
       await expectCanonicalShareLinks(dialog, `https://6529.io${artwork.path}`);
       await expect(
@@ -150,12 +181,11 @@ test.describe("Individual artwork sharing @readonly @surface", () => {
       const formats = artwork.kind === "memes" ? FORMATS : [FORMATS[0]];
       for (const format of formats) {
         await test.step(`${format.name} exports a ${format.width}×${format.height} PNG`, async () => {
-          const formatButton = dialog.getByRole("button", {
-            name: format.name,
-            exact: true,
+          const formatSelect = dialog.getByRole("combobox", {
+            name: "Image format",
           });
-          await formatButton.click();
-          await expect(formatButton).toHaveAttribute("aria-pressed", "true");
+          await formatSelect.selectOption(format.key);
+          await expect(formatSelect).toHaveValue(format.key);
           const preview = dialog.getByRole("img", {
             name: /^Share image for /,
           });
@@ -171,6 +201,11 @@ test.describe("Individual artwork sharing @readonly @surface", () => {
             )
           ).toBe(format.height);
           await expectDialogFits(page, dialog);
+          await dialog.screenshot({
+            path: testInfo.outputPath(
+              `${artwork.kind}-${format.key}-share-dialog.png`
+            ),
+          });
 
           const downloadPromise = page.waitForEvent("download");
           await dialog

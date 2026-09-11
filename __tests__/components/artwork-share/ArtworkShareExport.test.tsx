@@ -11,7 +11,9 @@ import ArtworkShareExport from "@/components/artwork-share/ArtworkShareExport";
 import type { ArtworkShareDetails } from "@/components/artwork-share/artworkShare";
 import { useArtworkExport } from "@/components/artwork-share/useArtworkExport";
 import { canUseSystemShare } from "@/components/header/share/header-share/shareUtils";
+import type { NftSocialCardFormat } from "@/components/providers/metadata";
 import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
+import { t } from "@/i18n/messages";
 
 jest.mock("@capacitor/core", () => ({
   Capacitor: { isNativePlatform: jest.fn() },
@@ -46,9 +48,9 @@ const nativeShare = jest.mocked(shareFetchedBlobInNativeApp);
 const originalShare = Object.getOwnPropertyDescriptor(navigator, "share");
 const originalCanShare = Object.getOwnPropertyDescriptor(navigator, "canShare");
 
-function renderExport() {
+function renderExport(format: NftSocialCardFormat = "portrait") {
   return render(
-    <ArtworkShareExport artwork={artwork} format="portrait" locale="en-US" />
+    <ArtworkShareExport artwork={artwork} format={format} locale="en-US" />
   );
 }
 
@@ -108,6 +110,8 @@ it("calls browser sharing synchronously with the prepared file and prevents dupl
 
 it("uses the prepared PNG with the native save/share helper", async () => {
   jest.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+  jest.mocked(canUseSystemShare).mockReturnValue(false);
+  Reflect.deleteProperty(navigator, "canShare");
   renderExport();
 
   await userEvent.click(
@@ -140,6 +144,58 @@ it("keeps a download available when the browser cannot share files", () => {
   ).not.toBeInTheDocument();
 });
 
+it("requires explicit file capability even when link sharing is supported", () => {
+  Reflect.deleteProperty(navigator, "canShare");
+  renderExport();
+
+  expect(screen.getByRole("link", { name: "Download image" })).toHaveAttribute(
+    "download",
+    "6529-nextgen-7-portrait.png"
+  );
+  expect(
+    screen.queryByRole("button", { name: "Share image" })
+  ).not.toBeInTheDocument();
+});
+
+it("shows a disabled preparation action while keeping caption copying available", () => {
+  jest.mocked(useArtworkExport).mockReturnValue({
+    state: { status: "loading" },
+    retry,
+  });
+  renderExport();
+
+  const pending = screen.getByRole("button", {
+    name: t("en-US", "artworkShare.preparing"),
+  });
+  expect(pending).toBeDisabled();
+  expect(pending).toHaveAttribute("aria-busy", "true");
+  expect(screen.getByRole("button", { name: "Copy caption" })).toBeEnabled();
+  expect(
+    screen.queryByRole("link", { name: "Download image" })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Share image" })
+  ).not.toBeInTheDocument();
+  expect(screen.queryByRole("img")).not.toBeInTheDocument();
+});
+
+it("reveals the attributed caption alongside the image workflow", async () => {
+  renderExport();
+  expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+
+  await userEvent.click(
+    screen.getByRole("button", {
+      name: t("en-US", "artworkShare.captionLabel"),
+    })
+  );
+
+  expect(screen.getByRole("textbox")).toHaveValue(
+    "Pebble #7\nby 6529er · Pebbles\nhttps://6529.io/nextgen/token/7"
+  );
+  expect(screen.getByRole("textbox")).toHaveAttribute("readonly");
+  expect(screen.getByRole("button", { name: "Copy caption" })).toBeEnabled();
+});
+
 it("offers retry without sharing controls when export preparation fails", async () => {
   jest
     .mocked(useArtworkExport)
@@ -155,6 +211,7 @@ it("offers retry without sharing controls when export preparation fails", async 
   expect(
     screen.queryByRole("link", { name: "Download image" })
   ).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Copy caption" })).toBeEnabled();
   await userEvent.click(screen.getByRole("button", { name: "Try again" }));
   expect(retry).toHaveBeenCalledTimes(1);
 });
@@ -181,6 +238,41 @@ it.each([false, true])(
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   }
 );
+
+it("keeps a share pending across format changes and does not attach its failure to the new image", async () => {
+  let rejectSharing!: (reason: Error) => void;
+  webShare.mockReturnValueOnce(
+    new Promise<void>((_resolve, reject) => {
+      rejectSharing = reject;
+    })
+  );
+  const view = renderExport();
+  fireEvent.click(screen.getByRole("button", { name: "Share image" }));
+  expect(webShare).toHaveBeenCalledWith({ files: [file] });
+  const story = new File(["story"], "6529-nextgen-7-story.png", {
+    type: "image/png",
+  });
+  jest.mocked(useArtworkExport).mockReturnValue({
+    state: { status: "ready", file: story, previewUrl: "blob:story-preview" },
+    retry,
+  });
+  view.rerender(
+    <ArtworkShareExport artwork={artwork} format="story" locale="en-US" />
+  );
+  expect(screen.getByRole("button", { name: "Share image" })).toBeDisabled();
+  expect(screen.getByRole("link", { name: "Download image" })).toHaveAttribute(
+    "download",
+    "6529-nextgen-7-story.png"
+  );
+
+  await act(async () => rejectSharing(new Error("Old share failed")));
+
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  const share = screen.getByRole("button", { name: "Share image" });
+  expect(share).toBeEnabled();
+  await userEvent.click(share);
+  expect(webShare).toHaveBeenLastCalledWith({ files: [story] });
+});
 
 it.each([false, true])(
   "reports real share failures and allows retry (native: %s)",
