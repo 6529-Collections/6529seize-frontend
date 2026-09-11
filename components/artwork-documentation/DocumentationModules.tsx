@@ -38,6 +38,7 @@ import {
   isPublicationOnly,
 } from "@/lib/artwork-documentation/intake";
 import DocumentationFieldExample from "./DocumentationFieldExample";
+import { DocumentationRecordedAnswer } from "./DocumentationSummary";
 import {
   canEditDocumentationField,
   canReferenceDocumentationAssetLink,
@@ -48,6 +49,7 @@ interface Props {
   readonly edits: readonly PendingEdit[];
   readonly section?: DocumentationSection | undefined;
   readonly inlineFields?: readonly string[] | undefined;
+  readonly excludeFields?: readonly string[] | undefined;
   readonly onChange: (
     moduleId: string,
     operation: ApiArtworkDocumentationOperation
@@ -69,7 +71,7 @@ export default function DocumentationModules(props: Props) {
           MODULE_FIELDS[moduleId]
             .filter(
               (field) =>
-                readAnswer(props.context, moduleId, field.id, props.edits) ||
+                !!readAnswer(props.context, moduleId, field.id, props.edits) ||
                 isRedacted(props.context.modules[moduleId]?.answers[field.id])
             )
             .map((field) => `${moduleId}.${field.id}`)
@@ -87,6 +89,7 @@ export default function DocumentationModules(props: Props) {
           (props.inlineFields
             ? props.inlineFields.includes(`${moduleId}.${field.id}`)
             : fieldSection(moduleId, field.id) === props.section) &&
+          !props.excludeFields?.includes(`${moduleId}.${field.id}`) &&
           policy.fields.some((entry) => entry.id === field.id) &&
           visibleField(props.context, moduleId, field.id, props.edits)
       )
@@ -108,7 +111,7 @@ export default function DocumentationModules(props: Props) {
   const mainFields = fields.filter(({ moduleId }) => moduleId !== "interview");
   const optional = mainFields.filter((field) => !isPrimary(field));
   const interview = fields.filter(({ moduleId }) => moduleId === "interview");
-  const interviewMode = readAnswer(
+  const interviewMode: unknown = readAnswer(
     props.context,
     "interview",
     "mode",
@@ -128,7 +131,7 @@ export default function DocumentationModules(props: Props) {
             {msg("upgrade")}
           </p>
         ))}
-      <div className="tw-space-y-10 sm:tw-space-y-12">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 sm:tw-grid-cols-2">
         {mainFields.filter(isPrimary).map(renderField)}
       </div>
       {optional.length > 0 && (
@@ -141,7 +144,7 @@ export default function DocumentationModules(props: Props) {
           <p className="tw-mb-8 tw-mt-3 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-400">
             {msg("chapters.additionalHelp")}
           </p>
-          <div className="tw-space-y-10 sm:tw-space-y-12">
+          <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 sm:tw-grid-cols-2">
             {optional.map(renderField)}
           </div>
         </details>
@@ -162,13 +165,15 @@ export default function DocumentationModules(props: Props) {
               {msg("chapters.interviewHelp")}
             </p>
           </div>
-          {interview.filter(isInterviewPrimary).map(renderField)}
+          <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 sm:tw-grid-cols-2">
+            {interview.filter(isInterviewPrimary).map(renderField)}
+          </div>
           {interview.some((entry) => !isInterviewPrimary(entry)) && (
             <details>
               <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-text-iron-300">
                 {msg("chapters.interviewDetails")}
               </summary>
-              <div className="tw-mt-6 tw-space-y-10">
+              <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 sm:tw-grid-cols-2">
                 {interview
                   .filter((entry) => !isInterviewPrimary(entry))
                   .map(renderField)}
@@ -272,15 +277,41 @@ function DocumentationAnswerField(
         : {}),
     } as ApiArtworkDocumentationOperation);
   };
+  const fullWidth =
+    field.id === "title" ||
+    (field.editor.kind === "text" && field.editor.multiline === true) ||
+    (["object", "list", "localized"].includes(field.editor.kind) &&
+      field.id !== "declared_dimensions");
+  const fieldClass = `tw-min-w-0 ${fullWidth ? "sm:tw-col-span-2" : ""}`;
+  if (disabled)
+    return (
+      <section className={fieldClass} aria-labelledby={`${id}-label`}>
+        <h3
+          id={`${id}-label`}
+          className="tw-mb-3 tw-mt-0 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-400"
+        >
+          {label}
+        </h3>
+        {answer ? (
+          <DocumentationRecordedAnswer
+            answer={answer}
+            moduleId={moduleId}
+            field={field.id}
+            context={context}
+          />
+        ) : (
+          <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-400">
+            {msg(redacted ? "redacted" : "chapters.notRecorded")}
+          </p>
+        )}
+      </section>
+    );
   return (
-    <section
-      className="tw-min-w-0 tw-max-w-prose"
-      aria-labelledby={`${id}-label`}
-    >
+    <section className={fieldClass} aria-labelledby={`${id}-label`}>
       <div className="tw-mb-3 tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-2">
         <h3
           id={`${id}-label`}
-          className="tw-m-0 tw-text-lg tw-font-medium tw-leading-7 tw-text-iron-100"
+          className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100"
         >
           {label}
         </h3>
@@ -367,49 +398,96 @@ function DocumentationAnswerField(
               onChange={(value) => update({ value })}
             />
           ) : (
-            <label className="tw-block tw-text-sm tw-text-iron-300">
-              {msg("explanation")}
-              <textarea
-                id={id}
-                className={`${inputClass} tw-mt-2`}
-                rows={3}
-                disabled={disabled}
-                value={answer?.explanation ?? ""}
-                onChange={(event) =>
-                  update({ explanation: event.target.value })
-                }
-              />
-            </label>
+            <div className="tw-space-y-2">
+              <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-300">
+                {msg(`status.${status}`)}
+              </p>
+              {answer?.explanation && (
+                <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-base tw-leading-7 tw-text-iron-200">
+                  {answer.explanation}
+                </p>
+              )}
+            </div>
           )}
-          {definition.allowed_statuses.length > 1 && (
-            <details
-              open={status !== ApiArtworkDocumentationAnswerStatusEnum.Provided}
-              className="tw-mt-3"
-            >
-              <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
-                {msg("chapters.answerAlternatives")}
+          {(!!answer ||
+            definition.allowed_statuses.length > 1 ||
+            !publicationOnly) && (
+            <details className="tw-mt-2">
+              <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-xs tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+                {msg(
+                  answer
+                    ? "chapters.answerOptions"
+                    : "chapters.answerAlternatives"
+                )}
               </summary>
-              <label className="tw-mb-4 tw-block tw-text-sm tw-text-iron-300">
-                {msg("answerStatus")}
-                <select
-                  className={`${inputClass} tw-mt-2`}
-                  disabled={disabled}
-                  value={status}
-                  onChange={(event) =>
-                    update({
-                      status: event.target.value as NonNullable<
-                        ApiArtworkDocumentationAnswer["status"]
-                      >,
-                    })
-                  }
-                >
-                  {definition.allowed_statuses.map((item) => (
-                    <option key={item} value={item}>
-                      {msg(`status.${item}`)}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <div className="tw-space-y-4 tw-py-3">
+                {definition.allowed_statuses.length > 1 && (
+                  <label className="tw-block tw-text-sm tw-text-iron-300">
+                    {msg("answerStatus")}
+                    <select
+                      className={`${inputClass} tw-mt-2`}
+                      value={status}
+                      onChange={(event) =>
+                        update({
+                          status: event.target.value as NonNullable<
+                            ApiArtworkDocumentationAnswer["status"]
+                          >,
+                        })
+                      }
+                    >
+                      {definition.allowed_statuses.map((item) => (
+                        <option key={item} value={item}>
+                          {msg(`status.${item}`)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                {status !==
+                  ApiArtworkDocumentationAnswerStatusEnum.Provided && (
+                  <label className="tw-block tw-text-sm tw-text-iron-300">
+                    {msg("explanation")}
+                    <textarea
+                      id={id}
+                      className={`${inputClass} tw-mt-2`}
+                      rows={3}
+                      value={answer?.explanation ?? ""}
+                      onChange={(event) =>
+                        update({ explanation: event.target.value })
+                      }
+                    />
+                  </label>
+                )}
+                {!publicationOnly && (
+                  <AnswerVisibility
+                    publicationOnly={false}
+                    lockedRestricted={definition.locked_restricted}
+                    disabled={!answer}
+                    canRestrict={canEditDocumentationField(
+                      context,
+                      `${moduleId}.${field.id}`,
+                      true
+                    )}
+                    value={visibility}
+                    onChange={(intended_visibility) =>
+                      update({ intended_visibility })
+                    }
+                  />
+                )}
+                {answer && (
+                  <DocumentationButton
+                    secondary
+                    onClick={() =>
+                      onChange(moduleId, {
+                        op: "unset",
+                        field: field.id,
+                      } as ApiArtworkDocumentationOperation)
+                    }
+                  >
+                    {msg("clear")}
+                  </DocumentationButton>
+                )}
+              </div>
             </details>
           )}
           {invalid && (
@@ -417,37 +495,6 @@ function DocumentationAnswerField(
               {msg("invalidField")}
             </p>
           )}
-          <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-            {!publicationOnly && (
-              <AnswerVisibility
-                publicationOnly={publicationOnly}
-                lockedRestricted={definition.locked_restricted}
-                disabled={disabled || !answer}
-                canRestrict={canEditDocumentationField(
-                  context,
-                  `${moduleId}.${field.id}`,
-                  true
-                )}
-                value={visibility}
-                onChange={(intended_visibility) =>
-                  update({ intended_visibility })
-                }
-              />
-            )}
-            {answer && !disabled && (
-              <DocumentationButton
-                secondary
-                onClick={() =>
-                  onChange(moduleId, {
-                    op: "unset",
-                    field: field.id,
-                  } as ApiArtworkDocumentationOperation)
-                }
-              >
-                {msg("clear")}
-              </DocumentationButton>
-            )}
-          </div>
         </>
       )}
     </section>

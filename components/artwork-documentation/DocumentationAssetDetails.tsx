@@ -151,8 +151,8 @@ export default function DocumentationAssetDetails({
     );
   return (
     <details className="tw-mt-3">
-      <summary className="tw-cursor-pointer tw-py-2 tw-text-xs tw-text-iron-300">
-        {msg("fileDetails")}
+      <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+        {msg("chapters.editFileDetails")}
       </summary>
       <div className="tw-space-y-4">
         {links.map((link) => (
@@ -256,11 +256,12 @@ function ManifestEditor({
       ? "public_record"
       : "restricted";
   return (
-    <div className="tw-space-y-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-p-3">
+    <div className="tw-space-y-4 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-5">
       <p className="tw-text-sm tw-font-medium">{roleLabel}</p>
       <DocumentationValueEditor
         id={`manifest-${link.id}`}
-        label={msg("fileDetails")}
+        label={msg("chapters.editFileDetails")}
+        hideLabel
         editor={detailsEditor(publicationOnly)}
         value={value}
         onChange={change}

@@ -29,6 +29,7 @@ import {
 import {
   parseSection,
   SECTIONS,
+  MODULE_FIELDS,
   type DocumentationSection,
 } from "@/lib/artwork-documentation/registry";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
@@ -39,7 +40,6 @@ import DocumentationAuthGate, {
 import {
   DocumentationButton,
   DocumentationNotice,
-  panelClass,
   inputClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
@@ -56,6 +56,12 @@ import DocumentationArtworkPreview from "./DocumentationArtworkPreview";
 import DocumentationNewContext from "./DocumentationNewContext";
 import DocumentationWorkedExample from "./DocumentationWorkedExample";
 import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
+
+const FILE_FIELDS = [
+  "artwork.canonical_asset_id",
+  "artwork.declared_dimensions",
+  ...MODULE_FIELDS.files.map((field) => `files.${field.id}`),
+];
 
 interface Props {
   readonly workId: string;
@@ -141,7 +147,11 @@ function WorkspaceEditor({
   const publicationOnly = isPublicationOnly(context.profile);
   const [section, setSection] = useState(initialSection);
   const [reading, setReading] = useState(false);
-  const credit = readAnswer(draftRecord, "identity", "preferred_credit")?.value;
+  const credit: unknown = readAnswer(
+    draftRecord,
+    "identity",
+    "preferred_credit"
+  )?.value;
   const counts = Object.values(context.modules).reduce(
     (total, module) => ({
       required: total.required + module.completeness.required,
@@ -189,6 +199,193 @@ function WorkspaceEditor({
     setReading(false);
     focusHeading("documentation-chapter-title");
   };
+  const writingChapter = (
+    <>
+      {section === "artwork" && (
+        <DocumentationArtworkPreview
+          context={draftRecord}
+          allowSubmissionReference
+        />
+      )}
+      <DocumentationWorkedExample
+        key={`${context.id}-${section}`}
+        context={context}
+        edits={draft.edits}
+        section={section}
+      />
+      <div
+        id={`documentation-answers-${context.id}-${section}`}
+        tabIndex={-1}
+        className="tw-min-w-0 tw-space-y-10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+      >
+        {section === "artwork" && (
+          <DocumentationSources context={context} controller={controller} />
+        )}
+        {section === "artist" && (
+          <DocumentationArtistPin context={context} controller={controller} />
+        )}
+        {section === "rights" && (
+          <details className="tw-text-sm tw-leading-6 tw-text-iron-400">
+            <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2">
+              {msg("why")}
+            </summary>
+            <p>
+              {msg(publicationOnly ? "publication.whyRights" : "why.rights")}
+            </p>
+            <p>
+              {msg("cc0")}{" "}
+              <a
+                href="https://creativecommons.org/publicdomain/zero/1.0/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="tw-text-primary-300"
+              >
+                {msg("cc0Link")}
+              </a>
+            </p>
+          </details>
+        )}
+        {section === "review" ? (
+          <>
+            <DocumentationReview
+              context={context}
+              controller={controller}
+              saveState={draft.state}
+              edits={draft.edits}
+            />
+            <DocumentationFeedback context={context} />
+            {(mutationCapabilities(context).manage_assignments ||
+              mutationCapabilities(context).manage_context) && (
+              <details className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5">
+                <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-text-iron-400">
+                  {msg("chapters.recordManagement")}
+                </summary>
+                <div className="tw-mt-5 tw-space-y-6">
+                  <DocumentationAccess context={context} />
+                  <DocumentationNewContext
+                    context={context}
+                    controller={controller}
+                  />
+                  {mutationCapabilities(context).manage_context && (
+                    <DocumentationButton
+                      secondary
+                      onClick={() => {
+                        void controller.mutate((current, signal) =>
+                          changeDocumentationLifecycle(
+                            current,
+                            current.lifecycle ===
+                              ApiArtworkDocumentationContextLifecycleEnum.Active
+                              ? "archived"
+                              : "active",
+                            signal
+                          )
+                        );
+                      }}
+                    >
+                      {msg(
+                        context.lifecycle ===
+                          ApiArtworkDocumentationContextLifecycleEnum.Active
+                          ? "archive"
+                          : "restore"
+                      )}
+                    </DocumentationButton>
+                  )}
+                </div>
+              </details>
+            )}
+          </>
+        ) : (
+          <>
+            <DocumentationModules
+              key={`${context.id}-${section}`}
+              context={context}
+              edits={draft.edits}
+              section={section}
+              excludeFields={section === "artwork" ? FILE_FIELDS : undefined}
+              onChange={(moduleId, operation) =>
+                controller.edit(moduleId, operation)
+              }
+              onBlur={() => {
+                void controller.flush();
+              }}
+              readOnly={
+                context.lifecycle ===
+                ApiArtworkDocumentationContextLifecycleEnum.Archived
+              }
+              assets={assets}
+            />
+            {section === "artwork" && (
+              <section
+                className="tw-space-y-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8"
+                aria-labelledby="documentation-files-title"
+              >
+                <h3
+                  id="documentation-files-title"
+                  className="tw-m-0 tw-font-serif tw-text-2xl tw-font-normal"
+                >
+                  {msg("chapters.files")}
+                </h3>
+                <p className="tw-m-0 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-400">
+                  {msg("chapters.filesHelp")}
+                </p>
+                <DocumentationUpload
+                  context={context}
+                  controller={controller}
+                />
+                <DocumentationModules
+                  context={context}
+                  edits={draft.edits}
+                  inlineFields={FILE_FIELDS}
+                  onChange={(moduleId, operation) =>
+                    controller.edit(moduleId, operation)
+                  }
+                  onBlur={() => {
+                    void controller.flush();
+                  }}
+                  readOnly={
+                    context.lifecycle ===
+                    ApiArtworkDocumentationContextLifecycleEnum.Archived
+                  }
+                  assets={assets}
+                />
+              </section>
+            )}
+          </>
+        )}
+      </div>
+    </>
+  );
+  const readingChapter =
+    section === "review" ? (
+      <>
+        <DocumentationReview
+          context={context}
+          controller={controller}
+          saveState={draft.state}
+        />
+        <DocumentationFeedback context={context} />
+      </>
+    ) : (
+      <>
+        {section === "artwork" && (
+          <DocumentationArtworkPreview
+            context={context}
+            allowSubmissionReference
+          />
+        )}
+        <DocumentationSummary
+          context={context}
+          section={section}
+          showHeading={false}
+        />
+        {section === "artwork" && (
+          <>
+            <DocumentationSources context={context} controller={controller} />
+            <DocumentationUpload context={context} controller={controller} />
+          </>
+        )}
+      </>
+    );
   return (
     <div className="tw-space-y-10 sm:tw-space-y-14">
       <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-4">
@@ -210,7 +407,8 @@ function WorkspaceEditor({
             )}
           </p>
           <h1 className="tw-m-0 tw-break-words tw-font-serif tw-text-4xl tw-font-normal tw-leading-[1.08] tw-tracking-tight sm:tw-text-6xl">
-            {documentationTitle(draftRecord) ?? msg("untitled")}
+            {documentationTitle(draftRecord) ??
+              msg(canWrite && !reading ? "chapters.beginRecord" : "untitled")}
           </h1>
           {typeof credit === "string" && credit.trim() && (
             <p className="tw-mb-0 tw-mt-4 tw-text-lg tw-leading-7 tw-text-iron-200">
@@ -308,7 +506,7 @@ function WorkspaceEditor({
         </section>
       ) : (
         <div className="tw-grid tw-gap-8 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8 lg:tw-grid-cols-[200px_minmax(0,1fr)] lg:tw-gap-12 lg:tw-pt-12">
-          <aside>
+          <aside className="lg:tw-sticky lg:tw-top-24 lg:tw-self-start">
             <nav
               aria-label={msg("chapters.index")}
               className="tw-hidden lg:tw-block"
@@ -380,166 +578,7 @@ function WorkspaceEditor({
                 </p>
               )}
             </div>
-            {canWrite ? (
-              <>
-                {section === "artwork" && (
-                  <DocumentationArtworkPreview
-                    context={draftRecord}
-                    allowSubmissionReference
-                  />
-                )}
-                <DocumentationWorkedExample
-                  key={`${context.id}-${section}`}
-                  context={context}
-                  edits={draft.edits}
-                  section={section}
-                />
-                <div
-                  id={`documentation-answers-${context.id}-${section}`}
-                  tabIndex={-1}
-                  className="tw-min-w-0 tw-space-y-10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-                >
-                  {section === "artwork" && (
-                    <DocumentationSources
-                      context={context}
-                      controller={controller}
-                    />
-                  )}
-                  {section === "artist" && (
-                    <DocumentationArtistPin
-                      context={context}
-                      controller={controller}
-                    />
-                  )}
-                  {section === "rights" && (
-                    <details className="tw-text-sm tw-leading-6 tw-text-iron-400">
-                      <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2">
-                        {msg("why")}
-                      </summary>
-                      <p>
-                        {msg(
-                          publicationOnly
-                            ? "publication.whyRights"
-                            : "why.rights"
-                        )}
-                      </p>
-                      <p>
-                        {msg("cc0")}{" "}
-                        <a
-                          href="https://creativecommons.org/publicdomain/zero/1.0/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="tw-text-primary-300"
-                        >
-                          {msg("cc0Link")}
-                        </a>
-                      </p>
-                    </details>
-                  )}
-                  {section === "review" ? (
-                    <>
-                      <DocumentationReview
-                        context={context}
-                        controller={controller}
-                        saveState={draft.state}
-                        edits={draft.edits}
-                      />
-                      <DocumentationFeedback context={context} />
-                      {(mutationCapabilities(context).manage_assignments ||
-                        mutationCapabilities(context).manage_context) && (
-                        <details className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5">
-                          <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-text-iron-400">
-                            {msg("chapters.recordManagement")}
-                          </summary>
-                          <div className="tw-mt-5 tw-space-y-6">
-                            <DocumentationAccess context={context} />
-                            <DocumentationNewContext
-                              context={context}
-                              controller={controller}
-                            />
-                          </div>
-                        </details>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <DocumentationModules
-                        key={`${context.id}-${section}`}
-                        context={context}
-                        edits={draft.edits}
-                        section={section}
-                        onChange={(moduleId, operation) =>
-                          controller.edit(moduleId, operation)
-                        }
-                        onBlur={() => {
-                          void controller.flush();
-                        }}
-                        readOnly={
-                          context.lifecycle ===
-                          ApiArtworkDocumentationContextLifecycleEnum.Archived
-                        }
-                        assets={assets}
-                      />
-                      {section === "artwork" && (
-                        <section
-                          className="tw-space-y-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8"
-                          aria-labelledby="documentation-files-title"
-                        >
-                          <h3
-                            id="documentation-files-title"
-                            className="tw-m-0 tw-font-serif tw-text-2xl tw-font-normal"
-                          >
-                            {msg("chapters.files")}
-                          </h3>
-                          <p className="tw-m-0 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-400">
-                            {msg("chapters.filesHelp")}
-                          </p>
-                          <DocumentationUpload
-                            context={context}
-                            controller={controller}
-                          />
-                        </section>
-                      )}
-                    </>
-                  )}
-                </div>
-              </>
-            ) : section === "review" ? (
-              <>
-                <DocumentationReview
-                  context={context}
-                  controller={controller}
-                  saveState={draft.state}
-                />
-                <DocumentationFeedback context={context} />
-              </>
-            ) : (
-              <>
-                {section === "artwork" && (
-                  <DocumentationArtworkPreview
-                    context={context}
-                    allowSubmissionReference
-                  />
-                )}
-                <DocumentationSummary
-                  context={context}
-                  section={section}
-                  showHeading={false}
-                />
-                {section === "artwork" && (
-                  <DocumentationSources
-                    context={context}
-                    controller={controller}
-                  />
-                )}
-                {section === "artwork" && (
-                  <DocumentationUpload
-                    context={context}
-                    controller={controller}
-                  />
-                )}
-              </>
-            )}
+            {canWrite ? writingChapter : readingChapter}
             <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6">
               <DocumentationButton
                 secondary
@@ -558,44 +597,14 @@ function WorkspaceEditor({
                     )
                   }
                 >
-                  {msg("next")}
+                  {msg("chapters.nextChapter", {
+                    chapter: msg(
+                      `chapters.${SECTIONS[SECTIONS.indexOf(section) + 1] ?? "review"}`
+                    ),
+                  })}
                 </DocumentationButton>
               )}
             </div>
-            {mutationCapabilities(context).manage_context && (
-              <details className="tw-text-sm tw-text-iron-400">
-                <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2">
-                  {msg(
-                    context.lifecycle ===
-                      ApiArtworkDocumentationContextLifecycleEnum.Active
-                      ? "archive"
-                      : "restore"
-                  )}
-                </summary>
-                <DocumentationButton
-                  secondary
-                  onClick={() => {
-                    void controller.mutate((current, signal) =>
-                      changeDocumentationLifecycle(
-                        current,
-                        current.lifecycle ===
-                          ApiArtworkDocumentationContextLifecycleEnum.Active
-                          ? "archived"
-                          : "active",
-                        signal
-                      )
-                    );
-                  }}
-                >
-                  {msg(
-                    context.lifecycle ===
-                      ApiArtworkDocumentationContextLifecycleEnum.Active
-                      ? "archive"
-                      : "restore"
-                  )}
-                </DocumentationButton>
-              </details>
-            )}
           </div>
         </div>
       )}
@@ -640,48 +649,72 @@ function HistoricalDocumentation({
     asset_links: revision.snapshot.asset_links,
   };
   return (
-    <div className="tw-space-y-5">
-      <DocumentationNotice>
-        {msg("snapshot")} ·{" "}
-        {msg("revision", { number: revision.revision_number })} ·{" "}
-        {formatDate(locale, revision.created_at)}
-      </DocumentationNotice>
-      <Link
-        href={documentationWorkspacePath(context.work_id, context.id)}
-        className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-text-primary-300"
+    <article className="tw-space-y-10 sm:tw-space-y-14">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-4">
+        <Link
+          href={documentationWorkspacePath(context.work_id, context.id)}
+          className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        >
+          ← {msg("currentDraft")}
+        </Link>
+        <p className="tw-m-0 tw-text-xs tw-leading-6 tw-text-iron-400">
+          {msg("revision", {
+            number: new Intl.NumberFormat(locale).format(
+              revision.revision_number
+            ),
+          })}{" "}
+          · {formatDate(locale, revision.created_at)}
+        </p>
+      </div>
+      <DocumentationSummary
+        context={historical}
+        headingLevel={1}
+        media={<DocumentationArtworkPreview context={historical} />}
+      />
+      <section
+        className="tw-space-y-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8"
+        aria-labelledby="documentation-confirmed-title"
       >
-        {msg("currentDraft")}
-      </Link>
-      <h1 className="tw-break-words tw-text-3xl tw-font-semibold">
-        {documentationTitle(historical) ?? msg("untitled")}
-      </h1>
-      <DocumentationSummary context={historical} />
-      <section className="tw-space-y-3" aria-label={msg("reviewScope")}>
-        {revision.reviews.map((review) => (
-          <div key={review.lane} className={panelClass}>
-            <h2 className="tw-text-base tw-font-semibold">
-              {msg(`lane.${review.lane}`)}
-            </h2>
-            <p className="tw-text-sm tw-text-iron-300">
-              {msg(`review.${review.status}`)}
-            </p>
-            {review.reason && (
-              <p className="tw-whitespace-pre-wrap tw-text-sm tw-text-iron-300">
-                {review.reason}
-              </p>
-            )}
-          </div>
-        ))}
+        <h2
+          id="documentation-confirmed-title"
+          className="tw-m-0 tw-font-serif tw-text-2xl tw-font-normal"
+        >
+          {msg("snapshot")}
+        </h2>
+        <p className="tw-m-0 tw-max-w-prose tw-whitespace-pre-wrap tw-text-base tw-leading-7 tw-text-iron-300">
+          {revision.confirmation.accepted_copy}
+        </p>
+        <details className="tw-text-sm tw-text-iron-400">
+          <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+            {msg("chapters.revisionDetails")}
+          </summary>
+          <p className="tw-mt-3 tw-break-all tw-text-xs">
+            SHA-256: {revision.sha256}
+          </p>
+        </details>
       </section>
-      <p className="tw-text-sm tw-leading-relaxed tw-text-iron-300">
-        {revision.confirmation.accepted_copy}
-      </p>
-      <details className="tw-text-xs tw-text-iron-400">
-        <summary className="tw-cursor-pointer tw-py-2">
-          {msg("fileDetails")}
-        </summary>
-        <p className="tw-break-all">SHA-256: {revision.sha256}</p>
-      </details>
-    </div>
+      {revision.reviews.length > 0 && (
+        <section
+          className="tw-grid tw-gap-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8 sm:tw-grid-cols-3"
+          aria-label={msg("reviewScope")}
+        >
+          {revision.reviews.map((review) => (
+            <div key={review.lane}>
+              <h2 className="tw-mb-2 tw-mt-0 tw-text-sm tw-font-medium tw-text-iron-400">
+                {msg(`lane.${review.lane}`)}
+              </h2>
+              <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-200">
+                {msg(`review.${review.status}`)}
+              </p>
+              {review.reason && (
+                <p className="tw-mb-0 tw-mt-3 tw-whitespace-pre-wrap tw-text-sm tw-leading-6 tw-text-iron-300">
+                  {review.reason}
+                </p>
+              )}
+            </div>
+          ))}
+        </section>
+      )}
+    </article>
   );
 }

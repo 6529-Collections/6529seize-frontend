@@ -17,6 +17,16 @@ import {
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
+jest.mock("@/services/api/identity-query", () => ({
+  getIdentityQueryOptions: ({
+    handleOrWallet,
+  }: {
+    handleOrWallet: string;
+  }) => ({
+    queryKey: ["identity", handleOrWallet],
+    queryFn: async () => ({ handle: "DocumentationArtist" }),
+  }),
+}));
 jest.mock("@/components/artwork-documentation/DocumentationAuthGate", () => ({
   useDocumentationActor: () => ({
     actorKey: "artist-a",
@@ -99,6 +109,7 @@ it.each([
       </QueryClientProvider>
     );
     await screen.findByText("Prior discussion");
+    await screen.findByText("@DocumentationArtist");
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();

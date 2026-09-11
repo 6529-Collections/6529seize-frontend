@@ -1,4 +1,17 @@
 export const ARTWORK_DOCUMENTATION_CHAPTER_MESSAGES = {
+  "artworkDocumentation.chapters.answerOptions": "Answer options",
+  "artworkDocumentation.chapters.questionsHelp":
+    "A separate conversation with the team. Questions and replies stay outside the artwork record and its publication content.",
+  "artworkDocumentation.chapters.sourceReferences": "Submission references",
+  "artworkDocumentation.chapters.inRecord": "In the record",
+  "artworkDocumentation.chapters.fromSource": "From the source",
+  "artworkDocumentation.chapters.sourceReferencesHelp":
+    "Read the original source alongside the information recorded for this work.",
+  "artworkDocumentation.chapters.editFileDetails": "Edit file details",
+  "artworkDocumentation.chapters.revisionDetails": "Confirmed record details",
+  "artworkDocumentation.chapters.notRecorded": "Not yet recorded",
+  "artworkDocumentation.chapters.beginRecord": "Begin this work’s record",
+  "artworkDocumentation.chapters.nextChapter": "Next: {chapter}",
   "artworkDocumentation.chapters.artwork": "The work",
   "artworkDocumentation.chapters.story": "The story & the making",
   "artworkDocumentation.chapters.artist": "The artist",

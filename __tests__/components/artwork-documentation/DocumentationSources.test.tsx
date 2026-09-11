@@ -72,12 +72,12 @@ it.each([
     </QueryClientProvider>
   );
   await screen.findByText("Original source text");
-  expect(screen.getByRole("checkbox", { hidden: true })).toBeDisabled();
-  if (scenario === "viewer-only receipt")
-    expect(
-      screen.queryByRole("button", { hidden: true })
-    ).not.toBeInTheDocument();
-  else expect(screen.getByRole("button", { hidden: true })).toBeDisabled();
+  expect(
+    screen.queryByRole("checkbox", { hidden: true })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { hidden: true })
+  ).not.toBeInTheDocument();
   expect(importDocumentationSource).not.toHaveBeenCalled();
   controller.dispose();
   client.clear();

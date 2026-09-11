@@ -25,7 +25,6 @@ import {
 import {
   DocumentationButton,
   DocumentationNotice,
-  panelClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 
@@ -37,22 +36,24 @@ export default function DocumentationSources({
   readonly controller: DocumentationDraftController;
 }) {
   const { msg } = useDocumentationMessages();
+  const canImport =
+    mutationCapabilities(context).read_source_receipts &&
+    mutationCapabilities(context).edit_modules.length > 0;
+  const importHelp = isPublicationOnly(context.profile)
+    ? "publication.sourceHelp"
+    : "sourceHelp";
   if (
     !context.source_links.length ||
     !context.capabilities.read_source_receipts
   )
     return null;
   return (
-    <details className={panelClass}>
-      <summary className="tw-cursor-pointer tw-py-2 tw-text-base tw-font-semibold">
-        {msg("sourceTitle")}
+    <details className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-4">
+      <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+        {msg(canImport ? "sourceTitle" : "chapters.sourceReferences")}
       </summary>
       <p className="tw-text-sm tw-leading-relaxed tw-text-iron-300">
-        {msg(
-          isPublicationOnly(context.profile)
-            ? "publication.sourceHelp"
-            : "sourceHelp"
-        )}
+        {msg(canImport ? importHelp : "chapters.sourceReferencesHelp")}
       </p>
       {context.source_links.map((source) => (
         <SourceReceipt
@@ -104,6 +105,14 @@ function SourceReceipt({
         field.answer
       )
     ) ?? [];
+  const canSelect = (field: (typeof fields)[number]) =>
+    canImport &&
+    canEditDocumentationField(
+      context,
+      field.target_field,
+      field.answer.intended_visibility ===
+        ApiArtworkDocumentationAnswerIntendedVisibilityEnum.Restricted
+    );
   if (query.isError)
     return (
       <DocumentationNotice>{msg("sourceUnavailable")}</DocumentationNotice>
@@ -168,36 +177,35 @@ function SourceReceipt({
           key={field.target_field}
           className="tw-space-y-2 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3"
         >
-          <label className="tw-flex tw-items-center tw-gap-3 tw-text-sm">
-            <input
-              type="checkbox"
-              className="tw-h-5 tw-w-5 tw-accent-primary-400"
-              checked={selected.includes(field.target_field)}
-              disabled={
-                !canImport ||
-                !canEditDocumentationField(
-                  context,
-                  field.target_field,
-                  field.answer.intended_visibility ===
-                    ApiArtworkDocumentationAnswerIntendedVisibilityEnum.Restricted
-                )
-              }
-              onChange={(event) =>
-                setSelected(
-                  event.target.checked
-                    ? [...selected, field.target_field]
-                    : selected.filter((path) => path !== field.target_field)
-                )
-              }
-            />
-            {documentationFieldLabel(
-              field.target_field.split(".").at(-1) ?? field.target_field
-            )}
-          </label>
+          {canSelect(field) ? (
+            <label className="tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-font-medium tw-text-iron-200">
+              <input
+                type="checkbox"
+                className="tw-h-5 tw-w-5 tw-shrink-0 tw-accent-primary-400"
+                checked={selected.includes(field.target_field)}
+                onChange={(event) =>
+                  setSelected(
+                    event.target.checked
+                      ? [...selected, field.target_field]
+                      : selected.filter((path) => path !== field.target_field)
+                  )
+                }
+              />
+              {documentationFieldLabel(
+                field.target_field.split(".").at(-1) ?? field.target_field
+              )}
+            </label>
+          ) : (
+            <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
+              {documentationFieldLabel(
+                field.target_field.split(".").at(-1) ?? field.target_field
+              )}
+            </p>
+          )}
           <div className="tw-grid tw-gap-4 sm:tw-grid-cols-2">
             <div>
               <p className="tw-text-xs tw-font-medium tw-text-iron-400">
-                {msg("conflict.base")}
+                {msg("chapters.inRecord")}
               </p>
               <DocumentationValueSummary
                 value={
@@ -211,21 +219,21 @@ function SourceReceipt({
             </div>
             <div>
               <p className="tw-text-xs tw-font-medium tw-text-iron-400">
-                {msg("sourceProposal")}
+                {msg("chapters.fromSource")}
               </p>
               <DocumentationValueSummary
                 value={field.answer.value as unknown}
               />
             </div>
           </div>
-          {field.will_overwrite && (
+          {canSelect(field) && field.will_overwrite && (
             <p className="tw-text-xs tw-text-amber-200">
               {msg("sourceReplace")}
             </p>
           )}
         </div>
       ))}
-      {canImport && (
+      {fields.some(canSelect) && (
         <DocumentationButton
           secondary
           disabled={busy || !selected.length}

@@ -8,7 +8,34 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
 }));
 
 describe("artwork documentation modules", () => {
-  it("shows a viewer/editor's restricted answer but keeps its controls disabled while ordinary fields remain editable", () => {
+  it("keeps clearing an answer inside its options without hiding the recorded value", () => {
+    const context = documentationFixture();
+    const onChange = jest.fn();
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="artwork"
+        onChange={onChange}
+      />
+    );
+    const title = screen.getByRole("region", { name: "Title" });
+    expect(
+      within(title).getByDisplayValue("মুক্তিযুদ্ধ — A long title")
+    ).toBeVisible();
+    expect(
+      within(title).getByRole("button", { name: "Leave unanswered" })
+    ).not.toBeVisible();
+    fireEvent.click(within(title).getByText("Answer options"));
+    fireEvent.click(
+      within(title).getByRole("button", { name: "Leave unanswered" })
+    );
+    expect(onChange).toHaveBeenCalledWith("artwork", {
+      op: "unset",
+      field: "title",
+    });
+  });
+  it("reads a viewer/editor's restricted answer as prose while ordinary fields remain editable", () => {
     const context = documentationFixture();
     Object.assign(context.mutation_capabilities, {
       confirm_as_artist: false,
@@ -30,13 +57,12 @@ describe("artwork documentation modules", () => {
         onChange={onChange}
       />
     );
-    expect(screen.getByRole("textbox", { name: "Location" })).toHaveValue(
-      "Published location with restricted history"
-    );
-    expect(screen.getByRole("textbox", { name: "Location" })).toBeDisabled();
-    fireEvent.change(screen.getByRole("textbox", { name: "Location" }), {
-      target: { value: "Changed" },
-    });
+    const location = screen.getByRole("region", { name: "Location" });
+    expect(
+      within(location).getByText("Published location with restricted history")
+    ).toBeVisible();
+    expect(within(location).queryByRole("textbox")).not.toBeInTheDocument();
+    expect(within(location).queryByRole("button")).not.toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();
     const title = screen.getByDisplayValue("মুক্তিযুদ্ধ — A long title");
     expect(title).toBeEnabled();
@@ -113,7 +139,11 @@ describe("artwork documentation modules", () => {
         onChange={onChange}
       />
     );
-    fireEvent.click(screen.getByText("Not known or not applicable?"));
+    fireEvent.click(
+      within(screen.getByRole("region", { name: "Location" })).getByText(
+        "Answer options"
+      )
+    );
     fireEvent.change(screen.getByLabelText("How would you like to answer?"), {
       target: { value: "withheld" },
     });
@@ -174,8 +204,14 @@ describe("artwork documentation modules", () => {
     );
     const location = screen.getByRole("region", { name: "Location" });
     expect(
-      within(location).getByRole("textbox", { name: "Explanation" })
+      within(location).getByText("The original location was not recorded.", {
+        selector: "p",
+      })
     ).toBeVisible();
+    expect(
+      within(location).getByRole("textbox", { name: "Explanation" })
+    ).not.toBeVisible();
+    fireEvent.click(within(location).getByText("Answer options"));
     expect(
       within(location).getByRole("combobox", {
         name: "How would you like to answer?",
