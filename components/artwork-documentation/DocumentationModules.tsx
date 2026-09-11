@@ -213,6 +213,8 @@ function DocumentationAnswerField(
     ) ||
     redacted;
   const id = `documentation-${moduleId}-${field.id}`;
+  const headingId = `documentation-field-heading-${moduleId}-${field.id}`;
+  const helpId = `documentation-field-help-${moduleId}-${field.id}`;
   const label =
     (moduleId === "interview"
       ? context.profile.interview_instrument.prompts.find(
@@ -289,7 +291,9 @@ function DocumentationAnswerField(
       answer: merged,
       ...(field.id === "canonical_asset_id" && context.latest_revision_id
         ? {
-            replacementReason: canonicalSelectionChanged ? "" : replacementReason,
+            replacementReason: canonicalSelectionChanged
+              ? ""
+              : replacementReason,
           }
         : {}),
     } as ApiArtworkDocumentationOperation);
@@ -302,9 +306,9 @@ function DocumentationAnswerField(
   const fieldClass = `tw-min-w-0 ${fullWidth ? "sm:tw-col-span-2" : ""}`;
   if (disabled)
     return (
-      <section className={fieldClass} aria-labelledby={`${id}-label`}>
+      <section className={fieldClass} aria-labelledby={headingId}>
         <h3
-          id={`${id}-label`}
+          id={headingId}
           className="tw-mb-3 tw-mt-0 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-400"
         >
           {label}
@@ -324,10 +328,10 @@ function DocumentationAnswerField(
       </section>
     );
   return (
-    <section className={fieldClass} aria-labelledby={`${id}-label`}>
+    <section className={fieldClass} aria-labelledby={headingId}>
       <div className="tw-mb-3 tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-2">
         <h3
-          id={`${id}-label`}
+          id={headingId}
           className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100"
         >
           {label}
@@ -340,7 +344,7 @@ function DocumentationAnswerField(
       </div>
       {field.help && (
         <p
-          id={`${id}-help`}
+          id={helpId}
           className="tw-mb-4 tw-text-sm tw-leading-relaxed tw-text-iron-300"
         >
           {msg(fieldHelpKey(field.help, publicationOnly))}
@@ -408,7 +412,7 @@ function DocumentationAnswerField(
               }
               disabled={disabled}
               assets={choices}
-              describedBy={field.help ? `${id}-help` : undefined}
+              describedBy={field.help ? helpId : undefined}
               onChange={(value) => update({ value })}
             />
           ) : (

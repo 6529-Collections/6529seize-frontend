@@ -11,6 +11,76 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
 }));
 
 describe("artwork documentation modules", () => {
+  it("associates a nested Label with its input rather than the surrounding field heading", () => {
+    const context = documentationFixture();
+    const artwork = context.profile.modules.find(
+      (module) => module.id === "artwork"
+    )!;
+    const rights = context.profile.modules.find(
+      (module) => module.id === "rights"
+    )!;
+    rights.fields = [
+      {
+        ...artwork.fields[0]!,
+        id: "intended_license",
+        value_schema: {
+          type: "object",
+          properties: { uri: { type: "string" }, label: { type: "string" } },
+        } as never,
+      },
+    ];
+    context.modules["rights"]!.answers["intended_license"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: {
+        uri: "https://creativecommons.org/publicdomain/zero/1.0/",
+        label: "CC0 1.0",
+      },
+    } as never;
+    const { rerender } = render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="rights"
+        onChange={jest.fn()}
+      />
+    );
+    const field = screen.getByRole("region", {
+      name: "Intended artwork license",
+    });
+    const input = within(field).getByRole<HTMLInputElement>("textbox", {
+      name: "Label",
+    });
+    expect(input.labels).toHaveLength(1);
+    expect(input.labels?.[0]?.control).toBe(input);
+    expect(document.getElementById(input.id)).toBe(input);
+    expect(
+      document.getElementById(field.getAttribute("aria-labelledby")!)
+    ).toBe(
+      within(field).getByRole("heading", { name: "Intended artwork license" })
+    );
+
+    rerender(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="rights"
+        readOnly
+        onChange={jest.fn()}
+      />
+    );
+    const readOnlyField = screen.getByRole("region", {
+      name: "Intended artwork license",
+    });
+    expect(
+      document.getElementById(readOnlyField.getAttribute("aria-labelledby")!)
+    ).toBe(
+      within(readOnlyField).getByRole("heading", {
+        name: "Intended artwork license",
+      })
+    );
+    expect(within(readOnlyField).queryByRole("textbox")).toBeNull();
+  });
   it("asks for a replacement reason only while a different confirmed final file is selected", () => {
     const context = documentationFixture();
     context.latest_revision_id = "confirmed-revision";
@@ -32,7 +102,10 @@ describe("artwork documentation modules", () => {
       role: "artwork_final",
       intended_visibility: "public_record",
     })) as typeof context.asset_links;
-    const onChange = jest.fn<void, [string, ApiArtworkDocumentationOperation]>();
+    const onChange = jest.fn<
+      void,
+      [string, ApiArtworkDocumentationOperation]
+    >();
     const form = (edits: PendingEdit[]) => (
       <DocumentationModules
         context={context}
