@@ -2,6 +2,7 @@ import ManifoldMinting from "@/components/manifold-minting/ManifoldMinting";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import { render, screen, waitFor } from "@testing-library/react";
+import type { ComponentProps } from "react";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -308,6 +309,11 @@ describe("Mint artwork source", () => {
       animation_details: { format: "MP4" },
     },
   };
+  const artworkProps = {
+    ...defaultProps,
+    abi: [],
+    mintMetadata: videoMetadata,
+  } satisfies ComponentProps<typeof ManifoldMinting>;
 
   const renderedArtwork = () => {
     const props = jest.mocked(NFTImage).mock.calls.at(-1)?.[0];
@@ -324,8 +330,7 @@ describe("Mint artwork source", () => {
     const nextAnimation = "https://cdn.example/videos/124.MP4";
     const { rerender } = render(
       <ManifoldMinting
-        {...defaultProps}
-        mintMetadata={videoMetadata}
+        {...artworkProps}
         animationSrc={firstAnimation}
       />
     );
@@ -334,7 +339,7 @@ describe("Mint artwork source", () => {
 
     rerender(
       <ManifoldMinting
-        {...defaultProps}
+        {...artworkProps}
         mintMetadata={{ ...videoMetadata, tokenId: 124 }}
         animationSrc={nextAnimation}
       />
@@ -349,8 +354,7 @@ describe("Mint artwork source", () => {
     (animationSrc) => {
       render(
         <ManifoldMinting
-          {...defaultProps}
-          mintMetadata={videoMetadata}
+          {...artworkProps}
           animationSrc={animationSrc}
         />
       );
@@ -362,7 +366,7 @@ describe("Mint artwork source", () => {
   it("keeps interactive HTML artwork on its metadata source", () => {
     render(
       <ManifoldMinting
-        {...defaultProps}
+        {...artworkProps}
         mintMetadata={{
           ...videoMetadata,
           metadata: {
