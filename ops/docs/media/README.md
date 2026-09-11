@@ -10,6 +10,8 @@
 
 ## Features
 
+- [Collect](collecting.md): `/collect` and `/collect/orders`, profile set
+  completion, marketplace trades and TDH comparisons.
 - [Card Market Depth](feature-card-market-depth.md): quoted asks, bids, quantities
   and snapshot freshness on supported card pages.
 - [Memes](memes/README.md): `/the-memes`, `/the-memes/{id}`,

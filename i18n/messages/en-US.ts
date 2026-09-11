@@ -44,6 +44,7 @@ import { EULA_MESSAGES } from "@/i18n/messages/eula";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
+import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -1265,6 +1266,17 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
 } as const);
 
 const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
+  "pinControl.pinTooltip": "Pin",
+  "pinControl.unpinTooltip": "Unpin",
+  "pinControl.pinAriaLabel": "Pin wave",
+  "pinControl.unpinAriaLabel": "Unpin wave",
+  "pinControl.pinErrorTitle": "Couldn't pin this wave.",
+  "pinControl.unpinErrorTitle": "Couldn't unpin this wave.",
+  "pinControl.retryDescription": PLEASE_TRY_AGAIN,
+  "pinControl.limitMessage": "Maximum {count} pinned waves allowed",
+  "pinControl.limitTooltip":
+    "Max {count} pinned waves. Unpin another wave first.",
+  "pinControl.viewerChanged": "The active profile changed. Please try again.",
   highlyRated: "Worth Checking Out",
   highlyRatedInfoTooltip: "Highly rated waves you don’t follow yet.",
   "highlyRatedPreviewOpenAriaLabel.none": "Open {waveName}",
@@ -2763,6 +2775,7 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  ...COLLECT_MESSAGES,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,

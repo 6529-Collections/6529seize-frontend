@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-11T15:43:52.000Z",
+  "generated_at": "2026-08-11T15:43:52Z",
   "commit_sha": "21d60faed6a5",
   "base_url": "https://6529.io",
   "records": [
@@ -1372,6 +1372,7 @@
         "Sign out all clears every connected profile in one visible transition without switching through the remaining profiles.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
         "If Post cannot finish its session check, the draft stays in the composer. Wait for loading to finish, check the connection, complete sign-in if prompted, then retry Post. A stalled session check expires so a later attempt can check again; it does not automatically post the draft.",
+        "If Post asks you to reconnect or reactions show Please reconnect your wallet, the saved profile can still be visible even though its session cannot renew. Reconnect that profile from the wallet account controls, then retry the action. Save your draft before logging out or reloading; failed authentication keeps it in the composer, and reactions are not automatically retried after sign-in.",
         "Some write actions, settings, and subscriptions require a connected profile."
       ],
       "canonical_path": "/",
@@ -2430,7 +2431,8 @@
         "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
         "A Wave opened from a direct link remains visible and highlighted in the left sidebar even when it is not followed, pinned, or present in the loaded overview; this temporary route context does not join or pin it.",
         "When a direct link opens a subwave, the sidebar surfaces its visible parent, loads and expands the subwave list, reveals the selected child row, and keeps that parent tree ahead of paginated activity rows so every sibling remains reachable.",
-        "An active subwave header shows an up-left arrow and a linked parent wave name; selecting that name opens the parent wave."
+        "An active subwave header shows an up-left arrow and a linked parent wave name; selecting that name opens the parent wave.",
+        "Pin and unpin check the selected profile session before changing the list. If the session cannot renew, reconnect that wallet and retry; a failed session check leaves the pin state unchanged. Public waves can remain readable after session expiry but are not added to saved pins. Failed server pin changes roll back and show an error."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves?create=wave", "/messages"],
@@ -2438,7 +2440,8 @@
       "source_refs": [
         "ops/docs/waves/README.md",
         "ops/docs/waves/sidebars/feature-wave-list-navigation.md",
-        "ops/docs/wave-subwave-interaction-model.md"
+        "ops/docs/wave-subwave-interaction-model.md",
+        "ops/docs/waves/sidebars/feature-pinned-wave-controls.md"
       ]
     },
     {
@@ -7819,6 +7822,68 @@
         "lib/profile-cms/builder/agent-save.ts",
         "standalone/profile-cms-agent/README.md",
         "ops/docs/profiles/feature-profile-cms-builder-ai-agent-affordances.md"
+      ]
+    },
+    {
+      "id": "collect.overview",
+      "kind": "workflow",
+      "title": "Collect artwork and complete profile sets",
+      "aliases": [
+        "buy 6529 NFTs",
+        "sell NFTs",
+        "NFT bids",
+        "cheapest NFTs",
+        "complete a season",
+        "complete Pebbles",
+        "lowest cost TDH",
+        "gift a purchase"
+      ],
+      "keywords": [
+        "Collect",
+        "Memes",
+        "Gradient",
+        "Pebbles",
+        "season",
+        "artist",
+        "sets",
+        "marketplace",
+        "listing",
+        "offer",
+        "WETH",
+        "recipient",
+        "gifts",
+        "TDH"
+      ],
+      "facts": [
+        "Collect at /collect supports The Memes, 6529 Gradient and NextGen Pebbles. Browse artwork, compare observed low-price listings, find specific tokens, analyze season/full-set/artist/Pebbles trait goals and compare additional TDH.",
+        "All set collecting uses the profile across its confirmed consolidated wallets. Wallets identify custody, funding, signing or receipt; selecting a custody wallet does not redefine the primary collecting scope.",
+        "Purchase recipients follow minting: choose a profile wallet or enter a third-party wallet. Review the exact address. The purchase transaction delivers the NFT directly to that one recipient without a separate onward transfer. A gift outside the profile does not advance that profile’s projected completion or TDH.",
+        "Pebbles is the current NextGen project. Palette, Size, Traced and Ultimate goals extend its existing Trait Sets. Ultimate can satisfy multiple trait requirements with one token.",
+        "Completion plans show missing requirements and incomplete coverage. The initial scan checks one best exact OpenSea listing per artwork; it does not exhaust market depth. Each planned purchase gets a fresh quote and wallet approval, and several orders use separate transactions.",
+        "Supported execution uses Ethereum mainnet, exact NFTs, explicit quantities and ETH or WETH. Fixed-price offers use WETH and receive NFTs in the signing wallet. Profile consolidation and social proxy access do not grant trading authority over another wallet.",
+        "Review the total price, fees, seller net where applicable, recipient and token approval scope. New listings include configured creator support; standard offers include required provider fees; purchases and accepted offers preserve their signed fees. The 6529 platform fee is zero.",
+        "Orders at /collect/orders tracks operation recovery. Potential offer exposure begins when signable terms are revealed, even if no signature or publication is confirmed. A quote freshness timer does not expire a signed order.",
+        "If a wallet may have submitted a transaction but its hash was not returned, the review shows Checking the outcome and blocks another send for that operation across browsers. Copy the hash from wallet activity into Transaction hash from your wallet and select Check this transaction. The site verifies the exact transaction; this does not send a replacement. Approvals and recovery without local browser data use the same flow.",
+        "If publication or broadcast is uncertain, retain the order or transaction hash and reconcile it instead of sending a duplicate purchase. Cancellation can lose a race to a fill and is effective only after chain verification. Revoking an approval or pausing new trading does not permanently cancel signed orders.",
+        "TDH comparisons use a verified official snapshot and include changes to bonuses on existing holdings. The ranking is best among observed candidates, includes an estimated gas reserve, and is not a guarantee of future TDH or complete market coverage.",
+        "A Safe can receive a gift purchase. Execution from smart contract wallets and inside the native app is unavailable until those paths are supported. Programmatic preparation still requires owner review and wallet authorization; the backend does not hold user signing keys.",
+        "Saved rules freeze exact targets, funding wallet, recipient, unit and total review limits, gas reserve, expiry and action count. They prepare one ETH purchase at a time for wallet approval. Pause and expiry retain unresolved operations, and confirmed acquisitions count permanently even if the NFT is later sold or transferred. Rules do not grant unattended wallet execution authority."
+      ],
+      "canonical_path": "/collect",
+      "link_label": "Collect",
+      "related_paths": [
+        "/collect/orders",
+        "/the-memes",
+        "/6529-gradient",
+        "/nextgen"
+      ],
+      "tags": ["collections", "marketplace", "profiles", "TDH", "wallets"],
+      "source_refs": [
+        "ops/docs/media/collecting.md",
+        "app/collect/page.tsx",
+        "app/collect/orders/page.tsx",
+        "components/collect/CollectPageClient.tsx",
+        "components/collect/useMarketExecution.ts"
       ]
     }
   ]

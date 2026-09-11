@@ -15,6 +15,9 @@ import { CollectedStatsSeasons } from "./stats/subcomponents/CollectedStatsSeaso
 import type { DisplaySeason } from "./stats/types";
 import { useCollectedStatsData } from "./stats/useCollectedStatsData";
 import { useDesktopSeasonRowCapacity } from "./stats/useDesktopSeasonRowCapacity";
+import CollectEntryLink from "@/components/collect/CollectEntryLink";
+import ButtonLink from "@/components/utils/button/ButtonLink";
+import { t } from "@/i18n/messages";
 
 const getCollapsedStartedSeasons = ({
   startedSeasons,
@@ -220,6 +223,10 @@ export default function UserPageCollectedStats({
       />
 
       <div ref={detailsScrollTargetRef} className="tw-scroll-mt-24">
+        <div className="tw-flex tw-flex-wrap tw-gap-2 tw-px-4 tw-py-4 sm:tw-px-5">
+          <CollectEntryLink collection="memes" intent={activeSeasonNumber === null ? "full_set" : "season"} definitionId={activeSeasonNumber === null ? undefined : String(activeSeasonNumber)} locale={locale} complete />
+          <ButtonLink href="/collect/orders" variant="tertiary" size="sm" className="tw-min-h-11">{t(locale, "collect.entry.manage")}</ButtonLink>
+        </div>
         <CollectedStatsDetailsPanel
           isOpen={isDetailsOpen}
           detailsId={detailsId}
