@@ -6,6 +6,7 @@ import CollectAssetMedia from "./CollectAssetMedia";
 import { collectAssetHref } from "./collect.adapters";
 import type { CollectArtworkView } from "./collect.types";
 import { marketAmount } from "./market.adapters";
+import { collectTdhValueLabel } from "./collect-tdh-browse.helpers";
 import {
   collectCatalogEntryId,
   type CollectCatalogEntry,
@@ -38,6 +39,9 @@ export function collectCatalogArtwork(
     priceLabel: order ? marketAmount(order.total_wei, order.currency) : null,
     priceDescription: order
       ? t(locale, "collect.trade.orderQuantity", { quantity: order.quantity })
+      : undefined,
+    sourceLabel: entry.tdh
+      ? collectTdhValueLabel(entry.tdh, locale)
       : undefined,
     actions: (["buy", "offer", "list", "accept"] as const).map((action) => ({
       action,
