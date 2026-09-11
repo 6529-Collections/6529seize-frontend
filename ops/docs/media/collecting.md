@@ -23,16 +23,21 @@ opens the full Memes set when no season is selected. Gradients opens the full
 Gradients set; Pebbles opens its trait-set planner. Collected and Pebbles Trait
 Sets also link to relevant collecting goals.
 
-Supported artwork pages place one **Collect** action near the artwork summary,
+Supported artwork pages place a priced **Buy** action near the artwork summary,
 before the longer description and [**Listings and Offers**](feature-card-market-depth.md).
-It opens purchase review on the same page. Its more-actions menu contains
-**Make an offer**, **List for sale** and **Review offers**.
-These actions open a dialog immediately, with a loading message while the
-artwork and trading tools load. Current orders and terms are checked before a
-purchase can proceed.
+The lowest supported listing is selected automatically. **Deliver to · Change**
+lets you choose the receiving wallet; additional listings remain available under
+**Other listings**. Buy checks the selected order again before showing exact
+terms for wallet approval. A changed order requires another review.
 
-**Browse artwork** links in Collecting tools return to the original collection
-pages. The planner has no separate artwork search or browsing grid. Existing
+**Make an offer** is visible beside buying. **List for sale** appears when a
+confirmed wallet in the profile holds the NFT. Connect that holding wallet to
+list it; profile consolidation does not grant another wallet permission to sign.
+The more-actions menu contains **Review offers**.
+
+The **View The Memes**, **View Gradients** or **View Pebbles** link returns to the
+current collection page. On narrow screens it appears as an arrow with the same
+accessible name. The planner has no separate artwork search or browsing grid. Existing
 links for browsing or a specific artwork open the corresponding collection or
 card page.
 
@@ -74,15 +79,18 @@ trait requirements with one token. Artist goals let you include collaborations.
 ### Compare available listings
 
 Choose **Lowest listings**, then The Memes, Gradients or Pebbles. This tool shows
-observed listings with prices and quantities. Open an artwork for its card page,
+observed listings with prices and quantities, showing each NFT once at its lowest
+supported purchase price. An indivisible lot says how many copies its price
+includes. Open an artwork for its card page,
 or select **Collect** to check the current order and review a purchase. No listing
 results does not mean that no orders exist elsewhere. If the listing source
 cannot be loaded, use **Try again** or return to the collection page.
 
 ### Buy for another wallet
 
-The recipient picker follows minting and shows your profile's confirmed wallets
-automatically. Choose one, or use **Send to a fren** to search a profile or ENS
+**Deliver to** shows the selected destination compactly. Choose **Change** to
+open the mint-style picker with your profile's confirmed wallets. Choose one,
+or use **Send to a fren** to search a profile or ENS
 name, or enter another wallet. Check the full resolved address before
 authorization. The paying wallet is separate from the recipient. The NFT
 is delivered directly to the chosen recipient in the purchase transaction.
