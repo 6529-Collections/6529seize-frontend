@@ -26,3 +26,17 @@
   sidebar consumers instead of resolving with `DEFAULT_LOCALE`, and remove this
   fallback note once non-source locale dictionaries and runtime locale wiring are
   in place.
+
+## Wave pin controls
+
+- Component: `BrainLeftSidebarWavePin`; internal viewer-change errors in
+  `usePinnedWavesServer`.
+- Untranslated surface: pin/unpin accessible names, tooltips, limit feedback,
+  and error messages now use `waves.sidebar.pinControl.*` source messages.
+- Current fallback: the button follows browser locale; missing translations in
+  `en-GB`, `fr-FR`, `es-ES`, and `de-DE` resolve to `en-US`. Internal error details
+  use the canonical `en-US` message. The pin limit uses locale-aware formatting.
+- User impact: these controls and errors remain English in non-source locales.
+- Owner/follow-up: Waves UI maintainers and the frontend i18n migration workstream.
+- Remediation path: add reviewed translations for the pin-control message keys
+  and localize internal error details when the shared error surface is migrated.
