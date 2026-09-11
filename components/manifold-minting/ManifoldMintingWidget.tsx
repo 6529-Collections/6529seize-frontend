@@ -1,22 +1,14 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import {
-  type ReactNode,
-  useEffect,
-  useId,
-  useReducer,
-  useState,
-} from "react";
+import { type ReactNode, useEffect, useId, useReducer, useState } from "react";
 import {
   useReadContract,
   useReadContracts,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import OnchainTransactionModal, {
-  type OnchainTransactionModalStatus,
-} from "@/components/common/OnchainTransactionModal";
+import type { OnchainTransactionModalStatus } from "@/components/common/OnchainTransactionModal";
 import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
 import type { MintingClaimsProofItem } from "@/generated/models/MintingClaimsProofItem";
 import { areEqualAddresses, fromGWEI } from "@/helpers/Helpers";
@@ -31,8 +23,11 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import DotLoader from "../dotLoader/DotLoader";
 import Button from "../utils/button/Button";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
+import type { MintReceipt } from "./ManifoldMintingSuccess";
+import ManifoldMintingTransactionModal from "./ManifoldMintingTransactionModal";
 import {
-  getTransactionModalTitle,
+  createMintReceipt,
+  type MintArtwork,
   normalizeMintCount,
 } from "./ManifoldMintingWidget.utils";
 import { useManifoldMintConnectedAction } from "./useManifoldMintConnectedAction";
@@ -110,6 +105,7 @@ function resolveTransactionModalStatus({
 }
 
 interface MintTransactionAttempt {
+  readonly receipt: MintReceipt;
   readonly ignoredTransactionHash: string | undefined;
   readonly ignoredMintWriteError: Error | null;
   readonly ignoredReceiptError: Error | null;
@@ -163,6 +159,7 @@ export default function ManifoldMintingWidget(
     claim: ManifoldClaim;
     local_timezone: boolean;
     hideConnect?: boolean;
+    artwork?: MintArtwork | undefined;
     setFee: (fee: number) => void;
     setMintForAddress: (address: string | null) => void;
   }>
@@ -506,6 +503,14 @@ export default function ManifoldMintingWidget(
       dispatchTransactionAttempt({
         type: "start",
         attempt: {
+          receipt: createMintReceipt({
+            locale,
+            contract: props.contract,
+            tokenId: props.claim.tokenId,
+            quantity: safeMintCount,
+            recipient: mintForAddress,
+            artwork: props.artwork,
+          }),
           ignoredTransactionHash: mintWrite.data,
           ignoredMintWriteError: mintWrite.error,
           ignoredReceiptError: waitMintWrite.error,
@@ -756,6 +761,8 @@ export default function ManifoldMintingWidget(
     transactionModalStatus,
     resolvedMintError
   );
+  const closeTransactionModal = () =>
+    dispatchTransactionAttempt({ type: "clear" });
 
   return (
     <>
@@ -773,19 +780,17 @@ export default function ManifoldMintingWidget(
         {printMintDebug()}
       </div>
       {transactionModalStatus ? (
-        <OnchainTransactionModal
+        <ManifoldMintingTransactionModal
           status={transactionModalStatus}
-          title={getTransactionModalTitle(
-            locale,
-            props.contract,
-            props.claim.tokenId
-          )}
+          contract={props.contract}
+          tokenId={props.claim.tokenId}
+          receipt={transactionAttempt?.receipt}
           message={transactionModalMessage}
           transactionHash={
             hasCurrentTransactionHash ? mintWrite.data : undefined
           }
           chain={props.chain}
-          onClose={() => dispatchTransactionAttempt({ type: "clear" })}
+          onClose={closeTransactionModal}
         />
       ) : null}
     </>
