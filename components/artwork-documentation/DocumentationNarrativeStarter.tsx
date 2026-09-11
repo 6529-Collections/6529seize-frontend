@@ -69,7 +69,7 @@ export default function DocumentationNarrativeStarter(props: Props) {
           {msg("examples.adapt")}
         </DocumentationButton>
       ) : (
-        <div className="tw-space-y-3 tw-border-l-2 tw-border-solid tw-border-primary-400 tw-pl-4">
+        <div className="tw-space-y-3 tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400 tw-pl-4">
           <p
             id={`${props.id}-starter-help`}
             className="tw-m-0 tw-text-sm tw-leading-relaxed tw-text-iron-300"
