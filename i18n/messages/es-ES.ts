@@ -11,6 +11,7 @@ import { ES_ES_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { ES_ES_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { ES_ES_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { ES_ES_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
+import { ES_ES_THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
 import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
@@ -1227,4 +1228,5 @@ export const ES_ES_MESSAGES = {
   "notifications.filter.option.subscriptions": "Suscripciones",
   ...ES_ES_TRANSFER_MESSAGES,
   ...ES_ES_THE_MEMES_MINT_SUCCESS_MESSAGES,
+  ...ES_ES_THE_MEMES_MINT_PROGRESS_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

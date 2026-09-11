@@ -9,6 +9,19 @@ import ManifoldMintingSuccess, {
   type MintReceipt,
 } from "./ManifoldMintingSuccess";
 import { getTransactionModalTitle } from "./ManifoldMintingWidget.utils";
+import ManifoldMintingProgress from "./ManifoldMintingProgress";
+
+const TITLES = {
+  confirm_wallet: "theMemes.mint.transaction.walletTitle",
+  submitted: "theMemes.mint.transaction.submittedTitle",
+  success: "theMemes.mint.transaction.success",
+} as const;
+
+const DESCRIPTIONS = {
+  confirm_wallet: "theMemes.mint.transaction.walletDescription",
+  submitted: "theMemes.mint.transaction.submittedDescription",
+  success: "theMemes.mint.transaction.successDescription",
+} as const;
 
 export default function ManifoldMintingTransactionModal({
   status,
@@ -30,28 +43,37 @@ export default function ManifoldMintingTransactionModal({
   onClose: () => void;
 }>) {
   const locale = useBrowserLocale();
-  const isSuccess = status === "success";
+  const isError = status === "error";
+  const isPending = status === "confirm_wallet" || status === "submitted";
+  const transactionUrl = transactionHash
+    ? getTransactionLink(chain.id, transactionHash)
+    : undefined;
   return (
     <OnchainTransactionModal
       status={status}
       title={
-        isSuccess
-          ? t(locale, "theMemes.mint.transaction.success")
-          : getTransactionModalTitle(locale, contract, tokenId)
+        isError
+          ? getTransactionModalTitle(locale, contract, tokenId)
+          : t(locale, TITLES[status])
       }
-      subtitle={
-        isSuccess
-          ? t(locale, "theMemes.mint.transaction.successDescription")
-          : undefined
-      }
+      subtitle={isError ? undefined : t(locale, DESCRIPTIONS[status])}
       closeLabel={
-        isSuccess ? t(locale, "theMemes.mint.transaction.close") : undefined
+        isError ? undefined : t(locale, "theMemes.mint.transaction.close")
+      }
+      pendingContent={
+        isPending ? (
+          <ManifoldMintingProgress
+            status={status}
+            receipt={receipt}
+            transactionUrl={transactionUrl}
+          />
+        ) : undefined
       }
       successContent={
-        isSuccess && receipt && transactionHash ? (
+        status === "success" && receipt && transactionUrl ? (
           <ManifoldMintingSuccess
             receipt={receipt}
-            transactionUrl={getTransactionLink(chain.id, transactionHash)}
+            transactionUrl={transactionUrl}
             onClose={onClose}
           />
         ) : undefined

@@ -9,6 +9,7 @@ import { EN_GB_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES as EN_GB_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
+import { THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
 import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.json";
 
@@ -1098,4 +1099,5 @@ export const EN_GB_MESSAGES = {
   "notifications.filter.option.subscriptions": "Subscriptions",
   ...TRANSFER_MESSAGES,
   ...THE_MEMES_MINT_SUCCESS_MESSAGES,
+  ...THE_MEMES_MINT_PROGRESS_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;
