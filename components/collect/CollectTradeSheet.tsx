@@ -136,7 +136,7 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
     <div
       className={
         props.compact
-          ? "tw-space-y-3 tw-text-iron-100"
+          ? "tw-w-full tw-space-y-3 tw-text-iron-100"
           : "tw-space-y-5 tw-px-4 tw-text-iron-100 md:tw-px-6"
       }
     >

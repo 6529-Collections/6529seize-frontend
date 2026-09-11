@@ -138,6 +138,28 @@ it("honors an explicit full-set definition and retains edited drafts on rerender
   expect(mockReplace).not.toHaveBeenCalled();
 });
 
+it("preserves the focused goal controls and budget across URL filters and goal changes", () => {
+  mockSearchParams = new URLSearchParams("collection=memes&intent=full_set");
+  const { rerender } = render(<CollectPageClient />);
+  const budget = screen.getByLabelText("Goal budget");
+  fireEvent.change(budget, { target: { value: "2.5" } });
+  budget.focus();
+  mockSearchParams = new URLSearchParams(
+    "collection=memes&intent=full_set&q=artwork&page=2"
+  );
+  rerender(<CollectPageClient />);
+  expect(screen.getByLabelText("Goal budget")).toBe(budget);
+  expect(budget).toHaveFocus();
+  mockSearchParams = new URLSearchParams(
+    "collection=memes&intent=season&definition=1"
+  );
+  rerender(<CollectPageClient />);
+  expect(screen.getByLabelText("Goal budget")).toBe(budget);
+  expect(budget).toHaveFocus();
+  expect(budget).toHaveValue("2.5");
+  expect(screen.getByLabelText("Goal definition")).toHaveTextContent("1");
+});
+
 it.each(["Season", "Artist"])(
   "opens the Memes %s goal and clears artwork filters",
   (goal) => {

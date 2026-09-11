@@ -126,12 +126,9 @@ function renderActions(tokenId = "5", onMarketChange?: () => void) {
 async function openOffer() {
   const user = userEvent.setup();
   const trigger = screen.getByRole("button", {
-    name: "More trading actions for Meme Five",
+    name: "Make an offer: Meme Five",
   });
   await user.click(trigger);
-  await user.click(
-    await screen.findByRole("menuitem", { name: "Make an offer: Meme Five" })
-  );
   return {
     user,
     trigger,

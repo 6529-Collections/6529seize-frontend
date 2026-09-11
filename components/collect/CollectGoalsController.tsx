@@ -34,6 +34,7 @@ export default function CollectGoalsController({
   onPlan,
   onConnect,
   completion,
+  revision = 0,
 }: {
   readonly draft: CollectGoalDraft;
   readonly catalog: ApiCollectCatalog | undefined;
@@ -42,15 +43,36 @@ export default function CollectGoalsController({
   readonly onPlan: (plan: ApiCollectPlan | null) => void;
   readonly onConnect: () => void;
   readonly completion?: CollectCompletionSelection;
+  readonly revision?: number;
 }) {
   const locale = useBrowserLocale();
   const [recipient, setRecipient] = useState(profile?.primary_wallet ?? "");
-  const [plan, setPlan] = useState<ApiCollectPlan | null>(null);
+  const scope = JSON.stringify([
+    revision,
+    draft,
+    catalog?.version,
+    profile?.id,
+    recipient,
+  ]);
+  const [storedPlan, setStoredPlan] = useState<{
+    scope: string;
+    plan: ApiCollectPlan;
+  } | null>(null);
+  const plan = storedPlan?.scope === scope ? storedPlan.plan : null;
+  const [submittedScope, setSubmittedScope] = useState<string | null>(null);
+  const requestEpoch = useRef(0);
+  useEffect(
+    () => () => {
+      requestEpoch.current += 1;
+    },
+    [scope]
+  );
   const [scanError, setScanError] = useState(false);
   const [recipientError, setRecipientError] = useState(false);
   const [budgetError, setBudgetError] = useState(false);
   const scanProgress = useRef({ attempts: 0, stalled: 0 });
   const create = useMutation({ mutationFn: createCollectPlan });
+  const creating = create.isPending && submittedScope === scope;
   const scanning = plan?.state === ApiCollectPlanStateEnum.Scanning;
   useEffect(() => {
     if (plan?.state !== ApiCollectPlanStateEnum.Scanning || scanError) return;
@@ -65,7 +87,7 @@ export default function CollectGoalsController({
                 next.checked_asset_count > plan.checked_asset_count
                   ? 0
                   : scanProgress.current.stalled + 1;
-              setPlan(next);
+              setStoredPlan({ scope, plan: next });
               onPlan(next);
               if (
                 next.state === ApiCollectPlanStateEnum.Scanning &&
@@ -88,7 +110,7 @@ export default function CollectGoalsController({
       abort.abort();
       globalThis.clearTimeout(timer);
     };
-  }, [plan, scanError, onPlan]);
+  }, [plan, scanError, onPlan, scope]);
   const submit = (value: CollectGoalDraft) => {
     if (!profile?.id || !catalog) return;
     const validBudget = isPositiveEthAmount(value.budgetEth);
@@ -101,7 +123,10 @@ export default function CollectGoalsController({
     scanProgress.current = { attempts: 0, stalled: 0 };
     setScanError(false);
     onPlan(null);
-    setPlan(null);
+    setStoredPlan(null);
+    setSubmittedScope(scope);
+    requestEpoch.current += 1;
+    const epoch = requestEpoch.current;
     create.mutate(
       {
         goal: collectAnalysisRequest(profile.id, catalog, value),
@@ -112,15 +137,17 @@ export default function CollectGoalsController({
       },
       {
         onSuccess: (next) => {
-          setPlan(next);
+          if (epoch !== requestEpoch.current) return;
+          setStoredPlan({ scope, plan: next });
           onPlan(next);
         },
       }
     );
   };
-  const requestError = create.isError
-    ? t(locale, "collect.error.analysis")
-    : undefined;
+  const requestError =
+    create.isError && submittedScope === scope
+      ? t(locale, "collect.error.analysis")
+      : undefined;
   return (
     <div className="tw-space-y-4">
       <CollectGoalForm
@@ -132,13 +159,14 @@ export default function CollectGoalsController({
             ? { id: profile.id, displayName: profile.handle ?? profile.display }
             : null
         }
-        loading={create.isPending || scanning}
+        loading={creating || scanning}
         error={
           budgetError ? t(locale, "collect.goal.invalidBudget") : requestError
         }
         onChange={(value) => {
           setBudgetError(false);
-          setPlan(null);
+          requestEpoch.current += 1;
+          setStoredPlan(null);
           onPlan(null);
           onChange(value);
         }}
@@ -146,7 +174,7 @@ export default function CollectGoalsController({
         onConnect={onConnect}
       />
       <fieldset
-        disabled={create.isPending}
+        disabled={creating}
         className="tw-m-0 tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-4"
       >
         <CollectRecipientPicker
@@ -157,7 +185,8 @@ export default function CollectGoalsController({
           onChange={(address) => {
             setRecipient(address);
             setRecipientError(false);
-            setPlan(null);
+            requestEpoch.current += 1;
+            setStoredPlan(null);
             onPlan(null);
           }}
         />
@@ -179,7 +208,7 @@ export default function CollectGoalsController({
           })}
         </p>
       )}
-      {scanError && (
+      {plan && scanError && (
         <div role="alert" className="tw-space-y-3 tw-text-sm tw-text-iron-300">
           <p>{t(locale, "collect.plan.scanError")}</p>
           <Button
