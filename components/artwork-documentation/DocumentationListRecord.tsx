@@ -9,6 +9,7 @@ import { getIdentityQueryOptions } from "@/services/api/identity-query";
 import { documentationWorkspacePath } from "@/services/api/artwork-documentation-api";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
 import { formatDate } from "@/i18n/format";
+import { documentationSourcePreviewUrl } from "@/lib/artwork-documentation/source-preview";
 import { ArtworkImage } from "./DocumentationArtworkPreview";
 import { useDocumentationMessages } from "./DocumentationControls";
 
@@ -45,14 +46,16 @@ export default function DocumentationListRecord({
               item.url.startsWith("https://")
           )
       : undefined;
+  const previewUrl = media && documentationSourcePreviewUrl(media.url, true);
   return (
     <article className="tw-grid tw-min-w-0 tw-gap-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-8 sm:tw-grid-cols-[10rem_minmax(0,1fr)] sm:tw-gap-8">
-      {media ? (
+      {media && previewUrl ? (
         <figure className="tw-m-0 tw-min-w-0">
           <div className="tw-flex tw-min-h-32 tw-items-center tw-bg-iron-950 tw-p-3">
             <ArtworkImage
-              key={media.url}
-              url={media.url}
+              key={previewUrl}
+              url={previewUrl}
+              fallbackUrl={media.url}
               title={source?.title ?? msg("editorial.submissionImage")}
               compact
             />

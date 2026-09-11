@@ -8,6 +8,7 @@ import { ApiArtworkDocumentationAnswerStatusEnum } from "@/generated/models/ApiA
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import type { ApiArtworkDocumentationPublicPreview } from "@/generated/models/ApiArtworkDocumentationPublicPreview";
 import { isRedacted } from "@/lib/artwork-documentation/answers";
+import { documentationSourcePreviewUrl } from "@/lib/artwork-documentation/source-preview";
 import { downloadDocumentationAsset } from "@/services/api/artwork-documentation-assets-api";
 import { fetchDropsV2ByIds } from "@/services/api/wave-drops-v2-api";
 import { documentationQueryKey } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
@@ -25,17 +26,20 @@ export function ArtworkImage({
   url,
   title,
   compact,
+  fallbackUrl,
   width,
   height,
 }: {
   readonly url: string;
   readonly title: string;
   readonly compact: boolean;
+  readonly fallbackUrl?: string | undefined;
   readonly width?: number | null | undefined;
   readonly height?: number | null | undefined;
 }) {
   const { msg } = useDocumentationMessages();
   const [failed, setFailed] = useState(false);
+  const [usingFallback, setUsingFallback] = useState(false);
   const [intrinsic, setIntrinsic] = useState<{
     width: number;
     height: number;
@@ -47,9 +51,9 @@ export function ArtworkImage({
       </p>
     );
   return (
-    // Unoptimized authorized media loads directly, outside the shared image cache.
+    // Media loads directly; authorized asset URLs never enter a shared image cache.
     <Image
-      src={url}
+      src={usingFallback ? (fallbackUrl ?? url) : url}
       alt={title}
       unoptimized
       width={
@@ -70,7 +74,13 @@ export function ArtworkImage({
             height: element.naturalHeight,
           });
       }}
-      onError={() => setFailed(true)}
+      onError={() => {
+        if (!usingFallback && fallbackUrl && fallbackUrl !== url) {
+          setUsingFallback(true);
+        } else {
+          setFailed(true);
+        }
+      }}
       className={
         compact
           ? "tw-block tw-h-auto tw-max-h-64 tw-w-full tw-object-contain"
@@ -176,12 +186,14 @@ function SubmissionReference({ context, compact = false }: Props) {
               media.url.startsWith("https://")
           );
   if (!image) return null;
+  const previewUrl = documentationSourcePreviewUrl(image.url, compact);
   return (
     <figure className="tw-m-0 tw-min-w-0">
       <div className="tw-bg-iron-950 tw-p-5 sm:tw-p-8">
         <ArtworkImage
-          key={image.url}
-          url={image.url}
+          key={previewUrl}
+          url={previewUrl}
+          fallbackUrl={image.url}
           title={drop?.title ?? msg("editorial.submissionImage")}
           compact={compact}
         />
