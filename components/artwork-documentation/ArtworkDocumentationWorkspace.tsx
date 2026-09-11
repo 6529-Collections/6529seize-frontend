@@ -18,6 +18,7 @@ import {
   getDocumentationRevision,
 } from "@/services/api/artwork-documentation-api";
 import { documentationTitle } from "@/lib/artwork-documentation/answers";
+import { canWriteDocumentation } from "@/lib/artwork-documentation/capabilities";
 import {
   parseSection,
   SECTIONS,
@@ -122,6 +123,11 @@ function WorkspaceEditor({
   const router = useRouter();
   const draft = useDocumentationDraft(initial);
   const { context, controller } = draft;
+  const canWrite = canWriteDocumentation(context.capabilities);
+  const listPath =
+    !canWrite && context.program_id
+      ? `/artwork-documentation/programs/${encodeURIComponent(context.program_id)}`
+      : "/artwork-documentation";
   const publicationOnly = isPublicationOnly(context.profile);
   const [section, setSection] = useState(initialSection);
   const counts = Object.values(context.modules).reduce(
@@ -166,7 +172,7 @@ function WorkspaceEditor({
   return (
     <div className="tw-space-y-6">
       <Link
-        href="/artwork-documentation"
+        href={listPath}
         className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-text-iron-300 hover:tw-text-white"
       >
         ← {msg("back")}
@@ -185,7 +191,11 @@ function WorkspaceEditor({
           {documentationOptionLabel(context.confirmation_status)}
         </p>
       </header>
-      <DocumentationSaveStatus snapshot={draft} controller={controller} />
+      {canWrite ? (
+        <DocumentationSaveStatus snapshot={draft} controller={controller} />
+      ) : (
+        <DocumentationNotice>{msg("viewOnly")}</DocumentationNotice>
+      )}
       <DocumentationNotice>
         <p className="tw-m-0 tw-font-semibold">
           {msg(publicationOnly ? "publication.intro" : "publication.legacy")}
@@ -354,10 +364,11 @@ function WorkspaceEditor({
             <DocumentationButton
               secondary
               onClick={() => {
-                void saveExit();
+                if (canWrite) void saveExit();
+                else router.push(listPath);
               }}
             >
-              {msg("saveExit")}
+              {msg(canWrite ? "saveExit" : "back")}
             </DocumentationButton>
             {section !== "review" && (
               <DocumentationButton

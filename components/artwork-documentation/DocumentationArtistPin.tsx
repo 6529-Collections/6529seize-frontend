@@ -26,6 +26,7 @@ export default function DocumentationArtistPin({
   const candidate = context.available_artist_record;
   const revisionId = candidate?.id;
   if (
+    !context.capabilities.confirm_as_artist ||
     !candidate ||
     typeof revisionId !== "string" ||
     revisionId === context.artist_record_revision_id

@@ -18,6 +18,15 @@ Sign in with the profile that owns the work. The server determines access;
 being a Wave administrator does not automatically grant access to private
 documentation.
 
+An authorized program viewer can also open the program's artwork records,
+including their files, confirmed versions and **Questions for the team**.
+Viewer access may come from an individual profile or membership of an assigned
+group. The workspace identifies view-only access and offers navigation without
+save controls. Viewing does not grant permission to change artwork answers,
+send or resolve questions, import artist information or confirm a version.
+Artists and team members with separate editing or review permissions keep
+those permissions.
+
 Documentation can also be started in a supported submission form. It is
 optional and does not change submission eligibility. A successful artwork
 submission remains successful if linking its documentation needs a retry.
@@ -114,7 +123,9 @@ a source. Questions are sent when you choose **Send question to the team**;
 they do not use the artwork form's autosave. If sending fails, the unsent text
 stays in the current window so you can retry.
 
-The artist and authorized reviewers can discuss and resolve each question.
+The artist and team members with editing, review or coordination permissions
+can discuss and resolve each question. Program viewers can read the discussion;
+they do not see a question or reply composer or resolve and reopen controls.
 Resolved questions remain available as drafting history and can be reopened.
 This conversation is a drafting tool: questions and replies stay outside the
 artwork answers, confirmed artwork versions and future publication record.

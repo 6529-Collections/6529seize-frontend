@@ -137,7 +137,7 @@ export default function DocumentationAccess({
               >
                 <input
                   type="checkbox"
-                  className="tw-h-5 tw-w-5 tw-accent-primary-400"
+                  className="tw-h-5 tw-w-5 tw-shrink-0 tw-accent-primary-400"
                   checked={modules.includes(id)}
                   onChange={(event) =>
                     setModules(
@@ -166,7 +166,7 @@ export default function DocumentationAccess({
             >
               <input
                 type="checkbox"
-                className="tw-h-5 tw-w-5 tw-accent-primary-400"
+                className="tw-h-5 tw-w-5 tw-shrink-0 tw-accent-primary-400"
                 checked={evidence.includes(id)}
                 onChange={(event) =>
                   setEvidence(

@@ -14,6 +14,7 @@ import {
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
 import { formatDate } from "@/i18n/format";
 import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
+import { canWriteDocumentation } from "@/lib/artwork-documentation/capabilities";
 import {
   ApiArtworkDocumentationThreadAudienceEnum,
   ApiArtworkDocumentationThreadRestrictedClassEnum,
@@ -34,6 +35,7 @@ export default function DocumentationFeedback({
 }) {
   const { msg } = useDocumentationMessages();
   const questions = isPublicationOnly(context.profile);
+  const canParticipate = canWriteDocumentation(context.capabilities);
   const { connectedProfile, actorKey } = useDocumentationActor();
   const [text, setText] = useState("");
   const [audience, setAudience] = useState("artist_and_reviewers");
@@ -53,6 +55,7 @@ export default function DocumentationFeedback({
     meta: { persist: false },
   });
   const create = async () => {
+    if (!canParticipate) return;
     setBusy(true);
     setError(false);
     try {
@@ -101,6 +104,7 @@ export default function DocumentationFeedback({
           key={thread.id}
           contextId={context.id}
           thread={thread}
+          canParticipate={canParticipate}
           refresh={() => {
             void query.refetch();
           }}
@@ -111,65 +115,69 @@ export default function DocumentationFeedback({
           {msg(questions ? "questions.empty" : "noFeedback")}
         </p>
       )}
-      <label className="tw-block tw-text-sm tw-text-iron-300">
-        {msg(questions ? "questions.label" : "comment")}
-        <textarea
-          rows={3}
-          className={`${inputClass} tw-mt-2`}
-          value={text}
-          disabled={busy}
-          aria-describedby={
-            questions ? "documentation-question-help" : undefined
-          }
-          onChange={(event) => setText(event.target.value)}
-        />
-      </label>
-      {questions && (
-        <p
-          id="documentation-question-help"
-          className="tw-text-sm tw-leading-relaxed tw-text-iron-400"
-        >
-          {msg("questions.hint")} {msg("questions.notSaved")}
-        </p>
-      )}
-      {!questions && (
-        <label className="tw-block tw-text-sm tw-text-iron-300">
-          {msg("audience")}
-          <select
-            className={`${inputClass} tw-mt-2`}
-            value={audience}
-            onChange={(event) => setAudience(event.target.value)}
+      {canParticipate && (
+        <>
+          <label className="tw-block tw-text-sm tw-text-iron-300">
+            {msg(questions ? "questions.label" : "comment")}
+            <textarea
+              rows={3}
+              className={`${inputClass} tw-mt-2`}
+              value={text}
+              disabled={busy}
+              aria-describedby={
+                questions ? "documentation-question-help" : undefined
+              }
+              onChange={(event) => setText(event.target.value)}
+            />
+          </label>
+          {questions && (
+            <p
+              id="documentation-question-help"
+              className="tw-text-sm tw-leading-relaxed tw-text-iron-400"
+            >
+              {msg("questions.hint")} {msg("questions.notSaved")}
+            </p>
+          )}
+          {!questions && (
+            <label className="tw-block tw-text-sm tw-text-iron-300">
+              {msg("audience")}
+              <select
+                className={`${inputClass} tw-mt-2`}
+                value={audience}
+                onChange={(event) => setAudience(event.target.value)}
+              >
+                <option value="artist_and_reviewers">
+                  {msg("artistReviewers")}
+                </option>
+                {context.capabilities.review_lanes.length > 0 && (
+                  <option value="reviewers_only">{msg("reviewersOnly")}</option>
+                )}
+              </select>
+            </label>
+          )}
+          {!questions && context.capabilities.read_rights_evidence && (
+            <label className="tw-block tw-text-sm tw-text-iron-300">
+              {msg("visibility")}
+              <select
+                className={`${inputClass} tw-mt-2`}
+                value={restrictedClass}
+                onChange={(event) => setRestrictedClass(event.target.value)}
+              >
+                <option value="ordinary">{msg("artistReviewers")}</option>
+                <option value="rights">{msg("lane.rights")}</option>
+              </select>
+            </label>
+          )}
+          <DocumentationButton
+            disabled={busy || !text.trim() || Array.from(text).length > 4000}
+            onClick={() => {
+              void create();
+            }}
           >
-            <option value="artist_and_reviewers">
-              {msg("artistReviewers")}
-            </option>
-            {context.capabilities.review_lanes.length > 0 && (
-              <option value="reviewers_only">{msg("reviewersOnly")}</option>
-            )}
-          </select>
-        </label>
+            {msg(questions ? "questions.send" : "sendComment")}
+          </DocumentationButton>
+        </>
       )}
-      {!questions && context.capabilities.read_rights_evidence && (
-        <label className="tw-block tw-text-sm tw-text-iron-300">
-          {msg("visibility")}
-          <select
-            className={`${inputClass} tw-mt-2`}
-            value={restrictedClass}
-            onChange={(event) => setRestrictedClass(event.target.value)}
-          >
-            <option value="ordinary">{msg("artistReviewers")}</option>
-            <option value="rights">{msg("lane.rights")}</option>
-          </select>
-        </label>
-      )}
-      <DocumentationButton
-        disabled={busy || !text.trim() || Array.from(text).length > 4000}
-        onClick={() => {
-          void create();
-        }}
-      >
-        {msg(questions ? "questions.send" : "sendComment")}
-      </DocumentationButton>
     </section>
   );
 }
@@ -177,10 +185,12 @@ export default function DocumentationFeedback({
 function FeedbackThread({
   contextId,
   thread,
+  canParticipate,
   refresh,
 }: {
   readonly contextId: string;
   readonly thread: ApiArtworkDocumentationThread;
+  readonly canParticipate: boolean;
   readonly refresh: () => void;
 }) {
   const { msg, locale } = useDocumentationMessages();
@@ -191,6 +201,7 @@ function FeedbackThread({
     operation: () => Promise<unknown>,
     clearDraft = false
   ) => {
+    if (!canParticipate) return;
     const submittedText = text;
     setBusy(true);
     setError(false);
@@ -223,45 +234,49 @@ function FeedbackThread({
         </div>
       ))}
       {error && <DocumentationNotice error>{msg("error")}</DocumentationNotice>}
-      <label className="tw-block tw-text-sm tw-text-iron-300">
-        {msg("comment")}
-        <textarea
-          rows={2}
-          className={`${inputClass} tw-mt-2`}
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-        />
-      </label>
-      <div className="tw-flex tw-flex-wrap tw-gap-2">
-        <DocumentationButton
-          secondary
-          disabled={busy || !text.trim() || Array.from(text).length > 4000}
-          onClick={() => {
-            void action(
-              () => commentDocumentationThread(contextId, thread.id, text),
-              true
-            );
-          }}
-        >
-          {msg("sendComment")}
-        </DocumentationButton>
-        <DocumentationButton
-          secondary
-          disabled={busy}
-          onClick={() => {
-            void action(() =>
-              resolveDocumentationThread(
-                contextId,
-                thread.id,
-                thread.thread_version,
-                !thread.resolved
-              )
-            );
-          }}
-        >
-          {thread.resolved ? msg("reopen") : msg("resolve")}
-        </DocumentationButton>
-      </div>
+      {canParticipate && (
+        <>
+          <label className="tw-block tw-text-sm tw-text-iron-300">
+            {msg("comment")}
+            <textarea
+              rows={2}
+              className={`${inputClass} tw-mt-2`}
+              value={text}
+              onChange={(event) => setText(event.target.value)}
+            />
+          </label>
+          <div className="tw-flex tw-flex-wrap tw-gap-2">
+            <DocumentationButton
+              secondary
+              disabled={busy || !text.trim() || Array.from(text).length > 4000}
+              onClick={() => {
+                void action(
+                  () => commentDocumentationThread(contextId, thread.id, text),
+                  true
+                );
+              }}
+            >
+              {msg("sendComment")}
+            </DocumentationButton>
+            <DocumentationButton
+              secondary
+              disabled={busy}
+              onClick={() => {
+                void action(() =>
+                  resolveDocumentationThread(
+                    contextId,
+                    thread.id,
+                    thread.thread_version,
+                    !thread.resolved
+                  )
+                );
+              }}
+            >
+              {thread.resolved ? msg("reopen") : msg("resolve")}
+            </DocumentationButton>
+          </div>
+        </>
+      )}
     </div>
   );
 }

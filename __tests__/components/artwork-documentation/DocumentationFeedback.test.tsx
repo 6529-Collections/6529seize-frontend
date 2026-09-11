@@ -6,7 +6,13 @@ import {
   getDocumentationThreads,
   resolveDocumentationThread,
   createDocumentationThread,
+  commentDocumentationThread,
 } from "@/services/api/artwork-documentation-api";
+import {
+  ApiArtworkDocumentationCapabilitiesEditModulesEnum,
+  ApiArtworkDocumentationCapabilitiesReviewLanesEnum,
+  type ApiArtworkDocumentationCapabilities,
+} from "@/generated/models/ApiArtworkDocumentationCapabilities";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
@@ -22,7 +28,161 @@ jest.mock("@/services/api/artwork-documentation-api", () => ({
   getDocumentationThreads: jest.fn(),
   resolveDocumentationThread: jest.fn().mockResolvedValue({}),
   createDocumentationThread: jest.fn().mockResolvedValue({}),
+  commentDocumentationThread: jest.fn().mockResolvedValue({}),
 }));
+
+function viewerContext() {
+  const context = documentationFixture();
+  context.profile.intake_mode = "publication_only" as never;
+  context.profile.version = 2;
+  context.capabilities = {
+    ...context.capabilities,
+    read_restricted_fields: true,
+    confirm_as_artist: false,
+    edit_modules: [],
+    review_lanes: [],
+    manage_context: false,
+    manage_assignments: false,
+  };
+  return context;
+}
+
+function mockDiscussion(resolved = false) {
+  jest.mocked(getDocumentationThreads).mockResolvedValue({
+    data: [
+      {
+        id: "thread",
+        context_id: "context",
+        thread_version: 1,
+        resolved,
+        audience: "artist_and_reviewers",
+        restricted_class: "ordinary",
+        comments: [
+          {
+            id: "comment",
+            text: "Prior discussion",
+            actor_profile_id: "artist-a",
+            created_at: 1788998400000,
+          },
+        ],
+      },
+    ],
+  } as never);
+}
+
+it.each([
+  ["publication questions", true, false],
+  ["resolved publication questions", true, true],
+  ["legacy feedback", false, false],
+  ["resolved legacy feedback", false, true],
+])(
+  "lets a viewer read %s without conversation actions",
+  async (_, publication, resolved) => {
+    jest.clearAllMocks();
+    const context = viewerContext();
+    if (!publication) delete context.profile.intake_mode;
+    mockDiscussion(Boolean(resolved));
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    render(
+      <QueryClientProvider client={client}>
+        <DocumentationFeedback context={context} />
+      </QueryClientProvider>
+    );
+    await screen.findByText("Prior discussion");
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(createDocumentationThread).not.toHaveBeenCalled();
+    expect(commentDocumentationThread).not.toHaveBeenCalled();
+    expect(resolveDocumentationThread).not.toHaveBeenCalled();
+    client.clear();
+  }
+);
+
+const writerRoles: [string, Partial<ApiArtworkDocumentationCapabilities>][] = [
+  ["artist", { confirm_as_artist: true }],
+  [
+    "editor",
+    {
+      edit_modules: [
+        ApiArtworkDocumentationCapabilitiesEditModulesEnum.Artwork,
+      ],
+    },
+  ],
+  [
+    "reviewer",
+    {
+      review_lanes: [
+        ApiArtworkDocumentationCapabilitiesReviewLanesEnum.Curatorial,
+      ],
+    },
+  ],
+  ["context coordinator", { manage_context: true }],
+  ["assignment coordinator", { manage_assignments: true }],
+];
+
+it.each(writerRoles)(
+  "preserves discussion participation for a %s",
+  async (_, capabilities) => {
+    jest.clearAllMocks();
+    const context = viewerContext();
+    Object.assign(context.capabilities, capabilities);
+    mockDiscussion();
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    render(
+      <QueryClientProvider client={client}>
+        <DocumentationFeedback context={context} />
+      </QueryClientProvider>
+    );
+    await screen.findByText("Prior discussion");
+    fireEvent.change(
+      screen.getByRole("textbox", { name: "What would you like to ask?" }),
+      { target: { value: "My question" } }
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Send question to the team" })
+    );
+    await waitFor(() =>
+      expect(createDocumentationThread).toHaveBeenCalledWith(context.id, {
+        text: "My question",
+        audience: "artist_and_reviewers",
+        restricted_class: "ordinary",
+      })
+    );
+    fireEvent.change(screen.getByRole("textbox", { name: "Your comment" }), {
+      target: { value: "My reply" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add comment" }));
+    await waitFor(() =>
+      expect(commentDocumentationThread).toHaveBeenCalledWith(
+        context.id,
+        "thread",
+        "My reply"
+      )
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Resolve conversation" })
+      ).toBeEnabled()
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Resolve conversation" })
+    );
+    await waitFor(() =>
+      expect(resolveDocumentationThread).toHaveBeenCalledWith(
+        context.id,
+        "thread",
+        1,
+        true
+      )
+    );
+    client.clear();
+  }
+);
 
 it.each([false, true])(
   "preserves an unsent comment when toggling resolved=%s",
