@@ -1,3 +1,4 @@
+import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.en-GB.json";
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.en-GB.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.en-GB.json";
 import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.en-GB.json";
@@ -11,6 +12,7 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.jso
 
 export const EN_GB_MESSAGES = {
   ...profileCmsStudioMessages,
+  ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,
   ...profileCmsStudioUploadMessages,
   ...studioWalletImportMessages,

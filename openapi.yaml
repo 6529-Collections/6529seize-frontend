@@ -15607,12 +15607,857 @@ paths:
         "409":
           description: Current primary no longer matches the expected version
 
+  /profile-cms/packages/{id}/agent-grants:
+    post:
+      tags:
+        - Profile CMS
+      summary: Create a proposal-only grant for one saved draft
+      operationId: createProfileCmsAgentGrant
+      description: Current profile owner only; proxy sessions cannot manage grants.
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/profile-cms/profile-cms-agent.handlers"
+          name: handleCreateProfileCmsAgentGrant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateProfileCmsAgentGrantRequest"
+      responses:
+        "200":
+          description: Successful private response; Cache-Control no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCreatedProfileCmsAgentGrant"
+        "400":
+          description: Invalid request or candidate identity
+        "401":
+          description: Missing, expired or revoked credential
+        "403":
+          description: Current owner authorization required
+        "404":
+          description: Draft, grant or proposal unavailable
+        "409":
+          description: Draft changed or idempotency conflict
+        "413":
+          description: Request exceeds size or complexity limit
+        "429":
+          description: Durable grant or profile quota exhausted
+        "503":
+          description: Agent proposals are disabled
+    get:
+      tags:
+        - Profile CMS
+      summary: List draft agent grants
+      operationId: listProfileCmsAgentGrants
+      description: Current profile owner only; proxy sessions cannot manage grants.
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/profile-cms/profile-cms-agent.handlers"
+          name: handleListProfileCmsAgentGrants
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 10000
+            default: 0
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        "200":
+          description: Successful private response; Cache-Control no-store
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiProfileCmsAgentGrant"
+        "400":
+          description: Invalid request or candidate identity
+        "401":
+          description: Missing, expired or revoked credential
+        "403":
+          description: Current owner authorization required
+        "404":
+          description: Draft, grant or proposal unavailable
+        "409":
+          description: Draft changed or idempotency conflict
+        "413":
+          description: Request exceeds size or complexity limit
+        "429":
+          description: Durable grant or profile quota exhausted
+        "503":
+          description: Agent proposals are disabled
+  /profile-cms/agent-grants/{id}:
+    delete:
+      tags:
+        - Profile CMS
+      summary: Revoke a draft agent grant
+      operationId: revokeProfileCmsAgentGrant
+      description: Current profile owner only; proxy sessions cannot manage grants.
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/profile-cms/profile-cms-agent.handlers"
+          name: handleRevokeProfileCmsAgentGrant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful private response; Cache-Control no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileCmsAgentGrant"
+        "400":
+          description: Invalid request or candidate identity
+        "401":
+          description: Missing, expired or revoked credential
+        "403":
+          description: Current owner authorization required
+        "404":
+          description: Draft, grant or proposal unavailable
+        "409":
+          description: Draft changed or idempotency conflict
+        "413":
+          description: Request exceeds size or complexity limit
+        "429":
+          description: Durable grant or profile quota exhausted
+        "503":
+          description: Agent proposals are disabled
+  /profile-cms/packages/{id}/agent-proposals:
+    get:
+      tags:
+        - Profile CMS
+      summary: List proposals for owner review
+      operationId: listProfileCmsAgentProposals
+      description: Current profile owner only; proxy sessions cannot manage grants.
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/profile-cms/profile-cms-agent.handlers"
+          name: handleListProfileCmsAgentProposals
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 10000
+            default: 0
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        "200":
+          description: Successful private response; Cache-Control no-store
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiProfileCmsAgentProposalSummary"
+        "400":
+          description: Invalid request or candidate identity
+        "401":
+          description: Missing, expired or revoked credential
+        "403":
+          description: Current owner authorization required
+        "404":
+          description: Draft, grant or proposal unavailable
+        "409":
+          description: Draft changed or idempotency conflict
+        "413":
+          description: Request exceeds size or complexity limit
+        "429":
+          description: Durable grant or profile quota exhausted
+        "503":
+          description: Agent proposals are disabled
+  /profile-cms/agent-session/draft:
+    get:
+      tags:
+        - Profile CMS
+      summary: Read the draft selected by the grant
+      operationId: getProfileCmsAgentDraft
+      description: >-
+        Uses only a draft-scoped CMS grant, not a website JWT. Cannot save,
+        upload or publish. The handler checks authorization and durable quotas
+        on every request.
+      security:
+        - cmsAgentGrant: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/profile-cms/profile-cms-agent.handlers"
+          name: handleGetProfileCmsAgentDraft
+      responses:
+        "200":
+          description: Successful private response; Cache-Control no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileCmsAgentDraft"
+        "400":
+          description: Invalid request or candidate identity
+        "401":
+          description: Missing, expired or revoked credential
+        "403":
+          description: Current owner authorization required
+        "404":
+          description: Draft, grant or proposal unavailable
+        "409":
+          description: Draft changed or idempotency conflict
+        "413":
+          description: Request exceeds size or complexity limit
+        "429":
+          description: Durable grant or profile quota exhausted
+        "503":
+          description: Agent proposals are disabled
+  /profile-cms/agent-session/proposals/validate:
+    post:
+      tags:
+        - Profile CMS
+      summary: Validate a complete multipage candidate without saving
+      operationId: validateProfileCmsAgentCandidate
+      description: >-
+        Uses only a draft-scoped CMS grant, not a website JWT. Cannot save,
+        upload or publish. The handler checks authorization and durable quotas
+        on every request.
+      security:
+        - cmsAgentGrant: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/profile-cms/profile-cms-agent.handlers"
+          name: handleValidateProfileCmsAgentCandidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiValidateProfileCmsAgentCandidateRequest"
+      responses:
+        "200":
+          description: Successful private response; Cache-Control no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileCmsAgentCandidateValidation"
+        "400":
+          description: Invalid request or candidate identity
+        "401":
+          description: Missing, expired or revoked credential
+        "403":
+          description: Current owner authorization required
+        "404":
+          description: Draft, grant or proposal unavailable
+        "409":
+          description: Draft changed or idempotency conflict
+        "413":
+          description: Request exceeds size or complexity limit
+        "429":
+          description: Durable grant or profile quota exhausted
+        "503":
+          description: Agent proposals are disabled
+  /profile-cms/agent-session/proposals:
+    post:
+      tags:
+        - Profile CMS
+      summary: Submit a complete multipage candidate for owner review
+      operationId: submitProfileCmsAgentProposal
+      description: >-
+        Uses only a draft-scoped CMS grant, not a website JWT. Cannot save,
+        upload or publish. The handler checks authorization and durable quotas
+        on every request.
+      security:
+        - cmsAgentGrant: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/profile-cms/profile-cms-agent.handlers"
+          name: handleSubmitProfileCmsAgentProposal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiSubmitProfileCmsAgentProposalRequest"
+      responses:
+        "200":
+          description: Successful private response; Cache-Control no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileCmsAgentProposal"
+        "400":
+          description: Invalid request or candidate identity
+        "401":
+          description: Missing, expired or revoked credential
+        "403":
+          description: Current owner authorization required
+        "404":
+          description: Draft, grant or proposal unavailable
+        "409":
+          description: Draft changed or idempotency conflict
+        "413":
+          description: Request exceeds size or complexity limit
+        "429":
+          description: Durable grant or profile quota exhausted
+        "503":
+          description: Agent proposals are disabled
+  /profile-cms/agent-session/proposals/{id}:
+    get:
+      tags:
+        - Profile CMS
+      summary: Read a proposal made by this grant
+      operationId: getProfileCmsAgentProposal
+      description: >-
+        Uses only a draft-scoped CMS grant, not a website JWT. Cannot save,
+        upload or publish. The handler checks authorization and durable quotas
+        on every request.
+      security:
+        - cmsAgentGrant: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/profile-cms/profile-cms-agent.handlers"
+          name: handleGetProfileCmsAgentProposal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful private response; Cache-Control no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileCmsAgentProposal"
+        "400":
+          description: Invalid request or candidate identity
+        "401":
+          description: Missing, expired or revoked credential
+        "403":
+          description: Current owner authorization required
+        "404":
+          description: Draft, grant or proposal unavailable
+        "409":
+          description: Draft changed or idempotency conflict
+        "413":
+          description: Request exceeds size or complexity limit
+        "429":
+          description: Durable grant or profile quota exhausted
+        "503":
+          description: Agent proposals are disabled
+  /profile-cms/agent-proposals/{id}:
+    get:
+      tags:
+        - Profile CMS
+      summary: Read a complete proposal for owner review
+      description: >-
+        Current profile owner only. Applying requires an independently saved
+        newer draft with the exact candidate hash. This endpoint never saves or
+        publishes content. Terminal decisions are immutable.
+      operationId: getOwnerProfileCmsAgentProposal
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/profile-cms/profile-cms-agent.handlers"
+          name: handleGetOwnerProfileCmsAgentProposal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful private response; Cache-Control no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileCmsAgentProposal"
+        "400":
+          description: Invalid review request
+        "401":
+          description: Owner wallet authentication required
+        "403":
+          description: Current profile owner required
+        "404":
+          description: Proposal unavailable
+        "409":
+          description: >-
+            Changed base, conflicting terminal decision, or saved result
+            mismatch
+    post:
+      tags:
+        - Profile CMS
+      summary: Record owner review after rejection or an exact candidate save
+      description: >-
+        Current profile owner only. Applying requires an independently saved
+        newer draft with the exact candidate hash. This endpoint never saves or
+        publishes content. Terminal decisions are immutable.
+      operationId: reviewProfileCmsAgentProposal
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/profile-cms/profile-cms-agent.handlers"
+          name: handleReviewProfileCmsAgentProposal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiReviewProfileCmsAgentProposalRequest"
+      responses:
+        "200":
+          description: Successful private response; Cache-Control no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileCmsAgentProposal"
+        "400":
+          description: Invalid review request
+        "401":
+          description: Owner wallet authentication required
+        "403":
+          description: Current profile owner required
+        "404":
+          description: Proposal unavailable
+        "409":
+          description: >-
+            Changed base, conflicting terminal decision, or saved result
+            mismatch
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
+    cmsAgentGrant:
+      type: http
+      scheme: bearer
+      bearerFormat: cms_agent_<uuid>.<secret>
+      description: >-
+        Proposal-only capability for one saved draft; never accepted by wallet
+        endpoints.
   schemas:
+    ApiCreatedProfileCmsAgentGrant:
+      type: object
+      additionalProperties: false
+      required:
+        - grant
+        - token
+      properties:
+        grant:
+          $ref: "#/components/schemas/ApiProfileCmsAgentGrant"
+        token:
+          type: string
+          description: Shown once. Send only in Authorization to agent-session routes.
+    ApiCreateProfileCmsAgentGrantRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - label
+        - expected_package_hash
+      properties:
+        label:
+          type: string
+          minLength: 1
+          maxLength: 80
+        expected_package_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        expires_in_seconds:
+          type: integer
+          format: int64
+          minimum: 60
+          maximum: 86400
+          default: 3600
+    ApiProfileCmsAgentCandidateValidation:
+      type: object
+      additionalProperties: false
+      required:
+        - valid
+        - validation
+        - candidate_package
+        - candidate_package_hash
+      properties:
+        valid:
+          type: boolean
+        validation:
+          $ref: "#/components/schemas/ApiProfileCmsValidationResult"
+        candidate_package:
+          type: object
+          additionalProperties: true
+        candidate_package_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+    ApiProfileCmsAgentConstraints:
+      type: object
+      additionalProperties: false
+      required:
+        - max_request_bytes
+        - max_json_depth
+        - max_json_nodes
+        - protected_fields
+        - hash_normalization
+        - publication_authority
+      properties:
+        max_request_bytes:
+          type: integer
+        max_json_depth:
+          type: integer
+        max_json_nodes:
+          type: integer
+        protected_fields:
+          type: array
+          items:
+            type: string
+        hash_normalization:
+          type: string
+          enum:
+            - server_recomputes
+        publication_authority:
+          type: boolean
+          enum:
+            - false
+    ApiProfileCmsAgentDraft:
+      type: object
+      additionalProperties: false
+      required:
+        - constraints
+        - grant
+        - cms_package
+        - proposal_schema
+      properties:
+        constraints:
+          $ref: "#/components/schemas/ApiProfileCmsAgentConstraints"
+        grant:
+          $ref: "#/components/schemas/ApiProfileCmsAgentGrant"
+        cms_package:
+          type: object
+          additionalProperties: true
+        proposal_schema:
+          type: string
+          enum:
+            - 6529.cms.agent_candidate.v1
+    ApiProfileCmsAgentGrant:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - profile_id
+        - draft_id
+        - package_id
+        - base_version
+        - base_package_hash
+        - label
+        - created_at
+        - expires_at
+        - revoked_at
+        - requests_remaining
+        - proposals_remaining
+      properties:
+        id:
+          type: string
+          format: uuid
+        profile_id:
+          type: string
+        draft_id:
+          type: string
+        package_id:
+          type: string
+        base_version:
+          type: integer
+          format: int64
+        base_package_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        label:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+        expires_at:
+          type: integer
+          format: int64
+        revoked_at:
+          type: integer
+          format: int64
+          nullable: true
+        requests_remaining:
+          type: integer
+          format: int64
+        proposals_remaining:
+          type: integer
+          format: int64
+    ApiProfileCmsAgentProposal:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - reviewed_at
+        - result_draft_id
+        - result_package_hash
+        - id
+        - grant_id
+        - profile_id
+        - draft_id
+        - base_version
+        - base_package_hash
+        - candidate_package_hash
+        - summary
+        - created_at
+        - candidate_package
+      properties:
+        status:
+          type: string
+          enum:
+            - pending
+            - rejected
+            - applied
+        reviewed_at:
+          type: integer
+          format: int64
+          nullable: true
+        result_draft_id:
+          type: string
+          nullable: true
+        result_package_hash:
+          type: string
+          nullable: true
+        id:
+          type: string
+          format: uuid
+        grant_id:
+          type: string
+          format: uuid
+        profile_id:
+          type: string
+        draft_id:
+          type: string
+        base_version:
+          type: integer
+          format: int64
+        base_package_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        candidate_package_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        summary:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+        candidate_package:
+          type: object
+          additionalProperties: true
+    ApiProfileCmsAgentProposalSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - reviewed_at
+        - result_draft_id
+        - result_package_hash
+        - id
+        - grant_id
+        - profile_id
+        - draft_id
+        - base_version
+        - base_package_hash
+        - candidate_package_hash
+        - summary
+        - created_at
+      properties:
+        status:
+          type: string
+          enum:
+            - pending
+            - rejected
+            - applied
+        reviewed_at:
+          type: integer
+          format: int64
+          nullable: true
+        result_draft_id:
+          type: string
+          nullable: true
+        result_package_hash:
+          type: string
+          nullable: true
+        id:
+          type: string
+          format: uuid
+        grant_id:
+          type: string
+          format: uuid
+        profile_id:
+          type: string
+        draft_id:
+          type: string
+        base_version:
+          type: integer
+          format: int64
+        base_package_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        candidate_package_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        summary:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+    ApiReviewProfileCmsAgentProposalRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - expected_draft_id
+        - expected_base_package_hash
+        - expected_candidate_package_hash
+      properties:
+        status:
+          type: string
+          enum:
+            - rejected
+            - applied
+        expected_draft_id:
+          type: string
+        expected_base_package_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        expected_candidate_package_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        result_draft_id:
+          type: string
+          description: >-
+            Required for applied. A new saved draft containing the exact
+            reviewed candidate.
+        result_package_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+          description: >-
+            Required for applied; must equal the candidate and saved result
+            hashes.
+    ApiSubmitProfileCmsAgentProposalRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - draft_id
+        - base_version
+        - base_package_hash
+        - candidate_package
+        - idempotency_key
+        - summary
+      properties:
+        draft_id:
+          type: string
+        base_version:
+          type: integer
+          format: int64
+        base_package_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        candidate_package:
+          type: object
+          additionalProperties: true
+        idempotency_key:
+          type: string
+          format: uuid
+        summary:
+          type: string
+          minLength: 1
+          maxLength: 1000
+    ApiValidateProfileCmsAgentCandidateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - draft_id
+        - base_version
+        - base_package_hash
+        - candidate_package
+      properties:
+        draft_id:
+          type: string
+        base_version:
+          type: integer
+          format: int64
+        base_package_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        candidate_package:
+          type: object
+          additionalProperties: true
     ApiArtworkDocumentationAnswer:
       type: object
       properties:
