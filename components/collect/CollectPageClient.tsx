@@ -31,18 +31,18 @@ import CollectTdhWorkspace from "./CollectTdhWorkspace";
 import CollectPlanBasket from "./CollectPlanBasket";
 import CollectPageView, { COLLECT_INTENTS } from "./CollectPageView";
 import CollectTradeController from "./CollectTradeController";
+import { collectProfileWallets } from "./collect-recipient.helpers";
 
 export default function CollectPageClient() {
   const searchParams = useSearchParams();
   const { connectedProfile } = useAuth();
-  const membership =
-    connectedProfile?.wallets
-      ?.map((wallet) => wallet.wallet.toLowerCase())
-      .sort()
-      .join(":") ?? "public";
+  const membership = collectProfileWallets(connectedProfile)
+    .map((wallet) => wallet.wallet.toLowerCase())
+    .sort()
+    .join(":");
   return (
     <CollectCatalogController
-      key={`${searchParams.toString()}:${connectedProfile?.id ?? "public"}:${membership}`}
+      key={`${connectedProfile?.id ?? "public"}:${membership}`}
       queryString={searchParams.toString()}
     />
   );
@@ -67,16 +67,49 @@ function CollectCatalogController({
   let fullSetDefinition = collection === "gradients" ? "gradients" : "memes";
   if (explicitDefinition === "memes" || explicitDefinition === "gradients")
     fullSetDefinition = explicitDefinition;
-  const [goalDraft, setGoalDraft] = useState<CollectGoalDraft>(() => ({
-    intent,
-    definitionId:
-      intent === "full_set" ? fullSetDefinition : (explicitDefinition ?? ""),
-    targetCount: "1",
-    budgetEth: "",
-    horizonDays: "30",
-    includeCollaborations: true,
+  const definitionId =
+    intent === "full_set" ? fullSetDefinition : (explicitDefinition ?? "");
+  const routeGoal = JSON.stringify([intent, collection, definitionId]);
+  const [goalState, setGoalState] = useState<{
+    routeGoal: string;
+    revision: number;
+    draft: CollectGoalDraft;
+  }>(() => ({
+    routeGoal,
+    revision: 0,
+    draft: {
+      intent,
+      definitionId,
+      targetCount: "1",
+      budgetEth: "",
+      horizonDays: "30",
+      includeCollaborations: true,
+    } satisfies CollectGoalDraft,
   }));
-  const [costPlan, setCostPlan] = useState<ApiCollectPlan | null>(null);
+  if (goalState.routeGoal !== routeGoal) {
+    setGoalState({
+      routeGoal,
+      revision: goalState.revision + 1,
+      draft: { ...goalState.draft, intent, definitionId },
+    });
+  }
+  const goalDraft = goalState.draft;
+  const setGoalDraft = (draft: CollectGoalDraft) =>
+    setGoalState((current) => ({
+      ...current,
+      draft,
+      revision: current.revision + 1,
+    }));
+  const [storedCostPlan, setStoredCostPlan] = useState<{
+    revision: number;
+    plan: ApiCollectPlan;
+  } | null>(null);
+  const costPlan =
+    storedCostPlan?.revision === goalState.revision
+      ? storedCostPlan.plan
+      : null;
+  const setCostPlan = (plan: ApiCollectPlan | null) =>
+    setStoredCostPlan(plan ? { revision: goalState.revision, plan } : null);
   const [basketOpen, setBasketOpen] = useState(false);
   const [trade, setTrade] = useState<{
     asset: ApiCollectAsset;
@@ -199,6 +232,7 @@ function CollectCatalogController({
     goalContent = (
       <CollectGoalsController
         draft={goalDraft}
+        revision={goalState.revision}
         catalog={catalog.data}
         profile={connectedProfile}
         completion={{

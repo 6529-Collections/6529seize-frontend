@@ -219,3 +219,50 @@ it("keeps large scans moving promptly while checked assets advance", async () =>
     jest.useRealTimers();
   }
 });
+
+it("does not expose or continue an earlier analysis after changing the goal revision", async () => {
+  let finish: ((value: ApiCollectPlan) => void) | undefined;
+  mockCreate.mockImplementation(
+    () =>
+      new Promise<ApiCollectPlan>((resolve) => {
+        finish = resolve;
+      })
+  );
+  const onPlan = jest.fn();
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  const content = (revision: number) => (
+    <QueryClientProvider client={client}>
+      <CollectGoalsController
+        revision={revision}
+        draft={{
+          intent: "season",
+          definitionId: "1",
+          targetCount: "2",
+          budgetEth: "1.25",
+          horizonDays: "30",
+          includeCollaborations: true,
+        }}
+        catalog={catalog}
+        profile={{ id: "profile", primary_wallet: address } as ApiIdentity}
+        onChange={jest.fn()}
+        onPlan={onPlan}
+        onConnect={jest.fn()}
+      />
+    </QueryClientProvider>
+  );
+  const view = render(content(0));
+  fireEvent.click(screen.getByRole("button", { name: "Preview plan" }));
+  await waitFor(() => expect(mockCreate).toHaveBeenCalledTimes(1));
+  view.rerender(content(1));
+  expect(screen.getByRole("button", { name: "Preview plan" })).toBeEnabled();
+  await act(async () => {
+    finish?.(scanning);
+  });
+  expect(onPlan).toHaveBeenLastCalledWith(null);
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  expect(mockAdvance).not.toHaveBeenCalled();
+  view.rerender(content(2));
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+});
