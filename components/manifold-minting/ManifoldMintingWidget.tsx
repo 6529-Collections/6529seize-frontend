@@ -101,7 +101,7 @@ function resolveTransactionModalStatus({
   if (hasTransactionHash && receiptSuccess) {
     return "success";
   }
-  return "confirm_wallet";
+  return hasTransactionHash ? "submitted" : "confirm_wallet";
 }
 
 interface MintTransactionAttempt {
