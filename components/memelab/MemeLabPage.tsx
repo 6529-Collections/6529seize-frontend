@@ -472,6 +472,7 @@ export default function MemeLabPageComponent({
         <MemeLabOverview
           nft={nft}
           defaultAdditionalDetailsOpen={defaultAdditionalDetailsOpen}
+          locale={locale}
         />
       );
     }
@@ -636,11 +637,6 @@ export default function MemeLabPageComponent({
               hasOwnershipContext={hasOwnershipContext}
               nftBalance={nftBalance}
             />
-            <MarketDepthPanel
-              contract={MEMELAB_CONTRACT}
-              tokenId={nft.id}
-              locale={locale}
-            />
             <MemeLabPageTabs
               nft={nft}
               activeTab={activeTab}
@@ -649,6 +645,11 @@ export default function MemeLabPageComponent({
             />
             {printHistoryTabs()}
             {printContent()}
+            <MarketDepthPanel
+              contract={MEMELAB_CONTRACT}
+              tokenId={nft.id}
+              locale={locale}
+            />
           </>
         )}
       </div>

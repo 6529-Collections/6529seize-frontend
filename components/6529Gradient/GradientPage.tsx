@@ -421,6 +421,10 @@ export default function GradientPageComponent({
   const [allNfts, setAllNfts] = useState<NftWithOwner[]>([]);
   const activitySectionRef = useRef<HTMLDivElement | null>(null);
   const [activityNearViewport, setActivityNearViewport] = useState(false);
+  const [marketRefreshVersion, setMarketRefreshVersion] = useState(0);
+  const refreshMarket = useCallback(() => {
+    setMarketRefreshVersion((version) => version + 1);
+  }, []);
 
   const rankedNFTs = useMemo(
     () => [...allNfts].sort((a, b) => (a.tdh_rank > b.tdh_rank ? 1 : -1)),
@@ -585,6 +589,15 @@ export default function GradientPageComponent({
         </header>
         {nft ? (
           <>
+            <div className="tw-mb-4">
+              <CollectDetailActions
+                collection="gradients"
+                tokenId={String(nft.id)}
+                title={nft.name}
+                locale={locale}
+                onMarketChange={refreshMarket}
+              />
+            </div>
             <div className="tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-x-10 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] xl:tw-gap-x-16">
               <div className="tw-relative lg:tw-flex lg:tw-flex-col lg:tw-self-stretch">
                 <div className="tw-mb-3 tw-flex tw-justify-end">
@@ -618,15 +631,7 @@ export default function GradientPageComponent({
             <MarketDepthPanel
               contract={GRADIENT_CONTRACT}
               tokenId={nft.id}
-              actions={(refresh) => (
-                <CollectDetailActions
-                  collection="gradients"
-                  tokenId={String(nft.id)}
-                  title={nft.name}
-                  locale={locale}
-                  onMarketChange={refresh}
-                />
-              )}
+              refreshKey={marketRefreshVersion}
             />
             <div ref={activitySectionRef} className="tw-min-h-px">
               {activityNearViewport && <GradientActivitySection nft={nft} />}

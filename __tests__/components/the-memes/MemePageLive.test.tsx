@@ -86,17 +86,10 @@ jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
   __esModule: true,
   default: () => <div data-testid="marketplace-links" />,
 }));
-const mockRefreshMarket = jest.fn();
 jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
   __esModule: true,
-  default: ({
-    actions,
-  }: {
-    actions?: React.ReactNode | ((refresh: () => void) => React.ReactNode);
-  }) => (
-    <div data-testid="market-depth">
-      {typeof actions === "function" ? actions(mockRefreshMarket) : actions}
-    </div>
+  default: ({ refreshKey }: { refreshKey?: number }) => (
+    <div data-refresh-key={refreshKey} data-testid="market-depth" />
   ),
 }));
 jest.mock("@/components/collect/CollectDetailActions", () => ({
@@ -684,14 +677,21 @@ describe("MemePageLiveRightMenu distribution link", () => {
 });
 
 describe("MemePageLiveSubMenu details", () => {
-  it("places the exact artwork action inside its existing market section", () => {
+  it("places one artwork action before details and refreshes market data", () => {
     render(<MemePageLiveSubMenu show nft={createNft({ id: 5 })} />);
     const collecting = screen.getByRole("button", { name: "Collect artwork" });
+    const marketDepth = screen.getByTestId("market-depth");
     expect(collecting).toHaveAttribute("data-family", "memes");
     expect(collecting).toHaveAttribute("data-token", "5");
-    expect(screen.getByTestId("market-depth")).toContainElement(collecting);
+    expect(
+      screen.getAllByRole("button", { name: "Collect artwork" })
+    ).toHaveLength(1);
+    expect(collecting.compareDocumentPosition(screen.getByText("d"))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(marketDepth).toHaveAttribute("data-refresh-key", "0");
     fireEvent.click(collecting);
-    expect(mockRefreshMarket).toHaveBeenCalledTimes(1);
+    expect(marketDepth).toHaveAttribute("data-refresh-key", "1");
   });
 
   it("renders the media type badge", () => {
@@ -721,10 +721,26 @@ describe("MemePageLiveSubMenu details", () => {
       />
     );
 
+    const detailsButton = screen.getByRole("button", {
+      name: /additional details/i,
+    });
+    expect(detailsButton).toHaveAttribute("aria-expanded", "false");
+    const detailsPanelId = detailsButton.getAttribute("aria-controls") ?? "";
+    expect(detailsPanelId).toBeTruthy();
+    expect(document.getElementById(detailsPanelId)).toHaveAttribute("hidden");
     expect(
-      screen.getByRole("button", { name: /additional details/i })
-    ).toHaveAttribute("aria-expanded", "false");
+      detailsButton.compareDocumentPosition(screen.getByTestId("market-depth"))
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(screen.queryByTestId("meme-page-art")).not.toBeInTheDocument();
+    fireEvent.click(detailsButton);
+    expect(detailsButton).toHaveAttribute("aria-expanded", "true");
+    expect(document.getElementById(detailsPanelId)).not.toHaveAttribute(
+      "hidden"
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("meme-page-art")).toBeInTheDocument()
+    );
+    fireEvent.click(detailsButton);
 
     rerender(
       <MemePageLiveSubMenu
