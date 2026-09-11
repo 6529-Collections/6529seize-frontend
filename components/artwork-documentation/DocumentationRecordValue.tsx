@@ -1,5 +1,7 @@
 "use client";
 
+import { formatDate, formatNumber } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import {
   documentationFieldLabel,
   documentationOptionLabel,
@@ -69,19 +71,19 @@ export function documentationLanguageName(
   }
 }
 
-function recordedDate(value: string, locale: string): string {
+function recordedDate(value: string, locale: SupportedLocale): string {
   const month = /^\d{4}-\d{2}$/.test(value);
   const day = /^\d{4}-\d{2}-\d{2}$/.test(value);
   if (!month && !day) return value;
   const date = new Date(`${value}${day ? "" : "-01"}T00:00:00Z`);
   if (Number.isNaN(date.getTime())) return value;
   if (date.toISOString().slice(0, value.length) !== value) return value;
-  return new Intl.DateTimeFormat(locale, {
+  return formatDate(locale, date, {
     year: "numeric",
     month: "long",
     ...(day ? { day: "numeric" as const } : {}),
     timeZone: "UTC",
-  }).format(date);
+  });
 }
 
 function NarrativeValue({
@@ -202,8 +204,8 @@ function StructuredRecordValue({
     return (
       <span>
         {msg("catalogue.dimensions", {
-          width: new Intl.NumberFormat(locale).format(record["width"]),
-          height: new Intl.NumberFormat(locale).format(record["height"]),
+          width: formatNumber(locale, record["width"]),
+          height: formatNumber(locale, record["height"]),
         })}
       </span>
     );
@@ -240,16 +242,23 @@ function StructuredRecordValue({
   if (
     typeof record["precision"] === "string" &&
     typeof record["start"] === "string"
-  )
+  ) {
+    const start = recordedDate(record["start"], locale);
+    const date =
+      typeof record["end"] === "string" && record["end"]
+        ? msg("catalogue.dateRange", {
+            start,
+            end: recordedDate(record["end"], locale),
+          })
+        : start;
     return (
       <span>
-        {record["approximate"] === true && <>{msg("catalogue.approximate")} </>}
-        {recordedDate(record["start"], locale)}
-        {typeof record["end"] === "string" && record["end"] && (
-          <> – {recordedDate(record["end"], locale)}</>
-        )}
+        {record["approximate"] === true
+          ? msg("catalogue.approximate", { date })
+          : date}
       </span>
     );
+  }
   if (
     typeof record["kind"] === "string" &&
     Object.keys(record).every((key) =>

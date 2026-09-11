@@ -33,7 +33,7 @@ import {
   type DocumentationSection,
 } from "@/lib/artwork-documentation/registry";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
-import { formatDate } from "@/i18n/format";
+import { formatDate, formatNumber } from "@/i18n/format";
 import DocumentationAuthGate, {
   useDocumentationActor,
 } from "./DocumentationAuthGate";
@@ -524,9 +524,9 @@ function WorkspaceEditor({
                         aria-hidden="true"
                         className="tw-w-5 tw-shrink-0 tw-text-xs tw-tabular-nums tw-text-iron-500"
                       >
-                        {new Intl.NumberFormat(locale, {
+                        {formatNumber(locale, index + 1, {
                           minimumIntegerDigits: 2,
-                        }).format(index + 1)}
+                        })}
                       </span>
                       {msg(`chapters.${item}`)}
                     </button>
@@ -560,9 +560,7 @@ function WorkspaceEditor({
             <div className="tw-max-w-prose">
               <p className="tw-mb-3 tw-text-xs tw-uppercase tw-tracking-widest tw-text-iron-400">
                 {msg("chapters.number", {
-                  number: new Intl.NumberFormat(locale).format(
-                    SECTIONS.indexOf(section) + 1
-                  ),
+                  number: formatNumber(locale, SECTIONS.indexOf(section) + 1),
                 })}
               </p>
               <h2
@@ -659,9 +657,7 @@ function HistoricalDocumentation({
         </Link>
         <p className="tw-m-0 tw-text-xs tw-leading-6 tw-text-iron-400">
           {msg("revision", {
-            number: new Intl.NumberFormat(locale).format(
-              revision.revision_number
-            ),
+            number: formatNumber(locale, revision.revision_number),
           })}{" "}
           · {formatDate(locale, revision.created_at)}
         </p>

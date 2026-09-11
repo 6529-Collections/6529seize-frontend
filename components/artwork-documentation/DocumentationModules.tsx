@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { formatNumber } from "@/i18n/format";
 import { ApiArtworkDocumentationAnswerStatusEnum } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import type { ApiArtworkDocumentationAnswer } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
@@ -141,7 +142,7 @@ export default function DocumentationModules(props: Props) {
         <details className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4">
           <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-base tw-font-medium tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
             {msg(`chapters.additional.${props.section ?? "review"}`, {
-              count: new Intl.NumberFormat(locale).format(optional.length),
+              count: formatNumber(locale, optional.length),
             })}
           </summary>
           <p className="tw-mb-8 tw-mt-3 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-400">
