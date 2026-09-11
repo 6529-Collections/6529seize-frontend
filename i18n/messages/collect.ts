@@ -160,6 +160,7 @@ export const COLLECT_MESSAGES = {
   "collect.trade.quantity": "Quantity",
   "collect.trade.unitPrice": "Unit price ({currency})",
   "collect.trade.duration": "Order duration",
+  "collect.trade.durationDay": "{days} day",
   "collect.trade.durationDays": "{days} days",
   "collect.trade.recipient": "Receiving wallet address",
   "collect.recipient.mode": "Where to receive the artwork",

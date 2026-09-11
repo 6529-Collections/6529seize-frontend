@@ -23,6 +23,9 @@ export default function CollectRulesPanel({
     enabled: isAuthenticated === true && Boolean(connectedProfile?.id),
     refetchInterval: 15000,
   });
+  const profileRules = rules.data?.rules.filter(
+    (rule) => rule.definition.profile_id === connectedProfile?.id
+  );
   if (!isAuthenticated) return null;
   return (
     <section className="tw-mx-auto tw-max-w-7xl tw-space-y-5 tw-px-4 tw-pb-12 sm:tw-px-6 lg:tw-px-8">
@@ -55,19 +58,17 @@ export default function CollectRulesPanel({
           </Button>
         </div>
       )}
-      {rules.data?.rules
-        .filter((rule) => rule.definition.profile_id === connectedProfile?.id)
-        .map((rule) => (
-          <CollectRuleCard
-            key={rule.id}
-            rule={rule}
-            onUpdated={() => {
-              void rules.refetch();
-            }}
-            onOperation={onOperation}
-          />
-        ))}
-      {rules.data?.rules.length === 0 && (
+      {profileRules?.map((rule) => (
+        <CollectRuleCard
+          key={rule.id}
+          rule={rule}
+          onUpdated={() => {
+            void rules.refetch();
+          }}
+          onOperation={onOperation}
+        />
+      ))}
+      {profileRules?.length === 0 && (
         <p className="tw-text-sm tw-text-iron-300">
           {t(locale, "collect.rules.empty")}
         </p>

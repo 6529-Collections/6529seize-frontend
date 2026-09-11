@@ -304,10 +304,10 @@ export function useMarketExecution(
           saveMarketIntent(expected.profile_id, current.id, {
             request: expected,
           });
-          onOperation(await continueMarketOperation(current.id));
-          setStage(null);
           if (receipt.status !== "success")
             throw new Error("MARKET_APPROVAL_REVERTED");
+          onOperation(await continueMarketOperation(current.id));
+          setStage(null);
           return;
         }
         if (

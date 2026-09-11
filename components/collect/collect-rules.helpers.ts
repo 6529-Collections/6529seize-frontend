@@ -7,6 +7,19 @@ import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
 import { MARKET_ZERO } from "./market-validation";
 
+export function collectRuleDeadlineFromPlan(
+  plan: Pick<ApiCollectPlan, "updated_at">
+): number {
+  const deadline = plan.updated_at + 7 * 86400000;
+  if (
+    !Number.isSafeInteger(plan.updated_at) ||
+    plan.updated_at <= 0 ||
+    deadline > 8640000000000000
+  )
+    throw new Error("RULE_PLAN_REFRESH");
+  return deadline;
+}
+
 export function ruleUnitPrice(order: ApiMarketTradeOrder): bigint {
   const total = BigInt(order.total_wei);
   const quantity = BigInt(order.quantity);
@@ -57,12 +70,15 @@ export function collectRuleTrade(
   rule: ApiCollectRule,
   target: ApiCollectRuleTarget,
   orders: readonly ApiMarketTradeOrder[],
-  acknowledgeExternal: boolean
+  acknowledgeExternal: boolean,
+  observedAt: number
 ): ApiMarketPrepareRequest {
   if (
     rule.state !== ApiCollectRuleStateEnum.Active ||
     rule.pending_review ||
-    rule.definition.expires_at <= Date.now()
+    !Number.isSafeInteger(observedAt) ||
+    observedAt <= 0 ||
+    rule.definition.expires_at <= observedAt
   )
     throw new Error("RULE_INACTIVE");
   const remaining = collectRuleRemaining(rule, target);

@@ -127,9 +127,15 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
             >
               {[24, 168, 720].map((hours) => (
                 <option key={hours} value={hours}>
-                  {t(locale, "collect.trade.durationDays", {
-                    days: hours / 24,
-                  })}
+                  {t(
+                    locale,
+                    hours === 24
+                      ? "collect.trade.durationDay"
+                      : "collect.trade.durationDays",
+                    {
+                      days: hours / 24,
+                    }
+                  )}
                 </option>
               ))}
             </select>

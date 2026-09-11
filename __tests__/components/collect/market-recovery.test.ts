@@ -78,6 +78,20 @@ it("blocks a server-recorded attempt without any browser storage", () => {
   expect(marketOperationHasUnresolvedSend(active())).toBe(true);
 });
 
+it("rejects a fetched operation with a different original profile before local recovery actions", async () => {
+  const operation = active();
+  mockFetch.mockResolvedValue({
+    ...operation,
+    profile_id: "another-original-profile",
+  });
+  await expect(
+    fetchRecoverableMarketOperation(operation.id, request.profile_id)
+  ).rejects.toThrow("MARKET_PROFILE_CHANGED");
+  expect(mockSave).not.toHaveBeenCalled();
+  expect(mockSubmit).not.toHaveBeenCalled();
+  expect(mockReject).not.toHaveBeenCalled();
+});
+
 it("retries only a known approval hash and leaves the unresolved server attempt fenced", async () => {
   const operation = active();
   mockFetch.mockResolvedValue(operation);
@@ -133,7 +147,30 @@ it("clears approval recovery only when the server has resolved the recorded atte
     request,
   });
   expect(mockSubmit).not.toHaveBeenCalled();
+  expect(mockBegin).not.toHaveBeenCalled();
 });
+
+it.each(["missing", "different", "active"] as const)(
+  "retains the local approval fence when its matching server resolution is %s",
+  async (resolution) => {
+    const operation = active();
+    operation.send_attempt!.transaction_hash = hash;
+    if (resolution === "missing") delete operation.send_attempt;
+    if (resolution === "different")
+      operation.send_attempt!.attempt_id = "different-attempt";
+    mockFetch.mockResolvedValue(operation);
+    mockRead.mockReturnValue({
+      request,
+      sendAttempt: attempt,
+      approvalHash: hash,
+    });
+    mockSubmit.mockResolvedValue(operation);
+    await fetchRecoverableMarketOperation(operation.id, request.profile_id);
+    expect(mockSave).not.toHaveBeenCalled();
+    expect(marketOperationHasUnresolvedSend(operation)).toBe(true);
+    expect(mockBegin).not.toHaveBeenCalled();
+  }
+);
 
 it.each(["USER_REJECTED", "WALLET_NOT_REQUESTED"] as const)(
   "recovers a lost positive %s acknowledgement without any new wallet request",

@@ -13,7 +13,10 @@ import { createCollectRule } from "@/services/api/collect-rules-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { collectRuleTargetsFromPlan } from "./collect-rules.helpers";
+import {
+  collectRuleDeadlineFromPlan,
+  collectRuleTargetsFromPlan,
+} from "./collect-rules.helpers";
 import { marketAmount } from "./market.adapters";
 import { MARKET_ZERO } from "./market-validation";
 import CollectAssetReference from "./CollectAssetReference";
@@ -42,7 +45,7 @@ export default function CollectSaveRule({
         targets: collectRuleTargetsFromPlan(plan),
         max_total_cost_wei: plan.result.total_cost_wei,
         max_gas_reserve_wei: plan.gas_reserve_per_order_wei,
-        expires_at: Date.now() + 7 * 86400000,
+        expires_at: collectRuleDeadlineFromPlan(plan),
         max_actions: plan.result.legs.length,
       };
       setReview(definition);

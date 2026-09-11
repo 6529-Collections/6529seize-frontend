@@ -7,6 +7,11 @@ import type { ApiCollectCatalog } from "@/generated/models/ApiCollectCatalog";
 import { ApiCollectKind } from "@/generated/models/ApiCollectKind";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import {
+  MEMES_CONTRACT,
+  GRADIENT_CONTRACT,
+  NEXTGEN_CONTRACT,
+} from "@/constants/constants";
 import type {
   CollectGoalDraft,
   CollectGoalOption,
@@ -34,9 +39,9 @@ export function collectAssetIdentity(
   )
     return null;
   const families: Readonly<Record<string, ApiCollectFamily>> = {
-    "0x33fd426905f149f8376e227d0c9d3340aad17af1": ApiCollectFamily.Memes,
-    "0x0c58ef43ff3032005e472cb5709f8908acb00205": ApiCollectFamily.Gradients,
-    "0x45882f9bc325e14fbb298a1df930c43a874b83ae": ApiCollectFamily.Pebbles,
+    [MEMES_CONTRACT.toLowerCase()]: ApiCollectFamily.Memes,
+    [GRADIENT_CONTRACT.toLowerCase()]: ApiCollectFamily.Gradients,
+    [NEXTGEN_CONTRACT.toLowerCase()]: ApiCollectFamily.Pebbles,
   };
   const family = families[contract.toLowerCase()];
   return family === undefined ? null : { family, tokenId };

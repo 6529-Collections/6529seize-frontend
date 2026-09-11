@@ -98,3 +98,10 @@ it("keeps new offers signer-recipient only", () => {
     )
   ).toBeInTheDocument();
 });
+
+it("labels one day and multiple days correctly", () => {
+  render(<CollectTradeForm {...props()} action="offer" currencyLabel="WETH" />);
+  expect(screen.getByRole("option", { name: "1 day" })).toHaveValue("24");
+  expect(screen.getByRole("option", { name: "7 days" })).toHaveValue("168");
+  expect(screen.getByRole("option", { name: "30 days" })).toHaveValue("720");
+});

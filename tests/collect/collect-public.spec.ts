@@ -236,9 +236,9 @@ test("public catalog supports search and a wallet-gated purchase", async ({
   await expect
     .poll(() =>
       backgroundBuyButton.evaluate((button) => {
-        let element: HTMLElement | null = button;
+        let element: Element | null = button;
         while (element) {
-          if (element.inert) return true;
+          if (element instanceof HTMLElement && element.inert) return true;
           element = element.parentElement;
         }
         return false;

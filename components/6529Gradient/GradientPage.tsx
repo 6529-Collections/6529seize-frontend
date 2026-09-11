@@ -130,6 +130,7 @@ function GradientMarketMetric({
 }
 
 function GradientMarketplaceLinks({ nft }: { readonly nft: NftWithOwner }) {
+  const locale = useBrowserLocale();
   return (
     <div className="tw-flex tw-min-w-[8.5rem] tw-flex-wrap tw-items-end tw-gap-3">
       <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
@@ -137,6 +138,7 @@ function GradientMarketplaceLinks({ nft }: { readonly nft: NftWithOwner }) {
         collection="gradients"
         intent="specific"
         tokenId={String(nft.id)}
+        locale={locale}
       />
     </div>
   );

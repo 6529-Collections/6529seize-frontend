@@ -95,7 +95,8 @@ export default function CollectRuleCard({
               rule,
               target,
               orders.orders,
-              external && acknowledged
+              external && acknowledged,
+              orders.observed_at
             ),
           },
         };

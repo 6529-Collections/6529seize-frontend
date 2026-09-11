@@ -57,9 +57,15 @@ export function getCollectedStatsIdentityKey(profile: ApiIdentity) {
 
 export function getProfileStatsPath(profile: ApiIdentity) {
   const wallets = new Set(
-    (profile.wallets ?? []).map(({ wallet }) => wallet.toLowerCase())
+    (profile.wallets ?? [])
+      .map(({ wallet }) => wallet.trim().toLowerCase())
+      .filter(Boolean)
   );
-  if (profile.primary_wallet) wallets.add(profile.primary_wallet.toLowerCase());
+  const primaryWallet =
+    typeof profile.primary_wallet === "string"
+      ? profile.primary_wallet.trim()
+      : "";
+  if (primaryWallet) wallets.add(primaryWallet.toLowerCase());
   if (!profile.consolidation_key && wallets.size > 1) {
     throw new Error(
       "getProfileStatsPath: confirmed consolidation is unavailable"

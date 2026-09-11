@@ -153,3 +153,68 @@ it("cannot replace a changed destination with an earlier in-flight plan response
   });
   expect(onPlan).toHaveBeenLastCalledWith(null);
 });
+
+it("backs off a stalled scan, stops after a bounded batch, and resumes only on retry", async () => {
+  jest.useFakeTimers();
+  try {
+    mockAdvance.mockImplementation(async () => ({ ...scanning }));
+    const onPlan = jest.fn();
+    mount(onPlan);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Preview plan" }));
+    });
+    await act(async () => jest.advanceTimersByTimeAsync(349));
+    expect(mockAdvance).not.toHaveBeenCalled();
+    await act(async () => jest.advanceTimersByTimeAsync(1));
+    expect(mockAdvance).toHaveBeenCalledTimes(1);
+    await act(async () => jest.advanceTimersByTimeAsync(699));
+    expect(mockAdvance).toHaveBeenCalledTimes(1);
+    await act(async () => jest.advanceTimersByTimeAsync(1));
+    expect(mockAdvance).toHaveBeenCalledTimes(2);
+    for (let attempt = 2; attempt < 8; attempt += 1) {
+      await act(async () => jest.advanceTimersByTimeAsync(5000));
+    }
+    expect(mockAdvance).toHaveBeenCalledTimes(8);
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    await act(async () => jest.advanceTimersByTimeAsync(60000));
+    expect(mockAdvance).toHaveBeenCalledTimes(8);
+    mockAdvance.mockResolvedValue(ready);
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    await act(async () => jest.advanceTimersByTimeAsync(350));
+    expect(onPlan).toHaveBeenLastCalledWith(ready);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+it("keeps large scans moving promptly while checked assets advance", async () => {
+  jest.useFakeTimers();
+  try {
+    let checked = 0;
+    mockAdvance.mockImplementation(async () => {
+      checked += 1;
+      return {
+        ...scanning,
+        state: checked === 12 ? "READY" : "SCANNING",
+        checked_asset_count: checked,
+        total_asset_count: 12,
+      };
+    });
+    const onPlan = jest.fn();
+    mount(onPlan);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Preview plan" }));
+    });
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      await act(async () => jest.advanceTimersByTimeAsync(350));
+    }
+    expect(mockAdvance).toHaveBeenCalledTimes(12);
+    expect(onPlan).toHaveBeenLastCalledWith(
+      expect.objectContaining({ state: "READY", checked_asset_count: 12 })
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  } finally {
+    jest.useRealTimers();
+  }
+});

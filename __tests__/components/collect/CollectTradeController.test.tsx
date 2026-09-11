@@ -6,6 +6,13 @@ import type { ReactNode } from "react";
 
 const mockRecover = jest.fn();
 const mockConfirm = jest.fn();
+const mockFetchRecover = jest.fn();
+interface RecoveryQuery {
+  queryKey: readonly unknown[];
+  queryFn: (context: { signal: AbortSignal }) => Promise<unknown>;
+  enabled?: boolean;
+}
+const mockQueries: RecoveryQuery[] = [];
 const mockAuth = {
   connectedProfile: {
     id: "new-profile",
@@ -29,15 +36,18 @@ jest.mock("@/hooks/useCapacitor", () => ({
   default: () => ({ isCapacitor: false }),
 }));
 jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => ({
-  QueryKey: {},
+  QueryKey: { MARKET_OPERATION: "market-operation" },
 }));
 jest.mock("@tanstack/react-query", () => ({
-  useQuery: () => ({
-    data: undefined,
-    isPending: false,
-    isError: false,
-    refetch: jest.fn(),
-  }),
+  useQuery: (query: RecoveryQuery) => {
+    mockQueries.push(query);
+    return {
+      data: undefined,
+      isPending: false,
+      isError: false,
+      refetch: jest.fn(),
+    };
+  },
   useQueryClient: () => ({ invalidateQueries: jest.fn() }),
 }));
 jest.mock("@/components/collect/useMarketExecution", () => ({
@@ -55,6 +65,8 @@ jest.mock("@/components/collect/market-operation-storage", () => ({
   readMarketIntent: () => null,
 }));
 jest.mock("@/components/collect/market-recovery", () => ({
+  fetchRecoverableMarketOperation: (...args: unknown[]) =>
+    mockFetchRecover(...args),
   marketOperationHasUnresolvedSend: (operation: ApiMarketOperation) =>
     operation.send_attempt?.status === "ACTIVE",
   marketOperationNeedsPolling: () => false,
@@ -103,9 +115,31 @@ const operation = {
 } as ApiMarketOperation;
 beforeEach(() => {
   jest.clearAllMocks();
+  mockQueries.length = 0;
   mockRecover.mockResolvedValue(undefined);
   mockAuth.isAuthenticated = true;
   mockAuth.activeProfileProxy = null;
+});
+it("keeps recovery bound to the original operation after the funding wallet changes profiles", async () => {
+  render(
+    <CollectTradeController
+      action="buy"
+      initialOperation={operation}
+      onClose={jest.fn()}
+    />
+  );
+  const query = mockQueries.find(
+    (item) => item.queryKey[0] === "market-operation"
+  );
+  expect(query?.enabled).toBe(true);
+  const signal = new AbortController().signal;
+  await query!.queryFn({ signal });
+  expect(mockFetchRecover).toHaveBeenCalledWith(
+    operation.id,
+    "original-profile",
+    signal
+  );
+  expect(mockConfirm).not.toHaveBeenCalled();
 });
 it("offers hash recovery with no local intent after profile migration and disabled trading", async () => {
   render(

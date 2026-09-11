@@ -31,6 +31,14 @@ describe("getStatsPath", () => {
 });
 
 describe("getCollectedStatsIdentityKey", () => {
+  it("deduplicates whitespace and case variants of a single custody wallet", () => {
+    expect(
+      getProfileStatsPath({
+        primary_wallet: " 0xABC ",
+        wallets: [{ wallet: "0xabc" }, { wallet: " 0xAbC " }, { wallet: " " }],
+      } as ApiIdentity)
+    ).toBe("wallet/0xabc");
+  });
   it("does not silently substitute a wallet for an unresolved multi-wallet profile", () => {
     expect(() =>
       getProfileStatsPath({

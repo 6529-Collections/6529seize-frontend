@@ -182,7 +182,7 @@ jobs:
           ];
           const corePlaywrightLanes = [];
           const collectBrowserRequired = plan.changed_files.some((file) =>
-            /^(?:app\/collect\/|components\/collect\/|components\/user\/collected\/|components\/nextGen\/|components\/6529Gradient\/|components\/memes\/|tests\/collect\/|generated\/models\/Api(?:Collect|Market))/.test(file) ||
+            /^(?:app\/collect\/|components\/collect\/|components\/user\/collected\/|components\/nextGen\/|components\/6529Gradient\/|components\/the-memes\/|tests\/collect\/|generated\/models\/Api(?:Collect|Market))/.test(file) ||
             ["services/api/collect-api.ts", "services/api/collect-rules-api.ts", "services/api/market-api.ts", "components/common/RecipientSelector.tsx", "components/mobile-wrapper-dialog/MobileWrapperDialog.tsx", "i18n/messages/collect.ts", "openapi.yaml", ".github/workflows/app-pr-ci.yml"].includes(file)
           );
           write("playwright_collect_required", String(collectBrowserRequired));

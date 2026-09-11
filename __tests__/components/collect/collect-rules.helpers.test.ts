@@ -1,5 +1,6 @@
 import {
   collectRuleRemaining,
+  collectRuleDeadlineFromPlan,
   collectRuleTargetsFromPlan,
   collectRuleTrade,
   ruleUnitPrice,
@@ -9,6 +10,7 @@ import type { ApiCollectRule } from "@/generated/models/ApiCollectRule";
 import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
 
+const observedAt = 1800000000000;
 const target = {
   asset_key: "1:nft:1",
   target_quantity: "3",
@@ -21,7 +23,7 @@ const rule = {
     profile_id: "profile",
     funding_wallet: "funding",
     recipient: "recipient",
-    expires_at: Date.now() + 86400000,
+    expires_at: observedAt + 86400000,
   },
   acquired: [{ asset_key: target.asset_key, quantity: "1" }],
 } as ApiCollectRule;
@@ -66,7 +68,8 @@ it("selects an affordable exact listing and caps quantity to the unacquired targ
     rule,
     target,
     [listing("5", "450", "affordable"), listing("1", "101", "expensive")],
-    true
+    true,
+    observedAt
   );
   expect(request).toMatchObject({
     profile_id: "profile",
@@ -84,7 +87,8 @@ it("refuses another prepare while an operation is pending", () => {
       { ...rule, pending_review: { operation_id: "one" } } as ApiCollectRule,
       target,
       [listing("1", "100")],
-      false
+      false,
+      observedAt
     )
   ).toThrow("RULE_INACTIVE");
 });
@@ -94,13 +98,56 @@ it("refuses paused rules and listings above the saved unit limit", () => {
       { ...rule, state: "PAUSED" } as ApiCollectRule,
       target,
       [listing("1", "100")],
-      false
+      false,
+      observedAt
     )
   ).toThrow("RULE_INACTIVE");
   expect(() =>
-    collectRuleTrade(rule, target, [listing("1", "101")], false)
+    collectRuleTrade(rule, target, [listing("1", "101")], false, observedAt)
   ).toThrow("RULE_NO_MATCH");
 });
+it("uses the plan and order server timestamps despite a device clock change", () => {
+  const clock = jest
+    .spyOn(Date, "now")
+    .mockReturnValue(observedAt + 400 * 86400000);
+  try {
+    expect(collectRuleDeadlineFromPlan({ updated_at: observedAt })).toBe(
+      observedAt + 7 * 86400000
+    );
+    expect(
+      collectRuleTrade(rule, target, [listing("1", "100")], false, observedAt)
+        .quantity
+    ).toBe("1");
+    clock.mockReturnValue(0);
+    expect(() =>
+      collectRuleTrade(
+        rule,
+        target,
+        [listing("1", "100")],
+        false,
+        rule.definition.expires_at
+      )
+    ).toThrow("RULE_INACTIVE");
+  } finally {
+    clock.mockRestore();
+  }
+});
+it.each([NaN, Infinity, 0, -1, 1.5, 8640000000000000])(
+  "requires a valid server plan timestamp (%s)",
+  (updated_at) => {
+    expect(() => collectRuleDeadlineFromPlan({ updated_at })).toThrow(
+      "RULE_PLAN_REFRESH"
+    );
+  }
+);
+it.each([NaN, Infinity, 0, -1, 1.5])(
+  "rejects a missing or invalid server order observation (%s)",
+  (at) => {
+    expect(() =>
+      collectRuleTrade(rule, target, [listing("1", "100")], false, at)
+    ).toThrow("RULE_INACTIVE");
+  }
+);
 it("preserves exact integer arithmetic and rejects fractional unit rounding", () => {
   expect(ruleUnitPrice(listing("1", "9007199254740993123456"))).toBe(
     9007199254740993123456n

@@ -12,13 +12,18 @@ import {
   createCollectPlan,
 } from "@/services/api/collect-api";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { isAddress, parseEther, zeroAddress } from "viem";
 import { collectAnalysisRequest, collectGoalOptions } from "./collect.adapters";
 import type { CollectGoalDraft } from "./collect.types";
 import CollectGoalForm from "./CollectGoalForm";
 import CollectRecipientPicker from "./CollectRecipientPicker";
 import { isPositiveEthAmount } from "./collect-form.validation";
+
+const MAX_STALLED_SCAN_ATTEMPTS = 8;
+const MAX_SCAN_ATTEMPTS = 2000 + MAX_STALLED_SCAN_ATTEMPTS;
+const INITIAL_SCAN_DELAY_MS = 350;
+const MAX_SCAN_DELAY_MS = 5000;
 
 export default function CollectGoalsController({
   draft,
@@ -41,23 +46,41 @@ export default function CollectGoalsController({
   const [scanError, setScanError] = useState(false);
   const [recipientError, setRecipientError] = useState(false);
   const [budgetError, setBudgetError] = useState(false);
+  const scanProgress = useRef({ attempts: 0, stalled: 0 });
   const create = useMutation({ mutationFn: createCollectPlan });
   const scanning = plan?.state === ApiCollectPlanStateEnum.Scanning;
   useEffect(() => {
     if (plan?.state !== ApiCollectPlanStateEnum.Scanning || scanError) return;
     const abort = new AbortController();
-    const timer = globalThis.setTimeout(() => {
-      void advanceCollectPlan(plan.id, abort.signal)
-        .then((next) => {
-          if (!abort.signal.aborted) {
-            setPlan(next);
-            onPlan(next);
-          }
-        })
-        .catch(() => {
-          if (!abort.signal.aborted) setScanError(true);
-        });
-    }, 350);
+    const timer = globalThis.setTimeout(
+      () => {
+        scanProgress.current.attempts += 1;
+        void advanceCollectPlan(plan.id, abort.signal)
+          .then((next) => {
+            if (!abort.signal.aborted) {
+              scanProgress.current.stalled =
+                next.checked_asset_count > plan.checked_asset_count
+                  ? 0
+                  : scanProgress.current.stalled + 1;
+              setPlan(next);
+              onPlan(next);
+              if (
+                next.state === ApiCollectPlanStateEnum.Scanning &&
+                (scanProgress.current.stalled >= MAX_STALLED_SCAN_ATTEMPTS ||
+                  scanProgress.current.attempts >= MAX_SCAN_ATTEMPTS)
+              )
+                setScanError(true);
+            }
+          })
+          .catch(() => {
+            if (!abort.signal.aborted) setScanError(true);
+          });
+      },
+      Math.min(
+        INITIAL_SCAN_DELAY_MS * 2 ** scanProgress.current.stalled,
+        MAX_SCAN_DELAY_MS
+      )
+    );
     return () => {
       abort.abort();
       globalThis.clearTimeout(timer);
@@ -72,6 +95,7 @@ export default function CollectGoalsController({
       isAddress(recipient) && recipient.toLowerCase() !== zeroAddress;
     setRecipientError(!valid);
     if (!valid) return;
+    scanProgress.current = { attempts: 0, stalled: 0 };
     setScanError(false);
     onPlan(null);
     setPlan(null);
@@ -154,7 +178,13 @@ export default function CollectGoalsController({
       {scanError && (
         <div role="alert" className="tw-space-y-3 tw-text-sm tw-text-iron-300">
           <p>{t(locale, "collect.plan.scanError")}</p>
-          <Button variant="secondary" onClick={() => setScanError(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              scanProgress.current = { attempts: 0, stalled: 0 };
+              setScanError(false);
+            }}
+          >
             {t(locale, "collect.retry")}
           </Button>
         </div>

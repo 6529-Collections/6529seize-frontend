@@ -53,6 +53,7 @@ function select(files: string[]) {
 }
 it.each([
   "components/collect/CollectTradeForm.tsx",
+  "components/the-memes/MemePageLiveStats.tsx",
   "tests/collect/collect-public.spec.ts",
   "components/user/collected/stats/useCollectedStatsData.ts",
   "generated/models/ApiMarketOperation.ts",

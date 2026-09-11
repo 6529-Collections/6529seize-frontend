@@ -1,6 +1,10 @@
 import { act, renderHook } from "@testing-library/react";
 import { useMarketExecution } from "@/components/collect/useMarketExecution";
-import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
+import {
+  ApiMarketOperationStateEnum,
+  type ApiMarketOperation,
+} from "@/generated/models/ApiMarketOperation";
+import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
 import type { ApiMarketSendAttemptRequest } from "@/generated/models/ApiMarketSendAttemptRequest";
 import { createMarketSendAttempt } from "@/components/collect/market-send-attempt";
@@ -88,15 +92,44 @@ const expected = {
   wallet: walletAddress,
   kind: "LIST",
 } as ApiMarketPrepareRequest;
-const operation = {
+const operation: ApiMarketOperation = {
   id: "operation-1",
   profile_id: "profile-one",
   revision: "revision-1",
-  state: "AWAITING_SIGNATURE",
-  kind: "LIST",
+  state: ApiMarketOperationStateEnum.AwaitingSignature,
+  kind: ApiMarketKind.List,
+  wallet: walletAddress,
+  recipient: walletAddress,
+  recipient_in_profile: true,
+  asset_key: "1:0x33fd426905f149f8376e227d0c9d3340aad17af1:1",
+  quantity: "1",
+  currency: "0x0000000000000000000000000000000000000000",
+  total_wei: "1000",
+  net_wei: "1000",
+  fees: [],
   approval_transactions: [],
-  order: { components: {} },
-} as ApiMarketOperation;
+  order: {
+    protocol_address: "0x0000000000000068f116a894984e2db1123eb395",
+    order_hash: hash,
+    digest: hash,
+    components: {
+      offerer: walletAddress,
+      zone: "0x0000000000000000000000000000000000000000",
+      offer: [],
+      consideration: [],
+      order_type: 0,
+      start_time: "1",
+      end_time: "2",
+      zone_hash: `0x${"0".repeat(64)}`,
+      salt: "0",
+      conduit_key: `0x${"0".repeat(64)}`,
+      counter: "0",
+    },
+  },
+  expires_at: 2,
+  updated_at: 1,
+  potential_liability_wei: "0",
+};
 let persisted: Record<string, unknown> | null = null;
 
 beforeEach(() => {
@@ -164,7 +197,7 @@ it("moves an already-approved new order into signature review before signing", a
   expect(onOperation).toHaveBeenCalledWith(operation);
   expect(mockWallet.signTypedData).not.toHaveBeenCalled();
 });
-it("clears a mined reverted approval so a later review can recover", async () => {
+it("clears a mined reverted legacy approval without advancing the operation", async () => {
   mockRead.mockReturnValue({ request: expected, approvalHash: hash });
   mockClient.waitForTransactionReceipt.mockResolvedValue({
     status: "reverted",
@@ -175,7 +208,31 @@ it("clears a mined reverted approval so a later review can recover", async () =>
   expect(mockSave).toHaveBeenCalledWith(expected.profile_id, operation.id, {
     request: expected,
   });
+  expect(mockContinue).not.toHaveBeenCalled();
+  expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+  expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+});
+it("continues a successful legacy approval without requesting another wallet transaction", async () => {
+  mockRead.mockReturnValue({ request: expected, approvalHash: hash });
+  mockClient.waitForTransactionReceipt.mockResolvedValue({ status: "success" });
+  mockContinue.mockResolvedValue(operation);
+  const onOperation = jest.fn();
+  const { result } = renderHook(() => useMarketExecution(onOperation));
+  await act(() => result.current.confirm(operation, expected));
   expect(mockContinue).toHaveBeenCalledWith(operation.id);
+  expect(onOperation).toHaveBeenCalledWith(operation);
+  expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+  expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+});
+it("retains a legacy approval hash when its receipt is unavailable", async () => {
+  mockRead.mockReturnValue({ request: expected, approvalHash: hash });
+  mockClient.waitForTransactionReceipt.mockRejectedValue(
+    new Error("RPC unavailable")
+  );
+  const { result } = renderHook(() => useMarketExecution(jest.fn()));
+  await act(() => result.current.confirm(operation, expected));
+  expect(mockSave).not.toHaveBeenCalled();
+  expect(mockContinue).not.toHaveBeenCalled();
   expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
 });
 
@@ -344,18 +401,22 @@ it("never sends when simulation exceeds the reviewed gas limit", async () => {
 
 it("journals the attempt before the wallet and blocks retry after a lost broadcast response", async () => {
   const { buyExpected, buyOperation } = buyReview();
+  let markerAtWallet: unknown;
+  let beginCountAtWallet = 0;
   mockWallet.sendTransaction.mockImplementation(async () => {
-    expect(persisted).toEqual(
-      expect.objectContaining({
-        sendAttempt: expect.objectContaining({ walletRequested: true }),
-      })
-    );
-    expect(mockBegin).toHaveBeenCalledTimes(1);
+    markerAtWallet = persisted;
+    beginCountAtWallet = mockBegin.mock.calls.length;
     throw new Error("RPC response lost after broadcast");
   });
   const { result } = renderHook(() => useMarketExecution(jest.fn()));
   await act(() => result.current.confirm(buyOperation, buyExpected));
   await act(() => result.current.confirm(buyOperation, buyExpected));
+  expect(markerAtWallet).toEqual(
+    expect.objectContaining({
+      sendAttempt: expect.objectContaining({ walletRequested: true }),
+    })
+  );
+  expect(beginCountAtWallet).toBe(1);
   expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(1);
   expect(mockReject).not.toHaveBeenCalled();
   expect(persisted).toHaveProperty("sendAttempt.walletRequested", true);
