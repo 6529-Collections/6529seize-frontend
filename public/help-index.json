@@ -7,7 +7,7 @@
     {
       "id": "artwork-documentation.overview",
       "kind": "workflow",
-      "title": "Private artwork documentation",
+      "title": "Artwork documentation and publication preparation",
       "aliases": [
         "my artwork documentation",
         "artist dossier",
@@ -27,13 +27,15 @@
       ],
       "facts": [
         "When the server enables artwork documentation for a profile, My artwork documentation appears in the account menu and opens /artwork-documentation. Eligible owned artwork menus also offer Artwork documentation on desktop and mobile.",
-        "The private workspace collects artwork identity, story and process, artist credits and contributors, files, rights and people, preservation and display guidance, and an optional artist interview. Each section explains why the information matters.",
+        "New publication forms collect one artwork record: identity, story and process, public credits, final files, rights intentions, preservation and an optional interview. All answers and selected files are intended for publication with the work.",
         "Documentation can begin independently or in a supported submission form and can continue afterward. It is optional during submission. A successful artwork post is not retried when its documentation source link needs recovery.",
         "Drafts save to the database. Unsaved text is not persisted in browser local storage. Keep the window open when saving fails or authentication expires, and resolve a version conflict before continuing.",
-        "All documentation remains private in this phase. Intended for a future public record means future publication intent, not current publication. Private contacts and sensitive rights evidence remain restricted, and original archival files require explicit access.",
+        "Drafts remain stored with 6529 during preparation. New publication forms have no per-field privacy choices or private evidence uploads. Earlier records preserve their original publication choices; restricted material is never silently converted.",
         "File transfer, checksum verification, inspection and malware screening have separate statuses. Upload limits are 4 GiB per file, 20 GiB of stored and reserved files per context, 100 files and five simultaneous upload sessions per context.",
         "Only the artist can confirm a documentation revision through a direct authenticated session. Confirmation preserves a dated immutable version in the database; it is not a wallet signature, mint instruction, or automatic effect of a proposed license. Curatorial, technical and rights reviews are separate.",
         "New edits preserve earlier confirmed versions. Shared artist information is versioned and pinned per work. Keys and Gates uses a photography documentation profile; selection does not establish minting, purchase or Museum accession.",
+        "Every section offers a complete fictional worked example for The Space Between by Ari Example. Empty sections open the example; existing records can reopen it. Examples never automatically save artist facts. Selected empty narrative fields offer an unsaved writing structure; explicit Use my answer adds only the artist-reviewed answer to ordinary autosave.",
+        "Questions for the team at the end of review are a separate drafting conversation. Questions and replies are excluded from artwork answers, confirmed versions and future publication. Resolved questions remain available as drafting history and can be reopened. Resolve questions before finalizing and add relevant public answers to the artwork form.",
         "Mint preparation and on-chain, IPFS or Arweave publication are deferred. The documentation form does not perform them."
       ],
       "canonical_path": "/artwork-documentation",
@@ -1324,12 +1326,16 @@
         "On desktop web, the collapsed sidebar account avatar highlights on hover but opens its account dropdown only when activated; the dropdown stays aligned with the sidebar on centered wide-screen layouts.",
         "Sign out all clears every connected profile in one visible transition without switching through the remaining profiles.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
+        "If Post cannot finish its session check, the draft stays in the composer. Wait for loading to finish, check the connection, complete sign-in if prompted, then retry Post. A stalled session check expires so a later attempt can check again; it does not automatically post the draft.",
         "Some write actions, settings, and subscriptions require a connected profile."
       ],
       "canonical_path": "/",
       "related_paths": ["/access"],
       "tags": ["auth", "wallet", "profiles"],
-      "source_refs": ["ops/docs/navigation/feature-wallet-account-controls.md"]
+      "source_refs": [
+        "ops/docs/navigation/feature-wallet-account-controls.md",
+        "ops/docs/waves/troubleshooting-wave-navigation-and-posting.md"
+      ]
     },
     {
       "id": "wallet.connection-sharing",
