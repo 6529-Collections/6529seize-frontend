@@ -45,6 +45,19 @@ it("fails closed for malformed write policy metadata", () => {
   expect(canWriteDocumentation(mutationCapabilities(context))).toBe(false);
 });
 
+it("treats an omitted optional restricted-field flag as false without removing original editor permissions", () => {
+  const context = limitedEditor();
+  delete context.mutation_capabilities.read_restricted_fields;
+  expect(canEditDocumentationField(context, "artwork.title")).toBe(true);
+  expect(canEditDocumentationField(context, "artwork.title", true)).toBe(false);
+});
+
+it("rejects malformed optional restricted-field flags", () => {
+  const context = limitedEditor();
+  Reflect.set(context.mutation_capabilities, "read_restricted_fields", null);
+  expect(canEditDocumentationField(context, "artwork.title")).toBe(false);
+});
+
 it("fails closed for an unknown writer module", () => {
   const context = limitedEditor();
   context.mutation_capabilities.edit_modules = ["unknown-module"] as never;

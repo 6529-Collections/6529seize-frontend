@@ -34,8 +34,10 @@ const RIGHTS_FIELDS = new Set([
 export function mutationCapabilities(
   context: ApiArtworkDocumentationContext
 ): ApiArtworkDocumentationCapabilities {
-  const capabilities = (context as Partial<ApiArtworkDocumentationContext>)
+  let capabilities = (context as Partial<ApiArtworkDocumentationContext>)
     .mutation_capabilities;
+  if (capabilities && capabilities.read_restricted_fields === undefined)
+    capabilities = { ...capabilities, read_restricted_fields: false };
   // Read grants must never be used as a fallback when write policy is absent.
   if (
     capabilities?.read_context !== true ||
