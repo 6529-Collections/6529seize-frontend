@@ -23,11 +23,13 @@ An authorized program viewer can also open the program's artwork records,
 including their files, confirmed versions and **Questions for the team**.
 Viewer access may come from an individual profile or membership of an assigned
 group. The workspace identifies view-only access and offers navigation without
-save controls. Viewing does not grant permission to change artwork answers,
+save controls. **Back to results** returns to the program list. Viewing does
+not grant permission to change artwork answers,
 send or resolve questions, import artist information or confirm a version.
 Artists and team members with separate editing or review permissions keep
 those permissions. Adding viewer access does not expand their editing scope:
-newly visible fields, files and conversations can still be read-only.
+newly visible fields, files and conversations can still be read-only. Answers
+outside your editing scope appear as readable text, with no editing controls.
 
 Documentation can also be started in a supported submission form. It is
 optional and does not change submission eligibility. A successful artwork
@@ -38,7 +40,8 @@ Retry that link from the documentation flow; do not submit the artwork again.
 
 Move through **Chapters in this record** using the chapter list on a larger
 screen or the chapter selector on a smaller one. Each chapter explains why its
-information matters.
+information matters. The next button names the chapter it will open, such as
+**Next: The story & the making**.
 
 1. **The work** — identify the title, date, location and form of the work. Add
    the exact final file under **Artwork & supporting files**.
@@ -64,8 +67,11 @@ rights details**, with a count of the questions inside. Open them when they
 help explain this particular work. You can leave optional details unanswered
 and return later.
 
-Where a question allows another answer status, open **Not known or not
-applicable?** and explain your choice. Record uncertainty instead of guessing.
+For an unanswered question that allows another answer status, open **Not known
+or not applicable?** and explain your choice. Once an answer is recorded,
+**Answer options** holds these choices and **Leave unanswered**. A recorded
+status and its explanation remain visible when the options are closed.
+Record uncertainty instead of guessing.
 A general location is enough; include only the location information you want
 published.
 
@@ -81,15 +87,16 @@ already has a version switches to that version without replacing its text.
 
 ## Start with a worked example
 
-Each chapter offers **See a complete example for this section**. Examples
+Each chapter offers **Read an example record**. Examples
 start closed, including in an empty chapter, so you can begin writing or open
-the guidance when you want it. Close and reopen an example at any time.
+the guidance when you want it. **Return to my writing** closes the example and
+returns you to your answers. You can reopen it at any time.
 The fictional photograph _The Space Between_, by fictional artist Ari Example,
 provides a consistent account throughout the record and the final review.
 It includes a complete caption and statement, construction and editing history,
 public credits, rights intentions and practical display guidance.
 
-**Read a worked example** beside a question shows the relevant answer. Examples
+**See an example** beside a question shows the relevant answer. Examples
 follow the questions available in your record. They are separate from your
 artwork: reading one never adds an answer, chooses a file or confirms a fact.
 
@@ -111,6 +118,8 @@ by itself establish purchase or accession by the Museum.
 The **Keys and Gates** program list brings the authorized artwork records
 together. Use **Find a record** to filter by confirmation or review status.
 Each entry offers **Open record**, a saved date and **Review status** details.
+On your personal documentation list, **Record for** selects the kind of record
+when you start a new one.
 
 The artist's preferred credit or display name identifies the record. When
 neither has been entered, an available profile handle is explicitly labelled
@@ -133,9 +142,19 @@ or sign in again. Unsaved text is not kept after the window is closed.
 If another editor changes the record, resolve the version conflict before
 continuing; the app does not silently overwrite their work.
 
-Upload the exact file you intend to include with the work. Finishing the
-transfer is followed by file processing; wait for the file to become ready.
-Viewers can see previews and original files according to their access.
+In **The work**, **Artwork & supporting files** brings **Add a file** together
+with the final artwork, dimensions, preservation master and source-file
+questions. Upload the exact file you intend to include with the work.
+Finishing the transfer is followed by file processing; wait for the file to
+become ready. **Edit file details** opens editable descriptions and other file
+information when your access permits it. **File integrity** shows the recorded
+file information and checksum. Viewers can see **Files in this record** and
+download originals according to their access, without upload or editing controls.
+
+**Check your existing information** lets authorized editors compare **In the
+record** with **From the source** before choosing **Use selected information**.
+Only information within your editing access can be selected. For viewers,
+**Submission references** presents the comparison without import controls.
 
 The upload limits are 4 GiB per file, 20 GiB of stored and reserved files per
 record, 100 files per record and five simultaneous uploads. A paused upload
@@ -198,6 +217,14 @@ Curatorial, technical and rights reviews are separate. Reviewers can discuss
 specific questions and request changes within their assigned access. A later
 edit creates a newer draft without changing the earlier confirmed revision.
 Confirming the newer draft creates a new version for review.
+
+Open a confirmed version to read its dated artwork record and the files selected
+for that version. **Confirmed record details** contains its identifying details
+and checksum. Returning to the current draft does not change the confirmed version.
+
+If your access allows it, **Manage this record** in **Review the record** offers
+the archive or restore action. Archiving preserves the record; it does not
+publish it.
 
 Artist identity information can be reused through versioned artist records.
 Each work keeps its selected version, so changing a shared artist record does
