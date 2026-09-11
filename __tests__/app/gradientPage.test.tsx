@@ -41,7 +41,7 @@ describe("generateMetadata", () => {
 
   it("returns metadata with thumbnail if available", async () => {
     (fetchUrl as jest.Mock).mockResolvedValue({
-      data: [{ thumbnail: "https://example.com/thumb.png" }],
+      data: [{ artist: "6529er", thumbnail: "https://example.com/thumb.png" }],
     });
 
     const metadata = await generateMetadata({
@@ -67,7 +67,12 @@ describe("generateMetadata", () => {
     expect(url.searchParams.get("badge")).toBe("6529 Gradient");
     expect(url.searchParams.get("collection")).toBe("6529 Gradient");
     expect(url.searchParams.get("image")).toBe("https://example.com/thumb.png");
-    expect(url.searchParams.get("subtitle")).toBe("Collections");
+    expect(url.searchParams.get("artist")).toBe("6529er");
+    expect(metadata.description).toContain("6529 Gradient #10 · 6529er");
+    expect(metadata.alternates?.canonical).toBe(
+      "https://test.6529.io/6529-gradient/10"
+    );
+    expect(metadata.openGraph?.url).toBe(metadata.alternates?.canonical);
     expect(url.searchParams.get("title")).toBe("6529 Gradient #10");
     expect(metadata.twitter?.card).toBe("summary_large_image");
   });
@@ -104,5 +109,23 @@ describe("generateMetadata", () => {
 
     expect(url.pathname).toBe(`/api/og-metadata/nfts/${GRADIENT_CONTRACT}/30`);
     expect(url.searchParams.get("image")).toBeNull();
+  });
+
+  it("prefers a sharp scaled artwork over the thumbnail", async () => {
+    (fetchUrl as jest.Mock).mockResolvedValue({
+      data: [
+        {
+          scaled: "https://example.com/scaled.png",
+          thumbnail: "https://example.com/thumb.png",
+        },
+      ],
+    });
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ id: "40" }),
+    });
+    const [image] = metadata.openGraph?.images as { url: string }[];
+    expect(new URL(image.url).searchParams.get("image")).toBe(
+      "https://example.com/scaled.png"
+    );
   });
 });

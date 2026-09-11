@@ -115,15 +115,10 @@ describe("branded OG card renderers", () => {
     );
     expect(collectTextNodes(element)).toEqual(
       expect.arrayContaining([
-        "The Memes",
+        "The Memes · #6,529",
         "Seize the Memes",
         "of Production",
-        "Card 6529 from The Memes",
-        "collection",
-        "#6,529",
-        "by",
         "6529er",
-        "0x33FD...7aF1",
       ])
     );
   });
@@ -185,7 +180,7 @@ describe("branded OG card renderers", () => {
       ])
     );
     expect(collectTextNodes(element)).toEqual(
-      expect.arrayContaining(["6529", "The Memes"])
+      expect.arrayContaining(["6529", "The Memes · #6,529"])
     );
   });
 
@@ -205,7 +200,7 @@ describe("branded OG card renderers", () => {
       ])
     );
     expect(collectTextNodes(element)).toEqual(
-      expect.arrayContaining(["6529", "The Memes"])
+      expect.arrayContaining(["6529", "The Memes · #6,529"])
     );
   });
 
@@ -239,11 +234,11 @@ describe("branded OG card renderers", () => {
   it("keeps non-decimal NFT ids unformatted", () => {
     const element = renderBrandedNftOgImage({
       contract: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
-      id: " 5 ",
-      title: "Spaced id",
+      id: "a5",
+      title: "Non-decimal id",
     });
 
-    expect(collectTextNodes(element)).toEqual(expect.arrayContaining(["# 5 "]));
+    expect(collectTextNodes(element)).toEqual(expect.arrayContaining(["#a5"]));
   });
 
   it("uses displayId for the visible NFT id label", () => {
@@ -256,16 +251,18 @@ describe("branded OG card renderers", () => {
     });
     const textNodes = collectTextNodes(element);
 
-    expect(textNodes).toContain("#42");
+    expect(textNodes).toContain("Pebbles #42");
+    expect(textNodes).not.toContain("#42");
     expect(textNodes).not.toContain("#10,000,000,042");
   });
 
-  it("positions NFT metadata below long subtitles", () => {
+  it("keeps long artwork titles and artist credits within the story safe area", () => {
     const element = renderBrandedNftOgImage({
       artist: "A Very Long Artist Name",
       badge: "Long Text",
       collection: "The Memes",
       contract: "0xabc",
+      format: "story",
       id: "999",
       imageUrl: "/memes-preview.png",
       subtitle:
@@ -274,41 +271,62 @@ describe("branded OG card renderers", () => {
         "This is a very long NFT title that should wrap cleanly inside the branded social card without escaping its content column or causing the image route to fail",
     });
     const records = collectElementRecords(element);
-    const subtitleRecord = records.find(({ props }) => {
-      const style = props.style;
-      return (
-        style?.color === "#D5D5DC" &&
-        style.fontSize === 34 &&
-        style.lineHeight === 1.18
-      );
-    });
     const metadataRecord = records.find(({ props }) => {
       const style = props.style;
-      return (
-        style?.color === "#9A9AA5" && style.fontSize === 30 && style.gap === 16
-      );
+      return style?.position === "absolute" && style.flexDirection === "column";
     });
-
-    expect(subtitleRecord).toBeDefined();
     expect(metadataRecord).toBeDefined();
-    if (!subtitleRecord?.props.style || !metadataRecord?.props.style) {
-      throw new Error("Expected subtitle and metadata records.");
+    if (!metadataRecord?.props.style) {
+      throw new Error("Expected artwork attribution.");
     }
-
-    const subtitleTop = getStyleNumber(subtitleRecord.props.style, "top");
-    const subtitleFontSize = getStyleNumber(
-      subtitleRecord.props.style,
-      "fontSize"
-    );
-    const subtitleLineHeight = getStyleNumber(
-      subtitleRecord.props.style,
-      "lineHeight"
-    );
-    const subtitleBottom =
-      subtitleTop +
-      subtitleRecord.childCount * subtitleFontSize * subtitleLineHeight;
     const metadataTop = getStyleNumber(metadataRecord.props.style, "top");
-
-    expect(metadataTop).toBeGreaterThanOrEqual(subtitleBottom + 18);
+    const lineBlocks = records.filter(
+      ({ props }) =>
+        props.style?.flexDirection === "column" &&
+        typeof props.style.fontSize === "number"
+    );
+    const textHeight = lineBlocks.reduce((sum, { props, childCount }) => {
+      const style = props.style!;
+      return (
+        sum +
+        childCount *
+          getStyleNumber(style, "fontSize") *
+          getStyleNumber(style, "lineHeight")
+      );
+    }, 0);
+    const gaps =
+      (lineBlocks.length - 1) *
+      getStyleNumber(metadataRecord.props.style, "gap");
+    expect(metadataTop).toBeGreaterThan(250);
+    expect(metadataTop + textHeight + gaps).toBeLessThan(1920 - 300);
+    expect(collectTextNodes(element).join(" ")).not.toContain("This subtitle");
+    expect(collectTextNodes(element).join(" ")).not.toContain("0xabc");
   });
+
+  it.each(["square", "portrait", "story"] as const)(
+    "keeps artwork uncropped in %s exports",
+    (format) => {
+      const element = renderBrandedNftOgImage({
+        format,
+        contract: "0xabc",
+        id: "1",
+        title: "Artwork",
+        imageUrl: "/memes-preview.png",
+      });
+      const images = collectElementRecords(element).filter(
+        ({ props }) => props.style?.objectFit !== undefined
+      );
+      expect(images.length).toBeGreaterThan(0);
+      expect(
+        images.every(({ props }) => props.style?.objectFit === "contain")
+      ).toBe(true);
+      const artFrame = collectElementRecords(element).find(
+        ({ props }) =>
+          props.style?.position === "absolute" &&
+          props.style.justifyContent === "center"
+      );
+      expect(artFrame?.props.style?.overflow).not.toBe("hidden");
+      expect(artFrame?.props.style?.borderRadius).toBeUndefined();
+    }
+  );
 });

@@ -10,6 +10,7 @@ import {
 } from "@/helpers/profile-collected-navigation";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import JsonLdScript from "@/lib/structured-data/json-ld";
+import { canonicalUrl } from "@/lib/structured-data/utils";
 import { buildNextgenTokenPageJsonLd } from "@/lib/structured-data/nextgen";
 import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
@@ -59,31 +60,43 @@ export async function generateMetadata({
   const baseTitle =
     data.token?.name ?? `${data.collection.name} - #${data.tokenId}`;
   const title = getNextgenTitle(viewDisplay, baseTitle);
-  return getAppMetadata(
+  const description = [baseTitle, data.collection.artist.trim(), "NextGen"]
+    .filter(Boolean)
+    .join(" · ");
+  const viewPath =
+    viewDisplay.length > 0
+      ? `/${viewDisplay.toLowerCase().replaceAll(" ", "-")}`
+      : "";
+  const canonical = canonicalUrl(
+    `/nextgen/token/${data.token?.id ?? data.tokenId}${viewPath}`
+  );
+  const metadata = getAppMetadata(
     getLargeSocialCardMetadata({
       title,
-      description: "NextGen",
+      description,
       ogImage: getNftSocialCardImagePath({
         artist: data.collection.artist,
         badge: "NextGen",
         collection: data.collection.name,
         contract: NEXTGEN_CONTRACT,
         displayId,
-        id: data.tokenId,
+        id: data.token?.id ?? data.tokenId,
         image: getFirstUsableImage(
-          data.token?.thumbnail_url,
           data.token?.image_url,
+          data.token?.thumbnail_url,
           data.collection.banner,
           data.collection.image
         ),
-        subtitle: `${data.collection.name} #${
-          displayId ?? data.tokenId
-        } | NextGen`,
         title,
       }),
       ogImageAlt: `${title} social card`,
     })
   );
+  return {
+    ...metadata,
+    alternates: { canonical },
+    openGraph: { ...metadata.openGraph, url: canonical },
+  };
 }
 
 export default async function NextGenTokenPage({

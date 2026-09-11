@@ -39,6 +39,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import NftNavigation from "../nft-navigation/NftNavigation";
 import MemeCalendarPeriods from "./MemeCalendarPeriods";
 import { MemePageArtViewer } from "./MemePageArtViewer";
+import ArtworkShareButton from "@/components/artwork-share/ArtworkShareButton";
 import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";
 import {
   MemePageNavigationSkeleton,
@@ -497,7 +498,22 @@ export default function MemePage({
     return (
       <div className={cardHeaderClassName}>
         <div className={artworkColumnClassName}>
-          <div className={`${styles["nftImageWrapper"] ?? ""} lg:tw-flex-1`}>
+          <div className="tw-mb-3 tw-flex tw-justify-end">
+            <ArtworkShareButton
+              locale={locale}
+              artwork={{
+                kind: "memes",
+                tokenId: nft.id,
+                title: nft.name,
+                artist: nft.artist,
+                collection: "The Memes",
+                imageUrl: nft.scaled || nft.image || nft.thumbnail,
+              }}
+            />
+          </div>
+          <div
+            className={`${styles["nftImageWrapper"] ?? ""} tw-relative lg:tw-flex-1`}
+          >
             <MemePageArtViewer
               key={`${nft.contract}-${nft.id}`}
               nft={nft}

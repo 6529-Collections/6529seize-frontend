@@ -144,7 +144,10 @@ const getSocialImage = (metadata: Metadata) => {
 const mockNextgenFetches = () => {
   (commonApiFetch as jest.Mock).mockImplementation(
     ({ endpoint }: { endpoint: string }) => {
-      if (endpoint === "nextgen/tokens/10000000042") {
+      if (
+        endpoint === "nextgen/tokens/10000000042" ||
+        endpoint === "nextgen/tokens/42"
+      ) {
         return Promise.resolve(token);
       }
       if (endpoint === "nextgen/tokens/10000000042/traits") {
@@ -302,8 +305,11 @@ describe("NextGen metadata", () => {
     expect(url.searchParams.get("badge")).toBe("NextGen");
     expect(url.searchParams.get("collection")).toBe("Pebbles");
     expect(url.searchParams.get("displayId")).toBe("42");
-    expect(url.searchParams.get("image")).toBe("https://cdn.test/thumb.png");
-    expect(url.searchParams.get("subtitle")).toBe("Pebbles #42 | NextGen");
+    expect(url.searchParams.get("image")).toBe("https://cdn.test/token.png");
+    expect(metadata.description).toContain("Pebble #42 · 6529er · NextGen");
+    const canonical = `https://test.6529.io/nextgen/token/10000000042${view ? `/${view}` : ""}`;
+    expect(metadata.alternates?.canonical).toBe(canonical);
+    expect(metadata.openGraph?.url).toBe(canonical);
     expect(url.searchParams.get("title")).toBe(title);
   });
 
@@ -322,5 +328,18 @@ describe("NextGen metadata", () => {
     expect(url.searchParams.get("collection")).toBe("NextGen");
     expect(url.searchParams.get("image")).toBeNull();
     expect(url.searchParams.get("title")).toBe("NextGen #999");
+  });
+
+  it("normalizes short token links to the indexed token identity", async () => {
+    mockNextgenFetches();
+    const metadata = await generateNextGenTokenMetadata({
+      params: Promise.resolve({ token: "42" }),
+    });
+    expect(metadata.alternates?.canonical).toBe(
+      "https://test.6529.io/nextgen/token/10000000042"
+    );
+    expect(new URL(getSocialImage(metadata).url).pathname).toBe(
+      `/api/og-metadata/nfts/${NEXTGEN_CONTRACT}/10000000042`
+    );
   });
 });

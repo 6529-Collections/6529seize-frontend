@@ -59,7 +59,10 @@ const PUBLIC_REVIEW_SANDBOX_ENV = {
 const READONLY_SPECS = {
   social: ["tests/social/waves-profile-readonly.spec.ts"],
   inputDetection: ["tests/input/win8-touch-latch-readonly.spec.ts"],
-  media: ["tests/media/media-mint-detail-readonly.spec.ts"],
+  media: [
+    "tests/media/media-mint-detail-readonly.spec.ts",
+    "tests/artwork-sharing.spec.ts",
+  ],
   delegation: ["tests/delegation/delegation-readonly.spec.ts"],
   networkOpenData: [
     "tests/network-open-data/network-open-data-api-readonly.spec.ts",

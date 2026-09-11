@@ -5,6 +5,57 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "nft.artwork-sharing",
+      "kind": "workflow",
+      "title": "Share artwork to social apps",
+      "aliases": [
+        "share artwork",
+        "share a Meme Card",
+        "share a Gradient",
+        "share a NextGen token",
+        "post artwork to Instagram",
+        "share art on Twitter",
+        "share art on Facebook",
+        "download a Story image"
+      ],
+      "keywords": [
+        "artwork",
+        "share",
+        "Instagram",
+        "IG",
+        "Twitter",
+        "X",
+        "Facebook",
+        "FB",
+        "Farcaster",
+        "caption",
+        "download",
+        "feed",
+        "Story"
+      ],
+      "facts": [
+        "Individual Meme, 6529 Gradient, and NextGen pages have a Share artwork button beside the art. It opens an artwork-sharing dialog on desktop, mobile web, and the native app, separate from navigation page sharing.",
+        "Share on X, Facebook, and Farcaster open link-sharing destinations where the user reviews and finishes the post. More apps opens the system share sheet for the artwork link when available. These link actions do not attach the prepared image.",
+        "Copy link copies the main artwork URL on https://6529.io without the current tab, query filters, or profile-return context. Copy caption includes the artwork title, available artist credit, collection, and URL. Caption and link also allows manual selection and copying.",
+        "Image format defaults to Feed · 4:5 at 1080x1350. Other formats are Square · 1:1 at 1080x1080, Story · 9:16 at 1080x1920, and Link card · 1.91:1 at 1200x630. Exports are PNG still images that preserve the artwork proportions and include artwork information and available artist credit.",
+        "Wait for the selected format's preview. Web offers Download image and, when file sharing is supported, Share image. The native app offers Save or share image through its system share sheet.",
+        "For Instagram, copy the caption, choose a feed or Story format, then save or share the image. Select the saved image in Instagram if needed and paste the caption before publishing. Available share targets depend on the device and installed apps; Instagram and automatic caption insertion are not guaranteed.",
+        "Image preparation failure leaves link and caption actions available and offers Try again. If web image sharing fails or is unavailable, download the image and upload it in the destination app. Native sharing errors allow another attempt. Copy errors can be recovered by selecting the caption text manually.",
+        "Canceling a share sheet is silent. Opening a composer or completing a file handoff does not mean a post was published; users finish publishing in the destination service. The feature does not automatically post, record animation, or replace the artwork viewer's original-media downloads."
+      ],
+      "canonical_path": "/the-memes/{id}",
+      "link_label": "Open the artwork and choose Share artwork",
+      "related_paths": ["/6529-gradient/{id}", "/nextgen/token/{token}"],
+      "tags": ["nft", "share", "memes", "gradients", "nextgen", "social"],
+      "source_refs": [
+        "components/artwork-share/ArtworkShareButton.tsx",
+        "components/artwork-share/ArtworkShareActions.tsx",
+        "components/artwork-share/ArtworkShareExport.tsx",
+        "components/artwork-share/artworkShare.ts",
+        "ops/docs/media/nft/feature-artwork-sharing.md"
+      ]
+    },
+    {
       "id": "nft.market-depth",
       "kind": "workflow",
       "title": "Card market depth",
@@ -4712,6 +4763,7 @@
         "Mobile web and native app sharing use their existing header placement and open the platform system share sheet directly.",
         "The profile menu contains Profile and Connect Device; connection targets never appear in the Share modal.",
         "Wave-specific link sharing also exists in the wave header.",
+        "Individual Meme, Gradient, and NextGen pages also offer Share artwork beside the art. That separate dialog supports copied captions and formatted still-image exports on desktop, mobile web, and native apps; use the artwork-sharing guide for Instagram image posts.",
         "Use share controls when users ask how to copy a route or send someone a page."
       ],
       "canonical_path": "/waves",
