@@ -6,7 +6,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import CollectArtworkCard from "./CollectArtworkCard";
 import CollectGoalNavigation, {
   getCollectIntentOptions,
@@ -132,6 +132,7 @@ function Listings({
 
 export default function CollectPageView(props: CollectPageViewProps) {
   const locale = useBrowserLocale();
+  const browseLabelId = useId();
   const [planOpen, setPlanOpen] = useState(false);
   const intentOptions = getCollectIntentOptions(props.intent);
   return (
@@ -144,10 +145,10 @@ export default function CollectPageView(props: CollectPageViewProps) {
           {t(locale, "collect.description")}
         </p>
         <nav
-          aria-label={t(locale, "collect.browseArtwork")}
+          aria-labelledby={browseLabelId}
           className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1 tw-text-xs"
         >
-          <span className="tw-text-iron-500">
+          <span id={browseLabelId} className="tw-text-iron-500">
             {t(locale, "collect.browseArtwork")}
           </span>
           {COLLECTIONS.map(({ id, href }) => (

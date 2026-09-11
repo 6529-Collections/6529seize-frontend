@@ -90,7 +90,7 @@ function DetailTrade({
   const lookup = useQuery({
     queryKey: [QueryKey.COLLECT_ASSETS, "detail", family, tokenId],
     queryFn: async ({ signal }) => {
-      let inspected = 0;
+      const inspected = new Set<string>();
       // Numeric searches also match artwork names, so the exact token can be
       // after the first page. Keep lookup bounded and cancellable throughout.
       for (
@@ -110,8 +110,13 @@ function DetailTrade({
           isExactAsset(item, family, tokenId)
         );
         if (asset) return asset;
-        inspected += page.data.length;
-        if (!page.next || page.data.length === 0 || inspected >= page.count)
+        const previousCount = inspected.size;
+        page.data.forEach((item) => inspected.add(item.asset_key));
+        if (
+          !page.next ||
+          inspected.size === previousCount ||
+          inspected.size >= page.count
+        )
           break;
       }
       throw new Error("COLLECT_DETAIL_ASSET_UNAVAILABLE");

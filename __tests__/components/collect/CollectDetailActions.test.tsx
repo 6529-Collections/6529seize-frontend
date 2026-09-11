@@ -198,7 +198,7 @@ it("stops a catalog that continually returns another matching token", async () =
   renderActions();
   fireEvent.click(screen.getByRole("button", { name: "Collect Meme Five" }));
   await screen.findByRole("alert");
-  expect(mockFetchAssets).toHaveBeenCalledTimes(100);
+  expect(mockFetchAssets).toHaveBeenCalledTimes(2);
   expect(screen.queryByTestId("trade")).not.toBeInTheDocument();
 });
 
