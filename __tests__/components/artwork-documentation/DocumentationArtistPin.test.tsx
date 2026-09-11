@@ -16,8 +16,8 @@ it.each([false, true])(
   "does not offer artist information import to a non-artist with identity editing=%s",
   (canEditIdentity) => {
     const context = documentationFixture();
-    context.capabilities.confirm_as_artist = false;
-    if (!canEditIdentity) context.capabilities.edit_modules = [];
+    context.mutation_capabilities.confirm_as_artist = false;
+    if (!canEditIdentity) context.mutation_capabilities.edit_modules = [];
     context.available_artist_record = {
       id: "new-artist-record",
       record_version: 2,

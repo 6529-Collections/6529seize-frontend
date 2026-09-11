@@ -14,6 +14,10 @@ import { useDocumentationActor } from "./DocumentationAuthGate";
 import { DocumentationValueSummary } from "./DocumentationSummary";
 import { readAnswer } from "@/lib/artwork-documentation/answers";
 import {
+  canEditDocumentationField,
+  mutationCapabilities,
+} from "@/lib/artwork-documentation/capabilities";
+import {
   canImportDocumentationAnswer,
   isPublicationOnly,
 } from "@/lib/artwork-documentation/intake";
@@ -74,6 +78,9 @@ function SourceReceipt({
   const { connectedProfile, actorKey } = useDocumentationActor();
   const [selected, setSelected] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const canImport =
+    mutationCapabilities(context).read_source_receipts &&
+    mutationCapabilities(context).edit_modules.length > 0;
   const query = useQuery({
     queryKey: documentationQueryKey(
       connectedProfile?.id,
@@ -101,6 +108,7 @@ function SourceReceipt({
       <DocumentationNotice>{msg("sourceUnavailable")}</DocumentationNotice>
     );
   const apply = async () => {
+    if (!canImport) return;
     setBusy(true);
     try {
       if (controller.snapshot().dirty) {
@@ -148,9 +156,8 @@ function SourceReceipt({
               className="tw-h-5 tw-w-5 tw-accent-primary-400"
               checked={selected.includes(field.target_field)}
               disabled={
-                !context.capabilities.edit_modules.some(
-                  (module) => module === field.target_field.split(".")[0]
-                )
+                !canImport ||
+                !canEditDocumentationField(context, field.target_field)
               }
               onChange={(event) =>
                 setSelected(
@@ -195,15 +202,17 @@ function SourceReceipt({
           )}
         </div>
       ))}
-      <DocumentationButton
-        secondary
-        disabled={busy || !selected.length}
-        onClick={() => {
-          void apply();
-        }}
-      >
-        {msg("sourceApply")}
-      </DocumentationButton>
+      {canImport && (
+        <DocumentationButton
+          secondary
+          disabled={busy || !selected.length}
+          onClick={() => {
+            void apply();
+          }}
+        >
+          {msg("sourceApply")}
+        </DocumentationButton>
+      )}
     </div>
   );
 }

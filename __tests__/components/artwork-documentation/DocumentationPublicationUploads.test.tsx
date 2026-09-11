@@ -1,10 +1,12 @@
 import {
   act,
   fireEvent,
-  render,
+  render as renderComponent,
   screen,
   waitFor,
 } from "@testing-library/react";
+import type { ReactElement } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import DocumentationUpload from "@/components/artwork-documentation/DocumentationUpload";
 import DocumentationAssetDetails from "@/components/artwork-documentation/DocumentationAssetDetails";
 import { documentationFixture } from "@/__tests__/fixtures/artwork-documentation";
@@ -27,6 +29,12 @@ import { transferDocumentationFile } from "@/lib/artwork-documentation/upload";
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
+jest.mock("@/components/artwork-documentation/DocumentationAuthGate", () => ({
+  useDocumentationActor: () => ({
+    actorKey: "artist-a",
+    connectedProfile: { id: "artist-a" },
+  }),
+}));
 jest.mock("@/services/api/artwork-documentation-assets-api");
 jest.mock("@/lib/artwork-documentation/upload", () => ({
   DocumentationFileChangedError: class extends Error {},
@@ -37,10 +45,21 @@ jest.mock("@/lib/artwork-documentation/poll-processing", () => ({
 }));
 
 const controllers: DocumentationDraftController[] = [];
+const clients: QueryClient[] = [];
+function render(element: ReactElement) {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  clients.push(client);
+  return renderComponent(
+    <QueryClientProvider client={client}>{element}</QueryClientProvider>
+  );
+}
 function uploadSession(
   overrides: Partial<ApiArtworkDocumentationAsset> = {}
 ): ApiArtworkDocumentationUploadSession {
   return {
+    can_mutate: true,
     asset: {
       id: "asset-1",
       filename: "final.png",
@@ -105,6 +124,7 @@ function setup(publicationOnly = true) {
   return { context, controller };
 }
 afterEach(() => {
+  clients.splice(0).forEach((client) => client.clear());
   controllers.splice(0).forEach((controller) => controller.dispose());
   jest.clearAllMocks();
 });
@@ -116,6 +136,45 @@ beforeEach(() => {
 });
 
 describe("publication-only artwork uploads", () => {
+  it.each([true, false, undefined])(
+    "uses explicit original upload authorization can_mutate=%s for recovery after reload",
+    async (canMutate) => {
+      const { context, controller } = setup(false);
+      Object.assign(context.mutation_capabilities, {
+        confirm_as_artist: false,
+        read_archival_files: false,
+        read_rights_evidence: false,
+      });
+      const session = uploadSession({
+        role: "preservation_master",
+        intended_visibility: "restricted",
+      });
+      if (canMutate === undefined)
+        Reflect.deleteProperty(session, "can_mutate");
+      else session.can_mutate = canMutate;
+      context.assets = [session.asset];
+      jest.mocked(getDocumentationUpload).mockResolvedValue(session);
+      render(<DocumentationUpload context={context} controller={controller} />);
+      await waitFor(() => expect(getDocumentationUpload).toHaveBeenCalled());
+      expect(screen.getByText("final.png")).toBeVisible();
+      if (canMutate)
+        expect(
+          await screen.findByRole("button", { name: "Try again" })
+        ).toBeDisabled();
+      else
+        expect(
+          screen.queryByRole("button", { name: "Try again" })
+        ).not.toBeInTheDocument();
+      const role = screen.getByRole("combobox", {
+        name: "What is this file for?",
+      });
+      expect(
+        role.querySelector('option[value="rights_instrument"]')
+      ).toBeDisabled();
+      expect(transferDocumentationFile).not.toHaveBeenCalled();
+      expect(linkDocumentationAsset).not.toHaveBeenCalled();
+    }
+  );
   it("shows the final artwork first and omits private upload roles and visibility controls", () => {
     render(<DocumentationUpload {...setup()} />);
     expect(
@@ -161,6 +220,7 @@ describe("publication-only artwork uploads", () => {
       state: "uploading",
     };
     jest.mocked(startDocumentationUpload).mockResolvedValue({
+      can_mutate: true,
       asset,
       upload_id: asset.id,
       expires_at: Date.now() + 60_000,
@@ -270,7 +330,7 @@ describe("publication-only artwork uploads", () => {
     );
     selectFile();
     expect(screen.getByRole("button", { name: "Upload file" })).toBeDisabled();
-    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Try again" }));
     await waitFor(() =>
       expect(transferDocumentationFile).toHaveBeenCalledWith(
         expect.objectContaining({ session, contextId: context.id })
@@ -300,7 +360,7 @@ describe("publication-only artwork uploads", () => {
         target: { value: "interview_recording" },
       }
     );
-    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Try again" }));
     await waitFor(() =>
       expect(transferDocumentationFile).toHaveBeenCalledTimes(2)
     );
@@ -371,9 +431,9 @@ describe("publication-only artwork uploads", () => {
       ).toBeEnabled()
     );
     expect(screen.getByRole("button", { name: "Try again" })).toBeDisabled();
-    expect(
-      screen.getByText(/This upload is still pending/)
-    ).toHaveTextContent("Cancel upload to release it");
+    expect(screen.getByText(/This upload is still pending/)).toHaveTextContent(
+      "Cancel upload to release it"
+    );
     fireEvent.click(screen.getByRole("button", { name: "Cancel upload" }));
     await waitFor(() =>
       expect(cancelDocumentationUpload).toHaveBeenCalledTimes(2)
@@ -403,15 +463,18 @@ describe("publication-only artwork uploads", () => {
       status: ApiArtworkDocumentationAnswerStatusEnum.Provided,
       value: "intended_public_record",
     };
-    jest.mocked(getDocumentationUpload).mockImplementation(async () => {
-      delete props.context.modules["interview"]!.answers[
-        "recording_permission"
-      ];
-      return session;
-    });
+    jest
+      .mocked(getDocumentationUpload)
+      .mockResolvedValueOnce(session)
+      .mockImplementation(async () => {
+        delete props.context.modules["interview"]!.answers[
+          "recording_permission"
+        ];
+        return session;
+      });
     render(<DocumentationUpload {...props} />);
     selectFile();
-    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Try again" }));
     await waitFor(() =>
       expect(
         screen.getByRole("button", { name: "Cancel upload" })

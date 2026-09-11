@@ -25,7 +25,9 @@ group. The workspace identifies view-only access and offers navigation without
 save controls. Viewing does not grant permission to change artwork answers,
 send or resolve questions, import artist information or confirm a version.
 Artists and team members with separate editing or review permissions keep
-those permissions.
+those permissions. Adding viewer access does not expand their editing scope:
+newly visible fields, files and conversations can still be read-only. Existing
+upload recovery also checks the person's original file permissions.
 
 Documentation can also be started in a supported submission form. It is
 optional and does not change submission eligibility. A successful artwork

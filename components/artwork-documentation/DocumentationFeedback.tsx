@@ -14,7 +14,11 @@ import {
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
 import { formatDate } from "@/i18n/format";
 import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
-import { canWriteDocumentation } from "@/lib/artwork-documentation/capabilities";
+import {
+  canWriteDocumentation,
+  canParticipateInDocumentationThread,
+  mutationCapabilities,
+} from "@/lib/artwork-documentation/capabilities";
 import {
   ApiArtworkDocumentationThreadAudienceEnum,
   ApiArtworkDocumentationThreadRestrictedClassEnum,
@@ -35,13 +39,17 @@ export default function DocumentationFeedback({
 }) {
   const { msg } = useDocumentationMessages();
   const questions = isPublicationOnly(context.profile);
-  const canParticipate = canWriteDocumentation(context.capabilities);
+  const canParticipate = canWriteDocumentation(mutationCapabilities(context));
   const { connectedProfile, actorKey } = useDocumentationActor();
   const [text, setText] = useState("");
   const [audience, setAudience] = useState("artist_and_reviewers");
   const [restrictedClass, setRestrictedClass] = useState("ordinary");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  const canCreate = canParticipateInDocumentationThread(context, {
+    audience: questions ? "artist_and_reviewers" : audience,
+    restricted_class: questions ? "ordinary" : restrictedClass,
+  });
   const query = useQuery({
     queryKey: documentationQueryKey(
       connectedProfile?.id,
@@ -55,7 +63,7 @@ export default function DocumentationFeedback({
     meta: { persist: false },
   });
   const create = async () => {
-    if (!canParticipate) return;
+    if (!canCreate) return;
     setBusy(true);
     setError(false);
     try {
@@ -104,7 +112,7 @@ export default function DocumentationFeedback({
           key={thread.id}
           contextId={context.id}
           thread={thread}
-          canParticipate={canParticipate}
+          canParticipate={canParticipateInDocumentationThread(context, thread)}
           refresh={() => {
             void query.refetch();
           }}
@@ -149,13 +157,13 @@ export default function DocumentationFeedback({
                 <option value="artist_and_reviewers">
                   {msg("artistReviewers")}
                 </option>
-                {context.capabilities.review_lanes.length > 0 && (
+                {mutationCapabilities(context).review_lanes.length > 0 && (
                   <option value="reviewers_only">{msg("reviewersOnly")}</option>
                 )}
               </select>
             </label>
           )}
-          {!questions && context.capabilities.read_rights_evidence && (
+          {!questions && mutationCapabilities(context).read_rights_evidence && (
             <label className="tw-block tw-text-sm tw-text-iron-300">
               {msg("visibility")}
               <select
@@ -169,7 +177,12 @@ export default function DocumentationFeedback({
             </label>
           )}
           <DocumentationButton
-            disabled={busy || !text.trim() || Array.from(text).length > 4000}
+            disabled={
+              !canCreate ||
+              busy ||
+              !text.trim() ||
+              Array.from(text).length > 4000
+            }
             onClick={() => {
               void create();
             }}

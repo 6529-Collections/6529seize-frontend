@@ -1,5 +1,7 @@
 "use client";
 
+import { mutationCapabilities } from "@/lib/artwork-documentation/capabilities";
+
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
@@ -86,7 +88,7 @@ export default function DocumentationReview({
     (module) => module.completeness.missing
   );
   const canConfirm =
-    context.capabilities.confirm_as_artist &&
+    mutationCapabilities(context).confirm_as_artist &&
     !missing.length &&
     saveState === "clean" &&
     context.lifecycle === ApiArtworkDocumentationContextLifecycleEnum.Active &&
@@ -158,7 +160,7 @@ export default function DocumentationReview({
                 </ul>
               </div>
             )}
-            {!context.capabilities.confirm_as_artist && (
+            {!mutationCapabilities(context).confirm_as_artist && (
               <p className="tw-text-sm tw-text-iron-400">
                 {msg("confirmArtist")}
               </p>
@@ -284,7 +286,7 @@ function DocumentationLaneReviews({
                 {review.reason}
               </p>
             )}
-            {context.capabilities.review_lanes.some(
+            {mutationCapabilities(context).review_lanes.some(
               (allowed) => String(allowed) === String(lane)
             ) && (
               <div className="tw-space-y-3">
