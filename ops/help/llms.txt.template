@@ -1,8 +1,23 @@
 # 6529.io
 
-> 6529.io is the home of The Memes by 6529 — an open-edition NFT art collection whose community tier is released under CC0 — and of the 6529 network: on-chain identity and reputation metrics (TDH, REP, NIC, Levels) plus Waves, the site's social threads. This file is the entry point for AI agents and lists the machine-readable files the site publishes.
+> 6529 is building a decentralized network state: a global community where people coordinate, fund, and build public goods across art, science, culture, and technology. Its goal is to make human coordination permissionless.
 
-Site data such as TDH, REP, and Wave activity changes continuously. Fetch the files below for current definitions and routes instead of relying on cached copies. These files are generated from the site's curated help corpus at build time (corpus revision {{GENERATED_AT}}).
+6529.io provides the network's tools for participation: wallet-based identities, reputation, community conversations and voting in Waves, digital art collections including The Memes, Meme Lab, and 6529 Gradient, and the NextGen generative art platform. This file is the entry point for AI agents exploring the site, its public data, and its APIs.
+
+Start with Explore 6529 below for the main site areas. Use help-index.json for the detailed map of documented features, workflows, and canonical page paths; use sitemap.xml to discover crawlable public pages. These are guides to the site, not an inventory of every profile, Wave, or drop. Use the API for live records and activity.
+
+The help index, glossary, and this entry point are regenerated at build time. Fetch the published resources for current definitions and routes. Values such as TDH, REP, and Wave activity change independently of these documentation files.
+
+## Explore 6529
+
+- [What is 6529?]({{BASE_URL}}/about/faq): the network's mission, how to get started, and how participation works.
+- [The Memes]({{BASE_URL}}/the-memes): large-edition art NFTs released by their artists under CC0; see the [license]({{BASE_URL}}/about/license) for scope and third-party rights.
+- [Meme Lab]({{BASE_URL}}/meme-lab): experimental art from artists who have minted a Meme Card.
+- [6529 Gradient]({{BASE_URL}}/6529-gradient): the collection of 101 NFTs interpreting the 6529 symbol.
+- [NextGen]({{BASE_URL}}/nextgen): the on-chain generative art platform, including collection and artwork browsing.
+- [Waves]({{BASE_URL}}/waves): community spaces for conversations, sharing drops, and voting.
+- [Network]({{BASE_URL}}/network): member discovery, reputation, and network metrics such as TDH, xTDH, and Levels.
+- [Tools]({{BASE_URL}}/tools): developer and utility tools, including the API guides linked below.
 
 ## Machine-readable files
 
@@ -20,6 +35,11 @@ Site data such as TDH, REP, and Wave activity changes continuously. Fetch the fi
 - [Authentication guide]({{BASE_URL}}/tools/api/authentication): session-v2 wallet authentication for external clients, with Node.js examples.
 - Respect documented rate limits, cache responses where possible, and do not hammer endpoints.
 
+## Website agent integration
+
+- [Website-agent setup guide]({{BASE_URL}}/profile-cms/agent/v1/README.md): connect a local MCP adapter to a profile website draft and submit revisions for owner review. Saving and publishing remain owner actions.
+- [Adapter download]({{BASE_URL}}/profile-cms/agent/v1/6529-cms-agent.zip): the local MCP adapter; its [manifest]({{BASE_URL}}/profile-cms/agent/v1/manifest.json) lists version, runtime requirements, and file hashes.
+
 ## Source code
 
 - [GitHub organization](https://github.com/6529-Collections): open-source repositories, including this site (6529seize-frontend, Apache-2.0) and the API server (6529seize-backend).
@@ -27,5 +47,5 @@ Site data such as TDH, REP, and Wave activity changes continuously. Fetch the fi
 ## Usage policy
 
 - Link to the 6529.io page URL when citing site content; canonical paths are listed in help-index.json.
-- Do not present guesses as 6529 facts. If a term, metric, or feature is not described in glossary.json, help-index.json, or the API, say it is not documented instead of inventing it.
+- Do not present guesses as 6529 facts. Check the linked first-party pages and guides, glossary.json, help-index.json, and API documentation. If they do not document a term, metric, or feature, say so instead of inventing it.
 - Do not expose wallet addresses, identity statements, or profile data beyond what the cited public page already shows.
