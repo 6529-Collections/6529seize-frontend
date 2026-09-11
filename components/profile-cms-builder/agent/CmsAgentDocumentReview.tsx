@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import CmsSiteRenderer from "@/components/profile-cms/CmsSiteRenderer";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -6,6 +6,9 @@ import { formatInteger } from "@/i18n/format";
 import type { CmsAgentDocumentReview } from "@/lib/profile-cms/agent-review";
 import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
 import { StudioButton, StudioSelect } from "../studio/StudioControls";
+
+const SCROLL_FOCUS_CLASS =
+  "focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
 export default function CmsAgentDocumentReviewPanel({
   base,
@@ -24,6 +27,7 @@ export default function CmsAgentDocumentReviewPanel({
   readonly onAccept: () => void;
   readonly onDismiss: () => void;
 }) {
+  const reviewTitleId = useId();
   const [side, setSide] = useState("after");
   const [pageId, setPageId] = useState(
     review.cmsPackage.payload.pages[0]?.id ?? ""
@@ -35,7 +39,10 @@ export default function CmsAgentDocumentReviewPanel({
   return (
     <section className="tw-space-y-5 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-4 sm:tw-p-6">
       <div>
-        <h3 className="tw-text-lg tw-font-semibold tw-text-white">
+        <h3
+          id={reviewTitleId}
+          className="tw-text-lg tw-font-semibold tw-text-white"
+        >
           {t(locale, "profileCms.agent.reviewTitle")}
         </h3>
         <p className="tw-mb-0 tw-mt-2 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-6 tw-text-iron-300">
@@ -69,7 +76,12 @@ export default function CmsAgentDocumentReviewPanel({
         />
       </div>
       {page ? (
-        <div className="tw-max-h-[70dvh] tw-overflow-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-700">
+        <div
+          role="region"
+          aria-labelledby={reviewTitleId}
+          tabIndex={0}
+          className={`tw-max-h-[70dvh] tw-overflow-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 ${SCROLL_FOCUS_CLASS}`}
+        >
           <CmsSiteRenderer
             cmsPackage={document}
             page={page}
@@ -130,12 +142,21 @@ function ChangeValue({
   readonly label: string;
   readonly value: unknown;
 }) {
+  const labelId = useId();
   return (
     <div className="tw-min-w-0">
-      <p className="tw-mb-1 tw-text-xs tw-font-medium tw-text-iron-400">
+      <p
+        id={labelId}
+        className="tw-mb-1 tw-text-xs tw-font-medium tw-text-iron-400"
+      >
         {label}
       </p>
-      <pre className="tw-mb-0 tw-max-h-80 tw-overflow-auto tw-whitespace-pre-wrap tw-break-words tw-rounded-lg tw-bg-black tw-p-3 tw-text-xs tw-text-iron-200">
+      <pre
+        role="region"
+        aria-labelledby={labelId}
+        tabIndex={0}
+        className={`tw-mb-0 tw-max-h-80 tw-overflow-auto tw-whitespace-pre-wrap tw-break-words tw-rounded-lg tw-bg-black tw-p-3 tw-text-xs tw-text-iron-200 ${SCROLL_FOCUS_CLASS}`}
+      >
         {value === undefined ? "—" : JSON.stringify(value, null, 2)}
       </pre>
     </div>

@@ -175,6 +175,54 @@ it("reviews every page and preserves the complete proposal when ordinary visual 
   expect(props.onSaveProposal).not.toHaveBeenCalled();
 });
 
+it.each([
+  {
+    locale: "en-US" as const,
+    uploadLabel: "Upload proposal",
+    reviewLabel: "Review the proposal",
+    changesLabel: /^All changes/,
+    valueLabels: ["Current draft", "Proposed website"],
+  },
+  {
+    locale: "fr-FR" as const,
+    uploadLabel: "Importer une proposition",
+    reviewLabel: "Examiner la proposition",
+    changesLabel: /^Toutes les modifications/,
+    valueLabels: ["Brouillon actuel", "Site proposé"],
+  },
+])(
+  "names and exposes each review scroll region to keyboard users in $locale",
+  async ({ locale, uploadLabel, reviewLabel, changesLabel, valueLabels }) => {
+    const { props, file } = fixture();
+    render(<ProfileCmsAgentWorkspace {...props} locale={locale} />);
+    const proposal = new File([file], "proposal.json", {
+      type: "application/json",
+    });
+    Object.defineProperty(proposal, "text", { value: async () => file });
+    fireEvent.change(screen.getByLabelText(uploadLabel), {
+      target: { files: [proposal] },
+    });
+    const preview = await screen.findByRole("region", { name: reviewLabel });
+    expect(preview).toHaveAttribute("tabindex", "0");
+    fireEvent.click(screen.getByText(changesLabel));
+    const labels = new Set<string>();
+    for (const name of valueLabels) {
+      for (const region of screen.getAllByRole("region", { name })) {
+        expect(region.tagName).toBe("PRE");
+        expect(region).toHaveAttribute("tabindex", "0");
+        region.focus();
+        expect(region).toHaveFocus();
+        const labelId = region.getAttribute("aria-labelledby") ?? "";
+        expect(document.getElementById(labelId)).toHaveTextContent(name);
+        expect(labels.has(labelId)).toBe(false);
+        labels.add(labelId);
+      }
+    }
+    expect(props.onApplyPackage).not.toHaveBeenCalled();
+    expect(props.onSaveProposal).not.toHaveBeenCalled();
+  }
+);
+
 it("keeps an unapplied JSON edit protected when a file review is already open", async () => {
   const { props, file } = fixture();
   const view = render(<ProfileCmsAgentWorkspace {...props} />);
