@@ -1265,6 +1265,17 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
 } as const);
 
 const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
+  "pinControl.pinTooltip": "Pin",
+  "pinControl.unpinTooltip": "Unpin",
+  "pinControl.pinAriaLabel": "Pin wave",
+  "pinControl.unpinAriaLabel": "Unpin wave",
+  "pinControl.pinErrorTitle": "Couldn't pin this wave.",
+  "pinControl.unpinErrorTitle": "Couldn't unpin this wave.",
+  "pinControl.retryDescription": PLEASE_TRY_AGAIN,
+  "pinControl.limitMessage": "Maximum {count} pinned waves allowed",
+  "pinControl.limitTooltip":
+    "Max {count} pinned waves. Unpin another wave first.",
+  "pinControl.viewerChanged": "The active profile changed. Please try again.",
   highlyRated: "Worth Checking Out",
   highlyRatedInfoTooltip: "Highly rated waves you don’t follow yet.",
   "highlyRatedPreviewOpenAriaLabel.none": "Open {waveName}",
