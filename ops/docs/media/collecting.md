@@ -23,9 +23,10 @@ opens the full Memes set when no season is selected. Gradients opens the full
 Gradients set; Pebbles opens its trait-set planner. Collected and Pebbles Trait
 Sets also link to relevant collecting goals.
 
-The **Listings and Offers** section on a supported artwork's page has a
-**Collect** action that opens purchase review on the same page. Its more-actions
-menu contains **Make an offer**, **List for sale** and **Review offers**.
+The [**Listings and Offers**](feature-card-market-depth.md) section on a
+supported artwork's page has a **Collect** action that opens purchase review on
+the same page. Its more-actions menu contains **Make an offer**, **List for
+sale** and **Review offers**.
 These actions open a dialog immediately, with a loading message while the
 artwork and trading tools load. Current orders and terms are checked before a
 purchase can proceed.

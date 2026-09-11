@@ -46,17 +46,10 @@ import NextGenTokenPage from "@/components/nextGen/collections/nextgenToken/Next
 import { NextgenCollectionView } from "@/types/enums";
 import { fireEvent, render, screen } from "@testing-library/react";
 
-const mockRefreshMarket = jest.fn();
 jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
   __esModule: true,
-  default: ({
-    actions,
-  }: {
-    actions?: React.ReactNode | ((refresh: () => void) => React.ReactNode);
-  }) => (
-    <div data-testid="market-depth">
-      {typeof actions === "function" ? actions(mockRefreshMarket) : actions}
-    </div>
+  default: ({ refreshKey }: { refreshKey?: number }) => (
+    <div data-refresh-key={refreshKey} data-testid="market-depth" />
   ),
 }));
 jest.mock("@/components/collect/CollectDetailActions", () => ({
@@ -173,16 +166,23 @@ describe("NextGenTokenPage", () => {
   });
 
   describe("rendering", () => {
-    it("places Pebbles trading in the existing market section", () => {
+    it("places one Pebbles action before artwork and refreshes market data", () => {
       renderComponent();
       const collecting = screen.getByRole("button", {
         name: "Collect artwork",
       });
+      const marketDepth = screen.getByTestId("market-depth");
       expect(collecting).toHaveAttribute("data-family", "pebbles");
       expect(collecting).toHaveAttribute("data-token", "1");
-      expect(screen.getByTestId("market-depth")).toContainElement(collecting);
+      expect(
+        screen.getAllByRole("button", { name: "Collect artwork" })
+      ).toHaveLength(1);
+      expect(
+        collecting.compareDocumentPosition(screen.getByTestId("art"))
+      ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(marketDepth).toHaveAttribute("data-refresh-key", "0");
       fireEvent.click(collecting);
-      expect(mockRefreshMarket).toHaveBeenCalledTimes(1);
+      expect(marketDepth).toHaveAttribute("data-refresh-key", "1");
     });
 
     it("does not map another NextGen project to Pebbles trading", () => {
