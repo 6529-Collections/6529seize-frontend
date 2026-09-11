@@ -79,7 +79,7 @@ function IndividualOrder({
   return (
     <li className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-py-4 last:tw-border-b-0">
       {showPrice && (
-        <p className="tw-mb-3 tw-mt-0 tw-text-sm tw-font-medium tw-text-iron-200">
+        <p className="tw-mb-3 tw-mt-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-200">
           {t(
             locale,
             order.side === ApiMarketOrderSideEnum.Ask

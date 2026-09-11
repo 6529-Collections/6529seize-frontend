@@ -108,7 +108,7 @@ export default function MarketDepthPriceLevels({
                         }}
                         className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-sm tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-left tw-font-medium tw-tabular-nums tw-text-iron-100 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
                       >
-                        <span className="tw-break-words">
+                        <span className="tw-min-w-0 tw-break-words">
                           {formatDecimal(locale, level.unit_price)}
                         </span>
                         <ChevronDownIcon
