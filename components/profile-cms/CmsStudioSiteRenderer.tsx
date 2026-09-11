@@ -75,7 +75,7 @@ const DENSITY_CLASSES = {
   compact: "tw-gap-x-6 tw-gap-y-6 @[48rem]/cms-studio:tw-gap-y-8",
 };
 const LINK_CLASS =
-  "tw-text-inherit tw-no-underline tw-transition-opacity hover:tw-opacity-70 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-current";
+  "tw-text-inherit tw-no-underline tw-transition-opacity hover:tw-text-inherit hover:tw-opacity-70 focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:!tw-outline-current";
 
 export default function CmsStudioSiteRenderer({
   cmsPackage,

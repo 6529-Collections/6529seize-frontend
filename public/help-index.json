@@ -5490,7 +5490,7 @@
         "Saving, image upload, server validation, and publishing require the connected non-proxy owner profile. Publishing uploads content and asks the wallet to sign; saving alone does not publish.",
         "Versions contains saved drafts and publications. Editing a publication creates a new draft when saved; the active site remains until a replacement is published. Browser recovery is local to the current browser and account context.",
         "Restore selects a previous publication. Unpublish removes the active website pointer but does not delete immutable content, uploaded images, or version history.",
-        "More tools contains optional JSON and Agent file workflows. A connected MCP agent service is not available."
+        "More tools contains optional JSON and Agent workflows. Bring your own agent through a complete website file kit or temporary access to one saved draft with the downloadable local MCP adapter. Saving and publication remain owner actions."
       ],
       "canonical_path": "/{user}/cms/builder",
       "related_paths": ["/{user}"],
@@ -7789,7 +7789,7 @@
     {
       "id": "profiles.cms-agent-files",
       "kind": "workflow",
-      "title": "Use your own agent through website files",
+      "title": "Bring your own agent to the website studio",
       "aliases": [
         "bring your own agent",
         "CMS AI",
@@ -7810,20 +7810,24 @@
       ],
       "facts": [
         "The visual website studio works without an agent. More tools opens optional JSON and Agent workspaces for users who bring their own external agent or local tool.",
-        "Download Package JSON, Source packet JSON, and Schema bundle JSON. Review their draft content and wallet-source details before sharing them with an external tool; the source packet does not replace the complete package.",
-        "Paste or upload an agent-patch JSON file up to 2 MiB, choose Review patch, inspect the changes and validation findings, then choose Apply to draft. Applying a patch is local editing and cannot save, sign, or publish.",
-        "The current patch importer edits supported first-page metadata and block fields, block additions/removals/reordering, the first menu label, and the theme accent. It is not a general multipage API; use the visual editor or full-package JSON import for broader changes.",
-        "Stale draft IDs, versions, base hashes, unsupported operations, and invalid results are rejected. Re-review against the current draft after changes.",
-        "A complete replacement package can be pasted into JSON and imported for the current profile handle. Preserve a saved or downloaded copy before broad replacement.",
-        "There is no connected MCP service, automatic agent session, or built-in paid inference provider. File exchange does not require sharing website session tokens, wallet private keys, or recovery phrases. Publication remains a separate owner-reviewed wallet-signing step."
+        "Exchange a file: Download agent kit includes the complete multipage website, schemas and editing instructions without credentials. Review its draft content and wallet-source details before sharing it with your external agent. Upload proposal accepts the kit's JSON proposal format up to 1 MiB. Review all changes and page previews, then choose Use in draft to apply it locally; save and publish separately.",
+        "Connect an agent: sign in as the non-proxy profile owner, save current changes as a draft, name the connection, choose 1 hour, 4 hours or 24 hours, then Create access key. Copy the one-time key into the agent client's private environment settings and follow Setup guide with Download local MCP adapter. It requires Node.js 22 or newer and a client supporting local stdio MCP 2025-11-25.",
+        "Temporary access permits reading one exact saved draft, validating complete revisions, submitting proposals and reading their status. It cannot save or overwrite drafts, upload media or permanent publication content, sign, publish, unpublish or change the profile. Revoke access stops future requests; submitted proposals remain reviewable after revocation or expiry.",
+        "Both workflows can change pages, navigation, copy, blocks and design while preserving website identity and the existing ordered artwork catalog. Add new artwork in the studio, save a fresh base and create new access or a new kit. Stale or invalid proposals are rejected. Apply or discard pending JSON before accepting a replacement.",
+        "Refresh retrieves proposals for the selected draft. Review shows Current draft, Proposed website, every page and All changes; the summary was written by the external agent. Save proposed draft saves the exact reviewed revision as a draft. Reject proposal declines it. Publication remains a separate owner-reviewed wallet-signing step.",
+        "After an uncertain save, Retry save confirmation checks the same revision without creating another draft. A local recovery record blocks new connected-proposal saves while the result is unresolved. Keep that record and inspect Versions; do not repeat from another browser. Retry status update records a confirmed save without changing the open document. If another session rejected the proposal, retry closes its recovery record without loading rejected content or writing again; any earlier saved draft remains in Versions. Safe connected-proposal saving requires browser local storage and Web Locks.",
+        "Advanced source and legacy patches retains Package JSON, Source packet JSON, Schema bundle JSON and the older first-page-only patch format, with its 2 MiB limit. Use the full agent kit for multipage proposals.",
+        "Use your own agent subscription or API account. The local adapter makes no model calls or background retries. File exchange does not require a session token; connected access uses a separate temporary key. Keep keys out of prompts and website files. Neither workflow requires wallet private keys or recovery phrases."
       ],
       "canonical_path": "/{user}/cms/builder",
       "related_paths": ["/{user}"],
       "tags": ["profiles", "cms", "agents"],
       "source_refs": [
-        "components/profile-cms-builder/ProfileCmsAgentPanel.tsx",
-        "lib/profile-cms/builder/agent-patch-operations.ts",
-        "components/profile-cms-builder/ProfileCmsBuilderJsonPanel.tsx",
+        "components/profile-cms-builder/agent/ProfileCmsAgentWorkspace.tsx",
+        "components/profile-cms-builder/agent/CmsAgentConnection.tsx",
+        "lib/profile-cms/agent-kit.ts",
+        "lib/profile-cms/builder/agent-save.ts",
+        "standalone/profile-cms-agent/README.md",
         "ops/docs/profiles/feature-profile-cms-builder-ai-agent-affordances.md"
       ]
     },

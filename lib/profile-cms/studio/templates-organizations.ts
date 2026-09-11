@@ -24,91 +24,94 @@ export const ORGANIZATION_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Northline Practice",
     family: "organization",
     description:
-      "A service-oriented organization with selected work, a clear offer, and a human team.",
+      "A company website with services, a project case study and team introductions.",
     presentation: style("organization", "paper", "sans", "balanced"),
     pages: [
       page(
         "studio",
-        "Good questions. Useful outcomes.",
-        "Northline Practice is a fictional independent team working across research, design, and clear communication.",
+        "Research, design and documentation",
+        "Northline Practice helps small teams organise information and build tools their colleagues can use and maintain.",
         image(
           ART.grid,
-          "Original example visual study for the Northline Practice demonstration."
+          "Night Grid — a dark grid with a bright diagonal strip."
         ),
-        heading("From an uncertain brief to a useful direction"),
+        heading("What we do"),
         card(
           "Research",
-          "Understand the people, material, and constraints around a real question.",
+          "Interview the people using a tool, review the existing material and identify the tasks that need work.",
           "third"
         ),
         card(
-          "Design",
-          "Turn a direction into a concrete example that people can discuss and use.",
+          "Product design",
+          "Design search, reading and editing screens, then test the main tasks in a working prototype.",
           "third"
         ),
         card(
-          "Communication",
-          "Make the result understandable to the people who need it.",
+          "Documentation",
+          "Write setup guides, content rules and handover notes for the people who will look after the result.",
           "third"
         ),
-        pageLink("Explore our services", "services"),
-        pageLink("Read a case study", "common-index"),
-        pageLink("Meet the example team", "people")
+        pageLink("Our services", "services"),
+        pageLink("Common Index case study", "common-index"),
+        pageLink("Meet the team", "people")
       ),
       page(
         "services",
-        "A small team, a considered process.",
-        "The demonstration practice offers a connected sequence of research, prototyping, and editorial work.",
-        heading("Understanding the brief"),
+        "Services and project stages",
+        "We work on internal tools, digital catalogues and small publishing sites.",
+        heading("Research and scope"),
         text(
-          "We begin by reading what already exists and speaking with the people closest to the problem. The result is a clear question and a set of constraints worth testing."
+          "We begin with the existing screens and documents, then talk to the people who use them. The first deliverable is a task list, a content inventory and an agreed problem to solve."
         ),
-        heading("Making the direction visible"),
+        heading("Design and testing"),
         text(
-          "A prototype, a draft narrative, or a small working system makes abstract disagreements easier to resolve. Review happens around something concrete."
+          "We build the main task using realistic content, including long titles, missing information and error states. We review the prototype with users before preparing detailed screens."
         ),
-        heading("Preparing the handover"),
+        heading("Documentation and handover"),
         text(
-          "The final work includes the context needed to maintain it: decisions, source material, and an understandable operating model."
+          "The handover includes component designs, content rules and a decision log. We walk through the unresolved questions with the developer and the person maintaining the tool."
         ),
-        pageLink("See the approach in a case study", "common-index")
+        pageLink("View a project example", "common-index")
       ),
       page(
         "common-index",
-        "Common Index: a shared reference shelf.",
-        "A fictional concept project showing how the practice explains a problem, contribution, and outcome without invented client metrics.",
-        kicker("Concept study · Research / Product / Editorial"),
+        "Common Index",
+        "A self-directed prototype for a research team whose reading list has outgrown several shared documents.",
+        kicker("Concept project · Research, design and documentation"),
         heading("The brief"),
         text(
-          "Design a small research library that a new contributor can understand without an oral history of every link."
+          "Create one searchable reading library while keeping the contributor notes that explain why each article was saved."
         ),
-        image(ART.signal, "Original example artwork used as a visual study."),
-        heading("The decision"),
-        text(
-          "Separate the source from the annotation. Give every item a reason for inclusion and a visible place in a short reading path."
+        image(
+          ART.signal,
+          "Quiet Signal — overlapping blue curves and a small red accent."
         ),
-        heading("The next step"),
+        heading("The design"),
         text(
-          "Test the vocabulary with actual readers before making claims about adoption, time saved, or commercial outcomes."
+          "An entry has a title, original URL, topic and contributor note. Readers can filter the library or start with a short introductory list. The editor flags duplicate URLs before they are added."
+        ),
+        heading("Next test"),
+        text(
+          "Ask a new reader to find an unfamiliar article and a regular contributor to add one. Check whether both can complete the task without someone explaining the topic labels."
         ),
         pageLink("Meet the team", "people")
       ),
       page(
         "people",
-        "People make the practice.",
-        "A fictional team used to demonstrate roles and collaboration without borrowing anyone's real biography.",
-        heading("The example team"),
+        "The Northline team",
+        "Mira handles research and documentation. Rowan handles product design and prototypes.",
+        heading("Roles"),
         card(
           "Mira — Research",
-          "Connects close reading with practical questions and carefully documented sources."
+          "Plans interviews, maps the existing content and turns findings into a clear task list. Writes the guides that accompany the finished tool."
         ),
         card(
           "Rowan — Design",
-          "Turns a direction into clear visual systems and testable prototypes."
+          "Designs the screens and builds prototypes for review. Checks layout, interaction states and the details needed for development."
         ),
-        heading("Starting a conversation"),
+        heading("Before a first meeting"),
         text(
-          "A useful project introduction describes the question, the people it affects, and the constraints. An actual organization can add its verified contact destination here."
+          "Prepare a few existing screens or documents, a description of who uses them and the task causing the most difficulty. Include any deadline or technical constraint we should know about."
         ),
         pageLink("Review the services", "services")
       ),
@@ -120,77 +123,74 @@ export const ORGANIZATION_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Common Ground",
     family: "organization",
     description:
-      "A mission-led home for programs, people, public-interest work, and transparent documentation.",
+      "A foundation website with programme descriptions and public documentation.",
     presentation: style("organization", "stone", "serif", "airy"),
     pages: [
       page(
         "studio",
-        "Common ground begins with access.",
-        "Common Ground is a fictional foundation exploring how people can understand and contribute to shared cultural resources.",
-        heading("A mission made concrete"),
+        "Resources for local history groups",
+        "Common Ground develops practical guides and workshops for volunteers who want to record and share the history of their neighbourhood.",
+        heading("What the programme covers"),
         text(
-          "A public resource becomes useful when someone can find it, understand it, and see how to participate. Our demonstration programs focus on those three steps."
+          "We focus on the work a small volunteer group needs to do: organise photographs, record interviews, check permissions and publish a catalogue that other people can search."
         ),
         image(
           ART.afterimage,
-          "Original example artwork for the foundation demonstration.",
+          "Afterimage — a reflective loop on an orange background.",
           "two_thirds"
         ),
         card(
-          "The starting point",
-          "Clear context, accessible materials, and a realistic invitation to participate.",
+          "Who it is for",
+          "Local history groups, volunteer archives and people starting a neighbourhood collection with limited time and equipment.",
           "third"
         ),
-        pageLink("Explore the programs", "programs"),
-        pageLink("Read the stewardship approach", "stewardship")
+        pageLink("Programme plans", "programs"),
+        pageLink("How we document the work", "stewardship")
       ),
       page(
         "programs",
-        "Three ways to make room.",
-        "Illustrative program descriptions, without invented beneficiaries, funding totals, or impact statistics.",
-        heading("Program areas"),
+        "Programme plans",
+        "Three proposed activities for groups preparing their first public collection.",
+        heading("Programme areas"),
         card(
-          "The open shelf",
-          "A proposed reading space pairing primary sources with concise, accessible introductions.",
+          "Photo catalogue",
+          "A workshop on file naming, captions and source records. Participants leave with a small catalogue they can continue to maintain.",
           "third"
         ),
         card(
-          "Local notes",
-          "A proposed workshop format for recording the knowledge people already hold about a place.",
+          "Interview notes",
+          "A session on preparing questions, recording consent and keeping transcripts with the original recording.",
           "third"
         ),
         card(
-          "Shared tools",
-          "A proposed guide to documenting and maintaining small public resources.",
+          "Publishing guide",
+          "A step-by-step guide to choosing material for a public page, checking permissions and explaining how to request a correction.",
           "third"
         ),
-        heading("From intention to evidence"),
+        heading("Pilot preparation"),
         text(
-          "An actual program page can add supplied dates, partners, outcomes, and reports. Distinguish what is proposed from what has happened."
+          "The first pilot needs a sample collection, a facilitator and a review of the consent forms. Dates and registration will be published after those items are confirmed."
         ),
-        pageLink("How the record is kept", "stewardship")
+        pageLink("Documentation and participation", "stewardship")
       ),
       page(
         "stewardship",
-        "Be clear about the work.",
-        "An example statement about public accountability and care for shared resources.",
-        heading("Documentation"),
+        "How the programme is run",
+        "Plans, permissions and review notes are kept with each programme record.",
+        heading("Programme records"),
         text(
-          "Keep decisions and source material close to the public explanation. A useful report makes the scope and limits of its claims understandable."
+          "Each activity has an outline, a list of materials and a note of what changed after review. Reports distinguish planned sessions from sessions that have taken place."
         ),
-        heading("Participation"),
+        heading("Taking part"),
         text(
-          "Describe who a program is for and what participation involves. Add a support or application link only when an authentic destination exists."
+          "Each session description states the expected experience, equipment and time commitment. Participants can choose whether their material appears in the public catalogue."
         ),
-        heading("Shared permissions"),
+        heading("Reuse permissions"),
         text(
-          "Use explicit permissions for material intended to be reused, and retain attribution and context."
+          "Contributors choose what can be shared. The catalogue records the permission for each item and retains the original credit when it is reused."
         ),
-        externalLink(
-          "Explore Creative Commons licensing",
-          SOURCE_LINKS.licenses
-        ),
-        pageLink("Return to the mission", "studio")
+        externalLink("Creative Commons license guide", SOURCE_LINKS.licenses),
+        pageLink("Back to Common Ground", "studio")
       ),
     ],
   }),
@@ -200,74 +200,74 @@ export const ORGANIZATION_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Open Current",
     family: "organization",
     description:
-      "An approachable technical home for use cases, ecosystem context, and primary documentation.",
+      "A technical project website with use cases, design notes and documentation links.",
     presentation: style("organization", "night", "mono", "compact"),
     pages: [
       page(
         "studio",
-        "Open Current.",
-        "A fictional infrastructure project exploring clear interfaces for shared digital resources.",
-        kicker("An open-source concept · No deployed protocol claimed"),
-        heading("Make the boundary understandable"),
+        "Open Current",
+        "A project to define an export format for shared reading lists and small digital catalogues.",
+        kicker("Project proposal · Data format and import tools"),
+        heading("Move a catalogue between tools"),
         text(
-          "A useful interface tells people what they can verify, what depends on a service, and how to carry their work elsewhere."
+          "The proposal separates the catalogue data from the interface used to edit it. A contributor should be able to export entries, notes and source links without rebuilding the list by hand."
         ),
-        heading("Project areas"),
+        heading("Design requirements"),
         card(
-          "Portable records",
-          "Keep data formats documented and independent of one interface.",
+          "Documented fields",
+          "Publish the field names, supported values and a complete example file so another tool can read the catalogue.",
           "third"
         ),
         card(
-          "Clear permissions",
-          "Make access and revocation understandable to the person granting them.",
+          "Contributor access",
+          "Separate permission to read, add entries and edit other people's notes. Make the current permissions visible to the owner.",
           "third"
         ),
         card(
-          "Public references",
-          "Keep primary documentation alongside technical claims.",
+          "Import reports",
+          "Report missing fields and unsupported values before an import changes the catalogue.",
           "third"
         ),
-        pageLink("Explore the use cases", "use-cases"),
-        pageLink("Open the documentation shelf", "resources")
+        pageLink("Use cases", "use-cases"),
+        pageLink("Technical references", "resources")
       ),
       page(
         "use-cases",
-        "Start with a real task.",
-        "Illustrative use cases for the fictional Open Current project.",
-        heading("A shared research collection"),
+        "Two catalogue use cases",
+        "A shared research library and an artist's file index have similar data needs but different access rules.",
+        heading("Research library"),
         text(
-          "Contributors add sources and annotations while retaining the context that makes each item useful. The data can be exported in a documented format."
+          "Store an article's title, URL, topics and contributor note. Export the entries with their stable identifiers so edits can be matched during a later import."
         ),
-        heading("A portable creative record"),
+        heading("Artwork file index"),
         text(
-          "A maker describes a work, its representations, and the permissions attached to each one. A public view selects only the material intended for disclosure."
+          "Keep a work's title, image files, credits and permissions together. Let the owner choose which entries and fields appear in a public catalogue."
         ),
-        heading("Explicit limits"),
+        heading("Current scope"),
         text(
-          "These are concept descriptions. No production uptime, audit, adoption, security guarantee, or integration partnership is claimed."
+          "The proposal covers the file format and validation rules. Hosting, storage availability and user authentication still need separate implementations."
         ),
-        pageLink("Read the source material", "resources")
+        pageLink("Technical references", "resources")
       ),
       page(
         "resources",
-        "Primary documentation first.",
-        "Real public references behind the example's technical interests; these are not documentation for a deployed Open Current service.",
-        heading("Applications and accounts"),
+        "Reading for the design",
+        "Background documentation for accounts, permissions and content addressing.",
+        heading("Accounts and applications"),
         externalLink("Ethereum developer documentation", SOURCE_LINKS.ethereum),
         text(
-          "A starting point for understanding the network's application model."
+          "The account and transaction documentation is useful when considering who can authorise changes to a record."
         ),
-        heading("Content addressing"),
+        heading("Content identifiers"),
         externalLink("IPFS documentation", SOURCE_LINKS.ipfs),
         text(
-          "A starting point for understanding references based on content rather than one server location."
+          "Content identifiers can help distinguish one file version from another. Keeping the referenced file available is a separate requirement."
         ),
-        heading("Project updates"),
+        heading("Next design review"),
         text(
-          "An actual project can publish dated release notes and link its genuine repository, app, and governance destinations here."
+          "Review a complete sample export, an invalid file and a changed entry. Decide how the importer should report each case before building the editing interface."
         ),
-        pageLink("Return to the project", "studio")
+        pageLink("Back to Open Current", "studio")
       ),
     ],
   }),
@@ -277,60 +277,61 @@ export const ORGANIZATION_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Signal Garden",
     family: "organization",
     description:
-      "A creative world with series, contributor context, project notes, and honest external links.",
+      "A digital art project website with a series, project story and source notes.",
     presentation: style("gallery", "ink", "sans", "balanced"),
     pages: [
       page(
         "studio",
-        "Signal Garden.",
-        "A fictional digital art project about patterns that grow, repeat, and find their own interruptions.",
-        image(
-          ART.signal,
-          "Original example artwork; no Signal Garden token is offered or asserted."
-        ),
-        heading("Enter the garden"),
+        "Signal Garden",
+        "A digital image project organised around three settings: blue curves, an orange loop and a grid of lights.",
+        image(ART.signal, "Quiet Signal — overlapping blue curves on cream."),
+        heading("The first image set"),
         text(
-          "Three image studies establish the project's visual vocabulary. A short story and a clear record give that vocabulary somewhere to grow."
+          "The project starts with three images and a short note for each. The series page keeps them together; the project notes explain where the images came from."
         ),
-        pageLink("View the example series", "series"),
-        pageLink("Read the project story", "story"),
-        pageLink("Project notes and sources", "notes")
+        pageLink("View the series", "series"),
+        pageLink("Project story", "story"),
+        pageLink("Credits and project notes", "notes")
       ),
       page(
         "series",
-        "A small world in three images.",
-        "Example collection imagery with no invented token contract, holder count, sale history, or utility.",
-        gallery("Signal studies", [ART.signal, ART.afterimage, ART.grid]),
-        heading("Series note"),
+        "The first three images",
+        "Quiet Signal, Afterimage and Night Grid form the project's initial visual reference set.",
+        gallery("Signal Garden image set", [
+          ART.signal,
+          ART.afterimage,
+          ART.grid,
+        ]),
+        heading("How the set is arranged"),
         text(
-          "A line carries across the first image, becomes an impression in the second, and gathers into a rhythm in the third. The sequence is the beginning of a world, not a roadmap promise."
+          "Quiet Signal introduces the fine lines. Afterimage changes to a single reflective loop and a bright orange background. Night Grid closes the set with dark cells and small lights."
         ),
-        pageLink("Read the story", "story")
+        pageLink("Project story", "story")
       ),
       page(
         "story",
-        "A garden is a system that changes.",
-        "An example project narrative built around a small visual idea.",
+        "Building Signal Garden",
+        "The project uses three image settings as the basis for a small online art catalogue.",
         text(
-          "Signal Garden begins with repeated forms and the variation that appears between them. Its fictional world is built through images and short notes rather than a list of promised utilities.\n\nA real project can add the people, source material, and decisions that explain how its world came into being."
+          "Each setting gets an image, a title and a short description. The next set will develop the blue curves into a group of winding paths, using the same cream background across the series.\n\nBefore starting those images, I am preparing the individual reference records and comparing the three compositions side by side. There is no token release attached to this sample site."
         ),
         image(ART.afterimage, ART_CAPTIONS.afterimage),
-        pageLink("Open the project notes", "notes")
+        pageLink("Credits and project notes", "notes")
       ),
       page(
         "notes",
-        "Keep the context with the work.",
-        "A place for actual contributor credits, collection references, and dated updates as they are supplied.",
-        heading("Example asset credits"),
+        "Credits and project notes",
+        "Image sources and a collection reference used while planning the catalogue.",
+        heading("Image sources"),
         text(
-          "The imagery in this demonstration was generated for the 6529 template library. It is not a collection minted by the profile using this design."
+          "Quiet Signal, Afterimage and Night Grid were generated for the 6529 template library. The asset records retain their source and rights information."
         ),
-        heading("A real collection to explore"),
+        heading("Collection reference"),
         text(
-          "The Memes is a separate existing collection on 6529. This reference is for discovery, not an affiliation claim."
+          "The Memes is a separate collection with individual card pages and artist credits. It is a useful reference for presenting a series as both a whole and a set of individual works."
         ),
-        externalLink("Explore The Memes", SOURCE_LINKS.memes),
-        pageLink("Return to Signal Garden", "studio")
+        externalLink("Browse The Memes", SOURCE_LINKS.memes),
+        pageLink("Back to Signal Garden", "studio")
       ),
     ],
   }),
@@ -340,76 +341,76 @@ export const ORGANIZATION_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Meridian Research",
     family: "fund",
     description:
-      "A restrained mandate, considered approach, clearly described relationships, and readable research.",
+      "A fund website with a mandate, research process and clearly labelled project coverage.",
     presentation: style("fund", "paper", "serif", "airy"),
     pages: [
       page(
         "studio",
-        "A long view of open systems.",
-        "Meridian Research Fund is a fictional organization used to demonstrate a clear mandate and a research-led public presence.",
-        kicker("Mandate / Approach / Research"),
-        heading("Understand what can endure"),
+        "Research on digital infrastructure",
+        "Meridian Research studies software for storing, finding and publishing shared information.",
+        kicker("Mandate · Research process · Project coverage"),
+        heading("Research mandate"),
         text(
-          "The example mandate focuses on the relationship between useful infrastructure, patient development, and the communities that maintain it."
+          "We focus on tools with a defined user need, understandable operating costs and a credible maintenance plan. Our reviews examine the product, its dependencies and how the team makes decisions."
         ),
         quote(
-          "Clarity about a thesis includes clarity about what would change it.",
-          "Example research principle"
+          "Every memo needs a section on what would make us stop pursuing the idea.",
+          "Meridian research checklist"
         ),
-        pageLink("Read the approach", "approach"),
-        pageLink("View example relationships", "portfolio"),
-        pageLink("Read the research note", "research")
+        pageLink("Research process", "approach"),
+        pageLink("Projects under review", "portfolio"),
+        pageLink("Read the maintenance note", "research")
       ),
       page(
         "approach",
-        "A thesis with visible assumptions.",
-        "An illustrative research approach, not a claim of fund performance, investment advice, or a solicitation.",
-        heading("Understand the system"),
+        "Research process",
+        "The same review structure is used for each project: users, product, operating costs and risks.",
+        heading("Understand the task"),
         text(
-          "Begin with the underlying task, the participants, and the dependencies. Separate direct observations from interpretations."
+          "Identify who uses the product and what they would use without it. Test the main task and record which parts depend on another service."
         ),
-        heading("Study the incentives"),
+        heading("Review the operating model"),
         text(
-          "Ask who maintains the resource, who benefits from it, and how those relationships may change over time."
+          "Check who pays for storage, support and ongoing development. Review how prices or usage could change those costs and who is responsible for responding."
         ),
-        heading("Keep a revisable record"),
+        heading("Document the decision"),
         text(
-          "A dated research note should preserve its assumptions and identify evidence that would require a different conclusion."
+          "Keep the sources, assumptions and unanswered questions with the memo. Record the review date and the conditions that would require a new assessment."
         ),
-        pageLink("Read a complete example note", "research")
+        pageLink("Read the maintenance note", "research")
       ),
       page(
         "portfolio",
-        "Relationships, described precisely.",
-        "Fictional research subjects illustrating how an organization can distinguish investment, collaboration, and observation.",
-        heading("Example research subjects"),
+        "Projects under review",
+        "Two concept projects used to illustrate the research process. These entries are research subjects, not portfolio holdings.",
+        heading("Current coverage"),
         card(
           "Common Index",
-          "A fictional shared-reference tool. Illustrative relationship: research subject only; no investment is claimed."
+          "A shared reading-library concept. Review topic: duplicate entries, search quality and the work required to maintain the catalogue."
         ),
         card(
           "Open Current",
-          "A fictional infrastructure concept. Illustrative relationship: research subject only; no funding or endorsement is claimed."
+          "A catalogue export-format proposal. Review topic: whether a second tool can import the data without losing fields or source links."
         ),
-        heading("The relationship belongs in the record"),
+        heading("Relationship labels"),
         text(
-          "An actual portfolio page should state only supplied relationships and relevant dates. Logos, descriptions, and proximity do not establish investment or endorsement."
+          "Project coverage is labelled separately from any investment or commercial relationship. A completed research memo does not establish either one."
         ),
-        pageLink("Read the approach", "approach")
+        pageLink("Research process", "approach")
       ),
       page(
         "research",
-        "Infrastructure is also a maintenance question.",
-        "An example research note about the work required to keep a shared resource useful.",
-        kicker("Research notebook · Illustrative analysis"),
+        "Who maintains the service?",
+        "A research note on the recurring work behind a shared digital catalogue.",
+        kicker("Research note · Maintenance and dependencies"),
         text(
-          "A technical design can be elegant and still depend on fragile maintenance. Useful analysis asks who updates the documentation, handles failures, and makes decisions when priorities conflict.\n\nThis shifts attention from launch narratives to the ongoing work of stewardship. The evidence may be ordinary: clear records, tested recovery paths, and understandable responsibilities."
+          "A catalogue needs more than storage. Someone must review duplicate entries, repair imports and respond when a source link stops working. Those tasks should appear in the operating plan.\n\nOur review asks for a named owner for each task, a way to restore the data and a record of the outside services involved. We also test whether an export can be opened without the original interface."
         ),
-        heading("Questions to carry forward"),
+        heading("Questions for the next review"),
         text(
-          "Which dependencies are replaceable? Which decisions are reversible? What information would an independent operator need to continue the work?"
+          "What is the cost per active catalogue? How is a failed import recovered? Can another operator restore the service from the documented files and instructions?"
         ),
-        pageLink("Return to the mandate", "studio")
+        pageLink("Back to the mandate", "studio")
       ),
     ],
   }),
@@ -419,80 +420,77 @@ export const ORGANIZATION_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Afterlight Collective",
     family: "fund",
     description:
-      "An art-led collective with a collecting thesis, public selections, and readable governance references.",
+      "A collecting group website with a selection, collecting criteria and member roles.",
     presentation: style("dao", "stone", "sans", "airy"),
     pages: [
       page(
         "studio",
-        "Afterlight Collective.",
-        "A fictional collecting group asking what art can make visible when people look together.",
-        image(
-          ART.afterimage,
-          "Afterimage — original example artwork; no acquisition is claimed."
-        ),
-        heading("A shared reason to look"),
+        "Afterlight Collective",
+        "A group that reviews digital art together and keeps a shared record of its selections and decisions.",
+        image(ART.afterimage, "Afterimage — a reflective loop on orange."),
+        heading("What we look at"),
         text(
-          "The example thesis brings together works concerned with repetition, memory, and the traces a system leaves behind. The group begins with conversation, not a price chart."
+          "Our first selection compares images built from repeated lines, a single large form and a grid of lights. Members prepare a short note before discussing an addition."
         ),
-        pageLink("Read the collecting thesis", "thesis"),
-        pageLink("Visit the selection", "selection"),
-        pageLink("People and decisions", "collective")
+        pageLink("Collecting criteria", "thesis"),
+        pageLink("View the selection", "selection"),
+        pageLink("Roles and decisions", "collective")
       ),
       page(
         "thesis",
-        "Collecting as a shared practice.",
-        "An example thesis for a fictional collective, distinct from a financial fund mandate.",
-        heading("What connects the selection"),
+        "Collecting criteria",
+        "We look at the work first, then check the artist or source record, file details and terms of any proposed acquisition.",
+        heading("Reasons for a proposal"),
         text(
-          "We are interested in works that reveal how patterns accumulate and change. A strong addition should deepen a conversation among the works already present."
+          "A member's note should explain what they see in the work and why it belongs beside the existing selection. A different medium or composition can be a reason to include it."
         ),
-        heading("How to describe an acquisition"),
+        heading("Acquisition records"),
         text(
-          "An actual record would include the supplied work identity, source, relationship, date, and decision context. An image in an exhibition is not proof of custody."
+          "A completed acquisition record needs the work identity, transaction or transfer reference, date and approved decision. Display selections are recorded separately from custody."
         ),
         quote(
-          "The collection is a reason to keep talking, looking, and learning.",
-          "Example collective principle"
+          "Bring the original work link and a short written reason for the proposal.",
+          "Member proposal checklist"
         ),
-        pageLink("See the example selection", "selection")
+        pageLink("View the selection", "selection")
       ),
       page(
         "selection",
-        "A conversation in three works.",
-        "An example public selection without claims of token ownership, treasury activity, or completed acquisition.",
+        "The current display selection",
+        "Three images for discussion: Afterimage, Quiet Signal and Night Grid.",
         gallery(
           "Afterlight selection",
           [ART.afterimage, ART.signal, ART.grid],
           "editorial"
         ),
-        heading("Curatorial note"),
+        heading("Notes on the order"),
         text(
-          "The order moves from a quiet impression to a continuous gesture and finally a denser rhythm. Each image changes the pace at which the next is encountered."
+          "Afterimage starts with a large reflective form. Quiet Signal follows with fine blue curves, then Night Grid adds small lights and dark rectangular gaps. The page keeps the different image shapes intact."
         ),
-        pageLink("Read how the collective works", "collective")
+        pageLink("Roles and decisions", "collective")
       ),
       page(
         "collective",
-        "People, decisions, and context.",
-        "A fictional collective's public explanation of its working model.",
+        "How the group works",
+        "Members divide proposal preparation, source checking and record keeping.",
         heading("Working roles"),
         card(
-          "Curation",
-          "Members propose a selection and explain the relationship among the works."
+          "Selection review",
+          "Prepare the work links and written reasons for a proposal. Collect questions before the discussion so members can check the same sources."
         ),
         card(
-          "Documentation",
-          "Members keep supplied sources and decision context connected to the public record."
+          "Record keeping",
+          "Record the decision, relevant links and any follow-up task. Keep the display list separate from acquisition and custody records."
         ),
-        heading("Governance references"),
+        heading("Decision records"),
         text(
-          "An actual collective can link genuine proposals and decisions here. A public reference is not a voting interface or permission to execute a treasury action."
+          "A proposal needs a stated scope, the people responsible for reviewing it and a final decision record. A discussion page does not authorise a treasury transaction."
         ),
-        heading("Public participation"),
+        heading("Public member details"),
         text(
-          "Only members who choose public visibility should appear on this page. Add an authentic community destination when one is configured."
+          "Members choose whether their name and role appear on the public site. Meeting notes use role names when a member has not chosen public attribution."
         ),
-        pageLink("Return to the collective", "studio")
+        pageLink("Back to the collective", "studio")
       ),
     ],
   }),
@@ -502,71 +500,71 @@ export const ORGANIZATION_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Field Archive",
     family: "organization",
     description:
-      "A public collection presented through highlights, exhibition context, research, and stewardship.",
+      "A collection website with highlights, an online exhibition and preservation notes.",
     presentation: style("editorial", "paper", "serif", "airy"),
     pages: [
       page(
         "studio",
-        "Field Archive.",
-        "A fictional collection devoted to the relationship between an artwork and the record that helps future visitors understand it.",
+        "Field Archive",
+        "A digital image catalogue with work descriptions, source records and notes on keeping the files accessible.",
         image(ART.signal, ART_CAPTIONS.signal),
-        heading("Encounter the work. Keep the context."),
+        heading("Browse the images and their records"),
         text(
-          "The demonstration archive pairs spacious artwork views with readable interpretation and a clear statement of stewardship."
+          "The archive has three sample images. Each entry keeps the full composition, a short description and the source information needed to identify the file."
         ),
         pageLink("Collection highlights", "highlights"),
-        pageLink("An example exhibition", "exhibition"),
-        pageLink("Stewardship and research", "stewardship")
+        pageLink("Online exhibition", "exhibition"),
+        pageLink("Preservation and research", "stewardship")
       ),
       page(
         "highlights",
-        "A record open to looking.",
-        "Three example works demonstrating collection presentation without asserting custody, donation, or acquisition history.",
+        "Collection highlights",
+        "Quiet Signal, Afterimage and Night Grid, with their titles and source records.",
         gallery(
           "Collection highlights",
           [ART.signal, ART.afterimage, ART.grid],
           "editorial"
         ),
-        heading("Reading a catalog entry"),
+        heading("Quiet Signal: catalogue note"),
         text(
-          "An actual entry should distinguish the work from its display image, identify supplied attribution, and explain the institution's relationship to it. Unknown information should remain unknown."
+          "Quiet Signal is a landscape PNG showing fine blue curves on cream, with a red cluster at the lower-right edge. Its record links the displayed file to the original template-library asset and retains the file's dimensions, checksum and rights statement."
         ),
-        pageLink("See the exhibition context", "exhibition")
+        pageLink("View the online exhibition", "exhibition")
       ),
       page(
         "exhibition",
-        "Intervals: an example exhibition.",
-        "A fictional digital presentation about the space between repeated forms.",
+        "Lines, loops and lights",
+        "An online selection comparing fine curves, a reflective form and a dense grid.",
         image(ART.afterimage, ART_CAPTIONS.afterimage, "two_thirds"),
         text(
-          "The selection invites visitors to follow a changing interval through three different visual rhythms. There is no claimed physical venue or historical exhibition date.",
+          "Quiet Signal's blue lines overlap in broad bands. Afterimage has a large loop against orange. Night Grid uses a much darker field of small illuminated cells. The exhibition presents each at its original proportions.",
           "third"
         ),
         image(ART.grid, ART_CAPTIONS.grid),
-        heading("Exhibition context"),
+        heading("About the selection"),
         text(
-          "A real exhibition page can add supplied dates, venue, curatorial credits, installation views, and a catalog. This example demonstrates the composition without inventing that history."
+          "The grouping is based on visible differences between the three images. They were generated for the 6529 template library and are presented here as an online sample exhibition."
         ),
-        pageLink("Read the stewardship statement", "stewardship")
+        pageLink("Preservation and research", "stewardship")
       ),
       page(
         "stewardship",
-        "Care includes the record.",
-        "An example statement about documentation, public interpretation, and long-term access.",
-        heading("Sources and uncertainty"),
+        "Keeping the catalogue usable",
+        "The archive record includes the source file, its permissions and the information needed to check it later.",
+        heading("Source records"),
         text(
-          "Keep original sources alongside interpretation. Describe uncertainty in the record rather than converting an assumption into a fact through repetition."
+          "Keep the original source link and a copy of the supplied description. Label editorial observations separately so they are not mistaken for the artist's words."
         ),
-        heading("Representations and rights"),
+        heading("Files and permissions"),
         text(
-          "An image, a digital file, and a physical work may have different permissions and preservation needs. Record those relationships explicitly."
+          "Record the file type, dimensions and checksum for each representation. Keep the rights statement with the file so an exported catalogue does not lose it."
         ),
-        heading("Access over time"),
+        heading("Availability checks"),
         text(
-          "A durable reference should be accompanied by a realistic preservation plan. A public URL alone is not evidence of a permanent archive."
+          "Check that the public file can still be retrieved and that its checksum matches the record. Keep a documented recovery copy rather than relying on one public URL."
         ),
-        externalLink("Read about shared licensing", SOURCE_LINKS.licenses),
-        pageLink("Return to Field Archive", "studio")
+        externalLink("Creative Commons license guide", SOURCE_LINKS.licenses),
+        pageLink("Back to Field Archive", "studio")
       ),
     ],
   }),
