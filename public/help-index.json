@@ -7960,7 +7960,7 @@
         "TDH"
       ],
       "facts": [
-        "Collecting tools at /collect opens the set planner for The Memes, 6529 Gradient and NextGen Pebbles. Choose Complete a set, Lowest listings or TDH. Complete a set offers a season, a full Memes or Gradients set, an artist, or a Pebbles trait set. The planner has no duplicate artwork catalogue or search.",
+        "Collecting tools at /collect opens the set planner for The Memes, 6529 Gradient and NextGen Pebbles. Choose Complete a set, Lowest listings or TDH. In the set planner, choose Collection first. The Memes offers Full set, Season and Artist under Build toward. Gradients opens its full set directly; Pebbles offers its named sets. The planner has no duplicate artwork catalogue or search.",
         "Browse artworks on /the-memes, /6529-gradient and /nextgen/collection/pebbles. Complete my set on The Memes carries the selected season, or its full set when no season is selected; the Gradients link opens its full set and the Pebbles link opens its trait-set planner. Browse artwork links return from Collecting tools to these native collection pages.",
         "On a supported artwork card, the Listings and Offers section has a Collect action and a more-actions menu for Make an offer, List for sale and Review offers. Collect opens purchase review without leaving the card; current orders and trade terms are checked before signing.",
         "Artwork-card trading actions open a dialog immediately with a loading message while the artwork and trading tools load. If the artwork cannot be loaded for trading, Try again retries within the same dialog. Close or Escape returns to the card. Closing while it loads cancels that attempt; the review does not open later when loading finishes.",

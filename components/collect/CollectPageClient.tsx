@@ -62,12 +62,14 @@ function CollectCatalogController({
     ) ?? "memes";
   const intent: CollectIntent =
     COLLECT_INTENTS.find((item) => item === params.get("intent")) ?? "full_set";
-  const fullSetDefinition = collection === "gradients" ? "gradients" : "memes";
+  const explicitDefinition = params.get("definition");
+  let fullSetDefinition = collection === "gradients" ? "gradients" : "memes";
+  if (explicitDefinition === "memes" || explicitDefinition === "gradients")
+    fullSetDefinition = explicitDefinition;
   const [goalDraft, setGoalDraft] = useState<CollectGoalDraft>(() => ({
     intent,
     definitionId:
-      params.get("definition") ??
-      (intent === "full_set" ? fullSetDefinition : ""),
+      intent === "full_set" ? fullSetDefinition : (explicitDefinition ?? ""),
     targetCount: "1",
     budgetEth: "",
     horizonDays: "30",
@@ -140,6 +142,57 @@ function CollectCatalogController({
     }
     router.replace(`/collect?${next.toString()}`, { scroll: false });
   };
+  let completionCollection: CollectCollection =
+    fullSetDefinition === "gradients" ? "gradients" : "memes";
+  if (intent === "pebbles_set") completionCollection = "pebbles";
+  else if (intent === "season" || intent === "artist")
+    completionCollection = "memes";
+  const changeCollection = (value: CollectCollection) => {
+    const patch: Record<string, string> = {
+      collection: value,
+      token: "",
+      q: "",
+    };
+    if (["season", "full_set", "artist", "pebbles_set"].includes(intent)) {
+      if (value === completionCollection) return;
+      patch["definition"] = "";
+      if (value === "pebbles") patch["intent"] = "pebbles_set";
+      else if (value === "gradients" || intent === "pebbles_set")
+        patch["intent"] = "full_set";
+    }
+    updateQuery(patch);
+  };
+  const changeIntent = (value: CollectIntent) => {
+    const patch: Record<string, string> = {
+      intent: value,
+      definition: "",
+    };
+    if (
+      ["season", "full_set", "artist", "pebbles_set", "tdh"].includes(value)
+    ) {
+      patch["token"] = "";
+      patch["q"] = "";
+    }
+    switch (value) {
+      case "season":
+      case "artist":
+      case "tdh":
+        patch["collection"] = "memes";
+        break;
+      case "full_set":
+        patch["collection"] =
+          completionCollection === "gradients" ? "gradients" : "memes";
+        break;
+      case "pebbles_set":
+        patch["collection"] = "pebbles";
+        break;
+      case "lowest":
+      case "explore":
+      case "specific":
+        break;
+    }
+    updateQuery(patch);
+  };
   let goalContent: ReactNode;
   if (["season", "full_set", "artist", "pebbles_set"].includes(intent))
     goalContent = (
@@ -147,6 +200,11 @@ function CollectCatalogController({
         draft={goalDraft}
         catalog={catalog.data}
         profile={connectedProfile}
+        completion={{
+          collection: completionCollection,
+          onCollectionChange: changeCollection,
+          onIntentChange: changeIntent,
+        }}
         onChange={setGoalDraft}
         onPlan={setCostPlan}
         onConnect={connect}
@@ -175,41 +233,8 @@ function CollectCatalogController({
         profile={profile}
         plan={plan}
         goalContent={goalContent}
-        onCollectionChange={(value) =>
-          updateQuery({ collection: value, token: "", q: "" })
-        }
-        onIntentChange={(value) => {
-          const patch: Record<string, string> = {
-            intent: value,
-            definition: "",
-          };
-          if (["season", "full_set", "artist", "pebbles_set"].includes(value)) {
-            patch["token"] = "";
-            patch["q"] = "";
-          }
-          switch (value) {
-            case "season":
-            case "artist":
-              patch["collection"] = "memes";
-              break;
-            case "full_set":
-              patch["collection"] = fullSetDefinition;
-              break;
-            case "pebbles_set":
-              patch["collection"] = "pebbles";
-              break;
-            case "tdh":
-              patch["collection"] = "memes";
-              patch["token"] = "";
-              patch["q"] = "";
-              break;
-            case "lowest":
-            case "explore":
-            case "specific":
-              break;
-          }
-          updateQuery(patch);
-        }}
+        onCollectionChange={changeCollection}
+        onIntentChange={changeIntent}
         onConnect={connect}
         onRetry={discovery.retry}
         onLoadMore={discovery.loadMore}

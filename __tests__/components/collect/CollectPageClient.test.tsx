@@ -1,5 +1,6 @@
 import CollectPageClient from "@/components/collect/CollectPageClient";
 import type CollectGoalsController from "@/components/collect/CollectGoalsController";
+import CollectCompletionControls from "@/components/collect/CollectCompletionControls";
 import type { ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 
@@ -41,13 +42,50 @@ jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
   __esModule: true,
   default: () => null,
 }));
+jest.mock("@/components/utils/select/dropdown/CommonDropdown", () => ({
+  __esModule: true,
+  default: ({
+    items,
+    activeItem,
+    filterLabel,
+    setSelected,
+  }: {
+    items: readonly { label: string; value: string }[];
+    activeItem: string;
+    filterLabel: string;
+    setSelected: (value: string) => void;
+  }) => (
+    <label>
+      {filterLabel}
+      <select
+        value={activeItem}
+        onChange={(event) => setSelected(event.target.value)}
+      >
+        {items.map((item) => (
+          <option key={item.value} value={item.value}>
+            {item.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  ),
+}));
 jest.mock("@/components/collect/CollectGoalsController", () => ({
   __esModule: true,
   default: ({
     draft,
     onChange,
+    completion,
   }: ComponentProps<typeof CollectGoalsController>) => (
     <div>
+      {completion && (
+        <CollectCompletionControls
+          {...completion}
+          intent={draft.intent}
+          disabled={false}
+          locale="en-US"
+        />
+      )}
       <output aria-label="Goal definition">{draft.definitionId}</output>
       <label>
         Goal budget
@@ -128,25 +166,55 @@ it("honors an explicit full-set definition and retains edited drafts on rerender
   expect(mockReplace).not.toHaveBeenCalled();
 });
 
-it.each([
-  ["season", "memes"],
-  ["artist", "memes"],
-  ["pebbles_set", "pebbles"],
-])(
-  "aligns an explicit %s goal with %s and clears artwork filters",
-  (intent, collection) => {
+it.each(["Season", "Artist"])(
+  "opens the Memes %s goal and clears artwork filters",
+  (goal) => {
     mockSearchParams = new URLSearchParams(
-      "collection=gradients&intent=full_set&definition=gradients&token=8&q=old"
+      "collection=memes&intent=full_set&definition=memes&token=8&q=old"
+    );
+    render(<CollectPageClient />);
+    fireEvent.click(screen.getByRole("radio", { name: goal }));
+    expect(mockReplace).toHaveBeenCalledWith(
+      `/collect?collection=memes&intent=${goal.toLowerCase()}`,
+      { scroll: false }
+    );
+  }
+);
+
+it.each([
+  ["memes", "artist", "gradients", "full_set"],
+  ["memes", "season", "pebbles", "pebbles_set"],
+  ["pebbles", "pebbles_set", "memes", "full_set"],
+  ["gradients", "full_set", "memes", "full_set"],
+])(
+  "switches %s %s to a valid %s %s goal",
+  (before, intent, after, nextIntent) => {
+    mockSearchParams = new URLSearchParams(
+      `collection=${before}&intent=${intent}&definition=old&token=8&q=old`
     );
     render(<CollectPageClient />);
     fireEvent.change(
-      screen.getByRole("combobox", { name: "What are you collecting?" }),
-      { target: { value: intent } }
+      screen.getByRole("combobox", { name: "Collection", exact: true }),
+      { target: { value: after } }
     );
     expect(mockReplace).toHaveBeenCalledWith(
-      `/collect?collection=${collection}&intent=${intent}`,
+      `/collect?collection=${after}&intent=${nextIntent}`,
       { scroll: false }
     );
+  }
+);
+
+it.each(["gradients", "pebbles"])(
+  "does not show Memes-only goal choices for %s",
+  (collection) => {
+    mockSearchParams = new URLSearchParams(
+      `collection=${collection}&intent=${collection === "pebbles" ? "pebbles_set" : "full_set"}`
+    );
+    render(<CollectPageClient />);
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("combobox", { name: "Collection", exact: true })
+    ).toHaveValue(collection);
   }
 );
 

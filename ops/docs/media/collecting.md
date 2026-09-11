@@ -38,11 +38,13 @@ card page.
 ## User Journey
 
 1. Start in **Complete a set**, or choose **Lowest listings** or **TDH**.
-   Complete a set offers a season, a full Memes or Gradients set, an artist,
-   or a Pebbles trait set.
+   In the set planner, choose **Collection** first. The Memes offers **Full
+   set**, **Season** and **Artist** under **Build toward**. Gradients opens its
+   full set directly; Pebbles offers its named sets.
 2. Connect your profile to inspect its holdings. Wallet controls describe where
    NFTs are held, which wallet pays or signs, and where a purchase is delivered.
-3. For a completion goal, choose its definition, **Copies per NFT** and budget.
+3. Choose the season, artist or Pebbles set when applicable, then
+   **Copies per NFT** and budget.
    Copies per NFT is the total you want to hold of each required NFT, including
    copies already in your profile.
    Review missing requirements, checked artworks, unavailable items and the
