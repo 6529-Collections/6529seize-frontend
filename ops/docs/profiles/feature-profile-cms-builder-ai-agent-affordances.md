@@ -118,6 +118,10 @@ open document or saving another draft. Safe connected-proposal saves require
 local storage and browser Web Locks. File exchange and ordinary visual editing
 remain available if those browser features are unavailable.
 
+If the proposal was rejected in another session, retrying closes its local
+recovery record without loading the rejected website or writing another draft.
+Any draft saved before that rejection remains in **Versions**.
+
 ## Limitations / Notes
 
 - The downloaded kit has no access credential, but it contains your draft and

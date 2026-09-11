@@ -325,6 +325,75 @@ it("retains the checkpoint and only retries owner disposition after a status res
   expect(localStorage.length).toBe(0);
 });
 
+it.each(["confirmed", "unknown"] as const)(
+  "releases a %s save checkpoint after the owner rejects its proposal",
+  async (receipt) => {
+    const { input, proposal, result } = setup();
+    if (receipt === "confirmed") {
+      recordReview.mockRejectedValueOnce(new Error("status unavailable"));
+      await expect(saveCmsAgentProposalDraft(input)).resolves.toMatchObject({
+        reviewRecorded: false,
+      });
+    } else {
+      save.mockRejectedValueOnce(new Error("response lost"));
+      await expect(saveCmsAgentProposalDraft(input)).rejects.toThrow(
+        "response lost"
+      );
+    }
+    expect(localStorage.length).toBe(1);
+    load.mockClear();
+    history.mockClear();
+    recordReview.mockClear();
+    readProposal.mockResolvedValue({ ...proposal, status: "rejected" });
+
+    await expect(confirmCmsAgentProposalSave(input)).rejects.toThrow(
+      "cms_agent_proposal_rejected"
+    );
+    expect(localStorage.length).toBe(0);
+    expect(load).not.toHaveBeenCalled();
+    expect(history).not.toHaveBeenCalled();
+    expect(recordReview).not.toHaveBeenCalled();
+    expect(save).toHaveBeenCalledTimes(1);
+
+    await expect(saveCmsAgentProposalDraft(input)).rejects.toThrow(
+      "cms_agent_proposal_changed"
+    );
+    expect(save).toHaveBeenCalledTimes(1);
+    readProposal.mockResolvedValue({ ...proposal, id: "next-proposal" });
+    recordReview.mockResolvedValue({
+      ...proposal,
+      id: "next-proposal",
+      status: "applied",
+      result_draft_id: result.id,
+      result_package_hash: result.packageHash,
+    });
+    await expect(
+      saveCmsAgentProposalDraft({
+        ...input,
+        proposal: { ...proposal, id: "next-proposal" },
+      })
+    ).resolves.toMatchObject({ reviewRecorded: true });
+    expect(save).toHaveBeenCalledTimes(2);
+  }
+);
+
+it("keeps the checkpoint when a rejected response has different immutable bindings", async () => {
+  const { input, proposal } = setup();
+  save.mockRejectedValueOnce(new Error("response lost"));
+  await expect(saveCmsAgentProposalDraft(input)).rejects.toThrow();
+  readProposal.mockResolvedValue({
+    ...proposal,
+    status: "rejected",
+    candidate_package_hash: `sha256:${"0".repeat(64)}`,
+  });
+  await expect(confirmCmsAgentProposalSave(input)).rejects.toThrow(
+    "cms_agent_proposal_changed"
+  );
+  expect(localStorage.length).toBe(1);
+  expect(save).toHaveBeenCalledTimes(1);
+  expect(recordReview).not.toHaveBeenCalled();
+});
+
 it("checkpoints only public identifiers and hashes, without candidate content", async () => {
   const { input } = setup();
   save.mockImplementationOnce(async () => {

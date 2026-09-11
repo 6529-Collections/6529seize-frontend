@@ -56,8 +56,7 @@ function assertProposalMatches(
     proposal.base_version !== checkpoint.baseVersion ||
     proposal.base_package_hash !== checkpoint.baseHash ||
     proposal.candidate_package_hash !== checkpoint.candidateHash ||
-    proposal.created_at !== checkpoint.proposalCreatedAt ||
-    proposal.status === "rejected"
+    proposal.created_at !== checkpoint.proposalCreatedAt
   )
     throw new Error("cms_agent_proposal_changed");
 }
@@ -99,6 +98,13 @@ async function finishSave(
   signal: AbortSignal
 ) {
   assertProposalMatches(current, checkpoint);
+  if (current.status === "rejected") {
+    // The owner's terminal decision prevents another save of this proposal,
+    // even if an earlier POST response was lost. Release the local lock without
+    // loading its candidate or recording a conflicting applied decision.
+    clearCmsAgentSaveCheckpoint(checkpoint.profileId);
+    throw new Error("cms_agent_proposal_rejected");
+  }
   const record = await confirmSavedRecord(checkpoint, signal);
   let reviewRecorded =
     current.status === "applied" &&
