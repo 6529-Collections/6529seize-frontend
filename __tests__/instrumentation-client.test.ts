@@ -335,6 +335,10 @@ describe("instrumentation-client", () => {
   const injectedIosAutoplayNotAllowedMessage =
     "The request is not allowed by the user agent or the platform in the current context, possibly because the user denied permission.";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
+  const rabbyMobileAndroidJavaBridgePostMessageErrorMessage =
+    "Error invoking postMessage: Java bridge method invocation error";
+  const rabbyMobileAndroidUserAgent =
+    "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 RabbyMobile/0.6.78 RabbyMobileAndroid/0.6.78 Mobile Safari/537.36";
   const nativeJsonStringifyFrame = {
     filename: "[native code]",
     function: "stringify",
@@ -1056,11 +1060,13 @@ describe("instrumentation-client", () => {
     },
   ];
 
-  const createObservedRabbyRainbowKitRawFrames = () => [
+  const createObservedRabbyRainbowKitRawFrames = (
+    wrapperFunction = "n"
+  ) => [
     {
       filename: "app:///_next/static/chunks/observed-rabby-webview.js",
       abs_path: "app:///_next/static/chunks/observed-rabby-webview.js",
-      function: "n",
+      function: wrapperFunction,
       in_app: true,
     },
     {
@@ -1072,7 +1078,8 @@ describe("instrumentation-client", () => {
   ];
 
   const createRabbyMobileRainbowKitNotFoundEvent = (
-    overrides: Record<string, unknown> = {}
+    overrides: Record<string, unknown> = {},
+    wrapperFunction = "n"
   ) => ({
     event_id: "rabby-mobile-rainbowkit-not-found",
     exception: {
@@ -1085,12 +1092,80 @@ describe("instrumentation-client", () => {
             handled: false,
           },
           stacktrace: {
-            frames: createObservedRabbyRainbowKitRawFrames(),
+            frames: createObservedRabbyRainbowKitRawFrames(wrapperFunction),
           },
         },
       ],
     },
     ...overrides,
+  });
+
+  const createObservedRabbyAndroidJavaBridgeFrames = () => [
+    {
+      filename: "app:///_next/static/chunks/observed-rabby-webview.js",
+      abs_path: "app:///_next/static/chunks/observed-rabby-webview.js",
+      function: "r",
+      lineno: 7,
+      colno: 6173,
+      in_app: true,
+    },
+    {
+      filename: "<anonymous>",
+      abs_path: "<anonymous>",
+      function: "?",
+      lineno: 140,
+      colno: 7,
+      in_app: true,
+    },
+    {
+      filename: "<anonymous>",
+      abs_path: "<anonymous>",
+      function: "__rabby__updateUrl",
+      lineno: 115,
+      colno: 12,
+      in_app: true,
+    },
+    {
+      filename: "<anonymous>",
+      abs_path: "<anonymous>",
+      function: "window.__RABBY_WEBVIEW_BRIDGE_POSTER__",
+      lineno: 74,
+      colno: 35,
+      in_app: true,
+    },
+    {
+      filename: "<anonymous>",
+      abs_path: "<anonymous>",
+      function: "Proxy.myPostMessage",
+      lineno: 28,
+      colno: 12,
+      in_app: true,
+    },
+  ];
+
+  const createRabbyMobileAndroidJavaBridgePostMessageEvent = () => ({
+    event_id: "rabby-mobile-android-java-bridge-post-message",
+    transaction: "/the-memes",
+    request: {
+      headers: {
+        "User-Agent": rabbyMobileAndroidUserAgent,
+      },
+    },
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: rabbyMobileAndroidJavaBridgePostMessageErrorMessage,
+          mechanism: {
+            type: "auto.browser.browserapierrors.setTimeout",
+            handled: false,
+          },
+          stacktrace: {
+            frames: createObservedRabbyAndroidJavaBridgeFrames(),
+          },
+        },
+      ],
+    },
   });
 
   beforeEach(() => {
@@ -3282,6 +3357,24 @@ describe("instrumentation-client", () => {
   it("drops the observed raw RainbowKit lookup error without wallet context", () => {
     const beforeSend = loadBeforeSend();
     const event = createRabbyMobileRainbowKitNotFoundEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops the observed raw RainbowKit lookup error with the r wrapper", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyMobileRainbowKitNotFoundEvent({}, "r");
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops the exact RabbyMobile Android Java bridge postMessage error", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createRabbyMobileAndroidJavaBridgePostMessageEvent();
 
     const result = beforeSend(event);
 

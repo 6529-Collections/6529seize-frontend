@@ -54,6 +54,7 @@ export {
 } from "./sentry-client-filters/wallets";
 export {
   shouldFilterRabbyChromeUserRejectedRequest,
+  shouldFilterRabbyMobileAndroidJavaBridgePostMessageError,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
 } from "./sentry-client-filters/rabby";
