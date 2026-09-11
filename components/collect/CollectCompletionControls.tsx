@@ -1,4 +1,11 @@
-import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
+import {
+  Label,
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+} from "@headlessui/react";
+import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useId } from "react";
@@ -31,21 +38,57 @@ export default function CollectCompletionControls({
   return (
     <div className="tw-mb-5 tw-grid tw-items-start tw-gap-5 sm:tw-grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
       <div className="tw-min-w-0 tw-space-y-2">
-        <p className="tw-m-0 tw-text-xs tw-font-semibold tw-text-iron-300">
-          {t(locale, "collect.goal.collection")}
-        </p>
-        <CommonDropdown
-          items={COLLECTIONS.map((value) => ({
-            value,
-            key: value,
-            label: t(locale, `collect.collection.${value}`),
-          }))}
-          activeItem={collection}
-          filterLabel={t(locale, "collect.goal.collection")}
-          setSelected={onCollectionChange}
+        <Listbox
+          value={collection}
+          onChange={onCollectionChange}
           disabled={disabled}
-          size="md"
-        />
+        >
+          <Label className="tw-block tw-text-xs tw-font-semibold tw-text-iron-300">
+            {t(locale, "collect.goal.collection")}
+          </Label>
+          <ListboxButton
+            aria-describedby={`${id}-collection-value`}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                event.currentTarget.click();
+              }
+            }}
+            className="tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+          >
+            <span id={`${id}-collection-value`}>
+              {t(locale, `collect.collection.${collection}`)}
+            </span>
+            <ChevronDownIcon
+              aria-hidden="true"
+              className="tw-size-4 tw-shrink-0 tw-text-iron-400"
+            />
+          </ListboxButton>
+          <ListboxOptions
+            anchor="bottom start"
+            className="tailwind-scope tw-z-50 tw-w-[var(--button-width)] tw-overflow-auto tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/10 [--anchor-gap:0.5rem] focus:tw-outline-none"
+          >
+            {COLLECTIONS.map((value) => (
+              <ListboxOption
+                key={value}
+                value={value}
+                className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-md tw-px-3 tw-py-2 data-[focus]:tw-bg-iron-800"
+              >
+                {({ selected }) => (
+                  <>
+                    <span>{t(locale, `collect.collection.${value}`)}</span>
+                    {selected && (
+                      <CheckIcon
+                        aria-hidden="true"
+                        className="tw-size-4 tw-shrink-0 tw-text-iron-300"
+                      />
+                    )}
+                  </>
+                )}
+              </ListboxOption>
+            ))}
+          </ListboxOptions>
+        </Listbox>
       </div>
       {collection === "memes" && (
         <fieldset

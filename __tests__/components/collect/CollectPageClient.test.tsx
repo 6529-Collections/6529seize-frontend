@@ -42,34 +42,6 @@ jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
   __esModule: true,
   default: () => null,
 }));
-jest.mock("@/components/utils/select/dropdown/CommonDropdown", () => ({
-  __esModule: true,
-  default: ({
-    items,
-    activeItem,
-    filterLabel,
-    setSelected,
-  }: {
-    items: readonly { label: string; value: string }[];
-    activeItem: string;
-    filterLabel: string;
-    setSelected: (value: string) => void;
-  }) => (
-    <label>
-      {filterLabel}
-      <select
-        value={activeItem}
-        onChange={(event) => setSelected(event.target.value)}
-      >
-        {items.map((item) => (
-          <option key={item.value} value={item.value}>
-            {item.label}
-          </option>
-        ))}
-      </select>
-    </label>
-  ),
-}));
 jest.mock("@/components/collect/CollectGoalsController", () => ({
   __esModule: true,
   default: ({
@@ -193,9 +165,16 @@ it.each([
       `collection=${before}&intent=${intent}&definition=old&token=8&q=old`
     );
     render(<CollectPageClient />);
-    fireEvent.change(
-      screen.getByRole("combobox", { name: "Collection", exact: true }),
-      { target: { value: after } }
+    fireEvent.keyDown(screen.getByRole("button", { name: /^Collection\b/ }), {
+      key: "Enter",
+    });
+    const labels: Readonly<Record<string, string>> = {
+      memes: "The Memes",
+      gradients: "Gradients",
+      pebbles: "Pebbles",
+    };
+    fireEvent.click(
+      screen.getByRole("option", { name: labels[after] ?? after, exact: true })
     );
     expect(mockReplace).toHaveBeenCalledWith(
       `/collect?collection=${after}&intent=${nextIntent}`,
@@ -213,8 +192,8 @@ it.each(["gradients", "pebbles"])(
     render(<CollectPageClient />);
     expect(screen.queryByRole("radio")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("combobox", { name: "Collection", exact: true })
-    ).toHaveValue(collection);
+      screen.getByRole("button", { name: /^Collection\b/ })
+    ).toHaveTextContent(collection === "gradients" ? "Gradients" : "Pebbles");
   }
 );
 

@@ -2,7 +2,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   ChartBarIcon,
-  RectangleStackIcon,
+  Squares2X2Icon,
   BarsArrowDownIcon,
 } from "@heroicons/react/24/outline";
 import type { CollectCollection, CollectIntent } from "./collect.types";
@@ -31,7 +31,7 @@ export default function CollectGoalNavigation({
     {
       id: "sets",
       label: "collect.navigation.completeSet",
-      Icon: RectangleStackIcon,
+      Icon: Squares2X2Icon,
       selected: SET_INTENTS.includes(intent),
       defaultIntent: collection === "pebbles" ? "pebbles_set" : "full_set",
     },

@@ -46,6 +46,11 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
     artist: "collect.goal.artist",
     pebbles_set: "collect.goal.set",
   };
+  const definitionPlaceholders: Partial<Record<CollectIntent, MessageKey>> = {
+    season: "collect.goal.selectSeason",
+    artist: "collect.goal.selectArtist",
+    pebbles_set: "collect.goal.selectSet",
+  };
   let gridClass = "sm:tw-grid-cols-2 lg:tw-grid-cols-3";
   if (showQuantity) {
     gridClass = showDefinition
@@ -93,8 +98,7 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
             <span>
               {t(
                 locale,
-                definitionLabels[draft.intent] ??
-                  "collect.goal.definition"
+                definitionLabels[draft.intent] ?? "collect.goal.definition"
               )}
             </span>
             <select
@@ -108,7 +112,11 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
               className={COLLECT_INPUT_CLASS}
             >
               <option value="">
-                {t(locale, "collect.goal.selectDefinition")}
+                {t(
+                  locale,
+                  definitionPlaceholders[draft.intent] ??
+                    "collect.goal.selectDefinition"
+                )}
               </option>
               {props.definitions.map((definition) => (
                 <option key={definition.id} value={definition.id}>
