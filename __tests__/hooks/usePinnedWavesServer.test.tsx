@@ -11,6 +11,18 @@ import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
+import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
+import { pinnedWavesApi } from "@/services/api/pinned-waves-api";
+
+jest.mock("@/services/api/pinned-waves-api", () => ({
+  pinnedWavesApi: { pinWave: jest.fn(), unpinWave: jest.fn() },
+}));
+
+jest.mock("@/services/auth/auth.utils", () => ({
+  ...jest.requireActual("@/services/auth/auth.utils"),
+  getWalletAddress: jest.fn(),
+  getWalletRole: jest.fn(),
+}));
 
 jest.mock("@tanstack/react-query", () => ({
   useMutation: jest.fn(),
@@ -56,10 +68,16 @@ const queryClientMock = {
   setQueryData: jest.fn(),
 };
 
+const requestAuth = jest.fn();
+
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AuthContext.Provider
     value={
-      { connectedProfile: { handle: "me" }, activeProfileProxy: null } as any
+      {
+        connectedProfile: { handle: "me" },
+        activeProfileProxy: null,
+        requestAuth,
+      } as any
     }
   >
     {children}
@@ -109,6 +127,9 @@ beforeEach(() => {
   jest.clearAllMocks();
   pinMutateAsync = jest.fn().mockResolvedValue(undefined);
   unpinMutateAsync = jest.fn().mockResolvedValue(undefined);
+  requestAuth.mockReset().mockResolvedValue({ success: true });
+  jest.mocked(getWalletAddress).mockReturnValue("0xabc");
+  jest.mocked(getWalletRole).mockReturnValue(null);
 
   let mutationCallCount = 0;
   useMutationMock.mockImplementation(() => {
@@ -235,6 +256,106 @@ test("fetches pinned waves across multiple API pages", async () => {
     expect.objectContaining({ page: 2, pageSize: 20 })
   );
 });
+
+test("does not turn anonymous overview results into pins or paginate through public waves", async () => {
+  fetchWavesV2PageMock.mockResolvedValue({
+    page: 1,
+    next: true,
+    waves: [{ ...createWave("public-wave"), pinned: false }],
+  });
+  renderHook(() => usePinnedWavesServer(), { wrapper });
+
+  await expect(getPinnedWavesQueryOptions().queryFn()).resolves.toEqual([]);
+  expect(fetchWavesV2PageMock).toHaveBeenCalledTimes(1);
+});
+
+test("excludes unpinned entries already present in the pinned cache", () => {
+  useQueryMock.mockReturnValue({
+    data: [createWave("pin"), { ...createWave("public"), pinned: false }],
+  });
+  const { result } = renderHook(() => usePinnedWavesServer(), { wrapper });
+  expect(result.current.pinnedIds).toEqual(["pin"]);
+});
+
+test.each([0, 1])(
+  "pin mutation %s checks the active account immediately before the API request",
+  async (index) => {
+    renderHook(() => usePinnedWavesServer(), { wrapper });
+    const { mutationFn } = useMutationMock.mock.calls[index][0];
+    jest.mocked(getWalletAddress).mockReturnValue("0xdef");
+    expect(() => mutationFn("wave")).toThrow("The active profile changed");
+    expect(pinnedWavesApi.pinWave).not.toHaveBeenCalled();
+    expect(pinnedWavesApi.unpinWave).not.toHaveBeenCalled();
+
+    jest.mocked(getWalletAddress).mockReturnValue("0xabc");
+    await mutationFn("wave");
+    expect(
+      index === 0 ? pinnedWavesApi.pinWave : pinnedWavesApi.unpinWave
+    ).toHaveBeenCalledWith("wave");
+  }
+);
+
+test.each(["pinWave", "unpinWave"] as const)(
+  "%s cancels when a proxy becomes active during authentication",
+  async (action) => {
+    requestAuth.mockImplementation(async () => {
+      jest.mocked(getWalletRole).mockReturnValue("proxy-1");
+      return { success: true };
+    });
+    const { result } = renderHook(() => usePinnedWavesServer(), { wrapper });
+    await result.current[action]("wave");
+    expect(pinMutateAsync).not.toHaveBeenCalled();
+    expect(unpinMutateAsync).not.toHaveBeenCalled();
+    expect(result.current.isOperationInProgress("wave")).toBe(false);
+  }
+);
+
+test.each(["pinWave", "unpinWave"] as const)(
+  "%s authenticates before changing pin state",
+  async (action) => {
+    let finishAuth!: (value: { success: boolean }) => void;
+    requestAuth.mockReturnValue(
+      new Promise((resolve) => {
+        finishAuth = resolve;
+      })
+    );
+    const { result } = renderHook(() => usePinnedWavesServer(), { wrapper });
+    const operation = result.current[action]("wave");
+    expect(requestAuth).toHaveBeenCalledTimes(1);
+    expect(pinMutateAsync).not.toHaveBeenCalled();
+    expect(unpinMutateAsync).not.toHaveBeenCalled();
+    finishAuth({ success: true });
+    await operation;
+    expect(
+      action === "pinWave" ? pinMutateAsync : unpinMutateAsync
+    ).toHaveBeenCalledWith("wave");
+  }
+);
+
+test.each(["pinWave", "unpinWave"] as const)(
+  "%s leaves pin state intact when authentication fails",
+  async (action) => {
+    requestAuth.mockResolvedValue({ success: false });
+    const { result } = renderHook(() => usePinnedWavesServer(), { wrapper });
+    await result.current[action]("wave");
+    expect(pinMutateAsync).not.toHaveBeenCalled();
+    expect(unpinMutateAsync).not.toHaveBeenCalled();
+  }
+);
+
+test.each(["pinWave", "unpinWave"] as const)(
+  "%s cancels when the account changes during authentication",
+  async (action) => {
+    requestAuth.mockImplementation(async () => {
+      jest.mocked(getWalletAddress).mockReturnValue("0xdef");
+      return { success: true };
+    });
+    const { result } = renderHook(() => usePinnedWavesServer(), { wrapper });
+    await result.current[action]("wave");
+    expect(pinMutateAsync).not.toHaveBeenCalled();
+    expect(unpinMutateAsync).not.toHaveBeenCalled();
+  }
+);
 
 test("stops fetching pinned waves once the pinned limit is reached", async () => {
   fetchWavesV2PageMock.mockImplementation(({ page }) =>

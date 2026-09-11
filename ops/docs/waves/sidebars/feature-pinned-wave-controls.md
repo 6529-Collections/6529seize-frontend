@@ -9,7 +9,9 @@ This page covers two separate pin-style controls:
 - App shortcuts: local recent-thread chips shown above content in the native app
   on small screens.
 
-Both lists are capped at **20** items. They are independent and do not sync.
+Server pins allow **100** ordinary waves; announcement and official waves do not
+count toward that limit. App shortcuts are capped at **20** items. The lists are
+independent and do not sync.
 
 ## Location in the Site
 
@@ -35,7 +37,7 @@ Both lists are capped at **20** items. They are independent and do not sync.
 1. Open `/waves/{waveId}` and select `Pin wave` from the header or wave row.
 2. The wave appears in the pinned block above regular waves.
 3. Unpin from either control to remove it from the pinned block.
-4. If 20 waves are already pinned, pinning is blocked until you unpin one.
+4. If 100 ordinary waves are already pinned, pinning is blocked until you unpin one.
 5. In native app small-screen mode, opened threads are added to local shortcuts
    (newest first, max 20).
 
@@ -59,10 +61,15 @@ Both lists are capped at **20** items. They are independent and do not sync.
 
 ## Failure and Recovery
 
-- If the 20-wave limit is reached, pinning is blocked and an error toast is
+- If the 100-wave limit is reached, pinning is blocked and an error toast is
   shown. Unpin another wave, then retry.
-- If a server pin/unpin request fails, optimistic UI changes are reverted. Retry
-  from the same control.
+- Pin and unpin check your session before changing the list. If you are asked to
+  reconnect, reconnect the wallet for the selected profile, then retry the action.
+  An unsuccessful session check leaves the pin state unchanged.
+- If a server pin/unpin request fails, optimistic UI changes are reverted and an
+  error is shown. Retry from the same control.
+- If your session expires, public waves remain browsable but are not added to
+  your pinned list. Reconnect to load your saved pins.
 - If an app shortcut points to a thread that no longer resolves, that chip is
   removed.
 - If you remove the currently open shortcut, the app returns to section home

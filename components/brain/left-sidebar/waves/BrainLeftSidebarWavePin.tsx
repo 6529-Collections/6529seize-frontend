@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { Tooltip } from "react-tooltip";
 import { useAuth } from "@/components/auth/Auth";
 import {
@@ -53,8 +52,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   compact = false,
   className,
 }) => {
-  const { waves } = useMyStream();
-  const { pinnedIds, isOperationInProgress, canPinWave } =
+  const { pinnedIds, isOperationInProgress, canPinWave, pinWave, unpinWave } =
     usePinnedWavesServer();
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const isTouchDevice = useIsTouchDevice();
@@ -96,13 +94,13 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
 
     try {
       if (isPinned) {
-        waves.removePinnedWave(waveId);
+        await unpinWave(waveId);
         setMaxLimitTooltipRequest(null);
       } else {
         const canPin = canPinWave(waveId);
 
         if (canPin) {
-          waves.addPinnedWave(waveId);
+          await pinWave(waveId);
         } else {
           setMaxLimitTooltipRequest({ waveId, pinnedIdsKey });
           setToast({

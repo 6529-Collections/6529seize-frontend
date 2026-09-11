@@ -23,6 +23,7 @@ import {
 } from "@/services/api/waves-v2-api";
 import type { SidebarWave, SidebarWavesPage } from "@/types/waves.types";
 import { useOfficialWaves } from "./useOfficialWaves";
+import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
 
 export const MAX_PINNED_WAVES = 100;
 
@@ -90,9 +91,14 @@ async function fetchPinnedWavesPages(): Promise<SidebarWave[]> {
       pinned: ApiWavesPinFilter.Pinned,
     });
 
-    pinnedWaves.push(...page.waves);
+    const confirmedPins = page.waves.filter((wave) => wave.pinned === true);
+    pinnedWaves.push(...confirmedPins);
 
-    if (!page.next || page.waves.length === 0) {
+    if (
+      !page.next ||
+      page.waves.length === 0 ||
+      confirmedPins.length !== page.waves.length
+    ) {
       break;
     }
 
@@ -344,6 +350,21 @@ function restorePinnedWaves(
   }
 }
 
+function isCurrentPinViewer(viewerIdentityKey: string | null): boolean {
+  const address = getWalletAddress();
+  return Boolean(
+    address &&
+    !getWalletRole() &&
+    viewerIdentityKey === `${address.toLowerCase()}:primary`
+  );
+}
+
+function assertCurrentPinViewer(viewerIdentityKey: string | null): void {
+  if (!isCurrentPinViewer(viewerIdentityKey)) {
+    throw new Error("The active profile changed. Please try again.");
+  }
+}
+
 function usePinnedWaveMutations(
   queryClient: QueryClient,
   pinnedWavesQueryKey: PinnedWavesQueryKey,
@@ -356,7 +377,10 @@ function usePinnedWaveMutations(
   );
 
   const pinMutation = useMutation<void, Error, string, MutationContext>({
-    mutationFn: pinnedWavesApi.pinWave,
+    mutationFn: (waveId) => {
+      assertCurrentPinViewer(viewerIdentityKey);
+      return pinnedWavesApi.pinWave(waveId);
+    },
     onMutate: (waveId: string) =>
       optimisticallyPinWave(queryClient, pinnedWavesQueryKey, waveId),
     onError: (err, _, context) => {
@@ -367,7 +391,10 @@ function usePinnedWaveMutations(
   });
 
   const unpinMutation = useMutation<void, Error, string, MutationContext>({
-    mutationFn: pinnedWavesApi.unpinWave,
+    mutationFn: (waveId) => {
+      assertCurrentPinViewer(viewerIdentityKey);
+      return pinnedWavesApi.unpinWave(waveId);
+    },
     onMutate: (waveId: string) =>
       optimisticallyUnpinWave(queryClient, pinnedWavesQueryKey, waveId),
     onError: (err, _, context) => {
@@ -392,6 +419,7 @@ export function usePinnedWavesServer(
     activeProfileProxy,
     fetchingProfile,
     isAuthenticated,
+    requestAuth,
   } = useAuth();
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const queryClient = useQueryClient();
@@ -439,7 +467,10 @@ export function usePinnedWavesServer(
     isEnabled && hasAuthenticatedProfile && !isPendingAuthSwitch,
     !hasAuthenticatedProfile || isPendingAuthSwitch
   );
-  const pinnedWaves = data ?? [];
+  const pinnedWaves = useMemo(
+    () => data?.filter((wave) => wave.pinned === true) ?? [],
+    [data]
+  );
   const { pinnedIds, canPinWave } = usePinnedWavesBudget(
     pinnedWaves,
     ongoingOperations,
@@ -464,12 +495,16 @@ export function usePinnedWavesServer(
       ongoingOperations.current.add(waveId);
 
       try {
+        const { success } = await requestAuth();
+        if (!success || !isCurrentPinViewer(viewerIdentityKey)) {
+          return;
+        }
         await pinMutation.mutateAsync(waveId);
       } finally {
         ongoingOperations.current.delete(waveId);
       }
     },
-    [canPinWave, pinMutation]
+    [canPinWave, pinMutation, requestAuth, viewerIdentityKey]
   );
 
   const unpinWave = useCallback(
@@ -481,12 +516,16 @@ export function usePinnedWavesServer(
       ongoingOperations.current.add(waveId);
 
       try {
+        const { success } = await requestAuth();
+        if (!success || !isCurrentPinViewer(viewerIdentityKey)) {
+          return;
+        }
         await unpinMutation.mutateAsync(waveId);
       } finally {
         ongoingOperations.current.delete(waveId);
       }
     },
-    [unpinMutation]
+    [unpinMutation, requestAuth, viewerIdentityKey]
   );
 
   return {
