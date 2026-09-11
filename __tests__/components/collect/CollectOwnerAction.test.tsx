@@ -19,6 +19,10 @@ let mockAnalysis:
   | undefined;
 const mockSwitch = jest.fn();
 const mockConnect = jest.fn();
+const mockRefetch = jest.fn();
+let mockIsPending = false;
+let mockIsError = false;
+let mockIsFetching = false;
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ connectedProfile: mockProfile }),
 }));
@@ -40,10 +44,19 @@ jest.mock("@/services/api/collect-api", () => ({
   fetchCollectAssetOwnership: jest.fn(),
 }));
 jest.mock("@tanstack/react-query", () => ({
-  useQuery: () => ({ data: mockAnalysis }),
+  useQuery: () => ({
+    data: mockAnalysis,
+    isPending: mockIsPending,
+    isError: mockIsError,
+    isFetching: mockIsFetching,
+    refetch: mockRefetch,
+  }),
 }));
 beforeEach(() => {
   jest.clearAllMocks();
+  mockIsPending = false;
+  mockIsError = false;
+  mockIsFetching = false;
   mockAddress = payer;
   mockProfile = {
     id: "profile",
@@ -98,4 +111,88 @@ it("keeps List for sale discoverable for guests and opens the connection flow", 
   fireEvent.click(screen.getByRole("button", { name: "List for sale" }));
   expect(mockConnect).toHaveBeenCalledTimes(1);
   expect(onList).not.toHaveBeenCalled();
+});
+
+it("shows a disabled listing action while checking ownership", () => {
+  mockAnalysis = undefined;
+  mockIsPending = true;
+  mockIsFetching = true;
+  const onList = jest.fn();
+  render(<CollectOwnerAction assetKey={asset} onList={onList} />);
+  const button = screen.getByRole("button", { name: "List for sale" });
+  expect(button).toBeDisabled();
+  expect(button).toHaveAccessibleDescription("Checking ownership…");
+  expect(screen.getByRole("status")).toHaveTextContent("Checking ownership…");
+  fireEvent.click(button);
+  expect(onList).not.toHaveBeenCalled();
+  expect(mockConnect).not.toHaveBeenCalled();
+});
+
+it.each([true, false])(
+  "shows a retry after ownership failure with cached ownership %s without opening listing",
+  (hasCachedOwnership) => {
+    mockIsError = true;
+    mockAddress = owner;
+    if (!hasCachedOwnership) mockAnalysis = undefined;
+    const onList = jest.fn();
+    const { rerender } = render(
+      <CollectOwnerAction assetKey={asset} onList={onList} />
+    );
+    const list = screen.getByRole("button", { name: "List for sale" });
+    expect(list).toBeDisabled();
+    expect(list).toHaveAccessibleDescription("Ownership could not be checked.");
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("Ownership could not be checked.");
+    fireEvent.click(list);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Retry ownership check" })
+    );
+    expect(mockRefetch).toHaveBeenCalledTimes(1);
+    expect(onList).not.toHaveBeenCalled();
+    expect(mockConnect).not.toHaveBeenCalled();
+    expect(mockSwitch).not.toHaveBeenCalled();
+
+    mockIsFetching = true;
+    rerender(<CollectOwnerAction assetKey={asset} onList={onList} />);
+    expect(screen.getByRole("status")).toBe(status);
+    expect(status).toHaveTextContent("Checking ownership…");
+    expect(
+      screen.getByRole("button", { name: "Retry ownership check" })
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "List for sale" })
+    ).toBeDisabled();
+  }
+);
+
+it("restores listing only after a successful ownership retry", () => {
+  mockIsError = true;
+  mockAddress = owner;
+  const onList = jest.fn();
+  const { rerender } = render(
+    <CollectOwnerAction assetKey={asset} onList={onList} />
+  );
+  fireEvent.click(
+    screen.getByRole("button", { name: "Retry ownership check" })
+  );
+  mockIsError = false;
+  rerender(<CollectOwnerAction assetKey={asset} onList={onList} />);
+  const list = screen.getByRole("button", { name: "List for sale" });
+  expect(list).toBeEnabled();
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  fireEvent.click(list);
+  expect(onList).toHaveBeenCalledWith(list);
+});
+
+it("keeps confirmed non-owners and profiles without eligible wallets quiet", () => {
+  mockAnalysis!.requirements[0]!.holdings = [];
+  const { rerender, container } = render(
+    <CollectOwnerAction assetKey={asset} onList={jest.fn()} />
+  );
+  expect(container).toBeEmptyDOMElement();
+  mockProfile!.wallets = [];
+  mockAnalysis = undefined;
+  mockIsPending = true;
+  rerender(<CollectOwnerAction assetKey={asset} onList={jest.fn()} />);
+  expect(container).toBeEmptyDOMElement();
 });

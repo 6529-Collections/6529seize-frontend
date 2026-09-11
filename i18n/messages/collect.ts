@@ -19,6 +19,9 @@ export const COLLECT_MESSAGES = {
   "collect.selection.removeArtwork": "Remove {title} from selection",
   "collect.list.chooseOwner":
     "Connect a wallet holding this artwork to list it for sale.",
+  "collect.list.checkingOwnership": "Checking ownership…",
+  "collect.list.ownershipError": "Ownership could not be checked.",
+  "collect.list.retryOwnership": "Retry ownership check",
   "collect.acquire": "Collect",
   "collect.acquireFor": "Collect {title}",
   "collect.menu.offer": "Make an offer",

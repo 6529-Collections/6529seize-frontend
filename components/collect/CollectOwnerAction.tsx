@@ -7,7 +7,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { fetchCollectAssetOwnership } from "@/services/api/collect-api";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { collectProfileWallets } from "./collect-recipient.helpers";
 
 const ACTION_CLASS =
@@ -24,6 +24,7 @@ export default function CollectOwnerAction({
   const { connectedProfile } = useAuth();
   const connection = useSeizeConnectContext();
   const [chooseOwner, setChooseOwner] = useState(false);
+  const ownershipStatusId = useId();
   const profileId = connectedProfile?.id;
   const wallets = collectProfileWallets(connectedProfile);
   const membership = wallets
@@ -54,6 +55,44 @@ export default function CollectOwnerAction({
       >
         {t(locale, "collect.menu.list")}
       </button>
+    );
+  const checkingOwnership =
+    ownership.isPending || (ownership.isError && ownership.isFetching);
+  if (wallets.length > 0 && (checkingOwnership || ownership.isError))
+    return (
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2">
+        <button
+          type="button"
+          className={`${ACTION_CLASS} disabled:tw-opacity-50`}
+          disabled
+          aria-describedby={ownershipStatusId}
+        >
+          {t(locale, "collect.menu.list")}
+        </button>
+        <span
+          id={ownershipStatusId}
+          role="status"
+          className="tw-text-xs tw-leading-5 tw-text-iron-400"
+        >
+          {t(
+            locale,
+            checkingOwnership
+              ? "collect.list.checkingOwnership"
+              : "collect.list.ownershipError"
+          )}
+        </span>
+        {ownership.isError && (
+          <button
+            type="button"
+            className={`${ACTION_CLASS} disabled:tw-opacity-50`}
+            disabled={checkingOwnership}
+            aria-label={t(locale, "collect.list.retryOwnership")}
+            onClick={() => void ownership.refetch()}
+          >
+            {t(locale, "collect.retry")}
+          </button>
+        )}
+      </div>
     );
   const analysis = ownership.data;
   const owned =
