@@ -4,6 +4,11 @@ import NextGenTokenArt from "@/components/nextGen/collections/nextgenToken/NextG
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
 
+jest.mock("@/components/artwork-share/ArtworkShareButton", () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 jest.mock("@capacitor/core", () => ({
   Capacitor: { isNativePlatform: () => true },
 }));

@@ -149,6 +149,28 @@ afterEach(() => {
 });
 
 describe("MemePageArtViewer", () => {
+  it("keeps artwork sharing available when the media URLs are missing", () => {
+    const nft = {
+      ...baseNft,
+      image: "",
+      scaled: "",
+      thumbnail: "",
+      animation: "",
+      compressed_animation: "",
+      metadata: {},
+    } as Parameters<typeof MemePageArtViewer>[0]["nft"];
+    render(
+      <MemePageArtViewer
+        nft={nft}
+        actions={<button type="button">Share artwork</button>}
+      />
+    );
+    expect(screen.getByRole("button", { name: "Share artwork" })).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Download media" })
+    ).not.toBeInTheDocument();
+  });
+
   it("fills the available width in row and column layout wrappers", () => {
     const { container } = render(<MemePageArtViewer nft={baseNft as any} />);
 

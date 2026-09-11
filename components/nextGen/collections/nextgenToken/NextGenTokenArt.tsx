@@ -16,6 +16,7 @@ import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import { Spinner } from "@/components/dotLoader/DotLoader";
+import ArtworkShareButton from "@/components/artwork-share/ArtworkShareButton";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useDownloader from "@/hooks/useDownloader";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -408,6 +409,18 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           >
             Fullscreen
           </Tooltip>
+          <ArtworkShareButton
+            locale={locale}
+            artwork={{
+              kind: "nextgen",
+              tokenId: props.token.id,
+              displayId: props.token.normalised_id,
+              title: props.token.name,
+              artist: props.collection.artist,
+              collection: props.collection.name,
+              imageUrl: props.token.image_url || props.token.thumbnail_url,
+            }}
+          />
         </div>
       </div>
     );
@@ -515,11 +528,12 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
   return (
     <div className="tw-w-full">
       {isBoxOpen ? createPortal(artworkPanel, document.body) : artworkPanel}
-      {downloader.error && !isShareCancelError(downloader.error.errorMessage) && (
-        <p role="alert" className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-error">
-          {t(locale, "artworkShare.downloadError")}
-        </p>
-      )}
+      {downloader.error &&
+        !isShareCancelError(downloader.error.errorMessage) && (
+          <p role="alert" className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-error">
+            {t(locale, "artworkShare.downloadError")}
+          </p>
+        )}
 
       {mode === Mode.LIVE && (
         <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">

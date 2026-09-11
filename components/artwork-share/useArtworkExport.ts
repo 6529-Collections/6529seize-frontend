@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type ExportState =
   | { readonly status: "loading" | "error" }
@@ -8,9 +8,14 @@ type ExportState =
       readonly previewUrl: string;
     };
 
-interface PreparedExport {
+interface ExportRequest {
   readonly url: string;
   readonly filename: string;
+  readonly attempt: number;
+}
+
+interface PreparedExport {
+  readonly request: ExportRequest;
   readonly state: ExportState;
 }
 
@@ -67,10 +72,12 @@ async function readExportBlob(response: Response, signal: AbortSignal) {
 export function useArtworkExport(url: string, filename: string) {
   const [attempt, setAttempt] = useState(0);
   const [prepared, setPrepared] = useState<PreparedExport>();
+  const request = useMemo(
+    () => ({ url, filename, attempt }),
+    [url, filename, attempt]
+  );
   const state: ExportState =
-    prepared?.url === url && prepared.filename === filename
-      ? prepared.state
-      : { status: "loading" };
+    prepared?.request === request ? prepared.state : { status: "loading" };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -79,7 +86,9 @@ export function useArtworkExport(url: string, filename: string) {
     const timeout = globalThis.setTimeout(() => controller.abort(), 30_000);
     const prepare = async () => {
       try {
-        const response = await fetch(url, { signal: controller.signal });
+        const response = await fetch(request.url, {
+          signal: controller.signal,
+        });
         if (
           !response.ok ||
           response.headers.get("content-type")?.split(";")[0] !== "image/png"
@@ -90,17 +99,15 @@ export function useArtworkExport(url: string, filename: string) {
         if (controller.signal.aborted)
           throw new Error("Artwork export timed out");
         if (disposed) return;
-        const file = new File([blob], filename, { type: "image/png" });
+        const file = new File([blob], request.filename, { type: "image/png" });
         previewUrl = URL.createObjectURL(file);
         setPrepared({
-          url,
-          filename,
+          request,
           state: { status: "ready", file, previewUrl },
         });
       } catch {
         controller.abort();
-        if (!disposed)
-          setPrepared({ url, filename, state: { status: "error" } });
+        if (!disposed) setPrepared({ request, state: { status: "error" } });
       } finally {
         globalThis.clearTimeout(timeout);
       }
@@ -112,7 +119,7 @@ export function useArtworkExport(url: string, filename: string) {
       globalThis.clearTimeout(timeout);
       if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
-  }, [url, filename, attempt]);
+  }, [request]);
 
   const retry = () => {
     setPrepared(undefined);

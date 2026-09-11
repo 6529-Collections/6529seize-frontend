@@ -17,6 +17,7 @@ import {
 import { ImageResponse } from "next/og";
 import { NextResponse } from "next/server";
 import { prepareNftArtworkImage } from "./artwork";
+import { fetchNftCardMetadata, type NftCardMetadata } from "./metadata";
 
 export const runtime = "edge";
 export const revalidate = 3600;
@@ -34,26 +35,31 @@ const getNftCardModel = ({
   id,
   format,
   request,
+  metadata,
 }: {
   readonly contract: string;
   readonly id: string;
   readonly format: NftSocialCardFormat;
   readonly request: Request;
+  readonly metadata: NftCardMetadata | null;
 }): BrandedNftOgImageModel => {
   const searchParams = new URL(request.url).searchParams;
-  const collection = getQueryText(searchParams, "collection");
+  const collection =
+    getQueryText(searchParams, "collection") ?? metadata?.collection ?? null;
   const title =
-    getQueryText(searchParams, "title") ?? getDefaultTitle({ collection, id });
+    getQueryText(searchParams, "title") ??
+    metadata?.title ??
+    getDefaultTitle({ collection, id });
 
   return {
-    artist: getQueryText(searchParams, "artist"),
-    badge: getQueryText(searchParams, "badge") ?? collection,
+    artist: getQueryText(searchParams, "artist") ?? metadata?.artist,
+    badge: getQueryText(searchParams, "badge") ?? metadata?.badge ?? collection,
     collection,
     contract,
-    displayId: getQueryText(searchParams, "displayId"),
+    displayId: getQueryText(searchParams, "displayId") ?? metadata?.displayId,
     format,
     id,
-    imageUrl: getQueryImageUrl(searchParams, "image"),
+    imageUrl: getQueryImageUrl(searchParams, "image") ?? metadata?.imageUrl,
     origin: getOgImageRequestOrigin(request),
     subtitle: getQueryText(searchParams, "subtitle"),
     title,
@@ -96,11 +102,21 @@ export async function GET(
   const cardFormat = format as NftSocialCardFormat;
 
   try {
+    const searchParams = new URL(request.url).searchParams;
+    const metadata =
+      getQueryImageUrl(searchParams, "image") === null
+        ? await fetchNftCardMetadata(
+            normalizedContract,
+            normalizedId,
+            request.signal
+          )
+        : null;
     const model = getNftCardModel({
       contract: normalizedContract,
       id: normalizedId,
       format: cardFormat,
       request,
+      metadata,
     });
     // Satori swallows remote image failures. Explicit downloads must have art
     // ready before rendering; ordinary crawler previews retain their fallback.
