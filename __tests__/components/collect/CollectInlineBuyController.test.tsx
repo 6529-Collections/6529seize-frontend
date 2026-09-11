@@ -266,3 +266,28 @@ it("reuses the same prepare key and exact request after a lost response", async 
   expect(mockPrepare.mock.calls[1]).toEqual(mockPrepare.mock.calls[0]);
   expect(mockConfirm).not.toHaveBeenCalled();
 });
+
+it("defaults an older full-lot listing to the whole quantity and hides unsupported partial editing", async () => {
+  mockFetchOrders.mockResolvedValue({
+    orders: [
+      {
+        ...order,
+        quantity: "2",
+        total_wei: "200000000000000000",
+        net_wei: "200000000000000000",
+      },
+    ],
+  });
+  renderBuy();
+  const buy = await screen.findByRole("button", { name: "Buy 0.2 ETH" });
+  await waitFor(() => expect(buy).toBeEnabled());
+  expect(screen.getByText("Quantity: 2")).toBeVisible();
+  expect(
+    screen.queryByRole("textbox", { name: "Quantity" })
+  ).not.toBeInTheDocument();
+  fireEvent.click(buy);
+  await waitFor(() => expect(mockPrepare).toHaveBeenCalledTimes(1));
+  expect(mockPrepare.mock.calls[0][0]).toEqual(
+    expect.objectContaining({ quantity: "2", amount_wei: "200000000000000000" })
+  );
+});

@@ -16,6 +16,7 @@ import { MARKET_ZERO } from "./market-validation";
 type Props = ComponentProps<typeof CollectTradeForm> & {
   readonly amountWei: string | null;
   readonly orderOptions?: ReactNode;
+  readonly quantityStep?: string;
 };
 
 export default function CollectInlineBuyForm(props: Props) {
@@ -71,7 +72,7 @@ export default function CollectInlineBuyForm(props: Props) {
         errorId={`${id}-error`}
         onChange={(value) => change({ recipient: value })}
       />
-      {(props.maxQuantity !== "1" || props.draft.quantity !== "1") && (
+      {props.maxQuantity !== (props.quantityStep ?? "1") && (
         <label className="tw-flex tw-items-center tw-gap-3 tw-text-xs tw-text-iron-300">
           <span>{t(locale, "collect.trade.quantity")}</span>
           <input
@@ -89,6 +90,12 @@ export default function CollectInlineBuyForm(props: Props) {
           />
         </label>
       )}
+      {props.maxQuantity === (props.quantityStep ?? "1") &&
+        props.draft.quantity !== "1" && (
+          <p className="tw-m-0 tw-text-xs tw-text-iron-300">
+            {t(locale, "collect.trade.quantity")}: {props.draft.quantity}
+          </p>
+        )}
       {props.orderOptions}
       {external && (
         <label className="tw-flex tw-min-h-11 tw-items-start tw-gap-3 tw-text-xs tw-leading-5 tw-text-iron-300">

@@ -2,6 +2,7 @@ import {
   collectBuyAmount,
   collectBuyListings,
   collectListingKey,
+  collectOrderPurchaseQuantity,
 } from "@/components/collect/collect-buy.helpers";
 import {
   MARKET_SEAPORT,
@@ -18,24 +19,31 @@ const maker = "0x1111111111111111111111111111111111111111";
 function listing(
   patch: Partial<ApiMarketTradeOrder> = {}
 ): ApiMarketTradeOrder {
-  return {
-    identity: {
-      protocol_address: MARKET_SEAPORT,
-      order_hash: `0x${"a".repeat(64)}`,
+  return Object.assign(
+    {
+      identity: {
+        protocol_address: MARKET_SEAPORT,
+        order_hash: `0x${"a".repeat(64)}`,
+      },
+      asset_key: asset,
+      maker,
+      side: ApiMarketTradeOrderSideEnum.Listing,
+      quantity: "2",
+      currency: MARKET_ZERO,
+      total_wei: "8",
+      net_wei: "6",
+      fees: [],
+      start_time: "1",
+      end_time: "300",
+      recipient: MARKET_ZERO,
+      ...patch,
     },
-    asset_key: asset,
-    maker,
-    side: ApiMarketTradeOrderSideEnum.Listing,
-    quantity: "2",
-    currency: MARKET_ZERO,
-    total_wei: "8",
-    net_wei: "6",
-    fees: [],
-    start_time: "1",
-    end_time: "300",
-    recipient: MARKET_ZERO,
-    ...patch,
-  };
+    {
+      purchase_quantity: "1",
+      quantity_step: "1",
+      available_quantity: patch.quantity ?? "2",
+    }
+  );
 }
 function candidates(
   orders: ApiMarketTradeOrder[],
@@ -96,4 +104,48 @@ it("keeps exact listing identity distinct across assets and protocols", () => {
       listing({ identity: { ...order.identity, protocol_address: maker } })
     )
   );
+});
+
+it("does not infer a one-copy purchase for a full-only or fee-indivisible edition lot", () => {
+  const fullOnly = {
+    ...listing({ quantity: "2", total_wei: "200", net_wei: "200" }),
+    purchase_quantity: "2",
+    quantity_step: "2",
+  };
+  expect(collectOrderPurchaseQuantity(fullOnly)).toBe("2");
+  expect(collectBuyAmount(fullOnly, "1")).toBeNull();
+  expect(collectBuyAmount(fullOnly, "2")).toBe("200");
+  const indivisible = {
+    ...fullOnly,
+    net_wei: "199",
+    fees: [{ recipient: maker, amount_wei: "1" }],
+    quantity_step: "1",
+  };
+  expect(collectBuyAmount(indivisible, "1")).toBeNull();
+  expect(collectBuyAmount(indivisible, "2")).toBe("200");
+});
+
+it("uses explicit available quantity separately from the quoted unit-price basis", () => {
+  const normalized = {
+    ...listing({ quantity: "1", total_wei: "7", net_wei: "7" }),
+    available_quantity: "3",
+  };
+  expect(collectOrderPurchaseQuantity(normalized)).toBe("1");
+  expect(collectBuyAmount(normalized, "3")).toBe("21");
+  expect(collectBuyAmount(normalized, "4")).toBeNull();
+});
+
+it("defaults legacy discovery to its exact whole lot", () => {
+  const {
+    purchase_quantity: _purchase,
+    quantity_step: _step,
+    available_quantity: _available,
+    ...legacy
+  } = Object.assign(listing(), {
+    purchase_quantity: "1",
+    quantity_step: "1",
+    available_quantity: "2",
+  });
+  expect(collectOrderPurchaseQuantity(legacy)).toBe("2");
+  expect(collectBuyAmount(legacy, "1")).toBeNull();
 });

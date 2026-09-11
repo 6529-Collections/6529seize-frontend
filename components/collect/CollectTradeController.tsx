@@ -61,6 +61,9 @@ import {
   collectBuyAmount,
   collectBuyListings,
   collectListingKey,
+  collectOrderPurchaseQuantity,
+  collectOrderAvailableQuantity,
+  collectOrderQuantityStep,
 } from "./collect-buy.helpers";
 
 function recoveredTransactionFacts(
@@ -160,7 +163,7 @@ export default function CollectTradeController({
             ?.request ?? null)
         : null
   );
-  const [draft, setDraft] = useState<CollectTradeDraft>({
+  const [inputDraft, setDraft] = useState<CollectTradeDraft>({
     quantity: initialQuantity ?? "1",
     unitPriceEth: "",
     expiryHours: "168",
@@ -168,6 +171,9 @@ export default function CollectTradeController({
       initialRecipient ??
       defaultCollectRecipient(connectedProfile, connection.address),
   });
+  const [quantityEdited, setQuantityEdited] = useState(
+    initialQuantity !== undefined
+  );
   const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const pendingPrepare = useRef<{
@@ -197,7 +203,7 @@ export default function CollectTradeController({
     ? collectBuyListings({
         orders: orders.data?.orders ?? [],
         assetKey,
-        quantity: draft.quantity,
+        ...(quantityEdited ? { quantity: inputDraft.quantity } : {}),
         profileWallets: collectProfileWallets(connectedProfile).map(
           (item) => item.wallet
         ),
@@ -206,6 +212,13 @@ export default function CollectTradeController({
     : [];
   const selectedOrder =
     chosenOrder ?? (inlineBuy ? (buyOrders[0] ?? null) : null);
+  const automaticQuantity = selectedOrder
+    ? collectOrderPurchaseQuantity(selectedOrder)
+    : null;
+  const draft =
+    inlineBuy && !quantityEdited && automaticQuantity
+      ? { ...inputDraft, quantity: automaticQuantity }
+      : inputDraft;
   const capability = useQuery({
     queryKey: [QueryKey.COLLECT_CAPABILITIES],
     queryFn: ({ signal }) => fetchCollectCapabilities(signal),
@@ -428,8 +441,14 @@ export default function CollectTradeController({
           action="buy"
           draft={draft}
           maxQuantity={
-            selectedOrder?.quantity ??
-            (asset?.family.toString() === "memes" ? "100" : "1")
+            (selectedOrder
+              ? collectOrderAvailableQuantity(selectedOrder)
+              : null) ?? "1"
+          }
+          quantityStep={
+            selectedOrder
+              ? (collectOrderQuantityStep(selectedOrder) ?? "1")
+              : "1"
           }
           makerLabel={connection.address ?? "—"}
           currencyLabel="ETH"
@@ -442,7 +461,14 @@ export default function CollectTradeController({
           disabledReason={disabledReason ?? noInlineOrder}
           loading={preparing}
           error={error}
-          onChange={setDraft}
+          onChange={(value) => {
+            if (value.quantity !== draft.quantity) {
+              setQuantityEdited(true);
+              setSelectedOrder(null);
+            } else if (!chosenOrder && selectedOrder)
+              setSelectedOrder(selectedOrder);
+            setDraft(value);
+          }}
           onPrepare={(value) => {
             void prepare(value);
           }}
