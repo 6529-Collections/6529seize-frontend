@@ -105,14 +105,27 @@ and approval amounts before continuing with remaining offers.
 
 ### Compare TDH
 
-Choose **TDH**, a collection, a budget and a time horizon to compare additional
-TDH for the current profile. Opening the TDH tool starts with The Memes. A direct
-link with a collection selected keeps that collection, and you can change it.
-Comparisons use a verified official snapshot and include changes to bonuses on
-existing holdings. Gift allocations outside the profile contribute no TDH to
-that profile. Cost comparisons include an estimated gas reserve and identify
-the observed candidate pool; they are not a guarantee of the lowest price
-across every marketplace or of future TDH rules.
+Choose **TDH** to see listings immediately, starting with The Memes. You do not
+need a profile, budget or time horizon to browse. The grid compares each NFT's
+best supported indexed ETH ask by **base TDH/day per ETH**. A higher value means
+more base TDH accrual for the listed price. Signed listing fees are included;
+gas and current availability are checked at purchase.
+
+Holding time starts when you receive an NFT. The seller's accumulated TDH does
+not transfer, and this comparison excludes profile and set multipliers. The
+rate describes a full held day rather than a promise about tomorrow's snapshot.
+For an indivisible lot, the displayed price and rate cover its exact quantity.
+
+Open **How TDH value works** for the source snapshot and coverage. Indexed prices
+can change, and a bounded comparison identifies when more indexed asks were
+outside its coverage. The site checks a fresh executable quote before purchase.
+
+The separate time-based profile comparison uses a verified official TDH snapshot
+and includes bonus changes on existing holdings. Gifts outside the profile add
+no TDH to that profile. Its future projection and estimated gas reserve serve a
+different purpose from the base-rate listing grid. Open **Project profile TDH**
+to choose a budget and time horizon; **Back to TDH listings** returns to browsing.
+A direct link with a collection selected keeps that collection.
 
 ### Save a rule for reviewed purchases
 

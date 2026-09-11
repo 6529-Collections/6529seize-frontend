@@ -136,8 +136,25 @@ export const COLLECT_MESSAGES = {
   "collect.intent.full_set": "Complete a full set",
   "collect.intent.artist": "Collect an artist",
   "collect.intent.pebbles_set": "Complete a Pebbles set",
-  "collect.intent.tdh": "Project your profile’s TDH",
+  "collect.tdh.projectionTitle": "Project your profile’s TDH",
   "collect.tdh.backToListings": "Back to TDH listings",
+  "collect.intent.tdh": "Lowest cost TDH",
+  "collect.tdhBrowse.scope": "Ranked by base TDH/day per ETH.",
+  "collect.tdhBrowse.value": "≈ {value} base TDH/day per ETH",
+  "collect.tdhBrowse.target": "Project profile TDH",
+  "collect.tdhBrowse.explain": "How TDH value works",
+  "collect.tdhBrowse.method":
+    "Compares each NFT’s best supported ETH listing using its current base TDH accrual per full held day. Listing fees are included; gas is checked at purchase. Each listing is verified again before checkout.",
+  "collect.tdhBrowse.profile":
+    "Holding time starts when you receive an NFT; the seller’s accumulated TDH does not transfer. Profile and set multipliers are excluded here. Use profile projection to compare their effect on your whole profile.",
+  "collect.tdhBrowse.snapshot":
+    "{count} indexed asks considered · Snapshot {date}.",
+  "collect.tdhBrowse.bounded":
+    "This comparison covers a bounded portion of the indexed collection. More favorable listings may exist outside this view.",
+  "collect.tdhBrowse.stale":
+    "These indexed prices are awaiting a market refresh. Checkout checks current availability and price.",
+  "collect.tdhBrowse.unavailable":
+    "Indexed listings are refreshing. Please try again shortly.",
   "collect.chooseGoal": "What are you collecting?",
   "collect.search": "Search artwork",
   "collect.searchPlaceholder": "Title, artist or token number",

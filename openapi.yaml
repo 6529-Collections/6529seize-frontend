@@ -3559,6 +3559,57 @@ paths:
           description: Profile not authorized
         "503":
           description: Source unavailable
+  /collect/tdh-listings:
+    get:
+      tags:
+        - Collect
+      summary: Browse listings by cost per base TDH accrual rate
+      description: >-
+        Compares the best supported ETH ask for each NFT across a completed
+        indexed collection snapshot. Base TDH accrual is per full held day and
+        excludes profile multipliers, inherited seller history, and gas. A fresh
+        executable quote is always required before purchase.
+      operationId: getCollectTdhListings
+      security:
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-tdh-listings.handlers"
+          name: handleGetCollectTdhListings
+      parameters:
+        - name: family
+          in: query
+          schema:
+            $ref: "#/components/schemas/ApiCollectFamily"
+        - name: cursor
+          in: query
+          schema:
+            type: string
+            maxLength: 2048
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 48
+            default: 24
+      responses:
+        "200":
+          description: Ranked indexed listings and source coverage
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectTdhListings"
+        "400":
+          description: Invalid request
+        "409":
+          description: Listings changed; restart pagination
+        "503":
+          description: Indexed source unavailable
   /collect/tdh-ranking:
     post:
       tags:
@@ -20990,6 +21041,104 @@ components:
       required:
         - candidate_id
         - reason
+    ApiCollectTdhListing:
+      type: object
+      additionalProperties: false
+      properties:
+        asset:
+          $ref: "#/components/schemas/ApiCollectAsset"
+        order:
+          $ref: "#/components/schemas/ApiMarketTradeOrder"
+        available_quantity:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+        purchase_quantity:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          description: >-
+            Exact fill quantity described by the order and purchase cost. One
+            copy when every signed item supports an exact unit fill; otherwise
+            the indivisible lot.
+        purchase_cost_wei:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          description: Signed ETH price including listing fees, excluding gas.
+        rate_hundredths:
+          type: string
+          pattern: ^[1-9][0-9]*$
+          description: >-
+            Indexed base TDH per full held day per copy, multiplied by 100 after
+            production rate rounding.
+        base_tdh_per_day_hundredths:
+          type: string
+          pattern: ^[1-9][0-9]*$
+          description: >-
+            Rate hundredths multiplied by the exact purchase quantity.
+            Accumulated TDH and profile boosts are excluded.
+      required:
+        - asset
+        - order
+        - available_quantity
+        - purchase_quantity
+        - purchase_cost_wei
+        - rate_hundredths
+        - base_tdh_per_day_hundredths
+    ApiCollectTdhListings:
+      type: object
+      additionalProperties: false
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectTdhListing"
+        family:
+          $ref: "#/components/schemas/ApiCollectFamily"
+        next:
+          type: string
+          nullable: true
+        snapshot_id:
+          type: string
+        catalog_version:
+          type: string
+        observed_at:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum:
+            - fresh
+            - stale
+            - unavailable
+        indexed_ask_count:
+          type: integer
+          format: int64
+        evaluated_ask_count:
+          type: integer
+          format: int64
+        ranked_nft_count:
+          type: integer
+          format: int64
+        coverage_complete:
+          type: boolean
+          description: >-
+            All asks in the available completed index partitions were considered
+            within the read bound. This is not a guarantee of exhaustive live
+            marketplace coverage or executability.
+        source:
+          type: string
+      required:
+        - entries
+        - family
+        - next
+        - snapshot_id
+        - catalog_version
+        - observed_at
+        - status
+        - indexed_ask_count
+        - evaluated_ask_count
+        - ranked_nft_count
+        - coverage_complete
+        - source
     ApiCollectTdhProjection:
       type: object
       additionalProperties: false

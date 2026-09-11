@@ -11,6 +11,7 @@ import type { ApiCollectTdhRequest } from "@/generated/models/ApiCollectTdhReque
 import type { ApiCollectTdhProjection } from "@/generated/models/ApiCollectTdhProjection";
 import type { ApiCollectTdhRankingRequest } from "@/generated/models/ApiCollectTdhRankingRequest";
 import type { ApiCollectTdhRanking } from "@/generated/models/ApiCollectTdhRanking";
+import type { ApiCollectTdhListings } from "@/generated/models/ApiCollectTdhListings";
 import { commonApiFetch, commonApiPost } from "./common-api";
 
 export const fetchCollectAssetOwnership = (
@@ -26,6 +27,19 @@ export const fetchCollectAssetOwnership = (
       assets: [{ asset_key: assetKey, quantity: "1" }],
     },
     signal,
+    errorMode: "structured",
+  });
+
+export const fetchCollectTdhListings = (
+  family: ApiCollectFamily,
+  cursor: string | null,
+  signal?: AbortSignal
+) =>
+  commonApiFetch<ApiCollectTdhListings>({
+    endpoint: "collect/tdh-listings",
+    params: { family, limit: "24", ...(cursor ? { cursor } : {}) },
+    signal,
+    cache: "no-store",
     errorMode: "structured",
   });
 
