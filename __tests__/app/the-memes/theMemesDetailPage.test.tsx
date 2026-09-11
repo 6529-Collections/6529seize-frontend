@@ -119,6 +119,12 @@ describe("The Memes detail generateMetadata", () => {
   it("canonicalizes locale query variants to the focused tab URL", async () => {
     mockShared.mockResolvedValue({
       title: "Meme",
+      openGraph: {
+        title: "Meme",
+        images: [
+          { url: "https://6529.io/meme-preview.png", width: 1200, height: 630 },
+        ],
+      },
       alternates: {
         languages: {
           "en-US": "https://6529.io/the-memes/123",
@@ -148,6 +154,13 @@ describe("The Memes detail generateMetadata", () => {
         "en-US": "https://6529.io/the-memes/123",
       },
     });
+    expect(metadata.openGraph).toEqual({
+      title: "Meme",
+      images: [
+        { url: "https://6529.io/meme-preview.png", width: 1200, height: 630 },
+      ],
+      url: "https://6529.io/the-memes/123?focus=history",
+    });
   });
 
   it("drops locale and invalid focus variants from the canonical URL", async () => {
@@ -166,6 +179,7 @@ describe("The Memes detail generateMetadata", () => {
     expect(metadata.alternates).toMatchObject({
       canonical: "https://6529.io/the-memes/123",
     });
+    expect(metadata.openGraph?.url).toBe("https://6529.io/the-memes/123");
   });
 
   it("uses the base card URL for the default live focus", async () => {
@@ -184,5 +198,6 @@ describe("The Memes detail generateMetadata", () => {
     expect(metadata.alternates).toMatchObject({
       canonical: "https://6529.io/the-memes/123",
     });
+    expect(metadata.openGraph?.url).toBe("https://6529.io/the-memes/123");
   });
 });
