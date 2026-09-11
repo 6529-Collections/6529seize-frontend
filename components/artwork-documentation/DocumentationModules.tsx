@@ -5,7 +5,10 @@ import { useState } from "react";
 import { ApiArtworkDocumentationAnswerStatusEnum } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import type { ApiArtworkDocumentationAnswer } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
-import type { ApiArtworkDocumentationOperation } from "@/generated/models/ApiArtworkDocumentationOperation";
+import {
+  ApiArtworkDocumentationOperationOpEnum,
+  type ApiArtworkDocumentationOperation,
+} from "@/generated/models/ApiArtworkDocumentationOperation";
 import { documentationFieldLabel } from "@/i18n/messages/artwork-documentation-fields";
 import {
   isRedacted,
@@ -220,6 +223,13 @@ function DocumentationAnswerField(
   const pending = edits.find(
     (edit) => edit.moduleId === moduleId && edit.operation.field === field.id
   );
+  const replacingCanonicalAsset =
+    moduleId === "artwork" &&
+    field.id === "canonical_asset_id" &&
+    !!context.latest_revision_id &&
+    pending?.operation.op === ApiArtworkDocumentationOperationOpEnum.Set &&
+    pending.operation.answer?.value !==
+      context.modules["artwork"]?.answers["canonical_asset_id"]?.value;
   const invalid = pending
     ? !validDocumentationOperation(context, moduleId, pending.operation)
     : false;
@@ -268,12 +278,19 @@ function DocumentationAnswerField(
     if (merged.status !== ApiArtworkDocumentationAnswerStatusEnum.Provided)
       delete merged.value;
     if (merged.explanation === "") delete merged.explanation;
+    const canonicalSelectionChanged =
+      field.id === "canonical_asset_id" &&
+      Object.hasOwn(next, "value") &&
+      next.value !== answer?.value;
+    if (canonicalSelectionChanged) setReplacementReason("");
     onChange(moduleId, {
       op: "set",
       field: field.id,
       answer: merged,
       ...(field.id === "canonical_asset_id" && context.latest_revision_id
-        ? { replacementReason }
+        ? {
+            replacementReason: canonicalSelectionChanged ? "" : replacementReason,
+          }
         : {}),
     } as ApiArtworkDocumentationOperation);
   };
@@ -358,27 +375,24 @@ function DocumentationAnswerField(
               })
             }
           />
-          {field.id === "canonical_asset_id" &&
-            context.latest_revision_id &&
-            !disabled && (
-              <label className="tw-mb-4 tw-block tw-text-sm tw-text-iron-300">
-                {msg("canonicalReason")}
-                <textarea
-                  className={`${inputClass} tw-mt-2`}
-                  rows={3}
-                  value={replacementReason}
-                  onChange={(event) => {
-                    const reason = event.target.value;
-                    setReplacementReason(reason);
-                    if (pending)
-                      onChange(moduleId, {
-                        ...pending.operation,
-                        replacementReason: reason,
-                      } as ApiArtworkDocumentationOperation);
-                  }}
-                />
-              </label>
-            )}
+          {replacingCanonicalAsset && (
+            <label className="tw-mb-4 tw-block tw-text-sm tw-text-iron-300">
+              {msg("canonicalReason")}
+              <textarea
+                className={`${inputClass} tw-mt-2`}
+                rows={3}
+                value={replacementReason}
+                onChange={(event) => {
+                  const reason = event.target.value;
+                  setReplacementReason(reason);
+                  onChange(moduleId, {
+                    ...pending.operation,
+                    replacementReason: reason,
+                  } as ApiArtworkDocumentationOperation);
+                }}
+              />
+            </label>
+          )}
           {status === ApiArtworkDocumentationAnswerStatusEnum.Provided ? (
             <DocumentationValueEditor
               id={id}

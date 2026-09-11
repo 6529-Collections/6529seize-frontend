@@ -2,12 +2,75 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import DocumentationValueEditor from "@/components/artwork-documentation/DocumentationValueEditor";
 import DocumentationModules from "@/components/artwork-documentation/DocumentationModules";
 import { documentationFixture } from "@/__tests__/fixtures/artwork-documentation";
+import type { ApiArtworkDocumentationOperation } from "@/generated/models/ApiArtworkDocumentationOperation";
+import type { PendingEdit } from "@/lib/artwork-documentation/draft-controller";
+import { validDocumentationOperation } from "@/lib/artwork-documentation/validation";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
 
 describe("artwork documentation modules", () => {
+  it("asks for a replacement reason only while a different confirmed final file is selected", () => {
+    const context = documentationFixture();
+    context.latest_revision_id = "confirmed-revision";
+    const artwork = context.profile.modules.find(
+      (module) => module.id === "artwork"
+    )!;
+    artwork.fields.push({ ...artwork.fields[0]!, id: "canonical_asset_id" });
+    context.modules["artwork"]!.answers["canonical_asset_id"] = {
+      status: "provided",
+      value: "original-file",
+      intended_visibility: "public_record",
+    } as never;
+    const assets = [
+      { id: "original-file", label: "Confirmed photograph" },
+      { id: "replacement-file", label: "Revised photograph" },
+    ];
+    context.asset_links = assets.map((asset) => ({
+      asset_id: asset.id,
+      role: "artwork_final",
+      intended_visibility: "public_record",
+    })) as typeof context.asset_links;
+    const onChange = jest.fn<void, [string, ApiArtworkDocumentationOperation]>();
+    const form = (edits: PendingEdit[]) => (
+      <DocumentationModules
+        context={context}
+        edits={edits}
+        section="artwork"
+        assets={assets}
+        onChange={onChange}
+      />
+    );
+    const { rerender } = render(form([]));
+    const applyPendingChange = () => {
+      const [moduleId, operation] = onChange.mock.calls.at(-1)!;
+      rerender(form([{ moduleId, operation, sequence: 1 }]));
+      return validDocumentationOperation(context, moduleId, operation);
+    };
+    const reasonName = "Why are you replacing the confirmed final file?";
+    const file = screen.getByRole("combobox", { name: "Final artwork file" });
+    expect(screen.queryByRole("textbox", { name: reasonName })).toBeNull();
+
+    fireEvent.change(file, { target: { value: "replacement-file" } });
+    expect(applyPendingChange()).toBe(false);
+    const reason = screen.getByRole("textbox", { name: reasonName });
+    expect(reason).toBeVisible();
+    fireEvent.change(reason, { target: { value: "1234567890123456789" } });
+    expect(applyPendingChange()).toBe(false);
+    expect(screen.getByRole("status")).toBeVisible();
+    fireEvent.change(reason, { target: { value: "12345678901234567890" } });
+    expect(applyPendingChange()).toBe(true);
+    expect(screen.queryByRole("status")).toBeNull();
+
+    fireEvent.change(file, { target: { value: "original-file" } });
+    expect(applyPendingChange()).toBe(true);
+    expect(screen.queryByRole("textbox", { name: reasonName })).toBeNull();
+
+    fireEvent.change(file, { target: { value: "replacement-file" } });
+    expect(applyPendingChange()).toBe(false);
+    expect(screen.getByRole("textbox", { name: reasonName })).toHaveValue("");
+  });
   it("keeps clearing an answer inside its options without hiding the recorded value", () => {
     const context = documentationFixture();
     const onChange = jest.fn();
