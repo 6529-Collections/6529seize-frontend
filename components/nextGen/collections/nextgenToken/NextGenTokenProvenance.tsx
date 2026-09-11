@@ -1,9 +1,11 @@
 "use client";
 
-import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
+import NftMarketActivity from "@/components/nft-market-activity/NftMarketActivity";
 import Pagination from "@/components/pagination/Pagination";
+import { NEXTGEN_CONTRACT } from "@/constants/constants";
 import type { NextGenCollection, NextGenLog } from "@/entities/INextgen";
-import type { Transaction } from "@/entities/ITransaction";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useEffect, useRef, useState } from "react";
 import { NextGenCollectionProvenanceRow } from "../collectionParts/NextGenCollectionProvenance";
@@ -18,16 +20,8 @@ const ERROR_ACTION_CLASSES =
   "tw-rounded-lg tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
 
 export default function NextGenTokenProvenance(props: Readonly<Props>) {
-  const scrollTarget = useRef<HTMLElement>(null);
+  const locale = useBrowserLocale();
   const logsScrollTarget = useRef<HTMLElement>(null);
-
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [transactionsLoaded, setTransactionsLoaded] = useState(false);
-  const [transactionsError, setTransactionsError] = useState(false);
-  const [totalResults, setTotalResults] = useState(0);
-  const [page, setPage] = useState(1);
-  const [transactionsRequestVersion, setTransactionsRequestVersion] =
-    useState(0);
 
   const [logs, setLogs] = useState<NextGenLog[]>([]);
   const [logsLoaded, setLogsLoaded] = useState(false);
@@ -35,39 +29,6 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
   const [logsTotalResults, setLogsTotalResults] = useState(0);
   const [logsPage, setLogsPage] = useState(1);
   const [logsRequestVersion, setLogsRequestVersion] = useState(0);
-
-  useEffect(() => {
-    let isCurrentRequest = true;
-    setTransactionsLoaded(false);
-    setTransactionsError(false);
-
-    void commonApiFetch<{
-      count: number;
-      page: number;
-      next: unknown;
-      data: Transaction[];
-    }>({
-      endpoint: `nextgen/tokens/${props.token_id}/transactions?page_size=${PAGE_SIZE}&page=${page}`,
-    })
-      .then((response) => {
-        if (!isCurrentRequest) return;
-        setTotalResults(response.count);
-        setTransactions(response.data);
-        setTransactionsLoaded(true);
-      })
-      .catch((error) => {
-        if (!isCurrentRequest) return;
-        console.error("Failed to fetch NextGen token transactions", error);
-        setTotalResults(0);
-        setTransactions([]);
-        setTransactionsError(true);
-        setTransactionsLoaded(true);
-      });
-
-    return () => {
-      isCurrentRequest = false;
-    };
-  }, [page, props.token_id, transactionsRequestVersion]);
 
   useEffect(() => {
     let isCurrentRequest = true;
@@ -103,88 +64,25 @@ export default function NextGenTokenProvenance(props: Readonly<Props>) {
   }, [logsPage, logsRequestVersion, props.collection.id, props.token_id]);
 
   return (
-    <section>
+    <section className="tw-min-w-0">
       <h2 className="tw-mb-5 tw-mt-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-2xl">
         Provenance
       </h2>
-      <div className="tw-grid tw-gap-5">
-        <section
-          className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 sm:tw-p-5"
-          ref={scrollTarget}
-        >
+      <div className="tw-grid tw-min-w-0 tw-gap-5">
+        <section className="tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 sm:tw-p-5">
           <h3 className="tw-mb-4 tw-mt-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white">
-            Token Provenance
+            {t(locale, "nftActivity.cardTitle")}
           </h3>
-          {!transactionsLoaded && (
-            <output
-              aria-label="Loading token provenance"
-              className="tw-block tw-py-5 tw-text-iron-400"
-            >
-              Loading token provenance…
-            </output>
-          )}
-          {transactionsError && (
-            <div
-              role="alert"
-              className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-py-5 tw-text-error"
-            >
-              <span>Unable to load token provenance.</span>
-              <button
-                type="button"
-                className={ERROR_ACTION_CLASSES}
-                onClick={() =>
-                  setTransactionsRequestVersion((value) => value + 1)
-                }
-              >
-                Retry
-              </button>
-            </div>
-          )}
-          {transactionsLoaded &&
-            !transactionsError &&
-            transactions.length === 0 && (
-              <p className="tw-mb-0 tw-py-5 tw-text-iron-400">
-                No token provenance entries found.
-              </p>
-            )}
-          {transactionsLoaded &&
-            !transactionsError &&
-            transactions.length > 0 && (
-              <div className="tw-overflow-x-auto">
-                <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
-                  <tbody>
-                    {transactions.map((transaction) => (
-                      <LatestActivityRow
-                        tr={transaction}
-                        hideNextgenTokenId
-                        key={`${transaction.from_address}-${transaction.to_address}-${transaction.transaction}-${transaction.token_id}`}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          {totalResults > PAGE_SIZE &&
-            transactionsLoaded &&
-            !transactionsError && (
-              <div className="tw-pt-5 tw-text-center">
-                <Pagination
-                  page={page}
-                  pageSize={PAGE_SIZE}
-                  totalResults={totalResults}
-                  setPage={(newPage: number) => {
-                    setPage(newPage);
-                    scrollTarget.current?.scrollIntoView({
-                      behavior: "smooth",
-                    });
-                  }}
-                />
-              </div>
-            )}
+          <NftMarketActivity
+            contract={NEXTGEN_CONTRACT}
+            tokenId={String(props.token_id)}
+            pageSize={PAGE_SIZE}
+            compact
+          />
         </section>
 
         <section
-          className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 sm:tw-p-5"
+          className="tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 sm:tw-p-5"
           ref={logsScrollTarget}
         >
           <h3 className="tw-mb-4 tw-mt-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-white">

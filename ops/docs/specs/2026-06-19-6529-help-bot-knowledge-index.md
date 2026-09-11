@@ -33,11 +33,19 @@ current pages; those guides are not invented as historical snapshot routes.
 The EMMA record covers the five fixed collection shortcuts, Memes season
 selection, Intern JPG token IDs, and the manual contract path in Create Snapshots.
 
-The profile CMS builder record covers direct route access, owner-only save and
-publish actions, draft recovery, signed-in gallery snapshots for wallet addresses
-and ENS names, wallet-signed publishing, version restoration, and unpublishing.
-It distinguishes removing the active website
-pointer from deleting immutable storage and links to the builder's user guide.
+The profile website studio records cover 39 editable templates (23 original
+compositions and 16 credited Memes inspirations), page and menu editing, image
+uploads, indexed wallet galleries, and the profile header's published Website
+link. They describe readable custom page addresses while preserving archive
+paths, owner-only save and publish, browser recovery, wallet signing, version
+restoration, and unpublishing. Upload records explicitly state that image files
+become public before the website is published. The optional agent-file record
+covers exports and reviewed local patches, including their first-page limits;
+it does not claim a connected MCP service. These records link to the studio's
+user guide and distinguish removing the active website pointer from deleting
+immutable storage. Per-page sharing-image choices and automatic reset, search
+visibility (`noindex` pages remain public), and Apply/Discard form recovery behavior are
+also included.
 
 ## Goals
 

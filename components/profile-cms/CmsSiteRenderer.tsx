@@ -9,16 +9,33 @@ import { createRendererContext } from "@/components/profile-cms/site-renderer/da
 import { NavigationItem } from "@/components/profile-cms/site-renderer/NavigationItem";
 import { getPageTypeLabel } from "@/components/profile-cms/site-renderer/nftHelpers";
 import { NftDetailPage } from "@/components/profile-cms/site-renderer/NftDetailPage";
+import CmsStudioSiteRenderer, {
+  type CmsStudioEditingContext,
+} from "./CmsStudioSiteRenderer";
+import { getCmsStudioPresentation } from "@/lib/profile-cms/studio/presentation";
 
 export default function CmsSiteRenderer({
   cmsPackage,
   locale = DEFAULT_LOCALE,
   page,
+  editing,
 }: {
   readonly cmsPackage: CmsPackageV1;
   readonly locale?: SupportedLocale | undefined;
   readonly page: CmsPageV1;
+  readonly editing?: CmsStudioEditingContext | undefined;
 }) {
+  const presentation = getCmsStudioPresentation(cmsPackage);
+  if (presentation)
+    return (
+      <CmsStudioSiteRenderer
+        cmsPackage={cmsPackage}
+        page={page}
+        locale={locale}
+        presentation={presentation}
+        editing={editing}
+      />
+    );
   const context = createRendererContext(cmsPackage, locale);
   const navigationItems = getCmsNavigationItems(cmsPackage);
   const accentStyle = {

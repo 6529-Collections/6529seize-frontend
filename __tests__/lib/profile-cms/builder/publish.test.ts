@@ -575,6 +575,15 @@ describe("profile CMS publish orchestration", () => {
   });
 
   describe("published url", () => {
+    it.each([
+      "/punk6529/../identity/index.html",
+      "/punk6529/%2e%2e/identity/index.html",
+      "/punk6529/..\\identity/index.html",
+    ])("keeps a normalized visitor URL inside the profile for %s", (path) => {
+      expect(
+        getProfileCmsPublishedUrl("punk6529", "https://6529.io", path)
+      ).toBe("https://6529.io/punk6529/index.html");
+    });
     it("builds the canonical /{handle}/index.html url", () => {
       expect(getProfileCmsPublishedUrl("punk6529")).toBe(
         "https://6529.io/punk6529/index.html"
@@ -582,6 +591,56 @@ describe("profile CMS publish orchestration", () => {
       expect(
         getProfileCmsPublishedUrl("punk6529", "https://staging.6529.io")
       ).toBe("https://staging.6529.io/punk6529/index.html");
+    });
+
+    it("uses the canonical saved site's readable path without changing the signed root", async () => {
+      const cmsPackage = buildPackage();
+      const studioPackage = {
+        ...cmsPackage,
+        site: { ...cmsPackage.site, base_path: "/punk6529/studio/index.html" },
+        payload: {
+          ...cmsPackage.payload,
+          pages: cmsPackage.payload.pages.map((page) => ({
+            ...page,
+            path: "/punk6529/studio/index.html",
+          })),
+          routes: [
+            {
+              path: "/punk6529/index.html",
+              kind: "alias" as const,
+              target: "/punk6529/studio/index.html",
+            },
+            {
+              path: "/punk6529/studio/index.html",
+              kind: "page" as const,
+              page_id: "page-home",
+            },
+          ],
+        },
+        storage: [RECEIPT],
+      };
+      mockSaveOk();
+      (getProfileCmsPackageById as jest.Mock).mockResolvedValue({
+        ...publishedRecord,
+        cmsPackage: studioPackage,
+      });
+      uploadMock.mockResolvedValue(RECEIPT);
+      publishMock.mockResolvedValue(publishedRecord);
+      const signTypedData = jest.fn(okSign());
+      const result = await runProfileCmsPublish({
+        cmsPackage,
+        profileId: "profile-1",
+        chainId: 1,
+        signerAddress: "0xabc",
+        signTypedData,
+      });
+      expect(result).toMatchObject({
+        ok: true,
+        publishedUrl: "https://6529.io/punk6529/studio",
+      });
+      expect(signTypedData.mock.calls[0]?.[0].message.primaryPath).toBe(
+        "/punk6529/index.html"
+      );
     });
   });
 

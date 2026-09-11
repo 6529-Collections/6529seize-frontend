@@ -6,6 +6,7 @@ The profile header appears on profile routes under `/{user}` and shows:
 
 - identity and profile metadata
 - profile actions (edit, follow, direct message)
+- a **Website** link when a published profile website is available
 - quick stats links (`TDH`, `xTDH`, `NIC`, `Rep`, `Followers`)
 - artist activity entry when available
 
@@ -75,6 +76,10 @@ The profile header appears on profile routes under `/{user}` and shows:
      loader, stays disabled, and ignores repeated clicks until the request
      settles
 
+The **Website** action opens the profile's published custom website. Its home
+page can use a readable address such as `/{user}/studio`; the normal profile stays
+at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
+
 ## Common Scenarios
 
 - Display name fallback order: `handle` -> `display` -> primary wallet -> route
@@ -108,6 +113,8 @@ The profile header appears on profile routes under `/{user}` and shows:
 - If header-side fetches fail (BIO statement, profile-enabled date, followers
   count), the profile route still loads and missing header fields are omitted.
 - Followers count falls back to `0` if the count request fails.
+- If the published website cannot be loaded, its header link is omitted; other
+  profile actions remain available.
 - If direct-message creation fails, users get an error toast, the paper-plane
   button returns to its idle state, and they can retry.
 - If profile header edits fail, users get a toast or inline error and can retry.
@@ -128,6 +135,7 @@ The profile header appears on profile routes under `/{user}` and shows:
 
 ## Related Pages
 
+- [Profile Website Studio](../feature-profile-cms-builder.md)
 - [Profiles Index](../README.md)
 - [Profiles Navigation Index](README.md)
 - [Profile Routes and Tab Visibility](feature-tabs.md)

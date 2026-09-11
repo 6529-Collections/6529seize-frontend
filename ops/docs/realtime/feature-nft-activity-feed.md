@@ -2,88 +2,51 @@
 
 Parent: [Realtime Index](README.md)
 
-## Overview
+`/nft-activity` brings on-chain transactions and recorded OpenSea market actions
+into one timeline for The Memes, Meme Lab, Gradients and NextGen. Wallet
+authentication is not required. Open it from `Network -> NFT Activity`.
 
-`/nft-activity` shows recent NFT transactions in a table.
-It refetches on first load, filter changes, and page changes.
-Wallet authentication is not required.
+## Browse activity
 
-## Location in the Site
+Choose a collection and an activity type to narrow the feed. Alongside sales,
+mints, airdrops, transfers and burns, the feed includes recorded listings,
+offers, cancellations, expirations and order validity changes. Changing filters
+starts a fresh result list. Use **Load more** to fetch older activity.
 
-- Route: `/nft-activity`
-- Navigation path: `Network -> NFT Activity`
+Rows identify the action, artwork or collection, participating wallets, quoted
+payment and time. An offer can apply to a collection rather than one card.
+On-chain rows can link to their Ethereum transaction; off-chain market actions
+can exist without a transaction hash.
 
-## Entry Points
+Individual supported card pages also show activity relevant to that card.
+Collection-wide offers may appear on eligible cards, but represent one shared
+order rather than separate bids for every card.
 
-- Open `Network -> NFT Activity` from navigation.
-- Open `/nft-activity` directly.
+## Loading and recovery
 
-## User Journey
+The feed shows loading, empty and error states. Retry a failed request using
+the retry control. Artwork metadata can fall back to a collection name and
+token ID when its title or thumbnail is unavailable.
 
-1. Open `/nft-activity`.
-2. Wait for the header loader while transactions are fetched.
-3. Filter with `Collection` (`All Collections`, `The Memes`, `NextGen`,
-   `Gradients`) and `Transaction Type` (`All Transactions`, `Sales`, `Mints`,
-   `Transfers`, `Airdrops`, `Burns`).
-4. After each filter change, page resets to `1`.
-5. Review each row: timestamp, transaction-type icon, description, royalties
-   (when present), gas indicator, and an Etherscan transaction link.
-6. Open row links in a new tab:
-   The Memes/Gradients token pages (`/the-memes/{id}`, `/6529-gradient/{id}`),
-   NextGen provenance (`/nextgen/token/{tokenId}/provenance`), and Etherscan.
+Filters are not saved in the URL. There is no date-range picker or configurable
+sort order. Activity is shown newest first.
 
-## Pagination
+## What the history means
 
-- Page size is fixed to `50`.
-- Pagination controls appear only when total results are greater than `50`.
-- Controls include previous/next buttons, page-number input (`Enter` to apply),
-  and a last-page shortcut.
-- Invalid page input resets back to the current page.
-- Page changes scroll the window to top.
+Sales, mints, transfers and burns come from indexed Ethereum transactions.
+Marketplace actions come from captured OpenSea events and observed order
+statuses. A status observation can arrive later than the action itself.
+OpenSea event delivery is best effort, and earlier off-chain history may be
+unavailable. The feed does not guarantee a complete record of every market
+action before capture began or during an outage.
 
-## Common Scenarios
+An order disappearing from the market is not, by itself, a confirmed
+cancellation. A fulfilled-order status is an order update; its associated sale
+is recorded separately as an on-chain transaction.
 
-- Compare activity by collection while keeping one transaction type.
-- Filter for one transaction type (for example `Sales` or `Burns`) across all
-  collections.
-- Jump from a NextGen row to `/nextgen/token/{tokenId}/provenance`.
-- Open the transaction icon to inspect on-chain details in Etherscan.
+## Related pages
 
-## Edge Cases
-
-- `MemeLab` transactions can appear in results, but there is no dedicated
-  `MemeLab` collection filter.
-- `MemeLab` rows render as text labels (`MemeLab #{id}`), not token image links.
-- If NFT metadata is not available for a row, the feed falls back to token text
-  labels such as `Meme #{id}`, `Gradient #{id}`, `MemeLab #{id}`, or
-  `NextGen #{id}`.
-- If NextGen collection metadata is missing, rows fall back to
-  `NextGen #{collectionId}` naming.
-- Rows without a token count are omitted from the table.
-- Filter/page state is local state only and is not encoded in the URL.
-- Some filter combinations return zero rows; the table is empty with no
-  dedicated empty-state message.
-- This route does not stream websocket push updates.
-
-## Failure and Recovery
-
-- If transaction loading fails, rows are cleared and pagination is hidden.
-- There is no dedicated inline error banner or retry button for load failures.
-- Retry by refreshing the route or changing filters/page.
-- If metadata fetches fail, transactions still render with fallback text labels.
-
-## Limitations / Notes
-
-- There is no date-range picker.
-- Sorting is not user-configurable.
-- Filter and page choices are not persisted in URL query parameters.
-
-## Related Pages
-
-- [Realtime Index](README.md)
 - [NFT Activity Browsing Flow](flow-nft-activity-browsing.md)
-- [Realtime Connectivity Troubleshooting](troubleshooting-realtime-connectivity.md)
-- [NextGen Token Media Rendering](../nextgen/feature-token-media-rendering.md)
-- [Pagination Controls](../shared/feature-pagination-controls.md)
-- [Loading Status Indicators](../shared/feature-loading-status-indicators.md)
+- [Card Market Depth](../media/feature-card-market-depth.md)
+- [Network Activity Feed](../network/feature-network-activity-feed.md)
 - [Docs Home](../README.md)
