@@ -11,10 +11,12 @@ import {
   waitFor,
 } from "@testing-library/react";
 import type { CollectTradeAction } from "@/components/collect/collect.types";
-import type { ReactNode } from "react";
 import userEvent from "@testing-library/user-event";
 
 const mockFetchAssets = jest.fn();
+const mockControllerRender = jest.fn();
+let mockSuspendedController: Promise<void> | null = null;
+let mockHidePurchasing = false;
 const mockAuth = {
   connectedProfile: {
     id: "profile-one",
@@ -23,9 +25,22 @@ const mockAuth = {
 };
 
 jest.mock("@/components/auth/Auth", () => ({ useAuth: () => mockAuth }));
-jest.mock("@/components/common/NftPurchasingGate", () => ({
+jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
+  useNftPurchasingVisibility: () => ({
+    hideNftPurchasing: mockHidePurchasing,
+    shouldRedirect: false,
+  }),
+}));
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => "en-US",
+}));
+jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
   __esModule: true,
-  default: ({ children }: { children: ReactNode }) => children,
+  default: () => false,
+}));
+jest.mock("@/hooks/useIsTouchDevice", () => ({
+  __esModule: true,
+  default: () => false,
 }));
 jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => ({
   QueryKey: { COLLECT_ASSETS: "collect-assets" },
@@ -40,17 +55,28 @@ jest.mock("@/components/collect/CollectTradeController", () => ({
     action,
     onClose,
     onMarketChange,
+    presentation,
   }: {
     asset: ApiCollectAsset;
     action: CollectTradeAction;
     onClose: () => void;
     onMarketChange?: () => void;
-  }) => (
-    <div data-testid="trade" data-asset={asset.asset_key} data-action={action}>
-      <button onClick={onClose}>Close trade</button>
-      <button onClick={onMarketChange}>Market changed</button>
-    </div>
-  ),
+    presentation?: string;
+  }) => {
+    mockControllerRender();
+    if (mockSuspendedController) throw mockSuspendedController;
+    return (
+      <div
+        data-testid="trade"
+        data-asset={asset.asset_key}
+        data-action={action}
+        data-presentation={presentation}
+      >
+        <button onClick={onClose}>Close trade</button>
+        <button onClick={onMarketChange}>Market changed</button>
+      </div>
+    );
+  },
 }));
 
 const asset: ApiCollectAsset = {
@@ -88,11 +114,97 @@ function renderActions(tokenId = "5", onMarketChange?: () => void) {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockHidePurchasing = false;
+  mockSuspendedController = null;
   mockAuth.connectedProfile.id = "profile-one";
   mockAuth.connectedProfile.wallets = [
     { wallet: "0x1111111111111111111111111111111111111111" },
   ];
   mockFetchAssets.mockResolvedValue({ data: [asset] });
+});
+
+it("opens one modal immediately and keeps it through the canonical lookup", async () => {
+  let finish: ((value: { data: ApiCollectAsset[] }) => void) | undefined;
+  mockFetchAssets.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      })
+  );
+  const view = renderActions();
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Collect Meme Five" }));
+  const dialog = screen.getByRole("dialog", { name: "Meme Five" });
+  expect(dialog).toContainElement(screen.getByRole("status"));
+  expect(screen.queryByTestId("trade")).not.toBeInTheDocument();
+  await waitFor(() => {
+    expect(view.container.inert).toBe(true);
+    expect(dialog).toContainElement(document.activeElement);
+  });
+  await act(async () => {
+    finish?.({ data: [asset] });
+  });
+  expect(await screen.findByTestId("trade")).toHaveAttribute(
+    "data-presentation",
+    "contents"
+  );
+  expect(screen.getAllByRole("dialog")).toHaveLength(1);
+  expect(screen.getByRole("dialog")).toBe(dialog);
+  expect(view.container.inert).toBe(true);
+});
+
+it("keeps lazy trade loading inside the existing modal without another opening", async () => {
+  let finish: (() => void) | undefined;
+  mockSuspendedController = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  renderActions();
+  fireEvent.click(screen.getByRole("button", { name: "Collect Meme Five" }));
+  const dialog = screen.getByRole("dialog", { name: "Meme Five" });
+  await waitFor(() => expect(mockControllerRender).toHaveBeenCalled());
+  expect(dialog).toContainElement(screen.getByRole("status"));
+  expect(screen.queryByTestId("trade")).not.toBeInTheDocument();
+  await act(async () => {
+    mockSuspendedController = null;
+    finish?.();
+  });
+  expect(await screen.findByTestId("trade")).toBeInTheDocument();
+  expect(screen.getAllByRole("dialog")).toHaveLength(1);
+  expect(screen.getByRole("dialog")).toBe(dialog);
+});
+
+it("discards suspended trade content when Escape closes the intent", async () => {
+  let finish: (() => void) | undefined;
+  mockSuspendedController = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  const view = renderActions();
+  const trigger = screen.getByRole("button", { name: "Collect Meme Five" });
+  const user = userEvent.setup();
+  await user.click(trigger);
+  await screen.findByRole("status");
+  await waitFor(() => expect(mockControllerRender).toHaveBeenCalled());
+  await user.keyboard("{Escape}");
+  await waitFor(() => {
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+    expect(Boolean(view.container.inert)).toBe(false);
+  });
+  await act(async () => {
+    mockSuspendedController = null;
+    finish?.();
+  });
+  expect(screen.queryByTestId("trade")).not.toBeInTheDocument();
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(trigger).toHaveFocus();
+});
+
+it("does not mount the dialog or begin lookup when purchasing is hidden", () => {
+  mockHidePurchasing = true;
+  renderActions();
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(mockFetchAssets).not.toHaveBeenCalled();
 });
 
 it("refreshes the enclosing artwork market on a reported trading change", async () => {
@@ -225,12 +337,16 @@ it("allows a failed lookup to be retried without a second trade action", async (
   mockFetchAssets.mockRejectedValueOnce(new Error("temporary failure"));
   renderActions();
   fireEvent.click(screen.getByRole("button", { name: "Collect Meme Five" }));
+  const dialog = screen.getByRole("dialog", { name: "Meme Five" });
   await screen.findByRole("alert");
+  expect(dialog).toContainElement(screen.getByRole("alert"));
   fireEvent.click(screen.getByRole("button", { name: "Try again" }));
   expect(await screen.findByTestId("trade")).toHaveAttribute(
     "data-asset",
     asset.asset_key
   );
+  expect(screen.getAllByRole("dialog")).toHaveLength(1);
+  expect(screen.getByRole("dialog")).toBe(dialog);
 });
 
 it("cancels the pending lookup when the user closes it", async () => {
@@ -259,7 +375,7 @@ it("cancels the pending lookup when the user closes it", async () => {
 });
 
 it.each(["loading", "error"])(
-  "returns focus to the overflow trigger after closing an inline %s state",
+  "returns focus to the overflow trigger after closing the modal's %s state",
   async (state) => {
     if (state === "loading")
       mockFetchAssets.mockImplementation(() => new Promise(() => undefined));
