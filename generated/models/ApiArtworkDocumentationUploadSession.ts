@@ -18,6 +18,10 @@ import { HttpFile } from '../http/http';
 export class ApiArtworkDocumentationUploadSession {
     'asset': ApiArtworkDocumentationAsset;
     'upload_id': string;
+    /**
+    * Whether original writer permissions allow this caller to continue or attach this unreferenced upload. Viewer read access does not grant upload mutation permission.
+    */
+    'can_mutate': boolean;
     'policy': { [key: string]: any; };
     'received_parts': Array<ApiArtworkDocumentationReceivedPart>;
     'expires_at': number;
@@ -37,6 +41,12 @@ export class ApiArtworkDocumentationUploadSession {
             "name": "upload_id",
             "baseName": "upload_id",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "can_mutate",
+            "baseName": "can_mutate",
+            "type": "boolean",
             "format": ""
         },
         {

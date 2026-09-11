@@ -130,6 +130,7 @@
       ],
       "facts": [
         "When the server enables artwork documentation for a profile, My artwork documentation appears in the account menu and opens /artwork-documentation. Eligible owned artwork menus also offer Artwork documentation on desktop and mobile.",
+        "Authorized program viewers can read artwork records, files, confirmed versions and Questions for the team through their profile or an assigned group. View-only access does not grant editing, question or reply posting, conversation resolution, artist information import or artist confirmation. Separate editing, review and coordination permissions remain unchanged; adding viewer access does not make newly visible fields, files or conversations editable.",
         "New publication forms collect one artwork record: identity, story and process, public credits, final files, rights intentions, preservation and an optional interview. All answers and selected files are intended for publication with the work.",
         "Documentation can begin independently or in a supported submission form and can continue afterward. It is optional during submission. A successful artwork post is not retried when its documentation source link needs recovery.",
         "Drafts save to the database. Unsaved text is not persisted in browser local storage. Keep the window open when saving fails or authentication expires, and resolve a version conflict before continuing.",

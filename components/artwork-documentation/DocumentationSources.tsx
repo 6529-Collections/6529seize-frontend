@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
+import { ApiArtworkDocumentationAnswerIntendedVisibilityEnum } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import type { DocumentationDraftController } from "@/lib/artwork-documentation/draft-controller";
 import {
   getDocumentationSourcePreview,
@@ -13,6 +14,10 @@ import { documentationFieldLabel } from "@/i18n/messages/artwork-documentation-f
 import { useDocumentationActor } from "./DocumentationAuthGate";
 import { DocumentationValueSummary } from "./DocumentationSummary";
 import { readAnswer } from "@/lib/artwork-documentation/answers";
+import {
+  canEditDocumentationField,
+  mutationCapabilities,
+} from "@/lib/artwork-documentation/capabilities";
 import {
   canImportDocumentationAnswer,
   isPublicationOnly,
@@ -74,6 +79,9 @@ function SourceReceipt({
   const { connectedProfile, actorKey } = useDocumentationActor();
   const [selected, setSelected] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const canImport =
+    mutationCapabilities(context).read_source_receipts &&
+    mutationCapabilities(context).edit_modules.length > 0;
   const query = useQuery({
     queryKey: documentationQueryKey(
       connectedProfile?.id,
@@ -101,6 +109,7 @@ function SourceReceipt({
       <DocumentationNotice>{msg("sourceUnavailable")}</DocumentationNotice>
     );
   const apply = async () => {
+    if (!canImport) return;
     setBusy(true);
     try {
       if (controller.snapshot().dirty) {
@@ -109,19 +118,36 @@ function SourceReceipt({
         setSelected([]);
         return;
       }
-      const success = await controller.mutate((current, signal) =>
-        importDocumentationSource(
+      const success = await controller.mutate(async (current, signal) => {
+        const selectedFields = fields.filter((field) =>
+          selected.includes(field.target_field)
+        );
+        if (
+          !mutationCapabilities(current).read_source_receipts ||
+          !selectedFields.length ||
+          selectedFields.some(
+            (field) =>
+              !canEditDocumentationField(
+                current,
+                field.target_field,
+                field.answer.intended_visibility ===
+                  ApiArtworkDocumentationAnswerIntendedVisibilityEnum.Restricted
+              )
+          )
+        )
+          throw Object.assign(new Error(msg("save.auth_expired")), {
+            status: 403,
+          });
+        return importDocumentationSource(
           current,
           receiptId,
-          fields
-            .filter((field) => selected.includes(field.target_field))
-            .map(({ source_path, target_field }) => ({
-              source_path,
-              target_field,
-            })),
+          selectedFields.map(({ source_path, target_field }) => ({
+            source_path,
+            target_field,
+          })),
           signal
-        )
-      );
+        );
+      });
       if (success) setSelected([]);
     } finally {
       setBusy(false);
@@ -148,8 +174,12 @@ function SourceReceipt({
               className="tw-h-5 tw-w-5 tw-accent-primary-400"
               checked={selected.includes(field.target_field)}
               disabled={
-                !context.capabilities.edit_modules.some(
-                  (module) => module === field.target_field.split(".")[0]
+                !canImport ||
+                !canEditDocumentationField(
+                  context,
+                  field.target_field,
+                  field.answer.intended_visibility ===
+                    ApiArtworkDocumentationAnswerIntendedVisibilityEnum.Restricted
                 )
               }
               onChange={(event) =>
@@ -195,15 +225,17 @@ function SourceReceipt({
           )}
         </div>
       ))}
-      <DocumentationButton
-        secondary
-        disabled={busy || !selected.length}
-        onClick={() => {
-          void apply();
-        }}
-      >
-        {msg("sourceApply")}
-      </DocumentationButton>
+      {canImport && (
+        <DocumentationButton
+          secondary
+          disabled={busy || !selected.length}
+          onClick={() => {
+            void apply();
+          }}
+        >
+          {msg("sourceApply")}
+        </DocumentationButton>
+      )}
     </div>
   );
 }

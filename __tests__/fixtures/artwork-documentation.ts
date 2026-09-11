@@ -4,7 +4,7 @@ import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-document
 import { MODULE_IDS } from "@/lib/artwork-documentation/registry";
 
 export function documentationFixture(): ApiArtworkDocumentationContext {
-  return {
+  const context = {
     id: "11111111-1111-4111-8111-111111111111",
     work_id: "22222222-2222-4222-8222-222222222222",
     owner_profile_id: "artist-a",
@@ -105,6 +105,7 @@ export function documentationFixture(): ApiArtworkDocumentationContext {
       read_rights_evidence: true,
       read_source_receipts: true,
       read_contact: true,
+      read_restricted_fields: true,
       confirm_as_artist: true,
       review_lanes: [],
       manage_assignments: true,
@@ -116,6 +117,13 @@ export function documentationFixture(): ApiArtworkDocumentationContext {
     source_links: [],
     issues: [],
   } as unknown as ApiArtworkDocumentationContext;
+  context.mutation_capabilities = {
+    ...context.capabilities,
+    edit_modules: [...context.capabilities.edit_modules],
+    review_lanes: [...context.capabilities.review_lanes],
+  };
+  context.mutation_restricted_paths = [];
+  return context;
 }
 
 export function titleOperation(

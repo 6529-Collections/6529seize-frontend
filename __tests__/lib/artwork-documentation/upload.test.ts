@@ -22,6 +22,7 @@ const file = (value: string) =>
     lastModified: 0,
   }) as File;
 const session = (): ApiArtworkDocumentationUploadSession => ({
+  can_mutate: true,
   upload_id: "upload",
   asset: {
     id: "upload",

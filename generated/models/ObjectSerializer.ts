@@ -824,7 +824,7 @@ import { ApiArtworkDocumentationCompleteUpload } from '../models/ApiArtworkDocum
 import { ApiArtworkDocumentationCompleteness, ApiArtworkDocumentationCompletenessStatusEnum       } from '../models/ApiArtworkDocumentationCompleteness';
 import { ApiArtworkDocumentationConfirmRequest } from '../models/ApiArtworkDocumentationConfirmRequest';
 import { ApiArtworkDocumentationConfirmation } from '../models/ApiArtworkDocumentationConfirmation';
-import { ApiArtworkDocumentationContext          , ApiArtworkDocumentationContextConfirmationStatusEnum   , ApiArtworkDocumentationContextLifecycleEnum          } from '../models/ApiArtworkDocumentationContext';
+import { ApiArtworkDocumentationContext            , ApiArtworkDocumentationContextConfirmationStatusEnum   , ApiArtworkDocumentationContextLifecycleEnum          } from '../models/ApiArtworkDocumentationContext';
 import { ApiArtworkDocumentationContextIssuesInner } from '../models/ApiArtworkDocumentationContextIssuesInner';
 import { ApiArtworkDocumentationContextListResponse } from '../models/ApiArtworkDocumentationContextListResponse';
 import { ApiArtworkDocumentationContextSummary } from '../models/ApiArtworkDocumentationContextSummary';
