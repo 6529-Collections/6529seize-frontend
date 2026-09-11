@@ -4,6 +4,8 @@ import type { ApiMarketOrders } from "@/generated/models/ApiMarketOrders";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
 import type { ApiMarketSignature } from "@/generated/models/ApiMarketSignature";
 import type { ApiMarketSubmission } from "@/generated/models/ApiMarketSubmission";
+import type { ApiMarketSendAttemptRequest } from "@/generated/models/ApiMarketSendAttemptRequest";
+import type { ApiMarketSendAttemptRejection } from "@/generated/models/ApiMarketSendAttemptRejection";
 import type { ApiMarketListings } from "@/generated/models/ApiMarketListings";
 import type { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
 import { commonApiFetch, commonApiPost } from "./common-api";
@@ -80,6 +82,26 @@ export const submitMarketTransaction = (
 ) =>
   commonApiPost<ApiMarketSubmission, ApiMarketOperation>({
     endpoint: `${operationPath(id)}/submissions`,
+    body,
+    errorMode: "structured",
+  });
+
+export const beginMarketTransactionAttempt = (
+  id: string,
+  body: ApiMarketSendAttemptRequest
+) =>
+  commonApiPost<ApiMarketSendAttemptRequest, ApiMarketOperation>({
+    endpoint: `${operationPath(id)}/send-attempts`,
+    body,
+    errorMode: "structured",
+  });
+
+export const rejectMarketTransactionAttempt = (
+  id: string,
+  body: ApiMarketSendAttemptRejection
+) =>
+  commonApiPost<ApiMarketSendAttemptRejection, ApiMarketOperation>({
+    endpoint: `${operationPath(id)}/send-attempts/rejection`,
     body,
     errorMode: "structured",
   });

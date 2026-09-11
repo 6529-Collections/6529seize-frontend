@@ -239,6 +239,8 @@ export const COLLECT_MESSAGES = {
     "Review and confirm each purchase separately. Availability and prices may change before checkout.",
   "collect.plan.orderGone":
     "This exact order is no longer available. Refresh the plan to choose another.",
+  "collect.plan.recipientMissing":
+    "This plan has no valid receiving wallet. Refresh the plan and choose a destination before continuing.",
   "collect.plan.tdhPreview": "Preview this basket’s TDH",
   "collect.lowest.scope":
     "Listings are ordered by price within the selected collection. This is the observed market, and availability can change.",
@@ -273,6 +275,14 @@ export const COLLECT_MESSAGES = {
   "collect.trade.transactionHash": "Transaction hash",
   "collect.trade.storageUnavailable":
     "This browser cannot safely save transaction recovery. Enable browser storage before continuing.",
+  "collect.trade.broadcastUnknown":
+    "Your wallet may have submitted this transaction. Check your wallet activity and enter its transaction hash to verify the outcome. This transaction cannot be sent again until its outcome is resolved.",
+  "collect.trade.recoveryHash": "Transaction hash from your wallet",
+  "collect.trade.recoverHash": "Check this transaction",
+  "collect.trade.recoveryCheckFailed":
+    "The transaction could not be checked. Keep the same hash and try checking again.",
+  "collect.trade.recoveryHashInvalid":
+    "Enter the full transaction hash: 0x followed by 64 hexadecimal characters.",
   "collect.trade.lockUnavailable":
     "This browser cannot safely coordinate wallet actions across tabs. Use a current supported browser.",
   "collect.trade.lockActive":

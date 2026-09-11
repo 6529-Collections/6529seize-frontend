@@ -7,6 +7,7 @@ import type { ApiCollectTdhRanking } from "@/generated/models/ApiCollectTdhRanki
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { formatNumber } from "@/i18n/format";
 import { compareCollectTdh } from "@/services/api/collect-api";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
@@ -18,6 +19,7 @@ import CollectAssetReference from "./CollectAssetReference";
 import { marketAmount } from "./market.adapters";
 import { MARKET_ZERO } from "./market-validation";
 import type { SupportedLocale } from "@/i18n/locales";
+import { isPositiveEthAmount } from "./collect-form.validation";
 
 function TdhResults({
   ranking,
@@ -28,7 +30,6 @@ function TdhResults({
   readonly budgetWei: string;
   readonly locale: SupportedLocale;
 }) {
-  const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
   const candidates = ranking.ranked.filter(
     (candidate) =>
       BigInt(candidate.total_cost_wei) <= BigInt(budgetWei) &&
@@ -61,7 +62,10 @@ function TdhResults({
             >
               <div className="tw-mb-4 tw-flex tw-flex-wrap tw-justify-between tw-gap-3">
                 <strong className="tw-text-lg tw-tabular-nums tw-text-iron-100">
-                  {number.format(candidate.additional_tdh)} TDH
+                  {formatNumber(locale, candidate.additional_tdh, {
+                    maximumFractionDigits: 2,
+                  })}{" "}
+                  TDH
                 </strong>
                 <span className="tw-text-sm tw-tabular-nums tw-text-iron-200">
                   {marketAmount(candidate.total_cost_wei, MARKET_ZERO)}
@@ -84,7 +88,9 @@ function TdhResults({
                     {t(locale, "collect.tdh.base")}
                   </dt>
                   <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-200">
-                    {number.format(candidate.additional_base_tdh)}
+                    {formatNumber(locale, candidate.additional_base_tdh, {
+                      maximumFractionDigits: 2,
+                    })}
                   </dd>
                 </div>
                 <div>
@@ -92,8 +98,10 @@ function TdhResults({
                     {t(locale, "collect.tdh.existing")}
                   </dt>
                   <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-200">
-                    {number.format(
-                      candidate.changed_boost_on_existing_holdings
+                    {formatNumber(
+                      locale,
+                      candidate.changed_boost_on_existing_holdings,
+                      { maximumFractionDigits: 2 }
                     )}
                   </dd>
                 </div>
@@ -104,7 +112,7 @@ function TdhResults({
                   <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-200">
                     {candidate.cost_per_additional_tdh &&
                     candidate.cost_per_additional_tdh.denominator_tdh > 0
-                      ? `≈ ${new Intl.NumberFormat(locale, { maximumSignificantDigits: 6 }).format(Number(formatEther(BigInt(candidate.cost_per_additional_tdh.numerator_wei))) / candidate.cost_per_additional_tdh.denominator_tdh)}`
+                      ? `≈ ${formatNumber(locale, Number(formatEther(BigInt(candidate.cost_per_additional_tdh.numerator_wei))) / candidate.cost_per_additional_tdh.denominator_tdh, { maximumSignificantDigits: 6 })}`
                       : "—"}
                   </dd>
                 </div>
@@ -150,6 +158,7 @@ export default function CollectTdhController({
   });
   const [recipient, setRecipient] = useState(profile?.primary_wallet ?? "");
   const [recipientError, setRecipientError] = useState(false);
+  const [budgetError, setBudgetError] = useState(false);
   const compare = useMutation({
     mutationFn: async ({
       request,
@@ -162,6 +171,9 @@ export default function CollectTdhController({
   const family = Object.values(ApiCollectFamily).find(
     (value) => value.toString() === collection
   );
+  const requestError = compare.isError
+    ? t(locale, "collect.tdh.error")
+    : undefined;
   if (family === undefined)
     return (
       <p className="tw-text-sm tw-text-iron-300">
@@ -170,6 +182,9 @@ export default function CollectTdhController({
     );
   const submit = (value: CollectGoalDraft) => {
     if (!profile?.id) return;
+    const validBudget = isPositiveEthAmount(value.budgetEth);
+    setBudgetError(!validBudget);
+    if (!validBudget) return;
     const valid =
       isAddress(recipient) && recipient.toLowerCase() !== zeroAddress;
     setRecipientError(!valid);
@@ -202,8 +217,11 @@ export default function CollectTdhController({
             : null
         }
         loading={compare.isPending}
-        error={compare.isError ? t(locale, "collect.tdh.error") : undefined}
+        error={
+          budgetError ? t(locale, "collect.goal.invalidBudget") : requestError
+        }
         onChange={(value) => {
+          setBudgetError(false);
           setDraft(value);
           compare.reset();
         }}

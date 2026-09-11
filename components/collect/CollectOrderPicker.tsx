@@ -1,6 +1,6 @@
 "use client";
 
-import type { ApiMarketOrder } from "@/generated/models/ApiMarketOrder";
+import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useId } from "react";
@@ -11,9 +11,9 @@ function CollectOrderPicker({
   value,
   onChange,
 }: {
-  readonly orders: readonly ApiMarketOrder[];
+  readonly orders: readonly ApiMarketTradeOrder[];
   readonly value: string | null;
-  readonly onChange: (order: ApiMarketOrder) => void;
+  readonly onChange: (order: ApiMarketTradeOrder) => void;
 }) {
   const locale = useBrowserLocale();
   const id = useId();
@@ -63,9 +63,9 @@ export function CollectOrderBook({
 }: {
   readonly loading: boolean;
   readonly failed: boolean;
-  readonly orders: readonly ApiMarketOrder[];
+  readonly orders: readonly ApiMarketTradeOrder[];
   readonly value: string | null;
-  readonly onChange: (order: ApiMarketOrder) => void;
+  readonly onChange: (order: ApiMarketTradeOrder) => void;
 }) {
   const locale = useBrowserLocale();
   if (loading) return <p role="status">{t(locale, "collect.loading")}</p>;

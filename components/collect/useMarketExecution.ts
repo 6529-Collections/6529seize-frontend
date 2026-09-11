@@ -35,6 +35,12 @@ import { readMarketIntent, saveMarketIntent } from "./market-operation-storage";
 import { withMarketOperationLock } from "./market-operation-lock";
 import { marketReviewTerms } from "./market-review-terms";
 import { marketExecutionError } from "./market-execution-errors";
+import {
+  clearResolvedMarketSend,
+  marketOperationSendAttempt,
+  sendReviewedMarketTransaction,
+  verifyRecoveredMarketTransaction,
+} from "./market-send-recovery";
 
 async function checkMarketWallet(
   wallet: WalletClient,
@@ -117,37 +123,19 @@ async function executeReviewedMarketOperation(options: {
     assertConnection();
     validateMarketOperation(operation, expected);
     setStage(approval ? "approval" : "submitted");
-    const hash = await wallet.sendTransaction({
-      ...request,
-      ...fees,
+    const { hash } = await sendReviewedMarketTransaction({
+      operation,
+      expected,
+      transaction,
+      assertConnection,
+      send: () => wallet.sendTransaction({ ...request, ...fees }),
+      onOperation,
     });
-    // Persist the hash before any network request. An uncertain submission can only retry this hash.
-    if (!approval) {
-      saveMarketIntent(expected.profile_id, operation.id, {
-        request: expected,
-        transactionHash: hash,
-      });
-      onOperation(
-        await submitMarketTransaction(operation.id, {
-          transaction_hash: hash,
-        })
-      );
-    } else {
-      saveMarketIntent(expected.profile_id, operation.id, {
-        request: expected,
-        approvalHash: hash,
-      });
-      const receipt = await client.waitForTransactionReceipt({
-        hash,
-        confirmations: 1,
-      });
-      saveMarketIntent(expected.profile_id, operation.id, {
-        request: expected,
-      });
-      onOperation(await continueMarketOperation(operation.id));
-      if (receipt.status !== "success")
-        throw new Error("MARKET_APPROVAL_REVERTED");
-    }
+    // The server journals approval hashes too, so reload/device changes cannot reopen a send.
+    setStage("reconciling");
+    onOperation(
+      await submitMarketTransaction(operation.id, { transaction_hash: hash })
+    );
   } else {
     if (
       !operation.order ||
@@ -217,6 +205,9 @@ export function useMarketExecution(
         )
           throw new Error("MARKET_ACTION_DISABLED");
         let current = await fetchMarketOperation(operation.id);
+        clearResolvedMarketSend(current);
+        if (marketOperationSendAttempt(current))
+          throw new Error("MARKET_BROADCAST_UNKNOWN");
         if (current.revision !== operation.revision) {
           onOperation(current);
           setStage(null);
@@ -301,5 +292,66 @@ export function useMarketExecution(
       busy.current = false;
     }
   };
-  return { confirm, stage, message };
+  const recoverTransaction = async (
+    operation: ApiMarketOperation,
+    hash: string
+  ) => {
+    if (busy.current || !client) return;
+    busy.current = true;
+    setMessage(undefined);
+    setStage("reconciling");
+    try {
+      await withMarketOperationLock(operation.id, async () => {
+        const assertRecoveryActor = () => {
+          const current = live.current;
+          if (
+            !current.auth.isAuthenticated ||
+            current.auth.activeProfileProxy ||
+            current.connection.address?.toLowerCase() !==
+              operation.wallet.toLowerCase()
+          )
+            throw new Error("MARKET_CONNECTION_CHANGED");
+        };
+        assertRecoveryActor();
+        const current = await fetchMarketOperation(operation.id);
+        if (
+          current.id !== operation.id ||
+          current.wallet.toLowerCase() !== operation.wallet.toLowerCase()
+        )
+          throw new Error("MARKET_REVIEW_MISMATCH");
+        const attempt = marketOperationSendAttempt(current);
+        if (!attempt) {
+          onOperation(current);
+          return;
+        }
+        const verified = await verifyRecoveredMarketTransaction(
+          client,
+          current,
+          attempt,
+          hash
+        );
+        assertRecoveryActor();
+        const saved = readMarketIntent(current.profile_id, current.id);
+        if (saved)
+          saveMarketIntent(current.profile_id, current.id, {
+            request: saved.request,
+            sendAttempt: attempt,
+            ...(attempt.purpose === "APPROVAL"
+              ? { approvalHash: verified }
+              : { transactionHash: verified }),
+          });
+        const resolved = await submitMarketTransaction(current.id, {
+          transaction_hash: verified,
+        });
+        clearResolvedMarketSend(resolved);
+        onOperation(resolved);
+      });
+    } catch (error) {
+      setMessage(marketExecutionError(error, locale));
+    } finally {
+      setStage(null);
+      busy.current = false;
+    }
+  };
+  return { confirm, recoverTransaction, stage, message };
 }

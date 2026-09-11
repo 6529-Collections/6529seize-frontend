@@ -25,7 +25,7 @@ export class ApiMarketPrepareRequest {
     'currency': string;
     'amount_wei': string;
     /**
-    * Order expiry as Unix seconds. Required for LIST and OFFER.
+    * Order expiry as Unix seconds, required for LIST and OFFER and rejected for BUY, ACCEPT, and CANCEL. Operation review freshness uses Unix milliseconds instead.
     */
     'expires_at'?: number;
     'order'?: ApiMarketIdentity;

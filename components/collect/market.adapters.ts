@@ -1,6 +1,7 @@
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { formatDate } from "@/i18n/format";
 import { formatEther } from "viem";
 import { collectAssetIdentity } from "./collect.adapters";
 import type {
@@ -136,10 +137,14 @@ export function marketOperationReview(
         ? [
             {
               label: t(locale, "collect.trade.orderEnds"),
-              value: new Intl.DateTimeFormat(locale, {
-                dateStyle: "medium",
-                timeStyle: "short",
-              }).format(Number(operation.order.components.end_time) * 1000),
+              value: formatDate(
+                locale,
+                Number(operation.order.components.end_time) * 1000,
+                {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                }
+              ),
             },
           ]
         : []),
@@ -208,10 +213,10 @@ export function marketOperationView(
     detail: operation.recipient,
     amountLabel: review.totalLabel,
     makerLabel: operation.wallet,
-    updatedLabel: new Intl.DateTimeFormat(locale, {
+    updatedLabel: formatDate(locale, operation.updated_at, {
       dateStyle: "medium",
       timeStyle: "short",
-    }).format(operation.updated_at),
+    }),
     cancellable:
       ["LIST", "OFFER"].includes(operation.kind) &&
       !["CONFIRMED", "CANCELLED", "EXPIRED"].includes(operation.state) &&

@@ -350,4 +350,40 @@ describe("independent marketplace review validation", () => {
       validateMarketTransaction(transaction, f.operation, f.request)
     ).not.toThrow();
   });
+  it.each([
+    ["Gradients", "0x0c58ef43ff3032005e472cb5709f8908acb00205"],
+    ["Pebbles", "0x45882f9bc325e14fbb298a1df930c43a874b83ae"],
+  ] as const)("requires a token-specific approval for %s", (_, contract) => {
+    const f = fixture();
+    f.request.asset_key = `1:${contract}:1`;
+    f.operation.asset_key = f.request.asset_key;
+    const transaction: ApiMarketTransaction = {
+      chain_id: 1,
+      sender: MAKER,
+      to: contract,
+      value: "0",
+      purpose: ApiMarketTransactionPurposeEnum.ApproveNft,
+      approval_scope: ApiMarketTransactionApprovalScopeEnum.Token,
+      data: encodeFunctionData({
+        abi: parseAbi(["function approve(address spender, uint256 amount)"]),
+        functionName: "approve",
+        args: [MARKET_CONDUIT, 1n],
+      }),
+    };
+    expect(() =>
+      validateMarketTransaction(transaction, f.operation, f.request)
+    ).not.toThrow();
+    transaction.approval_scope =
+      ApiMarketTransactionApprovalScopeEnum.Collection;
+    transaction.data = encodeFunctionData({
+      abi: parseAbi([
+        "function setApprovalForAll(address operator, bool approved)",
+      ]),
+      functionName: "setApprovalForAll",
+      args: [MARKET_CONDUIT, true],
+    });
+    expect(() =>
+      validateMarketTransaction(transaction, f.operation, f.request)
+    ).toThrow("MARKET_REVIEW_MISMATCH");
+  });
 });

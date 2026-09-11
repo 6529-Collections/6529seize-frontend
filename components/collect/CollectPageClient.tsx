@@ -6,7 +6,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
 import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
 import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
-import type { ApiMarketOrder } from "@/generated/models/ApiMarketOrder";
+import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -81,7 +81,7 @@ function CollectCatalogController({
   const [trade, setTrade] = useState<{
     asset: ApiCollectAsset;
     action: CollectTradeAction;
-    order?: ApiMarketOrder;
+    order?: ApiMarketTradeOrder;
     quantity?: string;
     recipient?: string;
   } | null>(null);

@@ -8,6 +8,7 @@ import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
 import type { ApiCollectRuleDefinition } from "@/generated/models/ApiCollectRuleDefinition";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { formatDate } from "@/i18n/format";
 import { createCollectRule } from "@/services/api/collect-rules-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -124,10 +125,10 @@ export default function CollectSaveRule({
           </p>
           <p className="tw-m-0 tw-text-sm tw-text-iron-300">
             {t(locale, "collect.rules.deadline", {
-              date: new Intl.DateTimeFormat(locale, {
+              date: formatDate(locale, review.expires_at, {
                 dateStyle: "medium",
                 timeStyle: "short",
-              }).format(review.expires_at),
+              }),
             })}
           </p>
           <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">

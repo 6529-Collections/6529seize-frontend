@@ -18,6 +18,7 @@ import { collectAnalysisRequest, collectGoalOptions } from "./collect.adapters";
 import type { CollectGoalDraft } from "./collect.types";
 import CollectGoalForm from "./CollectGoalForm";
 import CollectRecipientPicker from "./CollectRecipientPicker";
+import { isPositiveEthAmount } from "./collect-form.validation";
 
 export default function CollectGoalsController({
   draft,
@@ -39,6 +40,7 @@ export default function CollectGoalsController({
   const [plan, setPlan] = useState<ApiCollectPlan | null>(null);
   const [scanError, setScanError] = useState(false);
   const [recipientError, setRecipientError] = useState(false);
+  const [budgetError, setBudgetError] = useState(false);
   const create = useMutation({ mutationFn: createCollectPlan });
   const scanning = plan?.state === ApiCollectPlanStateEnum.Scanning;
   useEffect(() => {
@@ -63,6 +65,9 @@ export default function CollectGoalsController({
   }, [plan, scanError, onPlan]);
   const submit = (value: CollectGoalDraft) => {
     if (!profile?.id || !catalog) return;
+    const validBudget = isPositiveEthAmount(value.budgetEth);
+    setBudgetError(!validBudget);
+    if (!validBudget) return;
     const valid =
       isAddress(recipient) && recipient.toLowerCase() !== zeroAddress;
     setRecipientError(!valid);
@@ -86,6 +91,9 @@ export default function CollectGoalsController({
       }
     );
   };
+  const requestError = create.isError
+    ? t(locale, "collect.error.analysis")
+    : undefined;
   return (
     <div className="tw-space-y-4">
       <CollectGoalForm
@@ -97,8 +105,11 @@ export default function CollectGoalsController({
             : null
         }
         loading={create.isPending || scanning}
-        error={create.isError ? t(locale, "collect.error.analysis") : undefined}
+        error={
+          budgetError ? t(locale, "collect.goal.invalidBudget") : requestError
+        }
         onChange={(value) => {
+          setBudgetError(false);
           setPlan(null);
           onPlan(null);
           onChange(value);

@@ -63,6 +63,9 @@ it("requires explicit external delivery acknowledgement and clears it on destina
     screen.getByRole("button", { name: "Review exact terms" })
   ).toBeDisabled();
   fireEvent.click(screen.getByRole("checkbox"));
+  expect(screen.getByRole("checkbox")).toHaveAccessibleDescription(
+    expect.stringContaining("outside")
+  );
   expect(p.onChange).toHaveBeenCalledWith(
     expect.objectContaining({ acknowledgeExternalRecipient: true })
   );

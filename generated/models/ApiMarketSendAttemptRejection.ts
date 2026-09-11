@@ -11,14 +11,18 @@
  * Do not edit the class manually.
  */
 
-import { ApiMarketTradeOrder } from '../models/ApiMarketTradeOrder';
 import { HttpFile } from '../http/http';
 
-export class ApiMarketOrders {
-    'orders': Array<ApiMarketTradeOrder>;
-    'observed_at': number;
-    'source': string;
-    'complete': boolean;
+export class ApiMarketSendAttemptRejection {
+    /**
+    * Original reviewed revision; required to record a WALLET_NOT_REQUESTED rejection when its begin request did not persist. The atomic rejection prevents a delayed begin from reopening the wallet request, including after review expiry.
+    */
+    'expected_revision'?: string;
+    'attempt_id': string;
+    /**
+    * Only a wallet rejection or proof that the wallet request was never invoked; never use for timeouts or unknown broadcast outcomes
+    */
+    'reason': ApiMarketSendAttemptRejectionReasonEnum;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,34 +30,34 @@ export class ApiMarketOrders {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "orders",
-            "baseName": "orders",
-            "type": "Array<ApiMarketTradeOrder>",
-            "format": ""
-        },
-        {
-            "name": "observed_at",
-            "baseName": "observed_at",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "source",
-            "baseName": "source",
+            "name": "expected_revision",
+            "baseName": "expected_revision",
             "type": "string",
             "format": ""
         },
         {
-            "name": "complete",
-            "baseName": "complete",
-            "type": "boolean",
+            "name": "attempt_id",
+            "baseName": "attempt_id",
+            "type": "string",
+            "format": "uuid"
+        },
+        {
+            "name": "reason",
+            "baseName": "reason",
+            "type": "ApiMarketSendAttemptRejectionReasonEnum",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiMarketOrders.attributeTypeMap;
+        return ApiMarketSendAttemptRejection.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
+
+export enum ApiMarketSendAttemptRejectionReasonEnum {
+    UserRejected = 'USER_REJECTED',
+    WalletNotRequested = 'WALLET_NOT_REQUESTED'
+}
+

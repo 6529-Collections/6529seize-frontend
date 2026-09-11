@@ -71,7 +71,7 @@ const catalog: ApiCollectCatalog = {
   pebbles_traits: [],
   tdh_snapshot: null,
 };
-function mount(onPlan: jest.Mock) {
+function mount(onPlan: jest.Mock, budgetEth = "1.25") {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
@@ -82,7 +82,7 @@ function mount(onPlan: jest.Mock) {
           intent: "season",
           definitionId: "1",
           targetCount: "2",
-          budgetEth: "1.25",
+          budgetEth,
           horizonDays: "30",
           includeCollaborations: true,
         }}
@@ -100,6 +100,17 @@ beforeEach(() => {
   mockCreate.mockResolvedValue(scanning);
   mockAdvance.mockResolvedValue(ready);
 });
+it.each(["", "not-a-number", "1e3", "0", "-1", "1.0000000000000000001"])(
+  "rejects invalid controller budget %s before parsing or requesting a plan",
+  (budgetEth) => {
+    const onPlan = jest.fn();
+    mount(onPlan, budgetEth);
+    fireEvent.click(screen.getByRole("button", { name: "Preview plan" }));
+    expect(mockCreate).not.toHaveBeenCalled();
+    expect(mockAdvance).not.toHaveBeenCalled();
+    expect(onPlan).not.toHaveBeenCalled();
+  }
+);
 it("sends a profile goal and separate recipient, then advances the catalog scan to a ready plan", async () => {
   const onPlan = jest.fn();
   mount(onPlan);

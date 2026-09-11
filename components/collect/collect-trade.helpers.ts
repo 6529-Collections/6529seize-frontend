@@ -1,7 +1,7 @@
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
-import type { ApiMarketOrder } from "@/generated/models/ApiMarketOrder";
+import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
 import { parseEther } from "viem";
 import type { CollectTradeAction, CollectTradeDraft } from "./collect.types";
@@ -43,7 +43,7 @@ export function marketConnectionReason(options: {
 
 function exactTradeAmount(
   draft: CollectTradeDraft,
-  order: ApiMarketOrder | null
+  order: ApiMarketTradeOrder | null
 ): string {
   if (!order)
     return (
@@ -60,7 +60,7 @@ export function buildMarketRequest(options: {
   readonly profile: ApiIdentity;
   readonly wallet: string;
   readonly assetKey: string;
-  readonly selectedOrder: ApiMarketOrder | null;
+  readonly selectedOrder: ApiMarketTradeOrder | null;
   readonly cancelTarget: ApiMarketOperation | undefined;
 }): ApiMarketPrepareRequest {
   const { draft, action, profile, wallet, selectedOrder, cancelTarget } =

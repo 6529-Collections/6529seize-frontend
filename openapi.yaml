@@ -193,15 +193,13 @@ paths:
               - OFFER
       responses:
         "200":
-          description: Current reviewed trade state
+          description: Public observed listings or offers for the requested artwork; no private operation history
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMarketOrders"
         "400":
           description: Invalid trade terms
-        "403":
-          description: Wallet is not authorized
         "404":
           description: Trade or asset unavailable
         "409":
@@ -380,6 +378,92 @@ paths:
           description: Trade state or idempotency conflict
         "503":
           description: Trading unavailable
+  /market/operations/{id}/send-attempts:
+    post:
+      tags:
+        - Marketplace
+      summary: Reserve an exact transaction before opening the wallet
+      operationId: beginMarketTransactionAttempt
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: market
+        handler:
+          import: "@/api/marketplace/marketplace.handlers"
+          name: handleBeginMarketTransactionAttempt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMarketSendAttemptRequest"
+      responses:
+        "200":
+          description: Durable send attempt; all other sends for this operation are blocked pending recovery
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketOperation"
+        "400":
+          description: Invalid attempt
+        "403":
+          description: Original signing wallet and current profile required
+        "409":
+          description: Review changed or an unresolved attempt already exists
+        "503":
+          description: Attempt could not be verified
+  /market/operations/{id}/send-attempts/rejection:
+    post:
+      tags:
+        - Marketplace
+      summary: Acknowledge a positively identified pre-broadcast rejection
+      operationId: rejectMarketTransactionAttempt
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: market
+        handler:
+          import: "@/api/marketplace/marketplace.handlers"
+          name: handleRejectMarketTransactionAttempt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMarketSendAttemptRejection"
+      responses:
+        "200":
+          description: Matching attempt rejected; repeat acknowledgement is idempotent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketOperation"
+        "400":
+          description: Invalid acknowledgement
+        "403":
+          description: Original signing wallet required
+        "409":
+          description: Attempt changed or already has a transaction hash
   /market/operations/{id}/signature:
     post:
       tags:
@@ -17074,7 +17158,7 @@ components:
       required:
         - recipient
         - amount_wei
-    ApiMarketOrder:
+    ApiMarketTradeOrder:
       type: object
       additionalProperties: false
       properties:
@@ -17140,7 +17224,7 @@ components:
         orders:
           type: array
           items:
-            $ref: "#/components/schemas/ApiMarketOrder"
+            $ref: "#/components/schemas/ApiMarketTradeOrder"
         observed_at:
           type: integer
           format: int64
@@ -17188,7 +17272,7 @@ components:
           type: integer
           format: int64
           minimum: 1
-          description: Order expiry as Unix seconds. Required for LIST and OFFER.
+          description: Order expiry as Unix seconds, required for LIST and OFFER and rejected for BUY, ACCEPT, and CANCEL. Operation review freshness uses Unix milliseconds instead.
         order:
           $ref: "#/components/schemas/ApiMarketIdentity"
         acknowledge_external_recipient:
@@ -17391,6 +17475,89 @@ components:
         - order_hash
         - digest
         - components
+    ApiMarketSendAttemptRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        expected_revision:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        attempt_id:
+          type: string
+          format: uuid
+        purpose:
+          type: string
+          enum:
+            - APPROVAL
+            - TRANSACTION
+        transaction_digest:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+          description: SHA-256 of the canonical reviewed chain, sender, target, calldata and value
+      required:
+        - expected_revision
+        - attempt_id
+        - purpose
+        - transaction_digest
+    ApiMarketSendAttemptRejection:
+      type: object
+      additionalProperties: false
+      properties:
+        expected_revision:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+          description: Original reviewed revision; required to record a WALLET_NOT_REQUESTED rejection when its begin request did not persist. The atomic rejection prevents a delayed begin from reopening the wallet request, including after review expiry.
+        attempt_id:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          enum:
+            - USER_REJECTED
+            - WALLET_NOT_REQUESTED
+          description: Only a wallet rejection or proof that the wallet request was never invoked; never use for timeouts or unknown broadcast outcomes
+      required:
+        - attempt_id
+        - reason
+    ApiMarketSendAttempt:
+      type: object
+      additionalProperties: false
+      properties:
+        attempt_id:
+          type: string
+          format: uuid
+        purpose:
+          type: string
+          enum:
+            - APPROVAL
+            - TRANSACTION
+        transaction_digest:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        snapshot_block:
+          type: integer
+          format: int64
+          minimum: 0
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - REJECTED
+            - RESOLVED
+        transaction:
+          $ref: "#/components/schemas/ApiMarketTransaction"
+        transaction_hash:
+          type: string
+          nullable: true
+          pattern: ^0x[0-9a-fA-F]{64}$
+      required:
+        - attempt_id
+        - purpose
+        - transaction_digest
+        - snapshot_block
+        - status
+        - transaction
+        - transaction_hash
     ApiMarketOperation:
       type: object
       additionalProperties: false
@@ -17489,6 +17656,8 @@ components:
           type: string
           pattern: ^(0|[1-9][0-9]{0,77})$
           maxLength: 78
+        send_attempt:
+          $ref: "#/components/schemas/ApiMarketSendAttempt"
       required:
         - id
         - revision
@@ -17960,7 +18129,7 @@ components:
         asset:
           $ref: "#/components/schemas/ApiCollectAsset"
         order:
-          $ref: "#/components/schemas/ApiMarketOrder"
+          $ref: "#/components/schemas/ApiMarketTradeOrder"
       required:
         - asset
         - order

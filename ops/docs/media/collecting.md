@@ -117,6 +117,16 @@ exposure until confirmed cancellation, expiry or fill. If broadcast is uncertain
 retain the transaction hash and retry reconciliation of that same transaction.
 Do not send another purchase merely because a page timed out.
 
+If the wallet may have submitted a transaction without returning its hash, the
+review changes to **Checking the outcome**. That operation cannot send another
+transaction, including from another browser, while the attempt is unresolved.
+Open your wallet's activity, copy the hash into **Transaction hash from your
+wallet**, and select **Check this transaction**. The site verifies the exact
+sender, NFT action and transaction details before accepting it. This also works
+for an approval and when local browser recovery data is unavailable. A hash
+that cannot yet be verified remains available for another check; checking it
+does not send a replacement transaction.
+
 Orders created here retain their original terms for direct on-chain cancellation
 even when the marketplace provider is unavailable. Cancellation costs gas and
 can lose a race to a fill. Pausing new trading or revoking an approval does not

@@ -414,13 +414,16 @@ export * from '../models/ApiMarketListings';
 export * from '../models/ApiMarketMyOperations';
 export * from '../models/ApiMarketOfferItem';
 export * from '../models/ApiMarketOperation';
-export * from '../models/ApiMarketOrder';
 export * from '../models/ApiMarketOrderToSign';
 export * from '../models/ApiMarketOrders';
 export * from '../models/ApiMarketPrepareRequest';
+export * from '../models/ApiMarketSendAttempt';
+export * from '../models/ApiMarketSendAttemptRejection';
+export * from '../models/ApiMarketSendAttemptRequest';
 export * from '../models/ApiMarketSettlement';
 export * from '../models/ApiMarketSignature';
 export * from '../models/ApiMarketSubmission';
+export * from '../models/ApiMarketTradeOrder';
 export * from '../models/ApiMarketTransaction';
 export * from '../models/ApiMediaResolveRequest';
 export * from '../models/ApiMediaResolveResponse';
@@ -1187,14 +1190,17 @@ import { ApiMarketListingEntry } from '../models/ApiMarketListingEntry';
 import { ApiMarketListings } from '../models/ApiMarketListings';
 import { ApiMarketMyOperations } from '../models/ApiMarketMyOperations';
 import { ApiMarketOfferItem } from '../models/ApiMarketOfferItem';
-import { ApiMarketOperation  , ApiMarketOperationStateEnum                           } from '../models/ApiMarketOperation';
-import { ApiMarketOrder   , ApiMarketOrderSideEnum           } from '../models/ApiMarketOrder';
+import { ApiMarketOperation  , ApiMarketOperationStateEnum                            } from '../models/ApiMarketOperation';
 import { ApiMarketOrderToSign } from '../models/ApiMarketOrderToSign';
 import { ApiMarketOrders } from '../models/ApiMarketOrders';
 import { ApiMarketPrepareRequest            } from '../models/ApiMarketPrepareRequest';
+import { ApiMarketSendAttempt , ApiMarketSendAttemptPurposeEnum    , ApiMarketSendAttemptStatusEnum     } from '../models/ApiMarketSendAttempt';
+import { ApiMarketSendAttemptRejection  , ApiMarketSendAttemptRejectionReasonEnum   } from '../models/ApiMarketSendAttemptRejection';
+import { ApiMarketSendAttemptRequest  , ApiMarketSendAttemptRequestPurposeEnum    } from '../models/ApiMarketSendAttemptRequest';
 import { ApiMarketSettlement } from '../models/ApiMarketSettlement';
 import { ApiMarketSignature } from '../models/ApiMarketSignature';
 import { ApiMarketSubmission } from '../models/ApiMarketSubmission';
+import { ApiMarketTradeOrder   , ApiMarketTradeOrderSideEnum           } from '../models/ApiMarketTradeOrder';
 import { ApiMarketTransaction    , ApiMarketTransactionPurposeEnum  , ApiMarketTransactionApprovalScopeEnum       } from '../models/ApiMarketTransaction';
 import { ApiMediaResolveRequest } from '../models/ApiMediaResolveRequest';
 import { ApiMediaResolveResponse } from '../models/ApiMediaResolveResponse';
@@ -1652,7 +1658,11 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiIdentitySubscriptionTargetType",
     "ApiMarketKind",
     "ApiMarketOperationStateEnum",
-    "ApiMarketOrderSideEnum",
+    "ApiMarketSendAttemptPurposeEnum",
+    "ApiMarketSendAttemptStatusEnum",
+    "ApiMarketSendAttemptRejectionReasonEnum",
+    "ApiMarketSendAttemptRequestPurposeEnum",
+    "ApiMarketTradeOrderSideEnum",
     "ApiMarketTransactionPurposeEnum",
     "ApiMarketTransactionApprovalScopeEnum",
     "ApiMediaUploadMimeType",
@@ -2121,13 +2131,16 @@ let typeMap: {[index: string]: any} = {
     "ApiMarketMyOperations": ApiMarketMyOperations,
     "ApiMarketOfferItem": ApiMarketOfferItem,
     "ApiMarketOperation": ApiMarketOperation,
-    "ApiMarketOrder": ApiMarketOrder,
     "ApiMarketOrderToSign": ApiMarketOrderToSign,
     "ApiMarketOrders": ApiMarketOrders,
     "ApiMarketPrepareRequest": ApiMarketPrepareRequest,
+    "ApiMarketSendAttempt": ApiMarketSendAttempt,
+    "ApiMarketSendAttemptRejection": ApiMarketSendAttemptRejection,
+    "ApiMarketSendAttemptRequest": ApiMarketSendAttemptRequest,
     "ApiMarketSettlement": ApiMarketSettlement,
     "ApiMarketSignature": ApiMarketSignature,
     "ApiMarketSubmission": ApiMarketSubmission,
+    "ApiMarketTradeOrder": ApiMarketTradeOrder,
     "ApiMarketTransaction": ApiMarketTransaction,
     "ApiMediaResolveRequest": ApiMediaResolveRequest,
     "ApiMediaResolveResponse": ApiMediaResolveResponse,

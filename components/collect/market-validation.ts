@@ -406,7 +406,9 @@ function validateApprovalTransaction(
       );
     else
       assert(
-        approval.args[1] && transaction.approval_scope === Scope.Collection
+        NFT_TYPES[contract.toLowerCase()] === 3 &&
+          approval.args[1] &&
+          transaction.approval_scope === Scope.Collection
       );
   }
   assert(

@@ -2,12 +2,12 @@ import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
 import type { ApiCollectRule } from "@/generated/models/ApiCollectRule";
 import { ApiCollectRuleStateEnum } from "@/generated/models/ApiCollectRule";
 import type { ApiCollectRuleTarget } from "@/generated/models/ApiCollectRuleTarget";
-import type { ApiMarketOrder } from "@/generated/models/ApiMarketOrder";
+import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
 import { MARKET_ZERO } from "./market-validation";
 
-export function ruleUnitPrice(order: ApiMarketOrder): bigint {
+export function ruleUnitPrice(order: ApiMarketTradeOrder): bigint {
   const total = BigInt(order.total_wei);
   const quantity = BigInt(order.quantity);
   if (
@@ -56,7 +56,7 @@ export function collectRuleRemaining(
 export function collectRuleTrade(
   rule: ApiCollectRule,
   target: ApiCollectRuleTarget,
-  orders: readonly ApiMarketOrder[],
+  orders: readonly ApiMarketTradeOrder[],
   acknowledgeExternal: boolean
 ): ApiMarketPrepareRequest {
   if (

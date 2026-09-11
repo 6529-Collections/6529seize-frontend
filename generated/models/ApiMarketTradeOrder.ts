@@ -15,11 +15,11 @@ import { ApiMarketFee } from '../models/ApiMarketFee';
 import { ApiMarketIdentity } from '../models/ApiMarketIdentity';
 import { HttpFile } from '../http/http';
 
-export class ApiMarketOrder {
+export class ApiMarketTradeOrder {
     'identity': ApiMarketIdentity;
     'asset_key': string;
     'maker': string;
-    'side': ApiMarketOrderSideEnum;
+    'side': ApiMarketTradeOrderSideEnum;
     'quantity': string;
     'currency': string;
     'total_wei': string;
@@ -55,7 +55,7 @@ export class ApiMarketOrder {
         {
             "name": "side",
             "baseName": "side",
-            "type": "ApiMarketOrderSideEnum",
+            "type": "ApiMarketTradeOrderSideEnum",
             "format": ""
         },
         {
@@ -108,14 +108,14 @@ export class ApiMarketOrder {
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiMarketOrder.attributeTypeMap;
+        return ApiMarketTradeOrder.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
 
-export enum ApiMarketOrderSideEnum {
+export enum ApiMarketTradeOrderSideEnum {
     Listing = 'LISTING',
     Offer = 'OFFER'
 }

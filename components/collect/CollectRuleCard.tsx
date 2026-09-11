@@ -10,6 +10,7 @@ import type { ApiCollectRulePrepare } from "@/generated/models/ApiCollectRulePre
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { formatDate } from "@/i18n/format";
 import {
   pauseCollectRule,
   prepareCollectRule,
@@ -20,7 +21,7 @@ import {
   fetchMarketOrders,
 } from "@/services/api/market-api";
 import { useMutation } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import CollectAssetReference from "./CollectAssetReference";
 import {
   collectRuleRemaining,
@@ -40,6 +41,7 @@ export default function CollectRuleCard({
   readonly onOperation: (operation: ApiMarketOperation) => void;
 }) {
   const locale = useBrowserLocale();
+  const externalDescriptionId = useId();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const connection = useSeizeConnectContext();
   const [acknowledged, setAcknowledged] = useState(false);
@@ -169,22 +171,31 @@ export default function CollectRuleCard({
       </p>
       <p className="tw-m-0 tw-text-xs tw-text-iron-400">
         {t(locale, "collect.rules.deadline", {
-          date: new Intl.DateTimeFormat(locale, {
+          date: formatDate(locale, rule.definition.expires_at, {
             dateStyle: "medium",
             timeStyle: "short",
-          }).format(rule.definition.expires_at),
+          }),
         })}
       </p>
       {external && (
-        <label className="tw-flex tw-items-start tw-gap-3 tw-text-sm tw-leading-6 tw-text-iron-300">
-          <input
-            type="checkbox"
-            checked={acknowledged}
-            onChange={(event) => setAcknowledged(event.target.checked)}
-            className="tw-mt-1 tw-h-5 tw-w-5 tw-shrink-0"
-          />
-          {t(locale, "collect.trade.acknowledgeExternal")}
-        </label>
+        <div className="tw-space-y-2">
+          <p
+            id={externalDescriptionId}
+            className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300"
+          >
+            {t(locale, "collect.recipient.external")}
+          </p>
+          <label className="tw-flex tw-items-start tw-gap-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+            <input
+              type="checkbox"
+              aria-describedby={externalDescriptionId}
+              checked={acknowledged}
+              onChange={(event) => setAcknowledged(event.target.checked)}
+              className="tw-mt-1 tw-h-5 tw-w-5 tw-shrink-0"
+            />
+            {t(locale, "collect.trade.acknowledgeExternal")}
+          </label>
+        </div>
       )}
       <ul className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0">
         {rule.definition.targets.map((target) => (

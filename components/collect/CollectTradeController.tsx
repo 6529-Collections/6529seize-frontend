@@ -2,6 +2,7 @@
 
 import {
   fetchRecoverableMarketOperation,
+  marketOperationHasUnresolvedSend,
   marketOperationNeedsPolling,
 } from "./market-recovery";
 
@@ -15,7 +16,7 @@ import {
   marketConnectionReason,
 } from "./collect-trade.helpers";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
-import type { ApiMarketOrder } from "@/generated/models/ApiMarketOrder";
+import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -40,6 +41,7 @@ import { readMarketIntent, saveMarketIntent } from "./market-operation-storage";
 import { CollectOrderBook } from "./CollectOrderPicker";
 import CollectTradeForm from "./CollectTradeForm";
 import CollectTradeSheet from "./CollectTradeSheet";
+import CollectTransactionRecovery from "./CollectTransactionRecovery";
 import CollectAssetMedia from "./CollectAssetMedia";
 import { useMarketExecution } from "./useMarketExecution";
 import { useMarketSettlement } from "./useMarketSettlement";
@@ -90,6 +92,7 @@ function reviewStage(
   if (preparing) return "preparing";
   if (executing) return executing;
   if (!operation) return "review";
+  if (marketOperationHasUnresolvedSend(operation)) return "reconciling";
   const stage = marketOperationStage(operation);
   return stage === "review" && marketOperationNeedsPolling(operation)
     ? "reconciling"
@@ -110,7 +113,7 @@ export default function CollectTradeController({
   readonly asset?: ApiCollectAsset;
   readonly action: CollectTradeAction;
   readonly initialOperation?: ApiMarketOperation;
-  readonly initialOrder?: ApiMarketOrder;
+  readonly initialOrder?: ApiMarketTradeOrder;
   readonly initialQuantity?: string;
   readonly initialRecipient?: string;
   readonly cancelTarget?: ApiMarketOperation;
@@ -122,7 +125,7 @@ export default function CollectTradeController({
   const connection = useSeizeConnectContext();
   const { isCapacitor } = useCapacitor();
   const client = useQueryClient();
-  const [selectedOrder, setSelectedOrder] = useState<ApiMarketOrder | null>(
+  const [selectedOrder, setSelectedOrder] = useState<ApiMarketTradeOrder | null>(
     initialOrder ?? null
   );
   const [operation, setOperation] = useState<ApiMarketOperation | null>(
@@ -360,11 +363,23 @@ export default function CollectTradeController({
       stage={stage}
       form={form}
       recoveryAction={
-        <TradeRecoveryAction
-          reviewed={review !== null}
-          reason={reasonKey}
-          onConnect={connection.seizeConnect}
-        />
+        <>
+          {displayedOperation &&
+            marketOperationHasUnresolvedSend(displayedOperation) && (
+              <CollectTransactionRecovery
+                key={displayedOperation.id}
+                disabled={!isAuthenticated || Boolean(activeProfileProxy)}
+                onRecover={(hash) =>
+                  execution.recoverTransaction(displayedOperation, hash)
+                }
+              />
+            )}
+          <TradeRecoveryAction
+            reviewed={review !== null}
+            reason={reasonKey}
+            onConnect={connection.seizeConnect}
+          />
+        </>
       }
       message={execution.message ?? error}
       onClose={onClose}

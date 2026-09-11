@@ -162,18 +162,27 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
         </p>
       )}
       {external && (
-        <label className="tw-flex tw-min-h-11 tw-items-start tw-gap-3 tw-text-sm tw-leading-6 tw-text-iron-200">
-          <input
-            type="checkbox"
-            disabled={props.loading}
-            checked={props.draft.acknowledgeExternalRecipient === true}
-            onChange={(event) =>
-              change({ acknowledgeExternalRecipient: event.target.checked })
-            }
-            className="tw-mt-1 tw-size-4 tw-shrink-0 tw-accent-primary-500"
-          />
-          {t(locale, "collect.trade.external")}
-        </label>
+        <div className="tw-space-y-2">
+          <p
+            id={`${id}-external`}
+            className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300"
+          >
+            {t(locale, "collect.trade.external")}
+          </p>
+          <label className="tw-flex tw-min-h-11 tw-items-start tw-gap-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+            <input
+              type="checkbox"
+              aria-describedby={`${id}-external`}
+              disabled={props.loading}
+              checked={props.draft.acknowledgeExternalRecipient === true}
+              onChange={(event) =>
+                change({ acknowledgeExternalRecipient: event.target.checked })
+              }
+              className="tw-mt-1 tw-size-4 tw-shrink-0 tw-accent-primary-500"
+            />
+            {t(locale, "collect.trade.acknowledgeExternal")}
+          </label>
+        </div>
       )}
       {message && (
         <p

@@ -1,6 +1,10 @@
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
 import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
 import { isAddress, isHex, type Hex } from "viem";
+import {
+  isMarketSendAttempt,
+  type MarketSendAttempt,
+} from "./market-send-attempt";
 
 const key = (profileId: string, operationId: string) =>
   `6529-market:${profileId}:${operationId}`;
@@ -15,6 +19,7 @@ interface SavedMarketIntent {
   readonly request: ApiMarketPrepareRequest;
   readonly transactionHash?: Hex;
   readonly approvalHash?: Hex;
+  readonly sendAttempt?: MarketSendAttempt;
 }
 export function saveMarketIntent(
   profileId: string,
@@ -40,9 +45,11 @@ export function readMarketIntent(
   if (remembered?.transactionHash) return remembered;
   if (persisted?.transactionHash) return persisted;
   if (remembered?.approvalHash) return remembered;
+  if (persisted?.approvalHash) return persisted;
+  if (remembered?.sendAttempt) return remembered;
   return persisted ?? remembered ?? null;
 }
-function readPersistedMarketIntent(
+export function readPersistedMarketIntent(
   profileId: string,
   operationId: string
 ): SavedMarketIntent | null {
@@ -82,11 +89,16 @@ function readPersistedMarketIntent(
       "transactionHash" in parsed ? parsed.transactionHash : undefined;
     const approvalHash =
       "approvalHash" in parsed ? parsed.approvalHash : undefined;
+    const sendAttempt =
+      "sendAttempt" in parsed ? parsed.sendAttempt : undefined;
     if (!isOptionalHash(hash) || !isOptionalHash(approvalHash)) return null;
+    if (sendAttempt !== undefined && !isMarketSendAttempt(sendAttempt))
+      return null;
     return {
       request: request as ApiMarketPrepareRequest,
       ...(typeof hash === "string" ? { transactionHash: hash } : {}),
       ...(typeof approvalHash === "string" ? { approvalHash } : {}),
+      ...(sendAttempt ? { sendAttempt } : {}),
     };
   } catch {
     return null;

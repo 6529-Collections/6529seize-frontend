@@ -14,6 +14,7 @@
 import { ApiMarketFee } from '../models/ApiMarketFee';
 import { ApiMarketKind } from '../models/ApiMarketKind';
 import { ApiMarketOrderToSign } from '../models/ApiMarketOrderToSign';
+import { ApiMarketSendAttempt } from '../models/ApiMarketSendAttempt';
 import { ApiMarketSettlement } from '../models/ApiMarketSettlement';
 import { ApiMarketTransaction } from '../models/ApiMarketTransaction';
 import { HttpFile } from '../http/http';
@@ -49,6 +50,7 @@ export class ApiMarketOperation {
     'settlement'?: ApiMarketSettlement;
     'nft_recipient'?: string;
     'potential_liability_wei': string;
+    'send_attempt'?: ApiMarketSendAttempt;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -215,6 +217,12 @@ export class ApiMarketOperation {
             "name": "potential_liability_wei",
             "baseName": "potential_liability_wei",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "send_attempt",
+            "baseName": "send_attempt",
+            "type": "ApiMarketSendAttempt",
             "format": ""
         }    ];
 

@@ -137,7 +137,11 @@ function GradientMarketplaceLinks({ nft }: { readonly nft: NftWithOwner }) {
   return (
     <div className="tw-flex tw-min-w-[8.5rem] tw-flex-wrap tw-items-end tw-gap-3">
       <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
-      <CollectEntryLink collection="gradients" intent="specific" tokenId={String(nft.id)} />
+      <CollectEntryLink
+        collection="gradients"
+        intent="specific"
+        tokenId={String(nft.id)}
+      />
     </div>
   );
 }

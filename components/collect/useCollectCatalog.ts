@@ -3,7 +3,7 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
-import type { ApiMarketOrder } from "@/generated/models/ApiMarketOrder";
+import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import { fetchCollectAssets } from "@/services/api/collect-api";
 import { fetchMarketListings } from "@/services/api/market-api";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -11,7 +11,7 @@ import type { CollectCollection, CollectIntent } from "./collect.types";
 
 export interface CollectCatalogEntry {
   readonly asset: ApiCollectAsset;
-  readonly order?: ApiMarketOrder;
+  readonly order?: ApiMarketTradeOrder;
 }
 export function collectCatalogEntryId(entry: CollectCatalogEntry): string {
   return entry.order?.identity.order_hash ?? entry.asset.asset_key;

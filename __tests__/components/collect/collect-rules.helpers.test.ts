@@ -6,7 +6,7 @@ import {
 } from "@/components/collect/collect-rules.helpers";
 import { MARKET_ZERO } from "@/components/collect/market-validation";
 import type { ApiCollectRule } from "@/generated/models/ApiCollectRule";
-import type { ApiMarketOrder } from "@/generated/models/ApiMarketOrder";
+import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
 
 const target = {
@@ -29,13 +29,13 @@ function listing(
   quantity: string,
   total: string,
   hash = "order"
-): ApiMarketOrder {
+): ApiMarketTradeOrder {
   return {
     quantity,
     total_wei: total,
     currency: MARKET_ZERO,
     identity: { protocol_address: "protocol", order_hash: hash },
-  } as ApiMarketOrder;
+  } as ApiMarketTradeOrder;
 }
 it("freezes saved bounds directly from a large plan without one provider call per asset", () => {
   const legs = Array.from({ length: 600 }, (_, index) => ({

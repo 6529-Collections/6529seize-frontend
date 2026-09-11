@@ -183,16 +183,27 @@ test("public catalog supports search and a wallet-gated purchase", async ({
     fullPage: true,
   });
   await page.getByRole("searchbox", { name: "Search artwork" }).fill("2");
+  const searchResponse = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return (
+      url.pathname === "/api/collect/assets" &&
+      url.searchParams.get("query") === "2"
+    );
+  });
   await page.getByRole("searchbox", { name: "Search artwork" }).press("Enter");
+  await searchResponse;
   await expect(
     page.getByRole("heading", { name: "Catalog artwork 2" })
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Catalog artwork 1" })
   ).toHaveCount(0);
-  await page
-    .getByRole("button", { name: "Buy: Catalog artwork 2", exact: true })
-    .click();
+  const buyButton = page.getByRole("button", {
+    name: "Buy: Catalog artwork 2",
+    exact: true,
+  });
+  await buyButton.focus();
+  await buyButton.press("Enter");
   await expect(page.getByRole("dialog")).toHaveCount(1);
   await expect(
     page
@@ -209,6 +220,50 @@ test("public catalog supports search and a wallet-gated purchase", async ({
     fullPage: true,
   });
   await noHorizontalOverflow(page);
+  await expect
+    .poll(() =>
+      page
+        .getByRole("dialog")
+        .evaluate((dialog) => dialog.contains(document.activeElement))
+    )
+    .toBe(true);
+  await expect(page.getByRole("dialog")).toHaveAttribute("aria-modal", "true");
+  const backgroundBuyButton = page.getByRole("button", {
+    name: "Buy: Catalog artwork 2",
+    exact: true,
+    includeHidden: true,
+  });
+  await expect
+    .poll(() =>
+      backgroundBuyButton.evaluate((button) => {
+        let element: HTMLElement | null = button;
+        while (element) {
+          if (element.inert) return true;
+          element = element.parentElement;
+        }
+        return false;
+      })
+    )
+    .toBe(true);
+  await backgroundBuyButton.focus();
+  await expect
+    .poll(() =>
+      page
+        .getByRole("dialog")
+        .evaluate((dialog) => dialog.contains(document.activeElement))
+    )
+    .toBe(true);
+  await page.keyboard.press("Tab");
+  await expect
+    .poll(() =>
+      page
+        .getByRole("dialog")
+        .evaluate((dialog) => dialog.contains(document.activeElement))
+    )
+    .toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(buyButton).toBeFocused();
   expect(mutations).toEqual([]);
 });
 

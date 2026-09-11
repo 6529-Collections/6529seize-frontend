@@ -6,9 +6,11 @@ import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
 import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
 import type { ApiCollectPlanLeg } from "@/generated/models/ApiCollectPlanLeg";
 import { ApiCollectTdhRequestHorizonDaysEnum } from "@/generated/models/ApiCollectTdhRequest";
-import type { ApiMarketOrder } from "@/generated/models/ApiMarketOrder";
+import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { formatNumber } from "@/i18n/format";
+import { isAddress, zeroAddress } from "viem";
 import {
   fetchCollectAssets,
   projectCollectTdh,
@@ -51,21 +53,27 @@ export default function CollectPlanBasket({
   readonly onClose: () => void;
   readonly onPurchase: (
     asset: ApiCollectAsset,
-    order: ApiMarketOrder,
+    order: ApiMarketTradeOrder,
     quantity: string,
     recipient: string
   ) => void;
 }) {
   const locale = useBrowserLocale();
+  const recipient = plan.result.recipient;
+  const validRecipient = Boolean(
+    recipient && isAddress(recipient) && recipient.toLowerCase() !== zeroAddress
+  );
   const purchase = useMutation({
-    mutationFn: findPlanPurchase,
+    mutationFn: (leg: ApiCollectPlanLeg) => {
+      if (!validRecipient) throw new Error("PLAN_RECIPIENT_MISSING");
+      return findPlanPurchase(leg);
+    },
     onSuccess: ({ asset, order, leg }) => {
       if (plan.result.recipient)
         onPurchase(asset, order, leg.quantity, plan.result.recipient);
     },
   });
   const scenario = useMutation({ mutationFn: projectCollectTdh });
-  const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
   return (
     <MobileWrapperDialog
       title={t(locale, "collect.plan.basket")}
@@ -95,6 +103,11 @@ export default function CollectPlanBasket({
             {plan.result.recipient}
           </dd>
         </dl>
+        {!validRecipient && (
+          <p role="alert" className="tw-text-sm tw-text-iron-300">
+            {t(locale, "collect.plan.recipientMissing")}
+          </p>
+        )}
         <ul className="tw-m-0 tw-list-none tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-p-0">
           {plan.result.legs.map((leg) => (
             <li
@@ -111,7 +124,7 @@ export default function CollectPlanBasket({
               <Button
                 variant="secondary"
                 size="sm"
-                disabled={purchase.isPending}
+                disabled={purchase.isPending || !validRecipient}
                 loading={
                   purchase.isPending &&
                   purchase.variables.candidate_id === leg.candidate_id
@@ -136,9 +149,9 @@ export default function CollectPlanBasket({
         <Button
           variant="secondary"
           loading={scenario.isPending}
-          disabled={!plan.result.recipient || plan.result.legs.length === 0}
+          disabled={!validRecipient || plan.result.legs.length === 0}
           onClick={() => {
-            if (plan.result.recipient)
+            if (validRecipient && plan.result.recipient)
               scenario.mutate({
                 profile_id: plan.profile_id,
                 horizon_days: ApiCollectTdhRequestHorizonDaysEnum.NUMBER_30,
@@ -168,7 +181,10 @@ export default function CollectPlanBasket({
               {t(locale, "collect.tdh.additional")}
             </p>
             <p className="tw-mb-0 tw-mt-1 tw-text-xl tw-font-semibold tw-text-iron-100">
-              {number.format(scenario.data.additional_tdh)} TDH
+              {formatNumber(locale, scenario.data.additional_tdh, {
+                maximumFractionDigits: 2,
+              })}{" "}
+              TDH
             </p>
             <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-iron-400">
               {t(locale, "collect.tdh.rules", {
@@ -178,7 +194,7 @@ export default function CollectPlanBasket({
             </p>
           </div>
         )}
-        <CollectSaveRule plan={plan} />
+        {validRecipient && <CollectSaveRule plan={plan} />}
       </div>
     </MobileWrapperDialog>
   );

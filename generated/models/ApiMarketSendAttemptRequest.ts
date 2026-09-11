@@ -11,13 +11,16 @@
  * Do not edit the class manually.
  */
 
-import { ApiCollectAsset } from '../models/ApiCollectAsset';
-import { ApiMarketTradeOrder } from '../models/ApiMarketTradeOrder';
 import { HttpFile } from '../http/http';
 
-export class ApiMarketListingEntry {
-    'asset': ApiCollectAsset;
-    'order': ApiMarketTradeOrder;
+export class ApiMarketSendAttemptRequest {
+    'expected_revision': string;
+    'attempt_id': string;
+    'purpose': ApiMarketSendAttemptRequestPurposeEnum;
+    /**
+    * SHA-256 of the canonical reviewed chain, sender, target, calldata and value
+    */
+    'transaction_digest': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -25,22 +28,40 @@ export class ApiMarketListingEntry {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "asset",
-            "baseName": "asset",
-            "type": "ApiCollectAsset",
+            "name": "expected_revision",
+            "baseName": "expected_revision",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "order",
-            "baseName": "order",
-            "type": "ApiMarketTradeOrder",
+            "name": "attempt_id",
+            "baseName": "attempt_id",
+            "type": "string",
+            "format": "uuid"
+        },
+        {
+            "name": "purpose",
+            "baseName": "purpose",
+            "type": "ApiMarketSendAttemptRequestPurposeEnum",
+            "format": ""
+        },
+        {
+            "name": "transaction_digest",
+            "baseName": "transaction_digest",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiMarketListingEntry.attributeTypeMap;
+        return ApiMarketSendAttemptRequest.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
+
+export enum ApiMarketSendAttemptRequestPurposeEnum {
+    Approval = 'APPROVAL',
+    Transaction = 'TRANSACTION'
+}
+

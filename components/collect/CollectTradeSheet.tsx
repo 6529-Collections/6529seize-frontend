@@ -4,6 +4,7 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { formatDate } from "@/i18n/format";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type {
   CollectReviewFact,
@@ -113,7 +114,7 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
       maxWidthClass="md:tw-max-w-xl"
       focusTitleOnOpen
     >
-      <div className="tw-space-y-5 tw-text-iron-100">
+      <div className="tw-space-y-5 tw-px-4 tw-text-iron-100 md:tw-px-6">
         {review ? (
           <>
             <div className="tw-flex tw-items-center tw-gap-4">
@@ -170,10 +171,10 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
             {review.expiresAt !== null && (
               <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
                 {t(locale, "collect.trade.expiry", {
-                  time: new Intl.DateTimeFormat(locale, {
+                  time: formatDate(locale, review.expiresAt, {
                     dateStyle: "medium",
                     timeStyle: "medium",
-                  }).format(review.expiresAt),
+                  }),
                 })}
               </p>
             )}
