@@ -14,7 +14,9 @@ import {
 import { isRedacted } from "@/lib/artwork-documentation/answers";
 import {
   MODULE_FIELDS,
+  fieldSection,
   type ModuleId,
+  type DocumentationSection,
 } from "@/lib/artwork-documentation/registry";
 import { useDocumentationMessages } from "./DocumentationControls";
 import DocumentationRecordValue from "./DocumentationRecordValue";
@@ -99,26 +101,25 @@ function RecordAnswer({
   const translateEnum =
     editor?.kind === "choice" ||
     (editor?.kind === "list" && editor.item.kind === "choice");
-  const displayValue =
-    editor?.kind === "asset"
-      ? (Array.isArray(answer.value) ? answer.value : [answer.value]).map(
-          (id) =>
-            context.assets?.find((asset) => asset.id === id)?.filename ?? id
-        )
-      : answer.value;
+  const provided =
+    answer.status === ApiArtworkDocumentationAnswerStatusEnum.Provided;
   return (
     <>
-      <DocumentationRecordValue
-        translateEnum={
-          answer.status === ApiArtworkDocumentationAnswerStatusEnum.Provided &&
-          translateEnum
-        }
-        value={
-          answer.status === ApiArtworkDocumentationAnswerStatusEnum.Provided
-            ? displayValue
-            : documentationOptionLabel(answer.status ?? "unknown")
-        }
-      />
+      {provided && editor?.kind === "asset" ? (
+        <RecordFiles value={answer.value} assets={context.assets} />
+      ) : (
+        <DocumentationRecordValue
+          translateEnum={
+            answer.status ===
+              ApiArtworkDocumentationAnswerStatusEnum.Provided && translateEnum
+          }
+          value={
+            answer.status === ApiArtworkDocumentationAnswerStatusEnum.Provided
+              ? answer.value
+              : documentationOptionLabel(answer.status ?? "unknown")
+          }
+        />
+      )}
       {answer.explanation && (
         <p className="tw-mb-0 tw-mt-3 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-7 tw-text-iron-300">
           {answer.explanation}
@@ -134,21 +135,60 @@ function RecordAnswer({
   );
 }
 
+function RecordFiles({
+  value,
+  assets,
+}: {
+  readonly value: unknown;
+  readonly assets: RecordContext["assets"];
+}) {
+  const { msg } = useDocumentationMessages();
+  const ids = (Array.isArray(value) ? value : [value]).filter(
+    (id): id is string => typeof id === "string"
+  );
+  return (
+    <ul className="tw-m-0 tw-list-none tw-space-y-4 tw-p-0">
+      {ids.map((id) => {
+        const asset = assets?.find((item) => item.id === id);
+        return (
+          <li key={id} className="tw-break-words">
+            {asset?.filename ?? msg("catalogue.fileRecorded")}
+            <details className="tw-mt-1 tw-text-sm tw-text-iron-400">
+              <summary className="tw-min-h-11 tw-cursor-pointer tw-py-3 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+                {msg("catalogue.fileReference")}
+              </summary>
+              <code className="tw-break-all tw-text-xs tw-text-iron-400">
+                {id}
+              </code>
+            </details>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 function RecordSection({
   id,
   context,
   profile,
   consumed,
+  section,
 }: {
   readonly id: ModuleId;
   readonly context: RecordContext;
   readonly profile?: ApiArtworkDocumentationProfile | undefined;
   readonly consumed: ReadonlySet<string>;
+  readonly section?: DocumentationSection | undefined;
 }) {
   const { msg } = useDocumentationMessages();
   const order = MODULE_FIELDS[id].map((field) => field.id);
   const entries = Object.entries(context.modules[id]?.answers ?? {})
-    .filter(([field]) => !consumed.has(id + "." + field))
+    .filter(
+      ([field]) =>
+        !consumed.has(id + "." + field) &&
+        (!section || fieldSection(id, field) === section)
+    )
     .sort(([first], [second]) => {
       const a = order.indexOf(first);
       const b = order.indexOf(second);
@@ -202,12 +242,14 @@ export default function DocumentationSummary({
   modules = RECORD_ORDER,
   showHeading = true,
   media,
+  section,
 }: {
   readonly profile?: ApiArtworkDocumentationProfile | undefined;
   readonly context: RecordContext;
   readonly modules?: readonly ModuleId[];
   readonly showHeading?: boolean;
   readonly media?: ReactNode;
+  readonly section?: DocumentationSection | undefined;
 }) {
   const { msg } = useDocumentationMessages();
   const title = providedText(context, "artwork", "title");
@@ -241,12 +283,14 @@ export default function DocumentationSummary({
     if (context.modules["context"]?.answers["caption"])
       consumed.add("context.caption");
   }
-  const hasAnswers = modules.some(
-    (id) => Object.keys(context.modules[id]?.answers ?? {}).length > 0
+  const hasAnswers = modules.some((id) =>
+    Object.keys(context.modules[id]?.answers ?? {}).some(
+      (field) => !section || fieldSection(id, field) === section
+    )
   );
   return (
     <article aria-label={msg("catalogue.label")} className="tw-min-w-0">
-      {media && <div className="tw-mb-10">{media}</div>}
+      {media && <div className="tw-mb-10 empty:tw-hidden">{media}</div>}
       {showHeading && (
         <header className="tw-pb-10 tw-pt-4">
           <p className="tw-mb-5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.18em] tw-text-iron-400">
@@ -304,6 +348,7 @@ export default function DocumentationSummary({
           context={context}
           profile={profile}
           consumed={consumed}
+          section={section}
         />
       ))}
     </article>

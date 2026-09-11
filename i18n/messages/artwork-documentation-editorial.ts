@@ -1,4 +1,15 @@
 export const ARTWORK_DOCUMENTATION_EDITORIAL_MESSAGES = {
+  "artworkDocumentation.catalogue.fileRecorded": "File recorded",
+  "artworkDocumentation.catalogue.fileReference": "File reference",
+  "artworkDocumentation.editorial.returnToDraft": "Return to the draft",
+  "artworkDocumentation.editorial.publicationPreviewAction":
+    "Preview saved publication content",
+  "artworkDocumentation.editorial.savedPublicationPreview":
+    "This preview shows the saved content intended for publication. Questions are separate. Viewing it does not publish anything.",
+  "artworkDocumentation.editorial.savedRecordPreview":
+    "You are reading the saved draft. Artist confirmation records a specific version; it does not publish or mint the work.",
+  "artworkDocumentation.editorial.unsavedRecordPreview":
+    "This reading view includes your unsaved form edits. Save all changes before confirming the record.",
   "artworkDocumentation.editorial.datePrecision":
     "How precisely can you date it?",
   "artworkDocumentation.editorial.approximateDate": "This date is approximate",

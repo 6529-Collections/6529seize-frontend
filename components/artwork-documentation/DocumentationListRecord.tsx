@@ -11,19 +11,7 @@ import { formatDate } from "@/i18n/format";
 import { ArtworkImage } from "./DocumentationArtworkPreview";
 import { useDocumentationMessages } from "./DocumentationControls";
 
-// Optional during the additive API rollout; older summaries remain readable.
-export type DocumentationCatalogueItem =
-  ApiArtworkDocumentationContextSummary & {
-    readonly owner_profile_id?: string;
-    readonly artist_display_name?: string | null;
-    readonly artist_preferred_credit?: string | null;
-    readonly source_submission?: {
-      readonly drop_id: string;
-      readonly wave_id: string;
-      readonly source_receipt_id: string;
-      readonly title: string | null;
-    } | null;
-  };
+export type DocumentationCatalogueItem = ApiArtworkDocumentationContextSummary;
 
 export default function DocumentationListRecord({
   record,
@@ -91,7 +79,7 @@ export default function DocumentationListRecord({
           </p>
         ) : (
           identity.data?.handle && (
-              <p className="tw-mb-0 tw-mt-3 tw-break-words tw-text-sm tw-text-iron-300">
+            <p className="tw-mb-0 tw-mt-3 tw-break-words tw-text-sm tw-text-iron-300">
               {msg("editorial.artistProfile", { handle: identity.data.handle })}
             </p>
           )

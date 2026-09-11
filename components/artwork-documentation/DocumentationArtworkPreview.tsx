@@ -3,10 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
-import {
-  answerValue,
-  documentationTitle,
-} from "@/lib/artwork-documentation/answers";
+import type { ApiArtworkDocumentationPublicPreview } from "@/generated/models/ApiArtworkDocumentationPublicPreview";
+import { isRedacted } from "@/lib/artwork-documentation/answers";
 import { downloadDocumentationAsset } from "@/services/api/artwork-documentation-assets-api";
 import { fetchDropsV2ByIds } from "@/services/api/wave-drops-v2-api";
 import { documentationQueryKey } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
@@ -17,6 +15,7 @@ interface Props {
   readonly context: ApiArtworkDocumentationContext;
   readonly allowSubmissionReference?: boolean;
   readonly compact?: boolean;
+  readonly publication?: ApiArtworkDocumentationPublicPreview | undefined;
 }
 
 export function ArtworkImage({
@@ -56,7 +55,8 @@ function CanonicalPreview({
   context,
   assetId,
   compact = false,
-}: Props & { readonly assetId: string }) {
+  title,
+}: Props & { readonly assetId: string; readonly title: string }) {
   const { msg } = useDocumentationMessages();
   const { actorKey, connectedProfile } = useDocumentationActor();
   const asset = context.assets.find((item) => item.id === assetId);
@@ -83,7 +83,7 @@ function CanonicalPreview({
           <ArtworkImage
             key={query.data.url}
             url={query.data.url}
-            title={documentationTitle(context) ?? msg("untitled")}
+            title={title}
             compact={compact}
           />
         ) : (
@@ -173,13 +173,38 @@ export default function DocumentationArtworkPreview({
   context,
   allowSubmissionReference = false,
   compact = false,
+  publication,
 }: Props) {
-  const assetId = answerValue(context, "artwork", "canonical_asset_id");
-  if (typeof assetId === "string" && assetId)
+  const { msg } = useDocumentationMessages();
+  const answers = (publication ?? context).modules["artwork"]?.answers;
+  const assetAnswer = answers?.["canonical_asset_id"];
+  const titleAnswer = answers?.["title"];
+  const assetId =
+    assetAnswer &&
+    !isRedacted(assetAnswer) &&
+    assetAnswer.status === "provided" &&
+    typeof assetAnswer.value === "string"
+      ? assetAnswer.value
+      : null;
+  const title =
+    titleAnswer &&
+    !isRedacted(titleAnswer) &&
+    titleAnswer.status === "provided" &&
+    typeof titleAnswer.value === "string"
+      ? titleAnswer.value
+      : msg("untitled");
+  if (assetId)
     return (
-      <CanonicalPreview context={context} assetId={assetId} compact={compact} />
+      <CanonicalPreview
+        context={context}
+        assetId={assetId}
+        title={title}
+        compact={compact}
+      />
     );
-  return allowSubmissionReference && context.source_links.length ? (
+  return !publication &&
+    allowSubmissionReference &&
+    context.source_links.length ? (
     <SubmissionReference context={context} compact={compact} />
   ) : null;
 }

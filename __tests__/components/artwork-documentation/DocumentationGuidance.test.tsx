@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import DocumentationWorkedExample from "@/components/artwork-documentation/DocumentationWorkedExample";
 import DocumentationModules from "@/components/artwork-documentation/DocumentationModules";
 import DocumentationNarrativeStarter from "@/components/artwork-documentation/DocumentationNarrativeStarter";
@@ -67,7 +67,7 @@ describe("worked artwork documentation examples", () => {
     ).toContain("before finalizing");
   });
 
-  it("opens an empty section's complete fictional example without adding any answers", () => {
+  it("keeps an empty section's fictional example closed until deliberately opened without adding answers", async () => {
     const context = documentationFixture();
     context.modules["artwork"]!.answers = {};
     const before = JSON.stringify(context);
@@ -78,11 +78,14 @@ describe("worked artwork documentation examples", () => {
         section="artwork"
       />
     );
-    expect(
-      screen
-        .getByText("See a complete example for this section")
-        .closest("details")
-    ).toHaveAttribute("open");
+    const summary = screen
+      .getByText("See a complete example for this section")
+      .closest("summary")!;
+    expect(summary.closest("details")).not.toHaveAttribute("open");
+    fireEvent.click(summary);
+    await waitFor(() =>
+      expect(summary.closest("details")).toHaveAttribute("open")
+    );
     expect(screen.getByText("The Space Between")).toBeInTheDocument();
     expect(JSON.stringify(context)).toBe(before);
   });
@@ -149,6 +152,9 @@ describe("worked artwork documentation examples", () => {
       screen.getByRole("button", { name: "Adapt this writing structure" })
     );
     expect(onApply).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("textbox", { name: "Your answer for Caption" })
+    ).toHaveFocus();
     expect(
       screen.getByRole("button", { name: "Use my answer" })
     ).toBeDisabled();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import type {
   FieldValue,
   ValueEditor,
@@ -29,6 +29,9 @@ export default function DocumentationNarrativeStarter(props: Props) {
   const [text, setText] = useState("");
   const [language, setLanguage] = useState("");
   const [applied, setApplied] = useState(false);
+  const focusStarter = useCallback((element: HTMLTextAreaElement | null) => {
+    element?.focus();
+  }, []);
   const localized = props.editor.kind === "localized";
   const value: FieldValue = localized
     ? {
@@ -51,15 +54,19 @@ export default function DocumentationNarrativeStarter(props: Props) {
     props.validate(value);
   if (!open && (props.disabled || props.hasAnswer))
     return applied ? (
-      <p role="status" className="tw-mt-3 tw-text-sm tw-text-iron-300">
+      <p
+        role="status"
+        className="tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-300"
+      >
         {msg("examples.applied")}
       </p>
     ) : null;
   return (
-    <div className="tw-mt-3">
+    <div className="tw-mt-5 tw-min-w-0 tw-max-w-prose">
       {!open ? (
         <DocumentationButton
           secondary
+          className="tw-w-full sm:tw-w-auto"
           onClick={() => {
             setText(props.structure);
             setOpen(true);
@@ -69,20 +76,21 @@ export default function DocumentationNarrativeStarter(props: Props) {
           {msg("examples.adapt")}
         </DocumentationButton>
       ) : (
-        <div className="tw-space-y-3 tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400 tw-pl-4">
+        <div className="tw-space-y-4 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5">
           <p
             id={`${props.id}-starter-help`}
-            className="tw-m-0 tw-text-sm tw-leading-relaxed tw-text-iron-300"
+            className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300"
           >
             {msg("examples.unsaved")}
           </p>
           <label
-            className="tw-block tw-text-sm tw-text-iron-200"
+            className="tw-block tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100"
             htmlFor={`${props.id}-starter`}
           >
             {msg("examples.yourAnswer", { field: props.label })}
           </label>
           <textarea
+            ref={focusStarter}
             id={`${props.id}-starter`}
             rows={6}
             className={inputClass}
@@ -91,7 +99,7 @@ export default function DocumentationNarrativeStarter(props: Props) {
             onChange={(event) => setText(event.target.value)}
           />
           {localized && (
-            <label className="tw-block tw-text-sm tw-text-iron-300">
+            <label className="tw-block tw-max-w-sm tw-text-sm tw-leading-6 tw-text-iron-300">
               {msg("examples.language")}
               <input
                 className={`${inputClass} tw-mt-2`}
@@ -106,8 +114,9 @@ export default function DocumentationNarrativeStarter(props: Props) {
               {msg("examples.answerChanged")}
             </p>
           )}
-          <div className="tw-flex tw-flex-wrap tw-gap-2">
+          <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-flex-wrap">
             <DocumentationButton
+              className="tw-w-full sm:tw-w-auto"
               disabled={props.disabled || props.hasAnswer || !valid}
               onClick={() => {
                 if (props.disabled || props.hasAnswer || !valid) return;
@@ -125,6 +134,7 @@ export default function DocumentationNarrativeStarter(props: Props) {
             </DocumentationButton>
             <DocumentationButton
               secondary
+              className="tw-w-full sm:tw-w-auto"
               onClick={() => {
                 setText("");
                 setOpen(false);
