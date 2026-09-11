@@ -284,6 +284,28 @@ describe("CMS studio template library", () => {
     }
   );
 
+  it("uses edited navigation copy without renaming existing archive routes", () => {
+    const result = instantiateCmsStudioTemplate(
+      "process-journal",
+      "ExampleProfile",
+      NOW
+    );
+    const entry = result.payload.pages.find(
+      (page) => page.id === "page-a-rule-with-room"
+    );
+    expect(entry?.path).toBe("/ExampleProfile/a-rule-with-room/index.html");
+    expect(entry?.metadata.navigation_label).toBe("First entry");
+    expect(result.payload.navigation[0]?.items).toContainEqual({
+      page_id: "page-a-rule-with-room",
+      label: "First entry",
+    });
+    expect(result.payload.routes).toContainEqual({
+      path: "/ExampleProfile/a-rule-with-room/index.html",
+      kind: "page",
+      page_id: "page-a-rule-with-room",
+    });
+  });
+
   it("rejects an unknown template", () => {
     expect(() =>
       instantiateCmsStudioTemplate("missing", "ExampleProfile", NOW)

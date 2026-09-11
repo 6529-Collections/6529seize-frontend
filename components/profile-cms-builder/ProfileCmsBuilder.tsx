@@ -4,10 +4,11 @@ import { useMemo, useRef, useState, type ComponentProps } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import {
-  ProfileCmsAgentPanel,
-  downloadJsonFile,
-} from "@/components/profile-cms-builder/ProfileCmsAgentPanel";
+import { downloadJsonFile } from "@/components/profile-cms-builder/ProfileCmsAgentPanel";
+import ProfileCmsAgentWorkspace from "./agent/ProfileCmsAgentWorkspace";
+import { useCmsAgentProposalSave } from "./agent/useCmsAgentProposalSave";
+import type { CmsAgentProposal } from "@/lib/profile-cms/builder/agent-api";
+import type { LoadedProfileCmsPackageRecord } from "@/lib/profile-cms/builder/package-normalize";
 import {
   BuilderActionButton,
   TabButton,
@@ -133,6 +134,15 @@ function ProfileCmsBuilderWorkspace({
   const canUseBuilderApi =
     isCmsBuilderOwner(profileId, connectedProfile?.id, !!activeProfileProxy) &&
     isAuthenticated === true;
+  const agentProposalSave = useCmsAgentProposalSave({
+    profileId,
+    primaryWallet: connectedProfile?.primary_wallet ?? address,
+    enabled: canUseBuilderApi,
+  });
+  const agentSaveBlocked =
+    !!agentProposalSave.pendingConfirmation ||
+    !!agentProposalSave.pendingReview ||
+    agentProposalSave.checkpointUnavailable;
   const canRequestGallerySnapshot =
     !isProfileCmsBuilderApiEnabledEnv() || isAuthenticated === true;
   const busy = isSubmitting || isPublishing;
@@ -203,6 +213,7 @@ function ProfileCmsBuilderWorkspace({
   };
 
   const applyAgentPackage = (cmsPackage: CmsPackageV1) => {
+    if (hasUnappliedJson) return;
     if (cmsPackage.profile.handle.toLowerCase() !== handle.toLowerCase())
       return;
     setState(createBuilderStateFromPackage(cmsPackage));
@@ -293,6 +304,64 @@ function ProfileCmsBuilderWorkspace({
     }
   };
 
+  const applySavedAgentRecord = (record: LoadedProfileCmsPackageRecord) => {
+    setState(createBuilderStateFromPackage(record.cmsPackage));
+    setStudioRevision((value) => value + 1);
+    setSamplesReviewed(false);
+    setDraftId(record.id);
+    setDraftVersion(record.version);
+    setJsonDraft(null);
+    setDirty(false);
+    setActionResult({
+      ok: true,
+      action: "save_draft",
+      code: "draft_saved",
+      draftId: record.id,
+      packageHash: record.packageHash,
+      version: record.version,
+    });
+    setHistoryRevision((value) => value + 1);
+    setActiveTab("editor");
+  };
+  const confirmAgentSave = async () => {
+    if (!guardStudioForm() || busy || hasUnappliedJson || !canUseBuilderApi)
+      return;
+    if (dirty && !confirmCmsDiscard(locale)) return;
+    const version = ++stateVersionRef.current;
+    setIsSubmitting(true);
+    try {
+      const record = await agentProposalSave.retryConfirmation();
+      if (record && version === stateVersionRef.current)
+        applySavedAgentRecord(record);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  const saveAgentProposal = async (proposal: CmsAgentProposal) => {
+    if (
+      !guardStudioForm() ||
+      busy ||
+      dirty ||
+      agentSaveBlocked ||
+      hasUnappliedJson ||
+      !canUseBuilderApi ||
+      !profileId ||
+      proposal.draft_id !== draftId
+    )
+      throw new Error("cms_agent_save_unavailable");
+    const wallet = connectedProfile?.primary_wallet ?? address;
+    if (!wallet) throw new Error("cms_agent_wallet_unavailable");
+    const version = ++stateVersionRef.current;
+    setIsSubmitting(true);
+    try {
+      const record = await agentProposalSave.save(proposal, profileId, wallet);
+      if (version !== stateVersionRef.current) return;
+      applySavedAgentRecord(record);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <main className="tailwind-scope tw-min-h-[100dvh] tw-bg-iron-950 tw-text-iron-100">
       <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-black">
@@ -375,6 +444,43 @@ function ProfileCmsBuilderWorkspace({
           <p>{t(locale, "profileCms.builder.gallery.snapshot.required")}</p>
         ) : null}
         {importError ? <p role="alert">{importError}</p> : null}
+        {activeTab === "agent" && agentProposalSave.checkpointUnavailable ? (
+          <p role="alert" className="tw-text-sm tw-leading-6 tw-text-iron-200">
+            {t(locale, "profileCms.agent.saveCheckpointUnavailable")}
+          </p>
+        ) : null}
+        {agentProposalSave.pendingConfirmation ? (
+          <div
+            role="status"
+            className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-p-3 tw-text-sm tw-text-iron-300"
+          >
+            <p>{t(locale, "profileCms.agent.saveConfirmationPending")}</p>
+            <BuilderActionButton
+              disabled={
+                agentProposalSave.retrying ||
+                busy ||
+                hasUnappliedJson ||
+                studioPending ||
+                studioUploading
+              }
+              label={t(locale, "profileCms.agent.retrySaveConfirmation")}
+              onClick={() => void confirmAgentSave()}
+            />
+          </div>
+        ) : null}
+        {agentProposalSave.pendingReview ? (
+          <div
+            role="status"
+            className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-p-3 tw-text-sm tw-text-iron-300"
+          >
+            <p>{t(locale, "profileCms.agent.savedStatusPending")}</p>
+            <BuilderActionButton
+              disabled={agentProposalSave.retrying || busy}
+              label={t(locale, "profileCms.agent.retryStatus")}
+              onClick={() => void agentProposalSave.retry()}
+            />
+          </div>
+        ) : null}
         {recovery.failed ? (
           <div>
             <p role="alert">
@@ -526,12 +632,16 @@ function ProfileCmsBuilderWorkspace({
             ) : null}
 
             {activeTab === "agent" ? (
-              <ProfileCmsAgentPanel
+              <ProfileCmsAgentWorkspace
                 canUseBuilderApi={canUseBuilderApi}
                 currentDraftVersion={draftVersion}
                 draftId={draftId}
                 locale={locale}
                 onApplyPackage={applyAgentPackage}
+                onSaveProposal={saveAgentProposal}
+                dirty={dirty || hasUnappliedJson}
+                hasUnappliedJson={hasUnappliedJson}
+                saveBlocked={agentSaveBlocked}
                 profileId={profileId}
                 validation={validation}
               />

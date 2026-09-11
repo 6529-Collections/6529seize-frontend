@@ -14,9 +14,9 @@ export const ART = {
 } as const;
 
 export const ART_CAPTIONS = {
-  signal: "Quiet Signal — original example artwork.",
-  afterimage: "Afterimage — original example artwork.",
-  grid: "Night Grid — original example artwork.",
+  signal: "Quiet Signal — blue curved lines with a small red accent.",
+  afterimage: "Afterimage — a reflective loop against orange.",
+  grid: "Night Grid — a diagonal strip of lights across a dark grid.",
 } as const;
 
 export const SOURCE_LINKS = {
@@ -136,8 +136,7 @@ export function gallery(
     title,
     asset_ids,
     mode,
-    description:
-      "Original example artwork generated for the 6529 template library.",
+    description: "Selected digital images.",
     presentation: { span: "full", role: "body" },
   });
 }

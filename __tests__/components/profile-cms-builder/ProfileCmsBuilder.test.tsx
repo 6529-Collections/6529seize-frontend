@@ -207,7 +207,7 @@ it("allows guests to choose a template and edit it with the real renderer", () =
   click("Apply");
   click("Preview");
   expect(
-    screen.getByRole("heading", { name: "Mira, at the intersection." })
+    screen.getByRole("heading", { name: "Hi, I'm Mira." })
   ).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
   click("Edit");

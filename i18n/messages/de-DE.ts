@@ -1,4 +1,5 @@
 import artworkShareMessages from "@/i18n/messages/artworkShare.de-DE.json";
+import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.de-DE.json";
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.de-DE.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.de-DE.json";
 import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.de-DE.json";
@@ -18,6 +19,7 @@ const RETRY_LABEL = "Erneut versuchen";
 export const DE_DE_MESSAGES = {
   ...artworkShareMessages,
   ...profileCmsStudioMessages,
+  ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,
   ...profileCmsStudioUploadMessages,
   ...studioWalletImportMessages,

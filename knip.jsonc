@@ -27,6 +27,11 @@
       "standalone/standalone-memes-mint/src/next.config.ts",
       "standalone/standalone-memes-mint/src/postcss.config.js",
       "standalone/standalone-memes-mint/src/tailwind.config.cjs",
+      // Downloadable local MCP CLI and its deterministic build/protocol test runners.
+      "standalone/profile-cms-agent/main.mjs",
+      "standalone/profile-cms-agent/build.mjs",
+      "standalone/profile-cms-agent/*.test.mjs",
+      "standalone/profile-cms-agent/test-fixtures/api.mjs",
       "eslint.config.single.mjs",
       "eslint.config.tight.mjs",
       "eslint.config.diff.mjs",

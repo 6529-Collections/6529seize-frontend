@@ -46,9 +46,11 @@ uploads, indexed wallet galleries, and the profile header's published Website
 link. They describe readable custom page addresses while preserving archive
 paths, owner-only save and publish, browser recovery, wallet signing, version
 restoration, and unpublishing. Upload records explicitly state that image files
-become public before the website is published. The optional agent-file record
-covers exports and reviewed local patches, including their first-page limits;
-it does not claim a connected MCP service. These records link to the studio's
+become public before the website is published. The optional agent record covers
+complete multipage file exchange and temporary access to one saved draft through
+the local MCP adapter, using the owner's external inference account. It covers
+review, revocation, expiry, unchanged artwork catalogs, interrupted-save recovery,
+and the separate first-page legacy patch controls. These records link to the studio's
 user guide and distinguish removing the active website pointer from deleting
 immutable storage. Per-page sharing-image choices and automatic reset, search
 visibility (`noindex` pages remain public), and Apply/Discard form recovery behavior are
