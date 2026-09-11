@@ -36,10 +36,13 @@ it("explains an unmatched search without selecting a different artist", () => {
   render(
     <CollectGoalDefinitionPicker {...props} value="b" onChange={onChange} />
   );
+  const status = screen.getByRole("status");
+  expect(status).toBeEmptyDOMElement();
   fireEvent.change(screen.getByRole("combobox", { name: "Artist" }), {
     target: { value: "not in this catalog" },
   });
   expect(screen.getByRole("status")).toHaveTextContent("No matches");
+  expect(screen.getByRole("status")).toBe(status);
   expect(screen.getByRole("option")).toHaveAttribute("aria-disabled", "true");
   expect(onChange).not.toHaveBeenCalled();
 });

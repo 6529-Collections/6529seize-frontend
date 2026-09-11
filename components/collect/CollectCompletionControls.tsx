@@ -109,7 +109,13 @@ export default function CollectCompletionControls({
                   onChange={() => onIntentChange(goal)}
                   className="tw-peer tw-sr-only"
                 />
-                <span className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors peer-checked:tw-bg-iron-800 peer-checked:tw-text-iron-100 peer-focus-visible:tw-outline peer-focus-visible:tw-outline-2 peer-focus-visible:tw-outline-offset-2 peer-focus-visible:tw-outline-primary-400 peer-disabled:tw-cursor-not-allowed peer-disabled:tw-opacity-50 desktop-hover:hover:tw-text-iron-100">
+                <span className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1 tw-rounded-lg tw-px-2.5 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors peer-checked:tw-bg-iron-800 peer-checked:tw-text-iron-100 peer-focus-visible:tw-outline peer-focus-visible:tw-outline-2 peer-focus-visible:tw-outline-offset-2 peer-focus-visible:tw-outline-primary-400 peer-disabled:tw-cursor-not-allowed peer-disabled:tw-opacity-50 desktop-hover:hover:tw-text-iron-100">
+                  {intent === goal && (
+                    <CheckIcon
+                      aria-hidden="true"
+                      className="tw-size-3.5 tw-shrink-0"
+                    />
+                  )}
                   {t(locale, `collect.goal.option.${goal}`)}
                 </span>
               </label>
