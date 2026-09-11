@@ -3,6 +3,8 @@
 import dynamic from "next/dynamic";
 import type { NFT } from "@/entities/INFT";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
+import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { parseNftDescriptionToHtml } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -66,6 +68,11 @@ export function MemePageLiveSubMenu(props: {
           <>
             <MemePageCardDescription nft={props.nft} />
             <MemeCardFileType nft={props.nft} />
+            <MarketDepthPanel
+              contract={MEMES_CONTRACT}
+              tokenId={props.nft.id}
+              locale={locale}
+            />
           </>
         )}
         {props.nft && props.nftMeta && (

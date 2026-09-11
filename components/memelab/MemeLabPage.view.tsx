@@ -1,7 +1,3 @@
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
-import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
 import MemeLabLeaderboard from "@/components/leaderboard/MemeLabLeaderboard";
 import { MemeLabOverviewDetails } from "@/components/memelab/MemeLabAdditionalDetails";
 import {
@@ -10,56 +6,12 @@ import {
   MemeLabStatMetric,
 } from "@/components/memelab/MemeLabCardHeader";
 import { MemeLabYourCardsPanel } from "@/components/memelab/MemeLabYourCards";
-import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import { printMemeReferences } from "@/components/rememes/RememePage";
 import Timeline from "@/components/timeline/Timeline";
 import type { LabExtendedData, LabNFT, NFT, NFTHistory } from "@/entities/INFT";
-import type { Transaction } from "@/entities/ITransaction";
 import { formatInteger, formatPercent } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-
-export function MemeLabActivityContent({
-  activity,
-  activityLoading,
-  nft,
-}: {
-  readonly activity: Transaction[];
-  readonly activityLoading: boolean;
-  readonly nft: LabNFT | undefined;
-}) {
-  if (activity.length > 0) {
-    return (
-      <div className="tw-overflow-x-auto">
-        <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
-          <tbody>
-            {activity.map((tr) => (
-              <LatestActivityRow
-                tr={tr}
-                nft={nft}
-                key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  }
-
-  if (activityLoading) {
-    return (
-      <div className="tw-flex tw-items-center tw-justify-center tw-py-4">
-        <CircleLoader size={CircleLoaderSize.LARGE} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-py-2">
-      <NothingHereYetSummer />
-    </div>
-  );
-}
 
 export function MemeLabOverview({
   nft,
