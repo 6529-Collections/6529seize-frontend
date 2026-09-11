@@ -6,7 +6,7 @@ import type {
   CmsBlockV1,
   CmsPageV1,
 } from "@/lib/profile-cms/protocol/v1";
-import { getCmsPagePath } from "@/lib/profile-cms/runtime/routes";
+import { getCmsPublicPagePath } from "@/lib/profile-cms/runtime/routes";
 import { resolveCmsUri } from "@/lib/profile-cms/runtime/uri";
 import type { CmsArtInspectionMetadata } from "@/components/profile-cms/CmsArtLightbox";
 import {
@@ -244,7 +244,7 @@ export function getNftCollectionContext(
   }
 
   const href = collectionPage
-    ? getCmsPagePath(context.cmsPackage, collectionPage.id)
+    ? getCmsPublicPagePath(context.cmsPackage, collectionPage.id)
     : null;
 
   return {
@@ -276,7 +276,7 @@ export function createPagePreviewCard(
   pageId: string
 ): PagePreviewCard | null {
   const page = context.pageMap.get(pageId);
-  const href = getCmsPagePath(context.cmsPackage, pageId);
+  const href = getCmsPublicPagePath(context.cmsPackage, pageId);
   if (!page || !href) {
     return null;
   }

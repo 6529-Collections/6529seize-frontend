@@ -11,6 +11,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import UserPageHeaderClient from "./UserPageHeaderClient";
 import { getRandomColor } from "@/helpers/Helpers";
 import { getProfileCmsPrimarySite } from "@/lib/profile-cms/runtime/fetcher";
+import { getCmsPublicPath } from "@/lib/profile-cms/runtime/routes";
 
 async function fetchStatements(
   handleOrWallet: string,
@@ -123,7 +124,10 @@ export default async function UserPageHeader({
       }
       cmsWebsiteHref={
         cmsHandle && cmsSiteResult.status === "fulfilled" && cmsSiteResult.value
-          ? `/${encodeURIComponent(cmsHandle)}/index.html`
+          ? getCmsPublicPath(
+              cmsSiteResult.value.cmsPackage,
+              cmsSiteResult.value.cmsPackage.site.base_path
+            )
           : null
       }
     />

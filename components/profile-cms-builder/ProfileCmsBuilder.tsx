@@ -4,7 +4,6 @@ import { useMemo, useRef, useState, type ComponentProps } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import CmsSiteRenderer from "@/components/profile-cms/CmsSiteRenderer";
 import {
   ProfileCmsAgentPanel,
   downloadJsonFile,
@@ -13,15 +12,15 @@ import {
   BuilderActionButton,
   TabButton,
 } from "@/components/profile-cms-builder/ProfileCmsBuilderControls";
-import {
-  EditorPanel,
-  type GallerySnapshotStatus,
-} from "@/components/profile-cms-builder/ProfileCmsBuilderEditorPanel";
+import ProfileCmsStudioEditor, {
+  type StudioEditorHandle,
+} from "./studio/ProfileCmsStudioEditor";
 import { JsonPanel } from "@/components/profile-cms-builder/ProfileCmsBuilderJsonPanel";
 import {
   PublishStatePanel,
   ValidationPanel,
   getExpectedBuilderEndpoint,
+  getActionResultMessage,
 } from "@/components/profile-cms-builder/ProfileCmsBuilderStatusPanels";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -30,45 +29,30 @@ import {
   createCmsBuilderSourcePacket,
 } from "@/lib/profile-cms/builder/agent";
 import {
-  requestProfileCmsGallerySnapshot,
   runProfileCmsBuilderAction,
   type ProfileCmsBuilderAction,
   type ProfileCmsBuilderActionResult,
 } from "@/lib/profile-cms/builder/api";
 import {
-  parseWalletGallerySources,
-  type WalletGalleryBuilderState,
-} from "@/lib/profile-cms/builder/gallery";
-import {
-  createBuilderBlock,
   createBuilderStateFromPackage,
   createDefaultCmsBuilderState,
   parseCmsPackageCandidateJson,
   validateCmsBuilderState,
-  type CmsBuilderBlock,
-  type CmsBuilderBlockKind,
   type CmsBuilderState,
-  type CmsBuilderTemplate,
 } from "@/lib/profile-cms/builder/package";
 import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
 
 import ProfileCmsPublishPanel from "./ProfileCmsPublishPanel";
 import ProfileCmsPendingJsonPanel from "./ProfileCmsPendingJsonPanel";
-import { refreshWalletGalleryState } from "@/lib/profile-cms/builder/gallery-source";
 import ProfileCmsVersionHistoryPanel from "./ProfileCmsVersionHistoryPanel";
 import { useCmsDraftRecovery } from "./useCmsDraftRecovery";
 import { isProfileCmsBuilderApiEnabledEnv } from "@/config/profileCmsBuilderEnv";
-import {
-  canVisuallyEditCmsPackage,
-  updateCmsBuilderState,
-} from "@/lib/profile-cms/builder/editor";
 import { getProfileCmsPackageById } from "@/lib/profile-cms/builder/api";
-import { getStructuredApiErrorStatus } from "@/services/api/common-api";
 
 export default function ProfileCmsBuilder(
   props: ComponentProps<typeof ProfileCmsBuilderWorkspace>
 ) {
-  const { connectedProfile, activeProfileProxy } = useAuth();
+  const { connectedProfile, activeProfileProxy, isAuthenticated } = useAuth();
   const { address } = useSeizeConnectContext();
   return (
     <ProfileCmsBuilderWorkspace
@@ -79,19 +63,20 @@ export default function ProfileCmsBuilder(
         ":" +
         (address?.toLowerCase() ?? "disconnected") +
         ":" +
-        (activeProfileProxy ? "proxy" : "owner")
+        (activeProfileProxy ? "proxy" : "owner") +
+        ":" +
+        (isAuthenticated === true ? "authenticated" : "guest")
       }
       {...props}
     />
   );
 }
 
-type BuilderTab = "editor" | "preview" | "json" | "agent";
+type BuilderTab = "editor" | "json" | "agent" | "publish" | "history";
 function ProfileCmsBuilderWorkspace({
   handle,
   locale = DEFAULT_LOCALE,
   profileId,
-  title,
 }: {
   readonly handle: string;
   readonly locale?: SupportedLocale | undefined;
@@ -112,11 +97,30 @@ function ProfileCmsBuilderWorkspace({
   const [isPublishing, setIsPublishing] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [historyRevision, setHistoryRevision] = useState(0);
-  const [gallerySnapshotStatus, setGallerySnapshotStatus] =
-    useState<GallerySnapshotStatus>("idle");
-  const [gallerySnapshotError, setGallerySnapshotError] = useState("");
+  const [studioRevision, setStudioRevision] = useState(0);
+  const [studioPending, setStudioPending] = useState(false);
+  const studioPendingRef = useRef(false);
+  const [studioUploading, setStudioUploading] = useState(false);
+  const studioUploadingRef = useRef(false);
+  const changeStudioUploading = (uploading: boolean) => {
+    studioUploadingRef.current = uploading;
+    setStudioUploading(uploading);
+  };
+  const studioHandle = useRef<StudioEditorHandle>(null);
+  const changeStudioPending = (pending: boolean) => {
+    studioPendingRef.current = pending;
+    setStudioPending(pending);
+  };
+  const guardStudioForm = () => {
+    if (!studioPendingRef.current && !studioUploadingRef.current) return true;
+    studioHandle.current?.focusPendingForm();
+    return false;
+  };
+  const changeTab = (tab: BuilderTab) => {
+    if (guardStudioForm()) setActiveTab(tab);
+  };
+  const [samplesReviewed, setSamplesReviewed] = useState(false);
   const actionRequestIdRef = useRef(0);
-  const gallerySnapshotRequestIdRef = useRef(0);
   const stateVersionRef = useRef(0);
   const { activeProfileProxy, connectedProfile, isAuthenticated } = useAuth();
   const { address } = useSeizeConnectContext();
@@ -126,18 +130,18 @@ function ProfileCmsBuilderWorkspace({
     () => JSON.stringify(validation.cmsPackage, null, 2),
     [validation.cmsPackage]
   );
-  const canUseBuilderApi = isCmsBuilderOwner(
-    profileId,
-    connectedProfile?.id,
-    !!activeProfileProxy
-  );
+  const canUseBuilderApi =
+    isCmsBuilderOwner(profileId, connectedProfile?.id, !!activeProfileProxy) &&
+    isAuthenticated === true;
   const canRequestGallerySnapshot =
     !isProfileCmsBuilderApiEnabledEnv() || isAuthenticated === true;
-  const busy = isCmsBuilderBusy(
-    isSubmitting,
-    isPublishing,
-    gallerySnapshotStatus
-  );
+  const busy = isSubmitting || isPublishing;
+  const sampleReviewRequired =
+    validation.cmsPackage.payload.source_packets?.some(
+      (packet) =>
+        (packet as Record<string, unknown>)["content_status"] ===
+        "fictional_example"
+    ) && !samplesReviewed;
   const hasUnappliedJson = hasPendingCmsJson(jsonDraft, packageJson);
   const galleryReady = isCmsGalleryReady(state);
   const recovery = useCmsDraftRecovery({
@@ -147,7 +151,7 @@ function ProfileCmsBuilderWorkspace({
     cmsPackage: validation.cmsPackage,
     draftId,
     dirty,
-    busy,
+    busy: busy || studioPending || studioUploading,
     jsonDraft: jsonDraft ?? undefined,
     leaveMessage: t(locale, "profileCms.builder.recovery.leave"),
   });
@@ -179,156 +183,6 @@ function ProfileCmsBuilderWorkspace({
     setDirty(true);
   };
 
-  const updateState = (patch: Partial<CmsBuilderState>) => {
-    setState((current) => updateCmsBuilderState(current, patch));
-    clearActionResult();
-  };
-
-  const selectTemplate = (template: CmsBuilderTemplate) => {
-    if (
-      template !== state.template &&
-      (dirty || state.sourcePackage) &&
-      !confirmCmsDiscard(locale)
-    )
-      return;
-    gallerySnapshotRequestIdRef.current += 1;
-    setGallerySnapshotStatus("idle");
-    setState((current) => {
-      if (current.template === template) {
-        return current;
-      }
-
-      return {
-        ...current,
-        template,
-        sourcePackage: undefined,
-        ...(template === "wallet_gallery"
-          ? {
-              siteTitle: current.siteTitle.endsWith("Gallery")
-                ? current.siteTitle
-                : `${current.handle} Gallery`,
-              siteDescription:
-                current.siteDescription ||
-                "Generated gallery from reviewed wallet snapshot.",
-              themeAccent: "#00a86b",
-            }
-          : {}),
-      };
-    });
-    clearActionResult();
-  };
-
-  const updateGallery = (patch: Partial<WalletGalleryBuilderState>) => {
-    if (patch.walletInput !== undefined) {
-      gallerySnapshotRequestIdRef.current += 1;
-      setGallerySnapshotStatus("idle");
-    }
-    setState((current) =>
-      updateCmsBuilderState(current, {
-        template: "wallet_gallery",
-        gallery: {
-          ...current.gallery,
-          ...patch,
-        },
-      })
-    );
-    clearActionResult();
-  };
-
-  const updateBlock = (index: number, patch: Partial<CmsBuilderBlock>) => {
-    setState((current) =>
-      updateCmsBuilderState(current, {
-        blocks: current.blocks.map((block, blockIndex) =>
-          blockIndex === index ? { ...block, ...patch } : block
-        ),
-      })
-    );
-    clearActionResult();
-  };
-
-  const requestGallerySnapshot = async () => {
-    if (!canRequestGallerySnapshot) {
-      setGallerySnapshotStatus("error");
-      setGallerySnapshotError(
-        t(locale, "profileCms.builder.gallery.snapshot.signInRequired")
-      );
-      return;
-    }
-    const parsed = parseWalletGallerySources(state.gallery.walletInput);
-    if (!parsed.ok) {
-      setGallerySnapshotStatus("error");
-      setGallerySnapshotError(
-        parsed.errors.includes("missing_wallet")
-          ? t(locale, "profileCms.builder.gallery.wallets.emptyError")
-          : t(locale, "profileCms.builder.gallery.wallets.invalidError", {
-              entries: parsed.errors.join(", "),
-            })
-      );
-      return;
-    }
-
-    const requestId = gallerySnapshotRequestIdRef.current + 1;
-    gallerySnapshotRequestIdRef.current = requestId;
-    setGallerySnapshotStatus("loading");
-    setGallerySnapshotError("");
-    clearActionResult();
-
-    try {
-      const snapshot = await requestProfileCmsGallerySnapshot({
-        handle: state.handle,
-        sources: parsed.sources,
-      });
-      if (requestId !== gallerySnapshotRequestIdRef.current) {
-        return;
-      }
-
-      setState((current) =>
-        updateCmsBuilderState(current, {
-          template: "wallet_gallery",
-          gallery: refreshWalletGalleryState(current.gallery, snapshot),
-        })
-      );
-      clearActionResult();
-      setGallerySnapshotStatus("ready");
-    } catch (error) {
-      if (requestId !== gallerySnapshotRequestIdRef.current) {
-        return;
-      }
-      setGallerySnapshotStatus("error");
-      setGallerySnapshotError(
-        t(
-          locale,
-          getStructuredApiErrorStatus(error) === 401
-            ? "profileCms.builder.gallery.snapshot.sessionExpired"
-            : "profileCms.builder.gallery.snapshot.failed"
-        )
-      );
-    }
-  };
-
-  const addBlock = (kind: CmsBuilderBlockKind) => {
-    setState((current) =>
-      updateCmsBuilderState(current, {
-        blocks: [
-          ...current.blocks,
-          createBuilderBlock(kind, current.blocks.length, {
-            id: `block-${kind}-${Date.now()}-${stateVersionRef.current}`,
-          }),
-        ],
-      })
-    );
-    clearActionResult();
-  };
-
-  const removeBlock = (index: number) => {
-    setState((current) =>
-      updateCmsBuilderState(current, {
-        blocks: current.blocks.filter((_, blockIndex) => blockIndex !== index),
-      })
-    );
-    clearActionResult();
-  };
-
   const importJson = () => {
     setImportError("");
     try {
@@ -337,8 +191,9 @@ function ProfileCmsBuilderWorkspace({
       );
       if (importedPackage.profile.handle.toLowerCase() !== handle.toLowerCase())
         throw new Error("profile_mismatch");
-      gallerySnapshotRequestIdRef.current += 1;
       setState(createBuilderStateFromPackage(importedPackage));
+      setStudioRevision((value) => value + 1);
+      setSamplesReviewed(false);
       setJsonDraft(null);
       clearActionResult();
       setActiveTab("editor");
@@ -350,14 +205,14 @@ function ProfileCmsBuilderWorkspace({
   const applyAgentPackage = (cmsPackage: CmsPackageV1) => {
     if (cmsPackage.profile.handle.toLowerCase() !== handle.toLowerCase())
       return;
-    gallerySnapshotRequestIdRef.current += 1;
     setState(createBuilderStateFromPackage(cmsPackage));
+    setSamplesReviewed(false);
     setJsonDraft(null);
     clearActionResult();
   };
 
   const runAction = async (action: ProfileCmsBuilderAction) => {
-    if (busy || hasUnappliedJson || !galleryReady) return;
+    if (!guardStudioForm() || busy || hasUnappliedJson || !galleryReady) return;
     if (!canUseBuilderApi) {
       setActionResult({
         ok: false,
@@ -413,9 +268,8 @@ function ProfileCmsBuilderWorkspace({
   };
 
   const loadPackage = async (id: string) => {
-    if (!canUseBuilderApi || busy) return;
+    if (!guardStudioForm() || !canUseBuilderApi || busy) return;
     if (dirty && !confirmCmsDiscard(locale)) return;
-    gallerySnapshotRequestIdRef.current += 1;
     const version = ++stateVersionRef.current;
     setIsSubmitting(true);
     setImportError("");
@@ -424,6 +278,8 @@ function ProfileCmsBuilderWorkspace({
       if (version !== stateVersionRef.current) return;
       if (record.profileId !== profileId) throw new Error("profile_mismatch");
       setState(createBuilderStateFromPackage(record.cmsPackage));
+      setStudioRevision((value) => value + 1);
+      setSamplesReviewed(false);
       setDraftId(record.id);
       setDraftVersion(record.version);
       setJsonDraft(null);
@@ -440,19 +296,21 @@ function ProfileCmsBuilderWorkspace({
   return (
     <main className="tailwind-scope tw-min-h-[100dvh] tw-bg-iron-950 tw-text-iron-100">
       <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-black">
-        <div className="tw-mx-auto tw-flex tw-max-w-7xl tw-flex-col tw-gap-4 tw-px-4 tw-py-5 sm:tw-px-6 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between lg:tw-px-8">
+        <div className="tw-mx-auto tw-flex tw-max-w-[1800px] tw-flex-col tw-gap-2 tw-px-3 tw-py-3 sm:tw-gap-4 sm:tw-px-6 sm:tw-py-5 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between lg:tw-px-8">
           <div>
             <p className="tw-mb-1 tw-text-sm tw-font-semibold tw-uppercase tw-text-primary-300">
               {state.handle}
             </p>
-            <h1 className="tw-text-2xl tw-font-semibold tw-text-white">
-              {title}
+            <h1 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white sm:tw-text-2xl">
+              {t(locale, "profileCms.studio.title")}
             </h1>
           </div>
           <div className="tw-flex tw-flex-wrap tw-gap-2">
             <BuilderActionButton
               disabled={
                 busy ||
+                studioPending ||
+                studioUploading ||
                 hasUnappliedJson ||
                 !galleryReady ||
                 !canUseBuilderApi ||
@@ -464,23 +322,55 @@ function ProfileCmsBuilderWorkspace({
             <BuilderActionButton
               disabled={
                 busy ||
+                studioPending ||
+                studioUploading ||
                 hasUnappliedJson ||
                 !galleryReady ||
                 !canUseBuilderApi ||
                 !isProfileCmsBuilderApiEnabledEnv()
               }
-              label={t(locale, "profileCms.builder.cta.serverValidate")}
-              onClick={() => void runAction("validate")}
+              label={t(locale, "profileCms.studio.publish")}
+              onClick={() => changeTab("publish")}
             />
           </div>
         </div>
       </header>
 
       <div
-        className="tw-mx-auto tw-max-w-7xl tw-px-4 tw-pt-4"
+        className="tw-mx-auto tw-max-w-[1800px] tw-px-3 tw-pt-2 sm:tw-px-4 sm:tw-pt-4"
         aria-live="polite"
       >
-        <p>{t(locale, getDraftStateMessage(dirty, draftId))}</p>
+        <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+          {t(locale, getDraftStateMessage(dirty, draftId))}
+        </p>
+        {!canUseBuilderApi ? (
+          <p className="tw-text-sm tw-leading-6 tw-text-iron-200">
+            {t(locale, "profileCms.studio.ownerRequired")}
+          </p>
+        ) : null}
+        {studioPending ? (
+          <p role="status" className="tw-text-sm tw-leading-6 tw-text-iron-200">
+            {t(locale, "profileCms.studio.pendingForm")}
+          </p>
+        ) : null}
+        {studioUploading ? (
+          <p role="status" className="tw-text-sm tw-leading-6 tw-text-iron-200">
+            {t(locale, "profileCms.studio.pendingUpload")}
+          </p>
+        ) : null}
+        {actionResult ? (
+          <p
+            role={actionResult.ok ? "status" : "alert"}
+            className="tw-text-sm tw-leading-6 tw-text-iron-100"
+          >
+            {getActionResultMessage(locale, actionResult.code)}
+          </p>
+        ) : null}
+        {sampleReviewRequired ? (
+          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(locale, "profileCms.studio.sampleNotice")}
+          </p>
+        ) : null}
         {!galleryReady ? (
           <p>{t(locale, "profileCms.builder.gallery.snapshot.required")}</p>
         ) : null}
@@ -504,12 +394,13 @@ function ProfileCmsBuilderWorkspace({
               label={t(locale, "profileCms.builder.recovery.restore")}
               disabled={busy}
               onClick={() => {
-                if (!recovery.recovery) return;
+                if (!guardStudioForm() || !recovery.recovery) return;
                 if (dirty && !confirmCmsDiscard(locale)) return;
-                gallerySnapshotRequestIdRef.current += 1;
                 setState(
                   createBuilderStateFromPackage(recovery.recovery.cmsPackage)
                 );
+                setStudioRevision((value) => value + 1);
+                setSamplesReviewed(false);
                 setDraftId(recovery.recovery.draftId);
                 setJsonDraft(recovery.recovery.jsonDraft ?? null);
                 setActiveTab(
@@ -527,18 +418,18 @@ function ProfileCmsBuilderWorkspace({
           </div>
         ) : null}
       </div>
-      <div className="tw-mx-auto tw-max-w-7xl tw-px-4">
+      <div className="tw-mx-auto tw-max-w-[1800px] tw-px-4">
         <ProfileCmsPendingJsonPanel
           pending={hasUnappliedJson}
           busy={busy}
           locale={locale}
-          onReview={() => setActiveTab("json")}
+          onReview={() => changeTab("json")}
           onDiscard={() => {
             if (confirmCmsDiscard(locale)) setJsonDraft(null);
           }}
         />
       </div>
-      <div className="tw-mx-auto tw-grid tw-max-w-7xl tw-grid-cols-1 tw-gap-5 tw-px-4 tw-py-5 sm:tw-px-6 lg:tw-grid-cols-[minmax(0,1fr)_380px] lg:tw-px-8">
+      <div className="tw-mx-auto tw-grid tw-max-w-[1800px] tw-grid-cols-1 tw-gap-3 tw-px-3 tw-py-3 sm:tw-gap-5 sm:tw-px-6 sm:tw-py-5 lg:tw-px-8">
         <section
           aria-label={t(locale, "profileCms.builder.workspaceLabel")}
           className="tw-min-w-0 tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900"
@@ -547,63 +438,61 @@ function ProfileCmsBuilderWorkspace({
             <TabButton
               active={activeTab === "editor"}
               label={t(locale, "profileCms.builder.tab.editor")}
-              onClick={() => setActiveTab("editor")}
+              onClick={() => changeTab("editor")}
             />
             <TabButton
-              active={activeTab === "preview"}
-              label={t(locale, "profileCms.builder.tab.preview")}
-              onClick={() => setActiveTab("preview")}
+              active={activeTab === "publish"}
+              label={t(locale, "profileCms.studio.publish")}
+              onClick={() => changeTab("publish")}
             />
             <TabButton
-              active={activeTab === "json"}
-              label={t(locale, "profileCms.builder.tab.json")}
-              onClick={() => {
-                setActiveTab("json");
-              }}
+              active={activeTab === "history"}
+              label={t(locale, "profileCms.studio.versions")}
+              onClick={() => changeTab("history")}
             />
-            <TabButton
-              active={activeTab === "agent"}
-              label={t(locale, "profileCms.builder.tab.agent")}
-              onClick={() => setActiveTab("agent")}
-            />
+            <details className="tw-ml-auto tw-rounded-lg tw-p-2 tw-text-sm tw-text-iron-300">
+              <summary className="tw-cursor-pointer">
+                {t(locale, "profileCms.studio.advanced")}
+              </summary>
+              <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">
+                <TabButton
+                  active={activeTab === "json"}
+                  label={t(locale, "profileCms.builder.tab.json")}
+                  onClick={() => {
+                    changeTab("json");
+                  }}
+                />
+                <TabButton
+                  active={activeTab === "agent"}
+                  label={t(locale, "profileCms.builder.tab.agent")}
+                  onClick={() => changeTab("agent")}
+                />
+              </div>
+            </details>
           </div>
 
           <fieldset
             disabled={busy || (hasUnappliedJson && activeTab !== "json")}
             className="tw-min-w-0 tw-border-0 tw-p-0"
           >
-            {activeTab === "editor" && canVisuallyEditCmsPackage(state) ? (
-              <EditorPanel
-                addBlock={addBlock}
-                canRequestGallerySnapshot={canRequestGallerySnapshot}
-                gallerySnapshotError={gallerySnapshotError}
-                gallerySnapshotStatus={gallerySnapshotStatus}
+            <div hidden={activeTab !== "editor"}>
+              <ProfileCmsStudioEditor
+                key={studioRevision}
+                document={validation.cmsPackage}
                 locale={locale}
-                onRequestGallerySnapshot={() => void requestGallerySnapshot()}
-                removeBlock={removeBlock}
-                selectTemplate={selectTemplate}
-                state={state}
-                updateBlock={updateBlock}
-                updateGallery={updateGallery}
-                updateState={updateState}
+                initialShowTemplates={!state.sourcePackage}
+                canRequestSnapshot={canRequestGallerySnapshot}
+                canUpload={
+                  canUseBuilderApi && isProfileCmsBuilderApiEnabledEnv()
+                }
+                scopeKey={`${profileId ?? handle}:${address?.toLowerCase() ?? "guest"}:${studioRevision}`}
+                onChange={applyAgentPackage}
+                onTemplateCreated={() => setSamplesReviewed(false)}
+                onPendingChange={changeStudioPending}
+                onUploadBusyChange={changeStudioUploading}
+                handleRef={studioHandle}
               />
-            ) : null}
-
-            {activeTab === "editor" && !canVisuallyEditCmsPackage(state) ? (
-              <p className="tw-p-4">
-                {t(locale, "profileCms.builder.editor.advanced")}
-              </p>
-            ) : null}
-
-            {activeTab === "preview" ? (
-              <div className="tw-bg-black">
-                <CmsSiteRenderer
-                  cmsPackage={validation.cmsPackage}
-                  locale={locale}
-                  page={validation.page}
-                />
-              </div>
-            ) : null}
+            </div>
 
             {activeTab === "json" ? (
               <JsonPanel
@@ -650,31 +539,49 @@ function ProfileCmsBuilderWorkspace({
           </fieldset>
         </section>
 
-        <aside className="tw-flex tw-flex-col tw-gap-5">
-          <ProfileCmsPublishPanel
-            key={validation.cmsPackage.integrity.package_hash}
-            cmsPackage={validation.cmsPackage}
-            profileId={profileId}
-            primaryWallet={connectedProfile?.primary_wallet ?? address}
-            canUseBuilderApi={
-              canUseBuilderApi && isProfileCmsBuilderApiEnabledEnv()
-            }
-            canPublish={
-              validation.result.valid &&
-              !busy &&
-              !hasUnappliedJson &&
-              galleryReady
-            }
-            locale={locale}
-            onBusyChange={setIsPublishing}
-            onPublished={(published) => {
-              setDraftId(published.id);
-              setDraftVersion(published.version);
-              setDirty(false);
-              setHistoryRevision((value) => value + 1);
-            }}
-          />
-          {profileId ? (
+        <aside
+          className={`tw-mx-auto tw-w-full tw-max-w-4xl tw-flex-col tw-gap-5 ${activeTab === "publish" || activeTab === "history" ? "tw-flex" : "tw-hidden"}`}
+        >
+          {activeTab === "publish" && sampleReviewRequired ? (
+            <label className="tw-flex tw-items-start tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-5 tw-text-sm tw-leading-6">
+              <input
+                type="checkbox"
+                checked={samplesReviewed}
+                onChange={(event) => setSamplesReviewed(event.target.checked)}
+                className="tw-mt-1 tw-h-4 tw-w-4 tw-accent-primary-500"
+              />
+              <span>{t(locale, "profileCms.studio.reviewSamples")}</span>
+            </label>
+          ) : null}
+          {activeTab === "publish" ? (
+            <ProfileCmsPublishPanel
+              key={validation.cmsPackage.integrity.package_hash}
+              cmsPackage={validation.cmsPackage}
+              profileId={profileId}
+              primaryWallet={connectedProfile?.primary_wallet ?? address}
+              canUseBuilderApi={
+                canUseBuilderApi && isProfileCmsBuilderApiEnabledEnv()
+              }
+              canPublish={
+                validation.result.valid &&
+                !busy &&
+                !studioPending &&
+                !studioUploading &&
+                !hasUnappliedJson &&
+                galleryReady &&
+                !sampleReviewRequired
+              }
+              locale={locale}
+              onBusyChange={setIsPublishing}
+              onPublished={(published) => {
+                setDraftId(published.id);
+                setDraftVersion(published.version);
+                setDirty(false);
+                setHistoryRevision((value) => value + 1);
+              }}
+            />
+          ) : null}
+          {profileId && activeTab === "history" ? (
             <ProfileCmsVersionHistoryPanel
               profileId={profileId}
               enabled={canUseBuilderApi && isProfileCmsBuilderApiEnabledEnv()}
@@ -693,13 +600,18 @@ function ProfileCmsBuilderWorkspace({
               actionResult?.code !== "server_validation_invalid"
             }
           />
-          <PublishStatePanel
-            actionResult={actionResult}
-            draftId={draftId}
-            locale={locale}
-            packageHash={validation.cmsPackage.integrity.package_hash}
-            payloadHash={validation.cmsPackage.integrity.payload_hash}
-          />
+          <details className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-4">
+            <summary className="tw-cursor-pointer tw-text-sm tw-text-iron-300">
+              {t(locale, "profileCms.studio.details")}
+            </summary>
+            <PublishStatePanel
+              actionResult={actionResult}
+              draftId={draftId}
+              locale={locale}
+              packageHash={validation.cmsPackage.integrity.package_hash}
+              payloadHash={validation.cmsPackage.integrity.payload_hash}
+            />
+          </details>
         </aside>
       </div>
     </main>
@@ -716,7 +628,6 @@ function isCmsBuilderOwner(
 
 function confirmCmsDiscard(locale: SupportedLocale): boolean {
   // Confirm synchronously before replacing the editor's only unsaved working copy.
-  // eslint-disable-next-line no-alert
   return globalThis.confirm(t(locale, "profileCms.builder.recovery.replace"));
 }
 
@@ -735,14 +646,6 @@ function hasPendingCmsJson(
   packageJson: string
 ): boolean {
   return jsonDraft !== null && jsonDraft !== packageJson;
-}
-
-function isCmsBuilderBusy(
-  submitting: boolean,
-  publishing: boolean,
-  snapshot: GallerySnapshotStatus
-): boolean {
-  return submitting || publishing || snapshot === "loading";
 }
 
 function isCmsGalleryReady(state: CmsBuilderState): boolean {

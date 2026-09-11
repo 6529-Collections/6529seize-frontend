@@ -1,9 +1,8 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { useAuth } from "@/components/auth/Auth";
 import ProfileCmsBuilder from "@/components/profile-cms-builder/ProfileCmsBuilder";
-import * as editor from "@/components/profile-cms-builder/ProfileCmsBuilderEditorPanel";
 import { publicEnv } from "@/config/env";
 import {
   ApiProfileCmsWalletGallerySnapshotSourceEnum,
@@ -26,6 +25,10 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
 }));
 jest.mock("@/components/profile-cms/CmsSiteRenderer", () => ({
+  __esModule: true,
+  default: () => null,
+}));
+jest.mock("@/components/profile-cms-builder/studio/StudioImageUpload", () => ({
   __esModule: true,
   default: () => null,
 }));
@@ -53,7 +56,13 @@ async function openGallery() {
       title="Profile CMS builder"
     />
   );
-  await user.click(screen.getByRole("button", { name: "Wallet gallery" }));
+  await user.click(screen.getByRole("button", { name: "Preview Signature" }));
+  await user.click(screen.getByRole("button", { name: "Use this template" }));
+  await user.click(screen.getByRole("button", { name: "Add your art" }));
+  await user.type(
+    screen.getByLabelText("Wallets or ENS names"),
+    "punk6529.eth"
+  );
   return user;
 }
 
@@ -109,29 +118,17 @@ describe("CMS wallet snapshot authentication", () => {
     }
   );
 
-  it("guards a direct snapshot handler call while signed out", async () => {
-    const originalEditor = editor.EditorPanel;
-    let requestSnapshot: (() => void) | undefined;
-    jest.spyOn(editor, "EditorPanel").mockImplementation((props) => {
-      requestSnapshot = props.onRequestGallerySnapshot;
-      return originalEditor(props);
-    });
-    await openGallery();
-    expect(requestSnapshot).toBeDefined();
-    await act(async () => requestSnapshot?.());
-    expect(post).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "Sign in to request a wallet snapshot."
-    );
-  });
-
-  it.each([null, { id: "different-profile" }])(
-    "allows any authenticated session without target-profile ownership (%j)",
-    async (connectedProfile) => {
+  it.each([
+    [null, null],
+    [{ id: "different-profile" }, null],
+    [{ id: "different-profile" }, { id: "profile-proxy" }],
+  ])(
+    "allows any authenticated session without target-profile ownership (%j, %j)",
+    async (connectedProfile, activeProfileProxy) => {
       auth.mockReturnValue({
         isAuthenticated: true,
         connectedProfile,
-        activeProfileProxy: null,
+        activeProfileProxy,
       });
       const user = await openGallery();
       const request = screen.getByRole("button", { name: "Request snapshot" });
@@ -143,10 +140,27 @@ describe("CMS wallet snapshot authentication", () => {
         body: { wallets: ["punk6529.eth"] },
         errorMode: "structured",
       });
-      expect(await screen.findByText("Backend snapshot")).toBeInTheDocument();
+      expect(await screen.findByText(/0 holdings found/)).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
     }
   );
+
+  it("keeps explicit API-disabled example snapshots available while signed out", async () => {
+    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "false";
+    const user = await openGallery();
+    const request = screen.getByRole("button", { name: "Request snapshot" });
+    expect(request).toBeEnabled();
+    await user.click(request);
+    expect(
+      await screen.findByText(/Example snapshot: live wallet requests/)
+    ).toBeInTheDocument();
+    expect(post).not.toHaveBeenCalled();
+    expect(
+      screen
+        .getAllByRole("checkbox")
+        .every((element) => !(element as HTMLInputElement).checked)
+    ).toBe(true);
+  });
 
   it.each([
     [
@@ -169,7 +183,7 @@ describe("CMS wallet snapshot authentication", () => {
       await user.click(
         screen.getByRole("button", { name: "Request snapshot" })
       );
-      expect(await screen.findByText(message)).toHaveAttribute("role", "alert");
+      expect(await screen.findByRole("alert")).toHaveTextContent(message);
       expect(
         screen.getByRole("button", { name: "Request snapshot" })
       ).toHaveAccessibleDescription(message);

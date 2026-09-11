@@ -26,7 +26,6 @@ import {
 import { withComputedCmsHashes } from "@/lib/profile-cms/protocol/v1/hash";
 
 export {
-  WALLET_GALLERY_FIXTURE_WARNING_CODES,
   WALLET_GALLERY_BACKEND_WARNING_CODES,
   createDefaultWalletGalleryBuilderState,
   parseWalletGallerySources,

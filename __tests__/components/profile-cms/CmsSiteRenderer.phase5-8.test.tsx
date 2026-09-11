@@ -56,8 +56,8 @@ describe("CmsSiteRenderer Phase 5-8 fixtures", () => {
     const featuredLinks = within(gallerySection).getAllByRole("link");
     expect(featuredLinks.map((link) => link.getAttribute("href"))).toEqual(
       expect.arrayContaining([
-        "/punk6529/collections/the-memes/index.html",
-        "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html",
+        "/punk6529/collections/the-memes",
+        "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1",
       ])
     );
   });
@@ -96,8 +96,7 @@ describe("CmsSiteRenderer Phase 5-8 fixtures", () => {
     expect(screen.getAllByText("1").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Chain").length).toBeGreaterThan(0);
     expect(
-      screen.getAllByText("0x33fd426905f149f8376e227d0c9d3340aad17af1")
-        .length
+      screen.getAllByText("0x33fd426905f149f8376e227d0c9d3340aad17af1").length
     ).toBeGreaterThan(0);
   });
 
@@ -115,7 +114,7 @@ describe("CmsSiteRenderer Phase 5-8 fixtures", () => {
       screen.getByRole("link", { name: "Open 2D fallback" })
     ).toHaveAttribute(
       "href",
-      "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html"
+      "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1"
     );
   });
 
