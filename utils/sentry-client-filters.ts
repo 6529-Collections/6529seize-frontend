@@ -38,7 +38,10 @@ export {
   shouldFilterBrowserExtensionSendMessageError,
   shouldFilterBrowserExtensionWalletRejection,
 } from "./sentry-client-filters/extension-messaging";
-export { shouldFilterPoperBlockerOrphanFetchRejection } from "./sentry-client-filters/extension-fetch";
+export {
+  shouldFilterPoperBlockerOrphanFetchRejection,
+  shouldFilterUrbanVpnExecutorMIdError,
+} from "./sentry-client-filters/extension-fetch";
 export { shouldFilterExpectedWaveRequestReplacementAbort } from "./sentry-client-filters/wave-abort";
 export {
   shouldFilterBraveWalletPageEvaluationError,

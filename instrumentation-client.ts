@@ -36,6 +36,7 @@ import {
   shouldFilterBraveWalletPageEvaluationError,
   shouldFilterChromeMobileIosInjectedGaError,
   shouldFilterPoperBlockerOrphanFetchRejection,
+  shouldFilterUrbanVpnExecutorMIdError,
   shouldFilterExpectedWaveRequestReplacementAbort,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
@@ -199,6 +200,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterPoperBlockerOrphanFetchRejection(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterUrbanVpnExecutorMIdError(event, hint)) {
     return true;
   }
 

@@ -23,6 +23,17 @@ const poperBlockerInjectedFetchFrameSignatures = [
   },
 ] as const;
 
+const urbanVpnExecutorMIdErrorMessage =
+  "Cannot read properties of undefined (reading 'M_ID')";
+const urbanVpnExecutorPath = "app:///executors/200.js";
+const urbanVpnRawSentryWrapperPathPattern =
+  /^app:\/\/\/_next\/static\/chunks\/[A-Za-z0-9_-]+\.js$/;
+const urbanVpnXhrFunctions = new Set([
+  "XMLHttpRequest.<anonymous>",
+  "XMLHttpRequest.onreadystatechange",
+]);
+const urbanVpnExecutorFunctions = new Set(["F", "Z"]);
+
 function isPoperBlockerInjectedFetchPath(path: string): boolean {
   return path === poperBlockerInjectedFetchPath;
 }
@@ -81,6 +92,64 @@ function hasExactPoperBlockerInjectedFetchFramePair(
   );
 }
 
+function hasOnlyFramePaths(
+  frame: SentryStackFrame,
+  predicate: (path: string) => boolean
+): boolean {
+  const framePaths = getFramePaths(frame);
+  return framePaths.length > 0 && framePaths.every(predicate);
+}
+
+function isExactUrbanVpnSentryWrapperFrame(frame: SentryStackFrame): boolean {
+  // beforeSend receives this minified wrapper before Sentry applies source maps.
+  return (
+    frame.function === "XMLHttpRequest.r" &&
+    frame.lineno === 7 &&
+    frame.colno === 6173 &&
+    hasOnlyFramePaths(frame, (path) =>
+      urbanVpnRawSentryWrapperPathPattern.test(path)
+    )
+  );
+}
+
+function isExactUrbanVpnXhrFrame(frame: SentryStackFrame): boolean {
+  return (
+    typeof frame.function === "string" &&
+    urbanVpnXhrFunctions.has(frame.function) &&
+    frame.lineno === 1 &&
+    frame.colno === 2598 &&
+    hasOnlyFramePaths(frame, (path) => path === urbanVpnExecutorPath)
+  );
+}
+
+function isExactUrbanVpnExecutorFrame(frame: SentryStackFrame): boolean {
+  return (
+    typeof frame.function === "string" &&
+    urbanVpnExecutorFunctions.has(frame.function) &&
+    frame.lineno === 1 &&
+    frame.colno === 761 &&
+    hasOnlyFramePaths(frame, (path) => path === urbanVpnExecutorPath)
+  );
+}
+
+function hasExactUrbanVpnExecutorStack(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  if (!Array.isArray(frames) || frames.length !== 3) {
+    return false;
+  }
+
+  const [sentryWrapperFrame, xhrFrame, executorFrame] = frames;
+  return (
+    !!sentryWrapperFrame &&
+    !!xhrFrame &&
+    !!executorFrame &&
+    isExactUrbanVpnSentryWrapperFrame(sentryWrapperFrame) &&
+    isExactUrbanVpnXhrFrame(xhrFrame) &&
+    isExactUrbanVpnExecutorFrame(executorFrame)
+  );
+}
+
 export function shouldFilterPoperBlockerOrphanFetchRejection(
   event: SentryClientEvent,
   hint?: SentryEventHint
@@ -102,4 +171,27 @@ export function shouldFilterPoperBlockerOrphanFetchRejection(
   }
 
   return hasExactPoperBlockerInjectedFetchFramePair(value.stacktrace?.frames);
+}
+
+export function shouldFilterUrbanVpnExecutorMIdError(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  const values = event.exception?.values;
+  if (!Array.isArray(values) || values.length !== 1) {
+    return false;
+  }
+
+  const [value] = values;
+  if (
+    value?.type !== "TypeError" ||
+    value.value !== urbanVpnExecutorMIdErrorMessage ||
+    value.mechanism?.type !== browserUnhandledRejectionMechanism ||
+    value.mechanism.handled !== false ||
+    hasAppOwnedSourceEvidence(event, value, hint)
+  ) {
+    return false;
+  }
+
+  return hasExactUrbanVpnExecutorStack(value.stacktrace?.frames);
 }
