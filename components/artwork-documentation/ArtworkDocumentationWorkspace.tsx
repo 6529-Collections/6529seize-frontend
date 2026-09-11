@@ -350,7 +350,7 @@ function WorkspaceEditor({
               assets={assets}
             />
           )}
-          <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-3 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5">
+          <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5">
             <DocumentationButton
               secondary
               onClick={() => {
