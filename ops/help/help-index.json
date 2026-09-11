@@ -6756,6 +6756,8 @@
         "mint route",
         "mint current card",
         "mint confirmation",
+        "wallet not showing",
+        "mint submitted",
         "seized",
         "minted to"
       ],
@@ -6776,10 +6778,13 @@
         "If a remembered profile's authorized wallet is disconnected, the mint page hides the duplicate Connect control; selecting SEIZE opens wallet connection and continues when the same wallet reconnects and transaction details are unchanged.",
         "Selecting a different already-authenticated wallet switches the active profile and cancels the old pending mint so refreshed recipient, eligibility, price, and transaction details can be reviewed before selecting SEIZE again; an unauthenticated wallet must complete normal authentication first.",
         "Wallet confirmation, submitted, successful, and on-chain error states appear in the shared transaction modal; local recipient and mint-count validation stays inline.",
-        "Before confirmation and for transaction errors, the modal identifies the card as Mint: The Memes #{id} when a valid token ID is available, and otherwise keeps the generic Mint The Memes title.",
+        "For transaction errors, the modal identifies the card as Mint: The Memes #{id} when a valid token ID is available, and otherwise keeps the generic Mint The Memes title.",
+        "Confirm in your wallet asks users to review and confirm the mint in their wallet, with artwork details, Quantity, and the full destination address under Recipient. Wallet not showing? expands instructions to open the wallet app or browser extension to find the request; the help control does not open the wallet itself. Reject the request in the wallet to stop before submission.",
+        "Once submitted, the modal title is Mint submitted with the message Waiting for network confirmation. The same artwork, quantity, and Recipient remain visible, the window updates automatically, and View transaction opens an available transaction link in a new browser tab. The submitted state remains visible while receipt status updates until confirmation or an error.",
+        "Wallet confirmation and submitted states have no close or Done control, and Escape or clicking outside does not dismiss them. Before submission, reject the wallet request in the wallet to stop; after submission, wait for confirmation or an error.",
         "After receipt confirmation, the modal headline is SEIZED! with the message Your mint is confirmed. It shows artwork details, Quantity, and the full destination wallet address under Minted to. These details describe the submitted mint, including when minting for another wallet.",
         "Done closes the success confirmation and returns to the mint page. View transaction opens the transaction in a new browser tab; checking it is optional. The close control and Escape also dismiss the success confirmation.",
-        "Artwork preview unavailable means only the image could not be displayed; the successful mint, quantity, destination, and transaction link remain available.",
+        "Artwork preview unavailable means only the image could not be displayed in a wallet-request, submitted, or success modal. Quantity, destination, and available transaction links remain accessible, and the transaction status is unchanged. Missing artwork titles use Artwork.",
         "Mint eligibility is separate from subscription mode and allowlist rules."
       ],
       "canonical_path": "/the-memes/mint",
@@ -7979,7 +7984,7 @@
       "facts": [
         "Collecting tools at /collect opens the set planner for The Memes, 6529 Gradient and NextGen Pebbles. Choose Complete a set, Lowest listings or TDH. In the set planner, choose Collection first. The Memes offers Full set, Season and Artist under Build toward. Gradients opens its full set directly; Pebbles offers its named sets. Season, artist and Pebbles set selectors support typing to find an option by name, with clear empty and no-match states. The planner has no duplicate artwork catalogue.",
         "Browse artworks on /the-memes, /6529-gradient and /nextgen/collection/pebbles. Complete my set on The Memes carries the selected season, or its full set when no season is selected; the Gradients link opens its full set and the Pebbles link opens its trait-set planner. Browse artwork links return from Collecting tools to these native collection pages.",
-        "On a supported artwork card, the Listings and Offers section has a Collect action and a more-actions menu for Make an offer, List for sale and Review offers. Collect opens purchase review without leaving the card; current orders and trade terms are checked before signing.",
+        "Supported artwork cards place one Collect action near the artwork summary, before the longer description and Listings and Offers. A more-actions menu offers Make an offer, List for sale and Review offers. Collect opens purchase review without leaving the card; current orders and trade terms are checked before signing.",
         "Artwork-card trading actions open a dialog immediately with a loading message while the artwork and trading tools load. If the artwork cannot be loaded for trading, Try again retries within the same dialog. Close or Escape returns to the card. Closing while it loads cancels that attempt; the review does not open later when loading finishes.",
         "Lowest listings shows observed listings for the selected collection, including prices and quantities. Open the artwork image or title for its native card page, or select Collect to review the current order. Listing coverage is incomplete and availability can change; an empty result does not prove that no orders exist elsewhere. Try again retries a failed listing request.",
         "All set collecting uses the profile across its confirmed consolidated wallets. Copies per NFT is the total you want to hold of each required NFT, including copies already in your profile. Wallets identify custody, funding, signing or receipt; selecting a custody wallet does not redefine the primary collecting scope.",

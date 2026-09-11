@@ -677,21 +677,57 @@ describe("MemePageLiveRightMenu distribution link", () => {
 });
 
 describe("MemePageLiveSubMenu details", () => {
-  it("places one artwork action before details and refreshes market data", () => {
-    render(<MemePageLiveSubMenu show nft={createNft({ id: 5 })} />);
+  it("places one artwork action after artwork metadata and before statistics", () => {
+    const onMarketChange = jest.fn();
+    render(
+      <MemePageLiveRightMenu
+        show
+        nft={createNft({ id: 5 })}
+        nftMeta={createMeta()}
+        onMarketChange={onMarketChange}
+      />
+    );
     const collecting = screen.getByRole("button", { name: "Collect artwork" });
-    const marketDepth = screen.getByTestId("market-depth");
     expect(collecting).toHaveAttribute("data-family", "memes");
     expect(collecting).toHaveAttribute("data-token", "5");
     expect(
       screen.getAllByRole("button", { name: "Collect artwork" })
     ).toHaveLength(1);
-    expect(collecting.compareDocumentPosition(screen.getByText("d"))).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING
-    );
-    expect(marketDepth).toHaveAttribute("data-refresh-key", "0");
+    expect(
+      screen
+        .getByText("Created by")
+        .closest("section")
+        ?.compareDocumentPosition(collecting)
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(
+      collecting.compareDocumentPosition(
+        screen.getByText("Edition size").closest("section") as Node
+      )
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     fireEvent.click(collecting);
-    expect(marketDepth).toHaveAttribute("data-refresh-key", "1");
+    expect(onMarketChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses its parent market refresh version without duplicating actions", () => {
+    render(
+      <MemePageLiveSubMenu
+        show
+        nft={createNft({ id: 5 })}
+        marketRefreshVersion={3}
+      />
+    );
+    expect(
+      screen.queryByRole("button", { name: "Collect artwork" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("market-depth")).toHaveAttribute(
+      "data-refresh-key",
+      "3"
+    );
+    expect(
+      screen
+        .getByText("d")
+        .compareDocumentPosition(screen.getByTestId("market-depth"))
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it("renders the media type badge", () => {

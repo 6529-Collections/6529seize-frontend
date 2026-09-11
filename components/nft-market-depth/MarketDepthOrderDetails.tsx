@@ -79,7 +79,7 @@ function IndividualOrder({
   return (
     <li className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-py-4 last:tw-border-b-0">
       {showPrice && (
-        <p className="tw-mb-3 tw-mt-0 tw-text-sm tw-font-medium tw-text-iron-200">
+        <p className="tw-mb-3 tw-mt-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-200">
           {t(
             locale,
             order.side === ApiMarketOrderSideEnum.Ask
@@ -144,8 +144,8 @@ export default function MarketDepthOrderDetails({
   }
   if (isLoading) {
     return (
-      <p
-        role="status"
+      <output
+        aria-live="polite"
         className="tw-my-4 tw-flex tw-items-center tw-gap-2 tw-text-xs tw-text-iron-400"
       >
         <ArrowPathIcon
@@ -153,7 +153,7 @@ export default function MarketDepthOrderDetails({
           className="tw-h-4 tw-w-4 tw-animate-spin motion-reduce:tw-animate-none"
         />
         {t(locale, "marketDepth.orders.loadingDetails")}
-      </p>
+      </output>
     );
   }
   if (orders.length !== expectedCount) {

@@ -96,6 +96,57 @@ describe("OnchainTransactionModal", () => {
     }
   );
 
+  it.each(["confirm_wallet", "submitted", "success", "error"] as const)(
+    "keeps pending content within pending states (%s)",
+    (status) => {
+      render(
+        <OnchainTransactionModal
+          status={status}
+          title="Onchain action"
+          pendingContent={<div>Pending mint details</div>}
+          onClose={jest.fn()}
+        />
+      );
+      if (status === "confirm_wallet" || status === "submitted") {
+        expect(screen.getByText("Pending mint details")).toBeInTheDocument();
+        expect(
+          screen.queryByText(DEFAULT_MESSAGES[status])
+        ).not.toBeInTheDocument();
+        expect(screen.getByRole("status")).toHaveTextContent("Onchain action");
+      } else {
+        expect(
+          screen.queryByText("Pending mint details")
+        ).not.toBeInTheDocument();
+        if (status === "error") {
+          expect(
+            screen.getByRole("textbox", { name: "Transaction error details" })
+          ).toHaveValue(DEFAULT_MESSAGES.error);
+        } else {
+          expect(
+            screen.getByText(DEFAULT_MESSAGES.success)
+          ).toBeInTheDocument();
+        }
+      }
+    }
+  );
+
+  it.each([undefined, null, false, true])(
+    "preserves the default wallet instructions for empty pending content (%s)",
+    (pendingContent) => {
+      render(
+        <OnchainTransactionModal
+          status="confirm_wallet"
+          title="Onchain action"
+          pendingContent={pendingContent}
+          onClose={jest.fn()}
+        />
+      );
+      expect(
+        screen.getByText(DEFAULT_MESSAGES.confirm_wallet)
+      ).toBeInTheDocument();
+    }
+  );
+
   it("includes custom success actions in the focus trap after confirmation", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();

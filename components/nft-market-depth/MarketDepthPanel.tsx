@@ -558,7 +558,7 @@ export default function MarketDepthPanel({
                       className="tw-min-w-0"
                     >
                       <div className="tw-mb-3 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-3 tw-gap-y-1">
-                        <h3 className="tw-m-0 tw-text-base tw-font-medium tw-text-iron-100">
+                        <h3 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-base tw-font-medium tw-text-iron-100">
                           {t(
                             resolvedLocale,
                             side === "ask"

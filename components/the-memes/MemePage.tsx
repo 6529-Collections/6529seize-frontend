@@ -8,7 +8,7 @@ import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 
 import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDropNextMintSubscribe";
@@ -39,6 +39,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import NftNavigation from "../nft-navigation/NftNavigation";
 import MemeCalendarPeriods from "./MemeCalendarPeriods";
 import { MemePageArtViewer } from "./MemePageArtViewer";
+import { MemePageTabButton } from "./MemePageTabButton";
 import NftArtworkShareButton from "@/components/artwork-share/NftArtworkShareButton";
 import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";
 import {
@@ -104,9 +105,6 @@ const MEME_HISTORY_TABS: {
   { focus: MEME_HISTORY_TAB.TIMELINE },
 ];
 
-const MEME_TAB_BUTTON_BASE_CLASS_NAME =
-  "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
-
 interface MemeOwnerState {
   readonly consolidationKey: string;
   readonly owner: ConsolidatedTDH;
@@ -128,35 +126,6 @@ function getMemeHistoryTabLabel(
       throw new Error(`Unhandled MEME_HISTORY_TAB: ${String(unhandled)}`);
     }
   }
-}
-
-function getMemePageTabButtonClassName(isActive: boolean) {
-  return `${MEME_TAB_BUTTON_BASE_CLASS_NAME} ${
-    isActive
-      ? "tw-cursor-default tw-border-primary-400 tw-text-iron-100"
-      : "tw-cursor-pointer tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100"
-  }`;
-}
-
-function MemePageTabButton({
-  title,
-  isActive,
-  onClick,
-}: {
-  readonly title: string;
-  readonly isActive: boolean;
-  readonly onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      className={getMemePageTabButtonClassName(isActive)}
-      aria-current={isActive ? "page" : undefined}
-      onClick={onClick}
-    >
-      {title}
-    </button>
-  );
 }
 
 function UpcomingMemeDistributionHeaderLink({
@@ -293,6 +262,10 @@ export default function MemePage({
   const nftNotFound = pageData?.nftNotFound ?? false;
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [marketRefreshVersion, setMarketRefreshVersion] = useState(0);
+  const refreshMarket = useCallback(() => {
+    setMarketRefreshVersion((version) => version + 1);
+  }, []);
 
   const [ownerState, setOwnerState] = useState<MemeOwnerState>();
   const consolidationKey = connectedProfile?.consolidation_key;
@@ -544,6 +517,7 @@ export default function MemePage({
             nft={nft}
             nftMeta={nftMeta}
             locale={locale}
+            onMarketChange={refreshMarket}
           />
         </div>
       </div>
@@ -610,6 +584,7 @@ export default function MemePage({
             nftBalance={nftBalance}
             defaultAdditionalDetailsOpen={focusParam === MEME_FOCUS.THE_ART}
             locale={locale}
+            marketRefreshVersion={marketRefreshVersion}
           />
           {(activeTab === MEME_FOCUS.REFERENCES ||
             loadedPrimaryTabs.has(MEME_FOCUS.REFERENCES)) && (
