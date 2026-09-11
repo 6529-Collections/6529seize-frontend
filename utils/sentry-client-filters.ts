@@ -57,4 +57,5 @@ export {
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
 } from "./sentry-client-filters/rabby";
+export { shouldFilterZerionUserRejectedRequest } from "./sentry-client-filters/zerion";
 export { __testing } from "./sentry-client-filters/testing";

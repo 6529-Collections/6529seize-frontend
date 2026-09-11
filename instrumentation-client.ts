@@ -57,6 +57,7 @@ import {
   shouldFilterTwitterCurrentInsetReferenceError,
   shouldFilterTwitterConfigReferenceError,
   shouldFilterWalletConnectStaleSessionTopic,
+  shouldFilterZerionUserRejectedRequest,
   tagSampledLowValueNetworkError,
   type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
@@ -163,6 +164,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterKnownWalletProviderObjectRejection(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterZerionUserRejectedRequest(event, hint)) {
     return true;
   }
 
