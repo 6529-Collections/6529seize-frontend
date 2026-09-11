@@ -1,0 +1,153 @@
+"use client";
+
+import Button from "@/components/utils/button/Button";
+import type { ApiCollectCatalog } from "@/generated/models/ApiCollectCatalog";
+import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
+import { ApiCollectPlanStateEnum } from "@/generated/models/ApiCollectPlan";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import {
+  advanceCollectPlan,
+  createCollectPlan,
+} from "@/services/api/collect-api";
+import { useMutation } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { isAddress, parseEther, zeroAddress } from "viem";
+import { collectAnalysisRequest, collectGoalOptions } from "./collect.adapters";
+import type { CollectGoalDraft } from "./collect.types";
+import CollectGoalForm from "./CollectGoalForm";
+import CollectRecipientPicker from "./CollectRecipientPicker";
+
+export default function CollectGoalsController({
+  draft,
+  catalog,
+  profile,
+  onChange,
+  onPlan,
+  onConnect,
+}: {
+  readonly draft: CollectGoalDraft;
+  readonly catalog: ApiCollectCatalog | undefined;
+  readonly profile: ApiIdentity | null;
+  readonly onChange: (draft: CollectGoalDraft) => void;
+  readonly onPlan: (plan: ApiCollectPlan | null) => void;
+  readonly onConnect: () => void;
+}) {
+  const locale = useBrowserLocale();
+  const [recipient, setRecipient] = useState(profile?.primary_wallet ?? "");
+  const [plan, setPlan] = useState<ApiCollectPlan | null>(null);
+  const [scanError, setScanError] = useState(false);
+  const [recipientError, setRecipientError] = useState(false);
+  const create = useMutation({ mutationFn: createCollectPlan });
+  const scanning = plan?.state === ApiCollectPlanStateEnum.Scanning;
+  useEffect(() => {
+    if (plan?.state !== ApiCollectPlanStateEnum.Scanning || scanError) return;
+    const abort = new AbortController();
+    const timer = globalThis.setTimeout(() => {
+      void advanceCollectPlan(plan.id, abort.signal)
+        .then((next) => {
+          if (!abort.signal.aborted) {
+            setPlan(next);
+            onPlan(next);
+          }
+        })
+        .catch(() => {
+          if (!abort.signal.aborted) setScanError(true);
+        });
+    }, 350);
+    return () => {
+      abort.abort();
+      globalThis.clearTimeout(timer);
+    };
+  }, [plan, scanError, onPlan]);
+  const submit = (value: CollectGoalDraft) => {
+    if (!profile?.id || !catalog) return;
+    const valid =
+      isAddress(recipient) && recipient.toLowerCase() !== zeroAddress;
+    setRecipientError(!valid);
+    if (!valid) return;
+    setScanError(false);
+    onPlan(null);
+    setPlan(null);
+    create.mutate(
+      {
+        goal: collectAnalysisRequest(profile.id, catalog, value),
+        options: {
+          budget_wei: parseEther(value.budgetEth).toString(),
+          recipient,
+        },
+      },
+      {
+        onSuccess: (next) => {
+          setPlan(next);
+          onPlan(next);
+        },
+      }
+    );
+  };
+  return (
+    <div className="tw-space-y-4">
+      <CollectGoalForm
+        draft={draft}
+        definitions={collectGoalOptions(catalog, draft, locale)}
+        profile={
+          profile?.id
+            ? { id: profile.id, displayName: profile.handle ?? profile.display }
+            : null
+        }
+        loading={create.isPending || scanning}
+        error={create.isError ? t(locale, "collect.error.analysis") : undefined}
+        onChange={(value) => {
+          setPlan(null);
+          onPlan(null);
+          onChange(value);
+        }}
+        onSubmit={submit}
+        onConnect={onConnect}
+      />
+      <fieldset
+        disabled={create.isPending}
+        className="tw-m-0 tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-4"
+      >
+        <CollectRecipientPicker
+          profile={profile}
+          value={recipient}
+          invalid={recipientError}
+          errorId="collect-goal-recipient-error"
+          onChange={(address) => {
+            setRecipient(address);
+            setRecipientError(false);
+            setPlan(null);
+            onPlan(null);
+          }}
+        />
+        {recipientError && (
+          <p
+            id="collect-goal-recipient-error"
+            role="alert"
+            className="tw-text-sm tw-text-red"
+          >
+            {t(locale, "collect.trade.invalid.recipient")}
+          </p>
+        )}
+      </fieldset>
+      {scanning && (
+        <p role="status" className="tw-text-sm tw-text-iron-300">
+          {t(locale, "collect.plan.scanning", {
+            checked: plan.checked_asset_count,
+            total: plan.total_asset_count,
+          })}
+        </p>
+      )}
+      {scanError && (
+        <div role="alert" className="tw-space-y-3 tw-text-sm tw-text-iron-300">
+          <p>{t(locale, "collect.plan.scanError")}</p>
+          <Button variant="secondary" onClick={() => setScanError(false)}>
+            {t(locale, "collect.retry")}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}

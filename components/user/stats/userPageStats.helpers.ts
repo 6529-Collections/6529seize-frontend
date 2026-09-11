@@ -29,15 +29,7 @@ export function getStatsPath(
   return `wallet/${fallbackWallet.toLowerCase()}`;
 }
 
-export function getCollectedStatsIdentityKey(
-  profile: ApiIdentity,
-  activeAddress: string | null
-) {
-  const normalizedActiveAddress = activeAddress?.trim();
-  if (normalizedActiveAddress) {
-    return normalizedActiveAddress.toLowerCase();
-  }
-
+export function getCollectedStatsIdentityKey(profile: ApiIdentity) {
   const profileHandle = profile.handle?.trim();
   if (profileHandle) {
     return profileHandle.toLowerCase();
@@ -61,4 +53,17 @@ export function getCollectedStatsIdentityKey(
   }
 
   return fallbackWallet.toLowerCase();
+}
+
+export function getProfileStatsPath(profile: ApiIdentity) {
+  const wallets = new Set(
+    (profile.wallets ?? []).map(({ wallet }) => wallet.toLowerCase())
+  );
+  if (profile.primary_wallet) wallets.add(profile.primary_wallet.toLowerCase());
+  if (!profile.consolidation_key && wallets.size > 1) {
+    throw new Error(
+      "getProfileStatsPath: confirmed consolidation is unavailable"
+    );
+  }
+  return getStatsPath(profile, null);
 }

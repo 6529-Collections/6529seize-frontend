@@ -74,6 +74,13 @@ pointer from deleting immutable storage and links to the builder's user guide.
 
 ## Source Ownership
 
+The Collect workflow record owns `/collect` and `/collect/orders`, profile-wide
+set scope, direct gift recipients, marketplace review and recovery, observed
+price/TDH coverage, and saved rules that prepare purchases for wallet approval.
+Its facts must distinguish profile collecting from wallet authority and quote
+freshness from signed-order expiry. It must never imply an unattended spending
+mandate or exhaustive marketplace coverage.
+
 The frontend should own source-of-truth records for frontend concepts and
 navigation because the frontend owns:
 

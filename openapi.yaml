@@ -12,6 +12,963 @@ info:
 servers:
   - url: /api
 paths:
+  /collect/capabilities:
+    get:
+      tags:
+        - Collect
+      summary: get Collect Capabilities
+      operationId: getCollectCapabilities
+      security:
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect.handlers"
+          name: handleGetCollectCapabilities
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectCapabilities"
+        "400":
+          description: Invalid collecting request
+        "404":
+          description: Profile or catalog unavailable
+        "503":
+          description: Required snapshot or provider unavailable
+  /collect/catalog:
+    get:
+      tags:
+        - Collect
+      summary: get Collect Catalog
+      operationId: getCollectCatalog
+      security:
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect.handlers"
+          name: handleGetCollectCatalog
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectCatalog"
+        "400":
+          description: Invalid collecting request
+        "404":
+          description: Profile or catalog unavailable
+        "503":
+          description: Required snapshot or provider unavailable
+  /collect/assets:
+    get:
+      tags:
+        - Collect
+      summary: get Collect Assets
+      operationId: getCollectAssets
+      security:
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect.handlers"
+          name: handleGetCollectAssets
+      parameters:
+        - name: family
+          in: query
+          schema:
+            $ref: "#/components/schemas/ApiCollectFamily"
+        - name: query
+          in: query
+          schema:
+            type: string
+            maxLength: 100
+        - name: page
+          in: query
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 10000
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 48
+            default: 24
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectAssetsPage"
+        "400":
+          description: Invalid collecting request
+        "404":
+          description: Profile or catalog unavailable
+        "503":
+          description: Required snapshot or provider unavailable
+  /collect/analyses:
+    post:
+      tags:
+        - Collect
+      summary: analyze Collect Goal
+      operationId: analyzeCollectGoal
+      security:
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect.handlers"
+          name: handleAnalyzeCollectGoal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCollectAnalysisRequest"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectAnalysis"
+        "400":
+          description: Invalid collecting request
+        "404":
+          description: Profile or catalog unavailable
+        "503":
+          description: Required snapshot or provider unavailable
+  /market/orders:
+    get:
+      tags:
+        - Marketplace
+      summary: get Market Orders
+      operationId: getMarketOrders
+      security:
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache: false
+        typeImportGroup: market
+        handler:
+          import: "@/api/marketplace/marketplace.handlers"
+          name: handleGetMarketOrders
+      parameters:
+        - name: asset_key
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 150
+        - name: side
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - LISTING
+              - OFFER
+      responses:
+        "200":
+          description: Current reviewed trade state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketOrders"
+        "400":
+          description: Invalid trade terms
+        "403":
+          description: Wallet is not authorized
+        "404":
+          description: Trade or asset unavailable
+        "409":
+          description: Trade state or idempotency conflict
+        "503":
+          description: Trading unavailable
+  /market/operations:
+    post:
+      tags:
+        - Marketplace
+      summary: prepare Market Operation
+      operationId: prepareMarketOperation
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: market
+        handler:
+          import: "@/api/marketplace/marketplace.handlers"
+          name: handlePrepareMarketOperation
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMarketPrepareRequest"
+      responses:
+        "200":
+          description: Current reviewed trade state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketOperation"
+        "400":
+          description: Invalid trade terms
+        "403":
+          description: Wallet is not authorized
+        "404":
+          description: Trade or asset unavailable
+        "409":
+          description: Trade state or idempotency conflict
+        "503":
+          description: Trading unavailable
+  /market/me/operations:
+    get:
+      tags:
+        - Marketplace
+      summary: get My Market Operations
+      operationId: getMyMarketOperations
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: market
+        handler:
+          import: "@/api/marketplace/marketplace.handlers"
+          name: handleGetMyMarketOperations
+      responses:
+        "200":
+          description: Current reviewed trade state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketMyOperations"
+        "400":
+          description: Invalid trade terms
+        "403":
+          description: Wallet is not authorized
+        "404":
+          description: Trade or asset unavailable
+        "409":
+          description: Trade state or idempotency conflict
+        "503":
+          description: Trading unavailable
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+            maxLength: 200
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+  /market/operations/{id}:
+    get:
+      tags:
+        - Marketplace
+      summary: get Market Operation
+      operationId: getMarketOperation
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: market
+        handler:
+          import: "@/api/marketplace/marketplace.handlers"
+          name: handleGetMarketOperation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Current reviewed trade state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketOperation"
+        "400":
+          description: Invalid trade terms
+        "403":
+          description: Wallet is not authorized
+        "404":
+          description: Trade or asset unavailable
+        "409":
+          description: Trade state or idempotency conflict
+        "503":
+          description: Trading unavailable
+  /market/operations/{id}/continue:
+    post:
+      tags:
+        - Marketplace
+      summary: continue Market Operation
+      operationId: continueMarketOperation
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: market
+        handler:
+          import: "@/api/marketplace/marketplace.handlers"
+          name: handleContinueMarketOperation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Current reviewed trade state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketOperation"
+        "400":
+          description: Invalid trade terms
+        "403":
+          description: Wallet is not authorized
+        "404":
+          description: Trade or asset unavailable
+        "409":
+          description: Trade state or idempotency conflict
+        "503":
+          description: Trading unavailable
+  /market/operations/{id}/signature:
+    post:
+      tags:
+        - Marketplace
+      summary: publish Market Operation
+      operationId: publishMarketOperation
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: market
+        handler:
+          import: "@/api/marketplace/marketplace.handlers"
+          name: handlePublishMarketOperation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMarketSignature"
+      responses:
+        "200":
+          description: Current reviewed trade state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketOperation"
+        "400":
+          description: Invalid trade terms
+        "403":
+          description: Wallet is not authorized
+        "404":
+          description: Trade or asset unavailable
+        "409":
+          description: Trade state or idempotency conflict
+        "503":
+          description: Trading unavailable
+  /market/operations/{id}/submissions:
+    post:
+      tags:
+        - Marketplace
+      summary: submit Market Operation
+      operationId: submitMarketOperation
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: market
+        handler:
+          import: "@/api/marketplace/marketplace.handlers"
+          name: handleSubmitMarketOperation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMarketSubmission"
+      responses:
+        "200":
+          description: Current reviewed trade state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketOperation"
+        "400":
+          description: Invalid trade terms
+        "403":
+          description: Wallet is not authorized
+        "404":
+          description: Trade or asset unavailable
+        "409":
+          description: Trade state or idempotency conflict
+        "503":
+          description: Trading unavailable
+  /collect/plans:
+    post:
+      tags:
+        - Collect
+      summary: create Collect Plan
+      operationId: createCollectPlan
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-plan.handlers"
+          name: handleCreateCollectPlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCollectPlanRequest"
+      responses:
+        "200":
+          description: Current collecting plan or projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectPlan"
+        "400":
+          description: Invalid collecting request
+        "403":
+          description: Profile not authorized
+        "404":
+          description: Plan unavailable
+        "409":
+          description: Profile or catalog changed
+        "503":
+          description: Source data unavailable
+  /collect/plans/{id}:
+    get:
+      tags:
+        - Collect
+      summary: get Collect Plan
+      operationId: getCollectPlan
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-plan.handlers"
+          name: handleGetCollectPlan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Current collecting plan or projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectPlan"
+        "400":
+          description: Invalid collecting request
+        "403":
+          description: Profile not authorized
+        "404":
+          description: Plan unavailable
+        "409":
+          description: Profile or catalog changed
+        "503":
+          description: Source data unavailable
+  /collect/plans/{id}/advance:
+    post:
+      tags:
+        - Collect
+      summary: advance Collect Plan
+      operationId: advanceCollectPlan
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-plan.handlers"
+          name: handleAdvanceCollectPlan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Current collecting plan or projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectPlan"
+        "400":
+          description: Invalid collecting request
+        "403":
+          description: Profile not authorized
+        "404":
+          description: Plan unavailable
+        "409":
+          description: Profile or catalog changed
+        "503":
+          description: Source data unavailable
+  /collect/tdh-scenarios:
+    post:
+      tags:
+        - Collect
+      summary: project Collect Purchases
+      operationId: projectCollectPurchases
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-plan.handlers"
+          name: handleProjectCollectPurchases
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCollectTdhRequest"
+      responses:
+        "200":
+          description: Current collecting plan or projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectTdhProjection"
+        "400":
+          description: Invalid collecting request
+        "403":
+          description: Profile not authorized
+        "404":
+          description: Plan unavailable
+        "409":
+          description: Profile or catalog changed
+        "503":
+          description: Source data unavailable
+  /market/listings:
+    get:
+      tags:
+        - Collect
+      summary: get Market Listings
+      operationId: getMarketListings
+      security:
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-discovery.handlers"
+          name: handleGetMarketListings
+      parameters:
+        - name: family
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/ApiCollectFamily"
+        - name: cursor
+          in: query
+          schema:
+            type: string
+            maxLength: 2048
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 48
+            default: 24
+      responses:
+        "200":
+          description: Observed listing candidates or TDH comparison
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketListings"
+        "400":
+          description: Invalid request
+        "403":
+          description: Profile not authorized
+        "503":
+          description: Source unavailable
+  /collect/tdh-ranking:
+    post:
+      tags:
+        - Collect
+      summary: rank Collect Tdh Purchases
+      operationId: rankCollectTdhPurchases
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-discovery.handlers"
+          name: handleRankCollectTdhPurchases
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCollectTdhRankingRequest"
+      responses:
+        "200":
+          description: Observed listing candidates or TDH comparison
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectTdhRanking"
+        "400":
+          description: Invalid request
+        "403":
+          description: Profile not authorized
+        "503":
+          description: Source unavailable
+  /collect/rules:
+    post:
+      tags:
+        - Collect
+      summary: create Collect Rule
+      operationId: createCollectRule
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-rules.handlers"
+          name: handleCreateCollectRule
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCollectRuleDefinition"
+      responses:
+        "200":
+          description: Current rule or reviewed operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectRule"
+        "400":
+          description: Invalid request
+        "403":
+          description: Profile or signing wallet not authorized
+        "404":
+          description: Rule not found
+        "409":
+          description: Rule changed, has an unresolved operation, or exceeds review limits
+        "503":
+          description: A source cannot be verified
+    get:
+      tags:
+        - Collect
+      summary: get Collect Rules
+      operationId: getCollectRules
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-rules.handlers"
+          name: handleGetCollectRules
+      parameters: []
+      responses:
+        "200":
+          description: Current rule or reviewed operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectRules"
+        "400":
+          description: Invalid request
+        "403":
+          description: Profile or signing wallet not authorized
+        "404":
+          description: Rule not found
+        "409":
+          description: Rule changed, has an unresolved operation, or exceeds review limits
+        "503":
+          description: A source cannot be verified
+  /collect/rules/{id}:
+    get:
+      tags:
+        - Collect
+      summary: get Collect Rule
+      operationId: getCollectRule
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-rules.handlers"
+          name: handleGetCollectRule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Current rule or reviewed operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectRule"
+        "400":
+          description: Invalid request
+        "403":
+          description: Profile or signing wallet not authorized
+        "404":
+          description: Rule not found
+        "409":
+          description: Rule changed, has an unresolved operation, or exceeds review limits
+        "503":
+          description: A source cannot be verified
+  /collect/rules/{id}/pause:
+    post:
+      tags:
+        - Collect
+      summary: pause Collect Rule
+      operationId: pauseCollectRule
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-rules.handlers"
+          name: handlePauseCollectRule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCollectRulePause"
+      responses:
+        "200":
+          description: Current rule or reviewed operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectRule"
+        "400":
+          description: Invalid request
+        "403":
+          description: Profile or signing wallet not authorized
+        "404":
+          description: Rule not found
+        "409":
+          description: Rule changed, has an unresolved operation, or exceeds review limits
+        "503":
+          description: A source cannot be verified
+  /collect/rules/{id}/prepare:
+    post:
+      tags:
+        - Collect
+      summary: prepare Collect Rule
+      operationId: prepareCollectRule
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-rules.handlers"
+          name: handlePrepareCollectRule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCollectRulePrepare"
+      responses:
+        "200":
+          description: Current rule or reviewed operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectRulePrepared"
+        "400":
+          description: Invalid request
+        "403":
+          description: Profile or signing wallet not authorized
+        "404":
+          description: Rule not found
+        "409":
+          description: Rule changed, has an unresolved operation, or exceeds review limits
+        "503":
+          description: A source cannot be verified
+  /collect/rules/{id}/reconcile:
+    post:
+      tags:
+        - Collect
+      summary: reconcile Collect Rule
+      operationId: reconcileCollectRule
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-rules.handlers"
+          name: handleReconcileCollectRule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Current rule or reviewed operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectRule"
+        "400":
+          description: Invalid request
+        "403":
+          description: Profile or signing wallet not authorized
+        "404":
+          description: Rule not found
+        "409":
+          description: Rule changed, has an unresolved operation, or exceeds review limits
+        "503":
+          description: A source cannot be verified
   /aggregated-activity:
     get:
       tags:
@@ -15613,6 +16570,1886 @@ components:
       type: http
       scheme: bearer
   schemas:
+    ApiCollectAccount:
+      type: object
+      additionalProperties: false
+      required:
+        - profile_id
+        - consolidation_key
+        - wallets
+        - membership_hash
+      properties:
+        profile_id:
+          type: string
+        consolidation_key:
+          type: string
+        wallets:
+          type: array
+          items:
+            type: string
+            pattern: ^0x[0-9a-fA-F]{40}$
+        membership_hash:
+          type: string
+    ApiCollectAnalysis:
+      type: object
+      additionalProperties: false
+      required:
+        - analysis_id
+        - catalog_version
+        - account
+        - holdings_snapshot
+        - kind
+        - target_copies
+        - requirements
+        - required_count
+        - satisfied_count
+        - complete
+        - missing_asset_keys
+        - recipient
+        - recipient_in_profile
+        - counts_toward_profile
+      properties:
+        analysis_id:
+          type: string
+        catalog_version:
+          type: string
+        account:
+          $ref: "#/components/schemas/ApiCollectAccount"
+        holdings_snapshot:
+          type: object
+          additionalProperties: false
+          required:
+            - block_number
+            - nextgen_block_number
+          properties:
+            block_number:
+              type: integer
+              format: int64
+              nullable: true
+            nextgen_block_number:
+              type: integer
+              format: int64
+              nullable: true
+        kind:
+          $ref: "#/components/schemas/ApiCollectKind"
+        target_copies:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        requirements:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectRequirement"
+        required_count:
+          type: integer
+          format: int64
+        satisfied_count:
+          type: integer
+          format: int64
+        complete:
+          type: boolean
+        missing_asset_keys:
+          type: array
+          items:
+            type: string
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+          nullable: true
+        recipient_in_profile:
+          type: boolean
+        counts_toward_profile:
+          type: boolean
+    ApiCollectAnalysisRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - profile_id
+        - kind
+      properties:
+        profile_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        kind:
+          $ref: "#/components/schemas/ApiCollectKind"
+        catalog_version:
+          type: string
+          maxLength: 100
+        season_id:
+          type: integer
+          format: int64
+          minimum: 1
+        artist_id:
+          type: string
+          maxLength: 100
+        include_collaborations:
+          type: boolean
+        trait:
+          type: string
+          enum:
+            - Palette
+            - Size
+            - Traced
+        target_copies:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        assets:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - asset_key
+              - quantity
+            properties:
+              asset_key:
+                type: string
+                maxLength: 150
+              quantity:
+                type: string
+                pattern: ^(0|[1-9][0-9]{0,77})$
+                maxLength: 78
+          maxItems: 250
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        universe:
+          type: string
+          enum:
+            - released
+            - tdh_eligible
+    ApiCollectArtist:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - asset_keys
+        - collaboration_asset_keys
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        asset_keys:
+          type: array
+          items:
+            type: string
+        collaboration_asset_keys:
+          type: array
+          items:
+            type: string
+    ApiCollectAsset:
+      type: object
+      additionalProperties: false
+      required:
+        - asset_key
+        - chain_id
+        - contract
+        - token_id
+        - family
+        - name
+        - image_url
+        - artist_ids
+        - season
+        - traits
+        - hodl_rate
+        - tdh_eligible
+      properties:
+        asset_key:
+          type: string
+        chain_id:
+          type: integer
+          format: int64
+        contract:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        token_id:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        family:
+          $ref: "#/components/schemas/ApiCollectFamily"
+        name:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        artist_ids:
+          type: array
+          items:
+            type: string
+        season:
+          type: integer
+          format: int64
+          nullable: true
+        traits:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectTrait"
+        hodl_rate:
+          type: number
+          nullable: true
+        tdh_eligible:
+          type: boolean
+    ApiCollectAssetsPage:
+      type: object
+      additionalProperties: false
+      required:
+        - count
+        - page
+        - next
+        - data
+        - catalog_version
+      properties:
+        count:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int64
+        next:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectAsset"
+        catalog_version:
+          type: string
+    ApiCollectCapabilities:
+      type: object
+      additionalProperties: false
+      required:
+        - version
+        - chain_id
+        - profile_scope
+        - families
+        - actions
+        - provider
+        - creator_fees
+        - platform_fee_bps
+      properties:
+        version:
+          type: string
+        chain_id:
+          type: integer
+          format: int64
+        profile_scope:
+          type: string
+          enum:
+            - confirmed_consolidation
+        families:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectFamily"
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectCapability"
+        provider:
+          type: string
+        creator_fees:
+          type: string
+          enum:
+            - SIGNED_ORDER_TERMS
+        platform_fee_bps:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 0
+    ApiCollectCapability:
+      type: object
+      additionalProperties: false
+      required:
+        - action
+        - enabled
+        - reason
+      properties:
+        action:
+          type: string
+          enum:
+            - BUY
+            - LIST
+            - OFFER
+            - ACCEPT
+            - CANCEL
+            - TDH_SCENARIO
+            - RULE_EXECUTION
+        enabled:
+          type: boolean
+        reason:
+          type: string
+          nullable: true
+    ApiCollectCatalog:
+      type: object
+      additionalProperties: false
+      required:
+        - version
+        - chain_id
+        - seasons
+        - artists
+        - pebbles_traits
+        - tdh_snapshot
+      properties:
+        version:
+          type: string
+        chain_id:
+          type: integer
+          format: int64
+        seasons:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectSeason"
+        artists:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectArtist"
+        pebbles_traits:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectFacet"
+        tdh_snapshot:
+          type: object
+          nullable: true
+          required:
+            - block_number
+            - block_timestamp
+          properties:
+            block_number:
+              type: integer
+              format: int64
+            block_timestamp:
+              type: string
+    ApiCollectFacet:
+      type: object
+      additionalProperties: false
+      required:
+        - trait
+        - values
+      properties:
+        trait:
+          type: string
+          enum:
+            - Palette
+            - Size
+            - Traced
+        values:
+          type: array
+          items:
+            type: string
+    ApiCollectFamily:
+      type: string
+      enum:
+        - memes
+        - gradients
+        - pebbles
+    ApiCollectHolding:
+      type: object
+      additionalProperties: false
+      required:
+        - asset_key
+        - wallet
+        - quantity
+      properties:
+        asset_key:
+          type: string
+        wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+    ApiCollectKind:
+      type: string
+      enum:
+        - memes_season
+        - memes_full_set
+        - memes_artist
+        - gradients_full_set
+        - pebbles_trait_set
+        - pebbles_ultimate
+        - exact
+    ApiCollectRequirement:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - label
+        - target_quantity
+        - owned_quantity
+        - missing_quantity
+        - asset_keys
+        - holdings
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        target_quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        owned_quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        missing_quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        asset_keys:
+          type: array
+          items:
+            type: string
+        holdings:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectHolding"
+    ApiCollectSeason:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - asset_keys
+        - current
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        asset_keys:
+          type: array
+          items:
+            type: string
+        current:
+          type: boolean
+    ApiCollectTrait:
+      type: object
+      additionalProperties: false
+      required:
+        - trait
+        - value
+      properties:
+        trait:
+          type: string
+        value:
+          type: string
+    ApiMarketKind:
+      type: string
+      enum:
+        - BUY
+        - LIST
+        - OFFER
+        - ACCEPT
+        - CANCEL
+    ApiMarketIdentity:
+      type: object
+      additionalProperties: false
+      properties:
+        protocol_address:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        order_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+      required:
+        - protocol_address
+        - order_hash
+    ApiMarketFee:
+      type: object
+      additionalProperties: false
+      properties:
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        amount_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+      required:
+        - recipient
+        - amount_wei
+    ApiMarketOrder:
+      type: object
+      additionalProperties: false
+      properties:
+        identity:
+          $ref: "#/components/schemas/ApiMarketIdentity"
+        asset_key:
+          type: string
+        maker:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        side:
+          type: string
+          enum:
+            - LISTING
+            - OFFER
+        quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        currency:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        total_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        net_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        fees:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketFee"
+        start_time:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        end_time:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+      required:
+        - identity
+        - asset_key
+        - maker
+        - side
+        - quantity
+        - currency
+        - total_wei
+        - net_wei
+        - fees
+        - start_time
+        - end_time
+        - recipient
+    ApiMarketOrders:
+      type: object
+      additionalProperties: false
+      properties:
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketOrder"
+        observed_at:
+          type: integer
+          format: int64
+        source:
+          type: string
+        complete:
+          type: boolean
+      required:
+        - orders
+        - observed_at
+        - source
+        - complete
+    ApiMarketPrepareRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        profile_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        asset_key:
+          type: string
+          minLength: 1
+          maxLength: 150
+        kind:
+          $ref: "#/components/schemas/ApiMarketKind"
+        quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        currency:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        amount_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        expires_at:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Order expiry as Unix seconds. Required for LIST and OFFER.
+        order:
+          $ref: "#/components/schemas/ApiMarketIdentity"
+        acknowledge_external_recipient:
+          type: boolean
+      required:
+        - profile_id
+        - wallet
+        - recipient
+        - asset_key
+        - kind
+        - quantity
+        - currency
+        - amount_wei
+        - acknowledge_external_recipient
+    ApiMarketTransaction:
+      type: object
+      additionalProperties: false
+      properties:
+        chain_id:
+          type: integer
+          format: int64
+        to:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        value:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        data:
+          type: string
+          pattern: ^0x[0-9a-fA-F]*$
+          maxLength: 100000
+        purpose:
+          type: string
+          enum:
+            - APPROVE_NFT
+            - APPROVE_CURRENCY
+            - FULFILL
+            - CANCEL
+        approval_scope:
+          type: string
+          enum:
+            - TOKEN
+            - COLLECTION
+            - CURRENCY_AMOUNT
+        gas_limit:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        max_fee_per_gas:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        gas_reserve_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        sender:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+      required:
+        - chain_id
+        - sender
+        - to
+        - value
+        - data
+        - purpose
+    ApiMarketOfferItem:
+      type: object
+      additionalProperties: false
+      properties:
+        item_type:
+          type: integer
+          format: int64
+        token:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        identifier_or_criteria:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        start_amount:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        end_amount:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+      required:
+        - item_type
+        - token
+        - identifier_or_criteria
+        - start_amount
+        - end_amount
+    ApiMarketConsiderationItem:
+      type: object
+      additionalProperties: false
+      properties:
+        item_type:
+          type: integer
+          format: int64
+        token:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        identifier_or_criteria:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        start_amount:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        end_amount:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+      required:
+        - item_type
+        - token
+        - identifier_or_criteria
+        - start_amount
+        - end_amount
+        - recipient
+    ApiMarketComponents:
+      type: object
+      additionalProperties: false
+      properties:
+        offerer:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        zone:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        offer:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketOfferItem"
+        consideration:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketConsiderationItem"
+        order_type:
+          type: integer
+          format: int64
+        start_time:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        end_time:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        zone_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        salt:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        conduit_key:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        counter:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+      required:
+        - offerer
+        - zone
+        - offer
+        - consideration
+        - order_type
+        - start_time
+        - end_time
+        - zone_hash
+        - salt
+        - conduit_key
+        - counter
+    ApiMarketOrderToSign:
+      type: object
+      additionalProperties: false
+      properties:
+        protocol_address:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        order_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        digest:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        components:
+          $ref: "#/components/schemas/ApiMarketComponents"
+      required:
+        - protocol_address
+        - order_hash
+        - digest
+        - components
+    ApiMarketOperation:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        revision:
+          type: string
+        state:
+          type: string
+          enum:
+            - PREPARING
+            - REVIEW
+            - APPROVAL
+            - AWAITING_SIGNATURE
+            - PUBLISHING
+            - LIVE
+            - SUBMITTED
+            - MINED
+            - CONFIRMED
+            - FAILED
+            - UNKNOWN
+            - CANCEL_PENDING
+            - CANCELLED
+            - EXPIRED
+        profile_id:
+          type: string
+        kind:
+          $ref: "#/components/schemas/ApiMarketKind"
+        wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        recipient_in_profile:
+          type: boolean
+        asset_key:
+          type: string
+        quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        currency:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        total_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        net_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        fees:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketFee"
+        approval_transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketTransaction"
+        transaction:
+          $ref: "#/components/schemas/ApiMarketTransaction"
+        order:
+          $ref: "#/components/schemas/ApiMarketOrderToSign"
+        transaction_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        order_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        expires_at:
+          type: integer
+          format: int64
+          description: >-
+            Review refresh deadline as Unix milliseconds; not an onchain
+            cancellation or expiry.
+        updated_at:
+          type: integer
+          format: int64
+        error_code:
+          type: string
+        block_number:
+          type: integer
+          format: int64
+        block_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        settlement:
+          $ref: "#/components/schemas/ApiMarketSettlement"
+        nft_recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        potential_liability_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+      required:
+        - id
+        - revision
+        - state
+        - profile_id
+        - kind
+        - wallet
+        - recipient
+        - recipient_in_profile
+        - asset_key
+        - quantity
+        - currency
+        - total_wei
+        - net_wei
+        - fees
+        - approval_transactions
+        - expires_at
+        - updated_at
+        - potential_liability_wei
+    ApiMarketMyOperations:
+      type: object
+      additionalProperties: false
+      properties:
+        operations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketOperation"
+        next:
+          type: string
+          nullable: true
+      required:
+        - operations
+        - next
+    ApiMarketSignature:
+      type: object
+      additionalProperties: false
+      properties:
+        signature:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{130}$
+      required:
+        - signature
+    ApiMarketSubmission:
+      type: object
+      additionalProperties: false
+      properties:
+        transaction_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+      required:
+        - transaction_hash
+    ApiCollectPlanOptions:
+      type: object
+      additionalProperties: false
+      properties:
+        budget_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        expected_analysis_id:
+          type: string
+      required:
+        - budget_wei
+        - recipient
+    ApiCollectPlanRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        goal:
+          $ref: "#/components/schemas/ApiCollectAnalysisRequest"
+        options:
+          $ref: "#/components/schemas/ApiCollectPlanOptions"
+      required:
+        - goal
+        - options
+    ApiCollectPlanLeg:
+      type: object
+      additionalProperties: false
+      properties:
+        candidate_id:
+          type: string
+        order_id:
+          type: string
+        asset_key:
+          type: string
+        quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        unit_price_wei:
+          type: string
+          description: Observed exact unit price including signed listing fees, excluding gas. Requires fresh preparation before execution.
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+      required:
+        - candidate_id
+        - order_id
+        - asset_key
+        - quantity
+    ApiCollectPlanRemaining:
+      type: object
+      additionalProperties: false
+      properties:
+        requirement_id:
+          type: string
+        missing_quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+      required:
+        - requirement_id
+        - missing_quantity
+    ApiCollectAcquisitionPlan:
+      type: object
+      additionalProperties: false
+      properties:
+        plan_id:
+          type: string
+        analysis_id:
+          type: string
+        status:
+          type: string
+          enum:
+            - complete
+            - partial
+            - unavailable
+        optimality:
+          type: string
+          enum:
+            - proven_within_candidates
+            - best_found
+        total_cost_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        legs:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectPlanLeg"
+        remaining_requirements:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectPlanRemaining"
+        projected_profile_complete:
+          type: boolean
+        projected_profile_satisfied_count:
+          type: integer
+          format: int64
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+          nullable: true
+        states_examined:
+          type: integer
+          format: int64
+        candidate_count:
+          type: integer
+          format: int64
+        evaluated_at:
+          type: string
+        method:
+          type: string
+      required:
+        - plan_id
+        - analysis_id
+        - status
+        - optimality
+        - total_cost_wei
+        - legs
+        - remaining_requirements
+        - projected_profile_complete
+        - projected_profile_satisfied_count
+        - recipient
+        - states_examined
+        - candidate_count
+        - evaluated_at
+        - method
+    ApiCollectPlan:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        state:
+          type: string
+          enum:
+            - SCANNING
+            - READY
+            - STALE
+        revision:
+          type: string
+        profile_id:
+          type: string
+        analysis:
+          $ref: "#/components/schemas/ApiCollectAnalysis"
+        result:
+          $ref: "#/components/schemas/ApiCollectAcquisitionPlan"
+        checked_asset_count:
+          type: integer
+          format: int64
+        total_asset_count:
+          type: integer
+          format: int64
+        unavailable_asset_count:
+          type: integer
+          format: int64
+        failed_asset_count:
+          type: integer
+          format: int64
+        candidate_universe_complete:
+          type: boolean
+        gas_reserve_per_order_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        assumptions:
+          type: array
+          items:
+            type: string
+        updated_at:
+          type: integer
+          format: int64
+        asset_scan_complete:
+          type: boolean
+      required:
+        - id
+        - state
+        - revision
+        - profile_id
+        - analysis
+        - result
+        - checked_asset_count
+        - total_asset_count
+        - unavailable_asset_count
+        - failed_asset_count
+        - candidate_universe_complete
+        - gas_reserve_per_order_wei
+        - assumptions
+        - updated_at
+        - asset_scan_complete
+    ApiCollectPurchaseAllocation:
+      type: object
+      additionalProperties: false
+      properties:
+        asset_key:
+          type: string
+        quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+      required:
+        - asset_key
+        - quantity
+        - recipient
+    ApiCollectTdhRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        profile_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        horizon_days:
+          type: integer
+          enum:
+            - 1
+            - 30
+            - 90
+            - 365
+        acquisitions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectPurchaseAllocation"
+          minItems: 1
+          maxItems: 2000
+      required:
+        - profile_id
+        - horizon_days
+        - acquisitions
+    ApiCollectProjectedToken:
+      type: object
+      additionalProperties: false
+      properties:
+        asset_key:
+          type: string
+        family:
+          $ref: "#/components/schemas/ApiCollectFamily"
+        balance:
+          type: number
+        raw_days_held:
+          type: number
+        hodl_rate:
+          type: number
+        base_tdh:
+          type: number
+        boosted_tdh:
+          type: number
+      required:
+        - asset_key
+        - family
+        - balance
+        - raw_days_held
+        - hodl_rate
+        - base_tdh
+        - boosted_tdh
+    ApiCollectBoost:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        available:
+          type: number
+        available_info:
+          type: array
+          items:
+            type: string
+        acquired:
+          type: number
+        acquired_info:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - available
+        - available_info
+        - acquired
+        - acquired_info
+    ApiCollectProjectedAccount:
+      type: object
+      additionalProperties: false
+      properties:
+        base_tdh:
+          type: number
+        boosted_tdh:
+          type: number
+        boost:
+          type: number
+        full_memes_sets:
+          type: integer
+          format: int64
+        tokens:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectProjectedToken"
+        boost_breakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectBoost"
+      required:
+        - base_tdh
+        - boosted_tdh
+        - boost
+        - full_memes_sets
+        - tokens
+        - boost_breakdown
+    ApiCollectRecipientAllocation:
+      type: object
+      additionalProperties: false
+      properties:
+        asset_key:
+          type: string
+        quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        counts_toward_profile:
+          type: boolean
+      required:
+        - asset_key
+        - quantity
+        - recipient
+        - counts_toward_profile
+    ApiCollectTdhProjection:
+      type: object
+      additionalProperties: false
+      properties:
+        account:
+          $ref: "#/components/schemas/ApiCollectAccount"
+        scenario_id:
+          type: string
+        snapshot_block:
+          type: integer
+          format: int64
+        snapshot_timestamp:
+          type: string
+        evaluated_at:
+          type: string
+        rules_version:
+          type: string
+        baseline:
+          $ref: "#/components/schemas/ApiCollectProjectedAccount"
+        proposed:
+          $ref: "#/components/schemas/ApiCollectProjectedAccount"
+        additional_tdh:
+          type: number
+        additional_base_tdh:
+          type: number
+        changed_boost_on_existing_holdings:
+          type: number
+        assumptions:
+          type: array
+          items:
+            type: string
+        horizon_days:
+          type: integer
+          format: int64
+        acquisition_timestamp:
+          type: string
+        recipient_allocations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectRecipientAllocation"
+      required:
+        - account
+        - scenario_id
+        - snapshot_block
+        - snapshot_timestamp
+        - evaluated_at
+        - rules_version
+        - baseline
+        - proposed
+        - additional_tdh
+        - additional_base_tdh
+        - changed_boost_on_existing_holdings
+        - assumptions
+        - horizon_days
+        - acquisition_timestamp
+        - recipient_allocations
+    ApiMarketSettlement:
+      type: object
+      additionalProperties: false
+      properties:
+        filled_quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        remaining_quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        transaction_hash:
+          type: string
+        block_number:
+          type: integer
+          format: int64
+        block_hash:
+          type: string
+        safe_block_number:
+          type: integer
+          format: int64
+      required:
+        - filled_quantity
+        - remaining_quantity
+    ApiMarketListingEntry:
+      type: object
+      additionalProperties: false
+      properties:
+        asset:
+          $ref: "#/components/schemas/ApiCollectAsset"
+        order:
+          $ref: "#/components/schemas/ApiMarketOrder"
+      required:
+        - asset
+        - order
+    ApiMarketListings:
+      type: object
+      additionalProperties: false
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketListingEntry"
+        next:
+          type: string
+          nullable: true
+        source:
+          type: string
+        observed_at:
+          type: string
+        received_count:
+          type: integer
+          format: int64
+        complete:
+          type: boolean
+      required:
+        - entries
+        - next
+        - source
+        - observed_at
+        - received_count
+        - complete
+    ApiCollectTdhRankingRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        profile_id:
+          type: string
+        family:
+          $ref: "#/components/schemas/ApiCollectFamily"
+        plan_id:
+          type: string
+          format: uuid
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        horizon_days:
+          type: integer
+          enum:
+            - 1
+            - 30
+            - 90
+            - 365
+      required:
+        - profile_id
+        - family
+        - recipient
+        - horizon_days
+    ApiCollectTdhRatio:
+      type: object
+      additionalProperties: false
+      properties:
+        numerator_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        denominator_tdh:
+          type: number
+      required:
+        - numerator_wei
+        - denominator_tdh
+    ApiCollectTdhRankedCandidate:
+      type: object
+      additionalProperties: false
+      properties:
+        candidate_id:
+          type: string
+        total_cost_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        scenario_id:
+          type: string
+        additional_tdh:
+          type: number
+        additional_base_tdh:
+          type: number
+        changed_boost_on_existing_holdings:
+          type: number
+        proposed_boost:
+          type: number
+        proposed_boosted_tdh:
+          type: number
+        cost_per_additional_tdh:
+          type: object
+          additionalProperties: false
+          properties:
+            numerator_wei:
+              type: string
+              pattern: ^(0|[1-9][0-9]{0,77})$
+              maxLength: 78
+            denominator_tdh:
+              type: number
+          required:
+            - numerator_wei
+            - denominator_tdh
+          nullable: true
+        acquisitions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectPurchaseAllocation"
+      required:
+        - candidate_id
+        - total_cost_wei
+        - scenario_id
+        - additional_tdh
+        - additional_base_tdh
+        - changed_boost_on_existing_holdings
+        - proposed_boost
+        - proposed_boosted_tdh
+        - cost_per_additional_tdh
+        - acquisitions
+    ApiCollectTdhExcludedCandidate:
+      type: object
+      additionalProperties: false
+      properties:
+        candidate_id:
+          type: string
+        reason:
+          type: string
+      required:
+        - candidate_id
+        - reason
+    ApiCollectTdhRanking:
+      type: object
+      additionalProperties: false
+      properties:
+        ranking_id:
+          type: string
+        account:
+          $ref: "#/components/schemas/ApiCollectAccount"
+        snapshot_block:
+          type: integer
+          format: int64
+        snapshot_timestamp:
+          type: string
+        acquisition_timestamp:
+          type: string
+        evaluated_at:
+          type: string
+        horizon_days:
+          type: integer
+          format: int64
+        rules_version:
+          type: string
+        candidate_count:
+          type: integer
+          format: int64
+        evaluated_count:
+          type: integer
+          format: int64
+        optimality:
+          type: string
+          enum:
+            - best_found
+        candidate_scope:
+          type: string
+          enum:
+            - supplied_verified_quotes
+        ranked:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectTdhRankedCandidate"
+        excluded:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectTdhExcludedCandidate"
+        assumptions:
+          type: array
+          items:
+            type: string
+      required:
+        - ranking_id
+        - account
+        - snapshot_block
+        - snapshot_timestamp
+        - acquisition_timestamp
+        - evaluated_at
+        - horizon_days
+        - rules_version
+        - candidate_count
+        - evaluated_count
+        - optimality
+        - candidate_scope
+        - ranked
+        - excluded
+        - assumptions
+    ApiCollectRuleTarget:
+      type: object
+      additionalProperties: false
+      properties:
+        asset_key:
+          type: string
+        target_quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        maximum_unit_price_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+      required:
+        - asset_key
+        - target_quantity
+        - maximum_unit_price_wei
+    ApiCollectRuleDefinition:
+      type: object
+      additionalProperties: false
+      properties:
+        profile_id:
+          type: string
+        funding_wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        plan_id:
+          type: string
+          nullable: true
+        analysis_id:
+          type: string
+          nullable: true
+        targets:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectRuleTarget"
+          minItems: 1
+          maxItems: 2000
+        max_total_cost_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        max_gas_reserve_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        expires_at:
+          type: integer
+          format: int64
+        max_actions:
+          type: integer
+          minimum: 1
+          maximum: 2000
+      required:
+        - profile_id
+        - funding_wallet
+        - recipient
+        - plan_id
+        - analysis_id
+        - targets
+        - max_total_cost_wei
+        - max_gas_reserve_wei
+        - expires_at
+        - max_actions
+    ApiCollectRuleReviewAsset:
+      type: object
+      additionalProperties: false
+      properties:
+        asset_key:
+          type: string
+        quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        unit_price_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+      required:
+        - asset_key
+        - quantity
+        - unit_price_wei
+    ApiCollectRuleReview:
+      type: object
+      additionalProperties: false
+      properties:
+        operation_id:
+          type: string
+        quote_id:
+          type: string
+        profile_id:
+          type: string
+        funding_wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        valid_until:
+          type: integer
+          format: int64
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectRuleReviewAsset"
+        item_cost_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        gas_reserve_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+      required:
+        - operation_id
+        - quote_id
+        - profile_id
+        - funding_wallet
+        - recipient
+        - valid_until
+        - assets
+        - item_cost_wei
+        - gas_reserve_wei
+    ApiCollectRuleAcquired:
+      type: object
+      additionalProperties: false
+      properties:
+        asset_key:
+          type: string
+        quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+      required:
+        - asset_key
+        - quantity
+    ApiCollectRulePause:
+      type: object
+      additionalProperties: false
+      properties:
+        expected_revision:
+          type: integer
+          format: int64
+        paused:
+          type: boolean
+      required:
+        - expected_revision
+        - paused
+    ApiCollectRulePrepare:
+      type: object
+      additionalProperties: false
+      properties:
+        expected_revision:
+          type: integer
+          format: int64
+        trade:
+          $ref: "#/components/schemas/ApiMarketPrepareRequest"
+      required:
+        - expected_revision
+        - trade
+    ApiCollectRule:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        mode:
+          type: string
+          enum:
+            - prepare_for_approval
+        definition:
+          $ref: "#/components/schemas/ApiCollectRuleDefinition"
+        revision:
+          type: integer
+          format: int64
+        state:
+          type: string
+          enum:
+            - ACTIVE
+            - PAUSED
+            - COMPLETED
+            - EXPIRED
+        pause_reason:
+          type: string
+          nullable: true
+        acquired:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectRuleAcquired"
+        spent_item_cost_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        spent_gas_cost_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        action_count:
+          type: integer
+          format: int64
+        review_count:
+          type: integer
+          format: int64
+        pending_review:
+          type: object
+          additionalProperties: false
+          properties:
+            operation_id:
+              type: string
+            quote_id:
+              type: string
+            profile_id:
+              type: string
+            funding_wallet:
+              type: string
+              pattern: ^0x[0-9a-fA-F]{40}$
+            recipient:
+              type: string
+              pattern: ^0x[0-9a-fA-F]{40}$
+            valid_until:
+              type: integer
+              format: int64
+            assets:
+              type: array
+              items:
+                $ref: "#/components/schemas/ApiCollectRuleReviewAsset"
+            item_cost_wei:
+              type: string
+              pattern: ^(0|[1-9][0-9]{0,77})$
+              maxLength: 78
+            gas_reserve_wei:
+              type: string
+              pattern: ^(0|[1-9][0-9]{0,77})$
+              maxLength: 78
+          required:
+            - operation_id
+            - quote_id
+            - profile_id
+            - funding_wallet
+            - recipient
+            - valid_until
+            - assets
+            - item_cost_wei
+            - gas_reserve_wei
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+        updated_at:
+          type: integer
+          format: int64
+      required:
+        - id
+        - mode
+        - definition
+        - revision
+        - state
+        - pause_reason
+        - acquired
+        - spent_item_cost_wei
+        - spent_gas_cost_wei
+        - action_count
+        - review_count
+        - pending_review
+        - created_at
+        - updated_at
+    ApiCollectRules:
+      type: object
+      additionalProperties: false
+      properties:
+        rules:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectRule"
+        complete:
+          type: boolean
+      required:
+        - rules
+        - complete
+    ApiCollectRulePrepared:
+      type: object
+      additionalProperties: false
+      properties:
+        rule:
+          $ref: "#/components/schemas/ApiCollectRule"
+        operation:
+          $ref: "#/components/schemas/ApiMarketOperation"
+      required:
+        - rule
+        - operation
     ApiArtworkDocumentationAnswer:
       type: object
       properties:

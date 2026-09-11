@@ -9,6 +9,7 @@ import ProfileAvatar, {
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import CollectEntryLink from "@/components/collect/CollectEntryLink";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
 import { TransferSingleActions } from "@/components/nft-transfer/TransferSingle";
 import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
@@ -134,8 +135,9 @@ function GradientMarketMetric({
 
 function GradientMarketplaceLinks({ nft }: { readonly nft: NftWithOwner }) {
   return (
-    <div className="tw-flex tw-min-w-[8.5rem] tw-items-end">
+    <div className="tw-flex tw-min-w-[8.5rem] tw-flex-wrap tw-items-end tw-gap-3">
       <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
+      <CollectEntryLink collection="gradients" intent="specific" tokenId={String(nft.id)} />
     </div>
   );
 }

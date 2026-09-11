@@ -30,6 +30,7 @@ import { faFire } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
+import CollectEntryLink from "@/components/collect/CollectEntryLink";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Tooltip } from "react-tooltip";
@@ -164,6 +165,11 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         <DetailRow label="Collector TDH">
           {numberWithCommas(Math.round((profile?.tdh ?? 0) * 100) / 100)}
         </DetailRow>
+        {props.collection.id === 1 && (
+          <div className="tw-py-3">
+            <CollectEntryLink collection="pebbles" intent="specific" tokenId={String(props.token.id)} />
+          </div>
+        )}
 
         {(!capacitor.isIos || country === "US") && (
           <DetailRow label="Listed" stacked>

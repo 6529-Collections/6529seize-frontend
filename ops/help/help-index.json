@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-11T15:43:52.000Z",
+  "generated_at": "2026-08-11T15:43:52Z",
   "commit_sha": "21d60faed6a5",
   "base_url": "https://6529.io",
   "records": [
@@ -7583,6 +7583,67 @@
         "app/[user]/[...cmsPath]/page.tsx",
         "lib/profile-cms/runtime/routes.ts",
         "ops/docs/profiles/troubleshooting/troubleshooting-routes-and-tabs.md"
+      ]
+    },
+    {
+      "id": "collect.overview",
+      "kind": "workflow",
+      "title": "Collect artwork and complete profile sets",
+      "aliases": [
+        "buy 6529 NFTs",
+        "sell NFTs",
+        "NFT bids",
+        "cheapest NFTs",
+        "complete a season",
+        "complete Pebbles",
+        "lowest cost TDH",
+        "gift a purchase"
+      ],
+      "keywords": [
+        "Collect",
+        "Memes",
+        "Gradient",
+        "Pebbles",
+        "season",
+        "artist",
+        "sets",
+        "marketplace",
+        "listing",
+        "offer",
+        "WETH",
+        "recipient",
+        "gifts",
+        "TDH"
+      ],
+      "facts": [
+        "Collect at /collect supports The Memes, 6529 Gradient and NextGen Pebbles. Browse artwork, compare observed low-price listings, find specific tokens, analyze season/full-set/artist/Pebbles trait goals and compare additional TDH.",
+        "All set collecting uses the profile across its confirmed consolidated wallets. Wallets identify custody, funding, signing or receipt; selecting a custody wallet does not redefine the primary collecting scope.",
+        "Purchase recipients follow minting: choose a profile wallet or enter a third-party wallet. Review the exact address. The purchase transaction delivers the NFT directly to that one recipient without a separate onward transfer. A gift outside the profile does not advance that profile’s projected completion or TDH.",
+        "Pebbles is the current NextGen project. Palette, Size, Traced and Ultimate goals extend its existing Trait Sets. Ultimate can satisfy multiple trait requirements with one token.",
+        "Completion plans show missing requirements and incomplete coverage. The initial scan checks one best exact OpenSea listing per artwork; it does not exhaust market depth. Each planned purchase gets a fresh quote and wallet approval, and several orders use separate transactions.",
+        "Supported execution uses Ethereum mainnet, exact NFTs, explicit quantities and ETH or WETH. Fixed-price offers use WETH and receive NFTs in the signing wallet. Profile consolidation and social proxy access do not grant trading authority over another wallet.",
+        "Review the total price, fees, seller net where applicable, recipient and token approval scope. New listings include configured creator support; standard offers include required provider fees; purchases and accepted offers preserve their signed fees. The 6529 platform fee is zero.",
+        "Orders at /collect/orders tracks operation recovery. Potential offer exposure begins when signable terms are revealed, even if no signature or publication is confirmed. A quote freshness timer does not expire a signed order.",
+        "If publication or broadcast is uncertain, retain the order or transaction hash and reconcile it instead of sending a duplicate purchase. Cancellation can lose a race to a fill and is effective only after chain verification. Revoking an approval or pausing new trading does not permanently cancel signed orders.",
+        "TDH comparisons use a verified official snapshot and include changes to bonuses on existing holdings. The ranking is best among observed candidates, includes an estimated gas reserve, and is not a guarantee of future TDH or complete market coverage.",
+        "A Safe can receive a gift purchase. Execution from smart contract wallets and inside the native app is unavailable until those paths are supported. Programmatic preparation still requires owner review and wallet authorization; the backend does not hold user signing keys.",
+        "Saved rules freeze exact targets, funding wallet, recipient, unit and total review limits, gas reserve, expiry and action count. They prepare one ETH purchase at a time for wallet approval. Pause and expiry retain unresolved operations, and confirmed acquisitions count permanently even if the NFT is later sold or transferred. Rules do not grant unattended wallet execution authority."
+      ],
+      "canonical_path": "/collect",
+      "link_label": "Collect",
+      "related_paths": [
+        "/collect/orders",
+        "/the-memes",
+        "/6529-gradient",
+        "/nextgen"
+      ],
+      "tags": ["collections", "marketplace", "profiles", "TDH", "wallets"],
+      "source_refs": [
+        "ops/docs/media/collecting.md",
+        "app/collect/page.tsx",
+        "app/collect/orders/page.tsx",
+        "components/collect/CollectPageClient.tsx",
+        "components/collect/useMarketExecution.ts"
       ]
     }
   ]

@@ -38,6 +38,7 @@ import { EULA_MESSAGES } from "@/i18n/messages/eula";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
+import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -2755,6 +2756,7 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 } as const);
 
 export const EN_US_MESSAGES = {
+  ...COLLECT_MESSAGES,
   "nftPicker.address.label": "Select collection",
   "nftPicker.address.placeholder": "Paste an Ethereum contract address…",
   "nftPicker.address.help":

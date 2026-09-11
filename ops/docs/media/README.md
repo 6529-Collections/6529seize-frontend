@@ -10,6 +10,8 @@
 
 ## Features
 
+- [Collect](collecting.md): `/collect` and `/collect/orders`, profile set
+  completion, marketplace trades and TDH comparisons.
 - [Memes](memes/README.md): `/the-memes`, `/the-memes/{id}`,
   `/the-memes/{id}/distribution`, `/the-memes/mint`, and `/meme-calendar`.
 - [Collections](collections/README.md): `/meme-lab`, `/meme-lab/{id}`,
