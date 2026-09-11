@@ -19,7 +19,6 @@ import {
   DocumentationButton,
   DocumentationNotice,
   inputClass,
-  panelClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 
@@ -66,8 +65,8 @@ export default function DocumentationNewContext({
     }
   };
   return (
-    <details className={panelClass}>
-      <summary className="tw-cursor-pointer tw-py-2 tw-text-sm tw-font-medium">
+    <details className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-4">
+      <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
         {msg("newContext")}
       </summary>
       <p className="tw-text-sm tw-leading-relaxed tw-text-iron-400">

@@ -2,10 +2,14 @@
 
 import { useState } from "react";
 
+import { formatNumber } from "@/i18n/format";
 import { ApiArtworkDocumentationAnswerStatusEnum } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import type { ApiArtworkDocumentationAnswer } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
-import type { ApiArtworkDocumentationOperation } from "@/generated/models/ApiArtworkDocumentationOperation";
+import {
+  ApiArtworkDocumentationOperationOpEnum,
+  type ApiArtworkDocumentationOperation,
+} from "@/generated/models/ApiArtworkDocumentationOperation";
 import { documentationFieldLabel } from "@/i18n/messages/artwork-documentation-fields";
 import {
   isRedacted,
@@ -27,7 +31,6 @@ import {
 import {
   DocumentationButton,
   inputClass,
-  panelClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 import DocumentationValueEditor, {
@@ -39,6 +42,7 @@ import {
   isPublicationOnly,
 } from "@/lib/artwork-documentation/intake";
 import DocumentationFieldExample from "./DocumentationFieldExample";
+import { DocumentationRecordedAnswer } from "./DocumentationSummary";
 import {
   canEditDocumentationField,
   canReferenceDocumentationAssetLink,
@@ -49,6 +53,7 @@ interface Props {
   readonly edits: readonly PendingEdit[];
   readonly section?: DocumentationSection | undefined;
   readonly inlineFields?: readonly string[] | undefined;
+  readonly excludeFields?: readonly string[] | undefined;
   readonly onChange: (
     moduleId: string,
     operation: ApiArtworkDocumentationOperation
@@ -59,40 +64,128 @@ interface Props {
 }
 
 export default function DocumentationModules(props: Props) {
-  const { msg } = useDocumentationMessages();
+  const { msg, locale } = useDocumentationMessages();
   const required = requiredPaths(props.context, props.edits);
+  // Keep optional answers in their current group while typing and autosaving.
+  // A fresh chapter visit promotes previously recorded answers into the open view.
+  const [initiallyAnswered] = useState(
+    () =>
+      new Set(
+        MODULE_IDS.flatMap((moduleId) =>
+          MODULE_FIELDS[moduleId]
+            .filter(
+              (field) =>
+                !!readAnswer(props.context, moduleId, field.id, props.edits) ||
+                isRedacted(props.context.modules[moduleId]?.answers[field.id])
+            )
+            .map((field) => `${moduleId}.${field.id}`)
+        )
+      )
+  );
+  const fields = MODULE_IDS.flatMap((moduleId) => {
+    const policy = props.context.profile.modules.find(
+      (module) => String(module.id) === moduleId
+    );
+    if (policy?.version !== 1) return [];
+    return MODULE_FIELDS[moduleId]
+      .filter(
+        (field) =>
+          (props.inlineFields
+            ? props.inlineFields.includes(`${moduleId}.${field.id}`)
+            : fieldSection(moduleId, field.id) === props.section) &&
+          !props.excludeFields?.includes(`${moduleId}.${field.id}`) &&
+          policy.fields.some((entry) => entry.id === field.id) &&
+          visibleField(props.context, moduleId, field.id, props.edits)
+      )
+      .map((field) => ({ moduleId, field }));
+  });
+  const isPrimary = ({ moduleId, field }: (typeof fields)[number]) =>
+    !!props.inlineFields ||
+    required.has(`${moduleId}.${field.id}`) ||
+    initiallyAnswered.has(`${moduleId}.${field.id}`);
+  const renderField = ({ moduleId, field }: (typeof fields)[number]) => (
+    <DocumentationAnswerField
+      key={`${moduleId}.${field.id}`}
+      {...props}
+      moduleId={moduleId}
+      field={field}
+      required={required.has(`${moduleId}.${field.id}`)}
+    />
+  );
+  const mainFields = fields.filter(({ moduleId }) => moduleId !== "interview");
+  const optional = mainFields.filter((field) => !isPrimary(field));
+  const interview = fields.filter(({ moduleId }) => moduleId === "interview");
+  const interviewMode: unknown = readAnswer(
+    props.context,
+    "interview",
+    "mode",
+    props.edits
+  )?.value;
+  const isInterviewPrimary = (entry: (typeof fields)[number]) =>
+    isPrimary(entry) ||
+    entry.field.id === "mode" ||
+    interviewMode === "written" ||
+    interviewMode === "recording";
   return (
-    <div className="tw-space-y-5" onBlur={props.onBlur}>
-      {MODULE_IDS.flatMap((moduleId) => {
-        const policy = props.context.profile.modules.find(
-          (module) => String(module.id) === moduleId
-        );
-        if (!policy) return [];
-        if (policy.version !== 1)
-          return [
-            <p role="alert" key={moduleId}>
-              {msg("upgrade")}
-            </p>,
-          ];
-        return MODULE_FIELDS[moduleId]
-          .filter(
-            (field) =>
-              (props.inlineFields
-                ? props.inlineFields.includes(`${moduleId}.${field.id}`)
-                : fieldSection(moduleId, field.id) === props.section) &&
-              policy.fields.some((entry) => entry.id === field.id) &&
-              visibleField(props.context, moduleId, field.id, props.edits)
-          )
-          .map((field) => (
-            <DocumentationAnswerField
-              key={`${moduleId}.${field.id}`}
-              {...props}
-              moduleId={moduleId}
-              field={field}
-              required={required.has(`${moduleId}.${field.id}`)}
-            />
-          ));
-      })}
+    <div className="tw-space-y-10" onBlur={props.onBlur}>
+      {props.context.profile.modules
+        .filter((module) => module.version !== 1)
+        .map((module) => (
+          <p role="alert" key={String(module.id)}>
+            {msg("upgrade")}
+          </p>
+        ))}
+      <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 sm:tw-grid-cols-2">
+        {mainFields.filter(isPrimary).map(renderField)}
+      </div>
+      {optional.length > 0 && (
+        <details className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4">
+          <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-base tw-font-medium tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+            {msg(`chapters.additional.${props.section ?? "review"}`, {
+              count: formatNumber(locale, optional.length),
+            })}
+          </summary>
+          <p className="tw-mb-8 tw-mt-3 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-400">
+            {msg("chapters.additionalHelp")}
+          </p>
+          <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 sm:tw-grid-cols-2">
+            {optional.map(renderField)}
+          </div>
+        </details>
+      )}
+      {interview.length > 0 && (
+        <section
+          className="tw-space-y-8 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8"
+          aria-labelledby="documentation-interview-title"
+        >
+          <div className="tw-max-w-prose">
+            <h3
+              id="documentation-interview-title"
+              className="tw-m-0 tw-font-serif tw-text-2xl tw-font-normal"
+            >
+              {msg("chapters.interview")}
+            </h3>
+            <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+              {msg("chapters.interviewHelp")}
+            </p>
+          </div>
+          <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 sm:tw-grid-cols-2">
+            {interview.filter(isInterviewPrimary).map(renderField)}
+          </div>
+          {interview.some((entry) => !isInterviewPrimary(entry)) && (
+            <details>
+              <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-text-iron-300">
+                {msg("chapters.interviewDetails")}
+              </summary>
+              <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 sm:tw-grid-cols-2">
+                {interview
+                  .filter((entry) => !isInterviewPrimary(entry))
+                  .map(renderField)}
+              </div>
+            </details>
+          )}
+        </section>
+      )}
     </div>
   );
 }
@@ -121,6 +214,9 @@ function DocumentationAnswerField(
     ) ||
     redacted;
   const id = `documentation-${moduleId}-${field.id}`;
+  const headingId = `documentation-field-heading-${moduleId}-${field.id}`;
+  const helpId = `documentation-field-help-${moduleId}-${field.id}`;
+  const replacementHelpId = `documentation-field-replacement-help-${moduleId}-${field.id}`;
   const label =
     (moduleId === "interview"
       ? context.profile.interview_instrument.prompts.find(
@@ -131,6 +227,13 @@ function DocumentationAnswerField(
   const pending = edits.find(
     (edit) => edit.moduleId === moduleId && edit.operation.field === field.id
   );
+  const replacingCanonicalAsset =
+    moduleId === "artwork" &&
+    field.id === "canonical_asset_id" &&
+    !!context.latest_revision_id &&
+    pending?.operation.op === ApiArtworkDocumentationOperationOpEnum.Set &&
+    pending.operation.answer?.value !==
+      context.modules["artwork"]?.answers["canonical_asset_id"]?.value;
   const invalid = pending
     ? !validDocumentationOperation(context, moduleId, pending.operation)
     : false;
@@ -179,31 +282,71 @@ function DocumentationAnswerField(
     if (merged.status !== ApiArtworkDocumentationAnswerStatusEnum.Provided)
       delete merged.value;
     if (merged.explanation === "") delete merged.explanation;
+    const canonicalSelectionChanged =
+      field.id === "canonical_asset_id" &&
+      Object.hasOwn(next, "value") &&
+      next.value !== answer?.value;
+    if (canonicalSelectionChanged) setReplacementReason("");
     onChange(moduleId, {
       op: "set",
       field: field.id,
       answer: merged,
       ...(field.id === "canonical_asset_id" && context.latest_revision_id
-        ? { replacementReason }
+        ? {
+            replacementReason: canonicalSelectionChanged
+              ? ""
+              : replacementReason,
+          }
         : {}),
     } as ApiArtworkDocumentationOperation);
   };
-  return (
-    <section className={panelClass} aria-labelledby={`${id}-label`}>
-      <div className="tw-mb-3 tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-2">
+  const fullWidth =
+    field.id === "title" ||
+    (field.editor.kind === "text" && field.editor.multiline === true) ||
+    (["object", "list", "localized"].includes(field.editor.kind) &&
+      field.id !== "declared_dimensions");
+  const fieldClass = `tw-min-w-0 ${fullWidth ? "sm:tw-col-span-2" : ""}`;
+  if (disabled)
+    return (
+      <section className={fieldClass} aria-labelledby={headingId}>
         <h3
-          id={`${id}-label`}
-          className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100"
+          id={headingId}
+          className="tw-mb-3 tw-mt-0 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-400"
         >
           {label}
         </h3>
-        <span className="tw-text-xs tw-text-iron-400">
-          {required ? msg("required") : msg("recommended")}
-        </span>
+        {answer ? (
+          <DocumentationRecordedAnswer
+            answer={answer}
+            moduleId={moduleId}
+            field={field.id}
+            context={context}
+          />
+        ) : (
+          <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-400">
+            {msg(redacted ? "redacted" : "chapters.notRecorded")}
+          </p>
+        )}
+      </section>
+    );
+  return (
+    <section className={fieldClass} aria-labelledby={headingId}>
+      <div className="tw-mb-3 tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-2">
+        <h3
+          id={headingId}
+          className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100"
+        >
+          {label}
+        </h3>
+        {required && (
+          <span className="tw-text-xs tw-text-iron-400">
+            {msg("chapters.essential")}
+          </span>
+        )}
       </div>
       {field.help && (
         <p
-          id={`${id}-help`}
+          id={helpId}
           className="tw-mb-4 tw-text-sm tw-leading-relaxed tw-text-iron-300"
         >
           {msg(fieldHelpKey(field.help, publicationOnly))}
@@ -238,54 +381,41 @@ function DocumentationAnswerField(
               })
             }
           />
-          {field.id === "canonical_asset_id" &&
-            context.latest_revision_id &&
-            !disabled && (
-              <label className="tw-mb-4 tw-block tw-text-sm tw-text-iron-300">
+          {replacingCanonicalAsset && (
+            <div className="tw-mb-4">
+              <label className="tw-block tw-text-sm tw-text-iron-300">
                 {msg("canonicalReason")}
                 <textarea
                   className={`${inputClass} tw-mt-2`}
                   rows={3}
+                  minLength={20}
+                  maxLength={1000}
+                  aria-describedby={replacementHelpId}
+                  aria-invalid={invalid}
                   value={replacementReason}
                   onChange={(event) => {
                     const reason = event.target.value;
                     setReplacementReason(reason);
-                    if (pending)
-                      onChange(moduleId, {
-                        ...pending.operation,
-                        replacementReason: reason,
-                      } as ApiArtworkDocumentationOperation);
+                    onChange(moduleId, {
+                      ...pending.operation,
+                      replacementReason: reason,
+                    } as ApiArtworkDocumentationOperation);
                   }}
                 />
               </label>
-            )}
-          {definition.allowed_statuses.length > 1 && (
-            <label className="tw-mb-4 tw-block tw-text-sm tw-text-iron-300">
-              {msg("answerStatus")}
-              <select
-                className={`${inputClass} tw-mt-2`}
-                disabled={disabled}
-                value={status}
-                onChange={(event) =>
-                  update({
-                    status: event.target.value as NonNullable<
-                      ApiArtworkDocumentationAnswer["status"]
-                    >,
-                  })
-                }
+              <p
+                id={replacementHelpId}
+                className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400"
               >
-                {definition.allowed_statuses.map((item) => (
-                  <option key={item} value={item}>
-                    {msg(`status.${item}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
+                {msg("canonicalReasonHelp")}
+              </p>
+            </div>
           )}
           {status === ApiArtworkDocumentationAnswerStatusEnum.Provided ? (
             <DocumentationValueEditor
               id={id}
               label={label}
+              hideLabel
               editor={documentationChoiceEditor(
                 field.editor,
                 definition.value_schema
@@ -296,58 +426,107 @@ function DocumentationAnswerField(
               }
               disabled={disabled}
               assets={choices}
-              describedBy={field.help ? `${id}-help` : undefined}
+              describedBy={field.help ? helpId : undefined}
               onChange={(value) => update({ value })}
             />
           ) : (
-            <label className="tw-block tw-text-sm tw-text-iron-300">
-              {msg("explanation")}
-              <textarea
-                id={id}
-                className={`${inputClass} tw-mt-2`}
-                rows={3}
-                disabled={disabled}
-                value={answer?.explanation ?? ""}
-                onChange={(event) =>
-                  update({ explanation: event.target.value })
-                }
-              />
-            </label>
+            <div className="tw-space-y-2">
+              <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-300">
+                {msg(`status.${status}`)}
+              </p>
+              {answer?.explanation && (
+                <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-base tw-leading-7 tw-text-iron-200">
+                  {answer.explanation}
+                </p>
+              )}
+            </div>
+          )}
+          {(!!answer ||
+            definition.allowed_statuses.length > 1 ||
+            !publicationOnly) && (
+            <details className="tw-mt-2">
+              <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-xs tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+                {msg(
+                  answer
+                    ? "chapters.answerOptions"
+                    : "chapters.answerAlternatives"
+                )}
+              </summary>
+              <div className="tw-space-y-4 tw-py-3">
+                {definition.allowed_statuses.length > 1 && (
+                  <label className="tw-block tw-text-sm tw-text-iron-300">
+                    {msg("answerStatus")}
+                    <select
+                      className={`${inputClass} tw-mt-2`}
+                      value={status}
+                      onChange={(event) =>
+                        update({
+                          status: event.target.value as NonNullable<
+                            ApiArtworkDocumentationAnswer["status"]
+                          >,
+                        })
+                      }
+                    >
+                      {definition.allowed_statuses.map((item) => (
+                        <option key={item} value={item}>
+                          {msg(`status.${item}`)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                {status !==
+                  ApiArtworkDocumentationAnswerStatusEnum.Provided && (
+                  <label className="tw-block tw-text-sm tw-text-iron-300">
+                    {msg("explanation")}
+                    <textarea
+                      id={id}
+                      className={`${inputClass} tw-mt-2`}
+                      rows={3}
+                      value={answer?.explanation ?? ""}
+                      onChange={(event) =>
+                        update({ explanation: event.target.value })
+                      }
+                    />
+                  </label>
+                )}
+                {!publicationOnly && (
+                  <AnswerVisibility
+                    publicationOnly={false}
+                    lockedRestricted={definition.locked_restricted}
+                    disabled={!answer}
+                    canRestrict={canEditDocumentationField(
+                      context,
+                      `${moduleId}.${field.id}`,
+                      true
+                    )}
+                    value={visibility}
+                    onChange={(intended_visibility) =>
+                      update({ intended_visibility })
+                    }
+                  />
+                )}
+                {answer && (
+                  <DocumentationButton
+                    secondary
+                    onClick={() =>
+                      onChange(moduleId, {
+                        op: "unset",
+                        field: field.id,
+                      } as ApiArtworkDocumentationOperation)
+                    }
+                  >
+                    {msg("clear")}
+                  </DocumentationButton>
+                )}
+              </div>
+            </details>
           )}
           {invalid && (
             <p role="status" className="tw-mt-3 tw-text-xs tw-text-amber-200">
               {msg("invalidField")}
             </p>
           )}
-          <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-            <AnswerVisibility
-              publicationOnly={publicationOnly}
-              lockedRestricted={definition.locked_restricted}
-              disabled={disabled || !answer}
-              canRestrict={canEditDocumentationField(
-                context,
-                `${moduleId}.${field.id}`,
-                true
-              )}
-              value={visibility}
-              onChange={(intended_visibility) =>
-                update({ intended_visibility })
-              }
-            />
-            {answer && !disabled && (
-              <DocumentationButton
-                secondary
-                onClick={() =>
-                  onChange(moduleId, {
-                    op: "unset",
-                    field: field.id,
-                  } as ApiArtworkDocumentationOperation)
-                }
-              >
-                {msg("clear")}
-              </DocumentationButton>
-            )}
-          </div>
         </>
       )}
     </section>

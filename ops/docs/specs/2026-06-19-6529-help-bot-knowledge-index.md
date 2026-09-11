@@ -33,6 +33,13 @@ current pages; those guides are not invented as historical snapshot routes.
 The EMMA record covers the five fixed collection shortcuts, Memes season
 selection, Intern JPG token IDs, and the manual contract path in Create Snapshots.
 
+The artwork documentation record owns the six-chapter writing flow, named next
+chapter controls, **Answer options**, deliberate examples, file preparation,
+**Read the draft** and saved publication previews. It distinguishes program
+viewers from editors, describes read-only answers and source comparisons, and
+keeps questions, draft content and dated confirmed versions separate. Its
+control names must match the artist workspace and personal record list.
+
 The artwork-sharing record covers the `Share artwork` control on individual
 Meme, Gradient, and NextGen pages, canonical artwork links, copied captions,
 and feed, square, Story, and link-card PNG exports. It distinguishes link

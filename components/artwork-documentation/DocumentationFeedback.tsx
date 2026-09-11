@@ -13,6 +13,7 @@ import {
 } from "@/services/api/artwork-documentation-api";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
 import { formatDate } from "@/i18n/format";
+import { getIdentityQueryOptions } from "@/services/api/identity-query";
 import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
 import {
   canWriteDocumentation,
@@ -28,7 +29,6 @@ import {
   DocumentationButton,
   DocumentationNotice,
   inputClass,
-  panelClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 
@@ -95,13 +95,13 @@ export default function DocumentationFeedback({
             ApiArtworkDocumentationThreadRestrictedClassEnum.Ordinary)
     ) ?? [];
   return (
-    <section className={`${panelClass} tw-space-y-4`}>
-      <h3 className="tw-m-0 tw-text-lg tw-font-semibold">
+    <section className="tw-min-w-0 tw-space-y-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8">
+      <h3 className="tw-m-0 tw-font-serif tw-text-3xl tw-font-normal">
         {msg(questions ? "questions.title" : "feedback")}
       </h3>
       {questions && (
         <p className="tw-text-sm tw-leading-relaxed tw-text-iron-300">
-          {msg("questions.help")}
+          {msg("chapters.questionsHelp")}
         </p>
       )}
       {(error || query.isError) && (
@@ -143,7 +143,7 @@ export default function DocumentationFeedback({
               id="documentation-question-help"
               className="tw-text-sm tw-leading-relaxed tw-text-iron-400"
             >
-              {msg("questions.hint")} {msg("questions.notSaved")}
+              {msg("questions.hint")}
             </p>
           )}
           {!questions && (
@@ -233,18 +233,18 @@ function FeedbackThread({
     }
   };
   return (
-    <div className="tw-space-y-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-p-4">
+    <div className="tw-space-y-4 tw-border-0 tw-border-l tw-border-solid tw-border-iron-700 tw-pl-5">
       <p className="tw-m-0 tw-text-xs tw-text-iron-400">
         {documentationOptionLabel(thread.audience)} ·{" "}
         {thread.resolved ? msg("resolved") : msg("feedback")}
       </p>
       {thread.comments.map((comment) => (
         <div key={comment.id}>
-          <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-text-iron-200">
+          <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-base tw-leading-7 tw-text-iron-200">
             {comment.text}
           </p>
           <p className="tw-mt-1 tw-text-xs tw-text-iron-400">
-            {comment.actor_profile_id} ·{" "}
+            <CommentAuthor profileId={comment.actor_profile_id} /> ·{" "}
             {formatDate(locale, comment.created_at)}
           </p>
         </div>
@@ -294,5 +294,19 @@ function FeedbackThread({
         </>
       )}
     </div>
+  );
+}
+
+function CommentAuthor({ profileId }: { readonly profileId: string }) {
+  const { msg } = useDocumentationMessages();
+  const profile = useQuery({
+    ...getIdentityQueryOptions({ handleOrWallet: profileId }),
+    retry: false,
+    staleTime: 60_000,
+  });
+  return (
+    <span>
+      {profile.data?.handle ? `@${profile.data.handle}` : msg("participant")}
+    </span>
   );
 }

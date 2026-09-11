@@ -54,11 +54,13 @@ export default function DocumentationSaveStatus({
     }
   };
   return (
-    <div className="tw-space-y-3">
+    <div
+      className={`tw-min-w-0 tw-max-w-full tw-space-y-3 ${["conflict", "offline", "invalid", "auth_expired"].includes(snapshot.state) ? "tw-basis-full" : ""}`}
+    >
       <p
         role="status"
         aria-live="polite"
-        className="tw-m-0 tw-text-sm tw-text-iron-300"
+        className="tw-m-0 tw-text-xs tw-leading-6 tw-text-iron-400"
       >
         {msg(`save.${snapshot.state}`)}
       </p>

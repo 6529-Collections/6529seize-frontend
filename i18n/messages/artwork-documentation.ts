@@ -1,9 +1,13 @@
 import { ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES } from "./artwork-documentation-guidance";
 import { ARTWORK_DOCUMENTATION_EXAMPLE_MESSAGES } from "./artwork-documentation-examples";
+import { ARTWORK_DOCUMENTATION_EDITORIAL_MESSAGES } from "./artwork-documentation-editorial";
+import { ARTWORK_DOCUMENTATION_CHAPTER_MESSAGES } from "./artwork-documentation-chapters";
 
 export const ARTWORK_DOCUMENTATION_MESSAGES = {
   ...ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES,
   ...ARTWORK_DOCUMENTATION_EXAMPLE_MESSAGES,
+  ...ARTWORK_DOCUMENTATION_EDITORIAL_MESSAGES,
+  ...ARTWORK_DOCUMENTATION_CHAPTER_MESSAGES,
   "artworkDocumentation.interviewEvidenceHelp":
     "Before selecting a recording or transcript, add the interview date, at least one participant and permission for that material. Choose permission for a future public record only when the participants have agreed to that use; otherwise keep the material restricted for private review.",
   "artworkDocumentation.all": "All",
@@ -55,7 +59,7 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.empty":
     "The next chapter starts here. Add the story, files and choices behind a work, then return whenever you have more to share.",
   "artworkDocumentation.signIn":
-    "Sign in to your artist profile to open your private documentation.",
+    "Sign in to your profile to open your artwork records.",
   "artworkDocumentation.connect": "Sign in",
   "artworkDocumentation.unavailable":
     "Artwork documentation is not available for this profile yet.",
@@ -68,7 +72,7 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.backToList": "Back to list",
   "artworkDocumentation.viewOnly":
     "You have view-only access to this artwork record.",
-  "artworkDocumentation.untitled": "Work awaiting a title",
+  "artworkDocumentation.untitled": "Title not yet provided",
   "artworkDocumentation.profile": "Documentation profile",
   "artworkDocumentation.program": "Program",
   "artworkDocumentation.allPrograms": "All programs",
@@ -200,7 +204,7 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.review.accepted": "Accepted",
   "artworkDocumentation.review.changes_requested": "Changes requested",
   "artworkDocumentation.reviewScope":
-    "Review decisions apply to the confirmed version shown. They do not change the artist's words.",
+    "Review decisions apply to the latest confirmed version. They do not change the artist's words.",
   "artworkDocumentation.assign": "Assign access",
   "artworkDocumentation.profileId": "Participant profile ID",
   "artworkDocumentation.role": "Role",
@@ -262,6 +266,8 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.canonical": "Use as final artwork",
   "artworkDocumentation.canonicalReason":
     "Why are you replacing the confirmed final file?",
+  "artworkDocumentation.canonicalReasonHelp":
+    "Explain the change in 20–1,000 characters. This explanation becomes part of the record’s history.",
   "artworkDocumentation.fileLabel": "File label",
   "artworkDocumentation.fileDescription": "File description",
   "artworkDocumentation.masterHelp":

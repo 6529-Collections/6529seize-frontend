@@ -20,7 +20,7 @@ export const ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES = {
   "artworkDocumentation.publicationUploadHelp":
     "Upload the exact file you intend to publish. Keep its original dimensions; there is no need to upscale. Only include supporting files intended for publication. Check the file's embedded location and other metadata before uploading; the original file is preserved as supplied.",
   "artworkDocumentation.publicationUploadStorage":
-    "Files are saved privately while you prepare the record. A later step will publish them; do not include private or sensitive material.",
+    "Files are saved with your draft. Include only the artwork and supporting material you intend to publish.",
   "artworkDocumentation.publicationMasterRole":
     "Preservation master for publication",
   "artworkDocumentation.publicationProcessRole": "Public process material",
@@ -37,8 +37,7 @@ export const ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES = {
     "Before selecting a recording or transcript, add its date, participants and their permission for publication. Ask the team before finalizing if anything is unclear. Only select material intended to become part of the public artwork record.",
   "artworkDocumentation.publication.whyRights":
     "A clear account of your rights and the sources you used helps people understand how the artwork can be shared. Resolve uncertainties with the team before finalizing, then include the relevant information in the public record.",
-  "artworkDocumentation.examples.title":
-    "See a complete example for this section",
+  "artworkDocumentation.examples.title": "Read an example record",
   "artworkDocumentation.examples.empty":
     "A good place to start: read an example, then tell your own story.",
   "artworkDocumentation.examples.fiction":
@@ -47,10 +46,9 @@ export const ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES = {
     "This invented tabletop photograph shows the level of detail that helps future viewers understand a work. These are examples to review, never facts about your artwork. Opening an example does not change your answers.",
   "artworkDocumentation.examples.scope":
     "The example follows the questions available in this record. Your form may show additional questions when they apply to your answers.",
-  "artworkDocumentation.examples.field": "Read a worked example",
+  "artworkDocumentation.examples.field": "See an example",
   "artworkDocumentation.examples.why": "Why this works",
-  "artworkDocumentation.examples.close":
-    "Close the example and write my answers",
+  "artworkDocumentation.examples.close": "Return to my writing",
   "artworkDocumentation.examples.adapt": "Adapt this writing structure",
   "artworkDocumentation.examples.unsaved":
     "Replace each [[prompt]] with your own words, or write freely. This working text is not saved. Use only information you want included with the artwork, then choose Use my answer to add it to your draft.",
@@ -78,7 +76,7 @@ export const ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES = {
     "Review the proposed answers before adding them. Select only the words you want published with this artwork; a submission does not automatically become part of its record.",
   "artworkDocumentation.questions.title": "Questions for the team",
   "artworkDocumentation.questions.help":
-    "Use this separate conversation for uncertainties or things you want to discuss with the team. Questions and replies are not part of the artwork record, its confirmed versions or the material prepared for future publication. The artist and authorized team reviewers can read them.",
+    "Use this conversation for questions you would like to discuss with the team. Questions and replies are separate from the artwork record, its confirmed versions and material for publication. The artist and people with access to this record can read the conversation.",
   "artworkDocumentation.questions.label": "What would you like to ask?",
   "artworkDocumentation.questions.hint":
     "For example: I am unsure which final file to supply. Could you help me choose before I finish the record?",

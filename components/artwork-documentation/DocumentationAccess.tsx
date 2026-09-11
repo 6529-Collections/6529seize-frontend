@@ -23,7 +23,6 @@ import {
   DocumentationButton,
   DocumentationNotice,
   inputClass,
-  panelClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 
@@ -94,8 +93,10 @@ export default function DocumentationAccess({
       },
     });
   return (
-    <section className={`${panelClass} tw-space-y-4`}>
-      <h3 className="tw-text-lg tw-font-semibold">{msg("assign")}</h3>
+    <section className="tw-min-w-0 tw-space-y-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8">
+      <h3 className="tw-m-0 tw-font-serif tw-text-2xl tw-font-normal">
+        {msg("assign")}
+      </h3>
       {error && <DocumentationNotice error>{msg("error")}</DocumentationNotice>}
       {query.data?.data
         .filter((grant) => grant.revoked_at === null)
@@ -135,7 +136,7 @@ export default function DocumentationAccess({
             {MODULE_IDS.map((id) => (
               <label
                 key={id}
-                className="tw-flex tw-items-center tw-gap-3 tw-text-sm tw-text-iron-300"
+                className="tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-text-iron-300"
               >
                 <input
                   type="checkbox"
@@ -164,7 +165,7 @@ export default function DocumentationAccess({
           ).map((id) => (
             <label
               key={id}
-              className="tw-flex tw-items-center tw-gap-3 tw-text-sm tw-text-iron-300"
+              className="tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-text-iron-300"
             >
               <input
                 type="checkbox"
