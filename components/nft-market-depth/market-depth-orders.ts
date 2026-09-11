@@ -41,7 +41,14 @@ function isLevelOrder(order: ApiMarketOrder): boolean {
 }
 
 function getSnapshotIds(data: ApiMarketDepth): string {
-  return JSON.stringify(data.snapshots.map(({ id }) => id).sort());
+  return JSON.stringify(
+    data.snapshots
+      .map(({ id }) => id)
+      .sort((left, right) => {
+        if (left === right) return 0;
+        return left < right ? -1 : 1;
+      })
+  );
 }
 
 function getAsOfTime(data: ApiMarketDepth): number | null {
