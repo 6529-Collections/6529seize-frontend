@@ -52,12 +52,15 @@
     {
       "id": "artwork-documentation.overview",
       "kind": "workflow",
-      "title": "Artwork documentation and publication preparation",
+      "title": "Write, read and confirm an artwork record",
       "aliases": [
         "my artwork documentation",
         "artist dossier",
         "Keys and Gates documentation",
-        "artwork provenance"
+        "artwork provenance",
+        "read the draft",
+        "saved publication preview",
+        "confirmed artwork record"
       ],
       "keywords": [
         "artwork",
@@ -68,21 +71,31 @@
         "rights",
         "consent",
         "preservation",
-        "Keys and Gates"
+        "Keys and Gates",
+        "chapters",
+        "worked examples",
+        "translations",
+        "submission reference"
       ],
       "facts": [
-        "When the server enables artwork documentation for a profile, My artwork documentation appears in the account menu and opens /artwork-documentation. Eligible owned artwork menus also offer Artwork documentation on desktop and mobile.",
+        "When artwork documentation is enabled for a profile, My artwork documentation appears in the account menu and opens /artwork-documentation. Eligible owned artwork menus also offer Artwork documentation on desktop and mobile. Sign in with the profile that owns the work; Wave administration alone does not give documentation access.",
         "Authorized program viewers can read artwork records, files, confirmed versions and Questions for the team through their profile or an assigned group. View-only access does not grant editing, question or reply posting, conversation resolution, artist information import or artist confirmation. Separate editing, review and coordination permissions remain unchanged; adding viewer access does not make newly visible fields, files or conversations editable.",
-        "New publication forms collect one artwork record: identity, story and process, public credits, final files, rights intentions, preservation and an optional interview. All answers and selected files are intended for publication with the work.",
+        "An artwork record brings together the artist's account, credits, final files, rights intentions and display guidance so viewers can understand the work and future custodians can preserve the choices that matter. All answers and selected files in a new publication form are intended for publication with the work.",
+        "Chapters in this record are The work, The story & the making, The artist, Rights & representation, Presentation & care, and Review the record. Use the chapter list on larger screens or the chapter selector on smaller screens. Artwork & supporting files is in The work; The artist interview is an optional area in Presentation & care.",
+        "Required, conditional and already answered questions stay visible. Other questions open under headings such as More about the work or Additional rights details, with a question count. Optional details can be left unanswered and revisited. Where available, Not known or not applicable? opens answer-status choices and an explanation instead of requiring a guess.",
+        "Dates can record a year, year and month, exact date or range, with This date is approximate when appropriate. For an answer with multiple languages, Language and translations holds the primary language, authorship, artist review and Add a translation. Each version keeps its text and review information; selecting an existing primary-language version does not overwrite it.",
         "Documentation can begin independently or in a supported submission form and can continue afterward. It is optional during submission. A successful artwork post is not retried when its documentation source link needs recovery.",
-        "Drafts save to the database. Unsaved text is not persisted in browser local storage. Keep the window open when saving fails or authentication expires, and resolve a version conflict before continuing.",
+        "Drafts save with 6529 during preparation. Check the save status or use Save and exit before leaving. Keep the window open when saving fails or sign-in expires, and resolve a version conflict before continuing. Unsaved text is not kept after the window is closed.",
         "Drafts remain stored with 6529 during preparation. New publication forms have no per-field privacy choices or private evidence uploads. Earlier records preserve their original publication choices; restricted material is never silently converted.",
-        "File transfer, checksum verification, inspection and malware screening have separate statuses. Upload limits are 4 GiB per file, 20 GiB of stored and reserved files per context, 100 files and five simultaneous upload sessions per context.",
-        "Only the artist can confirm a documentation revision through a direct authenticated session. Confirmation preserves a dated immutable version in the database; it is not a wallet signature, mint instruction, or automatic effect of a proposed license. Curatorial, technical and rights reviews are separate.",
-        "New edits preserve earlier confirmed versions. Shared artist information is versioned and pinned per work. Keys and Gates uses a photography documentation profile; selection does not establish minting, purchase or Museum accession.",
-        "Every section offers a complete fictional worked example for The Space Between by Ari Example. Empty sections open the example; existing records can reopen it. Examples never automatically save artist facts. Selected empty narrative fields offer an unsaved writing structure; explicit Use my answer adds only the artist-reviewed answer to ordinary autosave.",
+        "Choose the exact final artwork file. File processing follows transfer completion; wait until the file is ready. Upload limits are 4 GiB per file, 20 GiB of stored and reserved files per record, 100 files and five simultaneous uploads per record. A paused upload can require selecting the same file again.",
+        "The Keys and Gates program list shows authorized artwork records. Find a record filters confirmation and review status; each entry offers Open record and Review status details. Preferred artist credit or display name identifies the record, with an explicitly labelled Artist profile handle as a fallback. Submitted as shows an original submission title separately when no artwork title has been entered.",
+        "Submission reference images come from the original Wave submission and are not automatically chosen as final artwork files. The selected ready file is labelled Selected artwork file in the record. Source images are not substituted into draft reading views, the saved publication preview or confirmed versions when no artwork file is selected. An unavailable image preview does not prevent opening the record.",
+        "Each chapter offers See a complete example for this section, using the fictional photograph The Space Between by fictional artist Ari Example. Examples start closed, including in empty chapters, and open only when chosen. Read a worked example beside a question shows relevant guidance. Reading an example never adds answers, selects files or confirms facts.",
+        "Selected empty narrative fields offer Adapt this writing structure. Replace every double-bracket prompt, review the text and choose Use my answer to add it to ordinary autosave. The starter stays only in the current section until applied or discarded. Incomplete prompts and attempts to replace an existing answer are blocked; identity, dates, equipment, rights and files remain deliberate artist answers.",
+        "Read the draft opens a reading view without form controls and Return to writing resumes editing. It includes unsaved form edits in the current window, with a notice distinguishing saved and unsaved content. In Review the record, Preview saved publication content shows only the saved content intended for publication, excluding unsaved edits and Questions for the team. Save first to preview the latest version; Return to the draft closes this publication preview. Reading or previewing does not save, confirm or publish the record.",
         "Questions for the team at the end of review are a separate drafting conversation. Questions and replies are excluded from artwork answers, confirmed versions and future publication. Resolved questions remain available as drafting history and can be reopened. Resolve questions before finalizing and add relevant public answers to the artwork form.",
-        "Mint preparation and on-chain, IPFS or Arweave publication are deferred. The documentation form does not perform them."
+        "Only the artist can confirm a documentation version. Save all changes first; confirmation preserves a specific dated account for review without publishing the work or making a proposed license effective. Curatorial, technical and rights reviews are separate. Later edits create a newer draft without rewriting earlier confirmed versions.",
+        "Shared artist information is versioned and each work keeps its selected version. Keys and Gates includes the commission's photography questions and connection to its theme; selection does not by itself establish purchase or Museum accession. Publication remains a separate later step."
       ],
       "canonical_path": "/artwork-documentation",
       "link_label": "My artwork documentation",
@@ -92,7 +105,14 @@
         "ops/docs/artwork-documentation.md",
         "app/artwork-documentation/page.tsx",
         "components/header/user/HeaderArtworkDocumentationLink.tsx",
-        "components/waves/drops/WaveDropDocumentationAction.tsx"
+        "components/waves/drops/WaveDropDocumentationAction.tsx",
+        "components/artwork-documentation/ArtworkDocumentationWorkspace.tsx",
+        "components/artwork-documentation/DocumentationModules.tsx",
+        "components/artwork-documentation/DocumentationListRecord.tsx",
+        "components/artwork-documentation/DocumentationArtworkPreview.tsx",
+        "components/artwork-documentation/DocumentationReview.tsx",
+        "components/artwork-documentation/DocumentationValueEditor.tsx",
+        "components/artwork-documentation/DocumentationWorkedExample.tsx"
       ]
     },
     {

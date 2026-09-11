@@ -3,20 +3,21 @@
 Your work has a history. Keep it with the work.
 
 Artwork documentation brings the artist's account, credits, final files,
-rights information and display guidance together in a draft workspace. The
-artwork form prepares one record intended for publication with the work.
-It starts before a token exists and can grow as the artist adds information.
-Use **Questions for the team** at the end for drafting discussion, then resolve
-uncertainties before finalizing the public account.
+rights information and display guidance together in one record. It gives
+viewers a fuller understanding of the work and helps future custodians preserve
+the choices that matter. Start with what you know; you can return to the rest.
+
+Prepare the answers and files you want published with the artwork. Use
+**Questions for the team** at the end for drafting discussion, then put the
+relevant final answers into the record in your own words.
 
 ## Open your workspace
 
 When documentation is enabled for your profile, open your account menu and
 choose **My artwork documentation**. For an eligible artwork you submitted,
 the artwork's menu also offers **Artwork documentation** on desktop and mobile.
-Sign in with the profile that owns the work. The server determines access;
-being a Wave administrator does not automatically grant access to private
-documentation.
+Sign in with the profile that owns the work. Being a Wave administrator does
+not automatically grant access to its documentation.
 
 An authorized program viewer can also open the program's artwork records,
 including their files, confirmed versions and **Questions for the team**.
@@ -26,8 +27,7 @@ save controls. Viewing does not grant permission to change artwork answers,
 send or resolve questions, import artist information or confirm a version.
 Artists and team members with separate editing or review permissions keep
 those permissions. Adding viewer access does not expand their editing scope:
-newly visible fields, files and conversations can still be read-only. Existing
-upload recovery also checks the person's original file permissions.
+newly visible fields, files and conversations can still be read-only.
 
 Documentation can also be started in a supported submission form. It is
 optional and does not change submission eligibility. A successful artwork
@@ -36,35 +36,56 @@ Retry that link from the documentation flow; do not submit the artwork again.
 
 ## Prepare the work's record
 
-The workspace groups the questions into artwork, story and process, artist
-and contributors, rights and people, preservation and display, and review.
+Move through **Chapters in this record** using the chapter list on a larger
+screen or the chapter selector on a smaller one. Each chapter explains why its
+information matters.
 
-- Identify the work, its title, dates, location and exact final file.
-- Describe the image and the decisions behind it in your own words. Record
-  construction, compositing, editing and AI use where relevant.
-- Choose your public artist name and preferred credit. Credit collaborators
-  and describe their roles. A legal name is not required for your artist name.
-- Record the intended rights, third-party material and any depicted people.
-  Include the information you want published with the artwork. Do not upload
-  consent documents, private working files or sensitive evidence here.
-- Explain the properties that matter: crop, orientation, color, tonal balance,
-  detail, scale and changes you would or would not consider acceptable.
-- Add the optional artist interview when useful. Written answers and
-  recordings are alternative ways to preserve the artist's account.
+1. **The work** — identify the title, date, location and form of the work. Add
+   the exact final file under **Artwork & supporting files**.
+2. **The story & the making** — describe the work and the decisions behind it
+   in your own voice. Record construction, compositing, editing and AI use
+   where relevant, along with the history the work carries.
+3. **The artist** — choose your public artist name and preferred credit.
+   Credit collaborators and describe their roles. A legal name is not required
+   for your artist name.
+4. **Rights & representation** — explain your intended rights, third-party
+   material and any depicted people. Include the account you want published;
+   do not upload private consent documents or sensitive evidence here.
+5. **Presentation & care** — describe the crop, orientation, color, detail,
+   scale and other properties that matter. Explain acceptable changes. In
+   **The artist interview**, choose written answers, a recording or a
+   transcript when useful.
+6. **Review the record** — read the whole account, address missing information
+   and questions, and confirm a dated version when it is ready.
 
-Each section explains why the information matters. Required questions depend
-on the documentation profile and the answers already supplied. Recommended
-questions can add useful context without blocking review. Where a question
-allows it, record uncertainty instead of guessing. A general location is
-enough; include only the location information you want published.
+Required, conditional and already answered questions remain visible. Other
+details sit under headings such as **More about the work** or **Additional
+rights details**, with a count of the questions inside. Open them when they
+help explain this particular work. You can leave optional details unanswered
+and return later.
+
+Where a question allows another answer status, open **Not known or not
+applicable?** and explain your choice. Record uncertainty instead of guessing.
+A general location is enough; include only the location information you want
+published.
+
+For dates, choose the precision you know: year, year and month, exact date or
+range. Follow the displayed format and select **This date is approximate**
+when appropriate.
+
+For an answer with multiple languages, write in the language that best carries
+your meaning. Open **Language and translations** to set the primary language,
+record authorship and artist review, or **Add a translation**. Each translation
+keeps its own text and review information. Selecting a primary language that
+already has a version switches to that version without replacing its text.
 
 ## Start with a worked example
 
-Each section offers **See a complete example for this section**. An empty
-section opens the example so you can review a good answer before writing.
-You can close it to reach your form and reopen it after adding your answers.
-The fictional photograph *The Space Between*, by fictional artist Ari Example,
-provides a consistent account across all eight modules and the final review.
+Each chapter offers **See a complete example for this section**. Examples
+start closed, including in an empty chapter, so you can begin writing or open
+the guidance when you want it. Close and reopen an example at any time.
+The fictional photograph _The Space Between_, by fictional artist Ari Example,
+provides a consistent account throughout the record and the final review.
 It includes a complete caption and statement, construction and editing history,
 public credits, rights intentions and practical display guidance.
 
@@ -81,35 +102,49 @@ working text is kept only in the current section until applied or discarded.
 Dates, identity, equipment, rights, permissions and file choices remain your
 own deliberate answers; fictional facts are never inserted for you.
 
-The Keys and Gates profile applies the commission's photography requirements
-and asks how the work connects to its theme. Selection for the program does
-not by itself mean that a work has been minted, purchased or accessioned by
-the Museum.
+The Keys and Gates record includes the commission's photography questions and
+asks how the work connects to its theme. Selection for the program does not
+by itself establish purchase or accession by the Museum.
+
+## Find and recognize a record
+
+The **Keys and Gates** program list brings the authorized artwork records
+together. Use **Find a record** to filter by confirmation or review status.
+Each entry offers **Open record**, a saved date and **Review status** details.
+
+The artist's preferred credit or display name identifies the record. When
+neither has been entered, an available profile handle is explicitly labelled
+**Artist profile**. An original submission title appears separately as
+**Submitted as “…”** when the artwork record has no title. It does not fill in
+the record's title for you.
+
+An image marked **Submission reference** comes from the original Wave
+submission. It helps you recognize the work, but is not automatically selected
+as the final artwork file. Choose that file deliberately. A selected ready
+artwork file is labelled **Selected artwork file** in the record; unavailable
+previews do not prevent you from opening it.
 
 ## Saving and artwork files
 
-Changes save to 6529's database. Check the save status before leaving. If
-saving fails or your session expires, keep the window open while you retry
-or restore authentication. Unsaved text is not stored in browser local storage.
+Changes save with 6529 while you prepare the draft. Check the save status
+before leaving, or use **Save and exit**. If saving fails or your session
+expires, keep the window open while you retry
+or sign in again. Unsaved text is not kept after the window is closed.
 If another editor changes the record, resolve the version conflict before
 continuing; the app does not silently overwrite their work.
 
-Upload the exact file you intend to deposit. Originals are stored separately
-from ordinary public Wave media. Transfer completion, checksum verification,
-inspection and malware screening are distinct steps. A file is ready only
-after the required processing succeeds. Authorized viewers use a sanitized
-preview where available; access to original archival files requires a separate
-permission.
+Upload the exact file you intend to include with the work. Finishing the
+transfer is followed by file processing; wait for the file to become ready.
+Viewers can see previews and original files according to their access.
 
 The upload limits are 4 GiB per file, 20 GiB of stored and reserved files per
-context, 100 files per context and five simultaneous upload sessions. A paused
-multipart upload can require selecting the same file again so the client can
-verify its contents before resuming.
+record, 100 files per record and five simultaneous uploads. A paused upload
+can require selecting the same file again to resume it.
 
 The draft is stored with 6529 while you prepare it. Every answer and selected
 file in a new publication form is intended to become part of the public artwork
 record; there are no per-answer privacy choices. Review files for embedded
-information before adding them. A later step handles publication and minting.
+information before adding them. Publication is a separate later step.
 
 Earlier records keep their original publication choices and any restricted
 material. They are clearly labelled as earlier records and are not silently
@@ -117,9 +152,26 @@ converted. Saved artist information or submission proposals containing
 incompatible material cannot be copied into a publication record. Ask the
 team before carrying information forward.
 
+## Read the draft and preview publication content
+
+Choose **Read the draft** to read the record without form controls, then
+**Return to writing** to continue. This reading view includes any unsaved form
+edits in the current window. Its notice tells you whether you are reading the
+saved draft or a draft with unsaved changes.
+
+In **Review the record**, **Preview saved publication content** shows the
+saved content intended for publication. It does not include unsaved form
+edits or **Questions for the team**. Save your changes before using this
+preview to check the latest version. **Return to the draft** returns to the
+draft reading within review.
+
+Submission reference images are not substituted for a selected artwork file
+in these reading views or in confirmed versions. Reading a draft or opening
+the publication preview does not save, confirm or publish it.
+
 ## Questions before finalizing
 
-At the end of **Review and approve**, use **Questions for the team** for things
+At the end of **Review the record**, use **Questions for the team** for things
 you need to clarify. For example, ask which final file to use or how to explain
 a source. Questions are sent when you choose **Send question to the team**;
 they do not use the artwork form's autosave. If sending fails, the unsent text
@@ -138,10 +190,9 @@ files or create an appendix to the work.
 ## Confirm and review
 
 When the required information is ready, review the version and confirm it as
-the artist. Confirmation stores a dated, immutable documentation revision.
-It is an authenticated acknowledgement in the database, not a wallet
-signature, mint instruction or declaration that a proposed license is already
-effective.
+the artist. Save all changes first. Confirmation preserves that specific
+dated version so everyone can review the same account. It does not publish
+the work or make a proposed license effective.
 
 Curatorial, technical and rights reviews are separate. Reviewers can discuss
 specific questions and request changes within their assigned access. A later
@@ -151,7 +202,4 @@ Confirming the newer draft creates a new version for review.
 Artist identity information can be reused through versioned artist records.
 Each work keeps its selected version, so changing a shared artist record does
 not silently rewrite previously confirmed documentation. Work-specific
-contributors and private context information stay with their work.
-
-Nothing in this flow publishes on-chain, to IPFS or to Arweave. Mint
-preparation and permanent publication are later steps.
+contributors stay with their work.

@@ -29,6 +29,19 @@ function languageName(language: unknown, locale: string): string {
   }
 }
 
+function recordedDate(value: string, locale: string): string {
+  const match = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(value);
+  if (!match) return value;
+  const date = new Date(`${value}${match[3] ? "" : "-01"}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat(locale, {
+    year: "numeric",
+    month: "long",
+    ...(match[3] ? { day: "numeric" as const } : {}),
+    timeZone: "UTC",
+  }).format(date);
+}
+
 function NarrativeValue({
   record,
 }: {
@@ -105,7 +118,7 @@ export default function DocumentationRecordValue({
   value,
   translateEnum = false,
 }: Props) {
-  const { msg } = useDocumentationMessages();
+  const { msg, locale } = useDocumentationMessages();
   if (value === null || value === undefined) return null;
   if (typeof value === "boolean")
     return <span>{msg(value ? "yes" : "no")}</span>;
@@ -144,9 +157,9 @@ export default function DocumentationRecordValue({
     return (
       <span>
         {record["approximate"] === true && <>{msg("catalogue.approximate")} </>}
-        {record["start"]}
+        {recordedDate(record["start"], locale)}
         {typeof record["end"] === "string" && record["end"] && (
-          <> – {record["end"]}</>
+          <> – {recordedDate(record["end"], locale)}</>
         )}
       </span>
     );

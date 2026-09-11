@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import DocumentationValueEditor from "@/components/artwork-documentation/DocumentationValueEditor";
 import DocumentationSummary from "@/components/artwork-documentation/DocumentationSummary";
+import DocumentationRecordValue from "@/components/artwork-documentation/DocumentationRecordValue";
 import { documentationFixture } from "@/__tests__/fixtures/artwork-documentation";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
@@ -26,6 +27,23 @@ const narrative = {
 };
 
 describe("editorial artwork documentation", () => {
+  it.each([
+    [{ precision: "year", start: "1987" }, "1987"],
+    [{ precision: "month", start: "1987-09" }, "September 1987"],
+    [
+      {
+        precision: "range",
+        start: "1987-09-11",
+        end: "1988",
+        approximate: true,
+      },
+      "Approximately September 11, 1987 – 1988",
+    ],
+  ])("reads dates without inventing missing precision", (value, expected) => {
+    const { container } = render(<DocumentationRecordValue value={value} />);
+    expect(container).toHaveTextContent(expected);
+  });
+
   it("edits the primary narrative without dropping translations or review metadata", () => {
     const onChange = jest.fn();
     render(
