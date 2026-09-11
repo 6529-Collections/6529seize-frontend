@@ -28,6 +28,7 @@ import {
 } from "@/services/auth/auth.utils";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { reconcileDeliveredNotifications } from "./delivered-notifications";
 import { getStableDeviceId } from "./stable-device-id";
 import type { DevicePushData } from "./device-push.types";
 import {
@@ -51,7 +52,7 @@ import {
 
 type NotificationsContextType = {
   removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;
-  removeAllDeliveredNotifications: () => Promise<void>;
+  reconcileProfileDeliveredNotifications: () => Promise<void>;
 };
 
 const NotificationsContext = createContext<
@@ -83,7 +84,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { isCapacitor, isIos, isActive } = useCapacitor();
-  const { connectedProfile } = useAuth();
+  const { connectedProfile, activeProfileProxy } = useAuth();
   const forceAuthTokenRefresh = useReducer(
     (revision: number) => revision + 1,
     0
@@ -139,7 +140,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const removeDeliveredNotifications = useCallback(
     async (notifications: PushNotificationSchema[]) => {
-      if (isIos && isRegisteredRef.current) {
+      if (isIos && isRegisteredRef.current && notifications.length > 0) {
         try {
           await PushNotifications.removeDeliveredNotifications({
             notifications,
@@ -642,67 +643,66 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     pushRegistrationAuthKey,
   ]);
 
-  const removeWaveDeliveredNotifications = useCallback(
-    async (waveId: string) => {
-      if (isIos && isRegisteredRef.current) {
-        try {
-          const deliveredNotifications =
-            await PushNotifications.getDeliveredNotifications();
-          const waveNotifications = deliveredNotifications.notifications.filter(
-            (notification) =>
-              toRecord(notification.data)?.["wave_id"] === waveId
-          );
-          await removeDeliveredNotifications(waveNotifications);
-        } catch (error) {
-          console.error("Error removing wave delivered notifications", error);
-          Sentry.captureException(
-            toCaptureExceptionInput(
-              error,
-              "Failed to remove wave delivered notifications"
-            ),
-            {
-              tags: {
-                component: "NotificationsProvider",
-                operation: "removeWaveDeliveredNotifications",
-              },
-              extra: createErrorTelemetryExtra(error),
-            }
-          );
-        }
-      }
-    },
-    [isIos, removeDeliveredNotifications]
-  );
-
-  const removeAllDeliveredNotifications = useCallback(async () => {
-    if (isIos && isRegisteredRef.current) {
+  const reconcileProfile = useCallback(
+    async (waveId?: string) => {
+      const profileId = connectedProfile?.id;
+      if (
+        !isCapacitor ||
+        !isRegisteredRef.current ||
+        activeProfileProxy ||
+        !profileId ||
+        !authJwt ||
+        !isAuthJwtUsable(authJwt)
+      )
+        return;
       try {
-        await PushNotifications.removeAllDeliveredNotifications();
+        await reconcileDeliveredNotifications({
+          profileId,
+          authJwt,
+          ...(waveId === undefined ? {} : { waveId }),
+          isCurrent: () =>
+            connectedProfileRef.current?.id === profileId &&
+            getAuthJwt() === authJwt &&
+            isAuthJwtUsable(authJwt),
+        });
       } catch (error) {
-        console.error("Error removing all delivered notifications", error);
         Sentry.captureException(
           toCaptureExceptionInput(
             error,
-            "Failed to remove all delivered notifications"
+            "Failed to reconcile delivered notifications"
           ),
           {
             tags: {
               component: "NotificationsProvider",
-              operation: "removeAllDeliveredNotifications",
+              operation: "reconcileDeliveredNotifications",
             },
             extra: createErrorTelemetryExtra(error),
           }
         );
       }
-    }
-  }, [isIos]);
+    },
+    [isCapacitor, connectedProfile?.id, activeProfileProxy, authJwt]
+  );
+
+  const removeWaveDeliveredNotifications = useCallback(
+    (waveId: string) => reconcileProfile(waveId),
+    [reconcileProfile]
+  );
+  const reconcileProfileDeliveredNotifications = useCallback(
+    () => reconcileProfile(),
+    [reconcileProfile]
+  );
+
+  useEffect(() => {
+    if (isActive) void reconcileProfileDeliveredNotifications();
+  }, [isActive, reconcileProfileDeliveredNotifications]);
 
   const value = useMemo(
     () => ({
       removeWaveDeliveredNotifications,
-      removeAllDeliveredNotifications,
+      reconcileProfileDeliveredNotifications,
     }),
-    [removeWaveDeliveredNotifications, removeAllDeliveredNotifications]
+    [removeWaveDeliveredNotifications, reconcileProfileDeliveredNotifications]
   );
 
   return (

@@ -81,13 +81,28 @@ push to open the matching app route.
     feed without sending the higher-interruption mobile push.
   - Tapping a coverage push opens the matching profile's Subscriptions tab
     after the normal connected-profile resolution.
-- iOS delivered-notification cleanup:
-  - Tapped pushes are removed from iOS delivered notifications after successful
-    registration.
-  - Delivered notifications are also cleared during notifications read flows
-    (feed read actions, grouped reaction read actions, wave read actions).
-  - When notification unread count reaches zero in nav state, delivered
-    notifications are cleared.
+- Delivered-notification cleanup on iOS and Android:
+  - Reading notifications for one connected profile preserves another profile's
+    delivered notifications, including when both profiles follow the same wave.
+  - After feed, grouped, or wave reads, the app removes matching delivered entries
+    only when their individual server records confirm they are read. New unread
+    entries stay in the tray. Wave cleanup waits for the read request to succeed.
+  - Navigation unread refreshes and returning to the active app can reconcile
+    delivered entries for the active profile. Switching profiles cannot redirect
+    an older cleanup operation to the new profile.
+  - Missing or failed unread/read-state requests never mean zero. Entries with
+    missing profile metadata, unknown older Android tags, or unavailable records
+    are preserved; users can dismiss them manually.
+- Badges:
+  - iOS badge updates are asynchronous and server-driven across all profiles
+    registered to the device. UserA=1 and UserB=1 changes from 2 to 1 after
+    UserA reads, then to 0 after the final read. Single-profile 1 to 0 works too.
+  - Reading from the website or desktop can update the phone's iOS badge when
+    the correction push is delivered and badge permission is enabled.
+  - Tray cleanup does not calculate or overwrite the iOS badge. Delivery delays,
+    offline devices, or failed refreshes can leave the badge temporarily stale.
+  - Android dots/counts depend on the launcher and remaining notifications;
+    there is no guaranteed numeric unread badge.
 
 ## Failure and Recovery
 
@@ -117,7 +132,9 @@ push to open the matching app route.
 ## Limitations / Notes
 
 - Native-app behavior only; browser runtime does not run push registration.
-- Delivered-tray cleanup logic is iOS-specific.
+- Background cross-device reads update iOS badges; selective tray cleanup runs
+  when the app executes reconciliation for that profile. This does not promise
+  immediate background tray synchronization on either platform.
 - Device push tap redirects currently support `profile` and `waves` payload
   types.
 - Push receive/tap issues do not surface a global blocking banner.

@@ -24,9 +24,10 @@ const mockSeizeConnectContext = {
 };
 
 let mockIsActive = true;
+let mockIsIos = true;
 jest.mock("@/hooks/useCapacitor", () => () => ({
   isCapacitor: true,
-  isIos: true,
+  get isIos() { return mockIsIos; },
   get isActive() {
     return mockIsActive;
   },
@@ -42,6 +43,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => mockSeizeConnectContext,
 }));
 jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn().mockResolvedValue({ notifications: [{ id: 1, read_at: 123 }], unread_count: 0 }),
   commonApiPost: jest.fn().mockResolvedValue({}),
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue({}),
 }));
@@ -67,7 +69,7 @@ jest.mock("@capacitor/push-notifications", () => {
       register: jest.fn().mockResolvedValue(undefined),
       getDeliveredNotifications: jest
         .fn()
-        .mockResolvedValue({ notifications: [{ data: { wave_id: "w1" } }] }),
+        .mockResolvedValue({ notifications: [{ id: "native-1", data: { wave_id: "w1", target_profile_id: "test-profile-id", notification_id: "1" } }] }),
       removeDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
       removeAllDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
     },
@@ -90,6 +92,7 @@ const flushMicrotasks = async () => {
 };
 
 beforeEach(() => {
+  mockIsIos = true;
   const { getAuthJwt, isAuthJwtUsable } = require("@/services/auth/auth.utils");
 
   getAuthJwt.mockReset();
@@ -104,7 +107,7 @@ beforeEach(() => {
 describe("NotificationsContext", () => {
   it("provides context functions", () => {
     const { result } = renderHook(() => useNotificationsContext(), { wrapper });
-    expect(typeof result.current.removeAllDeliveredNotifications).toBe(
+    expect(typeof result.current.reconcileProfileDeliveredNotifications).toBe(
       "function"
     );
   });
@@ -1129,7 +1132,8 @@ describe("push registration behavior", () => {
   });
 });
 
-it("removes notifications when functions called", async () => {
+it.each([true, false])("reconciles delivered notifications on iOS=%s", async (isIos) => {
+  mockIsIos = isIos;
   const { PushNotifications } = require("@capacitor/push-notifications");
 
   let registrationCallback:
@@ -1164,11 +1168,11 @@ it("removes notifications when functions called", async () => {
 
   await act(async () => {
     await result.current.removeWaveDeliveredNotifications("w1");
-    await result.current.removeAllDeliveredNotifications();
+    await result.current.reconcileProfileDeliveredNotifications();
   });
   expect(PushNotifications.getDeliveredNotifications).toHaveBeenCalled();
   expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
-  expect(PushNotifications.removeAllDeliveredNotifications).toHaveBeenCalled();
+  expect(PushNotifications.removeAllDeliveredNotifications).not.toHaveBeenCalled();
 });
 
 it("skips notification removal when not registered", async () => {
@@ -1186,7 +1190,7 @@ it("skips notification removal when not registered", async () => {
 
   await act(async () => {
     await result.current.removeWaveDeliveredNotifications("w1");
-    await result.current.removeAllDeliveredNotifications();
+    await result.current.reconcileProfileDeliveredNotifications();
   });
 
   expect(PushNotifications.getDeliveredNotifications).not.toHaveBeenCalled();

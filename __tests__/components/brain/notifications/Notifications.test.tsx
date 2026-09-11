@@ -1,6 +1,14 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
+const mockMutationFunctions: Array<(ids?: number[]) => Promise<void>> = [];
+const mockReconcileDelivered = jest.fn().mockResolvedValue(undefined);
+const mockPostRead = jest.fn().mockResolvedValue(undefined);
+jest.mock("@/services/api/common-api", () => ({
+  commonApiPostWithoutBodyAndResponse: (...args: unknown[]) =>
+    mockPostRead(...args),
+}));
+
 const mutateAsyncMock = jest.fn();
 const requestAuthMock = jest.fn().mockResolvedValue({ success: true });
 const setActiveProfileProxyMock = jest.fn().mockResolvedValue(undefined);
@@ -23,7 +31,10 @@ jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
 }));
 
 jest.mock("@tanstack/react-query", () => ({
-  useMutation: () => ({ mutateAsync: mutateAsyncMock }),
+  useMutation: (options: { mutationFn: (ids?: number[]) => Promise<void> }) => {
+    mockMutationFunctions.push(options.mutationFn);
+    return { mutateAsync: mutateAsyncMock };
+  },
 }));
 
 jest.mock("next/navigation", () => ({
@@ -92,7 +103,7 @@ jest.mock("@/hooks/useNotificationsQuery", () => ({
 
 jest.mock("@/components/notifications/NotificationsContext", () => ({
   useNotificationsContext: () => ({
-    removeAllDeliveredNotifications: jest.fn(),
+    reconcileProfileDeliveredNotifications: mockReconcileDelivered,
   }),
 }));
 
@@ -301,5 +312,35 @@ describe("Notifications component", () => {
     await waitFor(() => {
       expect(mutateAsyncMock).toHaveBeenCalled();
     });
+  });
+});
+
+describe("delivered notification read ordering", () => {
+  beforeEach(() => {
+    mockMutationFunctions.length = 0;
+    mockPostRead.mockReset().mockResolvedValue(undefined);
+    mockReconcileDelivered.mockClear();
+  });
+
+  it("reconciles only after mark-all persistence succeeds", async () => {
+    render(<Notifications />);
+    let finishRead: (() => void) | undefined;
+    mockPostRead.mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        finishRead = resolve;
+      })
+    );
+    const pending = mockMutationFunctions[0]!();
+    expect(mockReconcileDelivered).not.toHaveBeenCalled();
+    finishRead!();
+    await pending;
+    expect(mockReconcileDelivered).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not remove delivered entries when a grouped read fails", async () => {
+    render(<Notifications />);
+    mockPostRead.mockRejectedValueOnce(new Error("offline"));
+    await expect(mockMutationFunctions[1]!([1, 2])).rejects.toThrow("offline");
+    expect(mockReconcileDelivered).not.toHaveBeenCalled();
   });
 });

@@ -4981,6 +4981,8 @@
       ],
       "facts": [
         "Mobile push notifications are documented under the Notifications area.",
+        "Mobile tray cleanup preserves other connected profiles and removes only matching notifications confirmed read; uncertain or failed refreshes preserve entries.",
+        "The iOS badge is updated asynchronously from unread notifications across device-registered profiles, including reads from desktop or web. Android dots and counts depend on the launcher.",
         "Push notification behavior depends on mobile app support and notification permissions.",
         "Push settings include toggles for Identity - REP, Identity - NIC, New Follows, Mentions, Drops - Quoted, Drops - Replied, Drops - Voted, Drops - Reacted, Drops - Boosted, Wave Invites, and Subscription Coverage.",
         "Running-low and action-required subscription coverage can send mobile push; the earlier plan-a-top-up alert remains in the in-app feed without a push.",
