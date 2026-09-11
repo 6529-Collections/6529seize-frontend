@@ -20,7 +20,7 @@
   `/meme-lab/collection/{collection}`, `/meme-lab/{id}/distribution`,
   `/rememes`, `/rememes/{contract}/{id}`, and `/rememes/add`.
 - [NFT](nft/README.md): shared ownership indicators, source fallbacks,
-  marketplace shortcuts, and transfer actions across media routes plus adjacent
+  artwork sharing, marketplace shortcuts, and transfer actions across media routes plus adjacent
   collected and NextGen token routes.
 - [Rendering](rendering/README.md): interactive HTML rendering rules (including
   sandboxed and non-sandboxed paths) plus `/6529-gradient` list sorting and

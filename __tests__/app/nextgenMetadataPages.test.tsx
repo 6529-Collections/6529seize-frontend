@@ -2,7 +2,10 @@ import { generateMetadata as generateNextGenCollectionMetadata } from "@/app/nex
 import { generateNextgenCollectionMetadata } from "@/app/nextgen/collection/[collection]/page-utils";
 import { generateMetadata as generateNextGenMetadata } from "@/app/nextgen/[[...view]]/page";
 import { generateMetadata as generateNextGenAdminMetadata } from "@/app/nextgen/manager/page";
-import { generateMetadata as generateNextGenTokenMetadata } from "@/app/nextgen/token/[token]/[[...view]]/page";
+import NextGenTokenPage, {
+  generateMetadata as generateNextGenTokenMetadata,
+} from "@/app/nextgen/token/[token]/[[...view]]/page";
+import { render } from "@testing-library/react";
 import { NEXTGEN_CONTRACT } from "@/constants/constants";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
@@ -138,13 +141,19 @@ const getSocialImage = (metadata: Metadata) => {
     url: string;
     width: number;
   }[];
+  if (!image) {
+    throw new Error("Expected a social image.");
+  }
   return image;
 };
 
 const mockNextgenFetches = () => {
   (commonApiFetch as jest.Mock).mockImplementation(
     ({ endpoint }: { endpoint: string }) => {
-      if (endpoint === "nextgen/tokens/10000000042") {
+      if (
+        endpoint === "nextgen/tokens/10000000042" ||
+        endpoint === "nextgen/tokens/42"
+      ) {
         return Promise.resolve(token);
       }
       if (endpoint === "nextgen/tokens/10000000042/traits") {
@@ -302,8 +311,11 @@ describe("NextGen metadata", () => {
     expect(url.searchParams.get("badge")).toBe("NextGen");
     expect(url.searchParams.get("collection")).toBe("Pebbles");
     expect(url.searchParams.get("displayId")).toBe("42");
-    expect(url.searchParams.get("image")).toBe("https://cdn.test/thumb.png");
-    expect(url.searchParams.get("subtitle")).toBe("Pebbles #42 | NextGen");
+    expect(url.searchParams.get("image")).toBe("https://cdn.test/token.png");
+    expect(metadata.description).toContain("Pebble #42 · 6529er · NextGen");
+    const canonical = `https://test.6529.io/nextgen/token/10000000042${view ? `/${view}` : ""}`;
+    expect(metadata.alternates?.canonical).toBe(canonical);
+    expect(metadata.openGraph?.url).toBe(canonical);
     expect(url.searchParams.get("title")).toBe(title);
   });
 
@@ -323,4 +335,51 @@ describe("NextGen metadata", () => {
     expect(url.searchParams.get("image")).toBeNull();
     expect(url.searchParams.get("title")).toBe("NextGen #999");
   });
+
+  it("normalizes short token links to the indexed token identity", async () => {
+    mockNextgenFetches();
+    const metadata = await generateNextGenTokenMetadata({
+      params: Promise.resolve({ token: "42" }),
+    });
+    expect(metadata.alternates?.canonical).toBe(
+      "https://test.6529.io/nextgen/token/10000000042"
+    );
+    expect(new URL(getSocialImage(metadata).url).pathname).toBe(
+      `/api/og-metadata/nfts/${NEXTGEN_CONTRACT}/10000000042`
+    );
+  });
+
+  it.each([
+    [undefined, ""],
+    ["display-center", "/display-center"],
+    ["rarity", "/rarity"],
+    ["unsupported", ""],
+  ])(
+    "keeps %s view metadata and JSON-LD on the same canonical token URL",
+    async (view, suffix) => {
+      mockNextgenFetches();
+      const params = Promise.resolve({
+        token: "42",
+        view: view ? [view] : undefined,
+      });
+      const metadata = await generateNextGenTokenMetadata({ params });
+      const { container } = render(
+        await NextGenTokenPage({ params, searchParams: Promise.resolve({}) })
+      );
+      const script = container.querySelector(
+        'script[type="application/ld+json"]'
+      );
+      const jsonLd = JSON.parse(script?.textContent ?? "{}") as {
+        "@graph": Record<string, unknown>[];
+      };
+      const canonical = `https://test.6529.io/nextgen/token/10000000042${suffix}`;
+      expect(metadata.alternates?.canonical).toBe(canonical);
+      expect(jsonLd["@graph"]).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ "@type": "VisualArtwork", url: canonical }),
+          expect.objectContaining({ "@type": "WebPage", url: canonical }),
+        ])
+      );
+    }
+  );
 });

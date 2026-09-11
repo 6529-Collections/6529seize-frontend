@@ -243,5 +243,20 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
         "/api/og-metadata/nfts/0xabc%2Fdef/1%2F2?artist=6529er&badge=The+Memes&collection=The+Memes&displayId=42&image=https%3A%2F%2Fcdn.test%2Fimage.png&subtitle=The+Memes+%231+%7C+Collections&title=Seize+the+Memes"
       );
     });
+
+    it.each(["landscape", "square", "portrait", "story"] as const)(
+      "includes the requested %s NFT export format",
+      (format) => {
+        const url = new URL(
+          getNftSocialCardImagePath({
+            contract: "0xabc",
+            id: 42,
+            format,
+          }),
+          "https://6529.io"
+        );
+        expect(url.searchParams.get("format")).toBe(format);
+      }
+    );
   });
 });

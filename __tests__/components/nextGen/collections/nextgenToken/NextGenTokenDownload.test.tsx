@@ -41,6 +41,7 @@ it("downloads image when dropdown item clicked and image exists", async () => {
     <NextGenTokenDownloadDropdownItem
       token={token}
       resolution={Resolution["1K"]}
+      download={mockDownload}
     />
   );
 
@@ -61,6 +62,7 @@ it("shows coming soon and disables when image missing", async () => {
     <NextGenTokenDownloadDropdownItem
       token={token}
       resolution={Resolution["1K"]}
+      download={mockDownload}
     />
   );
 

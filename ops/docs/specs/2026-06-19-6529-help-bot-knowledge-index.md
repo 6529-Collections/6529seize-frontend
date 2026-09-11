@@ -40,15 +40,24 @@ viewers from editors, describes read-only answers and source comparisons, and
 keeps questions, draft content and dated confirmed versions separate. Its
 control names must match the artist workspace and personal record list.
 
+The artwork-sharing record covers the `Share artwork` control on individual
+Meme, Gradient, and NextGen pages, canonical artwork links, copied captions,
+and feed, square, Story, and link-card PNG exports. It distinguishes link
+composers from file sharing, includes Instagram's save/share-and-paste flow,
+and explains preparation failures and device-dependent share destinations.
+It does not claim automatic posting or successful publication after a handoff.
+
 The profile website studio records cover 39 editable templates (23 original
 compositions and 16 credited Memes inspirations), page and menu editing, image
 uploads, indexed wallet galleries, and the profile header's published Website
 link. They describe readable custom page addresses while preserving archive
 paths, owner-only save and publish, browser recovery, wallet signing, version
 restoration, and unpublishing. Upload records explicitly state that image files
-become public before the website is published. The optional agent-file record
-covers exports and reviewed local patches, including their first-page limits;
-it does not claim a connected MCP service. These records link to the studio's
+become public before the website is published. The optional agent record covers
+complete multipage file exchange and temporary access to one saved draft through
+the local MCP adapter, using the owner's external inference account. It covers
+review, revocation, expiry, unchanged artwork catalogs, interrupted-save recovery,
+and the separate first-page legacy patch controls. These records link to the studio's
 user guide and distinguish removing the active website pointer from deleting
 immutable storage. Per-page sharing-image choices and automatic reset, search
 visibility (`noindex` pages remain public), and Apply/Discard form recovery behavior are

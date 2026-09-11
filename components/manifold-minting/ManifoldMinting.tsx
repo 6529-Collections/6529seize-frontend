@@ -63,6 +63,7 @@ interface Props {
   abi: Abi;
   mint_date: Time;
   mintMetadata: ManifoldMintMetadata;
+  animationSrc?: string | null | undefined;
   standalone?: boolean;
 }
 
@@ -295,18 +296,22 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     if (!instance) {
       return undefined;
     }
+    const animationSrc = props.animationSrc?.trim();
     return {
       id: instance.id,
       contract: props.contract,
       name: instance.asset.name ?? props.title,
       image: instance.asset.image_url ?? instance.asset.image ?? "",
-      animation: instance.asset.animation_url ?? instance.asset.animation ?? "",
+      animation:
+        animationSrc !== undefined && animationSrc.length > 0
+          ? animationSrc
+          : (instance.asset.animation_url ?? instance.asset.animation ?? ""),
       icon: "",
       thumbnail: "",
       scaled: "",
       metadata: instance.asset,
     };
-  }, [instance, props.contract, props.title]);
+  }, [instance, props.animationSrc, props.contract, props.title]);
 
   const artist = useMemo(() => {
     const name =

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/profile-cms/agent/v1/agent-file-proposal-v1.schema.json",
+  "title": "6529 website file proposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "base_package_hash",
+    "candidate_package",
+    "summary"
+  ],
+  "properties": {
+    "schema": {
+      "const": "6529.cms.agent_file_proposal.v1"
+    },
+    "base_package_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "candidate_package": {
+      "$ref": "https://6529.io/profile-cms/agent/v1/cms-package-v1.schema.json"
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    }
+  }
+}
