@@ -9,6 +9,7 @@ import userEvent from "@testing-library/user-event";
 import { getAccount } from "@wagmi/core";
 import React from "react";
 import Auth, { AuthContext, useAuth } from "@/components/auth/Auth";
+import type { RequestAuthOptions } from "@/components/auth/authTypes";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { mockTitleContextModule } from "@/__tests__/utils/titleTestUtils";
 import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
@@ -350,7 +351,11 @@ function RequestAuthButton() {
   );
 }
 
-function RequestAuthResultButton() {
+function RequestAuthResultButton({
+  options,
+}: {
+  readonly options?: RequestAuthOptions;
+}) {
   const { requestAuth } = useAuth();
   const [result, setResult] = React.useState("pending");
 
@@ -359,7 +364,7 @@ function RequestAuthResultButton() {
       <button
         type="button"
         onClick={() =>
-          void requestAuth().then(({ success }) => {
+          void requestAuth(options).then(({ success }) => {
             setResult(String(success));
           })
         }
@@ -671,6 +676,9 @@ describe("Auth component", () => {
         const mockValidateJwt =
           require("@/services/auth/jwt-validation.utils").validateJwt;
         authUtils.getAuthJwt.mockReturnValue("valid-jwt");
+        if (!canSign) {
+          sessionV2.getSessionClientType.mockReturnValue("native");
+        }
 
         render(
           <ReactQueryWrapperContext.Provider
@@ -700,8 +708,65 @@ describe("Auth component", () => {
         expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
         expect(mockSeizeDisconnect).not.toHaveBeenCalled();
         expect(mockSeizeDisconnectAndLogout).not.toHaveBeenCalled();
+        expect(require("react-toastify").toast).not.toHaveBeenCalled();
       }
     );
+
+    it("accepts a refreshed native session for composer preflight without a signer or active chain", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      canSignActiveWallet = false;
+      mockActiveChainId = undefined;
+      mockWagmiIsConnected = false;
+      const authUtils = jest.requireMock<typeof AuthUtilsModule>(
+        "@/services/auth/auth.utils"
+      );
+      const sessionV2 = jest.requireMock<typeof SessionV2Module>(
+        "@/services/auth/session-v2.utils"
+      );
+      const { validateJwt } = jest.requireMock<
+        typeof import("@/services/auth/jwt-validation.utils")
+      >("@/services/auth/jwt-validation.utils");
+      jest.mocked(authUtils.getWalletAddress).mockReturnValue(validAddress);
+      jest
+        .mocked(authUtils.getAuthJwt)
+        .mockReturnValue(TEST_REJECTED_SESSION_VALUE);
+      jest.mocked(sessionV2.getSessionClientType).mockReturnValue("native");
+      jest.mocked(validateJwt).mockImplementationOnce(async (params) => {
+        expect(params.shouldPersistRefreshedSession?.()).toBe(true);
+        jest
+          .mocked(authUtils.getAuthJwt)
+          .mockReturnValue(TEST_REPLACEMENT_SESSION_VALUE);
+        return {
+          isValid: true,
+          wasCancelled: false,
+          refreshOutcome: "success",
+        };
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={createReactQueryWrapperContextValue()}
+        >
+          <Auth>
+            <RequestAuthResultButton />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+      await userEvent.click(screen.getByTestId("request-auth-result"));
+
+      await waitFor(() =>
+        expect(screen.getByTestId("request-auth-success")).toHaveTextContent(
+          "true"
+        )
+      );
+      expect(authUtils.getAuthJwt()).toBe(TEST_REPLACEMENT_SESSION_VALUE);
+      expect(authUtils.invalidateAuthSessionForAddress).not.toHaveBeenCalled();
+      expect(sessionV2.getSessionNonce).not.toHaveBeenCalled();
+      expect(mockSignMessage).not.toHaveBeenCalled();
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+      expect(require("react-toastify").toast).not.toHaveBeenCalled();
+    });
 
     it.each([
       { chainId: undefined, chainState: "unknown" },
@@ -811,92 +876,107 @@ describe("Auth component", () => {
       });
     });
 
-    it("cancels deferred server-rejected recovery after the token changes", async () => {
-      const validAddress = "0x1111111111111111111111111111111111111111";
-      walletAddress = validAddress;
-      const authUtils =
-        require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
-      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
-        typeof authUtils.getAuthJwt
-      >;
-      const mockGetWalletAddress =
-        authUtils.getWalletAddress as jest.MockedFunction<
-          typeof authUtils.getWalletAddress
+    it.each([
+      { profileState: "connected", hasSigner: true },
+      { profileState: "saved native", hasSigner: false },
+    ])(
+      "cancels deferred server-rejected recovery for a $profileState profile after the token changes",
+      async ({ hasSigner }) => {
+        const validAddress = "0x1111111111111111111111111111111111111111";
+        walletAddress = validAddress;
+        canSignActiveWallet = hasSigner;
+        mockActiveChainId = hasSigner ? 1 : undefined;
+        mockWagmiIsConnected = hasSigner;
+        const authUtils =
+          require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+        const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
+          typeof authUtils.getAuthJwt
         >;
-      const mockRemoveAuthJwt = authUtils.removeAuthJwt as jest.MockedFunction<
-        typeof authUtils.removeAuthJwt
-      >;
-      const mockValidateJwt =
-        require("@/services/auth/jwt-validation.utils").validateJwt;
-      const sessionV2 = require("@/services/auth/session-v2.utils");
-      const validation = createDeferredPromise<{
-        readonly isValid: boolean;
-        readonly wasCancelled: boolean;
-        readonly refreshOutcome: "cancelled";
-      }>();
-      let shouldPersistRefreshedSession: (() => boolean) | undefined;
-      let requestResult: Promise<{ success: boolean }> | undefined;
-
-      mockGetAuthJwt.mockReturnValue(TEST_REJECTED_SESSION_VALUE);
-      mockGetWalletAddress.mockReturnValue(validAddress);
-      const rejectedAuthStateFingerprint = getAuthStateFingerprint({
-        walletAddress: validAddress,
-        jwt: TEST_REJECTED_SESSION_VALUE,
-      });
-      mockValidateJwt.mockImplementationOnce(
-        (params: { shouldPersistRefreshedSession?: () => boolean }) => {
-          shouldPersistRefreshedSession = params.shouldPersistRefreshedSession;
-          return validation.promise;
+        const mockGetWalletAddress =
+          authUtils.getWalletAddress as jest.MockedFunction<
+            typeof authUtils.getWalletAddress
+          >;
+        const mockRemoveAuthJwt =
+          authUtils.removeAuthJwt as jest.MockedFunction<
+            typeof authUtils.removeAuthJwt
+          >;
+        const mockValidateJwt =
+          require("@/services/auth/jwt-validation.utils").validateJwt;
+        const sessionV2 = require("@/services/auth/session-v2.utils");
+        if (!hasSigner) {
+          sessionV2.getSessionClientType.mockReturnValue("native");
         }
-      );
+        const validation = createDeferredPromise<{
+          readonly isValid: boolean;
+          readonly wasCancelled: boolean;
+          readonly refreshOutcome: "empty";
+        }>();
+        let shouldPersistRefreshedSession: (() => boolean) | undefined;
+        let requestResult: Promise<{ success: boolean }> | undefined;
 
-      const Child = () => {
-        const { requestAuth } = React.useContext(AuthContext);
-        return (
-          <button
-            type="button"
-            onClick={() => {
-              requestResult = requestAuth({
-                serverRejected: true,
-                expectedAuthStateFingerprint: rejectedAuthStateFingerprint,
-              });
-            }}
-          >
-            recover auth
-          </button>
+        mockGetAuthJwt.mockReturnValue(TEST_REJECTED_SESSION_VALUE);
+        mockGetWalletAddress.mockReturnValue(validAddress);
+        const rejectedAuthStateFingerprint = getAuthStateFingerprint({
+          walletAddress: validAddress,
+          jwt: TEST_REJECTED_SESSION_VALUE,
+        });
+        mockValidateJwt.mockImplementationOnce(
+          (params: { shouldPersistRefreshedSession?: () => boolean }) => {
+            shouldPersistRefreshedSession =
+              params.shouldPersistRefreshedSession;
+            return validation.promise;
+          }
         );
-      };
 
-      render(
-        <ReactQueryWrapperContext.Provider
-          value={{ invalidateAll: jest.fn() } as any}
-        >
-          <Auth>
-            <Child />
-          </Auth>
-        </ReactQueryWrapperContext.Provider>
-      );
+        const Child = () => {
+          const { requestAuth } = React.useContext(AuthContext);
+          return (
+            <button
+              type="button"
+              onClick={() => {
+                requestResult = requestAuth({
+                  serverRejected: true,
+                  expectedAuthStateFingerprint: rejectedAuthStateFingerprint,
+                });
+              }}
+            >
+              recover auth
+            </button>
+          );
+        };
 
-      fireEvent.click(screen.getByRole("button", { name: "recover auth" }));
-      await waitFor(() => expect(mockValidateJwt).toHaveBeenCalled());
-      expect(shouldPersistRefreshedSession?.()).toBe(true);
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={{ invalidateAll: jest.fn() } as any}
+          >
+            <Auth>
+              <Child />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
 
-      mockGetAuthJwt.mockReturnValue(TEST_REPLACEMENT_SESSION_VALUE);
-      expect(shouldPersistRefreshedSession?.()).toBe(false);
+        fireEvent.click(screen.getByRole("button", { name: "recover auth" }));
+        await waitFor(() => expect(mockValidateJwt).toHaveBeenCalled());
+        expect(shouldPersistRefreshedSession?.()).toBe(true);
 
-      validation.resolve({
-        isValid: false,
-        wasCancelled: true,
-        refreshOutcome: "cancelled",
-      });
-      await act(async () => {
-        await requestResult;
-      });
+        mockGetAuthJwt.mockReturnValue(TEST_REPLACEMENT_SESSION_VALUE);
+        expect(shouldPersistRefreshedSession?.()).toBe(false);
 
-      expect(mockRemoveAuthJwt).not.toHaveBeenCalled();
-      expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
-      expect(sessionV2.persistSessionResponse).not.toHaveBeenCalled();
-    });
+        validation.resolve({
+          isValid: false,
+          wasCancelled: false,
+          refreshOutcome: "empty",
+        });
+        await act(async () => {
+          await requestResult;
+        });
+
+        expect(mockRemoveAuthJwt).not.toHaveBeenCalled();
+        expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
+        expect(sessionV2.persistSessionResponse).not.toHaveBeenCalled();
+        expect(require("react-toastify").toast).not.toHaveBeenCalled();
+      }
+    );
 
     it("cancels server-rejected sign-in if auth changes during persistence", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
@@ -1194,6 +1274,12 @@ describe("Auth component", () => {
         expect(sessionV2.getSessionNonce).not.toHaveBeenCalled();
         expect(mockSignMessage).not.toHaveBeenCalled();
         expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+        if (!canSign) {
+          expect(require("react-toastify").toast).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({ type: "error" })
+          );
+        }
       }
     );
 
@@ -1387,6 +1473,90 @@ describe("Auth component", () => {
       expect(mockInvalidateAuthSession).not.toHaveBeenCalled();
       expect(mockSignMessage).not.toHaveBeenCalled();
     });
+
+    it.each([
+      { action: "composer preflight", serverRejected: false },
+      { action: "reaction recovery", serverRejected: true },
+    ])(
+      "asks to reconnect a saved native profile without a signer or chain during $action",
+      async ({ serverRejected }) => {
+        const validAddress = "0x1111111111111111111111111111111111111111";
+        walletAddress = validAddress;
+        canSignActiveWallet = false;
+        mockActiveChainId = undefined;
+        mockWagmiIsConnected = false;
+        const authUtils = jest.requireMock<typeof AuthUtilsModule>(
+          "@/services/auth/auth.utils"
+        );
+        const sessionV2 = jest.requireMock<typeof SessionV2Module>(
+          "@/services/auth/session-v2.utils"
+        );
+        const { validateJwt } = jest.requireMock<
+          typeof import("@/services/auth/jwt-validation.utils")
+        >("@/services/auth/jwt-validation.utils");
+        const { toast } =
+          jest.requireMock<typeof import("react-toastify")>("react-toastify");
+        jest.mocked(authUtils.getAuthJwt).mockReturnValue("expired-native-jwt");
+        jest.mocked(authUtils.getWalletAddress).mockReturnValue(validAddress);
+        jest.mocked(sessionV2.getSessionClientType).mockReturnValue("native");
+        jest.mocked(validateJwt).mockResolvedValue({
+          isValid: false,
+          wasCancelled: false,
+          refreshOutcome: "empty",
+        });
+        const expectedAuthStateFingerprint = getAuthStateFingerprint({
+          walletAddress: validAddress,
+          jwt: "expired-native-jwt",
+        });
+
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={createReactQueryWrapperContextValue()}
+          >
+            <Auth>
+              <RequestAuthResultButton
+                options={{ serverRejected, expectedAuthStateFingerprint }}
+              />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+        await userEvent.click(screen.getByTestId("request-auth-result"));
+
+        await waitFor(() =>
+          expect(screen.getByTestId("request-auth-success")).toHaveTextContent(
+            "false"
+          )
+        );
+        expect(validateJwt).toHaveBeenCalledWith(
+          expect.objectContaining({
+            jwt: "expired-native-jwt",
+            wallet: validAddress,
+            serverRejected,
+          })
+        );
+        expect(toast).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ type: "error" })
+        );
+        const renderedToast = jest.mocked(toast).mock.calls.at(-1)?.[0];
+        if (!React.isValidElement(renderedToast)) {
+          throw new Error("Expected a rendered reconnect toast");
+        }
+        render(renderedToast);
+        expect(
+          screen.getByText(
+            "Reconnect the wallet for this profile and try again."
+          )
+        ).toBeVisible();
+        expect(
+          authUtils.invalidateAuthSessionForAddress
+        ).not.toHaveBeenCalled();
+        expect(authUtils.removeAuthJwt).not.toHaveBeenCalled();
+        expect(sessionV2.getSessionNonce).not.toHaveBeenCalled();
+        expect(mockSignMessage).not.toHaveBeenCalled();
+        expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+      }
+    );
 
     it("uses session nonce signable_message for web sign-in", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
