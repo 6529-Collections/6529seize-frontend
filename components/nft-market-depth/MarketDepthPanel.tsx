@@ -44,7 +44,7 @@ interface MarketDepthPanelProps {
   readonly contract: string;
   readonly tokenId: string | number;
   readonly locale?: SupportedLocale | undefined;
-  readonly actions?: ReactNode;
+  readonly actions?: ReactNode | ((refresh: () => void) => ReactNode);
 }
 
 interface MarketDepthState {
@@ -100,7 +100,7 @@ function formatAge(
   if (!Number.isFinite(timestamp)) return null;
 
   const difference = timestamp - minuteClock * MINUTE_IN_MILLISECONDS;
-  if (difference >= MINUTE_IN_MILLISECONDS) return null;
+  if (difference > 0) return null;
   const absoluteDifference = Math.abs(difference);
   const units = [
     { unit: "year", milliseconds: 365 * 24 * 60 * MINUTE_IN_MILLISECONDS },
@@ -177,11 +177,11 @@ function LevelTable({
   return (
     <div className="tw-min-w-0">
       {visibleLevels.length === 0 ? (
-        <p className="tw-m-0 tw-border-t tw-border-solid tw-border-white/10 tw-py-4 tw-text-sm tw-text-iron-500">
+        <p className="tw-m-0 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-py-4 tw-text-sm tw-text-iron-500">
           {t(locale, "marketDepth.noLevels")}
         </p>
       ) : (
-        <div className="tw-min-w-0 tw-overflow-hidden tw-border-t tw-border-solid tw-border-white/10">
+        <div className="tw-min-w-0 tw-overflow-hidden tw-border-0 tw-border-t tw-border-solid tw-border-white/10">
           <table className="tw-w-full tw-table-fixed tw-border-collapse tw-text-right tw-text-xs sm:tw-text-sm">
             <caption className="tw-sr-only">
               {t(locale, "marketDepth.table.ariaLabel", {
@@ -189,7 +189,7 @@ function LevelTable({
                 currency,
               })}
             </caption>
-            <thead className="tw-border-b tw-border-solid tw-border-white/10 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+            <thead className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
               <tr>
                 <th
                   scope="col"
@@ -214,10 +214,10 @@ function LevelTable({
               </tr>
             </thead>
             <tbody>
-              {visibleLevels.map((level, index) => (
+              {visibleLevels.map((level) => (
                 <tr
-                  key={`${side}-${level.unit_price}-${index}`}
-                  className="tw-border-b tw-border-solid tw-border-white/5 last:tw-border-white/10"
+                  key={`${side}-${level.unit_price}`}
+                  className="tw-border-0 tw-border-b tw-border-solid tw-border-white/5 last:tw-border-white/10"
                 >
                   <td
                     className="tw-break-words tw-px-0 tw-py-2.5 tw-text-left tw-font-medium tw-tabular-nums tw-text-iron-100 sm:tw-pr-3"
@@ -241,7 +241,7 @@ function LevelTable({
         <button
           type="button"
           onClick={() => setShowAll((current) => !current)}
-          className="tw-mt-3 tw-min-h-11 tw-bg-transparent tw-px-0 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-400 tw-underline-offset-4 tw-transition hover:tw-text-white hover:tw-underline focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          className="tw-mt-3 tw-min-h-11 tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-400 tw-underline-offset-4 tw-transition hover:tw-text-white hover:tw-underline focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
         >
           {showAll
             ? t(locale, "marketDepth.levels.showFewer")
@@ -262,12 +262,12 @@ function MarketDepthSkeleton() {
   return (
     <div
       aria-hidden="true"
-      className="tw-grid tw-border-y tw-border-solid tw-border-white/10 sm:tw-grid-cols-2 sm:tw-divide-x sm:tw-divide-y-0 sm:tw-divide-white/10"
+      className="tw-grid tw-border-0 tw-border-y tw-border-solid tw-border-white/10 sm:tw-grid-cols-2 sm:tw-divide-x sm:tw-divide-y-0 sm:tw-divide-white/10"
     >
       {["one", "two"].map((key) => (
         <div
           key={key}
-          className="tw-h-24 tw-animate-pulse tw-border-b tw-border-solid tw-border-white/10 tw-bg-white/[0.02] last:tw-border-b-0 motion-reduce:tw-animate-none sm:tw-border-b-0"
+          className="tw-h-24 tw-animate-pulse tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-bg-white/[0.02] last:tw-border-b-0 motion-reduce:tw-animate-none sm:tw-border-b-0"
         />
       ))}
     </div>
@@ -322,7 +322,7 @@ function AboutPrices({
   );
 
   return (
-    <details className="tw-group tw-border-t tw-border-solid tw-border-white/10 tw-py-4">
+    <details className="tw-group tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-py-4">
       <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
         {t(locale, "marketDepth.about.title")}
         <span
@@ -377,6 +377,11 @@ export default function MarketDepthPanel({
   );
   const [state, setState] = useState<MarketDepthState>(INITIAL_STATE);
   const [retryVersion, setRetryVersion] = useState(0);
+  const refresh = useCallback(() => {
+    setRetryVersion((version) => version + 1);
+  }, []);
+  const renderedActions =
+    typeof actions === "function" ? actions(refresh) : actions;
   const [loadingMoreKey, setLoadingMoreKey] = useState<string | null>(null);
   const [loadMoreErrorKey, setLoadMoreErrorKey] = useState<string | null>(null);
   const loadMoreAbortControllerRef = useRef<AbortController | null>(null);
@@ -516,7 +521,7 @@ export default function MarketDepthPanel({
     <section
       aria-labelledby="market-depth-heading"
       aria-busy={effectiveStatus === "loading"}
-      className="tw-mt-8 tw-border-t tw-border-solid tw-border-white/10 tw-pt-7 before:tw-content-none after:tw-content-none [&_*]:before:tw-content-none [&_*]:after:tw-content-none"
+      className="tw-mt-8 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-7 before:tw-content-none after:tw-content-none [&_*]:before:tw-content-none [&_*]:after:tw-content-none"
     >
       <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-6 tw-gap-y-4">
         <div className="tw-max-w-2xl">
@@ -542,8 +547,8 @@ export default function MarketDepthPanel({
         {data && (
           <button
             type="button"
-            onClick={() => setRetryVersion((version) => version + 1)}
-            className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-sm tw-bg-transparent tw-px-1 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-400 tw-underline-offset-4 tw-transition hover:tw-text-white hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            onClick={refresh}
+            className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-sm tw-border-0 tw-bg-transparent tw-px-1 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-400 tw-underline-offset-4 tw-transition hover:tw-text-white hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
             <ArrowPathIcon aria-hidden="true" className="tw-h-3.5 tw-w-3.5" />
             {t(resolvedLocale, "marketDepth.refresh")}
@@ -551,7 +556,9 @@ export default function MarketDepthPanel({
         )}
       </div>
 
-      {Boolean(actions) && <div className="tw-mt-7">{actions}</div>}
+      {Boolean(renderedActions) && (
+        <div className="tw-mt-7">{renderedActions}</div>
+      )}
 
       {effectiveStatus === "loading" && (
         <div className="tw-mt-8">
@@ -563,14 +570,14 @@ export default function MarketDepthPanel({
       )}
 
       {effectiveStatus === "error" && (
-        <div className="tw-mt-8 tw-border-y tw-border-solid tw-border-white/10 tw-py-5">
+        <div className="tw-mt-8 tw-border-0 tw-border-y tw-border-solid tw-border-white/10 tw-py-5">
           <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-200">
             {t(resolvedLocale, "marketDepth.error")}
           </p>
           <button
             type="button"
-            onClick={() => setRetryVersion((version) => version + 1)}
-            className="tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-sm tw-bg-transparent tw-px-0 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-200 tw-underline-offset-4 tw-transition hover:tw-text-white hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            onClick={refresh}
+            className="tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-sm tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-200 tw-underline-offset-4 tw-transition hover:tw-text-white hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
             <ArrowPathIcon aria-hidden="true" className="tw-h-4 tw-w-4" />
             {t(resolvedLocale, "marketDepth.retry")}
@@ -582,7 +589,7 @@ export default function MarketDepthPanel({
         <div className="tw-mt-8">
           {data.status === ApiMarketDepthStatusEnum.Unavailable ? (
             <>
-              <div className="tw-border-y tw-border-solid tw-border-white/10 tw-py-5">
+              <div className="tw-border-0 tw-border-y tw-border-solid tw-border-white/10 tw-py-5">
                 <p className="tw-m-0 tw-text-sm tw-text-iron-300">
                   {t(resolvedLocale, "marketDepth.unavailable.title")}
                 </p>
@@ -591,8 +598,8 @@ export default function MarketDepthPanel({
             </>
           ) : (
             <>
-              <dl className="tw-m-0 tw-grid tw-border-y tw-border-solid tw-border-white/10 sm:tw-grid-cols-2 sm:tw-divide-x sm:tw-divide-y-0 sm:tw-divide-white/10">
-                <div className="tw-border-b tw-border-solid tw-border-white/10 tw-py-5 sm:tw-border-b-0 sm:tw-pr-8">
+              <dl className="tw-m-0 tw-grid tw-border-0 tw-border-y tw-border-solid tw-border-white/10 sm:tw-grid-cols-2 sm:tw-divide-x sm:tw-divide-y-0 sm:tw-divide-white/10">
+                <div className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-py-5 sm:tw-border-b-0 sm:tw-pr-8">
                   <dt className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
                     {t(resolvedLocale, "marketDepth.bestAsk")}
                   </dt>
@@ -617,7 +624,7 @@ export default function MarketDepthPanel({
               </dl>
 
               {!hasQuotedLevels && (
-                <p className="tw-mb-0 tw-mt-6 tw-border-b tw-border-solid tw-border-white/10 tw-pb-6 tw-text-sm tw-text-iron-400">
+                <p className="tw-mb-0 tw-mt-6 tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-pb-6 tw-text-sm tw-text-iron-400">
                   {t(resolvedLocale, "marketDepth.empty")}
                 </p>
               )}

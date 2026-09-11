@@ -13,8 +13,8 @@ The summaries show the lowest captured listing in ETH and the highest captured
 offer in WETH. Each price list starts with up to five levels. Use Show all levels
 to reveal the complete list, and Show fewer levels to return to the short view.
 Listings are ordered from lowest price upward and
-offers from highest price downward. Each level shows its unit price, quantity at
-that price and cumulative quoted quantity. Payment currencies stay separate,
+offers from highest price downward. Each level shows its unit price and quantity
+at that price. Total shows the cumulative quoted quantity. Payment currencies stay separate,
 including ETH and WETH; other currencies are identified with their address.
 
 Open Individual listings and offers to inspect each captured order's side,
