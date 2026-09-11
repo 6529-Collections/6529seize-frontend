@@ -64,6 +64,8 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
     "We could not complete that request. Your unsaved changes remain in this window. Please try again.",
   "artworkDocumentation.retry": "Try again",
   "artworkDocumentation.back": "My artwork documentation",
+  "artworkDocumentation.backToResults": "Back to results",
+  "artworkDocumentation.backToList": "Back to list",
   "artworkDocumentation.viewOnly":
     "You have view-only access to this artwork record.",
   "artworkDocumentation.untitled": "Work awaiting a title",

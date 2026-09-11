@@ -128,6 +128,8 @@ function WorkspaceEditor({
     !canWrite && context.program_id
       ? `/artwork-documentation/programs/${encodeURIComponent(context.program_id)}`
       : "/artwork-documentation";
+  const viewOnlyBackLabel = context.program_id ? "backToResults" : "backToList";
+  const backLabel = canWrite ? "back" : viewOnlyBackLabel;
   const publicationOnly = isPublicationOnly(context.profile);
   const [section, setSection] = useState(initialSection);
   const counts = Object.values(context.modules).reduce(
@@ -175,7 +177,7 @@ function WorkspaceEditor({
         href={listPath}
         className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-text-iron-300 hover:tw-text-white"
       >
-        ← {msg("back")}
+        ← {msg(backLabel)}
       </Link>
       <header>
         <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-widest tw-text-iron-400">
@@ -368,7 +370,7 @@ function WorkspaceEditor({
                 else router.push(listPath);
               }}
             >
-              {msg(canWrite ? "saveExit" : "back")}
+              {msg(canWrite ? "saveExit" : backLabel)}
             </DocumentationButton>
             {section !== "review" && (
               <DocumentationButton
