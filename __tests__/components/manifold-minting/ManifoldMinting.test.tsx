@@ -1,4 +1,6 @@
 import ManifoldMinting from "@/components/manifold-minting/ManifoldMinting";
+import NFTImage from "@/components/nft-image/NFTImage";
+import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import { render, screen, waitFor } from "@testing-library/react";
 
 jest.mock("next/link", () => ({
@@ -8,7 +10,7 @@ jest.mock("next/link", () => ({
 
 jest.mock("@/components/nft-image/NFTImage", () => ({
   __esModule: true,
-  default: () => <div data-testid="image" />,
+  default: jest.fn(() => <div data-testid="image" />),
 }));
 jest.mock("@/components/nft-attributes/NFTAttributes", () => ({
   __esModule: true,
@@ -293,5 +295,85 @@ describe("Component Structure", () => {
       },
       { timeout: 3000 }
     );
+  });
+});
+
+describe("Mint artwork source", () => {
+  const metadataAnimation = "https://arweave.net/original-film";
+  const videoMetadata = {
+    ...defaultProps.mintMetadata,
+    metadata: {
+      ...defaultProps.mintMetadata.metadata,
+      animation_url: metadataAnimation,
+      animation_details: { format: "MP4" },
+    },
+  };
+
+  const renderedArtwork = () => {
+    const props = jest.mocked(NFTImage).mock.calls.at(-1)?.[0];
+    expect(props).toBeDefined();
+    return props?.nft;
+  };
+
+  beforeEach(() => {
+    useManifoldClaim.mockReturnValue(createMockClaimState());
+  });
+
+  it("uses the API animation and updates it when the mint changes", () => {
+    const firstAnimation = "https://cdn.example/videos/123.MP4";
+    const nextAnimation = "https://cdn.example/videos/124.MP4";
+    const { rerender } = render(
+      <ManifoldMinting
+        {...defaultProps}
+        mintMetadata={videoMetadata}
+        animationSrc={firstAnimation}
+      />
+    );
+
+    expect(getResolvedAnimationSrc(renderedArtwork())).toBe(firstAnimation);
+
+    rerender(
+      <ManifoldMinting
+        {...defaultProps}
+        mintMetadata={{ ...videoMetadata, tokenId: 124 }}
+        animationSrc={nextAnimation}
+      />
+    );
+
+    expect(getResolvedAnimationSrc(renderedArtwork())).toBe(nextAnimation);
+    expect(renderedArtwork()?.id).toBe(124);
+  });
+
+  it.each([undefined, null, "", "   "])(
+    "uses token metadata when the API animation is %p",
+    (animationSrc) => {
+      render(
+        <ManifoldMinting
+          {...defaultProps}
+          mintMetadata={videoMetadata}
+          animationSrc={animationSrc}
+        />
+      );
+
+      expect(getResolvedAnimationSrc(renderedArtwork())).toBe(metadataAnimation);
+    }
+  );
+
+  it("keeps interactive HTML artwork on its metadata source", () => {
+    render(
+      <ManifoldMinting
+        {...defaultProps}
+        mintMetadata={{
+          ...videoMetadata,
+          metadata: {
+            ...videoMetadata.metadata,
+            animation_details: { format: "HTML" },
+          },
+        }}
+        animationSrc="https://cdn.example/videos/123.MP4"
+      />
+    );
+
+    expect(getResolvedAnimationSrc(renderedArtwork())).toBe(metadataAnimation);
   });
 });
