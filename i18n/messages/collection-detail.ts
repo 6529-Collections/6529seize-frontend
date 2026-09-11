@@ -68,7 +68,7 @@ export const MARKET_DEPTH_MESSAGES = namespaceMessages("marketDepth", [
   ["table.quantity", "Quantity"],
   ["table.quantityShort", "Quantity"],
   ["table.cumulative", "Cumulative"],
-  ["table.cumulativeShort", "Cumulative"],
+  ["table.cumulativeShort", "Total"],
   ["levels.showAll", "Show all levels"],
   ["levels.showFewer", "Show fewer levels"],
   ["orders.title", "Individual listings and offers"],

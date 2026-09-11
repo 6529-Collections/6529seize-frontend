@@ -13,6 +13,16 @@ import {
   getScopeLabel,
 } from "./market-depth-format";
 
+const ORDER_HEADERS = [
+  "marketDepth.orders.side",
+  "marketDepth.orders.scope",
+  "marketDepth.orders.applicability",
+  "marketDepth.orders.price",
+  "marketDepth.orders.currency",
+  "marketDepth.orders.remaining",
+  "marketDepth.orders.expires",
+] as const;
+
 export default function MarketDepthOrderDetails({
   data,
   locale,
@@ -27,7 +37,7 @@ export default function MarketDepthOrderDetails({
   readonly loadMoreError: string | null;
 }) {
   return (
-    <details className="tw-group tw-mt-6 tw-border-t tw-border-solid tw-border-white/10 tw-py-4">
+    <details className="tw-group tw-mt-6 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-py-4">
       <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
         <span>{t(locale, "marketDepth.orders.title")}</span>
         <span className="tw-flex tw-items-center tw-gap-3 tw-text-xs tw-font-normal tw-text-iron-500">
@@ -56,36 +66,20 @@ export default function MarketDepthOrderDetails({
               <caption className="tw-sr-only">
                 {t(locale, "marketDepth.orders.caption")}
               </caption>
-              <thead className="tw-sticky tw-top-0 tw-border-y tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+              <thead className="tw-sticky tw-top-0 tw-border-0 tw-border-y tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
                 <tr>
-                  <th scope="col" className="tw-px-2 tw-py-2.5">
-                    {t(locale, "marketDepth.orders.side")}
-                  </th>
-                  <th scope="col" className="tw-px-2 tw-py-2.5">
-                    {t(locale, "marketDepth.orders.scope")}
-                  </th>
-                  <th scope="col" className="tw-px-2 tw-py-2.5">
-                    {t(locale, "marketDepth.orders.applicability")}
-                  </th>
-                  <th scope="col" className="tw-px-2 tw-py-2.5">
-                    {t(locale, "marketDepth.orders.price")}
-                  </th>
-                  <th scope="col" className="tw-px-2 tw-py-2.5">
-                    {t(locale, "marketDepth.orders.currency")}
-                  </th>
-                  <th scope="col" className="tw-px-2 tw-py-2.5">
-                    {t(locale, "marketDepth.orders.remaining")}
-                  </th>
-                  <th scope="col" className="tw-px-2 tw-py-2.5">
-                    {t(locale, "marketDepth.orders.expires")}
-                  </th>
+                  {ORDER_HEADERS.map((header) => (
+                    <th key={header} scope="col" className="tw-px-2 tw-py-2.5">
+                      {t(locale, header)}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {data.orders.map((order) => (
                   <tr
                     key={order.order_key}
-                    className="tw-border-b tw-border-solid tw-border-white/5 last:tw-border-white/10"
+                    className="tw-border-0 tw-border-b tw-border-solid tw-border-white/5 last:tw-border-white/10"
                   >
                     <td className="tw-px-2 tw-py-3 tw-font-medium tw-text-iron-100">
                       {order.side === ApiMarketOrderSideEnum.Ask
@@ -128,7 +122,7 @@ export default function MarketDepthOrderDetails({
             type="button"
             onClick={onLoadMore}
             disabled={isLoadingMore}
-            className="tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-sm tw-bg-transparent tw-px-0 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-underline-offset-4 tw-transition hover:tw-text-white hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60"
+            className="tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-sm tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-underline-offset-4 tw-transition hover:tw-text-white hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60"
           >
             {isLoadingMore && (
               <ArrowPathIcon
