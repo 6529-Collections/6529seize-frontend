@@ -18,6 +18,7 @@ import {
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
 import { fetchDropsV2ByIds } from "@/services/api/wave-drops-v2-api";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiArtworkDocumentationProfile } from "@/generated/models/ApiArtworkDocumentationProfile";
 import DocumentationListRecord, {
   type DocumentationCatalogueItem,
 } from "./DocumentationListRecord";
@@ -31,6 +32,14 @@ import {
   panelClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
+
+function profileLabel(profile: ApiArtworkDocumentationProfile): string {
+  const label = documentationOptionLabel(profile.profile_id);
+  const program = profile.program_id
+    ? documentationOptionLabel(profile.program_id)
+    : null;
+  return program && program !== label ? `${program} · ${label}` : label;
+}
 
 export default function ArtworkDocumentationList({
   programId,
@@ -136,6 +145,13 @@ function DocumentationListContent({
     access.profiles.find(
       (profile) => documentationProfileKey(profile) === profileId
     ) ?? access.profiles[0];
+  const generalHeading = programId
+    ? msg("editorial.records")
+    : msg("editorial.personalTitle");
+  const heading =
+    programId === "6529NM-AP-01"
+      ? msg("editorial.programTitle")
+      : generalHeading;
   const start = async () => {
     if (!selected) return;
     setStarting(true);
@@ -170,11 +186,7 @@ function DocumentationListContent({
               : msg("title")}
           </p>
           <h1 className="tw-m-0 tw-max-w-3xl tw-font-serif tw-text-5xl tw-font-normal tw-leading-[1.05] tw-tracking-tight tw-text-iron-50 sm:tw-text-6xl">
-            {programId === "6529NM-AP-01"
-              ? msg("editorial.programTitle")
-              : programId
-                ? msg("editorial.records")
-                : msg("editorial.personalTitle")}
+            {heading}
           </h1>
         </div>
         <div className="lg:tw-pt-10">
@@ -218,7 +230,7 @@ function DocumentationListContent({
           {!programId && (
             <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-3">
               <label className="tw-grow tw-text-sm tw-text-iron-300">
-                {msg("profile")}
+                {msg("editorial.recordFor")}
                 <select
                   className={`${inputClass} tw-mt-2`}
                   value={selected ? documentationProfileKey(selected) : ""}
@@ -232,11 +244,7 @@ function DocumentationListContent({
                       key={documentationProfileKey(profile)}
                       value={documentationProfileKey(profile)}
                     >
-                      {documentationOptionLabel(profile.profile_id)}
-                      {profile.program_id
-                        ? ` · ${documentationOptionLabel(profile.program_id)}`
-                        : ""}{" "}
-                      · v{profile.version}
+                      {profileLabel(profile)}
                     </option>
                   ))}
                 </select>

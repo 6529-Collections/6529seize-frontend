@@ -2,6 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import Image from "next/image";
+import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
+import { ApiArtworkDocumentationAnswerStatusEnum } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import type { ApiArtworkDocumentationPublicPreview } from "@/generated/models/ApiArtworkDocumentationPublicPreview";
 import { isRedacted } from "@/lib/artwork-documentation/answers";
@@ -22,13 +25,21 @@ export function ArtworkImage({
   url,
   title,
   compact,
+  width,
+  height,
 }: {
   readonly url: string;
   readonly title: string;
   readonly compact: boolean;
+  readonly width?: number | null | undefined;
+  readonly height?: number | null | undefined;
 }) {
   const { msg } = useDocumentationMessages();
   const [failed, setFailed] = useState(false);
+  const [intrinsic, setIntrinsic] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
   if (failed)
     return (
       <p className="tw-m-0 tw-py-8 tw-text-sm tw-text-iron-400">
@@ -36,16 +47,34 @@ export function ArtworkImage({
       </p>
     );
   return (
-    // Authorized media loads directly, outside the Next optimizer and shared cache.
-    <img
+    // Unoptimized authorized media loads directly, outside the shared image cache.
+    <Image
       src={url}
       alt={title}
+      unoptimized
+      width={
+        intrinsic?.width ??
+        (typeof width === "number" && width > 0 ? width : 1280)
+      }
+      height={
+        intrinsic?.height ??
+        (typeof height === "number" && height > 0 ? height : 960)
+      }
+      loading={compact ? "lazy" : "eager"}
       referrerPolicy="no-referrer"
+      onLoad={(event) => {
+        const element = event.currentTarget;
+        if (element.naturalWidth > 0 && element.naturalHeight > 0)
+          setIntrinsic({
+            width: element.naturalWidth,
+            height: element.naturalHeight,
+          });
+      }}
       onError={() => setFailed(true)}
       className={
         compact
-          ? "tw-block tw-max-h-64 tw-w-full tw-object-contain"
-          : "tw-block tw-max-h-[70vh] tw-w-full tw-object-contain"
+          ? "tw-block tw-h-auto tw-max-h-64 tw-w-full tw-object-contain"
+          : "tw-block tw-h-auto tw-max-h-[70vh] tw-w-full tw-object-contain"
       }
     />
   );
@@ -85,6 +114,8 @@ function CanonicalPreview({
             url={query.data.url}
             title={title}
             compact={compact}
+            width={asset?.width}
+            height={asset?.height}
           />
         ) : (
           <p className="tw-m-0 tw-py-8 tw-text-sm tw-text-iron-400">
@@ -140,7 +171,8 @@ function SubmissionReference({ context, compact = false }: Props) {
           .find(
             (media) =>
               media.mime_type.startsWith("image/") &&
-              (!media.media_status || media.media_status === "ready") &&
+              (media.media_status === undefined ||
+                media.media_status === ApiDropMediaStatus.Ready) &&
               media.url.startsWith("https://")
           );
   if (!image) return null;
@@ -182,14 +214,14 @@ export default function DocumentationArtworkPreview({
   const assetId =
     assetAnswer &&
     !isRedacted(assetAnswer) &&
-    assetAnswer.status === "provided" &&
+    assetAnswer.status === ApiArtworkDocumentationAnswerStatusEnum.Provided &&
     typeof assetAnswer.value === "string"
       ? assetAnswer.value
       : null;
   const title =
     titleAnswer &&
     !isRedacted(titleAnswer) &&
-    titleAnswer.status === "provided" &&
+    titleAnswer.status === ApiArtworkDocumentationAnswerStatusEnum.Provided &&
     typeof titleAnswer.value === "string"
       ? titleAnswer.value
       : msg("untitled");

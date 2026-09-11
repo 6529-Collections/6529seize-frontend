@@ -11,13 +11,47 @@ interface Props {
   readonly translateEnum?: boolean;
 }
 
+function isPixelDimensions(
+  record: Record<string, unknown>
+): record is Record<string, unknown> & { width: number; height: number } {
+  return (
+    typeof record["width"] === "number" &&
+    typeof record["height"] === "number" &&
+    Object.keys(record).every((key) => ["width", "height"].includes(key))
+  );
+}
+
+function isAlternateTitle(
+  record: Record<string, unknown>
+): record is Record<string, unknown> & { language: string; text: string } {
+  return (
+    typeof record["language"] === "string" &&
+    typeof record["text"] === "string" &&
+    Object.keys(record).every((key) => ["language", "text"].includes(key))
+  );
+}
+
+function isDeclaredEmptyList(
+  record: Record<string, unknown>
+): record is Record<string, unknown> & { kind: string; entries: unknown[] } {
+  return (
+    typeof record["kind"] === "string" &&
+    Array.isArray(record["entries"]) &&
+    record["entries"].length === 0 &&
+    Object.keys(record).every((key) => ["kind", "entries"].includes(key))
+  );
+}
+
 function objectValue(value: unknown): Record<string, unknown> | null {
   return value !== null && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : null;
 }
 
-function languageName(language: unknown, locale: string): string {
+export function documentationLanguageName(
+  language: unknown,
+  locale: string
+): string {
   if (typeof language !== "string" || !language) return "";
   try {
     return (
@@ -30,14 +64,16 @@ function languageName(language: unknown, locale: string): string {
 }
 
 function recordedDate(value: string, locale: string): string {
-  const match = /^(\d{4})-(\d{2})(?:-(\d{2}))?$/.exec(value);
-  if (!match) return value;
-  const date = new Date(`${value}${match[3] ? "" : "-01"}T00:00:00Z`);
+  const month = /^\d{4}-\d{2}$/.test(value);
+  const day = /^\d{4}-\d{2}-\d{2}$/.test(value);
+  if (!month && !day) return value;
+  const date = new Date(`${value}${day ? "" : "-01"}T00:00:00Z`);
   if (Number.isNaN(date.getTime())) return value;
+  if (date.toISOString().slice(0, value.length) !== value) return value;
   return new Intl.DateTimeFormat(locale, {
     year: "numeric",
     month: "long",
-    ...(match[3] ? { day: "numeric" as const } : {}),
+    ...(day ? { day: "numeric" as const } : {}),
     timeZone: "UTC",
   }).format(date);
 }
@@ -77,7 +113,7 @@ function NarrativeValue({
           {msg("catalogue.languages")}
         </summary>
         <p className="tw-m-0 tw-leading-6">
-          {languageName(primary["language"], locale)}
+          {documentationLanguageName(primary["language"], locale)}
           {typeof primary["authorship"] === "string" && (
             <> · {documentationOptionLabel(primary["authorship"])}</>
           )}
@@ -88,7 +124,7 @@ function NarrativeValue({
         {translations.map((version, index) => (
           <div key={index} className="tw-mt-5">
             <p className="tw-mb-2 tw-text-sm tw-text-iron-400">
-              {languageName(version["language"], locale)}
+              {documentationLanguageName(version["language"], locale)}
               {typeof version["authorship"] === "string" && (
                 <> · {documentationOptionLabel(version["authorship"])}</>
               )}
@@ -118,7 +154,7 @@ export default function DocumentationRecordValue({
   value,
   translateEnum = false,
 }: Props) {
-  const { msg, locale } = useDocumentationMessages();
+  const { msg } = useDocumentationMessages();
   if (value === null || value === undefined) return null;
   if (typeof value === "boolean")
     return <span>{msg(value ? "yes" : "no")}</span>;
@@ -133,7 +169,7 @@ export default function DocumentationRecordValue({
   if (Array.isArray(value))
     return (
       <ul className="tw-m-0 tw-space-y-4 tw-pl-5">
-        {value.map((entry, index) => (
+        {value.map((entry: unknown, index) => (
           <li key={index}>
             <DocumentationRecordValue
               value={entry}
@@ -145,6 +181,35 @@ export default function DocumentationRecordValue({
     );
   const record = objectValue(value);
   if (!record) return null;
+  return <StructuredRecordValue record={record} />;
+}
+
+function StructuredRecordValue({
+  record,
+}: {
+  readonly record: Record<string, unknown>;
+}) {
+  const { msg, locale } = useDocumentationMessages();
+  if (isPixelDimensions(record))
+    return (
+      <span>
+        {msg("catalogue.dimensions", {
+          width: new Intl.NumberFormat(locale).format(record["width"]),
+          height: new Intl.NumberFormat(locale).format(record["height"]),
+        })}
+      </span>
+    );
+  if (isAlternateTitle(record))
+    return (
+      <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words">
+        <span lang={record["language"]}>{record["text"]}</span>{" "}
+        <span className="tw-text-sm tw-text-iron-400">
+          ({documentationLanguageName(record["language"], locale)})
+        </span>
+      </p>
+    );
+  if (isDeclaredEmptyList(record))
+    return <span>{documentationOptionLabel(record["kind"])}</span>;
   if (
     typeof record["primary_language"] === "string" &&
     Array.isArray(record["versions"])

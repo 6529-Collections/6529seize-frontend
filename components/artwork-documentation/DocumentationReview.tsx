@@ -98,6 +98,13 @@ export default function DocumentationReview({
     saveState === "clean" &&
     context.lifecycle === ApiArtworkDocumentationContextLifecycleEnum.Active &&
     confirmationCopyMatches(context.profile);
+  const draftPreviewMessage =
+    saveState === "clean"
+      ? "editorial.savedRecordPreview"
+      : "editorial.unsavedRecordPreview";
+  const previewMessage = preview
+    ? "editorial.savedPublicationPreview"
+    : draftPreviewMessage;
   const confirm = async () => {
     if (key.current.version !== context.draft_version)
       key.current = {
@@ -127,13 +134,7 @@ export default function DocumentationReview({
         role="status"
         className="tw-max-w-prose tw-text-sm tw-leading-7 tw-text-iron-400"
       >
-        {msg(
-          preview
-            ? "editorial.savedPublicationPreview"
-            : saveState === "clean"
-              ? "editorial.savedRecordPreview"
-              : "editorial.unsavedRecordPreview"
-        )}
+        {msg(previewMessage)}
       </p>
       {preview ? (
         <>

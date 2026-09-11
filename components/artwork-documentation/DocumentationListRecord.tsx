@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import type { ApiArtworkDocumentationContextSummary } from "@/generated/models/ApiArtworkDocumentationContextSummary";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
 import { getIdentityQueryOptions } from "@/services/api/identity-query";
 import { documentationWorkspacePath } from "@/services/api/artwork-documentation-api";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
@@ -39,7 +40,8 @@ export default function DocumentationListRecord({
           .find(
             (item) =>
               item.mime_type.startsWith("image/") &&
-              (!item.media_status || item.media_status === "ready") &&
+              (item.media_status === undefined ||
+                item.media_status === ApiDropMediaStatus.Ready) &&
               item.url.startsWith("https://")
           )
       : undefined;

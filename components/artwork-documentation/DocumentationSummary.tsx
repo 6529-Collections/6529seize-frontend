@@ -19,7 +19,9 @@ import {
   type DocumentationSection,
 } from "@/lib/artwork-documentation/registry";
 import { useDocumentationMessages } from "./DocumentationControls";
-import DocumentationRecordValue from "./DocumentationRecordValue";
+import DocumentationRecordValue, {
+  documentationLanguageName,
+} from "./DocumentationRecordValue";
 
 export { default as DocumentationValueSummary } from "./DocumentationRecordValue";
 
@@ -81,7 +83,7 @@ function providedText(
     : null;
 }
 
-function RecordAnswer({
+export function DocumentationRecordedAnswer({
   answer,
   moduleId,
   field,
@@ -92,7 +94,7 @@ function RecordAnswer({
   readonly field: string;
   readonly context: RecordContext;
 }) {
-  const { msg } = useDocumentationMessages();
+  const { msg, locale } = useDocumentationMessages();
   if (isRedacted(answer))
     return <span className="tw-text-iron-400">{msg("redacted")}</span>;
   const editor = MODULE_FIELDS[moduleId].find(
@@ -103,21 +105,24 @@ function RecordAnswer({
     (editor?.kind === "list" && editor.item.kind === "choice");
   const provided =
     answer.status === ApiArtworkDocumentationAnswerStatusEnum.Provided;
+  const value: unknown = answer.value;
+  let readableValue = provided
+    ? value
+    : documentationOptionLabel(answer.status ?? "unknown");
+  if (provided && ["title_language", "record_language"].includes(field))
+    readableValue = documentationLanguageName(value, locale);
+  else if (provided && field === "languages" && Array.isArray(value))
+    readableValue = value.map((language: unknown) =>
+      documentationLanguageName(language, locale)
+    );
   return (
     <>
       {provided && editor?.kind === "asset" ? (
-        <RecordFiles value={answer.value} assets={context.assets} />
+        <RecordFiles value={value} assets={context.assets} />
       ) : (
         <DocumentationRecordValue
-          translateEnum={
-            answer.status ===
-              ApiArtworkDocumentationAnswerStatusEnum.Provided && translateEnum
-          }
-          value={
-            answer.status === ApiArtworkDocumentationAnswerStatusEnum.Provided
-              ? answer.value
-              : documentationOptionLabel(answer.status ?? "unknown")
-          }
+          translateEnum={provided && translateEnum}
+          value={readableValue}
         />
       )}
       {answer.explanation && (
@@ -195,42 +200,71 @@ function RecordSection({
       return (a < 0 ? order.length : a) - (b < 0 ? order.length : b);
     });
   if (!entries.length) return null;
+  const references = entries.filter(([field]) => !order.includes(field));
   return (
     <section className="tw-grid tw-gap-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-10 lg:tw-grid-cols-[11rem_minmax(0,1fr)] lg:tw-gap-12">
       <h3 className="tw-m-0 tw-font-serif tw-text-2xl tw-font-normal tw-leading-tight tw-text-iron-100">
         {msg("catalogue.section." + id)}
       </h3>
-      <dl className="tw-m-0 tw-grid tw-min-w-0 tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 sm:tw-grid-cols-2">
-        {entries.map(([field, answer]) => {
-          const narrative = narrativeFields.has(field);
-          const label =
-            (id === "interview"
-              ? (profile ?? context.profile)?.interview_instrument.prompts.find(
-                  (prompt) => prompt.id === field
-                )?.text
-              : undefined) ?? documentationFieldLabel(field);
-          return (
-            <div
-              key={field}
-              className={
-                narrative ? "tw-min-w-0 sm:tw-col-span-2" : "tw-min-w-0"
-              }
-            >
-              <dt className="tw-mb-2 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-400">
-                {label}
-              </dt>
-              <dd className="tw-m-0 tw-max-w-prose tw-text-base tw-leading-8 tw-text-iron-200">
-                <RecordAnswer
-                  answer={answer}
-                  moduleId={id}
-                  field={field}
-                  context={context}
-                />
-              </dd>
-            </div>
-          );
-        })}
-      </dl>
+      <div className="tw-min-w-0">
+        <dl className="tw-m-0 tw-grid tw-min-w-0 tw-grid-cols-1 tw-gap-x-8 tw-gap-y-8 sm:tw-grid-cols-2">
+          {entries
+            .filter(([field]) => order.includes(field))
+            .map(([field, answer]) => {
+              const narrative = narrativeFields.has(field);
+              const label =
+                (id === "interview"
+                  ? (
+                      profile ?? context.profile
+                    )?.interview_instrument.prompts.find(
+                      (prompt) => prompt.id === field
+                    )?.text
+                  : undefined) ?? documentationFieldLabel(field);
+              return (
+                <div
+                  key={field}
+                  className={
+                    narrative ? "tw-min-w-0 sm:tw-col-span-2" : "tw-min-w-0"
+                  }
+                >
+                  <dt className="tw-mb-2 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-400">
+                    {label}
+                  </dt>
+                  <dd className="tw-m-0 tw-max-w-prose tw-text-base tw-leading-8 tw-text-iron-200">
+                    <DocumentationRecordedAnswer
+                      answer={answer}
+                      moduleId={id}
+                      field={field}
+                      context={context}
+                    />
+                  </dd>
+                </div>
+              );
+            })}
+        </dl>
+        {references.length > 0 && (
+          <details className="tw-mt-6 tw-text-sm tw-text-iron-400">
+            <summary className="tw-min-h-11 tw-cursor-pointer tw-py-3 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+              {msg("catalogue.references")}
+            </summary>
+            <dl className="tw-m-0 tw-space-y-5">
+              {references.map(([field, answer]) => (
+                <div key={field}>
+                  <dt className="tw-mb-2">{documentationFieldLabel(field)}</dt>
+                  <dd className="tw-m-0 tw-break-words tw-leading-7">
+                    <DocumentationRecordedAnswer
+                      answer={answer}
+                      moduleId={id}
+                      field={field}
+                      context={context}
+                    />
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </details>
+        )}
+      </div>
     </section>
   );
 }
@@ -241,6 +275,7 @@ export default function DocumentationSummary({
   profile,
   modules = RECORD_ORDER,
   showHeading = true,
+  headingLevel = 2,
   media,
   section,
 }: {
@@ -248,10 +283,12 @@ export default function DocumentationSummary({
   readonly context: RecordContext;
   readonly modules?: readonly ModuleId[];
   readonly showHeading?: boolean;
+  readonly headingLevel?: 1 | 2;
   readonly media?: ReactNode;
   readonly section?: DocumentationSection | undefined;
 }) {
   const { msg } = useDocumentationMessages();
+  const Heading = headingLevel === 1 ? "h1" : "h2";
   const title = providedText(context, "artwork", "title");
   const credit =
     providedText(context, "identity", "preferred_credit") ??
@@ -290,15 +327,17 @@ export default function DocumentationSummary({
   );
   return (
     <article aria-label={msg("catalogue.label")} className="tw-min-w-0">
-      {media && <div className="tw-mb-10 empty:tw-hidden">{media}</div>}
+      {media !== undefined && media !== null && media !== false && (
+        <div className="tw-mb-10 empty:tw-hidden">{media}</div>
+      )}
       {showHeading && (
         <header className="tw-pb-10 tw-pt-4">
           <p className="tw-mb-5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.18em] tw-text-iron-400">
             {msg("catalogue.eyebrow")}
           </p>
-          <h2 className="tw-m-0 tw-max-w-3xl tw-break-words tw-font-serif tw-text-4xl tw-font-normal tw-leading-[1.1] tw-text-iron-50 sm:tw-text-5xl">
+          <Heading className="tw-m-0 tw-max-w-3xl tw-break-words tw-font-serif tw-text-4xl tw-font-normal tw-leading-[1.1] tw-text-iron-50 sm:tw-text-5xl">
             {title ?? msg("untitled")}
-          </h2>
+          </Heading>
           {credit && (
             <p className="tw-mb-0 tw-mt-5 tw-whitespace-pre-wrap tw-break-words tw-text-lg tw-leading-7 tw-text-iron-200">
               {credit}
@@ -313,7 +352,7 @@ export default function DocumentationSummary({
                     {documentationFieldLabel(field)}
                   </dt>
                   <dd className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-200">
-                    <RecordAnswer
+                    <DocumentationRecordedAnswer
                       answer={answer}
                       moduleId="artwork"
                       field={field}
@@ -328,7 +367,7 @@ export default function DocumentationSummary({
       )}
       {showHeading && context.modules["context"]?.answers["caption"] && (
         <div className="tw-max-w-prose tw-pb-12 tw-text-lg tw-leading-8 tw-text-iron-200">
-          <RecordAnswer
+          <DocumentationRecordedAnswer
             answer={context.modules["context"].answers["caption"]}
             moduleId="context"
             field="caption"

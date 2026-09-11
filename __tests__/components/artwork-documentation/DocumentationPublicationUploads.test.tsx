@@ -179,7 +179,7 @@ describe("publication-only artwork uploads", () => {
     render(<DocumentationUpload {...setup()} />);
     expect(
       screen.getByRole("heading", {
-        name: "Add the final artwork or public supporting material",
+        name: "Add a file",
       })
     ).toBeInTheDocument();
     const roles = screen.getByRole("combobox", {
@@ -298,7 +298,7 @@ describe("publication-only artwork uploads", () => {
         assetId="asset-1"
       />
     );
-    fireEvent.click(screen.getByText("File details and integrity"));
+    fireEvent.click(screen.getByText("Edit file details"));
     fireEvent.click(screen.getByRole("button", { name: "Add entry" }));
     await waitFor(() =>
       expect(linkDocumentationAsset).toHaveBeenCalledWith(
@@ -539,7 +539,7 @@ describe("publication-only artwork uploads", () => {
     const asset = uploadSession({ state: "ready" }).asset;
     props.context.assets = [asset];
     render(<DocumentationAssetDetails {...props} assetId={asset.id} />);
-    fireEvent.click(screen.getByText("File details and integrity"));
+    fireEvent.click(screen.getByText("Edit file details"));
     asset.intended_visibility = "restricted";
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: "Add entry" }));
@@ -558,7 +558,7 @@ describe("publication-only artwork uploads", () => {
     jest.mocked(patchDocumentationAssetLink).mockResolvedValue(props.context);
     render(<DocumentationAssetDetails {...props} assetId={asset.id} />);
     fireEvent.click(
-      screen.getByText("File details and integrity", { selector: "summary" })
+      screen.getByText("Edit file details", { selector: "summary" })
     );
     fireEvent.change(screen.getByDisplayValue("Original label"), {
       target: { value: "Updated label" },

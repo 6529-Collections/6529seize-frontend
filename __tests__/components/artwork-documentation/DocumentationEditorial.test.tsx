@@ -27,6 +27,37 @@ const narrative = {
 };
 
 describe("editorial artwork documentation", () => {
+  it("reads dimensions and an explicit empty contributor list without structural labels", () => {
+    const { rerender, container } = render(
+      <DocumentationRecordValue value={{ width: 6000, height: 4000 }} />
+    );
+    expect(container).toHaveTextContent("6,000 × 4,000 pixels");
+    rerender(
+      <DocumentationRecordValue value={{ kind: "none", entries: [] }} />
+    );
+    expect(container).toHaveTextContent("None");
+    expect(screen.queryByText("Entries")).not.toBeInTheDocument();
+  });
+
+  it("reads language names while keeping recorded references available in a disclosure", () => {
+    const context = documentationFixture();
+    context.modules["artwork"]!.answers["title_language"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: "fr",
+    } as never;
+    context.modules["artwork"]!.answers["instrument_id"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: "preserved-reference-123",
+    } as never;
+    render(<DocumentationSummary context={context} />);
+    expect(screen.getByText("French")).toBeInTheDocument();
+    const reference = screen.getByText("preserved-reference-123");
+    expect(reference.closest("details")).not.toHaveAttribute("open");
+    expect(screen.getByText("Record references")).toBeInTheDocument();
+  });
+
   it.each([
     [{ precision: "year", start: "1987" }, "1987"],
     [{ precision: "month", start: "1987-09" }, "September 1987"],

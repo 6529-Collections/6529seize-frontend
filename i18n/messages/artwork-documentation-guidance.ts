@@ -37,8 +37,7 @@ export const ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES = {
     "Before selecting a recording or transcript, add its date, participants and their permission for publication. Ask the team before finalizing if anything is unclear. Only select material intended to become part of the public artwork record.",
   "artworkDocumentation.publication.whyRights":
     "A clear account of your rights and the sources you used helps people understand how the artwork can be shared. Resolve uncertainties with the team before finalizing, then include the relevant information in the public record.",
-  "artworkDocumentation.examples.title":
-    "See a complete example for this section",
+  "artworkDocumentation.examples.title": "Read an example record",
   "artworkDocumentation.examples.empty":
     "A good place to start: read an example, then tell your own story.",
   "artworkDocumentation.examples.fiction":
@@ -47,10 +46,9 @@ export const ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES = {
     "This invented tabletop photograph shows the level of detail that helps future viewers understand a work. These are examples to review, never facts about your artwork. Opening an example does not change your answers.",
   "artworkDocumentation.examples.scope":
     "The example follows the questions available in this record. Your form may show additional questions when they apply to your answers.",
-  "artworkDocumentation.examples.field": "Read a worked example",
+  "artworkDocumentation.examples.field": "See an example",
   "artworkDocumentation.examples.why": "Why this works",
-  "artworkDocumentation.examples.close":
-    "Close the example and write my answers",
+  "artworkDocumentation.examples.close": "Return to my writing",
   "artworkDocumentation.examples.adapt": "Adapt this writing structure",
   "artworkDocumentation.examples.unsaved":
     "Replace each [[prompt]] with your own words, or write freely. This working text is not saved. Use only information you want included with the artwork, then choose Use my answer to add it to your draft.",

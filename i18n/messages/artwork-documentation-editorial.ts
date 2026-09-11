@@ -1,4 +1,10 @@
 export const ARTWORK_DOCUMENTATION_EDITORIAL_MESSAGES = {
+  "artworkDocumentation.editorial.recordFor": "Record for",
+  "artworkDocumentation.editorial.addFile": "Add a file",
+  "artworkDocumentation.editorial.recordFiles": "Files in this record",
+  "artworkDocumentation.editorial.fileIntegrity": "File integrity",
+  "artworkDocumentation.catalogue.dimensions": "{width} × {height} pixels",
+  "artworkDocumentation.catalogue.references": "Record references",
   "artworkDocumentation.catalogue.fileRecorded": "File recorded",
   "artworkDocumentation.catalogue.fileReference": "File reference",
   "artworkDocumentation.editorial.returnToDraft": "Return to the draft",

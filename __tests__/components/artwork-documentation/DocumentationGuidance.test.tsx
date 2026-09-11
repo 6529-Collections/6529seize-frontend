@@ -79,7 +79,7 @@ describe("worked artwork documentation examples", () => {
       />
     );
     const summary = screen
-      .getByText("See a complete example for this section")
+      .getByText("Read an example record")
       .closest("summary")!;
     expect(summary.closest("details")).not.toHaveAttribute("open");
     fireEvent.click(summary);
@@ -99,9 +99,7 @@ describe("worked artwork documentation examples", () => {
       />
     );
     expect(
-      screen
-        .getByText("See a complete example for this section")
-        .closest("details")
+      screen.getByText("Read an example record").closest("details")
     ).not.toHaveAttribute("open");
     expect(
       screen.queryByText("12 May 2025; exact day.")
