@@ -79,6 +79,22 @@ const redirectConfig = {
   },
 };
 
+const captureReconciliationFailure = (failure: unknown) => {
+  Sentry.captureException(
+    toCaptureExceptionInput(
+      failure,
+      "Failed to reconcile delivered notifications"
+    ),
+    {
+      tags: {
+        component: "NotificationsProvider",
+        operation: "reconcileDeliveredNotifications",
+      },
+      extra: createErrorTelemetryExtra(failure),
+    }
+  );
+};
+
 export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -646,22 +662,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   ]);
 
   const reconcileQueue = useMemo(
-    () =>
-      createDeliveredNotificationsReconciler((error) => {
-        Sentry.captureException(
-          toCaptureExceptionInput(
-            error,
-            "Failed to reconcile delivered notifications"
-          ),
-          {
-            tags: {
-              component: "NotificationsProvider",
-              operation: "reconcileDeliveredNotifications",
-            },
-            extra: createErrorTelemetryExtra(error),
-          }
-        );
-      }),
+    () => createDeliveredNotificationsReconciler(captureReconciliationFailure),
     []
   );
 

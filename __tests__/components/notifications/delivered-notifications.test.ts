@@ -239,7 +239,7 @@ it("coalesces pending wave reads without losing either wave", async () => {
     .mockReturnValueOnce(firstSnapshot)
     .mockResolvedValue({ notifications: [a, b] });
   fetchMock.mockImplementation(async ({ params }) =>
-    response(Number(params?.id_less_than) - 1, 100)
+    response(Number(params?.["id_less_than"]) - 1, 100)
   );
   const reconcile = createDeliveredNotificationsReconciler(jest.fn());
   const first = reconcile(scope());
