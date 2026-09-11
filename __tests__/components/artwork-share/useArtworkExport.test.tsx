@@ -85,6 +85,51 @@ describe("useArtworkExport", () => {
     await waitFor(() => expect(result.current.state.status).toBe("ready"));
   });
 
+  it("prepares a fresh image when returning to a format before its replacement finishes", async () => {
+    const createPreview = jest.mocked(URL.createObjectURL);
+    createPreview.mockReturnValueOnce("blob:first-portrait");
+    createPreview.mockReturnValueOnce("blob:new-portrait");
+    fetchMock.mockResolvedValueOnce(png());
+    let resolveStory!: (response: Response) => void;
+    let resolvePortrait!: (response: Response) => void;
+    fetchMock.mockImplementationOnce(
+      () =>
+        new Promise<Response>((resolve) => {
+          resolveStory = resolve;
+        })
+    );
+    fetchMock.mockImplementationOnce(
+      () =>
+        new Promise<Response>((resolve) => {
+          resolvePortrait = resolve;
+        })
+    );
+    const { result, rerender } = renderHook(
+      ({ url }) => useArtworkExport(url, "art.png"),
+      { initialProps: { url: "/portrait.png" } }
+    );
+    await waitFor(() => expect(result.current.state.status).toBe("ready"));
+    expect(result.current.state).toMatchObject({
+      previewUrl: "blob:first-portrait",
+    });
+
+    rerender({ url: "/story.png" });
+    expect(result.current.state).toEqual({ status: "loading" });
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:first-portrait");
+    rerender({ url: "/portrait.png" });
+    expect(result.current.state).toEqual({ status: "loading" });
+
+    await act(async () => resolveStory(png()));
+    expect(result.current.state).toEqual({ status: "loading" });
+    expect(createPreview).toHaveBeenCalledTimes(1);
+    await act(async () => resolvePortrait(png()));
+    expect(result.current.state).toMatchObject({
+      status: "ready",
+      previewUrl: "blob:new-portrait",
+    });
+    expect(createPreview).toHaveBeenCalledTimes(2);
+  });
+
   it("aborts preparation when the dialog closes and does not create a late preview", async () => {
     let resolve!: (response: Response) => void;
     fetchMock.mockImplementationOnce(

@@ -50,11 +50,17 @@ viewers from editors, describes read-only answers and source comparisons, and
 keeps questions, draft content and dated confirmed versions separate. Its
 control names must match the artist workspace and personal record list.
 
-The artwork-sharing record covers the `Share artwork` control on individual
-Meme, Gradient, and NextGen pages, canonical artwork links, copied captions,
-and feed, square, Story, and link-card PNG exports. It distinguishes link
-composers from file sharing, includes Instagram's save/share-and-paste flow,
-and explains preparation failures and device-dependent share destinations.
+The artwork-sharing record covers the `Share artwork` icon in the existing
+media controls: over the artwork on individual Meme and Gradient pages, and
+in the strip below the artwork on NextGen pages. It covers canonical artwork
+links, copied captions, and feed, square, Story, and landscape PNG exports.
+The dialog shows the preview first, with an `Image format` menu and a primary
+image action. `Caption and link` starts collapsed with an adjacent `Copy`
+control, while `Share a link` groups destination actions and the copyable URL.
+Copy failures reveal and select the exact text for manual recovery.
+It distinguishes link composers from file sharing, includes Instagram's
+save/share-and-paste flow, and explains preparation failures and device-dependent
+share destinations.
 It does not claim automatic posting or successful publication after a handoff.
 
 The profile website studio records cover 39 editable templates (23 original

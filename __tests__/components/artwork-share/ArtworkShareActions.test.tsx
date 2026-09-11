@@ -11,6 +11,7 @@ import userEvent from "@testing-library/user-event";
 import ArtworkShareActions from "@/components/artwork-share/ArtworkShareActions";
 import type { ArtworkShareDetails } from "@/components/artwork-share/artworkShare";
 import { canUseSystemShare } from "@/components/header/share/header-share/shareUtils";
+import { t } from "@/i18n/messages";
 
 jest.mock("@capacitor/core", () => ({
   Capacitor: { isNativePlatform: jest.fn() },
@@ -36,7 +37,6 @@ const artwork: ArtworkShareDetails = {
   imageUrl: "https://images.test/7.png",
 };
 const url = "https://6529.io/the-memes/7";
-const caption = `Meme #7\nby Artist · The Memes\n${url}`;
 const webShare = jest.fn();
 const writeText = jest.fn();
 const nativeShare = jest.mocked(Share.share);
@@ -105,30 +105,34 @@ it("uses native link sharing independently of browser share support", async () =
   expect(webShare).not.toHaveBeenCalled();
 });
 
-it("copies the canonical artwork link and attributed caption", async () => {
+it("copies the canonical artwork link from the always visible URL field", async () => {
   renderActions();
-
-  await userEvent.click(screen.getByRole("button", { name: "Copy link" }));
-  expect(writeText).toHaveBeenLastCalledWith(url);
-  await userEvent.click(screen.getByRole("button", { name: "Copy caption" }));
-  expect(writeText).toHaveBeenLastCalledWith(caption);
-  expect(screen.getByRole("textbox", { name: "Caption and link" })).toHaveValue(
-    caption
-  );
-});
-
-it("keeps manually selectable text when clipboard access fails", async () => {
-  writeText.mockRejectedValue(new Error("Clipboard blocked"));
-  renderActions();
-
-  await userEvent.click(screen.getByRole("button", { name: "Copy caption" }));
 
   expect(
-    await screen.findByText("Could not copy. Select and copy the text below.")
-  ).toBeInTheDocument();
-  expect(screen.getByRole("textbox", { name: "Caption and link" })).toHaveValue(
-    caption
+    screen.getByRole("textbox", {
+      name: t("en-US", "artworkShare.artworkLink"),
+    })
+  ).toHaveValue(url);
+  await userEvent.click(screen.getByRole("button", { name: "Copy link" }));
+  expect(writeText).toHaveBeenLastCalledWith(url);
+});
+
+it("keeps direct destinations and copying when system sharing is unavailable", () => {
+  jest.mocked(canUseSystemShare).mockReturnValue(false);
+  renderActions();
+
+  expect(
+    screen.queryByRole("button", { name: "More apps" })
+  ).not.toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Share on X" })).toHaveAttribute(
+    "href",
+    "https://x.test/share"
   );
+  expect(screen.getByRole("link", { name: "Facebook" })).toHaveAttribute(
+    "href",
+    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`
+  );
+  expect(screen.getByRole("button", { name: "Copy link" })).toBeEnabled();
 });
 
 it.each([false, true])(
