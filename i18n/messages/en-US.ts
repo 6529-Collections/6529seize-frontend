@@ -1,3 +1,4 @@
+import artworkShareMessages from "@/i18n/messages/artworkShare.en-US.json";
 import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.en-US.json";
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.en-US.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.en-US.json";
@@ -2775,6 +2776,7 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  ...artworkShareMessages,
   ...COLLECT_MESSAGES,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,

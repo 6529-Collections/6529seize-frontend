@@ -24,6 +24,7 @@ import { printViewButton } from "../collectionParts/NextGenCollection";
 import NextGenTokenAbout from "./NextGenTokenAbout";
 import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
 import NextGenTokenArt from "./NextGenTokenArt";
+import ArtworkShareButton from "@/components/artwork-share/ArtworkShareButton";
 import NextGenTokenCollectionLinks from "./NextGenTokenCollectionLinks";
 import NextgenTokenRarity, {
   NextgenTokenTraits,
@@ -303,6 +304,19 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
         </section>
 
         <section aria-label={`${props.token.name} artwork`}>
+          <div className="tw-mb-3 tw-flex tw-justify-end">
+            <ArtworkShareButton
+              artwork={{
+                kind: "nextgen",
+                tokenId: props.token.id,
+                displayId: props.token.normalised_id,
+                title: props.token.name,
+                artist: props.collection.artist,
+                collection: props.collection.name,
+                imageUrl: props.token.image_url || props.token.thumbnail_url,
+              }}
+            />
+          </div>
           <NextGenTokenArt token={props.token} collection={props.collection} />
         </section>
 

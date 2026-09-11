@@ -1,3 +1,4 @@
+import artworkShareMessages from "@/i18n/messages/artworkShare.fr-FR.json";
 import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.fr-FR.json";
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.fr-FR.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.fr-FR.json";
@@ -14,6 +15,7 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.json";
 
 export const FR_FR_MESSAGES = {
+  ...artworkShareMessages,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,

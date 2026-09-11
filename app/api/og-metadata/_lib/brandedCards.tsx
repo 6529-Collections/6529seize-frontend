@@ -4,10 +4,13 @@ import {
   getMediaProxyUrl,
   getUsableText,
   getWrappedTextLines,
-  shortenAddress,
   truncateText,
 } from "@/app/api/og-metadata/_lib/imageUtils";
 import { isAllowedOgImageSourceUrl } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
+import {
+  NFT_SOCIAL_CARD_SIZES,
+  type NftSocialCardFormat,
+} from "@/components/providers/metadata";
 
 const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 630;
@@ -24,20 +27,13 @@ const MEDIA_TOP = 46;
 const MEDIA_SIZE = 538;
 const CONTENT_LEFT = 644;
 const CONTENT_WIDTH = CANVAS_WIDTH - CONTENT_LEFT - HORIZONTAL_MARGIN;
-const TITLE_FONT_SIZE = 58;
 const TITLE_LINE_HEIGHT = 1.08;
-const TITLE_MAX_LINES = 3;
 const COLLECTION_TITLE_FONT_SIZE = 64;
 const COLLECTION_TITLE_MAX_LINES = 2;
 const SUBTITLE_FONT_SIZE = 34;
 const SUBTITLE_LINE_HEIGHT = 1.18;
 const SUBTITLE_MAX_LINES = 3;
 const BADGE_TOP = 62;
-const NFT_TITLE_TOP = 154;
-const NFT_META_TOP = 404;
-const NFT_SUBTITLE_TOP = NFT_META_TOP - 78;
-const NFT_TITLE_SUBTITLE_GAP = 26;
-const NFT_SUBTITLE_META_GAP = 18;
 const COLLECTION_TITLE_TOP = 156;
 const COLLECTION_SUBTITLE_TOP = 338;
 
@@ -50,8 +46,10 @@ export type BrandedNftOgImageModel = {
   readonly collection?: string | null | undefined;
   readonly contract: string;
   readonly displayId?: string | null | undefined;
+  readonly format?: NftSocialCardFormat | undefined;
   readonly id: string;
   readonly imageUrl?: string | null | undefined;
+  readonly imageDataUrl?: string | undefined;
   readonly origin?: string | undefined;
   readonly subtitle?: string | null | undefined;
   readonly title: string;
@@ -70,10 +68,12 @@ const getDisplayImageUrl = ({
   imageUrl,
   origin,
   width,
+  proxyLocalAssets = false,
 }: {
   readonly imageUrl: string | null | undefined;
   readonly origin: string;
   readonly width: number;
+  readonly proxyLocalAssets?: boolean;
 }): string | null => {
   const normalizedImageUrl = getUsableText(imageUrl);
   if (!normalizedImageUrl) {
@@ -106,7 +106,12 @@ const getDisplayImageUrl = ({
     const resolvedUrl = new URL(normalizedImageUrl, publicEnv.BASE_ENDPOINT);
     const baseOrigin = new URL(publicEnv.BASE_ENDPOINT).origin;
 
-    return resolvedUrl.origin === baseOrigin ? resolvedUrl.toString() : null;
+    if (resolvedUrl.origin !== baseOrigin) {
+      return null;
+    }
+    return proxyLocalAssets
+      ? getProxiedPublicHttpsUrl(resolvedUrl.toString())
+      : resolvedUrl.toString();
   }
 };
 
@@ -155,58 +160,6 @@ const getKeyedLines = (
       value,
     };
   });
-};
-
-const getLineBlockHeight = ({
-  lineCount,
-  fontSize,
-  lineHeight,
-}: {
-  readonly lineCount: number;
-  readonly fontSize: number;
-  readonly lineHeight: number;
-}): number => lineCount * fontSize * lineHeight;
-
-const getNftLayout = ({
-  subtitleLines,
-  titleLines,
-}: {
-  readonly subtitleLines: readonly string[];
-  readonly titleLines: readonly string[];
-}): {
-  readonly metaTop: number;
-  readonly subtitleTop: number;
-} => {
-  const titleHeight = getLineBlockHeight({
-    lineCount: titleLines.length,
-    fontSize: TITLE_FONT_SIZE,
-    lineHeight: TITLE_LINE_HEIGHT,
-  });
-  const subtitleTop = Math.max(
-    NFT_SUBTITLE_TOP,
-    NFT_TITLE_TOP + titleHeight + NFT_TITLE_SUBTITLE_GAP
-  );
-
-  if (subtitleLines.length === 0) {
-    return {
-      metaTop: Math.max(NFT_META_TOP, subtitleTop),
-      subtitleTop,
-    };
-  }
-
-  const subtitleHeight = getLineBlockHeight({
-    lineCount: subtitleLines.length,
-    fontSize: SUBTITLE_FONT_SIZE,
-    lineHeight: SUBTITLE_LINE_HEIGHT,
-  });
-
-  return {
-    metaTop: Math.max(
-      NFT_META_TOP,
-      subtitleTop + subtitleHeight + NFT_SUBTITLE_META_GAP
-    ),
-    subtitleTop,
-  };
 };
 
 const CardLogo = () => (
@@ -404,39 +357,180 @@ const SubtitleLines = ({
   </div>
 );
 
-export const renderBrandedNftOgImage = ({
-  artist,
-  badge,
-  collection,
-  contract,
-  displayId,
-  id,
+const NFT_LAYOUTS = {
+  landscape: {
+    margin: 46,
+    mediaTop: 46,
+    mediaHeight: 538,
+    mediaWidth: 538,
+    textLeft: 636,
+    textTop: 112,
+    textWidth: 518,
+    titleSize: 52,
+    titleLines: 3,
+    footerBottom: 46,
+  },
+  square: {
+    margin: 60,
+    mediaTop: 60,
+    mediaHeight: 660,
+    mediaWidth: 960,
+    textLeft: 60,
+    textTop: 756,
+    textWidth: 960,
+    titleSize: 44,
+    titleLines: 2,
+    footerBottom: 40,
+  },
+  portrait: {
+    margin: 60,
+    mediaTop: 60,
+    mediaHeight: 930,
+    mediaWidth: 960,
+    textLeft: 60,
+    textTop: 1026,
+    textWidth: 960,
+    titleSize: 44,
+    titleLines: 2,
+    footerBottom: 40,
+  },
+  story: {
+    margin: 60,
+    mediaTop: 250,
+    mediaHeight: 1030,
+    mediaWidth: 960,
+    textLeft: 60,
+    textTop: 1320,
+    textWidth: 960,
+    titleSize: 50,
+    titleLines: 3,
+    footerBottom: 250,
+  },
+} as const;
+
+export const getNftArtworkImageUrl = ({
   imageUrl,
   origin = publicEnv.BASE_ENDPOINT,
-  subtitle,
-  title,
-}: BrandedNftOgImageModel) => {
-  const resolvedCollection = getUsableText(collection) ?? "NFT";
-  const resolvedBadge = getUsableText(badge) ?? resolvedCollection;
-  const titleLines = getTitleLines({
-    value: title,
-    fontSize: TITLE_FONT_SIZE,
-    maxLines: TITLE_MAX_LINES,
-  });
-  const subtitleLines = getSubtitleLines(subtitle);
-  const displayImageUrl = getDisplayImageUrl({
+  format = "landscape",
+}: BrandedNftOgImageModel): string | null =>
+  getDisplayImageUrl({
     imageUrl,
     origin,
-    width: MEDIA_SIZE,
+    width: NFT_LAYOUTS[format].mediaWidth,
+    proxyLocalAssets: true,
   });
-  const { metaTop, subtitleTop } = getNftLayout({ subtitleLines, titleLines });
-  const artistLabel = getUsableText(artist);
-  const visibleId = getUsableText(displayId) === null ? id : (displayId ?? id);
+
+const getNftIdentityLabel = ({
+  badge,
+  collection,
+  displayId,
+  id,
+  title,
+}: BrandedNftOgImageModel): string => {
+  const visibleId = getUsableText(displayId) ?? id;
   const numericId = /^(0|[1-9]\d*)$/.test(visibleId) ? Number(visibleId) : null;
   const idLabel =
     numericId !== null && Number.isSafeInteger(numericId)
       ? `#${formatInteger(numericId) ?? visibleId}`
       : `#${visibleId}`;
+  const resolvedCollection = getUsableText(collection);
+  const normalizedTitle = title.toLowerCase().replaceAll(",", "");
+  const titleNamesCollection =
+    resolvedCollection !== null &&
+    (normalizedTitle === resolvedCollection.toLowerCase() ||
+      normalizedTitle.includes(`${resolvedCollection.toLowerCase()} #`));
+  const labels: string[] = [];
+  if (resolvedCollection && !titleNamesCollection) {
+    labels.push(resolvedCollection);
+  } else if (
+    badge &&
+    badge !== resolvedCollection &&
+    !normalizedTitle.includes(badge.toLowerCase())
+  ) {
+    labels.push(badge);
+  }
+  if (!normalizedTitle.split(/\s+/).includes(`#${visibleId}`)) {
+    labels.push(idLabel);
+  }
+  return labels.join(" · ");
+};
+
+const NftTextLines = ({
+  value,
+  fontSize,
+  maxLines,
+  width,
+  color,
+  weight,
+}: {
+  readonly value: string | null | undefined;
+  readonly fontSize: number;
+  readonly maxLines: number;
+  readonly width: number;
+  readonly color: string;
+  readonly weight: number;
+}) => {
+  const lines = getWrappedTextLines({
+    value,
+    fontSize,
+    wrapWidth: width,
+    maxLines,
+    ellipsize: true,
+  });
+  if (lines.length === 0) {
+    return null;
+  }
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        color,
+        fontSize,
+        fontWeight: weight,
+        lineHeight: 1.12,
+        width,
+      }}
+    >
+      {getKeyedLines(lines).map(({ key, value: line }) => (
+        <div
+          key={key}
+          style={{
+            display: "flex",
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            width,
+          }}
+        >
+          {line}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export const renderBrandedNftOgImage = (model: BrandedNftOgImageModel) => {
+  const {
+    artist,
+    imageDataUrl,
+    imageUrl,
+    origin = publicEnv.BASE_ENDPOINT,
+    title,
+    format = "landscape",
+  } = model;
+  const size = NFT_SOCIAL_CARD_SIZES[format];
+  const layout = NFT_LAYOUTS[format];
+  const displayImageUrl =
+    imageDataUrl ??
+    getDisplayImageUrl({
+      imageUrl,
+      origin,
+      width: layout.mediaWidth,
+    });
+  // Feed exports need actual artwork. Ordinary link previews retain a fallback.
+  if (format !== "landscape" && !displayImageUrl) {
+    throw new Error("Artwork image is unavailable for export.");
+  }
 
   return (
     <div
@@ -445,50 +539,105 @@ export const renderBrandedNftOgImage = ({
         color: "#FFFFFF",
         display: "flex",
         fontFamily: "Montserrat, sans-serif",
-        height: CANVAS_HEIGHT,
+        height: size.height,
         overflow: "hidden",
         position: "relative",
-        width: CANVAS_WIDTH,
+        width: size.width,
       }}
     >
-      <CardMedia imageUrl={displayImageUrl} label={resolvedCollection} />
-      <CardLogo />
-      <Badge value={resolvedBadge} />
-      <TitleLines
-        fontSize={TITLE_FONT_SIZE}
-        lines={titleLines}
-        top={NFT_TITLE_TOP}
-      />
-      <SubtitleLines lines={subtitleLines} top={subtitleTop} />
       <div
         style={{
-          color: MUTED_TEXT,
+          alignItems: "center",
           display: "flex",
-          flexDirection: "column",
-          fontSize: 30,
-          fontWeight: 600,
-          gap: 16,
-          left: CONTENT_LEFT,
-          letterSpacing: 0,
-          lineHeight: 1,
+          justifyContent: "center",
+          height: layout.mediaHeight,
+          width: layout.mediaWidth,
+          left: layout.margin,
+          top: layout.mediaTop,
           position: "absolute",
-          top: metaTop,
-          width: CONTENT_WIDTH,
         }}
       >
-        <div style={{ display: "flex", gap: 12 }}>
-          <span style={{ color: "#FFFFFF" }}>{idLabel}</span>
-          <span>{resolvedCollection}</span>
-        </div>
-        {artistLabel ? (
-          <div style={{ display: "flex", gap: 12 }}>
-            <span>by</span>
-            <span style={{ color: "#FFFFFF" }}>{artistLabel}</span>
+        {displayImageUrl ? (
+          <OgRawImage
+            alt=""
+            src={displayImageUrl}
+            height={layout.mediaHeight}
+            width={layout.mediaWidth}
+            style={{
+              height: layout.mediaHeight,
+              width: layout.mediaWidth,
+              objectFit: "contain",
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              color: MUTED_TEXT,
+              fontSize: 76,
+              fontWeight: 700,
+            }}
+          >
+            6529
           </div>
-        ) : null}
-        <div style={{ display: "flex", fontSize: 24 }}>
-          {shortenAddress(contract)}
-        </div>
+        )}
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 14,
+          left: layout.textLeft,
+          top: layout.textTop,
+          position: "absolute",
+          width: layout.textWidth,
+        }}
+      >
+        <NftTextLines
+          value={getNftIdentityLabel(model)}
+          fontSize={24}
+          maxLines={1}
+          width={layout.textWidth}
+          color={MUTED_TEXT}
+          weight={500}
+        />
+        <NftTextLines
+          value={title}
+          fontSize={layout.titleSize}
+          maxLines={layout.titleLines}
+          width={layout.textWidth}
+          color="#FFFFFF"
+          weight={700}
+        />
+        <NftTextLines
+          value={getUsableText(artist)}
+          fontSize={28}
+          maxLines={2}
+          width={layout.textWidth}
+          color="#D5D5DC"
+          weight={500}
+        />
+      </div>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          position: "absolute",
+          right: layout.margin,
+          bottom: layout.footerBottom,
+          color: MUTED_TEXT,
+          fontSize: 20,
+        }}
+      >
+        <span>6529.io</span>
+        <OgRawImage
+          alt=""
+          src={LOGO_URL}
+          height={32}
+          width={32}
+          style={{ height: 32, width: 32, objectFit: "contain", opacity: 0.75 }}
+        />
       </div>
     </div>
   );
