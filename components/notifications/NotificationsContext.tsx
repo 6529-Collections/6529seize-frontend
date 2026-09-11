@@ -46,7 +46,6 @@ import {
   registerWithRetry,
   requestPushNotificationPermissions,
   toCaptureExceptionInput,
-  toRecord,
   type PushRegistrationFingerprint,
 } from "./notificationsPushRegistration";
 

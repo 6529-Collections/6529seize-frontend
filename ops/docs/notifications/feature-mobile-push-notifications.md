@@ -97,6 +97,8 @@ push to open the matching app route.
   - iOS badge updates are asynchronous and server-driven across all profiles
     registered to the device. UserA=1 and UserB=1 changes from 2 to 1 after
     UserA reads, then to 0 after the final read. Single-profile 1 to 0 works too.
+    The count respects push preferences and visibility filters, so it can differ
+    from the unfiltered in-app feed total.
   - Reading from the website or desktop can update the phone's iOS badge when
     the correction push is delivered and badge permission is enabled.
   - Tray cleanup does not calculate or overwrite the iOS badge. Delivery delays,
