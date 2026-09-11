@@ -10,7 +10,7 @@ import { parseNftDescriptionToHtml } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { useCallback, useId, useState } from "react";
+import { useId, useState } from "react";
 import {
   MemeArtworkDetails,
   MemeCardFileType,
@@ -27,6 +27,7 @@ export function MemePageLiveRightMenu(props: {
   nft: NFT | undefined;
   nftMeta?: ApiMemesExtendedData | undefined;
   locale?: SupportedLocale;
+  onMarketChange?: (() => void) | undefined;
 }) {
   if (props.show && props.nft) {
     const locale = props.locale ?? DEFAULT_LOCALE;
@@ -34,6 +35,17 @@ export function MemePageLiveRightMenu(props: {
     return (
       <div className="tw-w-full">
         <MemeArtworkDetails nft={props.nft} locale={locale} />
+        <div className="tw-py-3">
+          <CollectDetailActions
+            collection="memes"
+            tokenId={String(props.nft.id)}
+            title={props.nft.name}
+            locale={locale}
+            {...(props.onMarketChange
+              ? { onMarketChange: props.onMarketChange }
+              : {})}
+          />
+        </div>
         {props.nftMeta && (
           <MemeEditionSizeStats nftMeta={props.nftMeta} locale={locale} />
         )}
@@ -56,12 +68,8 @@ export function MemePageLiveSubMenu(props: {
   nftBalance?: number;
   defaultAdditionalDetailsOpen?: boolean;
   locale?: SupportedLocale;
+  marketRefreshVersion?: number | undefined;
 }) {
-  const [marketRefreshVersion, setMarketRefreshVersion] = useState(0);
-  const refreshMarket = useCallback(() => {
-    setMarketRefreshVersion((version) => version + 1);
-  }, []);
-
   if (props.show) {
     const locale = props.locale ?? DEFAULT_LOCALE;
     const nft = props.nft;
@@ -70,15 +78,6 @@ export function MemePageLiveSubMenu(props: {
       <>
         {nft && (
           <>
-            <div className="tw-mb-4">
-              <CollectDetailActions
-                collection="memes"
-                tokenId={String(nft.id)}
-                title={nft.name}
-                locale={locale}
-                onMarketChange={refreshMarket}
-              />
-            </div>
             <MemePageCardDescription nft={nft} />
             <MemeCardFileType nft={nft} />
             {props.nftMeta && (
@@ -98,7 +97,7 @@ export function MemePageLiveSubMenu(props: {
               contract={MEMES_CONTRACT}
               tokenId={nft.id}
               locale={locale}
-              refreshKey={marketRefreshVersion}
+              refreshKey={props.marketRefreshVersion ?? 0}
             />
           </>
         )}

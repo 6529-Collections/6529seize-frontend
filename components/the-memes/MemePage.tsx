@@ -8,7 +8,7 @@ import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 
 import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDropNextMintSubscribe";
@@ -293,6 +293,10 @@ export default function MemePage({
   const nftNotFound = pageData?.nftNotFound ?? false;
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [marketRefreshVersion, setMarketRefreshVersion] = useState(0);
+  const refreshMarket = useCallback(() => {
+    setMarketRefreshVersion((version) => version + 1);
+  }, []);
 
   const [ownerState, setOwnerState] = useState<MemeOwnerState>();
   const consolidationKey = connectedProfile?.consolidation_key;
@@ -544,6 +548,7 @@ export default function MemePage({
             nft={nft}
             nftMeta={nftMeta}
             locale={locale}
+            onMarketChange={refreshMarket}
           />
         </div>
       </div>
@@ -610,6 +615,7 @@ export default function MemePage({
             nftBalance={nftBalance}
             defaultAdditionalDetailsOpen={focusParam === MEME_FOCUS.THE_ART}
             locale={locale}
+            marketRefreshVersion={marketRefreshVersion}
           />
           {(activeTab === MEME_FOCUS.REFERENCES ||
             loadedPrimaryTabs.has(MEME_FOCUS.REFERENCES)) && (

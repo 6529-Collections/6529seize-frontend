@@ -34,10 +34,24 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 jest.mock("@/components/the-memes/MemePageLive", () => ({
-  MemePageLiveRightMenu: ({ show }: any) =>
-    show ? <div data-testid="live-right">Live</div> : null,
-  MemePageLiveSubMenu: ({ show }: any) =>
-    show ? <div data-testid="live-sub">Live Sub</div> : null,
+  MemePageLiveRightMenu: ({ show, nft, onMarketChange }: any) =>
+    show ? (
+      <div data-testid="live-right" data-token-id={nft?.id}>
+        <button type="button" onClick={onMarketChange}>
+          Settle market change
+        </button>
+      </div>
+    ) : null,
+  MemePageLiveSubMenu: ({ show, nft, marketRefreshVersion }: any) =>
+    show ? (
+      <div
+        data-market-refresh-version={marketRefreshVersion}
+        data-testid="live-sub"
+        data-token-id={nft?.id}
+      >
+        Live Sub
+      </div>
+    ) : null,
 }));
 
 jest.mock("@/components/the-memes/MemePageYourCards", () => ({
@@ -293,6 +307,19 @@ function renderPage(initialData?: {
           <MemePage nftId="1" initialData={initialData} />
         </AuthContext.Provider>
       ),
+    rerenderForToken: (
+      nextNftId: string,
+      nextInitialData: {
+        readonly nft: typeof nft;
+        readonly nftMeta: typeof nftMeta;
+        readonly nftNotFound: false;
+      }
+    ) =>
+      page.rerender(
+        <AuthContext.Provider value={mockAuthContext as any}>
+          <MemePage nftId={nextNftId} initialData={nextInitialData} />
+        </AuthContext.Provider>
+      ),
   };
 }
 
@@ -474,6 +501,7 @@ describe("MemePage search params handling", () => {
     );
     expect(detailsColumn?.className).toContain("tw-contents");
     expect(detailsColumn?.className).toContain("[&>*:first-child]:tw-order-1");
+    expect(detailsColumn?.className).toContain("[&>*:nth-child(2)]:tw-order-3");
     expect(artworkColumn).toHaveClass("tw-order-2");
     expect(artworkColumn).toHaveClass("lg:tw-self-stretch");
   });
@@ -520,6 +548,69 @@ describe("MemePage search params handling", () => {
       null,
       "",
       `/the-memes/1?focus=${MEME_FOCUS.REFERENCES}`
+    );
+  });
+
+  it("keeps one persistent artwork action wired to token-safe market refreshes", async () => {
+    const page = renderPage({ nft, nftMeta, nftNotFound: false });
+
+    const action = await screen.findByRole("button", {
+      name: "Settle market change",
+    });
+    const liveRight = screen.getByTestId("live-right");
+    const liveSub = screen.getByTestId("live-sub");
+    expect(
+      screen.getAllByRole("button", { name: "Settle market change" })
+    ).toHaveLength(1);
+    expect(liveRight).toContainElement(action);
+    expect(liveRight).toHaveAttribute("data-token-id", "1");
+    expect(liveSub).toHaveAttribute("data-token-id", "1");
+    expect(liveSub).toHaveAttribute("data-market-refresh-version", "0");
+
+    await userEvent.click(action);
+    expect(screen.getByTestId("live-sub")).toHaveAttribute(
+      "data-market-refresh-version",
+      "1"
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "References" }));
+    page.rerenderPage();
+    expect(screen.queryByTestId("live-sub")).not.toBeInTheDocument();
+    expect(
+      screen.getAllByRole("button", { name: "Settle market change" })
+    ).toHaveLength(1);
+
+    await userEvent.click(screen.getByRole("button", { name: "Overview" }));
+    page.rerenderPage();
+    expect(screen.getByTestId("live-sub")).toHaveAttribute(
+      "data-market-refresh-version",
+      "1"
+    );
+
+    const nextNft = { ...nft, id: 2, name: "Next Meme" };
+    const nextNftMeta = {
+      ...nftMeta,
+      id: 2,
+      meme: 2,
+      meme_name: "Next Meme",
+      collection_size: 2,
+    };
+    page.rerenderForToken("2", {
+      nft: nextNft,
+      nftMeta: nextNftMeta,
+      nftNotFound: false,
+    });
+    expect(screen.getByTestId("live-right")).toHaveAttribute(
+      "data-token-id",
+      "2"
+    );
+    expect(screen.getByTestId("live-sub")).toHaveAttribute(
+      "data-token-id",
+      "2"
+    );
+    expect(screen.getByTestId("live-sub")).toHaveAttribute(
+      "data-market-refresh-version",
+      "1"
     );
   });
 
