@@ -54,13 +54,15 @@ export const ARTWORK_DOCUMENTATION_EDITORIAL_MESSAGES = {
     "Shown from the original Wave submission for reference. Choose the final artwork file when it is ready; this image is not added to your record automatically.",
   "artworkDocumentation.editorial.languageHelp":
     "Write in the language that best carries your meaning. Additional translations keep their own credit and review status. Changing the primary language selects an existing version when one is available.",
-  "artworkDocumentation.editorial.translation": "Translation {number}",
+  "artworkDocumentation.editorial.translation": "Version {number}",
   "artworkDocumentation.editorial.addTranslation": "Add a translation",
   "artworkDocumentation.catalogue.label": "Artwork record",
   "artworkDocumentation.catalogue.eyebrow": "The artwork record",
   "artworkDocumentation.catalogue.empty":
     "No information has been recorded in this chapter yet.",
   "artworkDocumentation.catalogue.languages": "Language and translations",
+  "artworkDocumentation.catalogue.entriesSupplied": "Entries supplied",
+  "artworkDocumentation.catalogue.noEntriesRecorded": "No entries recorded",
   "artworkDocumentation.catalogue.artistReviewed": "Reviewed by the artist",
   "artworkDocumentation.catalogue.approximate": "Approximately",
   "artworkDocumentation.catalogue.section.identity": "The artist",

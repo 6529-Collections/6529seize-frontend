@@ -230,6 +230,68 @@ describe("editorial artwork documentation", () => {
     expect(screen.getByText("Record references")).toBeInTheDocument();
   });
 
+  it("reads supplied history entries as facts without authoring instructions", () => {
+    const { rerender, container } = render(
+      <DocumentationRecordValue
+        value={{
+          kind: "entries_supplied",
+          entries: [{ title: "An exhibition", year: "2026" }],
+        }}
+      />
+    );
+    expect(container).toHaveTextContent("An exhibition");
+    expect(container).toHaveTextContent("2026");
+    expect(screen.queryByText("Add entries")).toBeNull();
+    expect(screen.queryByText("Type")).toBeNull();
+    rerender(
+      <DocumentationRecordValue
+        value={{ kind: "entries_supplied", entries: [] }}
+      />
+    );
+    expect(container).toHaveTextContent("No entries recorded");
+    rerender(
+      <DocumentationRecordValue
+        value={{
+          kind: "entries_supplied",
+          entries: [],
+          explanation: "Still being prepared",
+        }}
+      />
+    );
+    expect(container).toHaveTextContent("Entries supplied");
+    expect(container).toHaveTextContent("Still being prepared");
+    expect(screen.queryByText("Add entries")).toBeNull();
+  });
+
+  it("keeps the original account's credit when a translation is selected first", () => {
+    const onChange = jest.fn();
+    render(
+      <DocumentationValueEditor
+        id="caption"
+        label="Caption"
+        editor={{ kind: "localized", max: 3000 }}
+        value={{ ...narrative, primary_language: "fr" }}
+        onChange={onChange}
+      />
+    );
+    fireEvent.click(screen.getByText("Language and translations"));
+    const original = screen.getByRole("group", { name: "Version 1 · English" });
+    expect(
+      within(original).getByDisplayValue("The doorway at dawn.")
+    ).toHaveAttribute("dir", "auto");
+    expect(
+      within(original).getByRole("combobox", { name: "Authorship" })
+    ).toHaveValue("original");
+    expect(screen.getByRole("textbox", { name: "Caption" })).toHaveValue(
+      "La porte à l’aube."
+    );
+    expect(screen.getByRole("textbox", { name: "Caption" })).toHaveAttribute(
+      "dir",
+      "auto"
+    );
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it.each([
     [{ precision: "year", start: "1987" }, "1987"],
     [{ precision: "month", start: "1987-09" }, "September 1987"],
@@ -308,9 +370,17 @@ describe("editorial artwork documentation", () => {
       "lang",
       "fr"
     );
+    expect(screen.getByText("La porte à l’aube.")).toHaveAttribute(
+      "dir",
+      "auto"
+    );
     expect(screen.getByText("The doorway at dawn.")).toHaveAttribute(
       "lang",
       "en"
+    );
+    expect(screen.getByText("The doorway at dawn.")).toHaveAttribute(
+      "dir",
+      "auto"
     );
     expect(
       screen.getByText("Reviewed by the artist", { exact: false })

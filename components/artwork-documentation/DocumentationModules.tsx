@@ -215,6 +215,7 @@ function DocumentationAnswerField(
   const id = `documentation-${moduleId}-${field.id}`;
   const headingId = `documentation-field-heading-${moduleId}-${field.id}`;
   const helpId = `documentation-field-help-${moduleId}-${field.id}`;
+  const replacementHelpId = `documentation-field-replacement-help-${moduleId}-${field.id}`;
   const label =
     (moduleId === "interview"
       ? context.profile.interview_instrument.prompts.find(
@@ -380,22 +381,34 @@ function DocumentationAnswerField(
             }
           />
           {replacingCanonicalAsset && (
-            <label className="tw-mb-4 tw-block tw-text-sm tw-text-iron-300">
-              {msg("canonicalReason")}
-              <textarea
-                className={`${inputClass} tw-mt-2`}
-                rows={3}
-                value={replacementReason}
-                onChange={(event) => {
-                  const reason = event.target.value;
-                  setReplacementReason(reason);
-                  onChange(moduleId, {
-                    ...pending.operation,
-                    replacementReason: reason,
-                  } as ApiArtworkDocumentationOperation);
-                }}
-              />
-            </label>
+            <div className="tw-mb-4">
+              <label className="tw-block tw-text-sm tw-text-iron-300">
+                {msg("canonicalReason")}
+                <textarea
+                  className={`${inputClass} tw-mt-2`}
+                  rows={3}
+                  minLength={20}
+                  maxLength={1000}
+                  aria-describedby={replacementHelpId}
+                  aria-invalid={invalid}
+                  value={replacementReason}
+                  onChange={(event) => {
+                    const reason = event.target.value;
+                    setReplacementReason(reason);
+                    onChange(moduleId, {
+                      ...pending.operation,
+                      replacementReason: reason,
+                    } as ApiArtworkDocumentationOperation);
+                  }}
+                />
+              </label>
+              <p
+                id={replacementHelpId}
+                className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400"
+              >
+                {msg("canonicalReasonHelp")}
+              </p>
+            </div>
           )}
           {status === ApiArtworkDocumentationAnswerStatusEnum.Provided ? (
             <DocumentationValueEditor

@@ -48,6 +48,12 @@ function objectValue(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
+function recordedOptionLabel(value: string, entriesSupplied: string): string {
+  return value === "entries_supplied"
+    ? entriesSupplied
+    : documentationOptionLabel(value);
+}
+
 export function documentationLanguageName(
   language: unknown,
   locale: string
@@ -99,6 +105,7 @@ function NarrativeValue({
   return (
     <div>
       <div
+        dir="auto"
         lang={
           typeof primary["language"] === "string"
             ? primary["language"]
@@ -133,6 +140,7 @@ function NarrativeValue({
               )}
             </p>
             <p
+              dir="auto"
               lang={
                 typeof version["language"] === "string"
                   ? version["language"]
@@ -162,7 +170,7 @@ export default function DocumentationRecordValue({
     return (
       <span className="tw-whitespace-pre-wrap tw-break-words">
         {translateEnum
-          ? documentationOptionLabel(String(value))
+          ? recordedOptionLabel(String(value), msg("catalogue.entriesSupplied"))
           : String(value)}
       </span>
     );
@@ -208,8 +216,22 @@ function StructuredRecordValue({
         </span>
       </p>
     );
+  if (
+    record["kind"] === "entries_supplied" &&
+    Array.isArray(record["entries"]) &&
+    Object.keys(record).every((key) => ["kind", "entries"].includes(key))
+  )
+    return record["entries"].length ? (
+      <DocumentationRecordValue value={record["entries"]} />
+    ) : (
+      <span>{msg("catalogue.noEntriesRecorded")}</span>
+    );
   if (isDeclaredEmptyList(record))
-    return <span>{documentationOptionLabel(record["kind"])}</span>;
+    return (
+      <span>
+        {recordedOptionLabel(record["kind"], msg("catalogue.entriesSupplied"))}
+      </span>
+    );
   if (
     typeof record["primary_language"] === "string" &&
     Array.isArray(record["versions"])
@@ -236,7 +258,12 @@ function StructuredRecordValue({
   )
     return (
       <div>
-        <span>{documentationOptionLabel(record["kind"])}</span>
+        <span>
+          {recordedOptionLabel(
+            record["kind"],
+            msg("catalogue.entriesSupplied")
+          )}
+        </span>
         {["detail", "explanation"].map((key) =>
           typeof record[key] === "string" && record[key] ? (
             <p

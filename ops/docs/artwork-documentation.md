@@ -81,8 +81,9 @@ when appropriate.
 
 For an answer with multiple languages, write in the language that best carries
 your meaning. Open **Language and translations** to set the primary language,
-record authorship and artist review, or **Add a translation**. Each translation
-keeps its own text and review information. Selecting a primary language that
+record authorship and artist review, or **Add a translation**. Each language version
+keeps its own text and review information. Versions retain their original or
+translation credit regardless of which language is shown first. Selecting a primary language that
 already has a version switches to that version without replacing its text.
 Use **Change language** to choose one version's language by name, then
 **Apply language**. **Other language** reveals a **Language tag** field for
@@ -156,6 +157,11 @@ become ready. **Edit file details** opens editable descriptions and other file
 information when your access permits it. **File integrity** shows the recorded
 file information and checksum. Viewers can see **Files in this record** and
 download originals according to their access, without upload or editing controls.
+
+Selecting a different final artwork file after confirmation asks why you are
+replacing it. Explain the change in 20–1,000 characters before it can save.
+Each replacement choice needs a fresh explanation. Returning to the saved file
+removes the prompt.
 
 **Check your existing information** lets authorized editors compare **In the
 record** with **From the source** before choosing **Use selected information**.

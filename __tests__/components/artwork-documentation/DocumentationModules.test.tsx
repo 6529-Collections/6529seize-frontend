@@ -129,6 +129,9 @@ describe("artwork documentation modules", () => {
     expect(applyPendingChange()).toBe(false);
     const reason = screen.getByRole("textbox", { name: reasonName });
     expect(reason).toBeVisible();
+    expect(reason).toHaveAccessibleDescription(
+      "Explain the change in 20–1,000 characters. This explanation becomes part of the record’s history."
+    );
     fireEvent.change(reason, { target: { value: "1234567890123456789" } });
     expect(applyPendingChange()).toBe(false);
     expect(screen.getByRole("status")).toBeVisible();

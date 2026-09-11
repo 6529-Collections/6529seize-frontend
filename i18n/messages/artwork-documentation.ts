@@ -204,7 +204,7 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.review.accepted": "Accepted",
   "artworkDocumentation.review.changes_requested": "Changes requested",
   "artworkDocumentation.reviewScope":
-    "Review decisions apply to the confirmed version shown. They do not change the artist's words.",
+    "Review decisions apply to the latest confirmed version. They do not change the artist's words.",
   "artworkDocumentation.assign": "Assign access",
   "artworkDocumentation.profileId": "Participant profile ID",
   "artworkDocumentation.role": "Role",
@@ -266,6 +266,8 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.canonical": "Use as final artwork",
   "artworkDocumentation.canonicalReason":
     "Why are you replacing the confirmed final file?",
+  "artworkDocumentation.canonicalReasonHelp":
+    "Explain the change in 20–1,000 characters. This explanation becomes part of the record’s history.",
   "artworkDocumentation.fileLabel": "File label",
   "artworkDocumentation.fileDescription": "File description",
   "artworkDocumentation.masterHelp":

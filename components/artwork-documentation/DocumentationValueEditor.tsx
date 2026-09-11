@@ -153,6 +153,7 @@ function LocalizedEditor(
       </label>
       <textarea
         id={id}
+        dir="auto"
         className={inputClass}
         rows={7}
         value={typeof primary["text"] === "string" ? primary["text"] : ""}
@@ -420,6 +421,7 @@ function ScalarEditor(
       {editor.kind === "text" && editor.multiline ? (
         <textarea
           {...shared}
+          dir="auto"
           rows={5}
           onChange={(event) => onChange(event.target.value)}
         />
@@ -427,6 +429,7 @@ function ScalarEditor(
         <input
           {...shared}
           type={editor.kind === "number" ? "number" : "text"}
+          dir={editor.kind === "text" ? "auto" : undefined}
           min={editor.kind === "number" ? 1 : undefined}
           onChange={(event) => {
             if (editor.kind !== "number") {
