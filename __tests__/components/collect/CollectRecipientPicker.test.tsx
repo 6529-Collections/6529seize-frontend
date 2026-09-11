@@ -126,7 +126,7 @@ it("immediately shows every confirmed wallet, preserving primary selection and f
   expect(screen.getByLabelText("Selected recipient")).toHaveTextContent(
     custody
   );
-  await user.click(screen.getByRole("button", { name: "My profile wallets" }));
+  await user.click(screen.getByRole("button", { name: "Send to me" }));
   expect(onChange).toHaveBeenCalledTimes(1);
 });
 
@@ -172,7 +172,7 @@ it("clears the external destination and restores the primary wallet when returni
     }
   );
   expect(screen.getByText(getAddress(fren), { selector: "p" })).toBeVisible();
-  await user.click(screen.getByRole("button", { name: "My profile wallets" }));
+  await user.click(screen.getByRole("button", { name: "Send to me" }));
   expect(screen.getByLabelText("Selected recipient")).toHaveTextContent(
     getAddress(primary)
   );
@@ -226,7 +226,7 @@ it("resolves a fren's ENS through the mint selector and reviews its full checksu
 it("restores the confirmed paying wallet when returning from Send to a fren", async () => {
   withQuery(<Picker payingWallet={custody} initialValue={fren} />);
   await userEvent.click(
-    screen.getByRole("button", { name: "My profile wallets" })
+    screen.getByRole("button", { name: "Send to me" })
   );
   expect(screen.getByLabelText("Selected recipient")).toHaveTextContent(
     custody
@@ -266,7 +266,7 @@ it("ignores a pending ENS result after switching back to profile wallets", async
     }
   );
   await waitFor(() => expect(commonApiFetch).toHaveBeenCalledTimes(1));
-  await user.click(screen.getByRole("button", { name: "My profile wallets" }));
+  await user.click(screen.getByRole("button", { name: "Send to me" }));
   await user.click(
     screen.getByRole("button", { name: /custody.collector.eth/ })
   );

@@ -184,7 +184,7 @@ export const COLLECT_MESSAGES = {
   "collect.trade.durationDays": "{days} days",
   "collect.trade.recipient": "Receiving wallet address",
   "collect.recipient.mode": "Where to receive the artwork",
-  "collect.recipient.myProfile": "My profile wallets",
+  "collect.recipient.myProfile": "Send to me",
   "collect.recipient.other": "Send to a fren",
   "collect.recipient.chooseWallet": "Choose a receiving wallet",
   "collect.recipient.walletsUnavailable":
