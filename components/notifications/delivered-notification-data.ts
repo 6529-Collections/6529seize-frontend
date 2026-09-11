@@ -7,7 +7,7 @@ export const getNotificationData = (
 ): Record<string, unknown> | null => {
   const raw: unknown = notification.data;
   const data =
-    raw && typeof raw === "object" && !Array.isArray(raw)
+    raw !== null && typeof raw === "object" && !Array.isArray(raw)
       ? (raw as Record<string, unknown>)
       : null;
   if (typeof data?.["target_profile_id"] === "string") return data;

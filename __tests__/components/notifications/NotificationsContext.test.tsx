@@ -53,12 +53,10 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => mockSeizeConnectContext,
 }));
 jest.mock("@/services/api/common-api", () => ({
-  commonApiFetch: jest
-    .fn()
-    .mockResolvedValue({
-      notifications: [{ id: 1, read_at: 123 }],
-      unread_count: 0,
-    }),
+  commonApiFetch: jest.fn().mockResolvedValue({
+    notifications: [{ id: 1, read_at: 123 }],
+    unread_count: 0,
+  }),
   commonApiPost: jest.fn().mockResolvedValue({}),
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue({}),
 }));
@@ -82,20 +80,18 @@ jest.mock("@capacitor/push-notifications", () => {
       addListener: jest.fn(),
       requestPermissions: jest.fn().mockResolvedValue({ receive: "granted" }),
       register: jest.fn().mockResolvedValue(undefined),
-      getDeliveredNotifications: jest
-        .fn()
-        .mockResolvedValue({
-          notifications: [
-            {
-              id: "native-1",
-              data: {
-                wave_id: "w1",
-                target_profile_id: "test-profile-id",
-                notification_id: "1",
-              },
+      getDeliveredNotifications: jest.fn().mockResolvedValue({
+        notifications: [
+          {
+            id: "native-1",
+            data: {
+              wave_id: "w1",
+              target_profile_id: "test-profile-id",
+              notification_id: "1",
             },
-          ],
-        }),
+          },
+        ],
+      }),
       removeDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
       removeAllDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
     },
@@ -862,11 +858,17 @@ describe("push registration behavior", () => {
 
   it("retries deferred registration after reconnect finishes pending logout", async () => {
     const { PushNotifications } = require("@capacitor/push-notifications");
-    const { flushPendingPushLogouts } = require("@/services/notifications/push-installation");
+    const {
+      flushPendingPushLogouts,
+    } = require("@/services/notifications/push-installation");
     await setupRegistrationCallback();
     flushPendingPushLogouts.mockResolvedValueOnce(true);
-    await act(async () => { globalThis.dispatchEvent(new Event("online")); });
-    await waitFor(() => expect(PushNotifications.removeAllListeners).toHaveBeenCalledTimes(2));
+    await act(async () => {
+      globalThis.dispatchEvent(new Event("online"));
+    });
+    await waitFor(() =>
+      expect(PushNotifications.removeAllListeners).toHaveBeenCalledTimes(2)
+    );
   });
 
   it("registers the same profile and token again after a fresh login", async () => {

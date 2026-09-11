@@ -155,11 +155,8 @@ export async function queueNativePushLogout(
       ? undefined
       : selectedProfileId;
   const legacyAddress = address ?? getWalletAddress();
-  const sessionAccounts = selected.length
-    ? selected
-    : legacyAddress
-      ? [{ address: legacyAddress }]
-      : [];
+  const fallbackAccounts = legacyAddress ? [{ address: legacyAddress }] : [];
+  const sessionAccounts = selected.length ? selected : fallbackAccounts;
   const sessions = (
     await Promise.all(
       sessionAccounts.map(async (account) => {
@@ -212,7 +209,7 @@ export async function queueNativePushLogout(
 
 async function drainPushLogouts(): Promise<boolean> {
   let reconciled = false;
-  while (true) {
+  for (;;) {
     const job = await serialized(async () => (await readState()).pending[0]);
     if (!job) return reconciled;
     try {
