@@ -86,6 +86,39 @@ jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
   __esModule: true,
   default: () => <div data-testid="marketplace-links" />,
 }));
+const mockRefreshMarket = jest.fn();
+jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
+  __esModule: true,
+  default: ({
+    actions,
+  }: {
+    actions?: React.ReactNode | ((refresh: () => void) => React.ReactNode);
+  }) => (
+    <div data-testid="market-depth">
+      {typeof actions === "function" ? actions(mockRefreshMarket) : actions}
+    </div>
+  ),
+}));
+jest.mock("@/components/collect/CollectDetailActions", () => ({
+  __esModule: true,
+  default: ({
+    collection,
+    tokenId,
+    onMarketChange,
+  }: {
+    collection: string;
+    tokenId: string;
+    onMarketChange?: () => void;
+  }) => (
+    <button
+      data-family={collection}
+      data-token={tokenId}
+      onClick={onMarketChange}
+    >
+      Collect artwork
+    </button>
+  ),
+}));
 
 const mockFetchUrl = jest.fn();
 jest.mock("@/services/6529api", () => ({
@@ -651,6 +684,16 @@ describe("MemePageLiveRightMenu distribution link", () => {
 });
 
 describe("MemePageLiveSubMenu details", () => {
+  it("places the exact artwork action inside its existing market section", () => {
+    render(<MemePageLiveSubMenu show nft={createNft({ id: 5 })} />);
+    const collecting = screen.getByRole("button", { name: "Collect artwork" });
+    expect(collecting).toHaveAttribute("data-family", "memes");
+    expect(collecting).toHaveAttribute("data-token", "5");
+    expect(screen.getByTestId("market-depth")).toContainElement(collecting);
+    fireEvent.click(collecting);
+    expect(mockRefreshMarket).toHaveBeenCalledTimes(1);
+  });
+
   it("renders the media type badge", () => {
     const nft = createNft({
       metadata: {

@@ -1,26 +1,43 @@
-# Collect
+# Collecting Tools
 
 ## Overview
 
-Collect brings artwork discovery, profile set completion, TDH comparisons and
-marketplace actions together. The supported collections are The Memes,
-6529 Gradient and NextGen Pebbles. Collecting belongs to your profile: holdings
-across its confirmed consolidated wallets count together.
+Collecting tools help you complete profile sets, compare observed listings and
+explore TDH. Browse individual artworks on The Memes, 6529 Gradient and NextGen
+Pebbles collection pages, and review trades on the artwork's own page.
+Collecting belongs to your profile: holdings across its confirmed consolidated
+wallets count together.
 
 ## Location in the Site
 
-- `/collect`: browse artwork, compare available listings and plan acquisitions.
+- `/collect`: opens the set planner, with **Lowest listings** and **TDH** tools.
 - `/collect/orders`: inspect trades, potential offers and transaction recovery.
+- `/the-memes`, `/6529-gradient` and `/nextgen/collection/pebbles`: browse artwork
+  and open individual cards.
 
 ## Entry Points
 
-Open **Collect** in the Collections navigation, or use an artwork's Collect
-action. Collected and Pebbles Trait Sets also link to relevant collecting goals.
+Open **Collecting tools** in the NFT navigation, or choose **Complete my set** on
+a collection page. The Memes carries the selected season into the planner, or
+opens the full Memes set when no season is selected. Gradients opens the full
+Gradients set; Pebbles opens its trait-set planner. Collected and Pebbles Trait
+Sets also link to relevant collecting goals.
+
+The **Listings and Offers** section on a supported artwork's page has a
+**Collect** action that opens purchase review on the same page. Its more-actions
+menu contains **Make an offer**, **List for sale** and **Review offers**.
+Current orders and terms are checked before a purchase can proceed.
+
+**Browse artwork** links in Collecting tools return to the original collection
+pages. The planner has no separate artwork search or browsing grid. Existing
+links for browsing or a specific artwork open the corresponding collection or
+card page.
 
 ## User Journey
 
-1. Choose a collection and an intent: browse, find low prices, complete a season
-   or set, collect an artist, or compare additional TDH.
+1. Start in **Complete a set**, or choose **Lowest listings** or **TDH**.
+   Complete a set offers a season, a full Memes or Gradients set, an artist,
+   or a Pebbles trait set.
 2. Connect your profile to inspect its holdings. Wallet controls describe where
    NFTs are held, which wallet pays or signs, and where a purchase is delivered.
 3. For a completion goal, choose its definition, number of copies and budget.
@@ -43,10 +60,20 @@ requirements. Changing a custody filter does not change the collecting subject.
 Pebbles supports Palette, Size, Traced and Ultimate; Ultimate can satisfy several
 trait requirements with one token. Artist goals let you include collaborations.
 
+### Compare available listings
+
+Choose **Lowest listings**, then The Memes, Gradients or Pebbles. This tool shows
+observed listings with prices and quantities. Open an artwork for its card page,
+or select **Collect** to check the current order and review a purchase. No listing
+results does not mean that no orders exist elsewhere. If the listing source
+cannot be loaded, use **Try again** or return to the collection page.
+
 ### Buy for another wallet
 
-The recipient picker follows minting: choose a wallet in your profile or enter
-a third-party wallet. Check the resolved address before authorization. The NFT
+The recipient picker follows minting and shows your profile's confirmed wallets
+automatically. Choose one, or use **Send to a fren** to search a profile or ENS
+name, or enter another wallet. Check the full resolved address before
+authorization. The paying wallet is separate from the recipient. The NFT
 is delivered directly to the chosen recipient in the purchase transaction.
 There is no separate onward transfer. A Safe can receive a purchase from a
 supported paying wallet.
@@ -71,7 +98,8 @@ and approval amounts before continuing with remaining offers.
 
 ### Compare TDH
 
-Choose a time horizon and compare additional TDH for the current profile.
+Choose **TDH**, a collection, a budget and a time horizon to compare additional
+TDH for the current profile.
 Comparisons use a verified official snapshot and include changes to bonuses on
 existing holdings. Gift allocations outside the profile contribute no TDH to
 that profile. Cost comparisons include an estimated gas reserve and identify
@@ -149,6 +177,8 @@ to trade your assets.
 Automatic wallet execution is not available. Programmatic preparation still
 requires the owner to review and authorize each purchase or order. Signed limit
 orders can be filled by others until effective cancellation or expiry.
+Multiple-order purchases use separate reviewed transactions. These controls do
+not create collection-wide or trait-group offers.
 
 ## Related Pages
 

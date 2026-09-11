@@ -19,5 +19,5 @@ network actions. Market history is based on captured events; it is not a
 complete historical order ledger.
 
 See [NFT Activity Feed](feature-nft-activity-feed.md) for supported actions,
-history limitations and recovery, or [Card Market Depth](../media/feature-card-market-depth.md)
+history limitations and recovery, or [Listings and Offers](../media/feature-card-market-depth.md)
 to inspect current quoted asks and offers.

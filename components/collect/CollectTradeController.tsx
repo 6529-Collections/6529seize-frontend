@@ -46,6 +46,7 @@ import CollectAssetMedia from "./CollectAssetMedia";
 import { useMarketExecution } from "./useMarketExecution";
 import { useMarketSettlement } from "./useMarketSettlement";
 import type { SupportedLocale } from "@/i18n/locales";
+import { defaultCollectRecipient } from "./collect-recipient.helpers";
 
 function recoveredTransactionFacts(
   operation: ApiMarketOperation | null,
@@ -109,6 +110,7 @@ export default function CollectTradeController({
   cancelTarget,
   onClose,
   onSettled,
+  onMarketChange,
 }: {
   readonly asset?: ApiCollectAsset;
   readonly action: CollectTradeAction;
@@ -119,15 +121,15 @@ export default function CollectTradeController({
   readonly cancelTarget?: ApiMarketOperation;
   readonly onClose: () => void;
   readonly onSettled?: () => void;
+  readonly onMarketChange?: () => void;
 }) {
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy, isAuthenticated } = useAuth();
   const connection = useSeizeConnectContext();
   const { isCapacitor } = useCapacitor();
   const client = useQueryClient();
-  const [selectedOrder, setSelectedOrder] = useState<ApiMarketTradeOrder | null>(
-    initialOrder ?? null
-  );
+  const [selectedOrder, setSelectedOrder] =
+    useState<ApiMarketTradeOrder | null>(initialOrder ?? null);
   const [operation, setOperation] = useState<ApiMarketOperation | null>(
     initialOperation ?? null
   );
@@ -142,7 +144,9 @@ export default function CollectTradeController({
     quantity: initialQuantity ?? "1",
     unitPriceEth: "",
     expiryHours: "168",
-    recipient: initialRecipient ?? connectedProfile?.primary_wallet ?? "",
+    recipient:
+      initialRecipient ??
+      defaultCollectRecipient(connectedProfile, connection.address),
   });
   const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -202,7 +206,7 @@ export default function CollectTradeController({
       queryKey: [QueryKey.MARKET_MY_OPERATIONS],
     });
   };
-  useMarketSettlement(displayedOperation, onSettled);
+  useMarketSettlement(displayedOperation, onSettled, onMarketChange);
   const execution = useMarketExecution(receiveOperation);
   const reasonKey = marketConnectionReason({
     capabilityEnabled:

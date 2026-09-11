@@ -44,7 +44,41 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 
 import NextGenTokenPage from "@/components/nextGen/collections/nextgenToken/NextGenToken";
 import { NextgenCollectionView } from "@/types/enums";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+
+const mockRefreshMarket = jest.fn();
+jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
+  __esModule: true,
+  default: ({
+    actions,
+  }: {
+    actions?: React.ReactNode | ((refresh: () => void) => React.ReactNode);
+  }) => (
+    <div data-testid="market-depth">
+      {typeof actions === "function" ? actions(mockRefreshMarket) : actions}
+    </div>
+  ),
+}));
+jest.mock("@/components/collect/CollectDetailActions", () => ({
+  __esModule: true,
+  default: ({
+    collection,
+    tokenId,
+    onMarketChange,
+  }: {
+    collection: string;
+    tokenId: string;
+    onMarketChange?: () => void;
+  }) => (
+    <button
+      data-family={collection}
+      data-token={tokenId}
+      onClick={onMarketChange}
+    >
+      Collect artwork
+    </button>
+  ),
+}));
 
 jest.mock(
   "@/components/nextGen/collections/nextgenToken/NextGenTokenProvenance",
@@ -139,6 +173,25 @@ describe("NextGenTokenPage", () => {
   });
 
   describe("rendering", () => {
+    it("places Pebbles trading in the existing market section", () => {
+      renderComponent();
+      const collecting = screen.getByRole("button", {
+        name: "Collect artwork",
+      });
+      expect(collecting).toHaveAttribute("data-family", "pebbles");
+      expect(collecting).toHaveAttribute("data-token", "1");
+      expect(screen.getByTestId("market-depth")).toContainElement(collecting);
+      fireEvent.click(collecting);
+      expect(mockRefreshMarket).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not map another NextGen project to Pebbles trading", () => {
+      renderComponent({ collection: { ...baseProps.collection, id: 2 } });
+      expect(
+        screen.queryByRole("button", { name: "Collect artwork" })
+      ).not.toBeInTheDocument();
+    });
+
     it("renders token name", () => {
       renderComponent();
       expect(screen.getByText("Token")).toBeInTheDocument();

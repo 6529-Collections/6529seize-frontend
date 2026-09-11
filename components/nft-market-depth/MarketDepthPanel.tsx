@@ -5,13 +5,24 @@ import type { ApiMarketDepth } from "@/generated/models/ApiMarketDepth";
 import { ApiMarketDepthStatusEnum } from "@/generated/models/ApiMarketDepth";
 import type { ApiMarketDepthLevel } from "@/generated/models/ApiMarketDepthLevel";
 import type { SupportedLocale } from "@/i18n/locales";
-import { formatInteger as formatLocalizedInteger } from "@/i18n/format";
+import {
+  formatInteger as formatLocalizedInteger,
+  formatRelativeTime,
+} from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import MarketDepthOrderDetails from "./MarketDepthOrderDetails";
 import {
   formatDate,
@@ -22,7 +33,8 @@ import {
 const MARKET_DEPTH_QUERY_KEY = QueryKey.NFT_MARKET_DEPTH;
 
 const PAGE_SIZE = 40;
-const MAX_LEVELS = 8;
+const MAX_LEVELS = 5;
+const MINUTE_IN_MILLISECONDS = 60_000;
 const NATIVE_ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 const WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
 
@@ -32,6 +44,7 @@ interface MarketDepthPanelProps {
   readonly contract: string;
   readonly tokenId: string | number;
   readonly locale?: SupportedLocale | undefined;
+  readonly actions?: ReactNode | ((refresh: () => void) => ReactNode);
 }
 
 interface MarketDepthState {
@@ -66,33 +79,61 @@ function isCanonicalCurrency(book: ApiMarketCurrencyBook): boolean {
   return address === NATIVE_ETH_ADDRESS || address === WETH_ADDRESS;
 }
 
-function statusLabel(
+const getMinuteClockSnapshot = () =>
+  Math.floor(Date.now() / MINUTE_IN_MILLISECONDS);
+const getServerMinuteClockSnapshot = () => null;
+const subscribeToMinuteClock = (onStoreChange: () => void) => {
+  const intervalId = globalThis.setInterval(
+    onStoreChange,
+    MINUTE_IN_MILLISECONDS
+  );
+  return () => globalThis.clearInterval(intervalId);
+};
+
+function formatAge(
   locale: SupportedLocale,
-  status: ApiMarketDepth["status"]
-): string {
-  switch (status) {
-    case ApiMarketDepthStatusEnum.Fresh:
-      return t(locale, "marketDepth.status.fresh");
-    case ApiMarketDepthStatusEnum.Stale:
-      return t(locale, "marketDepth.status.stale");
-    case ApiMarketDepthStatusEnum.Unavailable:
-      return t(locale, "marketDepth.status.unavailable");
-    default:
-      return t(locale, "marketDepth.status.unknown");
+  value: Date | string | null,
+  minuteClock: number | null
+): string | null {
+  if (value === null || minuteClock === null) return null;
+  const timestamp = new Date(value).getTime();
+  if (!Number.isFinite(timestamp)) return null;
+
+  const difference = timestamp - minuteClock * MINUTE_IN_MILLISECONDS;
+  if (difference > 0) return null;
+  const absoluteDifference = Math.abs(difference);
+  const units = [
+    { unit: "year", milliseconds: 365 * 24 * 60 * MINUTE_IN_MILLISECONDS },
+    { unit: "month", milliseconds: 30 * 24 * 60 * MINUTE_IN_MILLISECONDS },
+    { unit: "day", milliseconds: 24 * 60 * MINUTE_IN_MILLISECONDS },
+    { unit: "hour", milliseconds: 60 * MINUTE_IN_MILLISECONDS },
+    { unit: "minute", milliseconds: MINUTE_IN_MILLISECONDS },
+  ] as const;
+  const matchingUnit = units.find(
+    ({ milliseconds }) => absoluteDifference >= milliseconds
+  );
+
+  if (!matchingUnit) {
+    return formatRelativeTime(locale, 0, "second", { numeric: "auto" });
   }
+  return formatRelativeTime(
+    locale,
+    Math.round(difference / matchingUnit.milliseconds),
+    matchingUnit.unit,
+    { numeric: "auto" }
+  );
 }
 
-function statusClassName(status: ApiMarketDepth["status"]): string {
-  switch (status) {
-    case ApiMarketDepthStatusEnum.Fresh:
-      return "tw-border-emerald-400/30 tw-bg-emerald-400/10 tw-text-emerald-200";
-    case ApiMarketDepthStatusEnum.Stale:
-      return "tw-border-amber-400/30 tw-bg-amber-400/10 tw-text-amber-200";
-    case ApiMarketDepthStatusEnum.Unavailable:
-      return "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300";
-    default:
-      return "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300";
+function getUpdatedLabel(
+  locale: SupportedLocale,
+  age: string | null,
+  absoluteTime: string | null
+): string {
+  if (age) return t(locale, "marketDepth.updated", { time: age });
+  if (absoluteTime) {
+    return t(locale, "marketDepth.updatedAt", { time: absoluteTime });
   }
+  return t(locale, "marketDepth.updatedUnknown");
 }
 
 function DecimalValue({
@@ -136,11 +177,11 @@ function LevelTable({
   return (
     <div className="tw-min-w-0">
       {visibleLevels.length === 0 ? (
-        <p className="tw-m-0 tw-rounded-lg tw-bg-black/20 tw-p-3 tw-text-sm tw-text-iron-500">
+        <p className="tw-m-0 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-py-4 tw-text-sm tw-text-iron-500">
           {t(locale, "marketDepth.noLevels")}
         </p>
       ) : (
-        <div className="tw-min-w-0 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5">
+        <div className="tw-min-w-0 tw-overflow-hidden tw-border-0 tw-border-t tw-border-solid tw-border-white/10">
           <table className="tw-w-full tw-table-fixed tw-border-collapse tw-text-right tw-text-xs sm:tw-text-sm">
             <caption className="tw-sr-only">
               {t(locale, "marketDepth.table.ariaLabel", {
@@ -148,46 +189,46 @@ function LevelTable({
                 currency,
               })}
             </caption>
-            <thead className="tw-border-b tw-border-solid tw-border-white/5 tw-bg-black/20 tw-text-xs tw-font-medium tw-text-iron-500">
+            <thead className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
               <tr>
                 <th
                   scope="col"
-                  className="tw-w-[42%] tw-px-1 tw-py-2 tw-text-left sm:tw-px-3"
+                  className="tw-w-[38%] tw-px-0 tw-py-2.5 tw-text-left sm:tw-pr-3"
                 >
                   {t(locale, "marketDepth.table.price")}
                 </th>
                 <th
                   scope="col"
                   aria-label={t(locale, "marketDepth.table.quantity")}
-                  className="tw-w-[29%] tw-px-1 tw-py-2 sm:tw-px-3"
+                  className="tw-w-[31%] tw-px-0 tw-py-2.5 sm:tw-px-3"
                 >
                   {t(locale, "marketDepth.table.quantityShort")}
                 </th>
                 <th
                   scope="col"
                   aria-label={t(locale, "marketDepth.table.cumulative")}
-                  className="tw-w-[29%] tw-px-1 tw-py-2 sm:tw-px-3"
+                  className="tw-w-[31%] tw-px-0 tw-py-2.5 sm:tw-pl-3"
                 >
                   {t(locale, "marketDepth.table.cumulativeShort")}
                 </th>
               </tr>
             </thead>
             <tbody>
-              {visibleLevels.map((level, index) => (
+              {visibleLevels.map((level) => (
                 <tr
-                  key={`${side}-${level.unit_price}-${index}`}
-                  className="tw-border-b tw-border-solid tw-border-white/5 last:tw-border-b-0"
+                  key={`${side}-${level.unit_price}`}
+                  className="tw-border-0 tw-border-b tw-border-solid tw-border-white/5 last:tw-border-white/10"
                 >
                   <td
-                    className="tw-break-words tw-px-1 tw-py-2 tw-text-left tw-font-medium tw-text-white sm:tw-px-3"
+                    className="tw-break-words tw-px-0 tw-py-2.5 tw-text-left tw-font-medium tw-tabular-nums tw-text-iron-100 sm:tw-pr-3"
                     title={level.unit_price}
                   >
                     {formatDecimal(locale, level.unit_price)}
                   </td>
-                  <td className="tw-break-words tw-px-1 tw-py-2 tw-text-iron-200 sm:tw-px-3">
+                  <td className="tw-break-words tw-px-0 tw-py-2.5 tw-tabular-nums tw-text-iron-300 sm:tw-px-3">
                     {formatInteger(locale, level.quantity)}
                   </td>
-                  <td className="tw-break-words tw-px-1 tw-py-2 tw-text-iron-400 sm:tw-px-3">
+                  <td className="tw-break-words tw-px-0 tw-py-2.5 tw-tabular-nums tw-text-iron-500 sm:tw-pl-3">
                     {formatInteger(locale, level.cumulative_quantity)}
                   </td>
                 </tr>
@@ -200,7 +241,7 @@ function LevelTable({
         <button
           type="button"
           onClick={() => setShowAll((current) => !current)}
-          className="tw-mt-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition hover:tw-bg-white/5 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          className="tw-mt-3 tw-min-h-11 tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-400 tw-underline-offset-4 tw-transition hover:tw-text-white hover:tw-underline focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
         >
           {showAll
             ? t(locale, "marketDepth.levels.showFewer")
@@ -219,14 +260,104 @@ interface NonEmptyDepthSide {
 
 function MarketDepthSkeleton() {
   return (
-    <div aria-hidden="true" className="tw-grid tw-gap-4 md:tw-grid-cols-2">
+    <div
+      aria-hidden="true"
+      className="tw-grid tw-border-0 tw-border-y tw-border-solid tw-border-white/10 sm:tw-grid-cols-2 sm:tw-divide-x sm:tw-divide-y-0 sm:tw-divide-white/10"
+    >
       {["one", "two"].map((key) => (
         <div
           key={key}
-          className="tw-h-28 tw-animate-pulse tw-rounded-lg tw-bg-white/5 motion-reduce:tw-animate-none"
+          className="tw-h-24 tw-animate-pulse tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-bg-white/[0.02] last:tw-border-b-0 motion-reduce:tw-animate-none sm:tw-border-b-0"
         />
       ))}
     </div>
+  );
+}
+
+function SnapshotMeta({
+  data,
+  locale,
+  minuteClock,
+}: {
+  readonly data: ApiMarketDepth;
+  readonly locale: SupportedLocale;
+  readonly minuteClock: number | null;
+}) {
+  const absoluteTime = formatDate(data.as_of, locale);
+  const age = formatAge(locale, data.as_of, minuteClock);
+  const updatedLabel = getUpdatedLabel(locale, age, absoluteTime);
+
+  return (
+    <p
+      title={absoluteTime ?? undefined}
+      className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-500"
+    >
+      <span>{updatedLabel}</span>
+      {data.status === ApiMarketDepthStatusEnum.Stale && (
+        <>
+          <span aria-hidden="true"> · </span>
+          <span>{t(locale, "marketDepth.status.stale")}</span>
+        </>
+      )}
+      {data.status === ApiMarketDepthStatusEnum.Unavailable && (
+        <>
+          <span aria-hidden="true"> · </span>
+          <span>{t(locale, "marketDepth.status.unavailable")}</span>
+        </>
+      )}
+    </p>
+  );
+}
+
+function AboutPrices({
+  data,
+  locale,
+}: {
+  readonly data: ApiMarketDepth;
+  readonly locale: SupportedLocale;
+}) {
+  const hasUnpricedCollectionOrders = data.snapshots.some(
+    (snapshot) => snapshot.unsupported_count > 0
+  );
+
+  return (
+    <details className="tw-group tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-py-4">
+      <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+        {t(locale, "marketDepth.about.title")}
+        <span
+          aria-hidden="true"
+          className="tw-text-iron-500 tw-transition-transform group-open:tw-rotate-45 motion-reduce:tw-transition-none"
+        >
+          +
+        </span>
+      </summary>
+      <div className="tw-max-w-3xl tw-pb-2 tw-pt-2 tw-text-xs tw-leading-5 tw-text-iron-500">
+        <p className="tw-m-0">{t(locale, "marketDepth.about.description")}</p>
+        {hasUnpricedCollectionOrders && (
+          <p className="tw-mb-0 tw-mt-2">
+            {t(locale, "marketDepth.unpricedOrders")}
+          </p>
+        )}
+        {data.criteria_order_count > 0 && (
+          <p className="tw-mb-0 tw-mt-2">
+            {t(
+              locale,
+              data.criteria_order_count === 1
+                ? "marketDepth.criteriaSummary.single"
+                : "marketDepth.criteriaSummary",
+              { count: data.criteria_order_count }
+            )}
+          </p>
+        )}
+        {data.notes.length > 0 && (
+          <ul className="tw-mb-0 tw-mt-2 tw-space-y-1 tw-pl-4">
+            {data.notes.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </details>
   );
 }
 
@@ -234,11 +365,22 @@ export default function MarketDepthPanel({
   contract,
   tokenId,
   locale,
+  actions,
 }: MarketDepthPanelProps) {
   const browserLocale = useBrowserLocale();
   const resolvedLocale = locale ?? browserLocale;
+  const minuteClock = useSyncExternalStore(
+    subscribeToMinuteClock,
+    getMinuteClockSnapshot,
+    getServerMinuteClockSnapshot
+  );
   const [state, setState] = useState<MarketDepthState>(INITIAL_STATE);
   const [retryVersion, setRetryVersion] = useState(0);
+  const refresh = useCallback(() => {
+    setRetryVersion((version) => version + 1);
+  }, []);
+  const renderedActions =
+    typeof actions === "function" ? actions(refresh) : actions;
   const [loadingMoreKey, setLoadingMoreKey] = useState<string | null>(null);
   const [loadMoreErrorKey, setLoadMoreErrorKey] = useState<string | null>(null);
   const loadMoreAbortControllerRef = useRef<AbortController | null>(null);
@@ -358,7 +500,6 @@ export default function MarketDepthPanel({
   const wethBook = data
     ? getBookByAddress(data.books, WETH_ADDRESS)
     : undefined;
-  const formattedAsOf = data ? formatDate(data.as_of, resolvedLocale) : null;
   const hasQuotedLevels = Boolean(
     data?.books.some((book) => book.asks.length > 0 || book.bids.length > 0)
   );
@@ -379,48 +520,47 @@ export default function MarketDepthPanel({
     <section
       aria-labelledby="market-depth-heading"
       aria-busy={effectiveStatus === "loading"}
-      className="tw-mt-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 before:tw-content-none after:tw-content-none sm:tw-p-5 [&_*]:before:tw-content-none [&_*]:after:tw-content-none"
+      className="tw-mt-8 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-7 before:tw-content-none after:tw-content-none [&_*]:before:tw-content-none [&_*]:after:tw-content-none"
     >
-      <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
-        <div>
+      <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-6 tw-gap-y-4">
+        <div className="tw-max-w-2xl">
           <h2
             id="market-depth-heading"
-            className="tw-m-0 tw-text-lg tw-font-semibold tw-tracking-tight tw-text-white"
+            className="tw-m-0 tw-text-xl tw-font-medium tw-tracking-tight tw-text-white sm:tw-text-2xl"
           >
             {t(resolvedLocale, "marketDepth.title")}
           </h2>
-          <p className="tw-mb-0 tw-mt-1 tw-max-w-2xl tw-text-sm tw-leading-5 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
             {t(resolvedLocale, "marketDepth.description")}
           </p>
-          {formattedAsOf && (
-            <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-iron-400">
-              {t(resolvedLocale, "marketDepth.capturedAt", {
-                time: formattedAsOf,
-              })}
-            </p>
+          {data && (
+            <div className="tw-mt-2">
+              <SnapshotMeta
+                data={data}
+                locale={resolvedLocale}
+                minuteClock={minuteClock}
+              />
+            </div>
           )}
         </div>
         {data && (
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
-            <span
-              className={`tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold ${statusClassName(data.status)}`}
-            >
-              {statusLabel(resolvedLocale, data.status)}
-            </span>
-            <button
-              type="button"
-              onClick={() => setRetryVersion((version) => version + 1)}
-              className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition hover:tw-bg-white/5 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-            >
-              <ArrowPathIcon aria-hidden="true" className="tw-h-3.5 tw-w-3.5" />
-              {t(resolvedLocale, "marketDepth.refresh")}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={refresh}
+            className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-sm tw-border-0 tw-bg-transparent tw-px-1 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-400 tw-underline-offset-4 tw-transition hover:tw-text-white hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            <ArrowPathIcon aria-hidden="true" className="tw-h-3.5 tw-w-3.5" />
+            {t(resolvedLocale, "marketDepth.refresh")}
+          </button>
         )}
       </div>
 
+      {Boolean(renderedActions) && (
+        <div className="tw-mt-7">{renderedActions}</div>
+      )}
+
       {effectiveStatus === "loading" && (
-        <div className="tw-mt-5">
+        <div className="tw-mt-8">
           <p className="tw-sr-only" role="status">
             {t(resolvedLocale, "marketDepth.loading")}
           </p>
@@ -429,14 +569,14 @@ export default function MarketDepthPanel({
       )}
 
       {effectiveStatus === "error" && (
-        <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-rose-400/20 tw-bg-rose-400/5 tw-p-4">
+        <div className="tw-mt-8 tw-border-0 tw-border-y tw-border-solid tw-border-white/10 tw-py-5">
           <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-200">
             {t(resolvedLocale, "marketDepth.error")}
           </p>
           <button
             type="button"
-            onClick={() => setRetryVersion((version) => version + 1)}
-            className="tw-mt-3 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-rose-300/30 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-rose-100 tw-transition hover:tw-bg-rose-300/10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            onClick={refresh}
+            className="tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-sm tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-200 tw-underline-offset-4 tw-transition hover:tw-text-white hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
             <ArrowPathIcon aria-hidden="true" className="tw-h-4 tw-w-4" />
             {t(resolvedLocale, "marketDepth.retry")}
@@ -445,72 +585,58 @@ export default function MarketDepthPanel({
       )}
 
       {effectiveStatus === "ready" && data && (
-        <div className="tw-mt-5">
+        <div className="tw-mt-8">
           {data.status === ApiMarketDepthStatusEnum.Unavailable ? (
-            <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-black/20 tw-p-4">
-              <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
-                {t(resolvedLocale, "marketDepth.unavailable.title")}
-              </p>
-              {data.notes.length > 0 && (
-                <ul className="tw-mb-0 tw-mt-2 tw-space-y-1 tw-pl-5 tw-text-sm tw-text-iron-400">
-                  {data.notes.map((note) => (
-                    <li key={note}>{note}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
+            <>
+              <div className="tw-border-0 tw-border-y tw-border-solid tw-border-white/10 tw-py-5">
+                <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+                  {t(resolvedLocale, "marketDepth.unavailable.title")}
+                </p>
+              </div>
+              <AboutPrices data={data} locale={resolvedLocale} />
+            </>
           ) : (
             <>
-              <div className="tw-grid tw-gap-3 sm:tw-grid-cols-2">
-                <div className="tw-rounded-lg tw-border tw-border-solid tw-border-emerald-400/15 tw-bg-emerald-400/5 tw-p-4">
-                  <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-emerald-200/70">
+              <dl className="tw-m-0 tw-grid tw-border-0 tw-border-y tw-border-solid tw-border-white/10 sm:tw-grid-cols-2 sm:tw-divide-x sm:tw-divide-y-0 sm:tw-divide-white/10">
+                <div className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-py-5 sm:tw-border-b-0 sm:tw-pr-8">
+                  <dt className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
                     {t(resolvedLocale, "marketDepth.bestAsk")}
-                  </div>
-                  <div className="tw-mt-1 tw-text-2xl tw-font-semibold tw-text-emerald-100">
+                  </dt>
+                  <dd className="tw-m-0 tw-mt-2 tw-text-2xl tw-font-medium tw-tabular-nums tw-text-iron-100">
                     <DecimalValue
                       locale={resolvedLocale}
                       value={ethBook?.best_ask}
                     />
-                  </div>
+                  </dd>
                 </div>
-                <div className="tw-rounded-lg tw-border tw-border-solid tw-border-sky-400/15 tw-bg-sky-400/5 tw-p-4">
-                  <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-sky-200/70">
+                <div className="tw-py-5 sm:tw-pl-8">
+                  <dt className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
                     {t(resolvedLocale, "marketDepth.bestBid")}
-                  </div>
-                  <div className="tw-mt-1 tw-text-2xl tw-font-semibold tw-text-sky-100">
+                  </dt>
+                  <dd className="tw-m-0 tw-mt-2 tw-text-2xl tw-font-medium tw-tabular-nums tw-text-iron-100">
                     <DecimalValue
                       locale={resolvedLocale}
                       value={wethBook?.best_bid}
                     />
-                  </div>
+                  </dd>
                 </div>
-              </div>
-
-              {data.status === ApiMarketDepthStatusEnum.Stale && (
-                <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-amber-200">
-                  {t(resolvedLocale, "marketDepth.stale", {
-                    time:
-                      formattedAsOf ??
-                      t(resolvedLocale, "marketDepth.staleUnknownTime"),
-                  })}
-                </p>
-              )}
+              </dl>
 
               {!hasQuotedLevels && (
-                <p className="tw-mb-0 tw-mt-4 tw-rounded-lg tw-bg-black/20 tw-p-3 tw-text-sm tw-text-iron-400">
+                <p className="tw-mb-0 tw-mt-6 tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-pb-6 tw-text-sm tw-text-iron-400">
                   {t(resolvedLocale, "marketDepth.empty")}
                 </p>
               )}
 
               {nonEmptySides.length > 0 && (
-                <div className="tw-mt-5 tw-grid tw-grid-cols-[repeat(auto-fit,minmax(min(100%,20rem),1fr))] tw-gap-4">
+                <div className="tw-mt-10 tw-grid tw-grid-cols-[repeat(auto-fit,minmax(min(100%,20rem),1fr))] tw-gap-x-12 tw-gap-y-10">
                   {nonEmptySides.map(({ book, side, levels }) => (
                     <div
                       key={`${book.currency.address}-${side}`}
-                      className="tw-min-w-0 tw-rounded-lg tw-bg-black/5 tw-p-1 sm:tw-p-2"
+                      className="tw-min-w-0"
                     >
                       <div className="tw-mb-3 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-3 tw-gap-y-1">
-                        <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+                        <h3 className="tw-m-0 tw-text-base tw-font-medium tw-text-iron-100">
                           {t(
                             resolvedLocale,
                             side === "ask"
@@ -532,7 +658,7 @@ export default function MarketDepthPanel({
                         {!isCanonicalCurrency(book) && (
                           <span
                             title={book.currency.address}
-                            className="tw-w-full tw-break-all tw-text-[10px] tw-text-iron-500"
+                            className="tw-w-full tw-break-all tw-text-xs tw-text-iron-500"
                           >
                             {book.currency.address}
                           </span>
@@ -549,6 +675,10 @@ export default function MarketDepthPanel({
                 </div>
               )}
 
+              <p className="tw-mb-0 tw-mt-8 tw-max-w-3xl tw-text-xs tw-leading-5 tw-text-iron-500">
+                {t(resolvedLocale, "marketDepth.sourceCaveat")}
+              </p>
+
               <MarketDepthOrderDetails
                 data={data}
                 locale={resolvedLocale}
@@ -556,34 +686,7 @@ export default function MarketDepthPanel({
                 isLoadingMore={isLoadingMore}
                 loadMoreError={currentLoadMoreError}
               />
-
-              {(data.criteria_order_count > 0 || data.notes.length > 0) && (
-                <div className="tw-mt-4 tw-border-t tw-border-solid tw-border-white/10 tw-pt-3 tw-text-xs tw-leading-5 tw-text-iron-500">
-                  {data.criteria_order_count > 0 && (
-                    <p className="tw-m-0">
-                      {t(
-                        resolvedLocale,
-                        data.criteria_order_count === 1
-                          ? "marketDepth.criteriaSummary.single"
-                          : "marketDepth.criteriaSummary",
-                        { count: data.criteria_order_count }
-                      )}
-                    </p>
-                  )}
-                  {data.notes.length > 0 && (
-                    <details className="tw-mt-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-px-3 tw-py-2">
-                      <summary className="tw-cursor-pointer tw-font-semibold tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
-                        {t(resolvedLocale, "marketDepth.details")}
-                      </summary>
-                      <ul className="tw-mb-0 tw-mt-2 tw-space-y-1 tw-pl-4">
-                        {data.notes.map((note) => (
-                          <li key={note}>{note}</li>
-                        ))}
-                      </ul>
-                    </details>
-                  )}
-                </div>
-              )}
+              <AboutPrices data={data} locale={resolvedLocale} />
             </>
           )}
         </div>

@@ -3,14 +3,9 @@ import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import {
-  Dialog,
-  DialogPanel,
-  Transition,
-  TransitionChild,
-} from "@headlessui/react";
+import { Dialog, DialogPanel, TransitionChild } from "@headlessui/react";
 import clsx from "clsx";
-import { Fragment, useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
 import MobileWrapperDialogHeader from "./MobileWrapperDialogHeader";
@@ -384,6 +379,7 @@ export default function MobileWrapperDialog({
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const isTouchDevice = useIsTouchDevice();
   const titleRef = useRef<HTMLElement>(null);
+  const [dialogMount, setDialogMount] = useState<HTMLSpanElement | null>(null);
   const resolvedBackLabel = backLabel ?? t(locale, "common.back");
   const resolvedCloseLabel = closeLabel ?? t(locale, "common.close");
   const {
@@ -445,9 +441,10 @@ export default function MobileWrapperDialog({
   const hideMobileCloseButton = canDragToClose;
   const shouldHideOnDesktopHover =
     hideOnDesktopHover && !isMobileLayoutViewport && !isTouchDevice;
+  const dialogOpen = isOpen && dialogMount !== null;
 
   useEffect(() => {
-    if (!isOpen || !focusTitleOnOpen) {
+    if (!dialogOpen || !focusTitleOnOpen) {
       return;
     }
 
@@ -456,16 +453,21 @@ export default function MobileWrapperDialog({
     });
 
     return () => globalThis.cancelAnimationFrame(frame);
-  }, [focusTitleOnOpen, isOpen, title]);
+  }, [focusTitleOnOpen, dialogOpen, title]);
 
   if (shouldHideOnDesktopHover) {
     return null;
   }
 
   return (
-    <Transition appear={true} show={isOpen} as={Fragment}>
+    <>
+      {/* Commit the in-tree mount before opening so Headless UI can resolve its
+          modal boundary even after a menu has completed the global handoff.
+          The stable callback ref also resets readiness when this surface hides. */}
+      <span hidden aria-hidden="true" ref={setDialogMount} />
       <Dialog
         as="div"
+        open={dialogOpen}
         className={clsx("tailwind-scope tw-absolute", zIndexClassName)}
         onClose={handleClose}
         aria-label={ariaLabel}
@@ -526,13 +528,11 @@ export default function MobileWrapperDialog({
                           headerActions={headerActions}
                           showHeaderCloseButton={showInlineHeaderCloseButton}
                           showHeaderDivider={showHeaderDivider}
-                          headerCloseButtonClassName={
-                            clsx(
-                              hideMobileCloseButton &&
-                                "!tw-hidden md:!tw-inline-flex",
-                              headerCloseButtonClassName
-                            )
-                          }
+                          headerCloseButtonClassName={clsx(
+                            hideMobileCloseButton &&
+                              "!tw-hidden md:!tw-inline-flex",
+                            headerCloseButtonClassName
+                          )}
                           titleClassName={titleClassName}
                           titleRef={titleRef}
                           backLabel={resolvedBackLabel}
@@ -548,6 +548,6 @@ export default function MobileWrapperDialog({
           </div>
         </div>
       </Dialog>
-    </Transition>
+    </>
   );
 }

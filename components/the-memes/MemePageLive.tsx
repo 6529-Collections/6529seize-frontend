@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import type { NFT } from "@/entities/INFT";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
+import CollectDetailActions from "@/components/collect/CollectDetailActions";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { parseNftDescriptionToHtml } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -61,17 +62,27 @@ export function MemePageLiveSubMenu(props: {
 }) {
   if (props.show) {
     const locale = props.locale ?? DEFAULT_LOCALE;
+    const nft = props.nft;
 
     return (
       <>
-        {props.nft && (
+        {nft && (
           <>
-            <MemePageCardDescription nft={props.nft} />
-            <MemeCardFileType nft={props.nft} />
+            <MemePageCardDescription nft={nft} />
+            <MemeCardFileType nft={nft} />
             <MarketDepthPanel
               contract={MEMES_CONTRACT}
-              tokenId={props.nft.id}
+              tokenId={nft.id}
               locale={locale}
+              actions={(refresh) => (
+                <CollectDetailActions
+                  collection="memes"
+                  tokenId={String(nft.id)}
+                  title={nft.name}
+                  locale={locale}
+                  onMarketChange={refresh}
+                />
+              )}
             />
           </>
         )}
