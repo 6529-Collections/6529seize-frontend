@@ -149,6 +149,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       );
       expect(getMenuItem("Museum").children).toBeUndefined();
       expect(getMenuChildren("NFTs")).toEqual([
+        { label: "Collect", path: "/collect" },
         { label: "The Memes", path: "/the-memes" },
         { label: "6529 Gradient", path: "/6529-gradient" },
         { label: "NextGen", path: "/nextgen" },

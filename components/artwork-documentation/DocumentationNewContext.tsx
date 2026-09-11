@@ -1,5 +1,7 @@
 "use client";
 
+import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
+
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
@@ -66,7 +68,11 @@ export default function DocumentationNewContext({
         {msg("newContext")}
       </summary>
       <p className="tw-text-sm tw-leading-relaxed tw-text-iron-400">
-        {msg("newContextHelp")}
+        {msg(
+          isPublicationOnly(context.profile)
+            ? "publication.newContextHelp"
+            : "newContextHelp"
+        )}
       </p>
       {error && <DocumentationNotice error>{msg("error")}</DocumentationNotice>}
       <label className="tw-block tw-text-sm tw-text-iron-300">

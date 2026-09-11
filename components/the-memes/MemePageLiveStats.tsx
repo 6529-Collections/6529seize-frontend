@@ -6,6 +6,7 @@ import ProfileAvatar, {
 } from "@/components/common/profile/ProfileAvatar";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import CollectEntryLink from "@/components/collect/CollectEntryLink";
 import { getDistributionDetailHref } from "@/components/distribution/distributionRouteParams";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { BaseNFT, NFT } from "@/entities/INFT";
@@ -606,6 +607,9 @@ function MemeMarketplaceLinks({
         {t(locale, "theMemes.detail.live.market.marketplaces")}
       </div>
       <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
+      <div className="tw-mt-3">
+        <CollectEntryLink collection="memes" intent="specific" tokenId={String(nft.id)} locale={locale} />
+      </div>
     </div>
   );
 }

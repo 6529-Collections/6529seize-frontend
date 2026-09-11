@@ -44,8 +44,20 @@ export function ProfileCmsAgentPanel({
   });
   const schemaBundle = useMemo(() => createCmsBuilderSchemaBundle(), []);
   const [patchDraft, setPatchDraft] = useState("");
-  const [patchReview, setPatchReview] = useState<CmsAgentPatchReview | null>(
+  const [reviewedPatchJson, setReviewedPatchJson] = useState<string | null>(
     null
+  );
+  const patchReview = useMemo(
+    () =>
+      reviewedPatchJson === null
+        ? null
+        : reviewCmsAgentPatch({
+            currentDraftId: draftId,
+            currentDraftVersion,
+            currentPackage: validation.cmsPackage,
+            patchJson: reviewedPatchJson,
+          }),
+    [reviewedPatchJson, draftId, currentDraftVersion, validation.cmsPackage]
   );
   const [statusMessage, setStatusMessage] = useState("");
   const [uploadErrorMessage, setUploadErrorMessage] = useState("");
@@ -53,14 +65,7 @@ export function ProfileCmsAgentPanel({
   const reviewPatch = () => {
     setStatusMessage("");
     setUploadErrorMessage("");
-    setPatchReview(
-      reviewCmsAgentPatch({
-        currentDraftId: draftId,
-        currentDraftVersion,
-        currentPackage: validation.cmsPackage,
-        patchJson: patchDraft,
-      })
-    );
+    setReviewedPatchJson(patchDraft);
   };
 
   const applyPatch = () => {
@@ -70,7 +75,7 @@ export function ProfileCmsAgentPanel({
 
     onApplyPackage(patchReview.proposedPackage);
     setPatchDraft("");
-    setPatchReview(null);
+    setReviewedPatchJson(null);
     setStatusMessage(t(locale, "profileCms.builder.agent.patch.applied"));
   };
 
@@ -82,7 +87,7 @@ export function ProfileCmsAgentPanel({
 
     setStatusMessage("");
     setUploadErrorMessage("");
-    setPatchReview(null);
+    setReviewedPatchJson(null);
     if (file.size > MAX_AGENT_PATCH_FILE_BYTES) {
       setPatchDraft("");
       setUploadErrorMessage(
@@ -146,6 +151,11 @@ export function ProfileCmsAgentPanel({
             {t(locale, "profileCms.builder.agent.patch.review")}
           </button>
           <button
+            aria-describedby={
+              patchReview && !patchReview.ok
+                ? "cms-builder-agent-patch-errors"
+                : undefined
+            }
             className="tw-min-h-10 tw-border tw-border-solid tw-border-green tw-bg-green/10 tw-px-3 tw-text-sm tw-font-semibold tw-text-green disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
             disabled={!patchReview?.ok}
             onClick={applyPatch}
@@ -175,7 +185,7 @@ export function ProfileCmsAgentPanel({
           id="cms-builder-agent-patch"
           onChange={(event) => {
             setPatchDraft(event.target.value);
-            setPatchReview(null);
+            setReviewedPatchJson(null);
             setStatusMessage("");
             setUploadErrorMessage("");
           }}
@@ -404,7 +414,11 @@ function PatchReviewPanel({
           : t(locale, "profileCms.builder.agent.patch.rejected")}
       </div>
       {review.errors.length ? (
-        <ul className="tw-flex tw-flex-col tw-gap-2">
+        <ul
+          className="tw-flex tw-flex-col tw-gap-2"
+          id="cms-builder-agent-patch-errors"
+          role="alert"
+        >
           {review.errors.map((error) => (
             <li
               className="tw-border tw-border-solid tw-border-red tw-bg-black tw-p-3 tw-text-sm tw-text-red"

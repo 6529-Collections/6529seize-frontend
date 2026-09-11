@@ -29,6 +29,7 @@ jobs:
       jest_changed_required: ${{ steps.plan_outputs.outputs.jest_changed_required }}
       build_required: ${{ steps.plan_outputs.outputs.build_required }}
       playwright_smoke_required: ${{ steps.plan_outputs.outputs.playwright_smoke_required }}
+      playwright_collect_required: ${{ steps.plan_outputs.outputs.playwright_collect_required }}
       playwright_critical_shell_required: ${{ steps.plan_outputs.outputs.playwright_critical_shell_required }}
       playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}
       deployment_contract_required: ${{ steps.plan_outputs.outputs.deployment_contract_required }}
@@ -180,10 +181,15 @@ jobs:
             { lane: "quality", label: "Quality and contracts", runner: defaultRunner },
           ];
           const corePlaywrightLanes = [];
+          const collectBrowserRequired = plan.changed_files.some((file) =>
+            /^(?:app\/collect\/|components\/collect\/|components\/user\/collected\/|components\/nextGen\/|components\/6529Gradient\/|components\/the-memes\/|tests\/collect\/|generated\/models\/Api(?:Collect|Market))/.test(file) ||
+            ["services/api/collect-api.ts", "services/api/collect-rules-api.ts", "services/api/market-api.ts", "components/common/RecipientSelector.tsx", "components/mobile-wrapper-dialog/MobileWrapperDialog.tsx", "i18n/messages/collect.ts", "openapi.yaml", ".github/workflows/app-pr-ci.yml"].includes(file)
+          );
+          write("playwright_collect_required", String(collectBrowserRequired));
           if (plan.checks.build.required) {
             appCheckLanes.push({ lane: "build", label: "Production build", runner: buildRunner });
           }
-          if (plan.checks.playwright_smoke.required) {
+          if (plan.checks.playwright_smoke.required || collectBrowserRequired) {
             corePlaywrightLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
           }
           if (plan.checks.playwright_critical_shell.required) {
@@ -355,6 +361,19 @@ jobs:
           NEXT_DEV_DIST_DIR: ".next-playwright-smoke"
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:smoke
+
+      - name: Run Collect public browser pack
+        if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.playwright_collect_required == 'true'
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-collect"
+          PLAYWRIGHT_READONLY: "1"
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/collect"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/collect"
+        run: |
+          ./bin/6529 exec playwright test tests/collect/collect-public.spec.ts \
+            --project=web-desktop-chromium \
+            --project=web-mobile-chromium \
+            --workers=1
 
       - name: Run critical route-shell Playwright pack
         if: matrix.lane == 'playwright-critical-shell'

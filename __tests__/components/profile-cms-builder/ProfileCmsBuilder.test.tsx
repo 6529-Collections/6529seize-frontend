@@ -4,29 +4,36 @@ import {
   render,
   screen,
   waitFor,
-  within,
 } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
-
 import { useAuth } from "@/components/auth/Auth";
 import ProfileCmsBuilder from "@/components/profile-cms-builder/ProfileCmsBuilder";
 import { publicEnv } from "@/config/env";
-import { commonApiPost } from "@/services/api/common-api";
+import * as cmsApi from "@/lib/profile-cms/builder/api";
+import * as cmsImageUpload from "@/lib/profile-cms/studio/image-upload";
+import {
+  buildCmsPackageCandidate,
+  createDefaultCmsBuilderState,
+} from "@/lib/profile-cms/builder/package";
+import {
+  cmsPackageSchema,
+  withComputedCmsHashes,
+  type CmsPackageV1,
+} from "@/lib/profile-cms/protocol/v1";
+import { instantiateCmsStudioTemplate } from "@/lib/profile-cms/studio/templates";
+import roomFixture from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/exhibition-room.package.json";
 
 jest.mock("@/config/env", () => {
   const actual = jest.requireActual("@/config/env");
   return { ...actual, publicEnv: { ...actual.publicEnv } };
 });
-
-jest.mock("@/components/auth/Auth", () => ({
-  useAuth: jest.fn(),
-}));
-
+jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
 jest.mock("@/services/api/common-api", () => ({
+  getStructuredApiErrorStatus: jest.requireActual("@/services/api/common-api")
+    .getStructuredApiErrorStatus,
   commonApiPost: jest.fn(),
+  commonApiFetch: jest.fn(async () => []),
 }));
-
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({
@@ -43,584 +50,102 @@ jest.mock("next/link", () => ({
     </a>
   ),
 }));
-
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: jest.fn(),
+  useRouter: () => ({ push: jest.fn() }),
+}));
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({
+    address: "0x0000000000000000000000000000000000000001",
+    isConnected: true,
+    isSafeWallet: false,
   }),
 }));
-
-const useAuthMock = useAuth as jest.Mock;
-const commonApiPostMock = commonApiPost as jest.Mock;
-const createObjectUrlMock = jest.fn(() => "blob:cms-export");
-const revokeObjectUrlMock = jest.fn();
+jest.mock("@/hooks/profile-cms/useProfileCmsPublishSign", () => ({
+  useProfileCmsPublishSign: () => ({
+    signerAddress: "0x0000000000000000000000000000000000000001",
+    isConnected: true,
+    chainId: 1,
+    isSafe: false,
+    signTypedData: jest.fn(),
+  }),
+}));
+const auth = jest.mocked(useAuth);
+const createObjectUrl = jest.fn<string, [Blob | MediaSource]>(
+  () => "blob:cms-export"
+);
 const NativeBlob = globalThis.Blob;
-
 class CapturedBlob extends NativeBlob {
-  readonly parts: readonly BlobPart[];
-
-  constructor(parts: BlobPart[] = [], options?: BlobPropertyBag) {
+  constructor(
+    readonly parts: BlobPart[] = [],
+    options?: BlobPropertyBag
+  ) {
     super(parts, options);
-    this.parts = parts;
   }
 }
-
-describe("ProfileCmsBuilder", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    Object.defineProperty(globalThis, "Blob", {
-      configurable: true,
-      value: CapturedBlob,
-    });
-    Object.defineProperty(globalThis.URL, "createObjectURL", {
-      configurable: true,
-      value: createObjectUrlMock,
-    });
-    Object.defineProperty(globalThis.URL, "revokeObjectURL", {
-      configurable: true,
-      value: revokeObjectUrlMock,
-    });
-    delete publicEnv.PROFILE_CMS_BUILDER_API_ENABLED;
-    delete publicEnv.NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED;
-    useAuthMock.mockReturnValue({
-      activeProfileProxy: null,
-      connectedProfile: null,
-    });
-  });
-
-  afterEach(() => {
-    Object.defineProperty(globalThis, "Blob", {
-      configurable: true,
-      value: NativeBlob,
-    });
-  });
-
-  it("edits homepage content and previews with the real CMS renderer", async () => {
-    const user = userEvent.setup();
-    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
-
-    await user.clear(screen.getByLabelText("Page title"));
-    await user.type(screen.getByLabelText("Page title"), "Builder homepage");
-    await user.click(screen.getByRole("button", { name: "Callout" }));
-    await user.click(screen.getByRole("button", { name: "Preview" }));
-
-    expect(
-      screen.getByRole("heading", { name: "Builder homepage", level: 2 })
-    ).toBeInTheDocument();
-    expect(screen.getByText("Add a short callout.")).toBeInTheDocument();
-    expect(
-      screen.getByRole("navigation", { name: "punk6529 navigation" })
-    ).toBeInTheDocument();
-  });
-
-  it("exports package JSON and imports a modified candidate", async () => {
-    const user = userEvent.setup();
-    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
-
-    await user.click(screen.getByRole("button", { name: "JSON" }));
-    const jsonEditor = screen.getByLabelText(
-      "Package candidate"
-    ) as HTMLTextAreaElement;
-    const exported = JSON.parse(jsonEditor.value) as {
-      site: { title: string };
-    };
-    exported.site.title = "Imported site";
-
-    fireEvent.change(jsonEditor, {
-      target: { value: JSON.stringify(exported) },
-    });
-    await user.click(screen.getByRole("button", { name: "Import JSON" }));
-
-    expect(screen.getByLabelText("Site title")).toHaveValue("Imported site");
-  });
-
-  it("downloads package, source packet, and schema bundle JSON", async () => {
-    const user = userEvent.setup();
-    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
-
-    await user.click(screen.getByRole("button", { name: "JSON" }));
-    await user.click(
-      screen.getByRole("button", { name: "Download package JSON" })
-    );
-    await user.click(
-      screen.getByRole("button", { name: "Download source packet" })
-    );
-    await user.click(screen.getByRole("button", { name: "Download schemas" }));
-
-    expect(createObjectUrlMock).toHaveBeenCalledTimes(3);
-    const packageBlob = createObjectUrlMock.mock.calls[0]?.[0] as Blob;
-    const sourceBlob = createObjectUrlMock.mock.calls[1]?.[0] as Blob;
-    const schemaBlob = createObjectUrlMock.mock.calls[2]?.[0] as Blob;
-    await expect(readBlobText(packageBlob)).resolves.toContain(
-      '"schema": "6529.cms.package.v1"'
-    );
-    await expect(readBlobText(sourceBlob)).resolves.toContain(
-      '"schema": "6529.cms.builder_source_packet.v1"'
-    );
-    await expect(readBlobText(schemaBlob)).resolves.toContain(
-      '"schema": "6529.cms.builder_schema_bundle.v1"'
-    );
-  });
-
-  it("exports source packets with the current draft version after edits", async () => {
-    const user = userEvent.setup();
-    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
-
-    await user.clear(screen.getByLabelText("Page title"));
-    await user.type(screen.getByLabelText("Page title"), "Versioned draft");
-    await user.click(screen.getByRole("button", { name: "JSON" }));
-    await user.click(
-      screen.getByRole("button", { name: "Download source packet" })
-    );
-
-    const sourceBlob = createObjectUrlMock.mock.calls[0]?.[0] as Blob;
-    const sourcePacket = JSON.parse(await readBlobText(sourceBlob)) as {
-      draft: { base_version: number };
-    };
-    expect(sourcePacket.draft.base_version).toBeGreaterThan(0);
-  });
-
-  it("reviews an agent patch and applies it only after explicit approval", async () => {
-    const user = userEvent.setup();
-    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
-
-    const packageHash = await getCurrentPackageHash(user);
-    await user.click(screen.getByRole("button", { name: "Agent" }));
-    fireEvent.change(screen.getByLabelText("Agent patch JSON"), {
-      target: {
-        value: JSON.stringify(
-          buildAgentPatch(packageHash, [
-            {
-              op: "update_page_metadata",
-              path: "/payload/pages/0/metadata/title",
-              value: "Agent reviewed homepage",
-              reason: "Tighten the homepage title.",
-            },
-          ])
-        ),
-      },
-    });
-    await user.click(screen.getByRole("button", { name: "Review patch" }));
-
-    expect(
-      screen.getByText("Patch validates against the current draft.")
-    ).toBeInTheDocument();
-    expect(screen.getByText("Agent reviewed homepage")).toBeInTheDocument();
-    expect(commonApiPostMock).not.toHaveBeenCalled();
-
-    await user.click(screen.getByRole("button", { name: "Apply to draft" }));
-
-    expect(
-      screen.getByText("Patch applied to this draft.")
-    ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Editor" }));
-    expect(screen.getByLabelText("Page title")).toHaveValue(
-      "Agent reviewed homepage"
-    );
-    expect(commonApiPostMock).not.toHaveBeenCalled();
-  });
-
-  it("rejects unsafe agent patches and keeps apply disabled", async () => {
-    const user = userEvent.setup();
-    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
-
-    const packageHash = await getCurrentPackageHash(user);
-    await user.click(screen.getByRole("button", { name: "Agent" }));
-    fireEvent.change(screen.getByLabelText("Agent patch JSON"), {
-      target: {
-        value: JSON.stringify(
-          buildAgentPatch(packageHash, [
-            {
-              op: "add_block",
-              path: "/payload/pages/0/blocks/-",
-              value: {
-                id: "block-unsafe-link",
-                block_type: "button_link",
-                label: "Unsafe link",
-                href: "javascript:alert(1)",
-              },
-              reason: "Injected link.",
-            },
-          ])
-        ),
-      },
-    });
-    await user.click(screen.getByRole("button", { name: "Review patch" }));
-
-    expect(
-      screen.getByText("Patch was rejected before it could change the draft.")
-    ).toBeInTheDocument();
-    expect(screen.getByText("Code: block.unsafe_url")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Apply to draft" })
-    ).toBeDisabled();
-  });
-
-  it("rejects oversized uploaded agent patch files", async () => {
-    const user = userEvent.setup();
-    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
-
-    await user.click(screen.getByRole("button", { name: "Agent" }));
-    const file = new File(["{}"], "oversized-patch.json", {
-      type: "application/json",
-    });
-    Object.defineProperty(file, "size", {
-      configurable: true,
-      value: 2 * 1024 * 1024 + 1,
-    });
-
-    fireEvent.change(screen.getByLabelText("Upload patch"), {
-      target: { files: [file] },
-    });
-
-    expect(
-      await screen.findByText(
-        "Patch file is too large. Paste a smaller JSON patch."
-      )
-    ).toBeInTheDocument();
-    expect(screen.getByLabelText("Agent patch JSON")).toHaveValue("");
-  });
-
-  it("does not turn agent patch import into backend authority", async () => {
-    const user = userEvent.setup();
-    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
-    useAuthMock.mockReturnValue({
-      activeProfileProxy: null,
-      connectedProfile: { id: "profile-other" },
-    });
-
-    render(
-      <ProfileCmsBuilder
-        handle="punk6529"
-        profileId="profile-punk6529"
-        title="Profile CMS builder"
-      />
-    );
-
-    const packageHash = await getCurrentPackageHash(user);
-    await user.click(screen.getByRole("button", { name: "Agent" }));
-    fireEvent.change(screen.getByLabelText("Agent patch JSON"), {
-      target: {
-        value: JSON.stringify(
-          buildAgentPatch(packageHash, [
-            {
-              op: "update_theme",
-              path: "/site/theme/accent",
-              value: "#ffffff",
-            },
-          ])
-        ),
-      },
-    });
-    await user.click(screen.getByRole("button", { name: "Review patch" }));
-    await user.click(screen.getByRole("button", { name: "Apply to draft" }));
-
-    expect(commonApiPostMock).not.toHaveBeenCalled();
-
-    await user.click(screen.getByRole("button", { name: "Save draft" }));
-
-    expect(commonApiPostMock).not.toHaveBeenCalled();
-    expect(
-      screen.getByText(
-        "Connect as this profile before using backend builder actions."
-      )
-    ).toBeInTheDocument();
-  });
-
-  it("keeps publish honest when backend writes are disabled", async () => {
-    const user = userEvent.setup();
-    useAuthMock.mockReturnValue({
-      activeProfileProxy: null,
-      connectedProfile: { id: "profile-punk6529" },
-    });
-    render(
-      <ProfileCmsBuilder
-        handle="punk6529"
-        profileId="profile-punk6529"
-        title="Profile CMS builder"
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: "Save draft" }));
-
-    const statePanel = screen.getByRole("heading", {
-      name: "Draft and publish state",
-    }).parentElement;
-    expect(statePanel).not.toBeNull();
-    expect(
-      within(statePanel as HTMLElement).getByText(
-        "Builder API writes are not enabled in this frontend environment."
-      )
-    ).toBeInTheDocument();
-    expect(
-      within(statePanel as HTMLElement).getByText("profile-cms/packages")
-    ).toBeInTheDocument();
-  });
-
-  it("blocks draft saves unless the connected profile owns the target", async () => {
-    const user = userEvent.setup();
-    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
-    useAuthMock.mockReturnValue({
-      activeProfileProxy: null,
-      connectedProfile: { id: "profile-other" },
-    });
-
-    render(
-      <ProfileCmsBuilder
-        handle="punk6529"
-        profileId="profile-punk6529"
-        title="Profile CMS builder"
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: "Save draft" }));
-
-    expect(commonApiPostMock).not.toHaveBeenCalled();
-    expect(
-      screen.getByText(
-        "Connect as this profile before using backend builder actions."
-      )
-    ).toBeInTheDocument();
-  });
-
-  it("blocks server validation unless the connected profile owns the target", async () => {
-    const user = userEvent.setup();
-    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
-    useAuthMock.mockReturnValue({
-      activeProfileProxy: null,
-      connectedProfile: { id: "profile-other" },
-    });
-
-    render(
-      <ProfileCmsBuilder
-        handle="punk6529"
-        profileId="profile-punk6529"
-        title="Profile CMS builder"
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: "Server validate" }));
-
-    expect(commonApiPostMock).not.toHaveBeenCalled();
-    expect(
-      screen.getByText(
-        "Connect as this profile before using backend builder actions."
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("profile-cms/packages/validate")
-    ).toBeInTheDocument();
-  });
-
-  it("requests a fixture wallet snapshot and previews the generated gallery", async () => {
-    const user = userEvent.setup();
-    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
-
-    await user.click(screen.getByRole("button", { name: "Wallet gallery" }));
-    await user.click(screen.getByRole("button", { name: "Request snapshot" }));
-
-    expect(await screen.findByText("Fixture snapshot")).toBeInTheDocument();
-    expect(screen.getByText("The Memes #1")).toBeInTheDocument();
-    expect(screen.getAllByText("Media pending").length).toBeGreaterThan(0);
-
-    await user.click(screen.getByRole("button", { name: "Preview" }));
-
-    expect(
-      screen.getByRole("heading", { name: "punk6529 Gallery", level: 2 })
-    ).toBeInTheDocument();
-    expect(screen.getByText("Wallet gallery")).toBeInTheDocument();
-    expect(
-      screen.getAllByAltText("The Memes by 6529 card number 1").length
-    ).toBeGreaterThan(0);
-  });
-
-  it("validates wallet input before requesting a gallery snapshot", async () => {
-    const user = userEvent.setup();
-    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
-
-    await user.click(screen.getByRole("button", { name: "Wallet gallery" }));
-    fireEvent.change(screen.getByLabelText("Wallets or ENS names"), {
-      target: { value: "not_a_wallet!" },
-    });
-    await waitFor(() =>
-      expect(screen.getByLabelText("Wallets or ENS names")).toHaveValue(
-        "not_a_wallet!"
-      )
-    );
-    await user.click(screen.getByRole("button", { name: "Request snapshot" }));
-
-    expect(
-      await screen.findByText(
-        "These wallet entries need attention: not_a_wallet!"
-      )
-    ).toBeInTheDocument();
-    expect(commonApiPostMock).not.toHaveBeenCalled();
-  });
-
-  it("updates hide, feature, and priority controls for reviewed works", async () => {
-    const user = userEvent.setup();
-    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
-
-    await user.click(screen.getByRole("button", { name: "Wallet gallery" }));
-    await user.click(screen.getByRole("button", { name: "Request snapshot" }));
-    expect(await screen.findByText("The Memes #1")).toBeInTheDocument();
-
-    await user.click(screen.getAllByRole("button", { name: "Hide" })[0]!);
-    expect(screen.getByRole("button", { name: "Unhide" })).toBeInTheDocument();
-
-    await user.click(
-      screen.getAllByRole("button", { name: "Feature work" })[0]!
-    );
-    expect(
-      screen.getAllByRole("button", { name: "Unfeature work" }).length
-    ).toBeGreaterThan(1);
-
-    await user.click(screen.getAllByRole("button", { name: "Move down" })[0]!);
-    const workHeadings = screen.getAllByRole("heading", { level: 4 });
-    expect(workHeadings[0]).toHaveTextContent("The Memes #2");
-
-    await user.click(screen.getByRole("button", { name: "Preview" }));
-    expect(screen.queryByAltText("The Memes by 6529 card number 1")).toBeNull();
-    expect(
-      screen.getAllByAltText("The Memes by 6529 card number 2").length
-    ).toBeGreaterThan(0);
-  });
-
-  it("does not show a stale save result after edits during the request", async () => {
-    const user = userEvent.setup();
-    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
-    useAuthMock.mockReturnValue({
-      activeProfileProxy: null,
-      connectedProfile: { id: "profile-punk6529" },
-    });
-    let resolvePost:
-      | ((value: { draft_id: string; package_hash: string }) => void)
-      | undefined;
-    commonApiPostMock.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          resolvePost = resolve;
-        })
-    );
-
-    render(
-      <ProfileCmsBuilder
-        handle="punk6529"
-        profileId="profile-punk6529"
-        title="Profile CMS builder"
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: "Save draft" }));
-    await user.clear(screen.getByLabelText("Page title"));
-    await user.type(screen.getByLabelText("Page title"), "Changed draft");
-    await act(async () => {
-      resolvePost?.({ draft_id: "draft-1", package_hash: "hash-1" });
-    });
-
-    expect(screen.queryByText("Draft saved.")).not.toBeInTheDocument();
-    expect(screen.queryByText("draft-1")).not.toBeInTheDocument();
-  });
-
-  it("keeps production publish disabled until the signed storage flow exists", async () => {
-    const user = userEvent.setup();
-    useAuthMock.mockReturnValue({
-      activeProfileProxy: null,
-      connectedProfile: { id: "profile-punk6529" },
-    });
-    render(
-      <ProfileCmsBuilder
-        handle="punk6529"
-        profileId="profile-punk6529"
-        title="Profile CMS builder"
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: "Publish" }));
-
-    expect(
-      screen.getByText(
-        "Publishing needs the signed decentralized storage flow and is not enabled in this MVP."
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("profile-cms/packages/:id/publish")
-    ).toBeInTheDocument();
-  });
-
-  it("blocks publish unless the connected profile owns the target", async () => {
-    const user = userEvent.setup();
-    useAuthMock.mockReturnValue({
-      activeProfileProxy: null,
-      connectedProfile: { id: "profile-other" },
-    });
-
-    render(
-      <ProfileCmsBuilder
-        handle="punk6529"
-        profileId="profile-punk6529"
-        title="Profile CMS builder"
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: "Publish" }));
-
-    expect(
-      screen.getByText(
-        "Connect as this profile before using backend builder actions."
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("profile-cms/packages/:id/publish")
-    ).toBeInTheDocument();
-  });
-
-  it("adds a 3D room primitive and previews it through the CMS renderer", async () => {
-    const user = userEvent.setup();
-    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
-
-    await user.click(screen.getAllByRole("button", { name: "3D room" })[0]);
-    expect(screen.getByLabelText("Room style")).toHaveValue("white_cube");
-    await user.clear(screen.getByLabelText("Room work title"));
-    await user.type(
-      screen.getByLabelText("Room work title"),
-      "Builder Room Work"
-    );
-    await user.click(screen.getByRole("button", { name: "Preview" }));
-
-    expect(
-      screen.getByRole("button", { name: "Enter room" })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Builder Room Work" })
-    ).toHaveAttribute("href", "/punk6529/rooms/work-4/index.html");
-  });
-});
-
-async function getCurrentPackageHash(
-  user: ReturnType<typeof userEvent.setup>
-): Promise<string> {
-  await user.click(screen.getByRole("button", { name: "JSON" }));
-  const jsonEditor = screen.getByLabelText(
-    "Package candidate"
-  ) as HTMLTextAreaElement;
-  const exported = JSON.parse(jsonEditor.value) as {
-    integrity: { package_hash: string };
-  };
-  return exported.integrity.package_hash;
+const recoveryKey =
+  "profile-cms-recovery-v1:profile:0x0000000000000000000000000000000000000001";
+function owner(isAuthenticated: boolean | undefined) {
+  auth.mockReturnValue({
+    isAuthenticated,
+    activeProfileProxy: null,
+    connectedProfile: { id: "profile" },
+  } as ReturnType<typeof useAuth>);
 }
-
-function buildAgentPatch(
-  packageHash: string,
-  operations: readonly Record<string, unknown>[]
-): Record<string, unknown> {
+function showBuilder() {
+  return render(
+    <ProfileCmsBuilder handle="punk6529" profileId="profile" title="Builder" />
+  );
+}
+function click(name: string) {
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: name === "Apply" ? "Apply changes" : name,
+    })
+  );
+}
+function tab(name: "JSON" | "Agent") {
+  const details = screen.getByText("More tools").closest("details");
+  if (details && !details.open)
+    fireEvent.click(details.querySelector("summary")!);
+  click(name);
+}
+function currentPackage(): CmsPackageV1 {
+  tab("JSON");
+  return cmsPackageSchema.parse(
+    JSON.parse(
+      (screen.getByLabelText("Package candidate") as HTMLTextAreaElement).value
+    )
+  );
+}
+function importPackage(
+  document = buildCmsPackageCandidate(createDefaultCmsBuilderState("punk6529"))
+) {
+  tab("JSON");
+  fireEvent.change(screen.getByLabelText("Package candidate"), {
+    target: { value: JSON.stringify(document) },
+  });
+  click("Import JSON");
+  return document;
+}
+function change(label: string, value: string) {
+  fireEvent.change(screen.getByLabelText(label), { target: { value } });
+}
+function saveMock() {
+  return jest.spyOn(cmsApi, "runProfileCmsBuilderAction").mockResolvedValue({
+    ok: true,
+    action: "save_draft",
+    code: "draft_saved",
+    draftId: "saved-id",
+  });
+}
+function patch(hash: string, operations: unknown[]) {
   return {
     schema: "6529.cms.agent_patch.v1",
     patch_id: "patch-test",
     target: {
       draft_id: "local-draft",
-      base_version: 0,
-      base_package_hash: packageHash,
+      base_version: 1,
+      base_package_hash: hash,
     },
     operations,
     provenance: {
@@ -630,11 +155,452 @@ function buildAgentPatch(
     },
   };
 }
+beforeEach(() => {
+  jest.clearAllMocks();
+  localStorage.clear();
+  publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
+  delete publicEnv.NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED;
+  owner(true);
+  Object.defineProperty(globalThis, "Blob", {
+    configurable: true,
+    value: CapturedBlob,
+  });
+  Object.defineProperty(URL, "createObjectURL", {
+    configurable: true,
+    value: createObjectUrl,
+  });
+  Object.defineProperty(URL, "revokeObjectURL", {
+    configurable: true,
+    value: jest.fn(),
+  });
+  Object.defineProperty(crypto, "randomUUID", {
+    configurable: true,
+    value: () => "unique-test-id",
+  });
+});
+afterEach(() => {
+  jest.restoreAllMocks();
+  Object.defineProperty(globalThis, "Blob", {
+    configurable: true,
+    value: NativeBlob,
+  });
+});
 
-function readBlobText(blob: Blob): Promise<string> {
-  return Promise.resolve(
-    (blob as CapturedBlob).parts
-      .map((part) => (typeof part === "string" ? part : ""))
-      .join("")
+it.each([false, undefined])(
+  "requires owner authentication for saves even with stale profile metadata (%s)",
+  (authenticated) => {
+    owner(authenticated);
+    showBuilder();
+    expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+    expect(screen.getByText(/Sign in as this profile’s owner/)).toBeVisible();
+    expect(
+      screen.getAllByRole("button", { name: "Publish" })[0]
+    ).toBeDisabled();
+  }
+);
+it("allows guests to choose a template and edit it with the real renderer", () => {
+  owner(false);
+  showBuilder();
+  fireEvent.click(screen.getByRole("button", { name: "Preview Signature" }));
+  click("Use this template");
+  change("Page title", "My website");
+  click("Apply");
+  click("Preview");
+  expect(
+    screen.getByRole("heading", { name: "Mira, at the intersection." })
+  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+  click("Edit");
+  expect(currentPackage().payload.pages[0]!.metadata.title).toBe("My website");
+});
+it("blocks Save, outer tabs and preview without discarding pending page fields", () => {
+  const save = saveMock();
+  showBuilder();
+  importPackage();
+  change("Page title", "Pending title");
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+  click("Versions");
+  click("Preview");
+  expect(screen.getByLabelText("Page title")).toHaveValue("Pending title");
+  expect(screen.getByLabelText("Page title")).toHaveFocus();
+  click("Save draft");
+  expect(save).not.toHaveBeenCalled();
+});
+
+it("blocks save and navigation while an image upload could change the draft, with cancellation available", () => {
+  const upload = jest
+    .spyOn(cmsImageUpload, "uploadCmsStudioImage")
+    .mockImplementation(
+      async ({ signal }) =>
+        await new Promise((_resolve, reject) => {
+          signal.addEventListener(
+            "abort",
+            () => reject(new Error("cancelled")),
+            { once: true }
+          );
+        })
+    );
+  const save = saveMock();
+  showBuilder();
+  importPackage();
+  click("Add your art");
+  fireEvent.change(screen.getByLabelText("Image file"), {
+    target: { files: [new File(["image"], "file.png", { type: "image/png" })] },
+  });
+  change("Alt text", "New work");
+  click("Upload and add image");
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+  click("Versions");
+  click("Pages");
+  expect(screen.getByRole("button", { name: "Cancel" })).toBeVisible();
+  click("Save draft");
+  expect(save).not.toHaveBeenCalled();
+  click("Cancel");
+  expect(upload.mock.calls[0]![0].signal.aborted).toBe(true);
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeEnabled();
+});
+it("retains invalid fields and focuses the invalid slug until corrected or discarded", async () => {
+  showBuilder();
+  const original = importPackage();
+  change("Page title", "Keep my title");
+  change("Page address", "../invalid");
+  click("Apply");
+  await waitFor(() =>
+    expect(screen.getByLabelText("Page address")).toHaveFocus()
   );
-}
+  expect(screen.getByLabelText("Page title")).toHaveValue("Keep my title");
+  expect(screen.getByLabelText("Page address")).toHaveAttribute(
+    "aria-invalid",
+    "true"
+  );
+  click("Discard form changes");
+  expect(screen.getByLabelText("Page title")).toHaveValue(
+    original.payload.pages[0]!.metadata.title
+  );
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeEnabled();
+});
+it("applies one atomic form change, saves that version, and keeps undo across outer tabs", async () => {
+  const save = saveMock();
+  showBuilder();
+  const original = importPackage();
+  change("Page title", "Applied title");
+  change("Description for search and sharing", "Description edited together");
+  click("Apply");
+  click("Save draft");
+  await waitFor(() => expect(save).toHaveBeenCalledTimes(1));
+  expect(
+    save.mock.calls[0]![0].cmsPackage.payload.pages[0]!.metadata
+  ).toMatchObject({
+    title: "Applied title",
+    description: "Description edited together",
+  });
+  expect(
+    screen
+      .getAllByText("Draft saved.")
+      .some((element) => element.getAttribute("role") === "status")
+  ).toBe(true);
+  tab("JSON");
+  click("Editor");
+  click("↶ Undo");
+  expect(screen.getByLabelText("Page title")).toHaveValue(
+    original.payload.pages[0]!.metadata.title
+  );
+  click("↷ Redo");
+  expect(screen.getByLabelText("Page title")).toHaveValue("Applied title");
+});
+it("blocks undo and palette mutation while design text is pending", () => {
+  showBuilder();
+  importPackage();
+  change("Page title", "Applied first");
+  click("Apply");
+  click("Design");
+  change("Site name", "Pending site title");
+  click("↶ Undo");
+  change("Palette", "night");
+  expect(screen.getByLabelText("Site name")).toHaveValue("Pending site title");
+  expect(screen.getByLabelText("Palette")).not.toHaveValue("night");
+  click("Apply");
+  click("↶ Undo");
+  expect(screen.getByLabelText("Site name")).toHaveValue("punk6529");
+});
+it("keeps section fields through blocked navigation and preserves other pages and sources", () => {
+  showBuilder();
+  const original = importPackage(
+    instantiateCmsStudioTemplate("signature", "punk6529")
+  );
+  click("Content");
+  const text = original.payload.pages[0]!.blocks.find(
+    (block) => block.block_type === "rich_text"
+  ) as Record<string, unknown>;
+  fireEvent.click(screen.getAllByRole("button", { name: "Text" })[0]!);
+  change("Text", "My edited section");
+  click("Pages");
+  expect(screen.getByLabelText("Text")).toHaveValue("My edited section");
+  click("Apply");
+  const result = currentPackage();
+  expect(
+    result.payload.pages[0]!.blocks.find((block) => block.id === text["id"])
+  ).toMatchObject({ id: text["id"], content: "My edited section" });
+  expect(result.payload.pages.slice(1)).toEqual(
+    original.payload.pages.slice(1)
+  );
+  expect(result.payload.source_packets).toEqual(
+    original.payload.source_packets
+  );
+});
+it("resets sharing image and sets noindex without changing internal search visibility", () => {
+  showBuilder();
+  const document = instantiateCmsStudioTemplate("signature", "punk6529");
+  document.payload.pages[0]!.metadata.social_image_asset_id =
+    document.payload.assets[0]!.id;
+  document.payload.pages[0]!.metadata.search = "exclude";
+  importPackage(withComputedCmsHashes(document));
+  change("Sharing image", "");
+  fireEvent.click(
+    screen.getByRole("checkbox", {
+      name: "Allow search engines to index this page",
+    })
+  );
+  click("Apply");
+  const metadata = currentPackage().payload.pages[0]!.metadata;
+  expect(metadata.robots).toBe("noindex");
+  expect(metadata.search).toBe("exclude");
+  expect(metadata).not.toHaveProperty("social_image_asset_id");
+});
+it("preserves full imported room content when changing site metadata", () => {
+  showBuilder();
+  const original = importPackage(
+    withComputedCmsHashes(cmsPackageSchema.parse(roomFixture))
+  );
+  expect(currentPackage()).toEqual(original);
+  importPackage(
+    withComputedCmsHashes({
+      ...original,
+      site: { ...original.site, title: "Imported site" },
+    })
+  );
+  click("Design");
+  expect(screen.getByLabelText("Site name")).toHaveValue("Imported site");
+  expect(currentPackage().payload).toEqual(original.payload);
+});
+it("downloads package, source packet and schema bundle from the JSON workspace", () => {
+  showBuilder();
+  const original = importPackage();
+  tab("JSON");
+  click("Download package JSON");
+  click("Download source packet");
+  click("Download schemas");
+  expect(createObjectUrl).toHaveBeenCalledTimes(3);
+  const contents = createObjectUrl.mock.calls.map(
+    ([blob]) =>
+      JSON.parse((blob as CapturedBlob).parts.join("")) as Record<
+        string,
+        unknown
+      >
+  );
+  expect(contents[0]).toEqual(original);
+  expect(contents[1]).toMatchObject({
+    schema: "6529.cms.builder_source_packet.v1",
+    draft: { base_version: 1 },
+  });
+  expect(contents[2]).toHaveProperty("schema");
+});
+it("keeps incomplete JSON across tabs and blocks saves until explicit discard", () => {
+  showBuilder();
+  importPackage();
+  tab("JSON");
+  change("Package candidate", "{ unfinished");
+  click("Editor");
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+  tab("JSON");
+  expect(screen.getByLabelText("Package candidate")).toHaveValue(
+    "{ unfinished"
+  );
+  change("Package candidate", "");
+  expect(screen.getByLabelText("Package candidate")).toHaveValue("");
+  jest.spyOn(globalThis, "confirm").mockReturnValue(true);
+  click("Discard JSON changes");
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeEnabled();
+});
+it("recovers applied content and invalid JSON only after explicit same-scope recovery", async () => {
+  const first = showBuilder();
+  importPackage();
+  change("Page title", "Recover my title");
+  click("Apply");
+  tab("JSON");
+  change("Package candidate", "{ incomplete recovery");
+  await waitFor(() =>
+    expect(localStorage.getItem(recoveryKey)).toContain("{ incomplete recovery")
+  );
+  first.unmount();
+  showBuilder();
+  expect(screen.queryByLabelText("Page title")).toBeNull();
+  click("Recover draft");
+  expect(screen.getByLabelText("Package candidate")).toHaveValue(
+    "{ incomplete recovery"
+  );
+  jest.spyOn(globalThis, "confirm").mockReturnValue(true);
+  click("Discard JSON changes");
+  click("Editor");
+  expect(screen.getByLabelText("Page title")).toHaveValue("Recover my title");
+});
+it("clears active form state when the authenticated profile changes", () => {
+  const view = showBuilder();
+  importPackage();
+  change("Page title", "Private pending draft");
+  auth.mockReturnValue({
+    isAuthenticated: true,
+    activeProfileProxy: null,
+    connectedProfile: { id: "another-profile" },
+  } as ReturnType<typeof useAuth>);
+  view.rerender(
+    <ProfileCmsBuilder handle="punk6529" profileId="profile" title="Builder" />
+  );
+  expect(screen.queryByDisplayValue("Private pending draft")).toBeNull();
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+});
+it("surfaces failed saves in the editor instead of hiding feedback in details", async () => {
+  jest.spyOn(cmsApi, "runProfileCmsBuilderAction").mockResolvedValue({
+    ok: false,
+    action: "save_draft",
+    code: "request_failed",
+    expectedEndpoint: "profile-cms/packages",
+  });
+  showBuilder();
+  importPackage();
+  click("Save draft");
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Builder API action failed."
+  );
+  expect(screen.getByLabelText("Page title")).toBeVisible();
+});
+it("reviews Agent changes before applying them and does not grant save authority", () => {
+  owner(false);
+  showBuilder();
+  const original = importPackage();
+  tab("Agent");
+  change(
+    "Agent patch JSON",
+    JSON.stringify(
+      patch(original.integrity.package_hash, [
+        {
+          op: "update_page_metadata",
+          path: "/payload/pages/0/metadata",
+          value: { title: "Agent revised title" },
+        },
+      ])
+    )
+  );
+  click("Review patch");
+  expect(
+    screen.getByText("Patch validates against the current draft.")
+  ).toBeInTheDocument();
+  click("Apply to draft");
+  click("Editor");
+  expect(screen.getByLabelText("Page title")).toHaveValue(
+    "Agent revised title"
+  );
+  expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+});
+it("rejects unsafe Agent patches and oversized patch files", async () => {
+  showBuilder();
+  const original = importPackage();
+  tab("Agent");
+  change(
+    "Agent patch JSON",
+    JSON.stringify(
+      patch(original.integrity.package_hash, [
+        {
+          op: "add_block",
+          path: "/payload/pages/0/blocks",
+          value: {
+            id: "bad-link",
+            block_type: "button_link",
+            label: "Unsafe",
+            href: "javascript:alert(1)",
+          },
+        },
+      ])
+    )
+  );
+  click("Review patch");
+  expect(
+    screen.getByText("Patch was rejected before it could change the draft.")
+  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Apply to draft" })).toBeDisabled();
+  const file = new File(["{}"], "patch.json", { type: "application/json" });
+  Object.defineProperty(file, "size", { value: 2 * 1024 * 1024 + 1 });
+  fireEvent.change(screen.getByLabelText("Upload patch"), {
+    target: { files: [file] },
+  });
+  await waitFor(() =>
+    expect(screen.getByLabelText("Agent patch JSON")).toHaveValue("")
+  );
+});
+it("loads the exact saved package through Versions and saves the applied revision", async () => {
+  const document = instantiateCmsStudioTemplate("signature", "punk6529");
+  const record = {
+    id: "saved-id",
+    profileId: "profile",
+    profileHandle: "punk6529",
+    packageId: document.package_id,
+    version: 7,
+    status: "published" as const,
+    isPrimary: true,
+    createdAt: "2026-09-10T12:00:00Z",
+    updatedAt: "2026-09-10T12:00:00Z",
+    packageHash: document.integrity.package_hash,
+    payloadHash: document.integrity.payload_hash,
+    cmsPackage: document,
+  };
+  jest
+    .spyOn(cmsApi, "listProfileCmsPackagesForProfile")
+    .mockResolvedValue([record]);
+  jest.spyOn(cmsApi, "getProfileCmsPackageById").mockResolvedValue(record);
+  const save = saveMock();
+  showBuilder();
+  click("Versions");
+  fireEvent.click(await screen.findByRole("button", { name: "Load" }));
+  await waitFor(() =>
+    expect(screen.getByLabelText("Page title")).toHaveValue(
+      document.payload.pages[0]!.metadata.title
+    )
+  );
+  expect(currentPackage()).toEqual(document);
+  click("Editor");
+  change("Page title", "Next publication");
+  click("Apply");
+  click("Save draft");
+  await waitFor(() => expect(save).toHaveBeenCalledTimes(1));
+  expect(
+    save.mock.calls[0]![0].cmsPackage.payload.pages[0]!.metadata.title
+  ).toBe("Next publication");
+});
+it("does not accept late save responses after the owner scope changes", async () => {
+  let resolve!: (value: cmsApi.ProfileCmsBuilderActionResult) => void;
+  jest.spyOn(cmsApi, "runProfileCmsBuilderAction").mockReturnValue(
+    new Promise((done) => {
+      resolve = done;
+    })
+  );
+  const view = showBuilder();
+  importPackage();
+  click("Save draft");
+  auth.mockReturnValue({
+    isAuthenticated: false,
+    connectedProfile: null,
+    activeProfileProxy: null,
+  } as ReturnType<typeof useAuth>);
+  view.rerender(
+    <ProfileCmsBuilder handle="punk6529" profileId="profile" title="Builder" />
+  );
+  await act(async () =>
+    resolve({
+      ok: true,
+      action: "save_draft",
+      code: "draft_saved",
+      draftId: "old-owner-draft",
+    })
+  );
+  expect(screen.queryByText("Draft saved.")).toBeNull();
+});

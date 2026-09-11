@@ -1,4 +1,9 @@
+import { ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES } from "./artwork-documentation-guidance";
+import { ARTWORK_DOCUMENTATION_EXAMPLE_MESSAGES } from "./artwork-documentation-examples";
+
 export const ARTWORK_DOCUMENTATION_MESSAGES = {
+  ...ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES,
+  ...ARTWORK_DOCUMENTATION_EXAMPLE_MESSAGES,
   "artworkDocumentation.interviewEvidenceHelp":
     "Before selecting a recording or transcript, add the interview date, at least one participant and permission for that material. Choose permission for a future public record only when the participants have agreed to that use; otherwise keep the material restricted for private review.",
   "artworkDocumentation.all": "All",

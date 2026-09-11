@@ -7,8 +7,10 @@ import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
+import NftMarketActivity from "@/components/nft-market-activity/NftMarketActivity";
+import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import CollectEntryLink from "@/components/collect/CollectEntryLink";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
 import { TransferSingleActions } from "@/components/nft-transfer/TransferSingle";
 import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
@@ -26,7 +28,6 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFT } from "@/entities/INFT";
 import { CollectedCollectionType } from "@/entities/IProfile";
-import type { Transaction } from "@/entities/ITransaction";
 import {
   areEqualAddresses,
   numberWithCommas,
@@ -40,6 +41,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIdentity } from "@/hooks/useIdentity";
+import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import { ContractType } from "@/types/enums";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
@@ -62,11 +64,6 @@ interface NftWithOwner extends NFT {
 
 type GradientNftsResponse = Omit<DBResponse<NftWithOwner>, "next"> & {
   readonly next: string | null | undefined;
-};
-
-type TransactionsState = {
-  readonly nftId: string;
-  readonly data: Transaction[];
 };
 
 const GRADIENT_COLLECTION_START_INDEX = 0;
@@ -133,9 +130,16 @@ function GradientMarketMetric({
 }
 
 function GradientMarketplaceLinks({ nft }: { readonly nft: NftWithOwner }) {
+  const locale = useBrowserLocale();
   return (
-    <div className="tw-flex tw-min-w-[8.5rem] tw-items-end">
+    <div className="tw-flex tw-min-w-[8.5rem] tw-flex-wrap tw-items-end tw-gap-3">
       <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
+      <CollectEntryLink
+        collection="gradients"
+        intent="specific"
+        tokenId={String(nft.id)}
+        locale={locale}
+      />
     </div>
   );
 }
@@ -363,17 +367,8 @@ function GradientTransferWidget({ nft }: { readonly nft: NftWithOwner }) {
   );
 }
 
-function GradientActivitySection({
-  nft,
-  transactions,
-}: {
-  readonly nft: NftWithOwner;
-  readonly transactions: Transaction[];
-}) {
-  if (transactions.length === 0) {
-    return null;
-  }
-
+function GradientActivitySection({ nft }: { readonly nft: NftWithOwner }) {
+  const locale = useBrowserLocale();
   return (
     <section
       aria-labelledby="gradient-card-activity-heading"
@@ -384,22 +379,14 @@ function GradientActivitySection({
           id="gradient-card-activity-heading"
           className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200"
         >
-          Card Activity
+          {t(locale, "nftActivity.cardTitle")}
         </h3>
       </div>
-      <div className="tw-overflow-x-auto tw-overflow-y-hidden tw-pb-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-        <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
-          <tbody>
-            {transactions.map((tr) => (
-              <LatestActivityRow
-                nft={nft}
-                tr={tr}
-                key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <NftMarketActivity
+        contract={GRADIENT_CONTRACT}
+        tokenId={String(nft.id)}
+        pageSize={25}
+      />
     </section>
   );
 }
@@ -440,12 +427,6 @@ export default function GradientPageComponent({
   const [allNfts, setAllNfts] = useState<NftWithOwner[]>([]);
   const activitySectionRef = useRef<HTMLDivElement | null>(null);
   const [activityNearViewport, setActivityNearViewport] = useState(false);
-  const [transactionsState, setTransactionsState] = useState<TransactionsState>(
-    {
-      nftId: id,
-      data: [],
-    }
-  );
 
   const rankedNFTs = useMemo(
     () => [...allNfts].sort((a, b) => (a.tdh_rank > b.tdh_rank ? 1 : -1)),
@@ -481,9 +462,6 @@ export default function GradientPageComponent({
 
     return areEqualAddresses(connectedAddress, nft.owner);
   }, [connectedAddress, nft]);
-  const transactions =
-    transactionsState.nftId === id ? transactionsState.data : [];
-
   const fetchNfts = useCallback(
     async function fetchNftsInner(
       url: string,
@@ -552,40 +530,6 @@ export default function GradientPageComponent({
     observer.observe(element);
     return () => observer.disconnect();
   }, [id, nft]);
-
-  useEffect(() => {
-    if (!id || !activityNearViewport) {
-      return;
-    }
-
-    const abortController = new AbortController();
-
-    async function fetchTransactions() {
-      try {
-        const response = await fetchUrl<DBResponse<Transaction>>(
-          `${publicEnv.API_ENDPOINT}/api/transactions?contract=${GRADIENT_CONTRACT}&id=${id}`,
-          { signal: abortController.signal }
-        );
-        if (abortController.signal.aborted) {
-          return;
-        }
-        setTransactionsState({ nftId: id, data: response.data });
-      } catch (error: unknown) {
-        if (error instanceof Error && error.name === "AbortError") {
-          return;
-        }
-        console.error(
-          `Failed to fetch gradient transactions for id ${id}`,
-          error
-        );
-        setTransactionsState({ nftId: id, data: [] });
-      }
-    }
-
-    fetchTransactions();
-
-    return () => abortController.abort();
-  }, [activityNearViewport, id]);
 
   return (
     <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
@@ -670,13 +614,9 @@ export default function GradientPageComponent({
                 />
               </div>
             </div>
+            <MarketDepthPanel contract={GRADIENT_CONTRACT} tokenId={nft.id} />
             <div ref={activitySectionRef} className="tw-min-h-px">
-              {activityNearViewport && (
-                <GradientActivitySection
-                  nft={nft}
-                  transactions={transactions}
-                />
-              )}
+              {activityNearViewport && <GradientActivitySection nft={nft} />}
             </div>
           </>
         ) : (

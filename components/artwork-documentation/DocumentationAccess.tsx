@@ -15,6 +15,7 @@ import {
 } from "@/services/api/artwork-documentation-api";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
 import { MODULE_IDS } from "@/lib/artwork-documentation/registry";
+import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
 import { useDocumentationActor } from "./DocumentationAuthGate";
 import {
   DocumentationButton,
@@ -35,6 +36,7 @@ export default function DocumentationAccess({
     null
   );
   const artist = context.owner_profile_id === connectedProfile?.id;
+  const publicationOnly = isPublicationOnly(context.profile);
   const [modules, setModules] = useState<string[]>([]);
   const [evidence, setEvidence] = useState<string[]>([]);
   const [role, setRole] = useState("curatorial");
@@ -76,11 +78,13 @@ export default function DocumentationAccess({
         read_archival_files: artist
           ? evidence.includes("archival")
           : role === "technical",
-        read_rights_evidence: artist
-          ? evidence.includes("rights")
-          : role === "rights",
-        read_source_receipts: artist && evidence.includes("sources"),
-        read_contact: artist && evidence.includes("contact"),
+        read_rights_evidence:
+          !publicationOnly &&
+          (artist ? evidence.includes("rights") : role === "rights"),
+        read_source_receipts:
+          !publicationOnly && artist && evidence.includes("sources"),
+        read_contact:
+          !publicationOnly && artist && evidence.includes("contact"),
         confirm_as_artist: false,
         review_lanes: artist ? [] : [role],
         manage_assignments: false,
@@ -148,9 +152,14 @@ export default function DocumentationAccess({
             ))}
           </div>
           <p className="tw-text-xs tw-text-iron-400">
-            {msg("evidencePermissions")}
+            {msg(
+              publicationOnly ? "publication.fileAccess" : "evidencePermissions"
+            )}
           </p>
-          {["archival", "rights", "sources", "contact"].map((id) => (
+          {(publicationOnly
+            ? ["archival"]
+            : ["archival", "rights", "sources", "contact"]
+          ).map((id) => (
             <label
               key={id}
               className="tw-flex tw-items-center tw-gap-3 tw-text-sm tw-text-iron-300"
@@ -167,7 +176,11 @@ export default function DocumentationAccess({
                   )
                 }
               />
-              {msg(`evidence.${id}`)}
+              {msg(
+                publicationOnly
+                  ? "publication.originalAccess"
+                  : `evidence.${id}`
+              )}
             </label>
           ))}
         </fieldset>

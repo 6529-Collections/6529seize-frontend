@@ -19,6 +19,8 @@
       "ops/skills/**/scripts/**/*.{js,cjs,mjs}", // repo-local skill CLIs invoked by SKILL.md instructions
       "ops/workstreams/**/scripts/**/*.{js,cjs,mjs}", // campaign/workstream CLIs invoked per their plan docs
       "ops/scripts/verify-production-artifact.cjs", // isolated production artifact verifier
+      "ops/scripts/profile-cms-recover.ts", // documented independent CMS recovery CLI
+      "ops/scripts/profile-cms/migrate-static-pages.ts", // documented static-page migration CLI
       "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
       "standalone/standalone-memes-mint/src/app/layout.tsx",
       "standalone/standalone-memes-mint/src/app/page.tsx",
