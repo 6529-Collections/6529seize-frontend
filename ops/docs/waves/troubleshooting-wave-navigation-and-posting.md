@@ -82,6 +82,13 @@ is blocked.
   your connection, complete sign-in if prompted, then retry Post. A stalled
   session check expires so a later attempt can check the session again; the
   failed attempt does not automatically post your draft.
+- Post asks you to reconnect, or reactions show `Please reconnect your wallet`:
+  a saved profile can remain visible after its session can no longer renew.
+  Reconnect that profile using the
+  [wallet account controls](../navigation/feature-wallet-account-controls.md#failure-and-recovery),
+  then retry the action. Post keeps the draft when authentication fails; save
+  it before logging out or reloading. Reactions are not automatically retried
+  after signing in.
 - Footer shows `Connect your wallet to participate in this wave`:
   both chat and submission are blocked because the current viewer is signed out.
 - Footer shows `Create a profile to participate in this wave`:
