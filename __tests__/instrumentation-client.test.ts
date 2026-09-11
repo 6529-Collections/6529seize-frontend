@@ -1846,9 +1846,13 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
-  it.each([3, 7])(
-    "drops the observed raw anonymous EvalError wrapper at line %i",
-    (wrapperLine) => {
+  it.each([
+    { wrapperFunction: "n", wrapperLine: 3, wrapperColumn: 4853 },
+    { wrapperFunction: "n", wrapperLine: 7, wrapperColumn: 4853 },
+    { wrapperFunction: "r", wrapperLine: 7, wrapperColumn: 6173 },
+  ])(
+    "drops the observed raw anonymous EvalError wrapper $wrapperFunction at $wrapperLine:$wrapperColumn",
+    ({ wrapperFunction, wrapperLine, wrapperColumn }) => {
       const beforeSend = loadBeforeSend();
       const event = {
         transaction: "/waves/:wave",
@@ -1866,10 +1870,10 @@ describe("instrumentation-client", () => {
                   {
                     filename: "app:///_next/static/chunks/0example-chunk.js",
                     abs_path: "app:///_next/static/chunks/0example-chunk.js",
-                    function: "n",
+                    function: wrapperFunction,
                     in_app: true,
                     lineno: wrapperLine,
-                    colno: 4853,
+                    colno: wrapperColumn,
                   },
                   {
                     filename: "<anonymous>",
@@ -1910,7 +1914,7 @@ describe("instrumentation-client", () => {
         "    at eval (<anonymous>)",
         "    at predicate (<anonymous>:234:30)",
         "    at next (<anonymous>:234:30)",
-        `    at n (app:///_next/static/chunks/0example-chunk.js:${wrapperLine}:4853)`,
+        `    at ${wrapperFunction} (app:///_next/static/chunks/0example-chunk.js:${wrapperLine}:${wrapperColumn})`,
       ].join("\n");
 
       const result = beforeSend(event, { originalException: error });

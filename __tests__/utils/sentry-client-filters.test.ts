@@ -1157,14 +1157,16 @@ describe("sentry-client-filters", () => {
   });
 
   const createObservedRawAnonymousUnsafeEvalStack = (
-    wrapperLine: number
+    wrapperFunction: string,
+    wrapperLine: number,
+    wrapperColumn: number
   ): string =>
     [
       `EvalError: ${anonymousUnsafeEvalCspMessage}`,
       "    at eval (<anonymous>)",
       "    at predicate (<anonymous>:234:30)",
       "    at next (<anonymous>:234:30)",
-      `    at n (app:///_next/static/chunks/0example-chunk.js:${wrapperLine}:4853)`,
+      `    at ${wrapperFunction} (app:///_next/static/chunks/0example-chunk.js:${wrapperLine}:${wrapperColumn})`,
     ].join("\n");
 
   const createObservedSentryE7WasmCspUnsafeEvalEvent = (
@@ -8914,16 +8916,26 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
-  it.each([3, 7])(
-    "filters the observed raw anonymous EvalError wrapper at line %i",
-    (wrapperLine) => {
+  it.each([
+    { wrapperFunction: "n", wrapperLine: 3, wrapperColumn: 4853 },
+    { wrapperFunction: "n", wrapperLine: 7, wrapperColumn: 4853 },
+    { wrapperFunction: "r", wrapperLine: 7, wrapperColumn: 6173 },
+  ])(
+    "filters the observed raw anonymous EvalError wrapper $wrapperFunction at $wrapperLine:$wrapperColumn",
+    ({ wrapperFunction, wrapperLine, wrapperColumn }) => {
       // Arrange
       const frames = createObservedRawAnonymousUnsafeEvalFrames({
+        function: wrapperFunction,
         lineno: wrapperLine,
+        colno: wrapperColumn,
       });
       const event = createObservedRawAnonymousUnsafeEvalCspEvent({ frames });
       const error = new EvalError(anonymousUnsafeEvalCspMessage);
-      error.stack = createObservedRawAnonymousUnsafeEvalStack(wrapperLine);
+      error.stack = createObservedRawAnonymousUnsafeEvalStack(
+        wrapperFunction,
+        wrapperLine,
+        wrapperColumn
+      );
 
       // Act
       const result = shouldFilterAnonymousUnsafeEvalCspError(event, {
@@ -10875,16 +10887,57 @@ describe("sentry-client-filters", () => {
 
   it.each([
     [
-      "wrapper function",
+      "a changed wrapper function",
       createObservedRawAnonymousUnsafeEvalFrames({ function: "runTemplate" }),
     ],
-    ["wrapper line", createObservedRawAnonymousUnsafeEvalFrames({ lineno: 8 })],
     [
-      "wrapper column",
+      "a changed wrapper line",
+      createObservedRawAnonymousUnsafeEvalFrames({ lineno: 8 }),
+    ],
+    [
+      "a changed wrapper column",
       createObservedRawAnonymousUnsafeEvalFrames({ colno: 4854 }),
     ],
+    [
+      "the new function with the previous column",
+      createObservedRawAnonymousUnsafeEvalFrames({ function: "r" }),
+    ],
+    [
+      "the previous function with the new column",
+      createObservedRawAnonymousUnsafeEvalFrames({ colno: 6173 }),
+    ],
+    [
+      "the new function at an unobserved line",
+      createObservedRawAnonymousUnsafeEvalFrames({
+        function: "r",
+        lineno: 3,
+        colno: 6173,
+      }),
+    ],
+    [
+      "an unrecognized function at the new coordinates",
+      createObservedRawAnonymousUnsafeEvalFrames({
+        function: "s",
+        colno: 6173,
+      }),
+    ],
+    [
+      "a changed column on the new function",
+      createObservedRawAnonymousUnsafeEvalFrames({
+        function: "r",
+        colno: 6174,
+      }),
+    ],
+    [
+      "a conflicting application path on the new wrapper",
+      createObservedRawAnonymousUnsafeEvalFrames({
+        abs_path: "app:///utils/eval-template.ts",
+        function: "r",
+        colno: 6173,
+      }),
+    ],
   ])(
-    "does not filter raw unsafe-eval frames with a changed %s",
+    "does not filter raw unsafe-eval frames with %s",
     (_, frames) => {
       // Arrange
       const event = createObservedRawAnonymousUnsafeEvalCspEvent({ frames });
