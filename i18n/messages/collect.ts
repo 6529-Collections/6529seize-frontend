@@ -1,4 +1,65 @@
 export const COLLECT_MESSAGES = {
+  "collect.buy.splitDelivery": "Split delivery",
+  "collect.plan.batchDescription":
+    "Selected listings complete together in one transaction. Price and gas are checked before you confirm.",
+  "collect.plan.checkSelection": "Check selected listings",
+  "collect.plan.selectionEstimate":
+    "Selected listings: {price} · gas quoted at review",
+  "collect.plan.priceChanged":
+    "A selected listing’s price changed. Refresh this plan before continuing.",
+  "collect.plan.selectedTdhPreview": "Preview selected NFTs’ TDH",
+  "collect.selection.alreadySelected":
+    "This NFT is already selected from another listing.",
+  "collect.selection.limit": "Review up to {count} listings in one purchase.",
+  "collect.batchReview.quoteTitle": "Your purchase",
+  "collect.batchReview.atomic":
+    "All selected NFTs will be bought and delivered in one transaction, or none will be bought.",
+  "collect.batchReview.quotedQuantity": "Quantity {quantity}",
+  "collect.batchReview.deliveryCopies": "Deliver {quantity}",
+  "collect.batchReview.outsideProfile": "Outside this profile",
+  "collect.batchReview.purchaseTotal": "Purchase total, including fees",
+  "collect.batchReview.maximumTotal": "Maximum total with gas",
+  "collect.batchReview.gasUnavailable": "Gas quote unavailable",
+  "collect.batchReview.gasNote":
+    "Unused gas is not charged. A failed transaction can still use gas.",
+  "collect.batchReview.feesDetails": "Fees and order details",
+  "collect.batchReview.fee": "Fee {number}",
+  "collect.batchReview.orderHash": "Order hash",
+  "collect.batchReview.ethAmount": "{amount} ETH",
+  "collect.batchReview.close": "Close",
+  "collect.batchReview.title": "Review purchase",
+  "collect.batchReview.description":
+    "Choose the NFTs and delivery wallets for this purchase.",
+  "collect.batchReview.defaultDelivery": "Default delivery",
+  "collect.batchReview.selectAll": "Select all",
+  "collect.batchReview.selected": "{selected} of {total} selected",
+  "collect.batchReview.selectItem": "Select {title}",
+  "collect.batchReview.itemDetail": "#{token} · Quantity {quantity}",
+  "collect.batchReview.customizeDelivery": "Change delivery",
+  "collect.batchReview.customizeDeliveryFor": "Change delivery for {title}",
+  "collect.batchReview.deliveryFor": "Delivery for {title}",
+  "collect.batchReview.destinationQuantity": "Destination {number} · Copies",
+  "collect.batchReview.addDestination": "Split to another wallet",
+  "collect.batchReview.removeDestination": "Remove last destination",
+  "collect.batchReview.useDefaultDelivery": "Use default delivery",
+  "collect.batchReview.estimate": "Estimated total {price}",
+  "collect.batchReview.nextStep":
+    "Listing fees included. Next, check live availability and review the final total with gas.",
+  "collect.batchReview.prepare": "Review live total",
+  "collect.batchReview.back": "Back to selection",
+  "collect.batchReview.invalid.empty": "Select at least one NFT to continue.",
+  "collect.batchReview.invalid.limit":
+    "Select up to {max} listings for one transaction.",
+  "collect.batchReview.invalid.allocationLimit":
+    "Use up to {allocations} delivery allocations for one transaction.",
+  "collect.batchReview.invalid.recipient":
+    "Choose a valid destination wallet. ENS names must resolve before continuing.",
+  "collect.batchReview.invalid.quantity":
+    "Enter positive whole copy counts that add up to the selected quantity.",
+  "collect.batchReview.invalid.duplicate":
+    "Combine copies for the same wallet into one destination.",
+  "collect.batchReview.invalid.consent":
+    "Check each destination outside your profile before continuing.",
   "collect.buy.atPrice": "Buy {price}",
   "collect.buy.deliverTo": "Deliver to",
   "collect.buy.changeDelivery": "Change",
