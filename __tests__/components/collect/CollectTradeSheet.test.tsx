@@ -44,55 +44,63 @@ const review: CollectTradeReview = {
 };
 
 describe("Collect immutable review", () => {
-  it("submits the reviewed ID and revision exactly once while confirmation is pending", async () => {
-    let finish: (() => void) | undefined;
-    const onConfirm = jest.fn(
-      () =>
-        new Promise<void>((resolve) => {
-          finish = resolve;
-        })
-    );
-    render(
-      <CollectTradeSheet
-        open
-        review={review}
-        stage="review"
-        onClose={jest.fn()}
-        onRefresh={jest.fn()}
-        onConfirm={onConfirm}
-      />
-    );
-    const button = screen.getByRole("button", { name: "Continue to wallet" });
-    fireEvent.click(button);
-    fireEvent.click(button);
-    expect(onConfirm).toHaveBeenCalledTimes(1);
-    expect(onConfirm).toHaveBeenCalledWith("quote-1", "revision-3");
-    expect(button).toBeDisabled();
-    await act(async () => {
-      finish?.();
-    });
-  });
+  it.each(["dialog", "contents"] as const)(
+    "submits the reviewed ID and revision exactly once while confirmation is pending in %s presentation",
+    async (presentation) => {
+      let finish: (() => void) | undefined;
+      const onConfirm = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            finish = resolve;
+          })
+      );
+      render(
+        <CollectTradeSheet
+          open
+          presentation={presentation}
+          review={review}
+          stage="review"
+          onClose={jest.fn()}
+          onRefresh={jest.fn()}
+          onConfirm={onConfirm}
+        />
+      );
+      const button = screen.getByRole("button", { name: "Continue to wallet" });
+      fireEvent.click(button);
+      fireEvent.click(button);
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+      expect(onConfirm).toHaveBeenCalledWith("quote-1", "revision-3");
+      expect(button).toBeDisabled();
+      await act(async () => {
+        finish?.();
+      });
+    }
+  );
 
-  it("blocks stale terms and requests a new review", () => {
-    const onConfirm = jest.fn(async () => undefined);
-    const onRefresh = jest.fn();
-    render(
-      <CollectTradeSheet
-        open
-        review={{ ...review, expiresAt: Date.now() - 1000 }}
-        stage="review"
-        onClose={jest.fn()}
-        onRefresh={onRefresh}
-        onConfirm={onConfirm}
-      />
-    );
-    expect(
-      screen.queryByRole("button", { name: "Continue to wallet" })
-    ).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Refresh review" }));
-    expect(onRefresh).toHaveBeenCalledTimes(1);
-    expect(onConfirm).not.toHaveBeenCalled();
-  });
+  it.each(["dialog", "contents"] as const)(
+    "blocks stale terms and requests a new review in %s presentation",
+    (presentation) => {
+      const onConfirm = jest.fn(async () => undefined);
+      const onRefresh = jest.fn();
+      render(
+        <CollectTradeSheet
+          open
+          presentation={presentation}
+          review={{ ...review, expiresAt: Date.now() - 1000 }}
+          stage="review"
+          onClose={jest.fn()}
+          onRefresh={onRefresh}
+          onConfirm={onConfirm}
+        />
+      );
+      expect(
+        screen.queryByRole("button", { name: "Continue to wallet" })
+      ).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "Refresh review" }));
+      expect(onRefresh).toHaveBeenCalledTimes(1);
+      expect(onConfirm).not.toHaveBeenCalled();
+    }
+  );
 
   it("keeps the immutable recipient visible when a signing wallet becomes unavailable", () => {
     render(

@@ -82,3 +82,77 @@ it("requires the original execution wallet to cancel a historical order", () => 
     })
   ).toBe("collect.trade.reconnect");
 });
+
+it.each([undefined, []])(
+  "accepts the confirmed primary destination when the wallet array is absent or empty: %j",
+  (wallets) => {
+    expect(
+      buildMarketRequest({
+        profile: { ...profile, primary_wallet: wallet, wallets } as ApiIdentity,
+        wallet,
+        action: "buy",
+        assetKey: operation.asset_key,
+        selectedOrder: null,
+        cancelTarget: undefined,
+        draft: {
+          quantity: "1",
+          unitPriceEth: "1",
+          expiryHours: "168",
+          recipient: wallet,
+        },
+      })
+    ).toMatchObject({
+      recipient: wallet,
+      acknowledge_external_recipient: false,
+    });
+  }
+);
+
+it("does not infer primary membership when a supplied wallet list excludes it", () => {
+  const other = "0x2222222222222222222222222222222222222222";
+  expect(() =>
+    buildMarketRequest({
+      profile: {
+        ...profile,
+        primary_wallet: wallet,
+        wallets: [{ wallet: other }],
+      } as ApiIdentity,
+      wallet: other,
+      action: "buy",
+      assetKey: operation.asset_key,
+      selectedOrder: null,
+      cancelTarget: undefined,
+      draft: {
+        quantity: "1",
+        unitPriceEth: "1",
+        expiryHours: "168",
+        recipient: wallet,
+      },
+    })
+  ).toThrow("RECIPIENT_NOT_ACKNOWLEDGED");
+});
+
+it("retains authentication gates when the connected payer uses the primary fallback", () => {
+  const fallbackProfile = {
+    ...profile,
+    primary_wallet: wallet,
+  };
+  delete fallbackProfile.wallets;
+  expect(
+    marketConnectionReason({ ...connection, profile: fallbackProfile })
+  ).toBeUndefined();
+  expect(
+    marketConnectionReason({
+      ...connection,
+      profile: fallbackProfile,
+      isAuthenticated: false,
+    })
+  ).toBe("collect.trade.connectSigner");
+  expect(
+    marketConnectionReason({
+      ...connection,
+      profile: fallbackProfile,
+      isSafe: true,
+    })
+  ).toBe("collect.trade.safeUnavailable");
+});

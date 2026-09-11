@@ -6,7 +6,7 @@ import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext
 import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { fetchUrl } from "@/services/6529api";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
@@ -54,9 +54,38 @@ jest.mock("@/components/nft-market-activity/NftMarketActivity", () => ({
     />
   ),
 }));
+const mockRefreshMarket = jest.fn();
 jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
   __esModule: true,
-  default: () => <div data-testid="market-depth" />,
+  default: ({
+    actions,
+  }: {
+    actions?: React.ReactNode | ((refresh: () => void) => React.ReactNode);
+  }) => (
+    <div data-testid="market-depth">
+      {typeof actions === "function" ? actions(mockRefreshMarket) : actions}
+    </div>
+  ),
+}));
+jest.mock("@/components/collect/CollectDetailActions", () => ({
+  __esModule: true,
+  default: ({
+    collection,
+    tokenId,
+    onMarketChange,
+  }: {
+    collection: string;
+    tokenId: string;
+    onMarketChange?: () => void;
+  }) => (
+    <button
+      data-family={collection}
+      data-token={tokenId}
+      onClick={onMarketChange}
+    >
+      Collect artwork
+    </button>
+  ),
 }));
 jest.mock("@/components/nft-transfer/TransferSingle", () => ({
   __esModule: true,
@@ -155,6 +184,12 @@ describe("GradientPage", () => {
       expect(screen.getByTestId("owner-badge")).toBeInTheDocument()
     );
     expect(screen.getByTestId("transfer-action")).toBeInTheDocument();
+    const collecting = screen.getByRole("button", { name: "Collect artwork" });
+    expect(collecting).toHaveAttribute("data-family", "gradients");
+    expect(collecting).toHaveAttribute("data-token", "1");
+    expect(screen.getByTestId("market-depth")).toContainElement(collecting);
+    fireEvent.click(collecting);
+    expect(mockRefreshMarket).toHaveBeenCalledTimes(1);
   });
 
   it("returns to the originating profile collected card", async () => {

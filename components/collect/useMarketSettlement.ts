@@ -9,7 +9,8 @@ import { useEffect, useRef } from "react";
 /** A receipt can arrive from polling or recovery, not only from the wallet request. */
 export function useMarketSettlement(
   operation: ApiMarketOperation | null,
-  onSettled?: () => void
+  onSettled?: () => void,
+  onMarketChange?: () => void
 ) {
   const client = useQueryClient();
   const observed = useRef<string | null>(null);
@@ -35,6 +36,7 @@ export function useMarketSettlement(
       STATS_QUERY_KEY,
     ])
       void client.invalidateQueries({ queryKey: [key] });
+    onMarketChange?.();
     if (state.toString() === "CONFIRMED") onSettled?.();
-  }, [id, state, client, onSettled]);
+  }, [id, state, client, onSettled, onMarketChange]);
 }

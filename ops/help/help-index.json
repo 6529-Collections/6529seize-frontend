@@ -7904,7 +7904,7 @@
     {
       "id": "collect.overview",
       "kind": "workflow",
-      "title": "Collect artwork and complete profile sets",
+      "title": "Collecting tools and profile set completion",
       "aliases": [
         "buy 6529 NFTs",
         "sell NFTs",
@@ -7913,7 +7913,10 @@
         "complete a season",
         "complete Pebbles",
         "lowest cost TDH",
-        "gift a purchase"
+        "gift a purchase",
+        "complete my set",
+        "collecting tools",
+        "lowest listings"
       ],
       "keywords": [
         "Collect",
@@ -7932,27 +7935,31 @@
         "TDH"
       ],
       "facts": [
-        "Collect at /collect supports The Memes, 6529 Gradient and NextGen Pebbles. Browse artwork, compare observed low-price listings, find specific tokens, analyze season/full-set/artist/Pebbles trait goals and compare additional TDH.",
+        "Collecting tools at /collect opens the set planner for The Memes, 6529 Gradient and NextGen Pebbles. Choose Complete a set, Lowest listings or TDH. Complete a set offers a season, a full Memes or Gradients set, an artist, or a Pebbles trait set. The planner has no duplicate artwork catalogue or search.",
+        "Browse artworks on /the-memes, /6529-gradient and /nextgen/collection/pebbles. Complete my set on The Memes carries the selected season, or its full set when no season is selected; the Gradients link opens its full set and the Pebbles link opens its trait-set planner. Browse artwork links return from Collecting tools to these native collection pages.",
+        "On a supported artwork card, the Listings and Offers section has a Collect action and a more-actions menu for Make an offer, List for sale and Review offers. Collect opens purchase review without leaving the card; current orders and trade terms are checked before signing.",
+        "Artwork-card trading actions open a dialog immediately with a loading message while the artwork and trading tools load. If the artwork cannot be loaded for trading, Try again retries within the same dialog. Close or Escape returns to the card. Closing while it loads cancels that attempt; the review does not open later when loading finishes.",
+        "Lowest listings shows observed listings for the selected collection, including prices and quantities. Open the artwork image or title for its native card page, or select Collect to review the current order. Listing coverage is incomplete and availability can change; an empty result does not prove that no orders exist elsewhere. Try again retries a failed listing request.",
         "All set collecting uses the profile across its confirmed consolidated wallets. Wallets identify custody, funding, signing or receipt; selecting a custody wallet does not redefine the primary collecting scope.",
-        "Purchase recipients follow minting: choose a profile wallet or enter a third-party wallet. Review the exact address. The purchase transaction delivers the NFT directly to that one recipient without a separate onward transfer. A gift outside the profile does not advance that profile’s projected completion or TDH.",
+        "Purchase recipients follow minting and show the profile's confirmed wallets automatically. Choose one, or use Send to a fren to search a profile or ENS name, or enter another wallet. Review the full resolved address; the paying wallet is separate from the recipient. The purchase transaction delivers the NFT directly to that one recipient without a separate onward transfer. A gift outside the profile does not advance that profile’s projected completion or TDH.",
         "Pebbles is the current NextGen project. Palette, Size, Traced and Ultimate goals extend its existing Trait Sets. Ultimate can satisfy multiple trait requirements with one token.",
-        "Completion plans show missing requirements and incomplete coverage. The initial scan checks one best exact OpenSea listing per artwork; it does not exhaust market depth. Each planned purchase gets a fresh quote and wallet approval, and several orders use separate transactions.",
+        "Completion plans show missing requirements and incomplete coverage. The initial scan checks one best exact OpenSea listing per artwork; it does not exhaust market depth. Each planned purchase gets a fresh quote and wallet approval, and several orders use separate transactions. These controls do not create collection-wide or trait-group offers.",
         "Supported execution uses Ethereum mainnet, exact NFTs, explicit quantities and ETH or WETH. Fixed-price offers use WETH and receive NFTs in the signing wallet. Profile consolidation and social proxy access do not grant trading authority over another wallet.",
         "Review the total price, fees, seller net where applicable, recipient and token approval scope. New listings include configured creator support; standard offers include required provider fees; purchases and accepted offers preserve their signed fees. The 6529 platform fee is zero.",
         "Orders at /collect/orders tracks operation recovery. Potential offer exposure begins when signable terms are revealed, even if no signature or publication is confirmed. A quote freshness timer does not expire a signed order.",
         "If a wallet may have submitted a transaction but its hash was not returned, the review shows Checking the outcome and blocks another send for that operation across browsers. Copy the hash from wallet activity into Transaction hash from your wallet and select Check this transaction. The site verifies the exact transaction; this does not send a replacement. Approvals and recovery without local browser data use the same flow.",
         "If publication or broadcast is uncertain, retain the order or transaction hash and reconcile it instead of sending a duplicate purchase. Cancellation can lose a race to a fill and is effective only after chain verification. Revoking an approval or pausing new trading does not permanently cancel signed orders.",
-        "TDH comparisons use a verified official snapshot and include changes to bonuses on existing holdings. The ranking is best among observed candidates, includes an estimated gas reserve, and is not a guarantee of future TDH or complete market coverage.",
+        "Choose TDH, a collection, budget and time horizon to compare additional TDH for the current profile. Comparisons use a verified official snapshot and include changes to bonuses on existing holdings. The ranking is best among observed candidates, includes an estimated gas reserve, and is not a guarantee of future TDH or complete market coverage.",
         "A Safe can receive a gift purchase. Execution from smart contract wallets and inside the native app is unavailable until those paths are supported. Programmatic preparation still requires owner review and wallet authorization; the backend does not hold user signing keys.",
         "Saved rules freeze exact targets, funding wallet, recipient, unit and total review limits, gas reserve, expiry and action count. They prepare one ETH purchase at a time for wallet approval. Pause and expiry retain unresolved operations, and confirmed acquisitions count permanently even if the NFT is later sold or transferred. Rules do not grant unattended wallet execution authority."
       ],
       "canonical_path": "/collect",
-      "link_label": "Collect",
+      "link_label": "Open collecting tools",
       "related_paths": [
         "/collect/orders",
         "/the-memes",
         "/6529-gradient",
-        "/nextgen"
+        "/nextgen/collection/pebbles"
       ],
       "tags": ["collections", "marketplace", "profiles", "TDH", "wallets"],
       "source_refs": [
@@ -7960,6 +7967,11 @@
         "app/collect/page.tsx",
         "app/collect/orders/page.tsx",
         "components/collect/CollectPageClient.tsx",
+        "components/collect/CollectPageView.tsx",
+        "components/collect/CollectEntryLink.tsx",
+        "components/collect/CollectDetailActions.tsx",
+        "components/collect/CollectTradeSheet.tsx",
+        "components/collect/useCollectCatalog.ts",
         "components/collect/useMarketExecution.ts"
       ]
     }
