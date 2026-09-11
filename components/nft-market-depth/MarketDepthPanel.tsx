@@ -289,7 +289,6 @@ function SnapshotMeta({
 
   return (
     <p
-      role="status"
       title={absoluteTime ?? undefined}
       className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-500"
     >
@@ -659,7 +658,7 @@ export default function MarketDepthPanel({
                         {!isCanonicalCurrency(book) && (
                           <span
                             title={book.currency.address}
-                            className="tw-w-full tw-break-all tw-text-[10px] tw-text-iron-500"
+                            className="tw-w-full tw-break-all tw-text-xs tw-text-iron-500"
                           >
                             {book.currency.address}
                           </span>
