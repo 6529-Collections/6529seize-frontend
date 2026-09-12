@@ -117,7 +117,7 @@ export const linkDocumentationAsset = (
 export const downloadDocumentationAsset = (
   contextId: string,
   assetId: string,
-  variant: "original" | "preview",
+  variant: "original" | "preview" | "media" | "c2pa_report",
   signal?: AbortSignal
 ) =>
   commonApiPost<unknown, ApiArtworkDocumentationDownloadResponse>({

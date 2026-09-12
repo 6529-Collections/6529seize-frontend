@@ -267,11 +267,18 @@ function StructuredRecordValue({
     typeof record["start"] === "string"
   )
     return (
-      <DateValue
-        start={record["start"]}
-        end={record["end"]}
-        approximate={record["approximate"] === true}
-      />
+      <>
+        <DateValue
+          start={record["start"]}
+          end={record["end"]}
+          approximate={record["approximate"] === true}
+        />
+        {typeof record["note"] === "string" && (
+          <p className="tw-mb-0 tw-mt-2 tw-whitespace-pre-wrap tw-text-sm tw-leading-7 tw-text-iron-300">
+            {record["note"]}
+          </p>
+        )}
+      </>
     );
   if (
     typeof record["kind"] === "string" &&
