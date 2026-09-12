@@ -22,6 +22,12 @@ import CollectTradeActions from "./CollectTradeActions";
 import { CollectTradeDialog } from "./CollectTradeSheet";
 import CollectOwnerAction from "./CollectOwnerAction";
 import { collectProfileWallets } from "./collect-recipient.helpers";
+import {
+  MEMES_CONTRACT,
+  GRADIENT_CONTRACT,
+  NEXTGEN_CONTRACT,
+} from "@/constants/constants";
+import { revealMarketDepth } from "@/components/nft-market-depth/market-depth-disclosure";
 
 const CollectTradeController = lazy(() => import("./CollectTradeController"));
 const MAX_DETAIL_LOOKUP_PAGES = 100;
@@ -174,6 +180,24 @@ function DetailTrade({
 }
 
 function DetailActions(props: CollectDetailActionsProps) {
+  const viewMarket = (
+    <button
+      type="button"
+      className={ACTION_CLASS}
+      onClick={() =>
+        revealMarketDepth(
+          {
+            memes: MEMES_CONTRACT,
+            gradients: GRADIENT_CONTRACT,
+            pebbles: NEXTGEN_CONTRACT,
+          }[props.collection],
+          props.tokenId
+        )
+      }
+    >
+      {t(props.locale, "marketDepth.view")}
+    </button>
+  );
   const inlineLookup = useCollectDetailAsset(props.collection, props.tokenId);
   const [action, setAction] = useState<CollectTradeAction | null>(null);
   const [purchaseSession, setPurchaseSession] = useState(0);
@@ -200,6 +224,7 @@ function DetailActions(props: CollectDetailActionsProps) {
         onClose={() => setPurchaseSession((value) => value + 1)}
         renderSecondaryActions={(assetKey) => (
           <>
+            {viewMarket}
             <button
               ref={visibleOffer}
               type="button"
@@ -247,6 +272,7 @@ function DetailActions(props: CollectDetailActionsProps) {
             : "tw-hidden"
         }
       >
+        {viewMarket}
         <button
           type="button"
           aria-label={t(props.locale, "collect.actionFor", {

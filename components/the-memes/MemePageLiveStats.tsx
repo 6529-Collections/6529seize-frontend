@@ -23,7 +23,6 @@ import {
 } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { FireIcon } from "@heroicons/react/24/outline";
 import {
   ArrowUpRightIcon,
   InformationCircleIcon as InformationCircleSolidIcon,
@@ -32,6 +31,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Tooltip } from "react-tooltip";
 import MemePageMainStageSubmissionLink from "./MemePageMainStageSubmissionLink";
+import MemeSupplyStats from "./MemeSupplyStats";
 
 const ARTWORK_LABEL_CLASS =
   "tw-mb-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 md:tw-mb-2";
@@ -51,7 +51,6 @@ const INLINE_STATS_ROW_CLASS =
   "tw-flex tw-flex-wrap tw-gap-x-10 tw-gap-y-6 sm:tw-gap-x-14";
 const DETAIL_STATS_GRID_CLASS =
   "tw-grid tw-grid-cols-2 tw-items-start tw-gap-x-6 tw-gap-y-6 lg:tw-grid-cols-3 xl:tw-gap-x-8";
-const DETAIL_STATS_GRID_ITEM_CLASS = "tw-min-w-0";
 const MARKET_OVERVIEW_ROW_CLASS =
   "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 xl:tw-gap-x-8";
 const MARKET_GRID_ITEM_CLASS =
@@ -135,60 +134,7 @@ export function MemeEditionSizeStats({
   readonly nftMeta: ApiMemesExtendedData;
   readonly locale?: SupportedLocale | undefined;
 }) {
-  const editionSizeExMuseumLabel = getEditionSizeExMuseumLabel(nftMeta, locale);
-  const rankTotal = getMemeRankTotal(nftMeta);
-  const unranked = isMemeUnranked(nftMeta);
-
-  return (
-    <section className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-6 md:tw-py-8">
-      <div className={DETAIL_STATS_GRID_CLASS}>
-        <InlineStatsMetric
-          className={DETAIL_STATS_GRID_ITEM_CLASS}
-          label={t(locale, "theMemes.detail.live.edition.editionSize")}
-          value={formatInteger(locale, nftMeta.edition_size)}
-          rank={nftMeta.edition_size_rank}
-          total={rankTotal}
-          unranked={unranked}
-          locale={locale}
-        />
-        {nftMeta.burnt > 0 && (
-          <>
-            <InlineStatsMetric
-              className={DETAIL_STATS_GRID_ITEM_CLASS}
-              label={t(locale, "theMemes.detail.live.edition.burnt")}
-              value={formatInteger(locale, nftMeta.burnt)}
-              icon={<FireIcon className="tw-h-4 tw-w-4 tw-text-red" />}
-              locale={locale}
-            />
-            <InlineStatsMetric
-              className={DETAIL_STATS_GRID_ITEM_CLASS}
-              label={t(locale, "theMemes.detail.live.edition.exBurnt")}
-              value={formatInteger(locale, nftMeta.edition_size_not_burnt)}
-              rank={nftMeta.edition_size_not_burnt_rank}
-              total={rankTotal}
-              locale={locale}
-            />
-          </>
-        )}
-        <InlineStatsMetric
-          className={DETAIL_STATS_GRID_ITEM_CLASS}
-          label={editionSizeExMuseumLabel}
-          value={formatInteger(locale, nftMeta.edition_size_cleaned)}
-          rank={nftMeta.edition_size_cleaned_rank}
-          total={rankTotal}
-          locale={locale}
-        />
-        <InlineStatsMetric
-          className={DETAIL_STATS_GRID_ITEM_CLASS}
-          label={t(locale, "theMemes.detail.live.collectors.collectors")}
-          value={formatInteger(locale, nftMeta.hodlers)}
-          rank={nftMeta.hodlers_rank}
-          total={rankTotal}
-          locale={locale}
-        />
-      </div>
-    </section>
-  );
+  return <MemeSupplyStats nftMeta={nftMeta} locale={locale} />;
 }
 
 function InlineStatsMetric({
@@ -326,15 +272,6 @@ function getPercentUniqueExMuseumLabel(
   return nftMeta.burnt > 0
     ? t(locale, "theMemes.detail.live.collectors.uniqueExBurntAndMuseum")
     : t(locale, "theMemes.detail.live.collectors.uniqueExMuseum");
-}
-
-function getEditionSizeExMuseumLabel(
-  nftMeta: ApiMemesExtendedData,
-  locale: SupportedLocale
-) {
-  return nftMeta.burnt > 0
-    ? t(locale, "theMemes.detail.live.edition.exBurntAndMuseum")
-    : t(locale, "theMemes.detail.live.edition.exMuseum");
 }
 
 function formatLivePercent(locale: SupportedLocale, value: number) {

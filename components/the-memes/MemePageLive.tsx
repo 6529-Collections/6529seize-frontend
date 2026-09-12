@@ -142,20 +142,34 @@ function MemePageAdditionalDetailsAccordion({
         type="button"
         aria-expanded={isOpen}
         aria-controls={panelId}
-        onClick={() => setToggledOpen((current) => !(current ?? defaultOpen))}
-        className="tw-group tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-bg-transparent tw-px-0 tw-py-2.5 tw-text-left tw-text-iron-300 tw-transition-colors tw-duration-150 tw-ease-out hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none"
+        aria-label={t(locale, "theMemes.detail.live.additionalDetails")}
+        aria-describedby={`${panelId}-description`}
+        onClick={(event) => {
+          // Keep the heading as the scroll anchor, including on touch browsers.
+          event.currentTarget.focus({ preventScroll: true });
+          setToggledOpen((current) => !(current ?? defaultOpen));
+        }}
+        className="tw-group tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-4 tw-text-left tw-text-iron-200 tw-transition-colors tw-duration-150 tw-ease-out hover:tw-bg-white/5 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none"
       >
-        <span className="tw-text-sm tw-font-medium tw-text-iron-300 group-hover:tw-text-white sm:tw-text-base">
-          {t(locale, "theMemes.detail.live.additionalDetails")}
+        <span className="tw-min-w-0 tw-space-y-1">
+          <span className="tw-block tw-text-base tw-font-medium tw-leading-6 tw-text-iron-200 group-hover:tw-text-white sm:tw-text-lg">
+            {t(locale, "theMemes.detail.live.additionalDetails")}
+          </span>
+          <span
+            id={`${panelId}-description`}
+            className="tw-block tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400"
+          >
+            {t(locale, "theMemes.detail.live.additionalDetailsDescription")}
+          </span>
         </span>
         <ChevronDownIcon
           aria-hidden="true"
-          className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 tw-ease-out group-hover:tw-text-white motion-reduce:tw-transition-none ${
+          className={`tw-size-5 tw-shrink-0 tw-text-iron-400 tw-transition-transform tw-duration-200 tw-ease-out group-hover:tw-text-white motion-reduce:tw-transition-none ${
             isOpen ? "tw-rotate-180 tw-text-iron-100" : ""
           }`}
         />
       </button>
-      <div id={panelId} hidden={!isOpen}>
+      <div id={panelId} hidden={!isOpen} className="[overflow-anchor:none]">
         {isOpen && (
           <div className="tw-animate-fadeIn motion-reduce:tw-animate-none">
             <MemePageArt
