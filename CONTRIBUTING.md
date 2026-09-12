@@ -94,6 +94,12 @@ Useful commands:
 reporting only lines changed from the branch's merge base with `origin/main`.
 Legacy violations on untouched lines do not block a focused contribution.
 
+Changed-file lint and format commands use a Node runner to select files and
+split large lists into bounded chunks before invoking the installed tools.
+Paths with spaces, brackets, and parentheses stay intact, including when pnpm
+uses the default Windows shell. An empty change set skips the tool, and any
+failing chunk makes the command fail.
+
 Use focused checks for narrow changes. Use `6529 run build` when changes touch
 build-time behavior, generated API models, Next.js configuration, routing, or
 deployment-sensitive code.
