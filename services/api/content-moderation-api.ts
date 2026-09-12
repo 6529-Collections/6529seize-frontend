@@ -1,8 +1,5 @@
 import type { ApiBlockedProfile } from "@/generated/models/ApiBlockedProfile";
-import type { ApiContentModerationDropDecisionRequest } from "@/generated/models/ApiContentModerationDropDecisionRequest";
-import type { ApiContentModerationDropDecisionResponse } from "@/generated/models/ApiContentModerationDropDecisionResponse";
 import type { ApiContentModerationBlockActivityItem } from "@/generated/models/ApiContentModerationBlockActivityItem";
-import type { ApiContentModerationProfileStatusRequest } from "@/generated/models/ApiContentModerationProfileStatusRequest";
 import type { ApiContentModerationProfileListItem } from "@/generated/models/ApiContentModerationProfileListItem";
 import type { ApiContentModerationProfileStatusResponse } from "@/generated/models/ApiContentModerationProfileStatusResponse";
 import type { ApiContentModerationQueueItem } from "@/generated/models/ApiContentModerationQueueItem";
@@ -182,32 +179,6 @@ export const fetchSuspendedModerationProfiles = ({
       errorMode: "structured",
     }
   );
-
-export const decideModeratedDrop = (
-  dropId: string,
-  request: ApiContentModerationDropDecisionRequest
-): Promise<ApiContentModerationDropDecisionResponse> =>
-  commonApiPost<
-    ApiContentModerationDropDecisionRequest,
-    ApiContentModerationDropDecisionResponse
-  >({
-    endpoint: `content-moderation/drops/${dropId}/decision`,
-    body: request,
-    errorMode: "structured",
-  });
-
-export const setModeratedProfileStatus = (
-  profileId: string,
-  request: ApiContentModerationProfileStatusRequest
-): Promise<ApiContentModerationProfileStatusResponse> =>
-  commonApiPost<
-    ApiContentModerationProfileStatusRequest,
-    ApiContentModerationProfileStatusResponse
-  >({
-    endpoint: `content-moderation/profiles/${profileId}/status`,
-    body: request,
-    errorMode: "structured",
-  });
 
 export const fetchPublicModeratedProfileStatus = (
   profileId: string

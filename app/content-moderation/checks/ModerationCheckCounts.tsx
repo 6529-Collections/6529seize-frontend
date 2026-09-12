@@ -23,7 +23,10 @@ export default function ModerationCheckCounts({
   });
   return (
     <section className="tw-mt-6" aria-label={t(locale, "checks.title")}>
-      <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-gap-3 xl:tw-grid-cols-4">
+      <dl
+        aria-busy={query.isLoading}
+        className="tw-m-0 tw-grid tw-grid-cols-2 tw-gap-3 xl:tw-grid-cols-4"
+      >
         {(
           [
             "needs_review",

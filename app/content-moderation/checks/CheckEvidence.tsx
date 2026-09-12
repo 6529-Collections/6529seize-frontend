@@ -4,7 +4,8 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 
-export function collectEvidenceLinks(value: unknown): string[] {
+function collectEvidenceLinks(value: unknown): string[] {
+  // This bounded convenience list is not exhaustive; the complete saved JSON remains above it.
   const links = new Set<string>();
   function visit(item: unknown, depth: number) {
     if (depth > 8 || links.size >= 30) return;

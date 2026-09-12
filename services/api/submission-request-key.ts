@@ -4,7 +4,7 @@ const pendingKeys = new Map<string, string>();
 const MAX_PENDING_SUBMISSIONS = 128;
 
 function isModeratedSubmission(endpoint: string): boolean {
-  const path = endpoint.replace(/^\/+|\/+$/g, "");
+  const path = endpoint.split("/").filter(Boolean).join("/");
   return (
     path === "drops" ||
     /^drops\/[^/]+$/.test(path) ||

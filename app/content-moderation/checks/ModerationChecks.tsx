@@ -103,9 +103,9 @@ export default function ModerationChecks({
             </button>
           </div>
           {query.isLoading && (
-            <p role="status" className="tw-text-sm tw-text-iron-400">
+            <output className="tw-block tw-text-sm tw-text-iron-400">
               {t(locale, "checks.loading")}
-            </p>
+            </output>
           )}
           {query.isError && (
             <div

@@ -46,7 +46,7 @@ function CheckContext({
   const rows: Array<[MessageKey, string | null]> = [
     ["checks.subject", item.subject_id],
     ["checks.author", item.author_profile_id],
-    ["checks.operation", item.operation],
+    ["checks.operation", checkValueLabel(locale, item.operation)],
     ["checks.version", formatInteger(locale, item.version)],
     ["checks.created", date(item.created_at)],
     ["checks.updated", date(item.updated_at)],
@@ -152,14 +152,14 @@ export default function CheckDetail({
         {detailTitle}
       </h2>
       {query.isLoading && (
-        <p role="status" className="tw-text-sm tw-text-iron-400">
+        <output className="tw-block tw-text-sm tw-text-iron-400">
           {t(locale, "checks.loadingDetail")}
-        </p>
+        </output>
       )}
       {decisionSaved && (
-        <p role="status" className="tw-mt-4 tw-text-sm tw-text-iron-200">
+        <output className="tw-mt-4 tw-block tw-text-sm tw-text-iron-200">
           {t(locale, "checks.success")}
-        </p>
+        </output>
       )}
       {query.isError && (
         <div
@@ -187,12 +187,9 @@ export default function CheckDetail({
             {checkValueLabel(locale, detail.check.review_status)}
           </p>
           {detail.evidence_expired && (
-            <p
-              role="status"
-              className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-p-3 tw-text-sm tw-leading-6 tw-text-iron-200"
-            >
+            <output className="tw-block tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-p-3 tw-text-sm tw-leading-6 tw-text-iron-200">
               {t(locale, "checks.evidenceExpired")}
-            </p>
+            </output>
           )}
           <label className="tw-mt-5 tw-block tw-space-y-2 tw-text-sm tw-text-iron-300 lg:tw-hidden">
             <span>{t(locale, "checks.sections")}</span>

@@ -383,6 +383,16 @@ mistake.
   Open reports can be withdrawn; the full moderation record remains available
   only in WatchTower.
 
+## Checks localization follow-up
+
+The developer-only `/content-moderation/checks` surface currently uses the `en-US`
+source for its `checks.*` copy in `en-GB`, `fr-FR`, `es-ES` and `de-DE`. Dates and
+numbers still follow the selected locale. Frontend maintainers own the follow-up:
+translate this namespace and verify expanded labels on mobile before declaring
+those locale dictionaries complete. Provider, model, policy-version and unknown
+future audit identifiers remain exact server values for diagnosis; known review
+actions and operations have translated message keys.
+
 ## Related pages
 
 - [Waves](waves/README.md)

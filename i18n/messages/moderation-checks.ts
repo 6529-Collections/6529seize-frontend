@@ -1,4 +1,8 @@
 export const MODERATION_CHECK_MESSAGES = {
+  "checks.operation.CREATE": "Create",
+  "checks.operation.UPDATE": "Update",
+  "checks.operation.SAVE": "Save",
+  "checks.operation.CLASSIFY": "Classify",
   "checks.profileStatus": "Profile posting status",
   "checks.trigger.PUBLIC_FIELD": "Public-facing text check",
   "checks.trigger.KNOWN_SAFE_PERSONAL_NAME": "Known personal name",

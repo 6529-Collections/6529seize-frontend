@@ -22,7 +22,7 @@ import {
 import { CONTENT_MODERATOR_ACCESS_QUERY_KEY } from "@/hooks/content-moderation/useContentModeratorAccess";
 import { checkButtonClass, checkControlClass } from "./checks.helpers";
 
-export function moderationActionLabel(
+function moderationActionLabel(
   locale: SupportedLocale,
   action: ApiModerationAction,
   detail: ApiModerationCheckDetail
@@ -223,9 +223,9 @@ export default function CheckActions({
         </div>
       )}
       {mutation.isSuccess && (
-        <p role="status" className="tw-text-sm tw-text-iron-200">
+        <output className="tw-block tw-text-sm tw-text-iron-200">
           {t(locale, "checks.success")}
-        </p>
+        </output>
       )}
     </form>
   );

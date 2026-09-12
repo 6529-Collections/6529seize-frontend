@@ -4,7 +4,7 @@ import type { ApiModerationCheckDetail } from "@/generated/models/ApiModerationC
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
-import { checkValueLabel } from "./checks.helpers";
+import { checkAuditActionLabel, checkValueLabel } from "./checks.helpers";
 import { InertEvidence } from "./CheckEvidence";
 
 export default function CheckHistory({
@@ -88,7 +88,8 @@ export default function CheckHistory({
               className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-p-4"
             >
               <h4 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
-                {entry.action} · {date(entry.created_at)}
+                {checkAuditActionLabel(locale, entry.action)} ·{" "}
+                {date(entry.created_at)}
               </h4>
               <p className="tw-my-2 tw-break-words tw-text-sm tw-text-iron-400">
                 {t(locale, "checks.actor", {

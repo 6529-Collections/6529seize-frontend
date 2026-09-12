@@ -1,4 +1,5 @@
 import type { SupportedLocale } from "@/i18n/locales";
+import { ApiModerationAction } from "@/generated/models/ApiModerationAction";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { ModerationCheckFilters } from "@/services/api/moderation-checks-api";
 
@@ -24,6 +25,11 @@ export const CHECK_FILTER_OPTIONS = {
 } as const;
 
 const VALUE_KEYS: Record<string, MessageKey> = {
+  CREATE: "checks.operation.CREATE",
+  UPDATE: "checks.operation.UPDATE",
+  SAVE: "checks.operation.SAVE",
+  CLASSIFY: "checks.operation.CLASSIFY",
+  PROFILE_STATUS: "checks.profileStatus",
   PUBLIC_FIELD: "checks.trigger.PUBLIC_FIELD",
   KNOWN_SAFE_PERSONAL_NAME: "checks.trigger.KNOWN_SAFE_PERSONAL_NAME",
   PROFILE_SUSPENDED: "checks.trigger.PROFILE_SUSPENDED",
@@ -66,13 +72,23 @@ export function safeCheckId(value: string | null): string | null {
   return value && /^[a-zA-Z0-9_-]{1,128}$/.test(value) ? value : null;
 }
 
+export function checkAuditActionLabel(
+  locale: SupportedLocale,
+  value: string
+): string {
+  const action = Object.values(ApiModerationAction).find(
+    (candidate) => String(candidate) === value
+  );
+  return action === undefined ? value : t(locale, `checks.action.${action}`);
+}
+
 export function readCheckFilters(
   params: Pick<URLSearchParams, "get">
 ): ModerationCheckFilters {
   const values: Record<string, string | number> = {};
   for (const [key, options] of Object.entries(CHECK_FILTER_OPTIONS)) {
     const value = params.get(key);
-    if (value && options.some((option) => option === value))
+    if (value && (options as readonly string[]).includes(value))
       values[key] = value;
   }
   for (const key of ["profile_id", "subject_id"] as const) {

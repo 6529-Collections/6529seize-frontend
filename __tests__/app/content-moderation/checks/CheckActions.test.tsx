@@ -1,6 +1,4 @@
-import CheckActions, {
-  moderationActionLabel,
-} from "@/app/content-moderation/checks/CheckActions";
+import CheckActions from "@/app/content-moderation/checks/CheckActions";
 import { ApiModerationAction } from "@/generated/models/ApiModerationAction";
 import { ApiModerationCheckDetailActionEffectEnum } from "@/generated/models/ApiModerationCheckDetail";
 import { applyModerationAction } from "@/services/api/moderation-checks-api";
@@ -16,7 +14,7 @@ jest.mock("@/services/api/moderation-checks-api", () => ({
   applyModerationAction: jest.fn(),
 }));
 
-function setup() {
+function setup(detail = checkFixture()) {
   const saved = jest.fn();
   const reload = jest.fn();
   const client = new QueryClient({
@@ -24,7 +22,7 @@ function setup() {
   });
   const mounted = render(
     <QueryClientProvider client={client}>
-      <CheckActions detail={checkFixture()} onSaved={saved} onReload={reload} />
+      <CheckActions detail={detail} onSaved={saved} onReload={reload} />
     </QueryClientProvider>
   );
   return { saved, reload, ...mounted };
@@ -33,19 +31,20 @@ function setup() {
 beforeEach(() => jest.clearAllMocks());
 
 it("explains distinct allow scopes", () => {
+  const first = setup();
   expect(
-    moderationActionLabel("en-US", ApiModerationAction.Allow, checkFixture())
-  ).toBe("Approve exact resubmission");
+    screen.getByRole("option", { name: "Approve exact resubmission" })
+  ).toBeInTheDocument();
+  first.unmount();
+  setup(
+    checkFixture({
+      action_effect:
+        ApiModerationCheckDetailActionEffectEnum.GlobalCategoryRule,
+    })
+  );
   expect(
-    moderationActionLabel(
-      "en-US",
-      ApiModerationAction.Allow,
-      checkFixture({
-        action_effect:
-          ApiModerationCheckDetailActionEffectEnum.GlobalCategoryRule,
-      })
-    )
-  ).toBe("Allow future category use");
+    screen.getByRole("option", { name: "Allow future category use" })
+  ).toBeInTheDocument();
 });
 
 it("requires a reason and retries the same version and idempotency key after lost response", async () => {

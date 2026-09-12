@@ -315,6 +315,7 @@ function ModerationQueueCard({
 export default function ContentModerationPageClient() {
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy, fetchingProfile } = useAuth();
+  const profileId = connectedProfile?.id;
   const pathname = usePathname();
   const activeTab =
     getModerationTab(normalizePathname(pathname).split("/")[2]) ?? "OPEN";
@@ -400,11 +401,8 @@ export default function ContentModerationPageClient() {
         (!hasModeratorIdentity || (accessQuery.isSuccess && !canModerate)) && (
           <ContentModerationNoAccess locale={locale} />
         )}
-      {moderatorContentReady && (
-        <ModerationCheckCounts
-          key={connectedProfile?.id}
-          profileId={connectedProfile!.id}
-        />
+      {moderatorContentReady && profileId && (
+        <ModerationCheckCounts key={profileId} profileId={profileId} />
       )}
       {moderatorContentReady && (
         <ContentModerationTabs
@@ -423,14 +421,15 @@ export default function ContentModerationPageClient() {
         tabIndex={moderatorContentReady ? 0 : undefined}
         className="focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
       >
-        {moderatorContentReady && activeTab === "CHECKS" && (
+        {moderatorContentReady && profileId && activeTab === "CHECKS" && (
           <Suspense
-            fallback={<p role="status">{t(locale, "checks.loading")}</p>}
+            fallback={
+              <output className="tw-block">
+                {t(locale, "checks.loading")}
+              </output>
+            }
           >
-            <ModerationChecks
-              key={connectedProfile?.id}
-              profileId={connectedProfile!.id}
-            />
+            <ModerationChecks key={profileId} profileId={profileId} />
           </Suspense>
         )}
         {moderatorContentReady && activeDataState.isLoading && (
@@ -489,13 +488,15 @@ export default function ContentModerationPageClient() {
               {t(locale, "contentModeration.moderator.emptySuspended")}
             </p>
           )}
-        {moderatorContentReady && activeTab === "BLOCK_ACTIVITY" && (
-          <BlockActivityFeed
-            key={connectedProfile?.id}
-            profileId={connectedProfile!.id}
-            enabled={moderatorContentReady}
-          />
-        )}
+        {moderatorContentReady &&
+          profileId &&
+          activeTab === "BLOCK_ACTIVITY" && (
+            <BlockActivityFeed
+              key={profileId}
+              profileId={profileId}
+              enabled={moderatorContentReady}
+            />
+          )}
         {moderatorContentReady &&
           activeTab === "SUSPENDED" &&
           suspendedProfiles.length > 0 && (
