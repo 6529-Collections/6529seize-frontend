@@ -10,7 +10,10 @@ const fs = require("node:fs");
 const CONTRACTS = [
   {
     test: "__tests__/scripts/changed-file-gates.test.ts",
-    inputs: [/^package\.json$/u, /^scripts\/require-6529-command\.cjs$/u],
+    inputs: [
+      /^package\.json$/u,
+      /^scripts\/(?:require-6529-command|changed-file-gates)\.cjs$/u,
+    ],
   },
   {
     test: "__tests__/contracts/hover-revealed-controls.test.ts",

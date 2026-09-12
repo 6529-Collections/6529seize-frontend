@@ -4,12 +4,7 @@ import os from "node:os";
 import path from "node:path";
 
 const ROOT = process.cwd();
-const gitBash = path.join(
-  process.env["ProgramFiles"] ?? "",
-  "Git/bin/bash.exe"
-);
-const bash =
-  process.platform === "win32" && fs.existsSync(gitBash) ? gitBash : "bash";
+const pnpmPath = process.env["npm_execpath"];
 const { scripts } = JSON.parse(
   fs.readFileSync(path.join(ROOT, "package.json"), "utf8")
 ) as { scripts: Record<string, string> };
@@ -51,15 +46,28 @@ function fixture() {
   git(root, ["config", "user.email", "fixture@example.invalid"]);
   git(root, ["config", "commit.gpgsign", "false"]);
   write(root, ".gitignore", "node_modules/\ngate-invocations.log\n");
+  write(root, ".npmrc", "shell-emulator=false\n");
   write(root, "src/tracked.ts", "export const value = 1;\n");
+  for (const file of ["require-6529-command.cjs", "changed-file-gates.cjs"]) {
+    write(
+      root,
+      `scripts/${file}`,
+      fs.readFileSync(path.join(ROOT, "scripts", file), "utf8")
+    );
+  }
   write(
     root,
-    "scripts/require-6529-command.cjs",
-    fs.readFileSync(path.join(ROOT, "scripts/require-6529-command.cjs"), "utf8")
+    "package.json",
+    JSON.stringify({
+      name: "gate-fixture",
+      private: true,
+      scripts: Object.fromEntries(GATES.map((gate) => [gate, scripts[gate]])),
+    })
   );
   git(root, ["add", "."]);
   git(root, ["commit", "-s", "-m", "Create gate fixture"]);
   git(root, ["update-ref", "refs/remotes/origin/main", "HEAD"]);
+  git(root, ["switch", "-c", "feature"]);
   write(root, "node_modules/eslint/bin/eslint.js", PROBE);
   write(root, "node_modules/prettier/bin/prettier.cjs", PROBE);
   return root;
@@ -73,14 +81,28 @@ interface Invocation {
 function runGate(root: string, gate: string) {
   const log = path.join(root, "gate-invocations.log");
   fs.writeFileSync(log, "");
-  // Execute the actual package command, including its wrapper guard, against
-  // an isolated repository and recording CLI. Never format/lint app fixtures.
-  const result = spawnSync(bash, ["-c", scripts[gate]!], {
-    cwd: root,
-    env: process.env,
-    encoding: "utf8",
-    timeout: 30000,
-  });
+  if (!pnpmPath)
+    throw new Error("Run this test through the 6529 package wrapper.");
+  // Exercise pnpm's real platform shell, including cmd.exe on Windows. Clear
+  // any parent wrapper override so Bash cannot hide broken package quoting.
+  const env = { ...process.env };
+  for (const key of Object.keys(env)) {
+    if (/^npm_config_(?:script_shell|shell_emulator)$/iu.test(key))
+      delete env[key];
+  }
+  env["npm_config_userconfig"] = path.join(root, ".npmrc");
+  env["npm_config_shell_emulator"] = "false";
+  const nativePnpm = pnpmPath.toLowerCase().endsWith(".exe");
+  const result = spawnSync(
+    nativePnpm ? pnpmPath : process.execPath,
+    [...(nativePnpm ? [] : [pnpmPath]), "run", gate],
+    {
+      cwd: root,
+      env,
+      encoding: "utf8",
+      timeout: 30000,
+    }
+  );
   const calls = fs
     .readFileSync(log, "utf8")
     .split("\n")
@@ -130,6 +152,35 @@ describe.each(GATES)("%s command transport", (gate) => {
     expect(args.indexOf("--")).toBeGreaterThanOrEqual(0);
     expect(args.slice(args.indexOf("--") + 1)).toEqual([file]);
   });
+
+  it("preserves each gate's revision and extension selection", () => {
+    for (const file of [
+      "src/committed.ts",
+      "src/config.cjs",
+      "src/module.mjs",
+      "generated/excluded.ts",
+    ]) {
+      write(root, file, "export {};\n");
+    }
+    git(root, ["add", "."]);
+    git(root, ["commit", "-s", "-m", "Add committed changes"]);
+    write(root, "src/tracked.ts", "export const value = 2;\n");
+    write(root, "src/untracked.ts", "export {};\n");
+    const result = runGate(root, gate);
+    expect(result.error).toBeUndefined();
+    expect(result.status).toBe(0);
+    const expected = ["src/untracked.ts"];
+    if (gate !== "lint:changed:tight") expected.push("src/tracked.ts");
+    if (gate.includes("changed") && !gate.includes("uncommitted")) {
+      expected.push("src/committed.ts");
+      if (gate.startsWith("lint:"))
+        expected.push("src/config.cjs", "src/module.mjs");
+    }
+    const received = result.calls.flatMap(({ args }) =>
+      args.slice(args.indexOf("--") + 1)
+    );
+    expect(received.sort()).toEqual(expected.sort());
+  }, 60000);
 
   it("batches large path sets without losing metacharacters or exclusions", () => {
     const files = createLargeChange(root);
