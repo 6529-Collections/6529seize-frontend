@@ -96,11 +96,11 @@ export function readCheckFilters(
     if (value && (options as readonly string[]).includes(value))
       values[key] = value;
   }
-  for (const key of ["profile_id", "subject_id"] as const) {
-    const value = safeCheckId(
-      params.get(key),
-      key === "subject_id" ? 200 : 128
-    );
+  for (const [key, maxLength] of [
+    ["profile_id", 128],
+    ["subject_id", 200],
+  ] as const) {
+    const value = safeCheckId(params.get(key), maxLength);
     if (value) values[key] = value;
   }
   for (const key of ["from", "to"] as const) {
