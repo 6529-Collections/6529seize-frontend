@@ -11,12 +11,13 @@
  * Do not edit the class manually.
  */
 
-import { ApiMarketOperationResult } from '../models/ApiMarketOperationResult';
 import { HttpFile } from '../http/http';
 
-export class ApiMarketMyOperations {
-    'operations': Array<ApiMarketOperationResult>;
-    'next': string | null;
+export class ApiMarketBatchAllocation {
+    'recipient': string;
+    'quantity': string;
+    'acknowledge_external_recipient': boolean;
+    'recipient_in_profile'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,20 +25,32 @@ export class ApiMarketMyOperations {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "operations",
-            "baseName": "operations",
-            "type": "Array<ApiMarketOperationResult>",
+            "name": "recipient",
+            "baseName": "recipient",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "next",
-            "baseName": "next",
+            "name": "quantity",
+            "baseName": "quantity",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "acknowledge_external_recipient",
+            "baseName": "acknowledge_external_recipient",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "recipient_in_profile",
+            "baseName": "recipient_in_profile",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiMarketMyOperations.attributeTypeMap;
+        return ApiMarketBatchAllocation.attributeTypeMap;
     }
 
     public constructor() {

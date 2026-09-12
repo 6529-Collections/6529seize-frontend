@@ -409,6 +409,16 @@ export * from '../models/ApiLoginResponse';
 export * from '../models/ApiMarkDropUnreadResponse';
 export * from '../models/ApiMarkWaveReadRequest';
 export * from '../models/ApiMarkWaveReadResponse';
+export * from '../models/ApiMarketBatchAllocation';
+export * from '../models/ApiMarketBatchAllocationRequest';
+export * from '../models/ApiMarketBatchCapabilities';
+export * from '../models/ApiMarketBatchItem';
+export * from '../models/ApiMarketBatchItemRequest';
+export * from '../models/ApiMarketBatchMirrorTerms';
+export * from '../models/ApiMarketBatchOperation';
+export * from '../models/ApiMarketBatchPrepareRequest';
+export * from '../models/ApiMarketBatchSettlement';
+export * from '../models/ApiMarketBatchSettlementItem';
 export * from '../models/ApiMarketComponents';
 export * from '../models/ApiMarketConsiderationItem';
 export * from '../models/ApiMarketCurrency';
@@ -423,6 +433,8 @@ export * from '../models/ApiMarketListings';
 export * from '../models/ApiMarketMyOperations';
 export * from '../models/ApiMarketOfferItem';
 export * from '../models/ApiMarketOperation';
+export * from '../models/ApiMarketOperationPrepareRequest';
+export * from '../models/ApiMarketOperationResult';
 export * from '../models/ApiMarketOrder';
 export * from '../models/ApiMarketOrderToSign';
 export * from '../models/ApiMarketOrders';
@@ -1208,6 +1220,16 @@ import { ApiLoginResponse } from '../models/ApiLoginResponse';
 import { ApiMarkDropUnreadResponse } from '../models/ApiMarkDropUnreadResponse';
 import { ApiMarkWaveReadRequest } from '../models/ApiMarkWaveReadRequest';
 import { ApiMarkWaveReadResponse } from '../models/ApiMarkWaveReadResponse';
+import { ApiMarketBatchAllocation } from '../models/ApiMarketBatchAllocation';
+import { ApiMarketBatchAllocationRequest } from '../models/ApiMarketBatchAllocationRequest';
+import { ApiMarketBatchCapabilities , ApiMarketBatchCapabilitiesExecutionPolicyEnum  , ApiMarketBatchCapabilitiesCurrencyEnum  , ApiMarketBatchCapabilitiesPayerTypeEnum  , ApiMarketBatchCapabilitiesMaxOrdersEnum  , ApiMarketBatchCapabilitiesMaxAllocationsEnum  , ApiMarketBatchCapabilitiesMaxCalldataBytesEnum  , ApiMarketBatchCapabilitiesRestrictedErc1155MaxOrderQuantityEnum    } from '../models/ApiMarketBatchCapabilities';
+import { ApiMarketBatchItem } from '../models/ApiMarketBatchItem';
+import { ApiMarketBatchItemRequest } from '../models/ApiMarketBatchItemRequest';
+import { ApiMarketBatchMirrorTerms } from '../models/ApiMarketBatchMirrorTerms';
+import { ApiMarketBatchOperation  , ApiMarketBatchOperationStateEnum               , ApiMarketBatchOperationKindEnum  , ApiMarketBatchOperationExecutionPolicyEnum        } from '../models/ApiMarketBatchOperation';
+import { ApiMarketBatchPrepareRequest, ApiMarketBatchPrepareRequestKindEnum    , ApiMarketBatchPrepareRequestCurrencyEnum  , ApiMarketBatchPrepareRequestExecutionPolicyEnum     } from '../models/ApiMarketBatchPrepareRequest';
+import { ApiMarketBatchSettlement, ApiMarketBatchSettlementOutcomeEnum        } from '../models/ApiMarketBatchSettlement';
+import { ApiMarketBatchSettlementItem } from '../models/ApiMarketBatchSettlementItem';
 import { ApiMarketComponents } from '../models/ApiMarketComponents';
 import { ApiMarketConsiderationItem } from '../models/ApiMarketConsiderationItem';
 import { ApiMarketCurrency } from '../models/ApiMarketCurrency';
@@ -1222,6 +1244,8 @@ import { ApiMarketListings } from '../models/ApiMarketListings';
 import { ApiMarketMyOperations } from '../models/ApiMarketMyOperations';
 import { ApiMarketOfferItem } from '../models/ApiMarketOfferItem';
 import { ApiMarketOperation  , ApiMarketOperationStateEnum                            } from '../models/ApiMarketOperation';
+import { ApiMarketOperationPrepareRequestClass } from '../models/ApiMarketOperationPrepareRequest';
+import { ApiMarketOperationResultClass } from '../models/ApiMarketOperationResult';
 import { ApiMarketOrder     , ApiMarketOrderSideEnum  , ApiMarketOrderScopeEnum            , ApiMarketOrderApplicabilityEnum     } from '../models/ApiMarketOrder';
 import { ApiMarketOrderToSign } from '../models/ApiMarketOrderToSign';
 import { ApiMarketOrders } from '../models/ApiMarketOrders';
@@ -1233,7 +1257,7 @@ import { ApiMarketSettlement } from '../models/ApiMarketSettlement';
 import { ApiMarketSignature } from '../models/ApiMarketSignature';
 import { ApiMarketSnapshot } from '../models/ApiMarketSnapshot';
 import { ApiMarketSubmission } from '../models/ApiMarketSubmission';
-import { ApiMarketTradeOrder   , ApiMarketTradeOrderSideEnum           } from '../models/ApiMarketTradeOrder';
+import { ApiMarketTradeOrder   , ApiMarketTradeOrderSideEnum              } from '../models/ApiMarketTradeOrder';
 import { ApiMarketTransaction    , ApiMarketTransactionPurposeEnum  , ApiMarketTransactionApprovalScopeEnum       } from '../models/ApiMarketTransaction';
 import { ApiMediaResolveRequest } from '../models/ApiMediaResolveRequest';
 import { ApiMediaResolveResponse } from '../models/ApiMediaResolveResponse';
@@ -1701,9 +1725,29 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiGroupTdhInclusionStrategy",
     "ApiIdentitySubscriptionTargetAction",
     "ApiIdentitySubscriptionTargetType",
+    "ApiMarketBatchCapabilitiesExecutionPolicyEnum",
+    "ApiMarketBatchCapabilitiesCurrencyEnum",
+    "ApiMarketBatchCapabilitiesPayerTypeEnum",
+    "ApiMarketBatchCapabilitiesMaxOrdersEnum",
+    "ApiMarketBatchCapabilitiesMaxAllocationsEnum",
+    "ApiMarketBatchCapabilitiesMaxCalldataBytesEnum",
+    "ApiMarketBatchCapabilitiesRestrictedErc1155MaxOrderQuantityEnum",
+    "ApiMarketBatchOperationStateEnum",
+    "ApiMarketBatchOperationKindEnum",
+    "ApiMarketBatchOperationExecutionPolicyEnum",
+    "ApiMarketBatchPrepareRequestKindEnum",
+    "ApiMarketBatchPrepareRequestCurrencyEnum",
+    "ApiMarketBatchPrepareRequestExecutionPolicyEnum",
+    "ApiMarketBatchSettlementOutcomeEnum",
     "ApiMarketDepthStatusEnum",
     "ApiMarketKind",
     "ApiMarketOperationStateEnum",
+    "ApiMarketOperationPrepareRequestKindEnum",
+    "ApiMarketOperationPrepareRequestCurrencyEnum",
+    "ApiMarketOperationPrepareRequestExecutionPolicyEnum",
+    "ApiMarketOperationResultStateEnum",
+    "ApiMarketOperationResultKindEnum",
+    "ApiMarketOperationResultExecutionPolicyEnum",
     "ApiMarketOrderSideEnum",
     "ApiMarketOrderScopeEnum",
     "ApiMarketOrderApplicabilityEnum",
@@ -2182,6 +2226,16 @@ let typeMap: {[index: string]: any} = {
     "ApiMarkDropUnreadResponse": ApiMarkDropUnreadResponse,
     "ApiMarkWaveReadRequest": ApiMarkWaveReadRequest,
     "ApiMarkWaveReadResponse": ApiMarkWaveReadResponse,
+    "ApiMarketBatchAllocation": ApiMarketBatchAllocation,
+    "ApiMarketBatchAllocationRequest": ApiMarketBatchAllocationRequest,
+    "ApiMarketBatchCapabilities": ApiMarketBatchCapabilities,
+    "ApiMarketBatchItem": ApiMarketBatchItem,
+    "ApiMarketBatchItemRequest": ApiMarketBatchItemRequest,
+    "ApiMarketBatchMirrorTerms": ApiMarketBatchMirrorTerms,
+    "ApiMarketBatchOperation": ApiMarketBatchOperation,
+    "ApiMarketBatchPrepareRequest": ApiMarketBatchPrepareRequest,
+    "ApiMarketBatchSettlement": ApiMarketBatchSettlement,
+    "ApiMarketBatchSettlementItem": ApiMarketBatchSettlementItem,
     "ApiMarketComponents": ApiMarketComponents,
     "ApiMarketConsiderationItem": ApiMarketConsiderationItem,
     "ApiMarketCurrency": ApiMarketCurrency,
@@ -2195,6 +2249,8 @@ let typeMap: {[index: string]: any} = {
     "ApiMarketMyOperations": ApiMarketMyOperations,
     "ApiMarketOfferItem": ApiMarketOfferItem,
     "ApiMarketOperation": ApiMarketOperation,
+    "ApiMarketOperationPrepareRequest": ApiMarketOperationPrepareRequestClass,
+    "ApiMarketOperationResult": ApiMarketOperationResultClass,
     "ApiMarketOrder": ApiMarketOrder,
     "ApiMarketOrderToSign": ApiMarketOrderToSign,
     "ApiMarketOrders": ApiMarketOrders,

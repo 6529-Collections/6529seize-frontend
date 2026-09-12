@@ -11,12 +11,15 @@
  * Do not edit the class manually.
  */
 
-import { ApiMarketOperationResult } from '../models/ApiMarketOperationResult';
+import { ApiMarketBatchAllocation } from '../models/ApiMarketBatchAllocation';
+import { ApiMarketIdentity } from '../models/ApiMarketIdentity';
 import { HttpFile } from '../http/http';
 
-export class ApiMarketMyOperations {
-    'operations': Array<ApiMarketOperationResult>;
-    'next': string | null;
+export class ApiMarketBatchSettlementItem {
+    'asset_key': string;
+    'order': ApiMarketIdentity;
+    'filled_quantity': string;
+    'allocations': Array<ApiMarketBatchAllocation>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,20 +27,32 @@ export class ApiMarketMyOperations {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "operations",
-            "baseName": "operations",
-            "type": "Array<ApiMarketOperationResult>",
+            "name": "asset_key",
+            "baseName": "asset_key",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "next",
-            "baseName": "next",
+            "name": "order",
+            "baseName": "order",
+            "type": "ApiMarketIdentity",
+            "format": ""
+        },
+        {
+            "name": "filled_quantity",
+            "baseName": "filled_quantity",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "allocations",
+            "baseName": "allocations",
+            "type": "Array<ApiMarketBatchAllocation>",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiMarketMyOperations.attributeTypeMap;
+        return ApiMarketBatchSettlementItem.attributeTypeMap;
     }
 
     public constructor() {
