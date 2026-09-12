@@ -30,7 +30,7 @@ import type {
 import OfferPlanItem from "./OfferPlanItem";
 import OfferPlanPricing, { OFFER_INPUT_CLASS } from "./OfferPlanPricing";
 
-export interface OfferPlanPanelProps {
+interface OfferPlanPanelProps {
   readonly items: readonly CollectOfferSelection[];
   readonly profile: ApiIdentity | null;
   readonly payingWallet?: string | undefined;

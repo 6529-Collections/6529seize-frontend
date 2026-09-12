@@ -2,13 +2,25 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { useId } from "react";
-import type { OfferPricingControls } from "./collect-offer-plan.types";
+import {
+  Description,
+  Field,
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+} from "@headlessui/react";
+import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import type {
+  OfferPriceMethod,
+  OfferPricingControls,
+} from "./collect-offer-plan.types";
 import { OFFER_EXPIRY_HOURS } from "./collect-offer-plan.helpers";
 
 export const OFFER_INPUT_CLASS =
   "tw-min-h-11 tw-min-w-0 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50";
 
-export const OFFER_METHODS = {
+const OFFER_METHODS = {
   manual: "collect.offerPlan.method.manual",
   match_bid: "collect.offerPlan.method.matchBid",
   improve_bid: "collect.offerPlan.method.improveBid",
@@ -40,30 +52,68 @@ export default function OfferPlanPricing({
         {t(locale, "collect.offerPlan.pricing")}
       </legend>
       <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
-        <label className="tw-space-y-2 tw-text-xs tw-text-iron-300">
-          <span>{t(locale, "collect.offerPlan.pricing")}</span>
-          <select
+        <Field className="tw-min-w-0 tw-space-y-2">
+          <Listbox
             value={value.method}
-            className={OFFER_INPUT_CLASS}
-            onChange={(event) => {
-              const method = event.target.value;
-              if (
-                method === "manual" ||
-                method === "match_bid" ||
-                method === "improve_bid" ||
-                method === "discount_ask" ||
-                method === "goal"
-              )
-                onChange({ ...value, method });
-            }}
+            onChange={(method: OfferPriceMethod) =>
+              onChange({ ...value, method })
+            }
+            disabled={disabled}
           >
-            {Object.entries(OFFER_METHODS).map(([method, key]) => (
-              <option key={method} value={method}>
-                {t(locale, key)}
-              </option>
-            ))}
-          </select>
-        </label>
+            <label
+              htmlFor={`${id}-method`}
+              className="tw-block tw-text-xs tw-text-iron-300"
+            >
+              {t(locale, "collect.offerPlan.pricing")}
+            </label>
+            <ListboxButton
+              id={`${id}-method`}
+              aria-label={t(locale, "collect.offerPlan.pricing")}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  event.currentTarget.click();
+                }
+              }}
+              className="tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+            >
+              <Description as="span" className="tw-min-w-0">
+                {t(locale, OFFER_METHODS[value.method])}
+              </Description>
+              <ChevronDownIcon
+                aria-hidden="true"
+                className="tw-size-4 tw-shrink-0 tw-text-iron-400"
+              />
+            </ListboxButton>
+            <ListboxOptions
+              aria-label={t(locale, "collect.offerPlan.pricing")}
+              anchor="bottom start"
+              className="tailwind-scope tw-z-50 tw-w-[var(--button-width)] tw-overflow-auto tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/10 [--anchor-gap:0.5rem] focus:tw-outline-none"
+            >
+              {Object.entries(OFFER_METHODS).map(([method, key]) => (
+                <ListboxOption
+                  key={method}
+                  value={method}
+                  className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-md tw-px-3 tw-py-2 data-[focus]:tw-bg-iron-800"
+                >
+                  {({ selected }) => (
+                    <>
+                      <span className="tw-min-w-0 tw-whitespace-normal">
+                        {t(locale, key)}
+                      </span>
+                      {selected && (
+                        <CheckIcon
+                          aria-hidden="true"
+                          className="tw-size-4 tw-shrink-0 tw-text-iron-300"
+                        />
+                      )}
+                    </>
+                  )}
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </Listbox>
+        </Field>
         {percentage && (
           <label className="tw-space-y-2 tw-text-xs tw-text-iron-300">
             <span>
