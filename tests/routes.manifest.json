@@ -184,6 +184,9 @@
     "/artwork-documentation": {
       "classification": "auth"
     },
+    "/artwork-documentation/example/an-alteration": {
+      "classification": "crawlable"
+    },
     "/artwork-documentation/programs/[programId]": {
       "classification": "auth"
     },

@@ -28,6 +28,12 @@ scripts/routes-manifest.cjs --json` prints the discovered patterns.
   unauthenticated guard tests may still cover it.
 - `exempt`: intentionally excluded from route sampling, with `exemptReason`.
 
+Classify each page from its own access requirements. For example,
+`/artwork-documentation/example/an-alteration` renders checked-in public sample
+content and is `crawlable`, while the neighboring record editors use the
+documentation authentication gate. A `noindex` metadata setting is not an
+authentication requirement.
+
 Optional `family` and `projects` fields group intended sampling decisions;
 they do not schedule tests. Omitted projects impose no project restriction.
 The initial fixtures reuse existing browser examples, checked-in report slugs,
