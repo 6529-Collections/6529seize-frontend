@@ -18,6 +18,8 @@
   "profileCms.studio.desktop": "Ordinateur",
   "profileCms.studio.mobile": "Téléphone",
   "profileCms.studio.useTemplate": "Utiliser ce modèle",
+  "profileCms.studio.useTemplateNamed": "Utiliser ce modèle : {name}",
+  "profileCms.studio.invalidProfileHandle": "Les modèles de site nécessitent un nom de profil de 2 à 64 caractères, commençant par une lettre ou un chiffre et contenant uniquement des lettres, des chiffres, des tirets bas ou des traits d’union.",
   "profileCms.studio.backToTemplates": "Tous les modèles",
   "profileCms.studio.sampleNotice": "Vous explorez un exemple. Remplacez les noms, les textes et les œuvres proposés avant de publier.",
   "profileCms.studio.page": "Page",

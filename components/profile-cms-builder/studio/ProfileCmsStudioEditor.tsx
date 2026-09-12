@@ -296,9 +296,12 @@ export default function ProfileCmsStudioEditor({
           <ul className="tw-m-0 tw-max-h-72 tw-list-none tw-space-y-2 tw-overflow-y-auto tw-p-0">
             {document.payload.pages
               .filter((item) =>
-                item.metadata.title
-                  .toLocaleLowerCase(locale)
-                  .includes(pageSearch.toLocaleLowerCase(locale))
+                [item.metadata.navigation_label, item.metadata.title].some(
+                  (label) =>
+                    label
+                      ?.toLocaleLowerCase(locale)
+                      .includes(pageSearch.toLocaleLowerCase(locale)) === true
+                )
               )
               .map((item) => (
                 <li key={item.id}>

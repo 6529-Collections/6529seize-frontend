@@ -186,6 +186,120 @@ it("rejects extra annotations without a canonical artwork placement instead of s
   );
 });
 
+it.each(["missing", "empty"])(
+  "defensively recovers item-only artwork while rejecting %s canonical placements for authoring",
+  (canonicalState) => {
+    const document = nativeDocument();
+    const gallery = fields(document.payload.pages[0]!.blocks[0]!);
+    if (canonicalState === "missing") delete gallery["asset_ids"];
+    else gallery["asset_ids"] = [];
+    gallery["items"] = [
+      { asset_id: "asset-og", title: "First placement", page_id: "page-work" },
+      { asset_id: "asset-og", title: "Second placement" },
+    ];
+    const source = withComputedCmsHashes(document);
+    const validation = validateCmsPackageV1(source, { enforceHashes: true });
+    expect(validation.valid).toBe(false);
+    expect(
+      validation.issues.filter(
+        (issue) => issue.code === "block.gallery_item_unlisted"
+      )
+    ).toHaveLength(2);
+    const html = renderRecoveredCmsSite(source).get(
+      cmsRecoveryFilePath(source.payload.pages[0]!.path)
+    )!;
+    const recovered = new DOMParser()
+      .parseFromString(html, "text/html")
+      .getElementById("collection-grid")!;
+    expect(recovered.querySelectorAll("img")).toHaveLength(2);
+    expect(
+      Array.from(
+        recovered.querySelectorAll("h3"),
+        (heading) => heading.textContent
+      )
+    ).toEqual(["First placement", "Second placement"]);
+    expect(recovered.querySelectorAll("h3 a")).toHaveLength(1);
+    expect(fields(source.payload.pages[0]!.blocks[0]!)["asset_ids"]).toEqual(
+      canonicalState === "missing" ? undefined : []
+    );
+  }
+);
+
+it("keeps unsafe asset URIs and markup inert in item-only recovery", () => {
+  const document = nativeDocument();
+  const gallery = fields(document.payload.pages[0]!.blocks[0]!);
+  delete gallery["asset_ids"];
+  gallery["items"] = [
+    {
+      asset_id: "asset-og",
+      title: '<script>alert("injected")</script>',
+      page_id: "javascript:alert(1)",
+    },
+  ];
+  document.payload.assets.find((asset) => asset.id === "asset-og")!.uri =
+    "javascript:alert(1)";
+  const source = withComputedCmsHashes(document);
+  expect(validateCmsPackageV1(source).valid).toBe(false);
+  const html = renderRecoveredCmsSite(source).get(
+    cmsRecoveryFilePath(source.payload.pages[0]!.path)
+  )!;
+  const recovered = new DOMParser()
+    .parseFromString(html, "text/html")
+    .getElementById("collection-grid")!;
+  expect(recovered.querySelector("img,script,a")).toBeNull();
+  expect(recovered.textContent).toContain('<script>alert("injected")</script>');
+});
+
+it.each(["Reference", ""])(
+  "recovers a record with label %j once when content is its row fallback",
+  (label) => {
+    const document = nativeDocument();
+    const block = fields(document.payload.pages[0]!.blocks[1]!);
+    block["rows"] = [{ label, value: "CC.26.001", page_id: "page-work" }];
+    block["content"] = label ? `${label}: CC.26.001` : "CC.26.001";
+    const source = withComputedCmsHashes(document);
+    const html = renderRecoveredCmsSite(source).get(
+      cmsRecoveryFilePath(source.payload.pages[0]!.path)
+    )!;
+    const recovered = new DOMParser()
+      .parseFromString(html, "text/html")
+      .getElementById(block.id)!;
+    expect(recovered.textContent?.split("CC.26.001")).toHaveLength(2);
+    expect(recovered.querySelector("dt")?.textContent).toBe(label);
+    expect(recovered.querySelector("dd a")?.textContent).toBe("CC.26.001");
+    expect(
+      Array.from(
+        recovered.querySelectorAll("p"),
+        (paragraph) => paragraph.textContent
+      )
+    ).not.toContain(block["content"]);
+    expect(fields(source.payload.pages[0]!.blocks[1]!)["content"]).toBe(
+      block["content"]
+    );
+  }
+);
+
+it("retains independent callout paragraphs alongside rows", () => {
+  const document = nativeDocument();
+  const block = fields(document.payload.pages[0]!.blocks[1]!);
+  block["content"] =
+    "The committee reviewed the source record.\n\nReference: CC.26.001";
+  const source = withComputedCmsHashes(document);
+  const html = renderRecoveredCmsSite(source).get(
+    cmsRecoveryFilePath(source.payload.pages[0]!.path)
+  )!;
+  const recovered = new DOMParser()
+    .parseFromString(html, "text/html")
+    .getElementById(block.id)!;
+  const paragraphs = Array.from(
+    recovered.querySelectorAll("p"),
+    (paragraph) => paragraph.textContent
+  );
+  expect(paragraphs).toContain("The committee reviewed the source record.");
+  expect(paragraphs).toContain("Reference: CC.26.001");
+  expect(recovered.querySelector("dd a")?.textContent).toBe("CC.26.001");
+});
+
 it.each([
   ["mockup_style", "raw-html"],
   ["mockup_style", 1],

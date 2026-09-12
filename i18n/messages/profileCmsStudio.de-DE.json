@@ -18,6 +18,8 @@
   "profileCms.studio.desktop": "Desktop",
   "profileCms.studio.mobile": "Smartphone",
   "profileCms.studio.useTemplate": "Diese Vorlage verwenden",
+  "profileCms.studio.useTemplateNamed": "Diese Vorlage verwenden: {name}",
+  "profileCms.studio.invalidProfileHandle": "Website-Vorlagen erfordern einen Profilnamen mit 2–64 Zeichen. Er muss mit einem Buchstaben oder einer Zahl beginnen und darf nur Buchstaben, Zahlen, Unterstriche und Bindestriche enthalten.",
   "profileCms.studio.backToTemplates": "Alle Vorlagen",
   "profileCms.studio.sampleNotice": "Du siehst gerade Beispielinhalte. Ersetze die Beispielnamen, Texte und Kunstwerke vor der Veröffentlichung.",
   "profileCms.studio.page": "Seite",

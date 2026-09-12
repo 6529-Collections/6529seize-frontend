@@ -18,6 +18,8 @@
   "profileCms.studio.desktop": "Desktop",
   "profileCms.studio.mobile": "Phone",
   "profileCms.studio.useTemplate": "Use this template",
+  "profileCms.studio.useTemplateNamed": "Use this template: {name}",
+  "profileCms.studio.invalidProfileHandle": "Website templates require a profile name with 2–64 characters, starting with a letter or number and using only letters, numbers, underscores, or hyphens.",
   "profileCms.studio.backToTemplates": "All templates",
   "profileCms.studio.sampleNotice": "You’re exploring sample content. Replace the example names, words, and artwork before publishing.",
   "profileCms.studio.page": "Page",

@@ -66,6 +66,14 @@ has a contact email. Project mockups recover the current headings, notes, and ta
 or book rows as readable records. This archival layout is not a pixel-for-pixel copy of the interactive site:
 search, gallery filters, view switches, and contact forms are not activated.
 
+New native gallery drafts require an `asset_ids` placement for each annotated
+`items` entry, including repeated occurrences of the same artwork. Recovery can
+display item-only gallery data defensively when both ID arrays are empty, using
+the same asset lookup and URI checks as ordinary artwork. That display fallback
+does not make an invalid package pass authoring or publication validation.
+Record rows replace an exact duplicate prose fallback; independent paragraphs
+remain alongside the record.
+
 Recovery does not execute author JavaScript or activate embedded HTML and 3D
 runtimes. More specialized blocks retain their structured source in an expandable
 panel. Referenced media still needs its original host or decentralized gateway

@@ -689,10 +689,12 @@ function collectionPatch(
 
 function rowsText(rows: readonly Record<string, unknown>[]): string {
   return rows
-    .map(
-      (row) =>
-        `${getString(row, "label") ?? ""}: ${getString(row, "value") ?? ""}`
-    )
+    .flatMap((row) => {
+      const value = getString(row, "value");
+      if (value === undefined) return [];
+      const label = getString(row, "label");
+      return [label ? `${label}: ${value}` : value];
+    })
     .join("\n");
 }
 

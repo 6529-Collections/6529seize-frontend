@@ -306,13 +306,17 @@ export default function StudioCollectionFields({
                 Array.isArray(fields["display_modes"]) &&
                 fields["display_modes"].includes("list")
               }
-              onChange={(event) =>
-                onChange({
-                  display_modes: event.target.checked
-                    ? ["grid", "list"]
-                    : ["grid"],
-                })
+              disabled={
+                fields["display_modes"] !== undefined &&
+                !Array.isArray(fields["display_modes"])
               }
+              onChange={(event) => {
+                const source = fields["display_modes"];
+                const current = Array.isArray(source) ? source : ["grid"];
+                const next = current.filter((mode: unknown) => mode !== "list");
+                if (event.target.checked) next.push("list");
+                onChange({ display_modes: next });
+              }}
               className="tw-h-4 tw-w-4 tw-accent-primary-500"
             />
             {t(locale, "profileCms.approved.listOption")}

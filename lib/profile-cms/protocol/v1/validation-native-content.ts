@@ -64,6 +64,8 @@ export function validateNativeCmsContent(
         });
         return;
       }
+      // Rendering can salvage item-only data, but authored native galleries
+      // require canonical placements so annotations cannot silently disappear.
       const remainingAssets = countCanonicalAssets(fields["asset_ids"]);
       entries.forEach((entry: unknown, index) => {
         const entryPath = `${path}/${index}`;

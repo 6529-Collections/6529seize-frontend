@@ -18,6 +18,8 @@
   "profileCms.studio.desktop": "Ordenador",
   "profileCms.studio.mobile": "Teléfono",
   "profileCms.studio.useTemplate": "Usar esta plantilla",
+  "profileCms.studio.useTemplateNamed": "Usar esta plantilla: {name}",
+  "profileCms.studio.invalidProfileHandle": "Las plantillas requieren un nombre de perfil de 2 a 64 caracteres que empiece por una letra o un número y solo contenga letras, números, guiones bajos o guiones.",
   "profileCms.studio.backToTemplates": "Todas las plantillas",
   "profileCms.studio.sampleNotice": "Estás explorando contenido de ejemplo. Sustituye los nombres, los textos y las obras de muestra antes de publicar.",
   "profileCms.studio.page": "Página",
