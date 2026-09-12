@@ -12,7 +12,14 @@ import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { createContext, useContext, useId } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useId,
+  useRef,
+  type Ref,
+} from "react";
 import {
   marketDepthListingQuantityIsValid,
   type MarketDepthListingSelection,
@@ -65,12 +72,14 @@ export function useMarketDepthTradeActionsAvailable(): boolean {
 }
 
 export function MarketDepthLevelAction({
+  order,
   side,
   locale,
   open,
   panelId,
   onClick,
 }: {
+  readonly order?: ApiMarketOrder | undefined;
   readonly side: "ask" | "bid";
   readonly locale: SupportedLocale;
   readonly open: boolean;
@@ -78,10 +87,31 @@ export function MarketDepthLevelAction({
   readonly onClick: () => void;
 }) {
   const context = useContext(TradeContext);
+  const transferFocus = useRef(false);
+  const actionRef = useCallback((button: HTMLButtonElement | null) => {
+    if (!button) return;
+    if (transferFocus.current) {
+      transferFocus.current = false;
+      button.focus({ preventScroll: true });
+    }
+    return () => {
+      transferFocus.current = button.ownerDocument.activeElement === button;
+    };
+  }, []);
   if (!context) return null;
+  if (order)
+    return (
+      <MarketDepthOrderAction
+        order={order}
+        locale={locale}
+        compact
+        actionRef={actionRef}
+      />
+    );
   return (
     <NftPurchasingGate>
       <button
+        ref={actionRef}
         type="button"
         className={COMPACT_ACTION_CLASS}
         aria-expanded={open}
@@ -107,10 +137,12 @@ export function MarketDepthOrderAction({
   order,
   locale,
   compact = false,
+  actionRef,
 }: {
   readonly order: ApiMarketOrder;
   readonly locale: SupportedLocale;
   readonly compact?: boolean;
+  readonly actionRef?: Ref<HTMLButtonElement> | undefined;
 }) {
   const context = useContext(TradeContext);
   if (!context) return null;
@@ -136,6 +168,7 @@ export function MarketDepthOrderAction({
           </p>
         ) : (
           <button
+            ref={actionRef}
             type="button"
             className={compact ? COMPACT_ACTION_CLASS : ACTION_CLASS}
             disabled={Boolean(state?.busy) || context.selectionBusy}

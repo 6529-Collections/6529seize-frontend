@@ -30,7 +30,7 @@ import {
   within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 const mockFetchAssets = jest.fn();
 const mockFetchExactOrder = jest.fn();
@@ -385,6 +385,83 @@ describe("MarketDepthTradeActions", () => {
     expect(screen.getByText("Loading order details…")).toBeInTheDocument();
     expect(mockFetchExactOrder).not.toHaveBeenCalled();
   });
+
+  it.each([false, true])(
+    "preserves keyboard focus when single-order details arrive (moved away: %s)",
+    async (movedAway) => {
+      const user = userEvent.setup();
+      const order = depthOrder();
+      let resolveDetails!: () => void;
+      const details = new Promise<void>((resolve) => {
+        resolveDetails = resolve;
+      });
+      function Harness() {
+        const [orders, setOrders] = useState<readonly ApiMarketOrder[]>([]);
+        return (
+          <>
+            <MarketDepthTradeProvider
+              contract={MEMES_CONTRACT}
+              tokenId="8"
+              locale="en-US"
+              onMarketChange={jest.fn()}
+            >
+              <MarketDepthPriceLevels
+                side="ask"
+                levels={[
+                  {
+                    unit_price: order.unit_price!,
+                    quantity: "3",
+                    cumulative_quantity: "3",
+                    order_count: 1,
+                  },
+                ]}
+                currency={order.currency}
+                currencyLabel="ETH"
+                locale="en-US"
+                orders={orders}
+                isLoading={orders.length === 0}
+                error={null}
+                onLoadOrders={() => {
+                  void details.then(() => setOrders([order]));
+                }}
+                onRefresh={jest.fn()}
+              />
+            </MarketDepthTradeProvider>
+            <button type="button">Elsewhere</button>
+          </>
+        );
+      }
+      render(<Harness />);
+      await user.tab();
+      await user.tab();
+      const disclosureAction = screen.getByRole("button", { name: "Collect" });
+      expect(disclosureAction).toHaveFocus();
+      await user.keyboard("{Enter}");
+      expect(screen.getByText("Loading order details…")).toBeInTheDocument();
+      if (movedAway) {
+        await user.tab();
+        expect(screen.getByRole("button", { name: "Elsewhere" })).toHaveFocus();
+      }
+      await act(async () => resolveDetails());
+      const exactAction = screen.getByRole("button", { name: "Collect" });
+      expect(exactAction).not.toBe(disclosureAction);
+      expect(mockFetchExactOrder).not.toHaveBeenCalled();
+      if (movedAway) {
+        expect(screen.getByRole("button", { name: "Elsewhere" })).toHaveFocus();
+      } else {
+        expect(exactAction).toHaveFocus();
+        await user.keyboard("{Enter}");
+        await screen.findByRole("textbox", { name: "Quantity" });
+        expect(mockFetchExactOrder).toHaveBeenCalledWith(
+          HASH,
+          MARKET_SEAPORT,
+          ASSET_KEY,
+          ApiMarketTradeOrderSideEnum.Listing,
+          expect.any(AbortSignal)
+        );
+      }
+    }
+  );
 
   it("omits the action column and trading controls when purchasing is restricted", () => {
     mockHideNftPurchasing = true;

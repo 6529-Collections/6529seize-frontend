@@ -12,7 +12,6 @@ import { getLevelOrders } from "./market-depth-orders";
 import MarketDepthOrderDetails from "./MarketDepthOrderDetails";
 import {
   MarketDepthLevelAction,
-  MarketDepthOrderAction,
   MarketDepthOrderFeedback,
   useMarketDepthTradeActionsAvailable,
 } from "./MarketDepthOrderAction";
@@ -156,21 +155,14 @@ export default function MarketDepthPriceLevels({
                     </td>
                     {tradeActionsAvailable && (
                       <td className="tw-break-words tw-py-0 tw-pl-2">
-                        {singleOrder ? (
-                          <MarketDepthOrderAction
-                            order={singleOrder}
-                            locale={locale}
-                            compact
-                          />
-                        ) : (
-                          <MarketDepthLevelAction
-                            side={side}
-                            locale={locale}
-                            open={open}
-                            panelId={panelId}
-                            onClick={toggleDetails}
-                          />
-                        )}
+                        <MarketDepthLevelAction
+                          order={singleOrder}
+                          side={side}
+                          locale={locale}
+                          open={open}
+                          panelId={panelId}
+                          onClick={toggleDetails}
+                        />
                       </td>
                     )}
                   </tr>
