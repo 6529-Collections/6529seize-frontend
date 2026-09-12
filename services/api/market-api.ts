@@ -12,6 +12,10 @@ import { commonApiFetch, commonApiPost } from "./common-api";
 
 const operationPath = (id: string) =>
   `market/operations/${encodeURIComponent(id)}`;
+// Omitting include_batches preserves the legacy response contract during rollout.
+type LegacyMarketOperations = Omit<ApiMarketMyOperations, "operations"> & {
+  operations: ApiMarketOperation[];
+};
 export const fetchMarketListings = (
   family: ApiCollectFamily,
   cursor: string | null,
@@ -57,7 +61,7 @@ export const fetchMyMarketOperations = (
   signal?: AbortSignal,
   cursor?: string | null
 ) =>
-  commonApiFetch<ApiMarketMyOperations>({
+  commonApiFetch<LegacyMarketOperations>({
     endpoint: "market/me/operations",
     params: { limit: "24", ...(cursor ? { cursor } : {}) },
     signal,

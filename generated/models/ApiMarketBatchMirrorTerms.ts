@@ -11,12 +11,12 @@
  * Do not edit the class manually.
  */
 
-import { ApiMarketOperationResult } from '../models/ApiMarketOperationResult';
 import { HttpFile } from '../http/http';
 
-export class ApiMarketMyOperations {
-    'operations': Array<ApiMarketOperationResult>;
-    'next': string | null;
+export class ApiMarketBatchMirrorTerms {
+    'start_time': string;
+    'end_time': string;
+    'salt': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,20 +24,26 @@ export class ApiMarketMyOperations {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "operations",
-            "baseName": "operations",
-            "type": "Array<ApiMarketOperationResult>",
+            "name": "start_time",
+            "baseName": "start_time",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "next",
-            "baseName": "next",
+            "name": "end_time",
+            "baseName": "end_time",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "salt",
+            "baseName": "salt",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiMarketMyOperations.attributeTypeMap;
+        return ApiMarketBatchMirrorTerms.attributeTypeMap;
     }
 
     public constructor() {

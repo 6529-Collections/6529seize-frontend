@@ -11,35 +11,24 @@
  * Do not edit the class manually.
  */
 
-import { ApiMarketOperationResult } from '../models/ApiMarketOperationResult';
+import { ApiMarketBatchPrepareRequest } from '../models/ApiMarketBatchPrepareRequest';
+import { ApiMarketPrepareRequest } from '../models/ApiMarketPrepareRequest';
 import { HttpFile } from '../http/http';
 
-export class ApiMarketMyOperations {
-    'operations': Array<ApiMarketOperationResult>;
-    'next': string | null;
+/**
+ * @type ApiMarketOperationPrepareRequest
+ * Type
+ * @export
+ */
+export type ApiMarketOperationPrepareRequest = ApiMarketBatchPrepareRequest | ApiMarketPrepareRequest;
 
+/**
+* @type ApiMarketOperationPrepareRequestClass
+* @export
+*/
+export class ApiMarketOperationPrepareRequestClass {
     static readonly discriminator: string | undefined = undefined;
 
     static readonly mapping: {[index: string]: string} | undefined = undefined;
-
-    static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "operations",
-            "baseName": "operations",
-            "type": "Array<ApiMarketOperationResult>",
-            "format": ""
-        },
-        {
-            "name": "next",
-            "baseName": "next",
-            "type": "string",
-            "format": ""
-        }    ];
-
-    static getAttributeTypeMap() {
-        return ApiMarketMyOperations.attributeTypeMap;
-    }
-
-    public constructor() {
-    }
 }
+

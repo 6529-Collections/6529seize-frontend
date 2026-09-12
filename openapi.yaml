@@ -8442,14 +8442,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ApiMarketPrepareRequest"
+              $ref: "#/components/schemas/ApiMarketOperationPrepareRequest"
       responses:
         "200":
           description: Current reviewed trade state
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMarketOperation"
+                $ref: "#/components/schemas/ApiMarketOperationResult"
         "400":
           description: Invalid trade terms
         "403":
@@ -8506,6 +8506,14 @@ paths:
             minimum: 1
             maximum: 50
             default: 20
+        - name: include_batches
+          in: query
+          description: >-
+            Opt in to multi-artwork operations. Omitted/false preserves legacy
+            single-artwork history.
+          schema:
+            type: boolean
+            default: false
   /market/operations/{id}:
     get:
       tags:
@@ -8535,7 +8543,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMarketOperation"
+                $ref: "#/components/schemas/ApiMarketOperationResult"
         "400":
           description: Invalid trade terms
         "403":
@@ -8575,7 +8583,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMarketOperation"
+                $ref: "#/components/schemas/ApiMarketOperationResult"
         "400":
           description: Invalid trade terms
         "403":
@@ -8623,7 +8631,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMarketOperation"
+                $ref: "#/components/schemas/ApiMarketOperationResult"
         "400":
           description: Invalid attempt
         "403":
@@ -8667,7 +8675,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMarketOperation"
+                $ref: "#/components/schemas/ApiMarketOperationResult"
         "400":
           description: Invalid acknowledgement
         "403":
@@ -8709,7 +8717,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMarketOperation"
+                $ref: "#/components/schemas/ApiMarketOperationResult"
         "400":
           description: Invalid trade terms
         "403":
@@ -8755,7 +8763,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMarketOperation"
+                $ref: "#/components/schemas/ApiMarketOperationResult"
         "400":
           description: Invalid trade terms
         "403":
@@ -8766,6 +8774,29 @@ paths:
           description: Trade state or idempotency conflict
         "503":
           description: Trading unavailable
+  /market/batch-capabilities:
+    get:
+      tags:
+        - Marketplace
+      summary: Get atomic batch purchase capabilities
+      operationId: getMarketBatchCapabilities
+      x-6529-router:
+        enabled: true
+        auth: optional
+        cache: false
+        typeImportGroup: market
+        handler:
+          import: "@/api/marketplace/marketplace.handlers"
+          name: handleGetMarketBatchCapabilities
+      responses:
+        "200":
+          description: >-
+            Technical bounds do not guarantee a selection fits current gas or
+            quote validity limits.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketBatchCapabilities"
   /media/resolve:
     post:
       tags:
@@ -23617,7 +23648,9 @@ components:
           items:
             $ref: "#/components/schemas/ApiWaveParticipationRequirement"
         required_metadata:
-          description: "The metadata that must be provided by the participant. \nEmpty array if nothing is required.\n"
+          description: |
+            The metadata that must be provided by the participant. 
+            Empty array if nothing is required.
           type: array
           items:
             $ref: "#/components/schemas/ApiWaveRequiredMetadata"
@@ -26241,6 +26274,367 @@ components:
           nullable: true
           allOf:
             - $ref: "#/components/schemas/ApiDmUnreadConversationState"
+    ApiMarketBatchAllocation:
+      type: object
+      additionalProperties: false
+      properties:
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        quantity:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+        acknowledge_external_recipient:
+          type: boolean
+        recipient_in_profile:
+          type: boolean
+      required:
+        - recipient
+        - quantity
+        - acknowledge_external_recipient
+    ApiMarketBatchAllocationRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        quantity:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+        acknowledge_external_recipient:
+          type: boolean
+      required:
+        - recipient
+        - quantity
+        - acknowledge_external_recipient
+    ApiMarketBatchCapabilities:
+      type: object
+      additionalProperties: false
+      properties:
+        available:
+          type: boolean
+        execution_policy:
+          type: string
+          enum:
+            - ALL_OR_REVERT
+        currency:
+          type: string
+          enum:
+            - "0x0000000000000000000000000000000000000000"
+        payer_type:
+          type: string
+          enum:
+            - EOA
+        max_orders:
+          type: integer
+          format: int64
+          enum:
+            - 128
+        max_allocations:
+          type: integer
+          format: int64
+          enum:
+            - 256
+        max_calldata_bytes:
+          type: integer
+          format: int64
+          enum:
+            - 1048576
+        restricted_erc1155_max_order_quantity:
+          type: string
+          enum:
+            - "1"
+        requires_complete_simulation:
+          type: boolean
+          enum:
+            - true
+      required:
+        - available
+        - execution_policy
+        - currency
+        - payer_type
+        - max_orders
+        - max_allocations
+        - max_calldata_bytes
+        - restricted_erc1155_max_order_quantity
+        - requires_complete_simulation
+    ApiMarketBatchItem:
+      type: object
+      additionalProperties: false
+      properties:
+        asset_key:
+          type: string
+          minLength: 1
+          maxLength: 150
+        order:
+          $ref: "#/components/schemas/ApiMarketIdentity"
+        quantity: &ref_12
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+        amount_wei: *ref_12
+        allocations:
+          type: array
+          minItems: 1
+          maxItems: 256
+          items:
+            $ref: "#/components/schemas/ApiMarketBatchAllocation"
+        reviewed_order:
+          $ref: "#/components/schemas/ApiMarketOrderToSign"
+        net_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        fees:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketFee"
+      required:
+        - asset_key
+        - order
+        - quantity
+        - amount_wei
+        - allocations
+    ApiMarketBatchItemRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        asset_key:
+          type: string
+          minLength: 1
+          maxLength: 150
+        order:
+          $ref: "#/components/schemas/ApiMarketIdentity"
+        quantity: &ref_13
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+        amount_wei: *ref_13
+        allocations:
+          type: array
+          minItems: 1
+          maxItems: 256
+          items:
+            $ref: "#/components/schemas/ApiMarketBatchAllocationRequest"
+      required:
+        - asset_key
+        - order
+        - quantity
+        - amount_wei
+        - allocations
+    ApiMarketBatchMirrorTerms:
+      type: object
+      additionalProperties: false
+      properties:
+        start_time: &ref_14
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        end_time: *ref_14
+        salt: *ref_14
+      required:
+        - start_time
+        - end_time
+        - salt
+    ApiMarketBatchOperation:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        revision:
+          type: string
+        state:
+          type: string
+          enum:
+            - PREPARING
+            - REVIEW
+            - APPROVAL
+            - AWAITING_SIGNATURE
+            - PUBLISHING
+            - LIVE
+            - SUBMITTED
+            - MINED
+            - CONFIRMED
+            - FAILED
+            - UNKNOWN
+            - CANCEL_PENDING
+            - CANCELLED
+            - EXPIRED
+        profile_id:
+          type: string
+        wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        currency:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        total_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        transaction:
+          $ref: "#/components/schemas/ApiMarketTransaction"
+        transaction_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        expires_at:
+          type: integer
+          format: int64
+          description: >-
+            Review refresh deadline as Unix milliseconds; not an onchain
+            cancellation or expiry.
+        updated_at:
+          type: integer
+          format: int64
+        error_code:
+          type: string
+        block_number:
+          type: integer
+          format: int64
+        block_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        send_attempt:
+          $ref: "#/components/schemas/ApiMarketSendAttempt"
+        potential_liability_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        kind:
+          type: string
+          enum:
+            - BUY_BATCH
+        execution_policy:
+          type: string
+          enum:
+            - ALL_OR_REVERT
+        mirror_terms:
+          $ref: "#/components/schemas/ApiMarketBatchMirrorTerms"
+        block_timestamp:
+          type: integer
+          format: int64
+        items:
+          type: array
+          minItems: 1
+          maxItems: 128
+          items:
+            $ref: "#/components/schemas/ApiMarketBatchItem"
+        approval_transactions:
+          type: array
+          maxItems: 0
+          items:
+            $ref: "#/components/schemas/ApiMarketTransaction"
+        settlement:
+          $ref: "#/components/schemas/ApiMarketBatchSettlement"
+      required:
+        - id
+        - revision
+        - state
+        - profile_id
+        - wallet
+        - currency
+        - total_wei
+        - expires_at
+        - updated_at
+        - potential_liability_wei
+        - kind
+        - execution_policy
+        - items
+        - approval_transactions
+    ApiMarketBatchPrepareRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        kind:
+          type: string
+          enum:
+            - BUY_BATCH
+        profile_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        currency:
+          type: string
+          enum:
+            - "0x0000000000000000000000000000000000000000"
+        execution_policy:
+          type: string
+          enum:
+            - ALL_OR_REVERT
+        amount_wei:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+        items:
+          type: array
+          minItems: 1
+          maxItems: 128
+          items:
+            $ref: "#/components/schemas/ApiMarketBatchItemRequest"
+      required:
+        - kind
+        - profile_id
+        - wallet
+        - currency
+        - execution_policy
+        - amount_wei
+        - items
+    ApiMarketBatchSettlement:
+      type: object
+      additionalProperties: false
+      properties:
+        outcome:
+          type: string
+          enum:
+            - ALL_SELECTED
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketBatchSettlementItem"
+        transaction_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        block_number: &ref_15
+          type: integer
+          format: int64
+        block_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        safe_block_number: *ref_15
+      required:
+        - outcome
+        - items
+        - transaction_hash
+        - block_number
+        - block_hash
+    ApiMarketBatchSettlementItem:
+      type: object
+      additionalProperties: false
+      properties:
+        asset_key:
+          type: string
+        order:
+          $ref: "#/components/schemas/ApiMarketIdentity"
+        filled_quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        allocations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketBatchAllocation"
+      required:
+        - asset_key
+        - order
+        - filled_quantity
+        - allocations
     ApiMarketComponents:
       type: object
       additionalProperties: false
@@ -26532,7 +26926,7 @@ components:
         operations:
           type: array
           items:
-            $ref: "#/components/schemas/ApiMarketOperation"
+            $ref: "#/components/schemas/ApiMarketOperationResult"
         next:
           type: string
           nullable: true
@@ -26686,6 +27080,14 @@ components:
         - expires_at
         - updated_at
         - potential_liability_wei
+    ApiMarketOperationPrepareRequest:
+      oneOf:
+        - $ref: "#/components/schemas/ApiMarketPrepareRequest"
+        - $ref: "#/components/schemas/ApiMarketBatchPrepareRequest"
+    ApiMarketOperationResult:
+      oneOf:
+        - $ref: "#/components/schemas/ApiMarketOperation"
+        - $ref: "#/components/schemas/ApiMarketBatchOperation"
     ApiMarketOrder:
       type: object
       required:
@@ -27091,6 +27493,27 @@ components:
         recipient:
           type: string
           pattern: ^0x[0-9a-fA-F]{40}$
+        purchase_quantity:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+          description: >-
+            Supported initial purchase quantity: one exact edition when every
+            signed payment permits it, otherwise the complete available lot.
+        quantity_step:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+          description: >-
+            Supported UI quantity step: one when exact per-edition fills are
+            supported, otherwise the complete available lot.
+        available_quantity:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+          description: >-
+            Available quantity independent of the quantity used to quote
+            total_wei and fees.
       required:
         - identity
         - asset_key

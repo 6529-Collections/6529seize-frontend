@@ -184,7 +184,7 @@ export async function sendReviewedMarketTransaction(options: {
 
 export async function verifyRecoveredMarketTransaction(
   client: PublicClient,
-  operation: ApiMarketOperation,
+  operation: Pick<ApiMarketOperation, "wallet">,
   attempt: MarketSendAttempt,
   value: string
 ): Promise<Hex> {
