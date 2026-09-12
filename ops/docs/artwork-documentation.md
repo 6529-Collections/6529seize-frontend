@@ -128,7 +128,7 @@ another tab. Its complete supplied prose, production notes and written
 interview remain available together. Reading it never fills your answers,
 chooses a file or confirms a fact.
 
-The sample is illustrative, not a confirmed Museum accession. Only its supplied
+This is an illustrative (fictional) record. Only its supplied
 writing and photograph preview are included. Named RAW files, TIFF masters,
 projects, profiles and prints are described examples, not received or verified
 materials. The example also preserves a stated print-custody discrepancy for
