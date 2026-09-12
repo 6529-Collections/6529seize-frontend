@@ -32,7 +32,6 @@ import {
   syncConnectedWalletProfile,
   WALLET_ACCOUNTS_UPDATED_EVENT,
 } from "@/services/auth/auth.utils";
-import { getRole } from "@/services/auth/jwt-validation.utils";
 import {
   getSessionClientType,
   verifyActiveSessionV2WebSession,
@@ -45,6 +44,7 @@ import {
 import { AuthSignModal } from "./AuthSignModal";
 import { createAuthRequestActions } from "./authActions";
 import { AuthContext } from "./authContext";
+import { getAuthSessionRole } from "./auth-session-scope";
 import { useAuthImpactTracking } from "./auth-impact-tracking";
 import { navigateAfterProfileSwitch } from "./authProfileNavigation";
 import { isProfileForAddress } from "./authProfileUtils";
@@ -136,7 +136,6 @@ export default function Auth({
   });
   const connectedProfile =
     !isSigningOutAll && isConnectedProfileForAddress ? loadedProfile : null;
-  useContentModerationStateScope(connectedProfile?.id);
   const isConnectedProfileSettling = Boolean(
     !isSigningOutAll &&
     address &&
@@ -244,15 +243,14 @@ export default function Auth({
 
   const [activeProfileProxy, setActiveProfileProxy] =
     useState<ApiProfileProxy | null>(null);
-  const authRole = (() => {
-    try {
-      const authJwt = getAuthJwt();
-      return getRole(authJwt);
-    } catch (error) {
-      logErrorSecurely("derive_auth_role", error);
-      return null;
-    }
-  })();
+  const authRole = getAuthSessionRole();
+  const isDirectProfileSession =
+    authRole === null && activeProfileProxy === null;
+  useContentModerationStateScope(
+    connectedProfile?.id,
+    activeProfileProxy?.id,
+    isDirectProfileSession
+  );
 
   useEffect(() => {
     if (!address) {
@@ -749,6 +747,7 @@ export default function Auth({
       receivedProfileProxies,
       activeProfileProxy,
       showWaves,
+      isDirectProfileSession,
       sessionUpgradeRequired,
       connectionStatus: getProfileConnectedStatus({
         profile: connectedProfile ?? null,
@@ -765,6 +764,7 @@ export default function Auth({
       ensureActiveSessionV2WebSessionForActiveWallet,
       isAddressAuthorized,
       isFetchingConnectedProfile,
+      isDirectProfileSession,
       onActiveProfileProxy,
       receivedProfileProxies,
       requestAuth,

@@ -5,6 +5,25 @@ import {
   sanitizeUrlString,
 } from "@/utils/sentry-sanitizer";
 
+it("redacts sensitive top-level span data as well as nested evidence", () => {
+  const span = sanitizeSentrySpan({
+    data: {
+      evidence: "private",
+      content_snapshot: "private",
+      preview: "private",
+      nested: { moderator_note: "private" },
+      safe: "visible",
+    },
+  });
+  expect(span.data).toEqual({
+    evidence: "[Filtered]",
+    content_snapshot: "[Filtered]",
+    preview: "[Filtered]",
+    nested: { moderator_note: "[Filtered]" },
+    safe: "visible",
+  });
+});
+
 const SYNTHETIC_WAVE_ID = `${"1".repeat(8)}-${"2".repeat(4)}-4${"3".repeat(3)}-8${"4".repeat(3)}-${"5".repeat(12)}`;
 const SYNTHETIC_DROP_ID = `${"6".repeat(8)}-${"7".repeat(4)}-4${"8".repeat(3)}-8${"9".repeat(3)}-${"a".repeat(12)}`;
 const SYNTHETIC_AUTHOR_ID = `${"a".repeat(8)}-${"b".repeat(4)}-4${"c".repeat(3)}-8${"d".repeat(3)}-${"e".repeat(12)}`;
@@ -13,6 +32,28 @@ const SYNTHETIC_PROFILE = "synthetic-public-profile";
 const SYNTHETIC_MEDIA_ID = "synthetic-media-file";
 
 describe("sentry-sanitizer", () => {
+  it("normalizes Next.js server request context without retaining query values", () => {
+    const event = sanitizeSentryEvent({
+      contexts: {
+        nextjs: {
+          request_path: `/api/v2/waves/${SYNTHETIC_WAVE_ID}?token=synthetic-query#private`,
+          router_kind: "App Router",
+          router_path: "/api/v2/waves/[wave]",
+          route_type: "route",
+        },
+      },
+    });
+
+    expect(event.contexts?.["nextjs"]).toEqual({
+      request_path: "/api/v2/waves/:uuid",
+      router_kind: "App Router",
+      router_path: "/api/v2/waves/[wave]",
+      route_type: "route",
+    });
+    expect(JSON.stringify(event)).not.toContain("synthetic-query");
+    expect(JSON.stringify(event)).not.toContain(SYNTHETIC_WAVE_ID);
+  });
+
   it("redacts secrets from breadcrumb text fields", () => {
     const breadcrumb = sanitizeSentryBreadcrumb({
       message: "request failed Bearer abc123",
@@ -764,4 +805,19 @@ describe("sentry-sanitizer", () => {
       "/[waveid]/drops"
     );
   });
+});
+
+it("filters saved moderation evidence from telemetry context", () => {
+  const event = sanitizeSentryEvent({
+    extra: {
+      evidence: { text: "synthetic private material" },
+      content_snapshot: { parts: ["synthetic private material"] },
+      preview: "synthetic private material",
+      statement_value: "synthetic private material",
+      moderator_note: "synthetic private material",
+      error_code: "MODERATION_STORAGE_UNAVAILABLE",
+    },
+  });
+  expect(JSON.stringify(event)).not.toContain("synthetic private material");
+  expect(event.extra?.["error_code"]).toBe("MODERATION_STORAGE_UNAVAILABLE");
 });

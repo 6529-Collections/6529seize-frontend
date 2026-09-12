@@ -132,7 +132,7 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.metaDescription": "Review reported content.",
   "contentModeration.moderator.title": "WatchTower - Content Moderation",
   "contentModeration.moderator.description":
-    "Review reports, block activity and suspended profiles.",
+    "Review content checks, reports, block activity and suspended profiles.",
   "contentModeration.moderator.checkingPermissions": "Checking permissions…",
   "contentModeration.moderator.loading": "Loading reports…",
   "contentModeration.moderator.loadingMore": "Loading more…",
@@ -156,7 +156,8 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.tabs.blockActivityCompact": "Blocks",
   "contentModeration.moderator.blockActivity.blocked": "Blocked",
   "contentModeration.moderator.blockActivity.unblocked": "Unblocked",
-  "contentModeration.moderator.noPower": "You have no power here",
+  "contentModeration.moderator.noPower":
+    "WatchTower requires developer access. Use a developer profile and switch out of proxy mode.",
   "contentModeration.moderator.redirecting": "Redirecting in {seconds}",
   "contentModeration.moderator.openReportsIndicator":
     "Open reports need review",

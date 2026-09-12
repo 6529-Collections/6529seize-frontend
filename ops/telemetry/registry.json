@@ -20,7 +20,7 @@
       "id": "sentry",
       "owns": [
         "errors",
-        "server-client-traces",
+        "client-traces",
         "slow-code-paths",
         "code-level-spans-logs"
       ],
@@ -28,12 +28,11 @@
         "client-errors",
         "server-errors",
         "edge-errors",
-        "client-navigation-traces",
-        "request-traces"
+        "client-navigation-traces"
       ],
-      "sampling": "trace sample rate 0.1; custom logs use their producer policy",
+      "sampling": "client trace sample rate 0.1; client custom logs use their producer policy; server and edge capture errors without trace sampling or logs",
       "release": "inherited from the Sentry Next.js build integration",
-      "notes": "Replay remains opt-in and is not enabled by this change"
+      "notes": "Replay remains opt-in. Production enables server and edge error capture with existing event sanitization; Node skips OpenTelemetry setup and ESM loader hooks. Server and edge tracing/log export remain disabled."
     },
     {
       "id": "mixpanel",
@@ -340,7 +339,7 @@
       "owner": "sentry",
       "producer": "helpers/notifications.server.ts",
       "destinations": ["sentry:owner"],
-      "sampling": "only with a sampled parent Sentry request trace",
+      "sampling": "inactive while server Sentry tracing is disabled; requires a sampled parent request trace",
       "privacy": "fixed route/data path, request count, and anonymous/authenticated cohort only",
       "externalUsage": "new; none known",
       "lifecycle": "temporary",
@@ -354,7 +353,7 @@
       "owner": "sentry",
       "producer": "helpers/notifications.server.ts",
       "destinations": ["sentry:owner"],
-      "sampling": "only with a sampled parent Sentry request trace",
+      "sampling": "inactive while server Sentry tracing is disabled; requires a sampled parent request trace",
       "privacy": "fixed route/data path, request count, and anonymous/authenticated cohort only",
       "externalUsage": "new; none known",
       "lifecycle": "temporary",
@@ -368,7 +367,7 @@
       "owner": "sentry",
       "producer": "app/waves/waves-page.shared.tsx",
       "destinations": ["sentry:owner"],
-      "sampling": "only with a sampled parent Sentry request trace",
+      "sampling": "inactive while server Sentry tracing is disabled; requires a sampled parent request trace",
       "privacy": "fixed route/data path and zero request count only",
       "externalUsage": "new; none known",
       "lifecycle": "temporary",
@@ -382,7 +381,7 @@
       "owner": "sentry",
       "producer": "app/waves/waves-page.shared.tsx",
       "destinations": ["sentry:owner"],
-      "sampling": "only with a sampled parent Sentry request trace",
+      "sampling": "inactive while server Sentry tracing is disabled; requires a sampled parent request trace",
       "privacy": "fixed route/data path, request count, and anonymous/authenticated cohort only",
       "externalUsage": "new; none known",
       "lifecycle": "temporary",
@@ -396,7 +395,7 @@
       "owner": "sentry",
       "producer": "app/waves/wave-feed-seed.server.ts",
       "destinations": ["sentry:owner"],
-      "sampling": "only with a sampled parent Sentry request trace",
+      "sampling": "inactive while server Sentry tracing is disabled; requires a sampled parent request trace",
       "privacy": "fixed route/data path and anonymous/authenticated cohort only; request count is omitted because multipart hydration can add nested requests",
       "externalUsage": "new; none known",
       "lifecycle": "temporary",

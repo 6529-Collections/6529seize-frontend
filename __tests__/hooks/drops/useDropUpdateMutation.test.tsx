@@ -12,6 +12,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 
 // Mock the API module
 jest.mock("@/services/api/common-api", () => ({
+  ...jest.requireActual("@/services/api/common-api"),
   commonApiPost: jest.fn(),
 }));
 
@@ -168,6 +169,7 @@ describe("useDropUpdateMutation", () => {
       expect(mockedCommonApiPost).toHaveBeenCalledWith({
         endpoint: "drops/drop-123",
         body: mockRequest,
+        errorMode: "structured",
       });
     });
 
@@ -229,6 +231,15 @@ describe("useDropUpdateMutation", () => {
 
     it("should handle generic API errors", async () => {
       await testErrorScenario(new Error("API Error"));
+    });
+
+    it("explains a consumed approval without suggesting a new retry", async () => {
+      await testErrorScenario(
+        Object.assign(new Error("approval used"), {
+          response: { body: { code: "MODERATION_PERMIT_CONSUMED" } },
+        }),
+        "This approval has already been used. Only a retry of the original submission can return the saved result."
+      );
     });
 
     it("should handle time limit violation errors", async () => {

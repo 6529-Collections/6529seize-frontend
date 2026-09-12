@@ -1,7 +1,12 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "@/services/api/common-api";
+import {
+  commonApiPost,
+  getStructuredApiErrorCode,
+} from "@/services/api/common-api";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -17,6 +22,7 @@ interface DropUpdateMutationParams {
 }
 
 export const useDropUpdateMutation = () => {
+  const locale = useBrowserLocale();
   const { setToast } = useAuth();
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const myStreamContext = useMyStream();
@@ -26,6 +32,7 @@ export const useDropUpdateMutation = () => {
       return await commonApiPost<ApiUpdateDropRequest, ApiDrop>({
         endpoint: `drops/${dropId}`,
         body: request,
+        errorMode: "structured",
       });
     },
     onSuccess: (updatedDrop) => {
@@ -46,6 +53,13 @@ export const useDropUpdateMutation = () => {
       invalidateDrops();
     },
     onError: (error) => {
+      if (getStructuredApiErrorCode(error) === "MODERATION_PERMIT_CONSUMED") {
+        setToast({
+          message: t(locale, "contentModeration.approvalConsumed"),
+          type: "error",
+        });
+        return;
+      }
       console.error("Failed to update drop:", error);
 
       // Check if it's a time limit error
