@@ -23,6 +23,7 @@ test("keeps capped purchases as the default while showing the full-goal option",
     availabilityLabel: "2 priced for your goal",
     purchaseLabel: "Collect 1",
     priceLabel: "0.1 ETH",
+    availabilityRank: 0,
   });
   expect(view.scenarios?.map((option) => option.priceLabel)).toEqual([
     "0.11 ETH",
@@ -59,6 +60,7 @@ test("distinguishes purchases outside the budget from missing price evidence", (
   expect(view.requirements[0]).toMatchObject({
     purchaseLabel: "Outside this budget",
     priceLabel: "0.2 ETH",
+    availabilityRank: 1,
   });
   source.available_result = {
     ...source.available_result!,
@@ -68,6 +70,7 @@ test("distinguishes purchases outside the budget from missing price evidence", (
   view = collectCostPlanView(source, scenarioProfile, "Season", "en-US")!;
   expect(view.requirements[0]?.availabilityLabel).toBe("No purchase priced");
   expect(view.requirements[0]?.priceLabel).toBeUndefined();
+  expect(view.requirements[0]?.availabilityRank).toBe(2);
 });
 
 test("keeps different trait alternatives in each scenario's exact portfolio", () => {
@@ -90,8 +93,11 @@ test("keeps different trait alternatives in each scenario's exact portfolio", ()
   ]);
   expect(
     collectCostPlanView(source, scenarioProfile, "Trait goal", "en-US")
-      ?.requirements[0]?.priceLabel
-  ).toBe("0.1 ETH");
+      ?.requirements[0]
+  ).toMatchObject({
+    priceLabel: "0.1 ETH",
+    artworkKeys: [budgetLeg.asset_key],
+  });
   expect(
     collectCostPlanView(
       source,
@@ -99,8 +105,11 @@ test("keeps different trait alternatives in each scenario's exact portfolio", ()
       "Trait goal",
       "en-US",
       "available"
-    )?.requirements[0]?.priceLabel
-  ).toBe("0.2 ETH");
+    )?.requirements[0]
+  ).toMatchObject({
+    priceLabel: "0.2 ETH",
+    artworkKeys: [availableLeg.asset_key],
+  });
 });
 
 test("supports older API responses and never invents a missing price", () => {

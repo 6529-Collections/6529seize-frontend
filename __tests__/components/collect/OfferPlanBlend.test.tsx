@@ -5,6 +5,7 @@ import type {
   OfferPlanReview,
 } from "@/components/collect/collect-offer-plan.types";
 import type { ApiCollectPlanLeg } from "@/generated/models/ApiCollectPlanLeg";
+import { parseEther } from "viem";
 import {
   act,
   fireEvent,
@@ -36,9 +37,33 @@ function props() {
     payingWallet: OFFER_PAYER,
     analyze: jest
       .fn<Promise<OfferPlanAnalysisView>, [OfferPlanAnalysisInput]>()
-      .mockResolvedValue(offerAnalysis([offerPrice(2)])),
+      .mockImplementation(async (input) =>
+        offerAnalysis(
+          input.rows.map((row) => ({
+            ...offerPrice(
+              Number(row.assetKey.split(":")[2]),
+              row.pinned
+                ? parseEther(row.unitPriceEth).toString()
+                : "100000000000000000"
+            ),
+            quantity: row.quantity,
+            references:
+              input.controls.method === "match_bid"
+                ? [
+                    {
+                      kind: "bid",
+                      currency: "WETH",
+                      amountWei: "100000000000000000",
+                      observedAt: new Date().toISOString(),
+                    },
+                  ]
+                : [],
+          }))
+        )
+      ),
     onReviewOffer: jest.fn<void, [OfferPlanReview]>(),
     onReviewBuys: jest.fn<void, [readonly ApiCollectPlanLeg[]]>(),
+    buyObservedAt: new Date().toISOString(),
     buyOptions: [
       {
         candidate_id: "listing",
@@ -114,8 +139,12 @@ it("starts blend as offers and requires exact full-quantity listings before a Co
     )
   ).toBeInTheDocument();
   expect(
-    screen.getByRole("textbox", { name: "Offer budget (WETH)" })
+    screen.getByRole("textbox", { name: "Offer budget (WETH, optional)" })
   ).toHaveValue("");
+  expect(screen.getByRole("radio", { name: "Base" })).toBeChecked();
+  expect(
+    screen.queryByRole("button", { name: "Price method" })
+  ).not.toBeInTheDocument();
 });
 
 it("excludes buy NFTs from WETH allocation and returns exact purchase legs only on explicit review", async () => {
@@ -123,10 +152,10 @@ it("excludes buy NFTs from WETH allocation and returns exact purchase legs only 
   render(<OfferPlanPanel {...p} blended initialMethod="goal" />);
   fireEvent.click(route(1, "Collect now"));
   fireEvent.change(
-    screen.getByRole("textbox", { name: "Offer budget (WETH)" }),
+    screen.getByRole("textbox", { name: "Offer budget (WETH, optional)" }),
     { target: { value: "0.15" } }
   );
-  fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
+  fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
   await waitFor(() => expect(price(2)).toHaveValue("0.1"));
   expect(p.analyze).toHaveBeenCalledWith(
     expect.objectContaining({
@@ -169,7 +198,7 @@ it.each(["Offer", "Collect now"] as const)(
     expect(route(1, selectedRoute)).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(route(1, selectedRoute));
     expect(price(2)).toHaveValue("0.125");
-    expect(review(2)).toBeEnabled();
+    expect(review(2)).toBeDisabled();
     expect(p.analyze).not.toHaveBeenCalled();
     expect(p.onReviewOffer).not.toHaveBeenCalled();
   }
@@ -177,17 +206,17 @@ it.each(["Offer", "Collect now"] as const)(
 
 it("preserves generated prices and manual pins when the active Offer route is selected again", async () => {
   const p = props();
-  p.analyze.mockResolvedValue(offerAnalysis());
   render(<OfferPlanPanel {...p} blended initialMethod="match_bid" />);
+  fireEvent.click(screen.getByRole("radio", { name: "Conservative" }));
   fireEvent.change(price(2), { target: { value: "0.125" } });
-  fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
+  fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
   await waitFor(() => expect(price(1)).toHaveValue("0.1"));
   fireEvent.click(route(1, "Offer"));
   expect(price(1)).toHaveValue("0.1");
   expect(price(2)).toHaveValue("0.125");
-  expect(p.analyze).toHaveBeenCalledTimes(1);
-  fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
-  await waitFor(() => expect(p.analyze).toHaveBeenCalledTimes(2));
+  expect(p.analyze).toHaveBeenCalledTimes(2);
+  fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
+  await waitFor(() => expect(p.analyze).toHaveBeenCalledTimes(4));
   expect(p.analyze).toHaveBeenLastCalledWith(
     expect.objectContaining({
       rows: expect.arrayContaining([
@@ -203,9 +232,9 @@ it("preserves generated prices and manual pins when the active Offer route is se
 
 it("never silently reuses calculated amounts after changing the buy/offer allocation", async () => {
   const p = props();
-  p.analyze.mockResolvedValue(offerAnalysis());
   render(<OfferPlanPanel {...p} blended initialMethod="match_bid" />);
-  fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
+  fireEvent.click(screen.getByRole("radio", { name: "Conservative" }));
+  fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
   await waitFor(() => expect(price(1)).toHaveValue("0.1"));
   fireEvent.change(price(2), { target: { value: "0.125" } });
   fireEvent.click(route(1, "Collect now"));
@@ -286,7 +315,7 @@ it("discards late allocation results after an external purchase reservation", as
   const { rerender } = render(
     <OfferPlanPanel {...p} blended initialMethod="match_bid" />
   );
-  fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
+  fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
   rerender(
     <OfferPlanPanel
       {...p}
@@ -303,4 +332,158 @@ it("discards late allocation results after an external purchase reservation", as
     screen.queryByRole("textbox", { name: "WETH price per NFT for Artwork 1" })
   ).not.toBeInTheDocument();
   expect(p.onReviewOffer).not.toHaveBeenCalled();
+});
+
+it("automatically applies Base and a changed tier while preserving edited per-NFT prices", async () => {
+  const p = props();
+  p.buyOptions[0]!.unit_price_wei = "120000000000000000";
+  render(<OfferPlanPanel {...p} blended />);
+  fireEvent.change(price(2), { target: { value: "0.125" } });
+  await waitFor(() => expect(price(1)).toHaveValue("0.106666666666666666"));
+  expect(review(1)).toBeEnabled();
+  expect(p.analyze).toHaveBeenCalledTimes(2);
+  fireEvent.click(screen.getByRole("radio", { name: "Aggressive" }));
+  expect(review(1)).toBeDisabled();
+  await waitFor(() =>
+    expect(route(1, "Collect now")).toHaveAttribute("aria-pressed", "true")
+  );
+  expect(price(2)).toHaveValue("0.125");
+  expect(p.analyze).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      controls: expect.objectContaining({ method: "manual" }),
+      rows: [
+        expect.objectContaining({
+          assetKey: offerAsset(2).asset_key,
+          pinned: true,
+          unitPriceEth: "0.125",
+        }),
+      ],
+    })
+  );
+  expect(p.onReviewOffer).not.toHaveBeenCalled();
+  expect(p.onReviewBuys).not.toHaveBeenCalled();
+});
+
+it("clears review eligibility when refreshed automatic prices cannot pass funding analysis", async () => {
+  const p = props();
+  render(<OfferPlanPanel {...p} blended />);
+  await waitFor(() => expect(review(1)).toBeEnabled());
+  const observed = await p.analyze.mock.results[0]!.value;
+  p.analyze.mockImplementation(async (input) => {
+    if (input.controls.method === "manual")
+      throw new Error("funding unavailable");
+    return observed;
+  });
+  fireEvent.click(screen.getByRole("radio", { name: "Conservative" }));
+  await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
+  expect(review(1)).toBeDisabled();
+  expect(review(2)).toBeDisabled();
+  fireEvent.click(review(1));
+  expect(p.onReviewOffer).not.toHaveBeenCalled();
+});
+
+it.each(["missing", "wrong quantity"])(
+  "retains both selected purchases and blocks a silent subset when one exact option is %s",
+  async (failure) => {
+    const p = props();
+    const second = {
+      ...p.buyOptions[0]!,
+      candidate_id: "second",
+      order_id: `0x${"2".repeat(64)}`,
+      asset_key: offerAsset(2).asset_key,
+    };
+    p.buyOptions.push(second);
+    const { rerender } = render(<OfferPlanPanel {...p} blended />);
+    fireEvent.click(route(1, "Collect now"));
+    fireEvent.click(route(2, "Collect now"));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Review purchases (2)" })
+      ).toBeEnabled()
+    );
+    rerender(
+      <OfferPlanPanel
+        {...p}
+        blended
+        buyOptions={
+          failure === "missing"
+            ? [p.buyOptions[0]!]
+            : [p.buyOptions[0]!, { ...second, quantity: "2" }]
+        }
+      />
+    );
+    const reviewPurchases = screen.getByRole("button", {
+      name: "Review purchases (1)",
+    });
+    expect(reviewPurchases).toBeDisabled();
+    await waitFor(() => expect(p.analyze).toHaveBeenCalledTimes(2));
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Refresh prices" })
+      ).toBeEnabled()
+    );
+    expect(reviewPurchases).toBeDisabled();
+    expect(route(2, "Collect now")).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(reviewPurchases);
+    expect(p.onReviewBuys).not.toHaveBeenCalled();
+  }
+);
+
+it("discards old ask-derived funding after its source plan is cleared, before the next debounce", async () => {
+  const p = props();
+  const observed = offerAnalysis([
+    { ...offerPrice(1), references: [] },
+    { ...offerPrice(2), references: [] },
+  ]);
+  let resolveFunding!: (value: OfferPlanAnalysisView) => void;
+  p.analyze.mockResolvedValueOnce(observed).mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        resolveFunding = resolve;
+      })
+  );
+  const { rerender } = render(<OfferPlanPanel {...p} blended />);
+  fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
+  await waitFor(() => expect(p.analyze).toHaveBeenCalledTimes(2));
+  const manual = p.analyze.mock.calls[1]![0];
+  rerender(
+    <OfferPlanPanel {...p} blended buyOptions={[]} buyObservedAt={undefined} />
+  );
+  await act(async () => {
+    resolveFunding(
+      offerAnalysis(
+        manual.rows.map((row) => ({
+          ...offerPrice(
+            Number(row.assetKey.split(":")[2]),
+            parseEther(row.unitPriceEth).toString()
+          ),
+          quantity: row.quantity,
+        }))
+      )
+    );
+  });
+  expect(price(1)).toHaveValue("");
+  expect(review(1)).toBeDisabled();
+  fireEvent.click(review(1));
+  expect(p.onReviewOffer).not.toHaveBeenCalled();
+});
+
+it("checks the actual click time before reviewing purchases even before the expiry timer runs", async () => {
+  const p = props();
+  render(<OfferPlanPanel {...p} blended />);
+  fireEvent.click(route(1, "Collect now"));
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Review purchases (1)" })
+    ).toBeEnabled()
+  );
+  const clock = jest.spyOn(Date, "now").mockReturnValue(Date.now() + 120_000);
+  try {
+    fireEvent.click(
+      screen.getByRole("button", { name: "Review purchases (1)" })
+    );
+    expect(p.onReviewBuys).not.toHaveBeenCalled();
+  } finally {
+    clock.mockRestore();
+  }
 });

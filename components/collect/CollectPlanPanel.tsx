@@ -11,6 +11,22 @@ import type {
   CollectRequirementView,
 } from "./collect.types";
 import CollectStrategyPicker from "./CollectStrategyPicker";
+import CollectPlanArtwork from "./CollectPlanArtwork";
+
+function PlanAmount({
+  compact,
+  exact,
+}: {
+  readonly compact: string;
+  readonly exact?: string | undefined;
+}) {
+  return (
+    <span title={exact}>
+      <span aria-hidden={Boolean(exact)}>{compact}</span>
+      {exact && <span className="tw-sr-only">{exact}</span>}
+    </span>
+  );
+}
 
 function RequirementRows({
   requirements,
@@ -27,9 +43,31 @@ function RequirementRows({
           className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-2 tw-py-4"
         >
           <div className="tw-min-w-0 tw-flex-1 tw-basis-48">
-            <p className="tw-m-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100">
-              {requirement.label}
-            </p>
+            {requirement.assetKey ? (
+              <CollectPlanArtwork
+                assetKey={requirement.assetKey}
+                fallback={requirement.label}
+                locale={locale}
+              />
+            ) : (
+              <>
+                <p className="tw-m-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100">
+                  {requirement.label}
+                </p>
+                <div className="tw-mt-2 tw-space-y-3">
+                  {requirement.artworkKeys?.map((key) => (
+                    <CollectPlanArtwork
+                      key={key}
+                      assetKey={key}
+                      fallback={t(locale, "collect.offerPlan.tokenFallback", {
+                        token: key.split(":")[2] ?? "—",
+                      })}
+                      locale={locale}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
             <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-400">
               {requirement.detail}
             </p>
@@ -48,7 +86,10 @@ function RequirementRows({
                 )}
               </div>
               <p className="tw-m-0 tw-min-w-28 tw-text-right tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100">
-                {requirement.priceLabel ?? "—"}
+                <PlanAmount
+                  compact={requirement.priceLabel ?? "—"}
+                  exact={requirement.priceExactLabel}
+                />
               </p>
             </div>
           )}
@@ -81,9 +122,15 @@ export default function CollectPlanPanel({
     Boolean(plan.reviewDisabledReason) ||
     plan.blockers.length > 0 ||
     plan.totalLabel === null;
-  const missing = plan.requirements.filter(
-    (requirement) => requirement.status !== "owned"
-  );
+  const availabilityRank = (requirement: CollectRequirementView) => {
+    if (requirement.availabilityRank !== undefined)
+      return requirement.availabilityRank;
+    if (requirement.status === "selected") return 0;
+    return requirement.priceLabel ? 1 : 2;
+  };
+  const missing = plan.requirements
+    .filter((requirement) => requirement.status !== "owned")
+    .sort((left, right) => availabilityRank(left) - availabilityRank(right));
   const owned = plan.requirements.filter(
     (requirement) => requirement.status === "owned"
   );
@@ -106,7 +153,12 @@ export default function CollectPlanPanel({
             {t(locale, "collect.plan.estimate")}
           </p>
           <p className="tw-mb-0 tw-mt-1 tw-text-2xl tw-font-semibold tw-tabular-nums tw-text-iron-100">
-            {plan.totalLabel ?? t(locale, "collect.plan.priceUnavailable")}
+            <PlanAmount
+              compact={
+                plan.totalLabel ?? t(locale, "collect.plan.priceUnavailable")
+              }
+              exact={plan.totalExactLabel}
+            />
           </p>
         </div>
       </div>
@@ -133,7 +185,12 @@ export default function CollectPlanPanel({
             >
               <span className="tw-flex tw-flex-wrap tw-justify-between tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-100">
                 <span>{scenario.label}</span>
-                <span className="tw-tabular-nums">{scenario.priceLabel}</span>
+                <span className="tw-tabular-nums">
+                  <PlanAmount
+                    compact={scenario.priceLabel}
+                    exact={scenario.priceExactLabel}
+                  />
+                </span>
               </span>
               <span className="tw-mt-2 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
                 {scenario.detail}
@@ -183,6 +240,34 @@ export default function CollectPlanPanel({
           {blocker}
         </p>
       ))}
+      {plan.totalExactLabel && (
+        <details className="tw-mb-5 tw-text-xs tw-leading-5 tw-text-iron-400">
+          <summary className="tw-min-h-11 tw-cursor-pointer tw-content-center tw-rounded-md focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+            {t(locale, "collect.plan.exactAmounts")}
+          </summary>
+          <dl className="tw-m-0 tw-space-y-2 tw-break-words tw-tabular-nums">
+            {[
+              [t(locale, "collect.plan.estimate"), plan.totalExactLabel],
+              [
+                t(locale, "collect.plan.exactPurchases"),
+                plan.purchaseTotalExactLabel,
+              ],
+              [t(locale, "collect.plan.exactGas"), plan.gasReserveExactLabel],
+            ].map(
+              ([label, value]) =>
+                value && (
+                  <div
+                    key={label}
+                    className="tw-flex tw-flex-wrap tw-justify-between tw-gap-x-4"
+                  >
+                    <dt>{label}</dt>
+                    <dd className="tw-m-0">{value}</dd>
+                  </div>
+                )
+            )}
+          </dl>
+        </details>
+      )}
       {missing.length > 0 && (
         <div role="group" aria-label={t(locale, "collect.plan.requirements")}>
           <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-2 tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-pb-3 tw-text-xs tw-text-iron-400">

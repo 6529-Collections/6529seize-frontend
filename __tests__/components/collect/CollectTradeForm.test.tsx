@@ -1,5 +1,6 @@
 import CollectTradeForm from "@/components/collect/CollectTradeForm";
-import type { ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
+import { formatCollectCustomExpiryInput } from "@/components/collect/collect-custom-expiry";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
@@ -138,9 +139,98 @@ it.each(["offer", "list"] as const)(
   }
 );
 
-it("labels one day and multiple days correctly", () => {
-  render(<CollectTradeForm {...props()} action="offer" currencyLabel="WETH" />);
-  expect(screen.getByRole("option", { name: "1 day" })).toHaveValue("24");
-  expect(screen.getByRole("option", { name: "7 days" })).toHaveValue("168");
-  expect(screen.getByRole("option", { name: "30 days" })).toHaveValue("720");
+it("offers quick durations and a custom expiry without submitting the form", async () => {
+  const p = props();
+  render(<CollectTradeForm {...p} action="offer" currencyLabel="WETH" />);
+  fireEvent.keyDown(screen.getByRole("button", { name: "Order duration" }), {
+    key: "Enter",
+  });
+  expect(
+    await screen.findByRole("option", { name: "1 day" })
+  ).toBeInTheDocument();
+  expect(screen.getByRole("option", { name: "7 days" })).toBeInTheDocument();
+  expect(screen.getByRole("option", { name: "30 days" })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("option", { name: "Custom…" }));
+  expect(p.onChange).toHaveBeenCalledWith(
+    expect.objectContaining({
+      expiryHours: "custom",
+      expiryDateTime: expect.any(String),
+    })
+  );
+  expect(p.onPrepare).not.toHaveBeenCalled();
+});
+
+it.each(["offer", "list"] as const)(
+  "keeps a custom %s date editable and sends the chosen draft",
+  (action) => {
+    const p = props();
+    const custom = formatCollectCustomExpiryInput(Date.now() + 2 * 86_400_000);
+    function Form() {
+      const [draft, setDraft] = useState({
+        ...p.draft,
+        unitPriceEth: "0.1",
+        expiryHours: "custom",
+        expiryDateTime: custom,
+      });
+      return (
+        <CollectTradeForm
+          {...p}
+          action={action}
+          draft={draft}
+          onChange={(next) =>
+            setDraft({ ...next, expiryDateTime: next.expiryDateTime ?? "" })
+          }
+        />
+      );
+    }
+    render(<Form />);
+    expect(screen.getByLabelText("Expiry date and time")).toHaveValue(custom);
+    expect(screen.getByText(/Your timezone:/)).toBeInTheDocument();
+    const chosen = formatCollectCustomExpiryInput(Date.now() + 3 * 86_400_000);
+    fireEvent.change(screen.getByLabelText("Expiry date and time"), {
+      target: { value: chosen },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Review exact terms" }));
+    expect(p.onPrepare).toHaveBeenCalledWith(
+      expect.objectContaining({
+        expiryHours: "custom",
+        expiryDateTime: chosen,
+        quantity: "2",
+        unitPriceEth: "0.1",
+      })
+    );
+  }
+);
+
+it("blocks a custom expiry that became too soon while the form stayed open", () => {
+  const p = props();
+  const now = Date.UTC(2026, 8, 12, 12, 0);
+  const clock = jest.spyOn(Date, "now").mockReturnValue(now);
+  try {
+    const expiryDateTime = formatCollectCustomExpiryInput(now + 6 * 60_000);
+    render(
+      <CollectTradeForm
+        {...p}
+        action="offer"
+        draft={{
+          ...p.draft,
+          unitPriceEth: "0.1",
+          expiryHours: "custom",
+          expiryDateTime,
+        }}
+      />
+    );
+    clock.mockReturnValue(now + 2 * 60_000);
+    fireEvent.click(screen.getByRole("button", { name: "Review exact terms" }));
+    expect(p.onPrepare).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("Expiry date and time")).toHaveAttribute(
+      "aria-invalid",
+      "true"
+    );
+    expect(
+      screen.getByText("Choose an expiry at least 5 minutes from now.")
+    ).toBeInTheDocument();
+  } finally {
+    clock.mockRestore();
+  }
 });

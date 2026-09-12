@@ -3,8 +3,8 @@
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDecimalString, formatInteger, formatTime } from "@/i18n/format";
-import { t } from "@/i18n/messages";
-import { useEffect, useId, useRef, useState } from "react";
+import { t, type MessageKey } from "@/i18n/messages";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { formatEther } from "viem";
 import { isCollectProfileWallet } from "./collect-recipient.helpers";
 import {
@@ -34,6 +34,10 @@ import { MARKET_BATCH_LIMITS } from "./market-batch-validation";
 import OfferPlanItem from "./OfferPlanItem";
 import OfferPlanBuySummary from "./OfferPlanBuySummary";
 import OfferPlanPricing, { OFFER_INPUT_CLASS } from "./OfferPlanPricing";
+import { useCollectPlanMetadata } from "./CollectPlanMetadataProvider";
+import { matchingCollectAsset } from "./collect-plan-metadata";
+import { analyzeBlendedOffers } from "./collect-blended-analysis";
+import type { BlendRoute } from "./collect-blended-policy";
 
 interface OfferPlanPanelProps extends OfferPlanAcquisitionProps {
   readonly items: readonly CollectOfferSelection[];
@@ -83,15 +87,27 @@ function OfferPlanContents({
   initialMethod = "manual",
   blended = false,
   buyOptions = [],
+  buyObservedAt,
   buyLockedAssetKeys = [],
   onReviewBuys,
 }: OfferPlanPanelProps) {
   const locale = useBrowserLocale();
   const id = useId();
-  const [rows, setRows] = useState(() => initialOfferRows(items));
+  const metadata = useCollectPlanMetadata();
+  const [storedRows, setRows] = useState(() => initialOfferRows(items));
+  const rows = storedRows.map((row) => ({
+    ...row,
+    asset:
+      matchingCollectAsset(row.assetKey, row.asset) ??
+      metadata.assets.get(row.assetKey),
+  }));
   const [buyKeys, setBuyKeys] = useState<readonly string[]>([]);
+  const [routeOverrides, setRouteOverrides] = useState<
+    ReadonlyMap<string, BlendRoute>
+  >(new Map());
   const [controls, setControls] = useState<OfferPricingControls>({
-    method: initialMethod,
+    method: blended ? "match_bid" : initialMethod,
+    blendTier: "base",
     percent: "5",
     budgetEth: "",
     expiryHours: "168",
@@ -107,6 +123,7 @@ function OfferPlanContents({
   const generation = useRef(0);
   const pending = useRef(false);
   const mounted = useRef(false);
+  const automaticAttempt = useRef<string | null>(null);
   const publishedAssetKeys = [
     ...new Set([
       ...legacyPublished,
@@ -114,12 +131,21 @@ function OfferPlanContents({
       ...pendingOffers.map((offer) => offer.assetKey),
     ]),
   ];
+  const reason =
+    disabledReason ??
+    (!profile?.id ||
+    !payingWallet ||
+    !isCollectProfileWallet(profile, payingWallet)
+      ? t(locale, "collect.trade.connectSigner")
+      : undefined);
   const publishedScope = JSON.stringify({
     keys: [...publishedAssetKeys].sort((a, b) => a.localeCompare(b)),
     offers: publishedOffers,
     pending: pendingOffers,
     buys: buyKeys,
     buyLocks: buyLockedAssetKeys,
+    reason,
+    ...(blended ? { buyOptions, buyObservedAt } : {}),
   });
   const analysis =
     analysisResult?.scope === publishedScope ? analysisResult.view : null;
@@ -129,7 +155,8 @@ function OfferPlanContents({
       mounted.current = false;
     };
   }, []);
-  useEffect(() => {
+  // Invalidate during commit, before an old request can complete ahead of passive effects/debounce.
+  useLayoutEffect(() => {
     generation.current++;
   }, [publishedScope]);
 
@@ -139,22 +166,30 @@ function OfferPlanContents({
     ...buyLockedAssetKeys,
   ];
   const availableBuys = offerBuyOptions(rows, blended ? buyOptions : []);
-  const selectedBuyLegs = rows
-    .filter(
-      (row) =>
-        row.selected &&
-        buyKeys.includes(row.assetKey) &&
-        !publishedAssetKeys.includes(row.assetKey) &&
-        !buyLockedAssetKeys.includes(row.assetKey)
-    )
-    .flatMap((row) => availableBuys.get(row.assetKey)?.legs ?? []);
+  const selectedBuyRows = rows.filter(
+    (row) =>
+      row.selected &&
+      buyKeys.includes(row.assetKey) &&
+      !publishedAssetKeys.includes(row.assetKey) &&
+      !buyLockedAssetKeys.includes(row.assetKey)
+  );
+  const selectedBuyLegs = selectedBuyRows.flatMap(
+    (row) => availableBuys.get(row.assetKey)?.legs ?? []
+  );
   const buyCostWei = collectPlanSelectionCost(selectedBuyLegs);
   const totals = offerPlanTotals(rows, excludedOfferKeys);
   const selected = rows.filter(
     (row) => row.selected && !excludedOfferKeys.includes(row.assetKey)
   );
-  const budget =
-    controls.method === "goal" ? offerUnitWei(controls.budgetEth) : null;
+  const analysisRows = blended
+    ? rows.filter(
+        (row) =>
+          row.selected &&
+          !publishedAssetKeys.includes(row.assetKey) &&
+          !buyLockedAssetKeys.includes(row.assetKey)
+      )
+    : selected;
+  const budget = offerUnitWei(controls.budgetEth);
   const commitments = [...publishedOffers, ...pendingOffers];
   const committed = offerPublishedTotal(commitments);
   const publishedAmount = offerPublishedTotal(publishedOffers);
@@ -168,13 +203,6 @@ function OfferPlanContents({
     budget !== null && (unknownPublished || totals.amount + committed > budget);
   const fundingConflict =
     analysis !== null && totals.amount > BigInt(analysis.availableWei);
-  const reason =
-    disabledReason ??
-    (!profile?.id ||
-    !payingWallet ||
-    !isCollectProfileWallet(profile, payingWallet)
-      ? t(locale, "collect.trade.connectSigner")
-      : undefined);
   const filtered = rows.filter((row) =>
     `${row.asset?.name ?? ""} ${row.assetKey}`
       .toLowerCase()
@@ -189,10 +217,53 @@ function OfferPlanContents({
   const prices = new Map(
     analysis?.prices.map((price) => [price.assetKey, price])
   );
+  const buyNeedsRefresh =
+    blended &&
+    (analysis === null ||
+      selectedBuyRows.some(
+        (row) =>
+          !availableBuys.has(row.assetKey) ||
+          prices
+            .get(row.assetKey)
+            ?.reasons.some(
+              (code) =>
+                code === "BLEND_buy_unavailable" ||
+                code === "BLEND_stale_reference" ||
+                code === "BLEND_invalid_quantity"
+            )
+      ));
   const money = (amount: bigint | string) =>
     t(locale, "collect.offerPlan.weth", {
       amount: formatDecimalString(locale, formatEther(BigInt(amount))),
     });
+  const automaticKey = JSON.stringify([
+    controls.method,
+    controls.blendTier,
+    controls.percent,
+    controls.budgetEth,
+    controls.expiryHours,
+    controls.expiryDateTime,
+    analysisRows.map((row) => [
+      row.assetKey,
+      row.quantity,
+      row.pinned,
+      row.pinned ? row.unitPriceEth : "",
+      row.expiryHours,
+      row.expiryDateTime,
+    ]),
+    blended
+      ? [
+          publishedAssetKeys,
+          publishedOffers,
+          pendingOffers,
+          buyLockedAssetKeys,
+          [...routeOverrides],
+          buyObservedAt,
+          buyOptions,
+        ]
+      : publishedScope,
+    reason,
+  ]);
 
   const changed = () => {
     generation.current++;
@@ -220,6 +291,9 @@ function OfferPlanContents({
     )
       return;
     changed();
+    setRouteOverrides((current) =>
+      new Map(current).set(assetKey, buying ? "buy" : "offer")
+    );
     setBuyKeys((current) =>
       buying
         ? [...new Set([...current, assetKey])]
@@ -237,28 +311,35 @@ function OfferPlanContents({
   };
   const changeControls = (next: OfferPricingControls) => {
     changed();
-    if (next.expiryHours !== controls.expiryHours)
+    if (
+      next.expiryHours !== controls.expiryHours ||
+      next.expiryDateTime !== controls.expiryDateTime
+    )
       setRows((current) =>
         current.map((row) =>
           !publishedAssetKeys.includes(row.assetKey) &&
-          row.expiryHours === controls.expiryHours
-            ? { ...row, expiryHours: next.expiryHours }
+          !buyLockedAssetKeys.includes(row.assetKey) &&
+          row.expiryHours === controls.expiryHours &&
+          row.expiryDateTime === controls.expiryDateTime
+            ? updatedDefaultExpiry(row, next)
             : row
         )
       );
     const changedFormula =
       (next.method === "improve_bid" || next.method === "discount_ask") &&
       next.percent !== controls.percent;
-    const changedGoalBudget =
-      next.method === "goal" && next.budgetEth !== controls.budgetEth;
+    const changedGoalBudget = next.budgetEth !== controls.budgetEth;
     if (
       (next.method !== controls.method && next.method !== "manual") ||
       changedFormula ||
-      changedGoalBudget
+      changedGoalBudget ||
+      next.blendTier !== controls.blendTier
     )
       setRows((current) =>
         current.map((row) =>
-          row.pinned || publishedAssetKeys.includes(row.assetKey)
+          row.pinned ||
+          publishedAssetKeys.includes(row.assetKey) ||
+          buyLockedAssetKeys.includes(row.assetKey)
             ? row
             : { ...row, unitPriceEth: "" }
         )
@@ -267,7 +348,12 @@ function OfferPlanContents({
   };
   const analyzePrices = async () => {
     if (pending.current || reason || !profile?.id || !payingWallet) return;
-    const invalid = offerAnalysisIssue(selected, controls, unknownPublished);
+    automaticAttempt.current = automaticKey;
+    const invalid = offerAnalysisIssue(
+      analysisRows,
+      controls,
+      unknownPublished
+    );
     if (invalid) {
       setError(t(locale, invalid));
       return;
@@ -275,27 +361,67 @@ function OfferPlanContents({
     pending.current = true;
     setBusy(true);
     setError(undefined);
+    setAnalysis(null);
     const revision = ++generation.current;
     try {
-      const result = await analyze({
+      const input: OfferPlanAnalysisInput = {
         profileId: profile.id,
         wallet: payingWallet,
-        rows: selected,
+        rows: analysisRows,
         controls,
         committedAmountWei: (committed ?? 0n).toString(),
-      });
+      };
+      const isCurrent = () =>
+        mounted.current && revision === generation.current;
+      const blendedResult = blended
+        ? await analyzeBlendedOffers({
+            input,
+            analyze,
+            isCurrent,
+            policy: {
+              tier: controls.blendTier ?? "base",
+              buyOptions: availableBuys,
+              buyObservedAt,
+              lockedAssetKeys: new Set([
+                ...publishedAssetKeys,
+                ...buyLockedAssetKeys,
+              ]),
+              routeOverrides,
+            },
+          })
+        : null;
+      if (blended && !blendedResult) return;
+      const result = blendedResult ? blendedResult.view : await analyze(input);
       if (!mounted.current || revision !== generation.current) return;
+      const nextBuyKeys = blendedResult
+        ? [...blendedResult.proposal.buyKeys]
+        : buyKeys;
+      const applyExcluded = blended
+        ? [...publishedAssetKeys, ...buyLockedAssetKeys]
+        : excludedOfferKeys;
       setRows((current) => {
         const next = new Map(
           applyOfferPrices(
-            current.filter((row) => !excludedOfferKeys.includes(row.assetKey)),
+            current.filter((row) => !applyExcluded.includes(row.assetKey)),
             result.prices,
             controls.method
           ).map((row) => [row.assetKey, row])
         );
         return current.map((row) => next.get(row.assetKey) ?? row);
       });
-      setAnalysis({ scope: publishedScope, view: result });
+      if (blendedResult) setBuyKeys(nextBuyKeys);
+      setAnalysis({
+        scope: JSON.stringify({
+          keys: [...publishedAssetKeys].sort((a, b) => a.localeCompare(b)),
+          offers: publishedOffers,
+          pending: pendingOffers,
+          buys: nextBuyKeys,
+          buyLocks: buyLockedAssetKeys,
+          reason,
+          ...(blended ? { buyOptions, buyObservedAt } : {}),
+        }),
+        view: result,
+      });
     } catch {
       if (mounted.current && revision === generation.current)
         setError(t(locale, "collect.offerPlan.analysisFailed"));
@@ -305,10 +431,60 @@ function OfferPlanContents({
     }
   };
 
-  let calculateLabel = t(locale, "collect.offerPlan.calculate");
+  const latestAnalysis = useRef(analyzePrices);
+  useEffect(() => {
+    latestAnalysis.current = analyzePrices;
+  });
+  useEffect(() => {
+    if (
+      controls.method === "manual" ||
+      busy ||
+      reason ||
+      automaticAttempt.current === automaticKey
+    )
+      return;
+    const timer = globalThis.setTimeout(() => {
+      void latestAnalysis.current();
+    }, 350);
+    return () => globalThis.clearTimeout(timer);
+  }, [automaticKey, controls.method, busy, reason]);
+  useEffect(() => {
+    if (!blended || analysis === null) return;
+    const timer = globalThis.setTimeout(
+      () => {
+        if (pending.current) return;
+        generation.current++;
+        setAnalysis(null);
+        setError(t(locale, "collect.blend.refreshRequired"));
+      },
+      Math.max(0, Date.parse(analysis.validUntil) - Date.now())
+    );
+    return () => globalThis.clearTimeout(timer);
+  }, [analysis, blended, locale]);
+
+  let calculateLabel = t(locale, "collect.offerPlan.refreshPrices");
   if (controls.method === "manual")
     calculateLabel = t(locale, "collect.offerPlan.checkAmounts");
   if (busy) calculateLabel = t(locale, "collect.offerPlan.calculating");
+  let introKey: MessageKey = "collect.offerPlan.intro";
+  if (blended) introKey = "collect.blend.intro";
+  else if (controls.method !== "manual")
+    introKey = "collect.offerPlan.introCalculated";
+
+  const handleReviewBuys = (reviewedAt: number) => {
+    if (
+      busy ||
+      reason ||
+      buyNeedsRefresh ||
+      (analysis !== null && Date.parse(analysis.validUntil) <= reviewedAt) ||
+      !onReviewBuys ||
+      selectedBuyLegs.length === 0 ||
+      selectedBuyLegs.length > MARKET_BATCH_LIMITS.orders ||
+      buyCostWei === null
+    )
+      return;
+    onReviewBuys(selectedBuyLegs);
+  };
 
   if (!rows.length)
     return (
@@ -332,10 +508,7 @@ function OfferPlanContents({
           )}
         </h2>
         <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-relaxed tw-text-iron-400">
-          {t(
-            locale,
-            blended ? "collect.blend.intro" : "collect.offerPlan.intro"
-          )}
+          {t(locale, introKey)}
         </p>
       </div>
       <form
@@ -347,7 +520,8 @@ function OfferPlanContents({
       >
         <OfferPlanPricing
           value={controls}
-          disabled={busy}
+          blended={blended}
+          disabled={Boolean(reason)}
           error={error}
           onChange={changeControls}
         />
@@ -461,6 +635,8 @@ function OfferPlanContents({
               Boolean(reason) ||
               exceedsBudget ||
               fundingConflict ||
+              (blended && analysis === null) ||
+              (blended && prices.get(row.assetKey)?.status !== "PRICED") ||
               (controls.method === "goal" && budget === null)
             }
             onChange={changeRow}
@@ -470,6 +646,10 @@ function OfferPlanContents({
                 reason ||
                 exceedsBudget ||
                 fundingConflict ||
+                (blended &&
+                  (analysis === null ||
+                    Date.parse(analysis.validUntil) <= Date.now())) ||
+                (blended && prices.get(row.assetKey)?.status !== "PRICED") ||
                 (controls.method === "goal" && budget === null) ||
                 !row.asset ||
                 !row.selected ||
@@ -482,7 +662,10 @@ function OfferPlanContents({
                 quantity: row.quantity,
                 unitPriceEth: row.unitPriceEth,
                 expiryHours: row.expiryHours,
-                ...(controls.method === "goal"
+                ...(row.expiryDateTime
+                  ? { expiryDateTime: row.expiryDateTime }
+                  : {}),
+                ...(controls.method === "goal" || budget !== null
                   ? {
                       maximumOfferAmountWei: (
                         offerUnitWei(row.unitPriceEth)! * BigInt(row.quantity)
@@ -537,19 +720,10 @@ function OfferPlanContents({
           <OfferPlanBuySummary
             costWei={buyCostWei}
             listings={selectedBuyLegs.length}
-            disabled={busy || Boolean(reason) || !onReviewBuys}
-            onReview={() => {
-              if (
-                busy ||
-                reason ||
-                !onReviewBuys ||
-                selectedBuyLegs.length === 0 ||
-                selectedBuyLegs.length > MARKET_BATCH_LIMITS.orders ||
-                buyCostWei === null
-              )
-                return;
-              onReviewBuys(selectedBuyLegs);
-            }}
+            disabled={
+              busy || Boolean(reason) || !onReviewBuys || buyNeedsRefresh
+            }
+            onReview={handleReviewBuys}
           />
         )}
         <div className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-2">
@@ -640,4 +814,14 @@ function OfferPlanContents({
       </details>
     </section>
   );
+}
+
+function updatedDefaultExpiry(
+  row: OfferPlanRow,
+  controls: OfferPricingControls
+): OfferPlanRow {
+  const updated = { ...row, expiryHours: controls.expiryHours };
+  delete updated.expiryDateTime;
+  if (controls.expiryDateTime) updated.expiryDateTime = controls.expiryDateTime;
+  return updated;
 }

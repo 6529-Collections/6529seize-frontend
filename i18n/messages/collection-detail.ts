@@ -22,7 +22,8 @@ export const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["backLink.label", "Meme Lab"],
   ["backLink.ariaLabel", "Back to Meme Lab"],
   ["heading.fallback", "Meme Lab"],
-  ["additionalDetails", "Additional details"],
+  ["additionalDetails", "About this artwork"],
+  ["additionalDetailsDescription", "Traits, metadata and original files"],
   ["heading.card", "Card {tokenId}"],
   ["heading.ariaLabel", "Meme Lab Card {tokenId} - {name}"],
   ["sections.tabs", "Meme Lab page sections"],
@@ -49,6 +50,8 @@ export const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
 ] as const);
 
 export const MARKET_DEPTH_MESSAGES = namespaceMessages("marketDepth", [
+  ["disclosure", "Listings & offers"],
+  ["view", "View listings & offers"],
   ["title", "Listings and Offers"],
   ["description", "OpenSea listings and offers captured for this card."],
   ["loading", "Loading listings and offers"],
@@ -182,7 +185,7 @@ export const MARKET_DEPTH_MESSAGES = namespaceMessages("marketDepth", [
   ],
   [
     "trade.criteriaUnavailable",
-    "This collection or criteria offer cannot be accepted here yet.",
+    "This offer’s eligibility for this NFT has not been verified.",
   ],
   [
     "noSnapshotNotes",
@@ -383,6 +386,21 @@ export const THE_MEMES_DETAIL_LIVE_MESSAGES = namespaceMessages(
       "Unique % represents collector diversity. Higher percentage means more different collectors.",
     ],
     ["edition.editionSize", "Edition size"],
+    ["edition.rankLabel", "{label} rank"],
+    ["edition.exResearch", "Ex. research"],
+    ["edition.exMuseumAndResearch", "Ex. museum & research"],
+    ["edition.holdingWallets", "Holding wallets"],
+    ["edition.supplyDetails", "Supply details & rankings"],
+    ["edition.notComputed", "Not yet available"],
+    ["edition.researchReserve", "Network research reserve"],
+    [
+      "edition.exclusionsHelp",
+      "Excluded supply removes burned editions and the named reserve holdings. Research is the configured network-controlled allocation wallet. Museum & research excludes both reserves once. These counts do not indicate how many editions are listed for sale.",
+    ],
+    [
+      "edition.rankHelp",
+      "Smallest supply ranks first. Equal supplies share a rank; the next rank skips those ties.",
+    ],
     ["edition.burnt", "burnt"],
     ["edition.exBurnt", "ex. burnt"],
     ["edition.exMuseum", "ex. 6529 museum"],
@@ -403,7 +421,8 @@ export const THE_MEMES_DETAIL_LIVE_MESSAGES = namespaceMessages(
     ["market.unavailable", "N/A"],
     ["market.pending", "Pending"],
     ["market.ethUnit", "ETH"],
-    ["additionalDetails", "Additional details"],
+    ["additionalDetails", "About this artwork"],
+    ["additionalDetailsDescription", "Traits, metadata and original files"],
   ] as const
 );
 

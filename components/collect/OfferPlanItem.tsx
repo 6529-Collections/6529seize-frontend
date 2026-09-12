@@ -1,19 +1,33 @@
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatDecimalString, formatInteger, formatTime } from "@/i18n/format";
+import { formatDecimalString, formatTime } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 import { formatEther } from "viem";
 import { useId } from "react";
 import CollectAssetMedia from "./CollectAssetMedia";
 import type { OfferPlanPrice, OfferPlanRow } from "./collect-offer-plan.types";
-import {
-  OFFER_EXPIRY_HOURS,
-  offerRowIssue,
-  offerRowTotal,
-} from "./collect-offer-plan.helpers";
+import { offerRowIssue, offerRowTotal } from "./collect-offer-plan.helpers";
 import { OFFER_INPUT_CLASS } from "./OfferPlanPricing";
 import OfferPlanAcquisitionControl from "./OfferPlanAcquisitionControl";
+import { useCollectPlanMetadata } from "./CollectPlanMetadataProvider";
+import CollectOrderExpiryPicker from "./CollectOrderExpiryPicker";
 
 const REASON_KEYS: Readonly<Record<string, MessageKey>> = {
+  BLEND_excluded: "collect.blend.reason.excluded",
+  BLEND_locked: "collect.blend.reason.locked",
+  BLEND_invalid_quantity: "collect.blend.reason.invalidQuantity",
+  BLEND_manual_price: "collect.blend.reason.manualPrice",
+  BLEND_manual_buy: "collect.blend.reason.manualBuy",
+  BLEND_manual_offer: "collect.blend.reason.manualOffer",
+  BLEND_buy_unavailable: "collect.blend.reason.buyUnavailable",
+  BLEND_stale_reference: "collect.blend.reason.staleReference",
+  BLEND_no_reference: "collect.blend.reason.noReference",
+  BLEND_crossed_market: "collect.blend.reason.crossedMarket",
+  BLEND_tight_spread: "collect.blend.reason.tightSpread",
+  BLEND_spread_offer: "collect.blend.reason.spreadOffer",
+  BLEND_ask_offer: "collect.blend.reason.askOffer",
+  BLEND_ask_buy: "collect.blend.reason.askBuy",
+  BLEND_bid_only: "collect.blend.reason.bidOnly",
+  BLEND_invalid_amount: "collect.blend.reason.invalidAmount",
   MANUAL_PRICE: "collect.offerPlan.reason.manual",
   MATCH_BID: "collect.offerPlan.reason.matchBid",
   IMPROVE_BID: "collect.offerPlan.reason.improveBid",
@@ -65,6 +79,14 @@ export default function OfferPlanItem({
 }) {
   const locale = useBrowserLocale();
   const id = useId();
+  const metadata = useCollectPlanMetadata();
+  const artists = row.asset?.artist_ids
+    .map(
+      (artistId) =>
+        metadata.catalog?.artists.find((artist) => artist.id === artistId)?.name
+    )
+    .filter(Boolean)
+    .join(", ");
   const title =
     row.asset?.name ??
     t(locale, "collect.offerPlan.tokenFallback", {
@@ -74,6 +96,9 @@ export default function OfferPlanItem({
   const total = offerRowTotal(row);
   const disabled = busy || published || pending || buyReserved;
   const hasPrice = row.unitPriceEth !== "";
+  const blendReason = price?.reasons.find((reason) =>
+    reason.startsWith("BLEND_")
+  );
   return (
     <li className="tw-min-w-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-4 last:tw-border-b-0">
       <div className="tw-grid tw-items-center tw-gap-3 lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-gap-6">
@@ -110,6 +135,17 @@ export default function OfferPlanItem({
             >
               {title}
             </h3>
+            {artists && (
+              <p className="tw-m-0 tw-mt-1 tw-break-words tw-text-xs tw-text-iron-400">
+                {artists}
+              </p>
+            )}
+            {row.asset && (
+              <p className="tw-m-0 tw-mt-1 tw-text-xs tw-text-iron-500">
+                {t(locale, `collect.collection.${row.asset.family}`)} · #
+                {row.asset.token_id}
+              </p>
+            )}
             {published && (
               <p className="tw-m-0 tw-mt-1 tw-text-xs tw-text-iron-300">
                 {t(locale, "collect.offerPlan.published")}
@@ -140,6 +176,14 @@ export default function OfferPlanItem({
                 disabled={disabled}
                 onChange={(next) => onRouteChange?.(next)}
               />
+            )}
+            {blended && blendReason && (
+              <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
+                {t(
+                  locale,
+                  REASON_KEYS[blendReason] ?? "collect.offerPlan.reason.unknown"
+                )}
+              </p>
             )}
           </div>
         </div>
@@ -266,30 +310,15 @@ export default function OfferPlanItem({
             {t(locale, "collect.offerPlan.details")}
           </summary>
           <div className="tw-space-y-3 tw-py-2">
-            <label className="tw-block tw-w-28 tw-space-y-1 tw-text-xs tw-text-iron-300">
-              <span>{t(locale, "collect.offerPlan.expiry")}</span>
-              <select
-                value={row.expiryHours}
+            <div className="tw-max-w-sm">
+              <CollectOrderExpiryPicker
+                value={row}
                 disabled={disabled}
-                aria-label={t(locale, "collect.offerPlan.expiryFor", { title })}
-                onChange={(event) =>
-                  onChange({ ...row, expiryHours: event.target.value })
-                }
-                className={OFFER_INPUT_CLASS}
-              >
-                {OFFER_EXPIRY_HOURS.map((hours) => (
-                  <option key={hours} value={hours}>
-                    {t(
-                      locale,
-                      hours === "24"
-                        ? "collect.trade.durationDay"
-                        : "collect.trade.durationDays",
-                      { days: formatInteger(locale, Number(hours) / 24) }
-                    )}
-                  </option>
-                ))}
-              </select>
-            </label>
+                label={t(locale, "collect.offerPlan.expiryFor", { title })}
+                invalid={issue === "expiry"}
+                onChange={(next) => onChange({ ...row, ...next })}
+              />
+            </div>
             {price && (
               <ul className="tw-m-0 tw-space-y-1 tw-pl-4">
                 {price.reasons.map((reason) => (

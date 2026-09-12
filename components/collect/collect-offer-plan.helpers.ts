@@ -4,6 +4,7 @@ import { formatEther, parseEther } from "viem";
 import { isPositiveEthAmount } from "./collect-form.validation";
 import { collectProfileWallets } from "./collect-recipient.helpers";
 import { collectAssetIdentity } from "./collect.adapters";
+import { resolveCollectOrderExpiry } from "./collect-order-expiry";
 import type {
   CollectOfferSelection,
   OfferPlanPrice,
@@ -14,6 +15,7 @@ import type {
 } from "./collect-offer-plan.types";
 
 const UINT_MAX = 2n ** 256n - 1n;
+export const COLLECT_ANALYSIS_CLOCK_SKEW_MS = 15_000;
 export const OFFER_EXPIRY_HOURS = ["24", "168", "720"] as const;
 
 function offerSelectionKey(row: CollectOfferSelection): string {
@@ -50,8 +52,7 @@ export function offerRowTotal(row: OfferPlanRow): bigint | null {
 export function offerRowIssue(row: OfferPlanRow) {
   if (offerQuantity(row) === null) return "quantity";
   if (offerRowTotal(row) === null) return "price";
-  if (!OFFER_EXPIRY_HOURS.some((hours) => hours === row.expiryHours))
-    return "expiry";
+  if (resolveCollectOrderExpiry(row) === null) return "expiry";
   return null;
 }
 

@@ -6,6 +6,7 @@ import { t } from "@/i18n/messages";
 import { useId, useState } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import CollectRecipientPicker from "./CollectRecipientPicker";
+import CollectOrderExpiryPicker from "./CollectOrderExpiryPicker";
 import { COLLECT_INPUT_CLASS } from "./CollectGoalForm";
 import { validateCollectTrade } from "./collect-form.validation";
 import type { CollectTradeAction, CollectTradeDraft } from "./collect.types";
@@ -55,6 +56,7 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
     : props.error;
   return (
     <form
+      noValidate
       className="tw-space-y-4"
       onSubmit={(event) => {
         event.preventDefault();
@@ -141,29 +143,13 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
               className={COLLECT_INPUT_CLASS}
             />
           </label>
-          <label className="tw-block tw-space-y-2 tw-text-sm tw-text-iron-200">
-            <span>{t(locale, "collect.trade.duration")}</span>
-            <select
-              disabled={props.loading}
-              value={props.draft.expiryHours}
-              onChange={(event) => change({ expiryHours: event.target.value })}
-              className={COLLECT_INPUT_CLASS}
-            >
-              {[24, 168, 720].map((hours) => (
-                <option key={hours} value={hours}>
-                  {t(
-                    locale,
-                    hours === 24
-                      ? "collect.trade.durationDay"
-                      : "collect.trade.durationDays",
-                    {
-                      days: hours / 24,
-                    }
-                  )}
-                </option>
-              ))}
-            </select>
-          </label>
+          <CollectOrderExpiryPicker
+            value={props.draft}
+            disabled={props.loading}
+            invalid={invalid === "expiry"}
+            errorId={`${id}-error`}
+            onChange={change}
+          />
         </>
       )}
       {hasRecipient && (

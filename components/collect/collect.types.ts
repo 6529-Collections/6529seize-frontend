@@ -35,6 +35,7 @@ export interface CollectArtworkView {
   readonly priceLabel: string | null;
   readonly priceDescription?: string | undefined;
   readonly sourceLabel?: string | undefined;
+  readonly valueMetric?: { readonly value: string; readonly label: string };
   readonly actions: readonly CollectActionView[];
 }
 
@@ -54,7 +55,11 @@ export interface CollectRequirementView {
   readonly detail: string;
   readonly status: "owned" | "selected" | "missing" | "unavailable";
   readonly media?: ReactNode;
+  readonly assetKey?: string;
+  readonly artworkKeys?: readonly string[];
+  readonly priceExactLabel?: string;
   readonly availabilityLabel?: string;
+  readonly availabilityRank?: 0 | 1 | 2;
   readonly priceLabel?: string;
   readonly purchaseLabel?: string;
 }
@@ -76,16 +81,20 @@ export interface CollectPlanView {
   readonly snapshotLabel: string;
   readonly requirements: readonly CollectRequirementView[];
   readonly totalLabel: string | null;
+  readonly totalExactLabel?: string;
   readonly blockers: readonly string[];
   readonly assumptions: readonly string[];
   readonly reviewDisabledReason?: string | undefined;
   readonly purchaseTotalLabel?: string;
+  readonly purchaseTotalExactLabel?: string;
   readonly gasReserveLabel?: string;
+  readonly gasReserveExactLabel?: string;
   readonly outcomeLabel?: string;
   readonly scenarios?: readonly {
     id: CollectPlanScenario;
     label: string;
     priceLabel: string;
+    priceExactLabel?: string;
     detail: string;
   }[];
   readonly scenario?: CollectPlanScenario;
@@ -110,6 +119,7 @@ export interface CollectTradeDraft {
   readonly quantity: string;
   readonly unitPriceEth: string;
   readonly expiryHours: string;
+  readonly expiryDateTime?: string;
   readonly recipient: string;
 }
 

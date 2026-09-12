@@ -28,7 +28,7 @@ import {
 export const ACTION_CLASS =
   "tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-white";
 const COMPACT_ACTION_CLASS =
-  "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-100 tw-underline tw-decoration-white/30 tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-decoration-white";
+  "tw-my-0.5 tw-inline-flex tw-min-h-11 tw-min-w-11 tw-max-w-full tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:enabled:hover:tw-border-iron-500 desktop-hover:enabled:hover:tw-bg-iron-900 desktop-hover:enabled:hover:tw-text-white";
 
 export interface RowState {
   readonly busy: boolean;
@@ -153,11 +153,11 @@ export function MarketDepthOrderAction({
   if (!context) return null;
   const state = context.rowStates[order.order_key];
   const selected = context.selected.some((item) => rowMatches(item, order));
-  const criteriaOffer =
+  const unverifiedOffer =
     order.side === ApiMarketOrderSideEnum.Bid &&
-    (order.scope !== ApiMarketOrderScopeEnum.Token ||
-      order.applicability !== ApiMarketOrderApplicabilityEnum.Token ||
-      order.token_id === null);
+    (order.scope === ApiMarketOrderScopeEnum.Unknown ||
+      order.applicability ===
+        ApiMarketOrderApplicabilityEnum.CriteriaUnverified);
   const listingActionKey = selected
     ? "marketDepth.trade.remove"
     : "marketDepth.trade.collect";
@@ -167,7 +167,7 @@ export function MarketDepthOrderAction({
   return (
     <NftPurchasingGate>
       <div className={compact ? "" : "tw-mt-3"}>
-        {criteriaOffer ? (
+        {unverifiedOffer ? (
           <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
             {t(locale, "marketDepth.trade.criteriaUnavailable")}
           </p>
