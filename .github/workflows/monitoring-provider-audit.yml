@@ -23,7 +23,7 @@ jobs:
           fi
       - name: Read Sentry monitoring capabilities
         env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_MONITORING_AUTH_TOKEN || secrets.SENTRY_AUTH_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
@@ -53,13 +53,14 @@ jobs:
               return { status: 'unavailable' };
             }
           }
-          const [identity, project, projects, uptime, crons, rules] = await Promise.all([
+          const [identity, project, projects, uptime, crons, rules, integrations] = await Promise.all([
             read(''),
             read('projects/seize-ff/6529-frontend/'),
             read('organizations/seize-ff/projects/'),
             read('organizations/seize-ff/uptime/'),
             read('organizations/seize-ff/monitors/'),
             read('projects/seize-ff/6529-frontend/rules/'),
+            read('organizations/seize-ff/sentry-apps/'),
           ]);
           const scopes = Array.isArray(identity.data?.auth?.scopes)
             ? identity.data.auth.scopes.filter(value => typeof value === 'string' && /^[a-z]+:[a-z]+$/.test(value))
@@ -86,6 +87,8 @@ jobs:
             cronMonitorsOnFirstPage: Array.isArray(crons.data) ? crons.data.length : null,
             rulesStatus: rules.status,
             projectRulesOnFirstPage: Array.isArray(rules.data) ? rules.data.length : null,
+            integrationsStatus: integrations.status,
+            customIntegrationsOnFirstPage: Array.isArray(integrations.data) ? integrations.data.length : null,
           };
           const output = JSON.stringify(summary, null, 2);
           console.log(output);

@@ -9,8 +9,10 @@ review date. Update it in the same change as any custom signal.
 
 - AWS RUM owns real-user browser performance: Core Web Vitals,
   browser/device cohorts, page views, and browser HTTP health.
-- Sentry owns errors, client/server traces, slow code paths, and exact
-  code-level spans and logs.
+- Sentry owns browser, server, and edge errors plus browser traces, slow code
+  paths, and code-level spans and logs. Server and edge capture errors only;
+  they do not export traces or logs. Node also skips OpenTelemetry setup and
+  ESM loader hooks. Browser performance remains in client Sentry and AWS RUM.
 - Mixpanel owns user actions, feature adoption, and product funnels. Exact
   technical timings do not go to Mixpanel.
 - Google tag page analytics is a preserved legacy overlap. Its external usage

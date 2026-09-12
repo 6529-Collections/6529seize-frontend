@@ -32,6 +32,28 @@ const SYNTHETIC_PROFILE = "synthetic-public-profile";
 const SYNTHETIC_MEDIA_ID = "synthetic-media-file";
 
 describe("sentry-sanitizer", () => {
+  it("normalizes Next.js server request context without retaining query values", () => {
+    const event = sanitizeSentryEvent({
+      contexts: {
+        nextjs: {
+          request_path: `/api/v2/waves/${SYNTHETIC_WAVE_ID}?token=synthetic-query#private`,
+          router_kind: "App Router",
+          router_path: "/api/v2/waves/[wave]",
+          route_type: "route",
+        },
+      },
+    });
+
+    expect(event.contexts?.["nextjs"]).toEqual({
+      request_path: "/api/v2/waves/:uuid",
+      router_kind: "App Router",
+      router_path: "/api/v2/waves/[wave]",
+      route_type: "route",
+    });
+    expect(JSON.stringify(event)).not.toContain("synthetic-query");
+    expect(JSON.stringify(event)).not.toContain(SYNTHETIC_WAVE_ID);
+  });
+
   it("redacts secrets from breadcrumb text fields", () => {
     const breadcrumb = sanitizeSentryBreadcrumb({
       message: "request failed Bearer abc123",

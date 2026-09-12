@@ -7,11 +7,11 @@ const serverInstrumentationEnabled =
 export async function register() {
   if (!sentryEnabled) return;
   if (!serverInstrumentationEnabled) return;
-  if (publicEnv.NEXT_RUNTIME === "nodejs") {
+  if (process.env["NEXT_RUNTIME"] === "nodejs") {
     await import("./sentry.server.config");
   }
 
-  if (publicEnv.NEXT_RUNTIME === "edge") {
+  if (process.env["NEXT_RUNTIME"] === "edge") {
     await import("./sentry.edge.config");
   }
 }
