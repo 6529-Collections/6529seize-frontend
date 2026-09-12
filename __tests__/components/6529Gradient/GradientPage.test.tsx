@@ -54,17 +54,10 @@ jest.mock("@/components/nft-market-activity/NftMarketActivity", () => ({
     />
   ),
 }));
-const mockRefreshMarket = jest.fn();
 jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
   __esModule: true,
-  default: ({
-    actions,
-  }: {
-    actions?: React.ReactNode | ((refresh: () => void) => React.ReactNode);
-  }) => (
-    <div data-testid="market-depth">
-      {typeof actions === "function" ? actions(mockRefreshMarket) : actions}
-    </div>
+  default: ({ refreshKey }: { refreshKey?: number }) => (
+    <div data-refresh-key={refreshKey} data-testid="market-depth" />
   ),
 }));
 jest.mock("@/components/collect/CollectDetailActions", () => ({
@@ -185,11 +178,18 @@ describe("GradientPage", () => {
     );
     expect(screen.getByTestId("transfer-action")).toBeInTheDocument();
     const collecting = screen.getByRole("button", { name: "Collect artwork" });
+    const marketDepth = screen.getByTestId("market-depth");
     expect(collecting).toHaveAttribute("data-family", "gradients");
     expect(collecting).toHaveAttribute("data-token", "1");
-    expect(screen.getByTestId("market-depth")).toContainElement(collecting);
+    expect(
+      screen.getAllByRole("button", { name: "Collect artwork" })
+    ).toHaveLength(1);
+    expect(
+      collecting.compareDocumentPosition(screen.getByTestId("art-viewer"))
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(marketDepth).toHaveAttribute("data-refresh-key", "0");
     fireEvent.click(collecting);
-    expect(mockRefreshMarket).toHaveBeenCalledTimes(1);
+    expect(marketDepth).toHaveAttribute("data-refresh-key", "1");
   });
 
   it("returns to the originating profile collected card", async () => {
@@ -297,9 +297,9 @@ describe("GradientPage", () => {
     expect(screen.getByText("Artist")).toBeInTheDocument();
     expect(screen.getByTestId("artist")).toBeInTheDocument();
     expect(screen.queryByText("Market Overview")).not.toBeInTheDocument();
-    expect(screen.getByText("Floor Price")).toBeInTheDocument();
-    expect(screen.getByText("Market Cap")).toBeInTheDocument();
-    expect(screen.getByText("Highest Offer")).toBeInTheDocument();
+    expect(screen.queryByText("Floor Price")).not.toBeInTheDocument();
+    expect(screen.queryByText("Market Cap")).not.toBeInTheDocument();
+    expect(screen.queryByText("Highest Offer")).not.toBeInTheDocument();
   });
 
   it("displays TDH information", async () => {

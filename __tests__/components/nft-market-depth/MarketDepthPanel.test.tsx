@@ -11,6 +11,13 @@ import { commonApiFetch } from "@/services/api/common-api";
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
+  getStructuredApiErrorStatus: (error: unknown) =>
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    typeof error.status === "number"
+      ? error.status
+      : undefined,
 }));
 
 const fetchMock = commonApiFetch as jest.MockedFunction<typeof commonApiFetch>;
@@ -31,6 +38,59 @@ function StatefulAction({ refresh }: { refresh: () => void }) {
 }
 
 function depth(overrides: Record<string, unknown> = {}) {
+  const ethAsk = {
+    order_key: "order-ask",
+    order_id: "order-ask",
+    source: "opensea",
+    protocol: "seaport",
+    collection_slug: "collection",
+    side: "ask",
+    scope: "token",
+    maker: "0xask-maker",
+    token_id: "7",
+    original_quantity: "2",
+    remaining_quantity: "2",
+    currency: {
+      address: "0x0000000000000000000000000000000000000000",
+      symbol: "ETH",
+      decimals: 18,
+    },
+    total_price_raw: "2500000000000000000",
+    unit_price: "1.25",
+    starts_at: "2026-09-10T11:00:00.000Z",
+    expires_at: "2026-09-12T11:00:00.000Z",
+    observed_at: "2026-09-10T12:00:00.000Z",
+    applicability: "token",
+    liquidity_group: "ask-group",
+    caveats: [],
+  };
+  const wethBid = {
+    ...ethAsk,
+    order_key: "order-bid",
+    order_id: "order-bid",
+    side: "bid",
+    scope: "token",
+    maker: "0xbid-maker",
+    currency: {
+      address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+      symbol: "WETH",
+      decimals: 18,
+    },
+    unit_price: "1.1",
+    total_price_raw: "1100000000000000000",
+    liquidity_group: "bid-group",
+  };
+  const criteriaOrder = {
+    ...ethAsk,
+    order_key: "order-criteria",
+    order_id: "order-criteria",
+    scope: "collection",
+    maker: "0xcriteria-maker",
+    token_id: null,
+    unit_price: null,
+    applicability: "criteria_unverified",
+    liquidity_group: "criteria-group",
+  };
   return {
     contract: "0x0000000000000000000000000000000000000001",
     token_id: "7",
@@ -79,35 +139,8 @@ function depth(overrides: Record<string, unknown> = {}) {
         bid_order_count: 1,
       },
     ],
-    orders: [
-      {
-        order_key: "order-1",
-        order_id: "order-1",
-        source: "opensea",
-        protocol: "seaport",
-        collection_slug: "collection",
-        side: "ask",
-        scope: "collection",
-        maker: "0xmaker",
-        token_id: null,
-        original_quantity: "1",
-        remaining_quantity: "1",
-        currency: {
-          address: "0x0000000000000000000000000000000000000000",
-          symbol: "ETH",
-          decimals: 18,
-        },
-        total_price_raw: "1250000000000000000",
-        unit_price: "1.25",
-        starts_at: null,
-        expires_at: null,
-        observed_at: "2026-09-10T12:00:00.000Z",
-        applicability: "criteria_unverified",
-        liquidity_group: "group-1",
-        caveats: [],
-      },
-    ],
-    order_count: 1,
+    orders: [ethAsk, wethBid, criteriaOrder],
+    order_count: 3,
     next: null,
     criteria_order_count: 1,
     notes: [],
@@ -139,23 +172,6 @@ describe("MarketDepthPanel", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps captured depth visible when another page fails without exposing diagnostics", async () => {
-    fetchMock
-      .mockResolvedValueOnce(depth({ next: "cursor-1" }))
-      .mockRejectedValueOnce(new Error("private order diagnostic"));
-    render(<MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />);
-    await screen.findByText("Lowest listing · ETH");
-    fireEvent.click(screen.getByText("Individual listings and offers"));
-    fireEvent.click(screen.getByRole("button", { name: "Load more orders" }));
-    expect(
-      await screen.findByText("More listings and offers could not be loaded.")
-    ).toBeInTheDocument();
-    expect(screen.getByText("Lowest listing · ETH")).toBeInTheDocument();
-    expect(
-      screen.queryByText("private order diagnostic")
-    ).not.toBeInTheDocument();
-  });
-
   it("keeps currencies separate and labels criteria applicability", async () => {
     fetchMock.mockResolvedValue(depth());
 
@@ -175,7 +191,15 @@ describe("MarketDepthPanel", () => {
     expect(screen.getByText("Offers · WETH")).toBeInTheDocument();
     expect(screen.queryByText("Offers · ETH")).not.toBeInTheDocument();
     expect(screen.queryByText("Listings · WETH")).not.toBeInTheDocument();
-    expect(screen.getByText("Criteria match unverified")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Listings at 1.25 ETH" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Offers at 1.1 WETH" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Orders requiring verification (1)")
+    ).toBeInTheDocument();
     expect(
       screen.getByText("OpenSea listings and offers captured for this card.")
     ).toBeInTheDocument();
@@ -185,8 +209,8 @@ describe("MarketDepthPanel", () => {
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Individual listings and offers")
-    ).toBeInTheDocument();
+      screen.queryByText("Individual listings and offers")
+    ).not.toBeInTheDocument();
     expect(screen.getByText("About these prices")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -209,7 +233,7 @@ describe("MarketDepthPanel", () => {
             collection_slug: "collection",
             started_at: "2026-09-10T11:59:00.000Z",
             completed_at: "2026-09-10T12:00:00.000Z",
-            order_count: 1,
+            order_count: 3,
             unsupported_count: 2,
             schema_version: 1,
             normalizer_version: "1",
@@ -403,27 +427,102 @@ describe("MarketDepthPanel", () => {
     );
   });
 
-  it("aborts a pending old order page and ignores its late result", async () => {
+  it("aborts a pending first page when refreshKey changes and preserves the action slot", async () => {
     let resolveOldPage: ((page: ReturnType<typeof depth>) => void) | undefined;
     const pendingOldPage = new Promise<ReturnType<typeof depth>>((resolve) => {
       resolveOldPage = resolve;
     });
     fetchMock
-      .mockResolvedValueOnce(depth({ next: "cursor-1" }))
       .mockReturnValueOnce(pendingOldPage)
-      .mockResolvedValueOnce(
-        depth({
-          orders: [
+      .mockResolvedValueOnce(depth());
+
+    const { rerender } = render(
+      <MarketDepthPanel
+        contract="0x1"
+        tokenId="7"
+        locale="en-US"
+        refreshKey={0}
+        actions={(refresh) => <StatefulAction refresh={refresh} />}
+      />
+    );
+    const actionSlot = screen.getByTestId("market-depth-action-slot");
+    const oldPageSignal = fetchMock.mock.calls[0]?.[0].signal;
+    rerender(
+      <MarketDepthPanel
+        contract="0x1"
+        tokenId="7"
+        locale="en-US"
+        refreshKey={1}
+        actions={(refresh) => <StatefulAction refresh={refresh} />}
+      />
+    );
+
+    await waitFor(() => expect(oldPageSignal?.aborted).toBe(true));
+    expect(screen.getByTestId("market-depth-action-slot")).toBe(actionSlot);
+    resolveOldPage?.(
+      depth({
+        books: [
+          {
+            ...depth().books[0],
+            asks: [
+              {
+                unit_price: "99.99",
+                quantity: "1",
+                cumulative_quantity: "1",
+                order_count: 1,
+              },
+            ],
+            best_ask: "99.99",
+          },
+          depth().books[1],
+        ],
+      })
+    );
+
+    await screen.findByRole("button", { name: "Listings at 1.25 ETH" });
+    expect(
+      screen.queryByRole("button", { name: "Listings at 99.99 ETH" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("aborts pending price-row details and ignores their late result on refresh", async () => {
+    let resolveOldPage: ((page: ReturnType<typeof depth>) => void) | undefined;
+    const pendingOldPage = new Promise<ReturnType<typeof depth>>((resolve) => {
+      resolveOldPage = resolve;
+    });
+    const initial = depth({
+      orders: [depth().orders[0]],
+      order_count: 3,
+      next: "cursor-1",
+    });
+    const refreshed = depth({
+      books: [
+        {
+          ...depth().books[0],
+          asks: [
             {
-              ...depth().orders[0],
-              order_key: "new-card-page",
               unit_price: "3.33",
+              quantity: "1",
+              cumulative_quantity: "1",
+              order_count: 1,
             },
           ],
-          order_count: 1,
-          next: null,
-        })
-      );
+          best_ask: "3.33",
+        },
+        depth().books[1],
+      ],
+      orders: [
+        { ...depth().orders[0], unit_price: "3.33" },
+        depth().orders[1],
+        depth().orders[2],
+      ],
+      order_count: 3,
+      next: null,
+    });
+    fetchMock
+      .mockResolvedValueOnce(initial)
+      .mockReturnValueOnce(pendingOldPage)
+      .mockResolvedValueOnce(refreshed);
 
     render(
       <MarketDepthPanel
@@ -438,9 +537,10 @@ describe("MarketDepthPanel", () => {
       />
     );
 
-    await screen.findByText("Load more orders");
-    fireEvent.click(screen.getByText("Individual listings and offers"));
-    fireEvent.click(screen.getByRole("button", { name: "Load more orders" }));
+    await screen.findByRole("button", { name: "Listings at 1.25 ETH" });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Listings at 1.25 ETH" })
+    );
     const oldPageSignal = fetchMock.mock.calls[1]?.[0].signal;
     fireEvent.click(screen.getByRole("button", { name: "Refresh market" }));
 
@@ -448,20 +548,13 @@ describe("MarketDepthPanel", () => {
     await act(async () => {
       resolveOldPage?.(
         depth({
-          orders: [
-            {
-              ...depth().orders[0],
-              order_key: "old-page-result",
-              unit_price: "99.99",
-            },
-          ],
+          orders: [depth().orders[1], depth().orders[2]],
+          order_count: 3,
+          next: null,
         })
       );
     });
-    await waitFor(() => expect(screen.getByText("3.33")).toBeInTheDocument());
-    expect(
-      screen.queryByText("More listings and offers could not be loaded.")
-    ).not.toBeInTheDocument();
+    await screen.findByRole("button", { name: "Listings at 3.33 ETH" });
     expect(screen.queryByText("99.99")).not.toBeInTheDocument();
   });
 
@@ -497,8 +590,8 @@ describe("MarketDepthPanel", () => {
     fetchMock.mockResolvedValueOnce(
       depth({
         books: [],
-        orders: [],
-        order_count: 0,
+        orders: [depth().orders[2]],
+        order_count: 1,
         criteria_order_count: 1,
         snapshots: [
           {
@@ -508,7 +601,7 @@ describe("MarketDepthPanel", () => {
             started_at: "2026-09-10T11:59:00.000Z",
             completed_at: "2026-09-10T12:00:00.000Z",
             order_count: 1,
-            unsupported_count: 2,
+            unsupported_count: 1,
             schema_version: 1,
             normalizer_version: "1",
           },
@@ -534,9 +627,7 @@ describe("MarketDepthPanel", () => {
       screen.getByText("Some orders in the collection could not be priced.")
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "1 criteria order is shown separately; token applicability is unverified."
-      )
+      screen.getByText("Orders requiring verification (1)")
     ).toBeInTheDocument();
 
     fetchMock.mockResolvedValueOnce(
@@ -560,56 +651,159 @@ describe("MarketDepthPanel", () => {
     );
   });
 
-  it("shows every fetched order and appends the next immutable page", async () => {
-    const firstPage = depth({
-      orders: Array.from({ length: 13 }, (_, index) => ({
-        ...depth().orders[0],
-        order_key: `order-${index + 1}`,
-        unit_price: `${index + 1}.123456789012345678`,
-      })),
-      order_count: 14,
-      next: "cursor-1",
-    });
-    const secondPage = depth({
-      orders: [
-        {
-          ...depth().orders[0],
-          order_key: "order-14",
-          unit_price: "14.123456789012345678",
-        },
-      ],
-      order_count: 14,
-      next: null,
-    });
+  it("loads all price-row pages before showing order details", async () => {
+    let resolveFirstNextPage:
+      | ((page: ReturnType<typeof depth>) => void)
+      | undefined;
+    let resolveSecondNextPage:
+      | ((page: ReturnType<typeof depth>) => void)
+      | undefined;
+    const pendingFirstNextPage = new Promise<ReturnType<typeof depth>>(
+      (resolve) => {
+        resolveFirstNextPage = resolve;
+      }
+    );
+    const pendingSecondNextPage = new Promise<ReturnType<typeof depth>>(
+      (resolve) => {
+        resolveSecondNextPage = resolve;
+      }
+    );
     fetchMock
-      .mockResolvedValueOnce(firstPage)
-      .mockResolvedValueOnce(secondPage);
+      .mockResolvedValueOnce(
+        depth({
+          orders: [depth().orders[0]],
+          order_count: 3,
+          next: "cursor-1",
+        })
+      )
+      .mockReturnValueOnce(pendingFirstNextPage)
+      .mockReturnValueOnce(pendingSecondNextPage);
 
-    render(
-      <MarketDepthPanel
-        contract="0x0000000000000000000000000000000000000001"
-        tokenId="7"
-      />
-    );
+    render(<MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />);
 
-    await waitFor(() =>
-      expect(
-        screen.getByText("Individual listings and offers")
-      ).toBeInTheDocument()
-    );
-    fireEvent.click(screen.getByText("Individual listings and offers"));
-    expect(screen.getByText("13.123456789012345678")).toBeInTheDocument();
+    const priceButton = await screen.findByRole("button", {
+      name: "Listings at 1.25 ETH",
+    });
+    fireEvent.click(priceButton);
+    expect(priceButton).toHaveAttribute("aria-expanded", "true");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(
-      screen.getAllByText("0x0000000000000000000000000000000000000000").length
-    ).toBeGreaterThan(0);
+      screen.queryByRole("list", { name: "Orders at this price" })
+    ).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Load more orders" }));
-    await waitFor(() =>
-      expect(screen.getByText("14.123456789012345678")).toBeInTheDocument()
+    resolveFirstNextPage?.(
+      depth({
+        orders: [depth().orders[1]],
+        order_count: 3,
+        next: "cursor-2",
+      })
     );
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+    expect(
+      screen.queryByRole("list", { name: "Orders at this price" })
+    ).not.toBeInTheDocument();
+    resolveSecondNextPage?.(
+      depth({
+        orders: [depth().orders[2]],
+        order_count: 3,
+        next: null,
+      })
+    );
+    await screen.findByRole("list", { name: "Orders at this price" });
+    expect(
+      screen.getByRole("list", { name: "Orders at this price" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Quoted quantity")).toBeInTheDocument();
+    expect(screen.getByText("Expires")).toBeInTheDocument();
+    fireEvent.click(priceButton);
+    fireEvent.click(priceButton);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(
+      screen.queryByText("Individual listings and offers")
+    ).not.toBeInTheDocument();
   });
 
-  it("does not merge a pending order page after the card changes", async () => {
+  it("restarts once after a structured 400 and then drains the new snapshot", async () => {
+    const restartedPage = depth({
+      orders: [depth().orders[0]],
+      order_count: 3,
+      next: "cursor-2",
+    });
+    fetchMock
+      .mockResolvedValueOnce(
+        depth({
+          orders: [depth().orders[0]],
+          order_count: 3,
+          next: "cursor-1",
+        })
+      )
+      .mockRejectedValueOnce(
+        Object.assign(new Error("book changed"), { status: 400 })
+      )
+      .mockResolvedValueOnce(restartedPage)
+      .mockResolvedValueOnce(
+        depth({
+          orders: [depth().orders[1], depth().orders[2]],
+          order_count: 3,
+          next: null,
+        })
+      );
+
+    render(<MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Listings at 1.25 ETH" })
+    );
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
+    expect(fetchMock.mock.calls[1]?.[0]).toEqual(
+      expect.objectContaining({
+        params: { page_size: "40", cursor: "cursor-1" },
+      })
+    );
+    expect(fetchMock.mock.calls[2]?.[0]).toEqual(
+      expect.objectContaining({ params: { page_size: "40" } })
+    );
+    expect(fetchMock.mock.calls[3]?.[0]).toEqual(
+      expect.objectContaining({
+        params: { page_size: "40", cursor: "cursor-2" },
+      })
+    );
+    await screen.findByRole("list", { name: "Orders at this price" });
+    fireEvent.click(screen.getByText("Order information"));
+    expect(screen.getByText("0xask-maker")).toBeInTheDocument();
+  });
+
+  it("shows generic retry details after a persistent pagination failure", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        depth({
+          orders: [depth().orders[0]],
+          order_count: 3,
+          next: "cursor-1",
+        })
+      )
+      .mockRejectedValueOnce(
+        Object.assign(new Error("private provider diagnostic"), { status: 400 })
+      )
+      .mockRejectedValueOnce(
+        Object.assign(new Error("private provider diagnostic"), { status: 400 })
+      );
+
+    render(<MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Listings at 1.25 ETH" })
+    );
+
+    expect(
+      await screen.findByRole("button", { name: "Retry details" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(
+      screen.queryByText("private provider diagnostic")
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not merge a pending price-row page after the card changes", async () => {
     let resolvePendingPage:
       | ((page: ReturnType<typeof depth>) => void)
       | undefined;
@@ -617,10 +811,23 @@ describe("MarketDepthPanel", () => {
       resolvePendingPage = resolve;
     });
     fetchMock
-      .mockResolvedValueOnce(depth({ next: "cursor-1" }))
+      .mockResolvedValueOnce(
+        depth({
+          orders: [depth().orders[0]],
+          order_count: 3,
+          next: "cursor-1",
+        })
+      )
       .mockReturnValueOnce(pendingPage)
       .mockResolvedValueOnce(
-        depth({ token_id: "8", orders: [], order_count: 0, next: null })
+        depth({
+          token_id: "8",
+          books: [],
+          orders: [],
+          order_count: 0,
+          criteria_order_count: 0,
+          next: null,
+        })
       );
 
     const { rerender } = render(
@@ -630,11 +837,9 @@ describe("MarketDepthPanel", () => {
       />
     );
 
-    await waitFor(() =>
-      expect(screen.getByText("Load more orders")).toBeInTheDocument()
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Listings at 1.25 ETH" })
     );
-    fireEvent.click(screen.getByText("Individual listings and offers"));
-    fireEvent.click(screen.getByRole("button", { name: "Load more orders" }));
     rerender(
       <MarketDepthPanel
         contract="0x0000000000000000000000000000000000000001"
@@ -642,11 +847,7 @@ describe("MarketDepthPanel", () => {
       />
     );
     resolvePendingPage?.(
-      depth({
-        orders: [
-          { ...depth().orders[0], order_key: "old-card", unit_price: "99.99" },
-        ],
-      })
+      depth({ orders: [depth().orders[1], depth().orders[2]], next: null })
     );
 
     await waitFor(() =>
@@ -656,6 +857,8 @@ describe("MarketDepthPanel", () => {
         })
       )
     );
-    expect(screen.queryByText("99.99")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Listings at 1.25 ETH" })
+    ).not.toBeInTheDocument();
   });
 });

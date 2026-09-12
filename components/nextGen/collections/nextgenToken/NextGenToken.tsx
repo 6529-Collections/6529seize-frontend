@@ -18,7 +18,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { printViewButton } from "../collectionParts/NextGenCollection";
 import NextGenTokenAbout from "./NextGenTokenAbout";
@@ -47,6 +47,10 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
   const locale = useBrowserLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [marketRefreshVersion, setMarketRefreshVersion] = useState(0);
+  const refreshMarket = useCallback(() => {
+    setMarketRefreshVersion((version) => version + 1);
+  }, []);
 
   const { address: connectedAddress } = useSeizeConnectContext();
 
@@ -145,19 +149,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
                 contract={NEXTGEN_CONTRACT}
                 tokenId={props.token.id}
                 locale={locale}
-                actions={
-                  props.collection.id === 1
-                    ? (refresh) => (
-                        <CollectDetailActions
-                          collection="pebbles"
-                          tokenId={String(props.token.id)}
-                          title={props.token.name}
-                          locale={locale}
-                          onMarketChange={refresh}
-                        />
-                      )
-                    : undefined
-                }
+                refreshKey={marketRefreshVersion}
               />
             </section>
           )}
@@ -318,6 +310,18 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
             </div>
           </div>
         </section>
+
+        {props.collection.id === 1 && (
+          <div className="tw-mb-4">
+            <CollectDetailActions
+              collection="pebbles"
+              tokenId={String(props.token.id)}
+              title={props.token.name}
+              locale={locale}
+              onMarketChange={refreshMarket}
+            />
+          </div>
+        )}
 
         <section aria-label={`${props.token.name} artwork`}>
           <NextGenTokenArt token={props.token} collection={props.collection} />
