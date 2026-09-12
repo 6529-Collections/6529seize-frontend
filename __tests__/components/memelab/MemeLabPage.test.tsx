@@ -629,69 +629,43 @@ describe("MemeLabPageComponent", () => {
     });
   });
 
-  it("syncs additional details default with legacy The Art focus changes", async () => {
+  it("opens legacy artwork links in Details and keeps Overview separate", async () => {
     setupMockApiCalls();
-
     const queryClient = createTestQueryClient();
-    const page = (nftId = "1") => (
+    const page = () => (
       <QueryClientProvider client={queryClient}>
-        <MemeLabPageComponent nftId={nftId} />
+        <MemeLabPageComponent nftId="1" />
       </QueryClientProvider>
     );
     const { rerender } = render(page());
-
-    const detailsButton = await screen.findByRole("button", {
-      name: "About this artwork",
-    });
-    expect(detailsButton).toHaveAttribute("aria-expanded", "false");
-    const detailsPanelId = detailsButton.getAttribute("aria-controls") ?? "";
-    expect(detailsPanelId).toBeTruthy();
-    expect(document.getElementById(detailsPanelId)).toHaveAttribute(
-      "aria-hidden",
-      "true"
-    );
+    const details = await screen.findByRole("button", { name: "Details" });
+    expect(details).not.toHaveAttribute("aria-current");
     expect(
-      detailsButton.compareDocumentPosition(screen.getByTestId("market-depth"))
-    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    const focus = jest.spyOn(detailsButton, "focus");
-    fireEvent.click(detailsButton);
-    expect(focus).toHaveBeenLastCalledWith({ preventScroll: true });
-    expect(detailsButton).toHaveFocus();
-    expect(detailsButton).toHaveAttribute("aria-expanded", "true");
-    expect(document.getElementById(detailsPanelId)).toHaveAttribute(
-      "aria-hidden",
-      "false"
+      screen.queryByRole("heading", { name: "Properties" })
+    ).not.toBeInTheDocument();
+    fireEvent.click(details);
+    expect(mockUseRouter().replace).toHaveBeenLastCalledWith(
+      "/meme-lab/1?focus=the-art",
+      { scroll: false }
     );
-    fireEvent.click(detailsButton);
-    expect(focus).toHaveBeenCalledTimes(2);
-    expect(detailsButton).toHaveFocus();
-    expect(document.getElementById(detailsPanelId)).toHaveClass(
-      "[overflow-anchor:none]"
-    );
-
     mockSearchParamsWithFocus(MEME_FOCUS.THE_ART);
-
-    await act(async () => {
-      rerender(page());
-    });
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: "About this artwork" })
-      ).toHaveAttribute("aria-expanded", "true");
-    });
-
+    rerender(page());
+    expect(
+      await screen.findByRole("heading", { name: "Properties" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Details" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+    expect(screen.getAllByTestId("market-depth")).toHaveLength(1);
     mockSearchParamsWithFocus(MEME_FOCUS.LIVE);
-
-    await act(async () => {
-      rerender(page());
-    });
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: "About this artwork" })
-      ).toHaveAttribute("aria-expanded", "false");
-    });
+    rerender(page());
+    expect(
+      screen.queryByRole("heading", { name: "Properties" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "About this artwork" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders activity tab content", async () => {
@@ -966,9 +940,10 @@ describe("MemeLabPageComponent", () => {
 
     await waitFor(() => {
       expect(screen.getAllByTestId("nft-image")).toHaveLength(2);
-      expect(
-        screen.getByRole("button", { name: "About this artwork" })
-      ).toHaveAttribute("aria-expanded", "true");
+      expect(screen.getByRole("button", { name: "Details" })).toHaveAttribute(
+        "aria-current",
+        "page"
+      );
       expect(
         screen.getByRole("link", {
           name: "https://metadata.example/animation.html",

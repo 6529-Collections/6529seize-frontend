@@ -29,6 +29,7 @@ export const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["sections.tabs", "Meme Lab page sections"],
   ["sections.history", "Meme Lab history sections"],
   ["tabs.overview", "Overview"],
+  ["tabs.details", "Details"],
   ["tabs.references", "References"],
   ["tabs.collectors", "Collectors"],
   ["tabs.history", "History"],

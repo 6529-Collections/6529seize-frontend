@@ -7,6 +7,7 @@ import { getMemeLabRouteHrefWithLocale } from "@/components/memelab/memeLabRoute
 import { MemeLabCardVolumes } from "@/components/memelab/MemeLabCardHeader";
 import { MemeLabYourTransactionsTable } from "@/components/memelab/MemeLabYourCards";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
+import NftDetailTabSection from "@/components/nft-navigation/NftDetailTabSection";
 import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
 import NftMarketActivity from "@/components/nft-market-activity/NftMarketActivity";
 import {
@@ -50,6 +51,7 @@ import {
   parseMemeLabFocus,
   runAfterCriticalWork,
 } from "./MemeLabPage.utils";
+import { MemeLabAdditionalDetailsContent } from "./MemeLabAdditionalDetails";
 import { MemeLabPageTabs } from "./MemeLabPageTabs";
 import {
   MemeLabCollectors,
@@ -79,7 +81,6 @@ export default function MemeLabPageComponent({
   const { setTitle } = useTitle();
 
   const focusParam = searchParams.get("focus");
-  const defaultAdditionalDetailsOpen = focusParam === MEME_FOCUS.THE_ART;
   const searchParamsString = useMemo(
     () => searchParams.toString(),
     [searchParams]
@@ -446,6 +447,10 @@ export default function MemeLabPageComponent({
   }
 
   function printContent() {
+    if (activeTab === MEME_FOCUS.THE_ART) {
+      return nft ? <MemeLabAdditionalDetailsContent nft={nft} /> : null;
+    }
+
     if (activeTab === MEME_FOCUS.COLLECTORS) {
       return (
         <MemeLabCollectors
@@ -468,13 +473,7 @@ export default function MemeLabPageComponent({
     }
 
     if (activeTab === MEME_FOCUS.LIVE) {
-      return (
-        <MemeLabOverview
-          nft={nft}
-          defaultAdditionalDetailsOpen={defaultAdditionalDetailsOpen}
-          locale={locale}
-        />
-      );
+      return <MemeLabOverview nft={nft} />;
     }
 
     if (activeTab === MEME_FOCUS.HISTORY) {
@@ -637,19 +636,28 @@ export default function MemeLabPageComponent({
               hasOwnershipContext={hasOwnershipContext}
               nftBalance={nftBalance}
             />
-            <MemeLabPageTabs
-              nft={nft}
-              activeTab={activeTab}
+            <NftDetailTabSection
+              activeFocus={routeFocus}
               locale={locale}
-              onSelectTab={setActiveMemeLabTab}
-            />
-            {printHistoryTabs()}
-            {printContent()}
-            <MarketDepthPanel
-              contract={MEMELAB_CONTRACT}
-              tokenId={nft.id}
-              locale={locale}
-            />
+              navigation={
+                <>
+                  <MemeLabPageTabs
+                    nft={nft}
+                    activeTab={activeTab}
+                    locale={locale}
+                    onSelectTab={setActiveMemeLabTab}
+                  />
+                  {printHistoryTabs()}
+                </>
+              }
+            >
+              {printContent()}
+              <MarketDepthPanel
+                contract={MEMELAB_CONTRACT}
+                tokenId={nft.id}
+                locale={locale}
+              />
+            </NftDetailTabSection>
           </>
         )}
       </div>

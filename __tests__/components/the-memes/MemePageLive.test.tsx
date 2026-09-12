@@ -734,79 +734,14 @@ describe("MemePageLiveSubMenu details", () => {
     expect(screen.getByText("Interactive - HTML")).toBeInTheDocument();
   });
 
-  it("opens additional details when the default flag changes", async () => {
-    const nft = createNft();
-    const nftMeta = createMeta();
-
-    const { rerender } = render(
-      <MemePageLiveSubMenu
-        show
-        nft={nft}
-        nftMeta={nftMeta}
-        defaultAdditionalDetailsOpen={false}
-      />
-    );
-
-    const detailsButton = screen.getByRole("button", {
-      name: /about this artwork/i,
-    });
-    expect(detailsButton).toHaveAttribute("aria-expanded", "false");
-    const detailsPanelId = detailsButton.getAttribute("aria-controls") ?? "";
-    expect(detailsPanelId).toBeTruthy();
-    expect(document.getElementById(detailsPanelId)).toHaveAttribute("hidden");
-    expect(
-      detailsButton.compareDocumentPosition(screen.getByTestId("market-depth"))
-    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(screen.queryByTestId("meme-page-art")).not.toBeInTheDocument();
-    const focus = jest.spyOn(detailsButton, "focus");
-    fireEvent.click(detailsButton);
-    expect(focus).toHaveBeenLastCalledWith({ preventScroll: true });
-    expect(detailsButton).toHaveFocus();
-    expect(detailsButton).toHaveAttribute("aria-expanded", "true");
-    expect(document.getElementById(detailsPanelId)).not.toHaveAttribute(
-      "hidden"
-    );
-    await waitFor(() =>
-      expect(screen.getByTestId("meme-page-art")).toBeInTheDocument()
-    );
-    fireEvent.click(detailsButton);
-    expect(focus).toHaveBeenCalledTimes(2);
-    expect(detailsButton).toHaveFocus();
-    expect(document.getElementById(detailsPanelId)).toHaveClass(
-      "[overflow-anchor:none]"
-    );
-
-    rerender(
-      <MemePageLiveSubMenu
-        show
-        nft={nft}
-        nftMeta={nftMeta}
-        defaultAdditionalDetailsOpen={true}
-      />
-    );
-
-    await waitFor(() =>
-      expect(
-        screen.getByRole("button", { name: /about this artwork/i })
-      ).toHaveAttribute("aria-expanded", "true")
-    );
-    expect(screen.getByTestId("meme-page-art")).toBeInTheDocument();
-  });
-
-  it("passes locale into additional details content", () => {
+  it("keeps artwork details out of Overview", () => {
     render(
-      <MemePageLiveSubMenu
-        show
-        nft={createNft()}
-        nftMeta={createMeta()}
-        defaultAdditionalDetailsOpen={true}
-        locale="de-DE"
-      />
+      <MemePageLiveSubMenu show nft={createNft()} nftMeta={createMeta()} />
     );
-
-    expect(mockMemePageArt).toHaveBeenCalledWith(
-      expect.objectContaining({ locale: "de-DE" }),
-      undefined
-    );
+    expect(
+      screen.queryByRole("button", { name: /about this artwork/i })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("meme-page-art")).not.toBeInTheDocument();
+    expect(screen.getByTestId("market-depth")).toBeInTheDocument();
   });
 });
