@@ -61,7 +61,19 @@ export default function ListEditor(
     </>
   );
   return (
-    <div className="tw-space-y-4">
+    <fieldset
+      aria-describedby={props.describedBy}
+      className="tw-m-0 tw-min-w-0 tw-space-y-4 tw-border-0 tw-p-0"
+    >
+      <legend
+        className={
+          props.hideLabel
+            ? "tw-sr-only"
+            : "tw-mb-4 tw-text-base tw-font-medium tw-text-iron-100"
+        }
+      >
+        {props.label}
+      </legend>
       {entries.map((entry, index) =>
         collection ? (
           <DocumentationCollectionEntry
@@ -100,6 +112,6 @@ export default function ListEditor(
           {msg("add")}
         </DocumentationButton>
       )}
-    </div>
+    </fieldset>
   );
 }
