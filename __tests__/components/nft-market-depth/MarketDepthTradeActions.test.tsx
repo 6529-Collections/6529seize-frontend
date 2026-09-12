@@ -20,7 +20,13 @@ import {
   ApiMarketTradeOrderSideEnum,
   type ApiMarketTradeOrder,
 } from "@/generated/models/ApiMarketTradeOrder";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import type { ReactNode } from "react";
 
 const mockFetchAssets = jest.fn();
@@ -67,13 +73,26 @@ jest.mock("@/components/collect/CollectBatchController", () => ({
 }));
 jest.mock("@/components/collect/CollectTradeController", () => ({
   __esModule: true,
-  default: (props: unknown) => {
+  default: (props: {
+    initialOrder: ApiMarketTradeOrder;
+    onClose: () => void;
+  }) => {
     mockTrade(props);
-    return <div data-testid="offer-review" />;
+    return (
+      <div
+        data-testid="offer-review"
+        data-order-hash={props.initialOrder.identity.order_hash}
+      >
+        <button type="button" onClick={props.onClose}>
+          Close offer review
+        </button>
+      </div>
+    );
   },
 }));
 
 const HASH = `0x${"a".repeat(64)}`;
+const SECOND_HASH = `0x${"b".repeat(64)}`;
 const MAKER = "0x1111111111111111111111111111111111111111";
 const ASSET_KEY = `1:${MEMES_CONTRACT.toLowerCase()}:8`;
 const NOW = Math.floor(Date.now() / 1000);
@@ -157,6 +176,66 @@ function renderAction(order: ApiMarketOrder) {
       <MarketDepthOrderAction order={order} locale="en-US" />
     </MarketDepthTradeProvider>
   );
+}
+
+function offerRow(orderHash: string, orderKey: string): ApiMarketOrder {
+  return depthOrder({
+    order_id: orderHash,
+    order_key: orderKey,
+    side: ApiMarketOrderSideEnum.Bid,
+    currency: { address: MARKET_WETH, symbol: "WETH", decimals: 18 },
+  });
+}
+
+function renderOfferRows(rows: readonly ApiMarketOrder[]) {
+  return render(
+    <MarketDepthTradeProvider
+      contract={MEMES_CONTRACT}
+      tokenId="8"
+      locale="en-US"
+      onMarketChange={jest.fn()}
+    >
+      {rows.map((row) => (
+        <MarketDepthOrderAction
+          key={row.order_key}
+          order={row}
+          locale="en-US"
+        />
+      ))}
+    </MarketDepthTradeProvider>
+  );
+}
+
+function deferExactOrders() {
+  const resolvers = new Map<string, (order: ApiMarketTradeOrder) => void>();
+  mockFetchExactOrder.mockImplementation(
+    (orderHash: string) =>
+      new Promise<ApiMarketTradeOrder>((resolve) => {
+        resolvers.set(orderHash, resolve);
+      })
+  );
+  return (orderHash: string, order: ApiMarketTradeOrder) => {
+    const resolve = resolvers.get(orderHash);
+    if (!resolve) throw new Error(`MISSING_DEFERRED_ORDER_${orderHash}`);
+    resolve(order);
+  };
+}
+
+function ownedAsset() {
+  mockFetchOwnership.mockResolvedValue({
+    account: { profile_id: "profile-1" },
+    requirements: [
+      {
+        holdings: [
+          {
+            asset_key: ASSET_KEY,
+            wallet: mockConnection.address,
+            quantity: "3",
+          },
+        ],
+      },
+    ],
+  });
 }
 
 beforeEach(() => {
@@ -327,6 +406,104 @@ describe("MarketDepthTradeActions", () => {
       maximumOrderQuantity: "2",
       fixedOrder: true,
     });
+  });
+
+  it("keeps the later offer review when an older exact lookup resolves last", async () => {
+    const first = offerRow(HASH, "depth-first");
+    const second = offerRow(SECOND_HASH, "depth-second");
+    const resolve = deferExactOrders();
+    ownedAsset();
+    renderOfferRows([first, second]);
+    const actions = screen.getAllByRole("button", { name: "Accept offer" });
+
+    fireEvent.click(actions[0]!);
+    await waitFor(() => expect(mockFetchExactOrder).toHaveBeenCalledTimes(1));
+    fireEvent.click(actions[1]!);
+    await waitFor(() => expect(mockFetchExactOrder).toHaveBeenCalledTimes(2));
+    expect(actions[0]).toBeEnabled();
+
+    await act(async () => {
+      resolve(
+        SECOND_HASH,
+        executableOrder({
+          identity: {
+            protocol_address: MARKET_SEAPORT,
+            order_hash: SECOND_HASH,
+          },
+          side: ApiMarketTradeOrderSideEnum.Offer,
+          currency: MARKET_WETH,
+        })
+      );
+    });
+    expect(await screen.findByTestId("offer-review")).toHaveAttribute(
+      "data-order-hash",
+      SECOND_HASH
+    );
+
+    await act(async () => {
+      resolve(
+        HASH,
+        executableOrder({
+          side: ApiMarketTradeOrderSideEnum.Offer,
+          currency: MARKET_WETH,
+        })
+      );
+      await Promise.resolve();
+    });
+    expect(screen.getByTestId("offer-review")).toHaveAttribute(
+      "data-order-hash",
+      SECOND_HASH
+    );
+    expect(
+      mockTrade.mock.calls.some(
+        ([props]) =>
+          (props as { initialOrder: ApiMarketTradeOrder }).initialOrder.identity
+            .order_hash === HASH
+      )
+    ).toBe(false);
+  });
+
+  it("does not reopen an older offer after the later review closes", async () => {
+    const first = offerRow(HASH, "depth-first");
+    const second = offerRow(SECOND_HASH, "depth-second");
+    const resolve = deferExactOrders();
+    ownedAsset();
+    renderOfferRows([first, second]);
+    const actions = screen.getAllByRole("button", { name: "Accept offer" });
+
+    fireEvent.click(actions[0]!);
+    await waitFor(() => expect(mockFetchExactOrder).toHaveBeenCalledTimes(1));
+    fireEvent.click(actions[1]!);
+    await waitFor(() => expect(mockFetchExactOrder).toHaveBeenCalledTimes(2));
+    await act(async () => {
+      resolve(
+        SECOND_HASH,
+        executableOrder({
+          identity: {
+            protocol_address: MARKET_SEAPORT,
+            order_hash: SECOND_HASH,
+          },
+          side: ApiMarketTradeOrderSideEnum.Offer,
+          currency: MARKET_WETH,
+        })
+      );
+    });
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Close offer review" })
+    );
+    expect(screen.queryByTestId("offer-review")).toBeNull();
+
+    await act(async () => {
+      resolve(
+        HASH,
+        executableOrder({
+          side: ApiMarketTradeOrderSideEnum.Offer,
+          currency: MARKET_WETH,
+        })
+      );
+      await Promise.resolve();
+    });
+    expect(screen.queryByTestId("offer-review")).toBeNull();
   });
 
   it("does not publish a batch review after actor invalidation during its exact refresh", async () => {
