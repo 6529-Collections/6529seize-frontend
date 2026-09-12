@@ -225,6 +225,15 @@ const DOCUMENTATION_OPTION_LABELS: Readonly<Record<string, string>> = {
   interview_recording: "Interview recording",
   interview_transcript: "Interview transcript",
   other_supporting: "Other supporting file",
+  print_output: "Print output",
+  color_profile: "Color profile",
+  preset: "Preset or output settings",
+  source_code: "Source code",
+  dependency: "Dependency",
+  environment_package: "Environment package",
+  reference_capture: "Reference capture",
+  captions: "Captions",
+  notebook: "Notebook or field notes",
   self: "The artist",
   collaborator: "Collaborator",
   third_party: "Third party",
@@ -259,9 +268,93 @@ const DOCUMENTATION_OPTION_LABELS: Readonly<Record<string, string>> = {
 };
 
 export function documentationFieldLabel(id: string): string {
-  return DOCUMENTATION_FIELD_LABELS[id] ?? id;
+  return (
+    DOCUMENTATION_FIELD_LABELS[id] ??
+    id.replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase())
+  );
+}
+
+const DOCUMENTATION_REFERENCE_LABELS: Readonly<Record<string, string>> = {
+  agent_id: "Person, organization or tool",
+  asset_id: "File",
+  asset_ids: "Files",
+  caption_asset_ids: "Caption files",
+  component_ids: "Components",
+  embedded_media_asset_ids: "Embedded media files",
+  input_asset_ids: "Input files",
+  instrument_asset_ids: "Interview guide files",
+  interview_session_ids: "Conversations",
+  license_uri: "License link",
+  master_asset_ids: "Preservation masters",
+  model_asset_ids: "Model files",
+  object_id: "Physical object",
+  output_asset_ids: "Output files",
+  package_asset_ids: "Package files",
+  place_id: "Place",
+  profile_id: "6529 profile",
+  proof_asset_ids: "Proof files",
+  question_id: "Question",
+  recording_asset_ids: "Recordings",
+  reference_asset_ids: "Reference files",
+  related_subject_ids: "Related entries",
+  source_asset_ids: "Source files",
+  source_ids: "Sources",
+  speaker_agent_id: "Speaker",
+  stem_asset_ids: "Audio stem files",
+  subject_id: "Record entry",
+  subject_ids: "Record entries",
+  texture_asset_ids: "Texture files",
+  transcript_asset_id: "Transcript file",
+  transcript_asset_ids: "Transcript files",
+  transcript_document_id: "Written transcript",
+  work_id: "Artwork",
+  theme_connection: "Connection to the project",
+};
+
+/** Keep supplied editorial titles; replace mechanical schema names with established artist labels. */
+export function documentationSchemaLabel(id: string, title?: string): string {
+  const mechanical = id.replaceAll("_", " ");
+  if (title && title.toLowerCase() !== mechanical.toLowerCase()) return title;
+  return (
+    DOCUMENTATION_REFERENCE_LABELS[id] ??
+    DOCUMENTATION_FIELD_LABELS[id] ??
+    title ??
+    documentationFieldLabel(id)
+  );
+}
+
+const DOCUMENTATION_ENTRY_LABELS: Readonly<Record<string, string>> = {
+  alternate_titles: "Alternate title",
+  agents: "Person, organization or tool",
+  documents: "Document",
+  sessions: "Conversation",
+  components: "Component",
+  physical_objects: "Physical object",
+  measurements: "Measurement",
+  places: "Place",
+  relationships: "Relationship",
+  related_works: "Related work",
+  inscriptions: "Inscription",
+  classifications: "Classification",
+  external_identifiers: "Catalogue reference",
+  token_references: "Token reference",
+  described_materials: "Described material",
+  sources: "Source",
+  events: "Event",
+  questions: "Question",
+  segments: "Conversation section",
+  participants: "Participant",
+  presentation_scenes: "Presentation scene",
+  material_rights: "Material terms",
+};
+
+export function documentationEntryLabel(id: string): string {
+  return DOCUMENTATION_ENTRY_LABELS[id] ?? documentationSchemaLabel(id);
 }
 
 export function documentationOptionLabel(id: string): string {
-  return DOCUMENTATION_OPTION_LABELS[id] ?? id;
+  return (
+    DOCUMENTATION_OPTION_LABELS[id] ??
+    id.replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase())
+  );
 }
