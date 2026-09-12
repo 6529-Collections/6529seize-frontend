@@ -19,7 +19,7 @@ export default function DocumentationExampleRecord() {
         </p>
         <h1
           lang="en"
-          className="tw-mb-3 tw-mt-4 tw-font-serif tw-text-4xl tw-font-normal sm:tw-text-6xl"
+          className="tw-mb-3 tw-mt-4 tw-text-4xl tw-font-normal sm:tw-text-6xl"
         >
           {AN_ALTERATION_HEADER[0]}
         </h1>
@@ -92,7 +92,7 @@ export default function DocumentationExampleRecord() {
             >
               <h2
                 id={`${section.id}-title`}
-                className="tw-mb-8 tw-mt-0 tw-font-serif tw-text-3xl tw-font-normal"
+                className="tw-mb-8 tw-mt-0 tw-text-3xl tw-font-normal"
               >
                 {section.title}
               </h2>
@@ -108,7 +108,7 @@ export default function DocumentationExampleRecord() {
                   ) : (
                     <p
                       key={index}
-                      className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-font-serif tw-text-lg tw-leading-8 tw-text-iron-200"
+                      className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-lg tw-leading-8 tw-text-iron-200"
                     >
                       {paragraph}
                     </p>

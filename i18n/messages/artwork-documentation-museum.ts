@@ -143,7 +143,7 @@ export const ARTWORK_DOCUMENTATION_MUSEUM_MESSAGES = {
   "artworkDocumentation.museum.sample": "Read the complete example",
   "artworkDocumentation.museum.sampleLabel": "An example artist record",
   "artworkDocumentation.museum.sampleIntro":
-    "AN ALTERATION shows how an artist can describe a work, its making and its care in their own voice. This is an illustrative record, not a confirmed Museum accession.",
+    "AN ALTERATION shows how an artist can describe a work, its making and its care in their own voice. This is an illustrative (fictional) record.",
   "artworkDocumentation.museum.sampleMaterials":
     "About the example's materials",
   "artworkDocumentation.museum.sampleMaterialsHelp":
