@@ -35,6 +35,7 @@ const mockBegin = jest.fn();
 const mockReject = jest.fn();
 const mockRead = jest.fn();
 const mockValidate = jest.fn();
+const mockValidateForRefresh = jest.fn();
 const mockSave = jest.fn();
 const mockLock = jest.fn();
 const mockAuth = {
@@ -78,6 +79,8 @@ jest.mock("@/components/collect/market-operation-lock", () => ({
 }));
 jest.mock("@/components/collect/market-validation", () => ({
   validateMarketOperation: (...args: unknown[]) => mockValidate(...args),
+  validateMarketOperationForRefresh: (...args: unknown[]) =>
+    mockValidateForRefresh(...args),
   validateMarketTransaction: jest.fn(),
   marketTypedData: () => ({
     domain: { chainId: 1 },
@@ -184,6 +187,7 @@ beforeEach(() => {
     execute()
   );
   mockValidate.mockImplementation(() => undefined);
+  mockValidateForRefresh.mockImplementation(() => undefined);
   mockWallet.getChainId.mockResolvedValue(1);
   mockWallet.getAddresses.mockResolvedValue([walletAddress]);
   mockWallet.signTypedData.mockResolvedValue("0x1234");
@@ -543,6 +547,168 @@ function buyReview() {
   );
   return { buyExpected, buyOperation };
 }
+
+describe("refreshing purchase intent before execution", () => {
+  let now: number;
+  let clock: jest.SpyInstance;
+
+  beforeEach(() => {
+    now = 1_900_000_000_000;
+    clock = jest.spyOn(Date, "now").mockImplementation(() => now);
+    mockValidate.mockImplementation((value: ApiMarketOperation) => {
+      if (value.expires_at <= Date.now()) {
+        throw new Error("MARKET_REVIEW_REFRESH_REQUIRED");
+      }
+    });
+  });
+
+  afterEach(() => clock.mockRestore());
+
+  function purchaseWithFreshContinuation() {
+    const { buyExpected, buyOperation } = buyReview();
+    buyOperation.expires_at = now + 1000;
+    const refreshed = {
+      ...buyOperation,
+      expires_at: now + 60_000,
+      revision: "revision-2",
+    };
+    mockContinue.mockResolvedValue(refreshed);
+    mockBegin.mockImplementation(
+      (_id: string, body: ApiMarketSendAttemptRequest) => ({
+        ...refreshed,
+        state: ApiMarketOperationStateEnum.Unknown,
+        send_attempt: {
+          attempt_id: body.attempt_id,
+          purpose: body.purpose,
+          transaction_digest: body.transaction_digest,
+          snapshot_block: refreshed.block_number,
+          transaction: refreshed.transaction,
+          status: "ACTIVE",
+          transaction_hash: null,
+        },
+      })
+    );
+    return { buyExpected, buyOperation, refreshed };
+  }
+
+  it.each(["capability", "operation fetch"])(
+    "continues once with fresh unchanged terms after the old deadline passes during %s",
+    async (awaitedStep) => {
+      const { buyExpected, buyOperation, refreshed } =
+        purchaseWithFreshContinuation();
+      const pending = deferred<unknown>();
+      const request =
+        awaitedStep === "capability" ? mockCapabilities : mockFetch;
+      request.mockReturnValueOnce(pending.promise);
+      const onOperation = jest.fn();
+      const { result } = renderHook(() => useMarketExecution(onOperation));
+      let confirmation!: Promise<void>;
+      act(() => {
+        confirmation = result.current.confirm(buyOperation, buyExpected);
+      });
+      await waitFor(() => expect(request).toHaveBeenCalled());
+      now += 2000;
+      await act(async () => {
+        pending.resolve(
+          awaitedStep === "capability"
+            ? { actions: [{ action: "BUY", enabled: true }] }
+            : buyOperation
+        );
+        await confirmation;
+      });
+      expect(mockValidateForRefresh).toHaveBeenCalledWith(
+        buyOperation,
+        buyExpected
+      );
+      expect(mockContinue).toHaveBeenCalledTimes(1);
+      expect(mockValidate).toHaveBeenCalledWith(refreshed, buyExpected);
+      expect(onOperation).toHaveBeenCalledWith(refreshed);
+      expect(mockBegin).toHaveBeenCalledWith(
+        buyOperation.id,
+        expect.objectContaining({ expected_revision: refreshed.revision })
+      );
+      expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(1);
+      expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+      expect(result.current.message).toBeUndefined();
+    }
+  );
+
+  it("refreshes an already-expired purchase intent before asking the wallet", async () => {
+    const { buyExpected, buyOperation } = purchaseWithFreshContinuation();
+    buyOperation.expires_at = now - 1000;
+    const { result } = renderHook(() => useMarketExecution(jest.fn()));
+    await act(() => result.current.confirm(buyOperation, buyExpected));
+    expect(mockContinue).toHaveBeenCalledTimes(1);
+    expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(1);
+  });
+
+  it("requires another review if fresh continuation changes the reviewed gas terms", async () => {
+    const { buyExpected, buyOperation, refreshed } =
+      purchaseWithFreshContinuation();
+    buyOperation.expires_at = now - 1000;
+    const changed = {
+      ...refreshed,
+      transaction: { ...refreshed.transaction!, gas_reserve_wei: "201" },
+    };
+    mockContinue.mockResolvedValue(changed);
+    const onOperation = jest.fn();
+    const { result } = renderHook(() => useMarketExecution(onOperation));
+    await act(() => result.current.confirm(buyOperation, buyExpected));
+    expect(onOperation).toHaveBeenCalledWith(changed);
+    expect(result.current.message).toBe(
+      "The trade was refreshed. Review all details before continuing."
+    );
+    expect(mockBegin).not.toHaveBeenCalled();
+    expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+  });
+
+  it("rejects a continuation that is still expired with an actionable refresh message", async () => {
+    const { buyExpected, buyOperation, refreshed } =
+      purchaseWithFreshContinuation();
+    mockContinue.mockResolvedValue({ ...refreshed, expires_at: now });
+    const { result } = renderHook(() => useMarketExecution(jest.fn()));
+    await act(() => result.current.confirm(buyOperation, buyExpected));
+    expect(result.current.message).toBe(
+      "Refresh the review to continue with current terms."
+    );
+    expect(mockBegin).not.toHaveBeenCalled();
+    expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+    expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+  });
+
+  it("still validates the old intent bindings before requesting continuation", async () => {
+    const { buyExpected, buyOperation } = purchaseWithFreshContinuation();
+    buyOperation.expires_at = now - 1000;
+    mockValidateForRefresh.mockImplementation(() => {
+      throw new Error("MARKET_REVIEW_MISMATCH");
+    });
+    const { result } = renderHook(() => useMarketExecution(jest.fn()));
+    await act(() => result.current.confirm(buyOperation, buyExpected));
+    expect(mockContinue).not.toHaveBeenCalled();
+    expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+  });
+
+  it.each([ApiMarketKind.List, ApiMarketKind.Offer])(
+    "keeps %s signature reviews subject to strict freshness",
+    async (kind) => {
+      const value = { ...operation, kind, expires_at: now - 1000 };
+      mockCapabilities.mockResolvedValue({
+        actions: [{ action: kind, enabled: true }],
+      });
+      mockFetch.mockResolvedValue(value);
+      const { result } = renderHook(() => useMarketExecution(jest.fn()));
+      await act(() => result.current.confirm(value, { ...expected, kind }));
+      expect(mockValidateForRefresh).not.toHaveBeenCalled();
+      expect(mockContinue).not.toHaveBeenCalled();
+      expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+      expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+      expect(result.current.message).toBe(
+        "Refresh the review to continue with current terms."
+      );
+    }
+  );
+});
+
 it("checks paused rule continuation before opening a purchase wallet prompt", async () => {
   const { buyExpected, buyOperation } = buyReview();
   mockContinue.mockRejectedValue(new Error("RULE_PAUSED"));
@@ -643,6 +809,34 @@ it("journals the attempt before the wallet and blocks retry after a lost broadca
   expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(1);
   expect(mockReject).not.toHaveBeenCalled();
   expect(persisted).toHaveProperty("sendAttempt.walletRequested", true);
+});
+
+it("clears a prior error without changing the stage or releasing an unresolved send", async () => {
+  const { buyExpected, buyOperation } = buyReview();
+  mockWallet.sendTransaction.mockRejectedValue(
+    new Error("RPC response lost after broadcast")
+  );
+  const onOperation = jest.fn();
+  const { result } = renderHook(() => useMarketExecution(onOperation));
+  await act(() => result.current.confirm(buyOperation, buyExpected));
+  expect(result.current.message).toBeTruthy();
+  expect(persisted).toHaveProperty("sendAttempt.walletRequested", true);
+  const priorStage = result.current.stage;
+  const priorIntent = persisted;
+  const saveCount = mockSave.mock.calls.length;
+  const operationCount = onOperation.mock.calls.length;
+
+  act(() => result.current.clearMessage());
+
+  expect(result.current.message).toBeUndefined();
+  expect(result.current.stage).toBe(priorStage);
+  expect(persisted).toBe(priorIntent);
+  expect(mockSave).toHaveBeenCalledTimes(saveCount);
+  expect(onOperation).toHaveBeenCalledTimes(operationCount);
+  await act(() => result.current.confirm(buyOperation, buyExpected));
+  expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(1);
+  expect(mockBegin).toHaveBeenCalledTimes(1);
+  expect(mockReject).not.toHaveBeenCalled();
 });
 
 it("journals approval hashes on the server without clearing the fence after one confirmation", async () => {

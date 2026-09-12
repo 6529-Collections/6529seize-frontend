@@ -1,7 +1,9 @@
 # Collecting localization follow-up
 
 - Surfaces: `/collect` plan results, acquisition strategies and offer workspace;
-  NFT market-depth actions; trade-preparation recovery messages.
+  NFT market-depth actions; trade-preparation recovery messages; the Collect
+  navigation label and individual purchase summaries, wallet labels, fee
+  breakdowns and quote-refresh controls.
 - Remaining translations: the new English messages in
   `i18n/messages/collect.ts` and `i18n/messages/collection-detail.ts` do not yet
   have translations in every supported locale.
