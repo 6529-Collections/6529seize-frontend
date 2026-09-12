@@ -30,10 +30,9 @@ describe("artwork documentation modules", () => {
     );
     const duration = screen.getByRole("group", {
       name: "Duration",
-      exact: true,
     });
     expect(
-      within(duration).getByRole("combobox", { name: "Type", exact: true })
+      within(duration).getByRole("combobox", { name: "Type" })
     ).toBeInTheDocument();
     expect(duration.querySelector("legend")).not.toHaveClass("tw-sr-only");
     const examples = within(duration).getAllByText(
@@ -60,7 +59,7 @@ describe("artwork documentation modules", () => {
     );
     expect(
       within(
-        screen.getByRole("region", { name: "Caption", exact: true })
+        screen.getByRole("region", { name: "Caption" })
       ).getByText(
         "Give a reader a way into the work. Aim for 75–150 words in your chosen language."
       )
