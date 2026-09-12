@@ -15,6 +15,7 @@ let mockGoals: ComponentProps<typeof CollectGoalsController> | undefined;
 let mockView: ComponentProps<typeof CollectPageView> | undefined;
 let mockWorkspace: ComponentProps<typeof CollectOfferWorkspace> | undefined;
 let mockBasket: ComponentProps<typeof CollectPlanBasket> | undefined;
+let mockActualWorkspace = false;
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => mockQuery,
@@ -76,9 +77,20 @@ jest.mock("@/components/collect/CollectPageView", () => ({
     mockView = props;
     return (
       <div>
+        <nav data-collect-navigation>
+          <button type="button" aria-pressed="true">
+            Complete a set
+          </button>
+        </nav>
+        <button
+          type="button"
+          onClick={() => props.onPlanStrategyChange?.("buy")}
+        >
+          Collect current listings
+        </button>
         {props.recoveryContent}
         {props.goalContent}
-        {props.workspaceContent}
+        <div hidden={!props.workspaceActive}>{props.workspaceContent}</div>
       </div>
     );
   },
@@ -94,6 +106,12 @@ jest.mock("@/components/collect/CollectOfferWorkspace", () => ({
   __esModule: true,
   default: (props: ComponentProps<typeof CollectOfferWorkspace>) => {
     mockWorkspace = props;
+    if (mockActualWorkspace) {
+      const Workspace = jest.requireActual<{
+        default: typeof CollectOfferWorkspace;
+      }>("@/components/collect/CollectOfferWorkspace").default;
+      return <Workspace {...props} />;
+    }
     return <div data-testid="offer-workspace" />;
   },
 }));
@@ -148,6 +166,69 @@ beforeEach(() => {
   mockView = undefined;
   mockWorkspace = undefined;
   mockBasket = undefined;
+  mockActualWorkspace = false;
+});
+
+it("keeps focus on the current listing strategy when no offer workspace is open", async () => {
+  render(<CollectPageClient />);
+  act(() => goals().onPlan(scenarioPlan()));
+  const collect = screen.getByRole("button", {
+    name: "Collect current listings",
+  });
+  collect.focus();
+  fireEvent.click(collect);
+  await act(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+  );
+  expect(collect).toHaveFocus();
+});
+
+it("retains ordinary offer prices in the actual workspace after returning to collecting and reopening", () => {
+  mockActualWorkspace = true;
+  render(<CollectPageClient />);
+  act(() => goals().onPlan(scenarioPlan()));
+  act(() => view().onPlanOffers?.());
+  const price = screen.getByRole("textbox", {
+    name: "WETH price per NFT for NFT #1",
+  });
+  const initialSession = workspace().strategySessionKey;
+  fireEvent.change(price, { target: { value: "0.005" } });
+  fireEvent.click(screen.getByRole("button", { name: "Back to collecting" }));
+  expect(price).not.toBeVisible();
+  act(() => view().onPlanOffers?.());
+  expect(workspace().strategySessionKey).toBe(initialSession);
+  expect(
+    screen.getByRole("textbox", {
+      name: "WETH price per NFT for NFT #1",
+    })
+  ).toBe(price);
+  expect(price).toHaveValue("0.005");
+});
+
+it("starts ordinary offers in a fresh manual session after a preset, then preserves that session on reopen", () => {
+  mockActualWorkspace = true;
+  render(<CollectPageClient />);
+  act(() => goals().onPlan(scenarioPlan()));
+  act(() => view().onPlanStrategyChange?.("improve_bid"));
+  const presetSession = workspace().strategySessionKey;
+  expect(
+    screen.getByRole("button", { name: "Price method" })
+  ).toHaveTextContent("Above observed WETH offer");
+  act(() => workspace().onBack());
+  act(() => view().onPlanOffers?.());
+  expect(workspace().strategySessionKey).not.toBe(presetSession);
+  const manualSession = workspace().strategySessionKey;
+  expect(
+    screen.getByRole("button", { name: "Price method" })
+  ).toHaveTextContent("Enter each price");
+  const price = screen.getByRole("textbox", {
+    name: "WETH price per NFT for NFT #1",
+  });
+  fireEvent.change(price, { target: { value: "0.012" } });
+  act(() => workspace().onBack());
+  act(() => view().onPlanOffers?.());
+  expect(workspace().strategySessionKey).toBe(manualSession);
+  expect(price).toHaveValue("0.012");
 });
 
 it("initializes all plan offer strategies with the clicked method and a distinct explicit session", () => {

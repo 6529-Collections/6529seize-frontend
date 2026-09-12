@@ -90,8 +90,13 @@ export function MarketDepthLevelAction({
   const transferFocus = useRef(false);
   const actionRef = useCallback((button: HTMLButtonElement | null) => {
     if (!button) return;
-    if (transferFocus.current) {
-      transferFocus.current = false;
+    const shouldTransferFocus = transferFocus.current;
+    transferFocus.current = false;
+    const active = button.ownerDocument.activeElement;
+    if (
+      shouldTransferFocus &&
+      (active === null || active === button.ownerDocument.body)
+    ) {
       button.focus({ preventScroll: true });
     }
     return () => {

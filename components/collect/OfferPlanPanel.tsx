@@ -213,6 +213,7 @@ function OfferPlanContents({
   const changeRoute = (assetKey: string, buying: boolean) => {
     if (
       busy ||
+      buyKeys.includes(assetKey) === buying ||
       publishedAssetKeys.includes(assetKey) ||
       buyLockedAssetKeys.includes(assetKey) ||
       (buying && !availableBuys.has(assetKey))

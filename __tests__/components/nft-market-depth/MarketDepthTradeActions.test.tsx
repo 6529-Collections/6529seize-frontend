@@ -3,6 +3,7 @@ import {
   MarketDepthTradeProvider,
 } from "@/components/nft-market-depth/MarketDepthTradeActions";
 import MarketDepthPriceLevels from "@/components/nft-market-depth/MarketDepthPriceLevels";
+import { MarketDepthLevelAction } from "@/components/nft-market-depth/MarketDepthOrderAction";
 import {
   MARKET_SEAPORT,
   MARKET_WETH,
@@ -462,6 +463,48 @@ describe("MarketDepthTradeActions", () => {
       }
     }
   );
+
+  it("does not restore delayed action focus after a non-executable offer and a deliberate focus move", async () => {
+    const user = userEvent.setup();
+    const exact = offerRow(HASH, "offer");
+    const content = (order?: ApiMarketOrder) => (
+      <MarketDepthTradeProvider
+        contract={MEMES_CONTRACT}
+        tokenId="8"
+        locale="en-US"
+        onMarketChange={jest.fn()}
+      >
+        <MarketDepthLevelAction
+          order={order}
+          side="bid"
+          locale="en-US"
+          open
+          panelId="offer-details"
+          onClick={jest.fn()}
+        />
+        <button type="button">Elsewhere</button>
+      </MarketDepthTradeProvider>
+    );
+    const view = render(content());
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Sell" })).toHaveFocus();
+    view.rerender(
+      content({
+        ...exact,
+        scope: ApiMarketOrderScopeEnum.Collection,
+        applicability: ApiMarketOrderApplicabilityEnum.Collection,
+        token_id: null,
+      })
+    );
+    expect(screen.queryByRole("button", { name: "Sell" })).toBeNull();
+    await user.tab();
+    const elsewhere = screen.getByRole("button", { name: "Elsewhere" });
+    expect(elsewhere).toHaveFocus();
+    view.rerender(content(exact));
+    expect(screen.getByRole("button", { name: "Sell" })).toBeInTheDocument();
+    expect(elsewhere).toHaveFocus();
+    expect(mockFetchExactOrder).not.toHaveBeenCalled();
+  });
 
   it("omits the action column and trading controls when purchasing is restricted", () => {
     mockHideNftPurchasing = true;

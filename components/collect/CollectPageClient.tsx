@@ -227,7 +227,8 @@ function CollectCatalogController({
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
-    strategySession.current += 1;
+    if (strategy !== undefined || offerWorkspace?.strategy !== undefined)
+      strategySession.current += 1;
     setOfferWorkspace({
       items,
       hasAlternatives,
@@ -481,7 +482,7 @@ function CollectCatalogController({
     : null;
   const chooseStrategy = (strategy: CollectAcquisitionStrategy) => {
     if (strategy === "buy") {
-      closeOffers();
+      if (offerWorkspaceActive) closeOffers();
       return;
     }
     if (missingOffers)

@@ -158,6 +158,49 @@ it("excludes buy NFTs from WETH allocation and returns exact purchase legs only 
   );
 });
 
+it.each(["Offer", "Collect now"] as const)(
+  "preserves manual prices when the already selected %s route is clicked again",
+  (selectedRoute) => {
+    const p = props();
+    render(<OfferPlanPanel {...p} blended initialMethod="manual" />);
+    if (selectedRoute === "Collect now")
+      fireEvent.click(route(1, selectedRoute));
+    fireEvent.change(price(2), { target: { value: "0.125" } });
+    expect(route(1, selectedRoute)).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(route(1, selectedRoute));
+    expect(price(2)).toHaveValue("0.125");
+    expect(review(2)).toBeEnabled();
+    expect(p.analyze).not.toHaveBeenCalled();
+    expect(p.onReviewOffer).not.toHaveBeenCalled();
+  }
+);
+
+it("preserves generated prices and manual pins when the active Offer route is selected again", async () => {
+  const p = props();
+  p.analyze.mockResolvedValue(offerAnalysis());
+  render(<OfferPlanPanel {...p} blended initialMethod="match_bid" />);
+  fireEvent.change(price(2), { target: { value: "0.125" } });
+  fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
+  await waitFor(() => expect(price(1)).toHaveValue("0.1"));
+  fireEvent.click(route(1, "Offer"));
+  expect(price(1)).toHaveValue("0.1");
+  expect(price(2)).toHaveValue("0.125");
+  expect(p.analyze).toHaveBeenCalledTimes(1);
+  fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
+  await waitFor(() => expect(p.analyze).toHaveBeenCalledTimes(2));
+  expect(p.analyze).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      rows: expect.arrayContaining([
+        expect.objectContaining({
+          assetKey: offerAsset(2).asset_key,
+          unitPriceEth: "0.125",
+          pinned: true,
+        }),
+      ]),
+    })
+  );
+});
+
 it("never silently reuses calculated amounts after changing the buy/offer allocation", async () => {
   const p = props();
   p.analyze.mockResolvedValue(offerAnalysis());
