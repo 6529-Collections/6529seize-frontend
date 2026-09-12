@@ -26,9 +26,9 @@ import {
 } from "./market-depth-trade.helpers";
 
 export const ACTION_CLASS =
-  "tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-white";
+  "tw-font-inherit tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-meta tw-font-medium tw-leading-5 tw-text-iron-200 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:enabled:hover:tw-border-white/20 desktop-hover:enabled:hover:tw-bg-white/5 desktop-hover:enabled:hover:tw-text-white";
 const COMPACT_ACTION_CLASS =
-  "tw-my-0.5 tw-inline-flex tw-min-h-11 tw-min-w-11 tw-max-w-full tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:enabled:hover:tw-border-iron-500 desktop-hover:enabled:hover:tw-bg-iron-900 desktop-hover:enabled:hover:tw-text-white";
+  "tw-font-inherit tw-my-0.5 tw-inline-flex tw-min-h-11 tw-min-w-16 tw-max-w-full tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-2 tw-py-2 tw-text-meta tw-font-medium tw-leading-5 tw-text-iron-200 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:enabled:hover:tw-border-white/20 desktop-hover:enabled:hover:tw-bg-white/5 desktop-hover:enabled:hover:tw-text-white";
 
 export interface RowState {
   readonly busy: boolean;
@@ -175,7 +175,10 @@ export function MarketDepthOrderAction({
           <button
             ref={actionRef}
             type="button"
-            className={compact ? COMPACT_ACTION_CLASS : ACTION_CLASS}
+            className={`${compact ? COMPACT_ACTION_CLASS : ACTION_CLASS} ${selected ? "tw-border-white/20 tw-bg-white/5" : ""}`}
+            aria-pressed={
+              order.side === ApiMarketOrderSideEnum.Ask ? selected : undefined
+            }
             disabled={Boolean(state?.busy) || context.selectionBusy}
             onClick={(event) =>
               order.side === ApiMarketOrderSideEnum.Ask
@@ -221,9 +224,9 @@ export function MarketDepthOrderFeedback({
     )
   );
   const feedback = (
-    <div className="tw-space-y-2 tw-py-3 tw-text-left">
+    <div className="tw-space-y-2 tw-pb-4 tw-pt-2 tw-text-left">
       {selected && (
-        <label className="tw-inline-grid tw-gap-1 tw-text-xs tw-text-iron-400">
+        <label className="tw-inline-grid tw-gap-1.5 tw-text-meta tw-text-iron-400">
           <span>{t(locale, "marketDepth.trade.quantity")}</span>
           <input
             type="text"
@@ -237,7 +240,7 @@ export function MarketDepthOrderFeedback({
             onChange={(event) =>
               context.updateQuantity(order, event.currentTarget.value)
             }
-            className="tw-h-11 tw-w-24 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-text-sm tw-tabular-nums tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            className="tw-font-inherit tw-h-11 tw-w-24 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-text-sm tw-tabular-nums tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           />
         </label>
       )}

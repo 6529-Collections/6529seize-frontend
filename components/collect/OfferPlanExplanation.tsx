@@ -10,7 +10,7 @@ export default function OfferPlanExplanation({
   const locale = useBrowserLocale();
   return (
     <details className="tw-text-xs tw-leading-relaxed tw-text-iron-400">
-      <summary className="tw-min-h-6 tw-cursor-pointer tw-rounded-md tw-py-1 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+      <summary className="tw-min-h-11 tw-cursor-pointer tw-rounded-md tw-py-3 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
         {t(locale, "collect.offerPlan.howItWorks")}
       </summary>
       <p>{t(locale, "collect.offerPlan.independent")}</p>

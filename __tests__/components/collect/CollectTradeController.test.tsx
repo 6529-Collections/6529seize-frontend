@@ -123,6 +123,20 @@ const operation = {
   profile_id: "original-profile",
   revision: "revision",
   state: "REVIEW",
+  kind: "BUY",
+  asset_key: "1:0x33fd426905f149f8376e227d0c9d3340aad17af1:545",
+  quantity: "1",
+  wallet: "0x1111111111111111111111111111111111111111",
+  recipient: "0x1111111111111111111111111111111111111111",
+  recipient_in_profile: true,
+  currency: "0x0000000000000000000000000000000000000000",
+  total_wei: "1000000000000000000",
+  net_wei: "1000000000000000000",
+  fees: [],
+  approval_transactions: [],
+  potential_liability_wei: "0",
+  expires_at: 0,
+  updated_at: 0,
   send_attempt: { status: "ACTIVE" },
 } as ApiMarketOperation;
 beforeEach(() => {
@@ -162,9 +176,11 @@ it("offers hash recovery with no local intent after profile migration and disabl
       onClose={jest.fn()}
     />
   );
-  expect(screen.getByRole("status")).toHaveTextContent("Checking the outcome");
+  expect(screen.getByText(/Checking the outcome/)).toHaveTextContent(
+    "Checking the outcome"
+  );
   expect(
-    screen.queryByRole("button", { name: "Continue to wallet" })
+    screen.queryByRole("button", { name: "Continue in wallet" })
   ).not.toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: "Refresh review" })
@@ -236,11 +252,13 @@ it("keeps embedded recovery in the existing dialog without creating a second mod
   );
   expect(screen.getAllByRole("dialog")).toHaveLength(1);
   expect(screen.getByRole("dialog", { name: "Meme card" })).toContainElement(
-    screen.getByRole("status")
+    screen.getByText(/Checking the outcome/)
   );
-  expect(screen.getByRole("status")).toHaveTextContent("Checking the outcome");
+  expect(screen.getByText(/Checking the outcome/)).toHaveTextContent(
+    "Checking the outcome"
+  );
   expect(
-    screen.queryByRole("button", { name: "Continue to wallet" })
+    screen.queryByRole("button", { name: "Continue in wallet" })
   ).not.toBeInTheDocument();
   const hash = `0x${"d".repeat(64)}`;
   fireEvent.change(

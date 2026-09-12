@@ -129,7 +129,7 @@ const operation: ApiMarketOperation = {
       counter: "0",
     },
   },
-  expires_at: 2,
+  expires_at: Date.now() + 600_000,
   updated_at: 1,
   potential_liability_wei: "0",
 };
@@ -218,7 +218,7 @@ it("blocks a second tab before opening the wallet", async () => {
   expect(mockFetch).not.toHaveBeenCalled();
   expect(mockWallet.signTypedData).not.toHaveBeenCalled();
 });
-it("moves an already-approved new order into signature review before signing", async () => {
+it("continues an already-approved order into wallet signing when its reviewed terms are unchanged", async () => {
   const review = { ...operation, state: "REVIEW" } as ApiMarketOperation;
   mockFetch.mockResolvedValue(review);
   mockContinue.mockResolvedValue(operation);
@@ -227,6 +227,60 @@ it("moves an already-approved new order into signature review before signing", a
   await act(() => result.current.confirm(review, expected));
   expect(mockContinue).toHaveBeenCalledWith(operation.id);
   expect(onOperation).toHaveBeenCalledWith(operation);
+  expect(mockWallet.signTypedData).toHaveBeenCalledTimes(1);
+});
+it.each([
+  ApiMarketOperationStateEnum.Review,
+  ApiMarketOperationStateEnum.AwaitingSignature,
+])(
+  "compares fresh %s signing terms against the displayed review, even when GET keeps the revision",
+  async (state) => {
+    const reviewed = { ...operation, state };
+    const changed = {
+      ...operation,
+      order: { ...operation.order!, digest: `0x${"b".repeat(64)}` },
+    };
+    mockFetch.mockResolvedValue({ ...changed, state });
+    mockContinue.mockResolvedValue(changed);
+    const onOperation = jest.fn();
+    const { result } = renderHook(() => useMarketExecution(onOperation));
+    await act(() => result.current.confirm(reviewed, expected));
+    expect(onOperation).toHaveBeenCalledWith(changed);
+    expect(result.current.message).toBe(
+      "Terms changed. Review the updated details before continuing."
+    );
+    expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+    expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+    expect(mockSave).not.toHaveBeenCalled();
+  }
+);
+it("requires review of changed same-revision approval gas before opening the wallet", async () => {
+  const { buyOperation } = buyReview();
+  const reviewed = {
+    ...operation,
+    state: ApiMarketOperationStateEnum.Approval,
+    approval_transactions: [buyOperation.transaction!],
+  };
+  const changed = {
+    ...reviewed,
+    approval_transactions: [
+      {
+        ...buyOperation.transaction!,
+        gas_limit: "200",
+        gas_reserve_wei: "400",
+      },
+    ],
+  };
+  mockCapabilities.mockResolvedValue({
+    actions: [{ action: "LIST", enabled: true }],
+  });
+  mockFetch.mockResolvedValue(changed);
+  const onOperation = jest.fn();
+  const { result } = renderHook(() => useMarketExecution(onOperation));
+  await act(() => result.current.confirm(reviewed, expected));
+  expect(onOperation).toHaveBeenCalledWith(changed);
+  expect(mockBegin).not.toHaveBeenCalled();
+  expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
   expect(mockWallet.signTypedData).not.toHaveBeenCalled();
 });
 it("clears a mined reverted legacy approval without advancing the operation", async () => {
@@ -244,18 +298,25 @@ it("clears a mined reverted legacy approval without advancing the operation", as
   expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
   expect(mockWallet.signTypedData).not.toHaveBeenCalled();
 });
-it("continues a successful legacy approval without requesting another wallet transaction", async () => {
-  mockRead.mockReturnValue({ request: expected, approvalHash: hash });
-  mockClient.waitForTransactionReceipt.mockResolvedValue({ status: "success" });
-  mockContinue.mockResolvedValue(operation);
-  const onOperation = jest.fn();
-  const { result } = renderHook(() => useMarketExecution(onOperation));
-  await act(() => result.current.confirm(operation, expected));
-  expect(mockContinue).toHaveBeenCalledWith(operation.id);
-  expect(onOperation).toHaveBeenCalledWith(operation);
-  expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
-  expect(mockWallet.signTypedData).not.toHaveBeenCalled();
-});
+it.each(["revision-1", "revision-2"])(
+  "continues a successful legacy approval at %s without requesting another wallet transaction",
+  async (revision) => {
+    const current = { ...operation, revision };
+    mockFetch.mockResolvedValue(current);
+    mockRead.mockReturnValue({ request: expected, approvalHash: hash });
+    mockClient.waitForTransactionReceipt.mockResolvedValue({
+      status: "success",
+    });
+    mockContinue.mockResolvedValue(current);
+    const onOperation = jest.fn();
+    const { result } = renderHook(() => useMarketExecution(onOperation));
+    await act(() => result.current.confirm(operation, expected));
+    expect(mockContinue).toHaveBeenCalledWith(operation.id);
+    expect(onOperation).toHaveBeenCalledWith(current);
+    expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+    expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+  }
+);
 it("retains a legacy approval hash when its receipt is unavailable", async () => {
   mockRead.mockReturnValue({ request: expected, approvalHash: hash });
   mockClient.waitForTransactionReceipt.mockRejectedValue(
@@ -277,14 +338,15 @@ it("never opens a wallet prompt when the server capability is disabled", async (
   expect(mockWallet.signTypedData).not.toHaveBeenCalled();
   expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
 });
-it("requires review again when the prepared revision changes", async () => {
+it("signs a newer metadata revision only after validating the unchanged displayed terms", async () => {
   const changed = { ...operation, revision: "revision-2" };
   mockFetch.mockResolvedValue(changed);
   const onOperation = jest.fn();
   const { result } = renderHook(() => useMarketExecution(onOperation));
   await act(() => result.current.confirm(operation, expected));
-  expect(onOperation).toHaveBeenCalledWith(changed);
-  expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+  expect(mockValidate).toHaveBeenCalledWith(changed, expected);
+  expect(mockWallet.signTypedData).toHaveBeenCalledTimes(1);
+  expect(result.current.message).toBeUndefined();
 });
 it("never signs in profile proxy mode", async () => {
   mockAuth.activeProfileProxy = {};
@@ -459,17 +521,23 @@ it("discards a signed payload when the active profile changes during signing", a
   expect(mockSignature).not.toHaveBeenCalled();
   expect(onCommitment).not.toHaveBeenCalled();
 });
-it("retries attachment of an already-sent hash without sending a new transaction", async () => {
-  mockRead.mockReturnValue({ request: expected, transactionHash: hash });
-  mockSubmission.mockResolvedValue({ ...operation, state: "SUBMITTED" });
-  const { result } = renderHook(() => useMarketExecution(jest.fn()));
-  await act(() => result.current.confirm(operation, expected));
-  expect(mockSubmission).toHaveBeenCalledWith(operation.id, {
-    transaction_hash: hash,
-  });
-  expect(mockWallet.signTypedData).not.toHaveBeenCalled();
-  expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
-});
+it.each(["revision-1", "revision-2"])(
+  "retries attachment of an already-sent hash at %s without sending a new transaction",
+  async (revision) => {
+    mockFetch.mockResolvedValue({ ...operation, revision });
+    mockRead.mockReturnValue({ request: expected, transactionHash: hash });
+    mockSubmission.mockResolvedValue({ ...operation, state: "SUBMITTED" });
+    const { result } = renderHook(() => useMarketExecution(jest.fn()));
+    await act(() => result.current.confirm(operation, expected));
+    expect(mockSubmission).toHaveBeenCalledWith(operation.id, {
+      transaction_hash: hash,
+    });
+    expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+    expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+    expect(mockContinue).not.toHaveBeenCalled();
+    expect(mockBegin).not.toHaveBeenCalled();
+  }
+);
 it("attaches an already-sent hash even when intent changes during recovery fetch", async () => {
   mockRead.mockReturnValue({ request: expected, transactionHash: hash });
   mockSubmission.mockResolvedValue({ ...operation, state: "SUBMITTED" });
@@ -591,6 +659,48 @@ describe("refreshing purchase intent before execution", () => {
     return { buyExpected, buyOperation, refreshed };
   }
 
+  it("waits for mandatory fresh validation after GET changes only the displayed revision metadata", async () => {
+    const { buyExpected, buyOperation, refreshed } =
+      purchaseWithFreshContinuation();
+    const observed = {
+      ...buyOperation,
+      revision: "metadata-revision",
+      updated_at: now,
+    };
+    mockFetch.mockResolvedValue(observed);
+    const continuation = deferred<ApiMarketOperation>();
+    mockContinue.mockReturnValue(continuation.promise);
+    const onOperation = jest.fn();
+    const { result } = renderHook(() => useMarketExecution(onOperation));
+    let confirmation!: Promise<void>;
+    act(() => {
+      confirmation = result.current.confirm(buyOperation, buyExpected);
+    });
+    await waitFor(() => expect(mockContinue).toHaveBeenCalledTimes(1));
+    expect(mockValidateForRefresh).toHaveBeenCalledWith(observed, buyExpected);
+    expect(mockValidate).not.toHaveBeenCalled();
+    expect(mockBegin).not.toHaveBeenCalled();
+    expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+    await act(async () => {
+      continuation.resolve(refreshed);
+      await confirmation;
+    });
+    expect(mockValidate).toHaveBeenCalledWith(refreshed, buyExpected);
+    expect(mockBegin).toHaveBeenCalledWith(
+      buyOperation.id,
+      expect.objectContaining({ expected_revision: refreshed.revision })
+    );
+    expect(mockValidate.mock.invocationCallOrder[0]!).toBeLessThan(
+      mockBegin.mock.invocationCallOrder[0]!
+    );
+    expect(mockBegin.mock.invocationCallOrder[0]!).toBeLessThan(
+      mockWallet.sendTransaction.mock.invocationCallOrder[0]!
+    );
+    expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(1);
+    expect(onOperation).toHaveBeenCalledWith(refreshed);
+    expect(result.current.message).toBeUndefined();
+  });
+
   it.each(["capability", "operation fetch"])(
     "continues once with fresh unchanged terms after the old deadline passes during %s",
     async (awaitedStep) => {
@@ -650,13 +760,14 @@ describe("refreshing purchase intent before execution", () => {
       ...refreshed,
       transaction: { ...refreshed.transaction!, gas_reserve_wei: "201" },
     };
+    mockFetch.mockResolvedValue({ ...changed, revision: "metadata-revision" });
     mockContinue.mockResolvedValue(changed);
     const onOperation = jest.fn();
     const { result } = renderHook(() => useMarketExecution(onOperation));
     await act(() => result.current.confirm(buyOperation, buyExpected));
     expect(onOperation).toHaveBeenCalledWith(changed);
     expect(result.current.message).toBe(
-      "The trade was refreshed. Review all details before continuing."
+      "Terms changed. Review the updated details before continuing."
     );
     expect(mockBegin).not.toHaveBeenCalled();
     expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
@@ -669,7 +780,7 @@ describe("refreshing purchase intent before execution", () => {
     const { result } = renderHook(() => useMarketExecution(jest.fn()));
     await act(() => result.current.confirm(buyOperation, buyExpected));
     expect(result.current.message).toBe(
-      "Refresh the review to continue with current terms."
+      "Current terms could not be verified. Please try again."
     );
     expect(mockBegin).not.toHaveBeenCalled();
     expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
@@ -687,24 +798,78 @@ describe("refreshing purchase intent before execution", () => {
     expect(mockContinue).not.toHaveBeenCalled();
     expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
   });
+  it("preserves an active send returned by continuation without replacing its journal or requesting another send", async () => {
+    const { buyExpected, buyOperation, refreshed } =
+      purchaseWithFreshContinuation();
+    const attempt = createMarketSendAttempt(
+      refreshed.transaction!,
+      refreshed.block_number,
+      refreshed.revision
+    );
+    mockContinue.mockResolvedValue({
+      ...refreshed,
+      state: ApiMarketOperationStateEnum.Unknown,
+      send_attempt: {
+        attempt_id: attempt.id,
+        purpose: attempt.purpose,
+        transaction_digest: attempt.digest,
+        snapshot_block: attempt.snapshotBlock,
+        transaction: refreshed.transaction,
+        status: "ACTIVE",
+      },
+    });
+    const { result } = renderHook(() => useMarketExecution(jest.fn()));
+    await act(() => result.current.confirm(buyOperation, buyExpected));
+    expect(mockSave).not.toHaveBeenCalled();
+    expect(mockBegin).not.toHaveBeenCalled();
+    expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+    expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+  });
+  it.each(["fetch", "continuation"])(
+    "rejects a replacement operation identity returned by %s before changing a journal or opening the wallet",
+    async (source) => {
+      const { buyExpected, buyOperation, refreshed } =
+        purchaseWithFreshContinuation();
+      const response = source === "fetch" ? mockFetch : mockContinue;
+      response.mockResolvedValue({ ...refreshed, id: "another-operation" });
+      const onOperation = jest.fn();
+      const { result } = renderHook(() => useMarketExecution(onOperation));
+      await act(() => result.current.confirm(buyOperation, buyExpected));
+      expect(onOperation).not.toHaveBeenCalled();
+      expect(mockSave).not.toHaveBeenCalled();
+      expect(mockBegin).not.toHaveBeenCalled();
+      expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+      expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+    }
+  );
 
   it.each([ApiMarketKind.List, ApiMarketKind.Offer])(
-    "keeps %s signature reviews subject to strict freshness",
+    "automatically renews %s signature reviews and validates the fresh payload before signing",
     async (kind) => {
       const value = { ...operation, kind, expires_at: now - 1000 };
       mockCapabilities.mockResolvedValue({
         actions: [{ action: kind, enabled: true }],
       });
       mockFetch.mockResolvedValue(value);
+      const refreshed = {
+        ...value,
+        expires_at: now + 60_000,
+        revision: "fresh-signature-review",
+      };
+      mockContinue.mockResolvedValue(refreshed);
       const { result } = renderHook(() => useMarketExecution(jest.fn()));
       await act(() => result.current.confirm(value, { ...expected, kind }));
-      expect(mockValidateForRefresh).not.toHaveBeenCalled();
-      expect(mockContinue).not.toHaveBeenCalled();
+      expect(mockValidateForRefresh).toHaveBeenCalledWith(value, {
+        ...expected,
+        kind,
+      });
+      expect(mockContinue).toHaveBeenCalledWith(value.id);
+      expect(mockValidate).toHaveBeenCalledWith(refreshed, {
+        ...expected,
+        kind,
+      });
       expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
-      expect(mockWallet.signTypedData).not.toHaveBeenCalled();
-      expect(result.current.message).toBe(
-        "Refresh the review to continue with current terms."
-      );
+      expect(mockWallet.signTypedData).toHaveBeenCalledTimes(1);
     }
   );
 });

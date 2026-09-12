@@ -312,12 +312,17 @@ describe("MarketDepthTradeActions", () => {
     const disclosure = screen.getByRole("button", { name: /^Listings at / });
     const collect = screen.getByRole("button", { name: "Collect" });
     expect(disclosure).toHaveAttribute("aria-expanded", "false");
+    expect(collect).toHaveAttribute("aria-pressed", "false");
     await user.tab();
     expect(disclosure).toHaveFocus();
     await user.tab();
     expect(collect).toHaveFocus();
     await user.keyboard("{Enter}");
     await screen.findByRole("textbox", { name: "Quantity" });
+    expect(screen.getByRole("button", { name: "Remove" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
     expect(disclosure).toHaveAttribute("aria-expanded", "false");
     expect(onLoadOrders).not.toHaveBeenCalled();
     expect(mockFetchExactOrder).toHaveBeenCalledTimes(1);

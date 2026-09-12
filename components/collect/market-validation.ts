@@ -407,16 +407,20 @@ export function validateMarketOperation(
   });
 }
 
-/** Bind a previous purchase/cancellation review before mandatory fresh continuation. */
+/** Bind previous intent before mandatory fresh continuation; this never authorizes a send or signature. */
 export function validateMarketOperationForRefresh(
   operation: ApiMarketOperation,
   expected: ApiMarketPrepareRequest,
   now = Date.now()
 ): void {
   assert(
-    expected.kind === ApiMarketKind.Buy ||
-      expected.kind === ApiMarketKind.Accept ||
-      expected.kind === ApiMarketKind.Cancel
+    [
+      ApiMarketKind.Buy,
+      ApiMarketKind.Accept,
+      ApiMarketKind.Cancel,
+      ApiMarketKind.List,
+      ApiMarketKind.Offer,
+    ].includes(expected.kind)
   );
   validateMarketOperationBindings(operation, expected, now, {
     requireFreshReview: false,

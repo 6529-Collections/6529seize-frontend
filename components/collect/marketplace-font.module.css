@@ -1,0 +1,13 @@
+@font-face {
+  font-family: "6529 Market Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../../assets/inter/InterVariable.woff2") format("woff2");
+}
+
+.surface {
+  font-family: "6529 Market Inter", system-ui, sans-serif;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+}

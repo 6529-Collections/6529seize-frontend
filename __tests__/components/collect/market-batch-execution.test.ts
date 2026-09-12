@@ -193,7 +193,6 @@ it("never sends a second operation while an overlapping seller order has an unre
 });
 it.each([
   "disabled",
-  "changed revision",
   "changed fee",
   "wrong chain",
   "wrong signer",
@@ -207,9 +206,6 @@ it.each([
   switch (condition) {
     case "disabled":
       capability.mockResolvedValue({ ...enabledCapability, available: false });
-      break;
-    case "changed revision":
-      fetch.mockResolvedValue({ ...f.operation, revision: "2" });
       break;
     case "changed fee":
       refresh.mockResolvedValue({
@@ -263,8 +259,97 @@ it("requires a new visible confirmation when a refreshed gas cap changes", async
   expect(f.options.onOperation).toHaveBeenCalledWith(changed);
   expect(send).not.toHaveBeenCalled();
 });
+it.each([0, NOW - 1])(
+  "refreshes the stored review deadline %s before one exact wallet request",
+  async (deadline) => {
+    const f = setup();
+    const shown = { ...f.operation, expires_at: deadline };
+    f.options.operation = shown;
+    fetch.mockResolvedValue({ ...shown, revision: "2" });
+    refresh.mockResolvedValue({ ...f.operation, revision: "3" });
+    await expect(confirmMarketBatch(f.options)).resolves.toBe("COMPLETE");
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operation: expect.objectContaining({
+          revision: "3",
+          expires_at: f.operation.expires_at,
+        }),
+      })
+    );
+  }
+);
+it("refreshes an expired mirror window while retaining every approved economic term", async () => {
+  const f = setup();
+  const shown = {
+    ...f.operation,
+    transaction: { ...f.operation.transaction! },
+    mirror_terms: { ...f.operation.mirror_terms! },
+  };
+  f.options.operation = shown;
+  fetch.mockResolvedValue(shown);
+  jest.spyOn(Date, "now").mockReturnValue(NOW + 61_000);
+  f.operation.expires_at = NOW + 120_000;
+  f.operation.mirror_terms!.end_time = String(NOW / 1000 + 120);
+  f.orders[2]!.parameters.endTime = BigInt(NOW / 1000 + 120);
+  f.reencode();
+  await expect(confirmMarketBatch(f.options)).resolves.toBe("COMPLETE");
+  expect(send).toHaveBeenCalledTimes(1);
+  expect(send.mock.calls[0]?.[0].operation.transaction?.data).toBe(
+    f.operation.transaction!.data
+  );
+});
+it("compares refreshed economics against the shown review even when the GET has the same revision", async () => {
+  const f = setup();
+  const changed = {
+    ...f.operation,
+    transaction: { ...f.operation.transaction!, max_fee_per_gas: "9" },
+  };
+  fetch.mockResolvedValue(changed);
+  refresh.mockResolvedValue(changed);
+  await expect(confirmMarketBatch(f.options)).resolves.toBe("UPDATED_REVIEW");
+  expect(f.options.onOperation).toHaveBeenCalledWith(changed);
+  expect(send).not.toHaveBeenCalled();
+});
+it("rejects altered historical calldata before requesting a refresh", async () => {
+  const f = setup();
+  f.options.operation = {
+    ...f.operation,
+    expires_at: 0,
+    transaction: { ...f.operation.transaction!, data: "0x" },
+  };
+  await expect(confirmMarketBatch(f.options)).rejects.toThrow();
+  expect(refresh).not.toHaveBeenCalled();
+  expect(send).not.toHaveBeenCalled();
+});
+it("never sends a fresh continuation that still has an expired review", async () => {
+  const f = setup();
+  refresh.mockResolvedValue({ ...f.operation, expires_at: 0 });
+  await expect(confirmMarketBatch(f.options)).rejects.toThrow(
+    "MARKET_REVIEW_MISMATCH"
+  );
+  expect(send).not.toHaveBeenCalled();
+  expect(f.client.call).not.toHaveBeenCalled();
+});
+it("checks the current actor again after continuation before publishing or simulating the review", async () => {
+  const f = setup();
+  refresh.mockImplementation(async () => {
+    f.options.assertConnection.mockImplementation(() => {
+      throw new Error("MARKET_CONNECTION_CHANGED");
+    });
+    return f.operation;
+  });
+  await expect(confirmMarketBatch(f.options)).rejects.toThrow(
+    "MARKET_CONNECTION_CHANGED"
+  );
+  expect(f.options.onOperation).not.toHaveBeenCalled();
+  expect(f.client.call).not.toHaveBeenCalled();
+  expect(send).not.toHaveBeenCalled();
+});
 it("never refreshes or resends when a local unresolved wallet request exists", async () => {
   const f = setup();
+  f.operation.expires_at = 0;
   saveMarketBatch("profile", f.operation.id, {
     request: f.request,
     sendAttempt: {

@@ -44,7 +44,9 @@ export default function MarketDepthPriceLevels({
   const [showAll, setShowAll] = useState(false);
   const [openPrice, setOpenPrice] = useState<string | null>(null);
   const tradeActionsAvailable = useMarketDepthTradeActionsAvailable();
-  const priceWidth = tradeActionsAvailable ? "tw-w-[36%]" : "tw-w-[38%]";
+  const priceWidth = tradeActionsAvailable
+    ? "tw-w-[64%] sm:tw-w-[40%]"
+    : "tw-w-full sm:tw-w-[38%]";
   const quantityWidth = tradeActionsAvailable ? "tw-w-[16%]" : "tw-w-[31%]";
   const totalWidth = tradeActionsAvailable ? "tw-w-[16%]" : "tw-w-[31%]";
   const disclosureId = useId();
@@ -56,15 +58,15 @@ export default function MarketDepthPriceLevels({
 
   return (
     <div className="tw-min-w-0">
-      <div className="tw-min-w-0 tw-overflow-hidden tw-border-0 tw-border-t tw-border-solid tw-border-white/10">
-        <table className="tw-w-full tw-table-fixed tw-border-collapse tw-text-right tw-text-xs sm:tw-text-sm">
+      <div className="tw-min-w-0 tw-border-0 tw-border-t tw-border-solid tw-border-white/10">
+        <table className="tw-w-full tw-table-fixed tw-border-collapse tw-text-right tw-text-meta tw-leading-5">
           <caption className="tw-sr-only">
             {t(locale, "marketDepth.table.ariaLabel", {
               side: label,
               currency: currencyLabel,
             })}
           </caption>
-          <thead className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-text-[11px] tw-font-medium tw-text-iron-500">
+          <thead className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-text-xs tw-font-normal tw-text-iron-400 [&_th]:tw-font-normal">
             <tr>
               <th
                 scope="col"
@@ -75,19 +77,19 @@ export default function MarketDepthPriceLevels({
               <th
                 scope="col"
                 aria-label={t(locale, "marketDepth.table.quantity")}
-                className={`${quantityWidth} tw-py-2.5 tw-pl-0 tw-pr-1 sm:tw-px-3`}
+                className={`${quantityWidth} tw-hidden tw-py-2.5 sm:tw-table-cell sm:tw-px-3`}
               >
                 {t(locale, "marketDepth.table.quantityShort")}
               </th>
               <th
                 scope="col"
                 aria-label={t(locale, "marketDepth.table.cumulative")}
-                className={`${totalWidth} tw-px-0 tw-py-2.5 sm:tw-pl-3`}
+                className={`${totalWidth} tw-hidden tw-px-0 tw-py-2.5 sm:tw-table-cell sm:tw-pl-3`}
               >
                 {t(locale, "marketDepth.table.cumulativeShort")}
               </th>
               {tradeActionsAvailable && (
-                <th scope="col" className="tw-w-[32%] tw-py-2.5">
+                <th scope="col" className="tw-w-[36%] tw-py-2.5 sm:tw-w-[28%]">
                   <span className="tw-sr-only">
                     {t(locale, "marketDepth.table.action")}
                   </span>
@@ -133,9 +135,9 @@ export default function MarketDepthPriceLevels({
                         )}
                         title={level.unit_price}
                         onClick={toggleDetails}
-                        className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-sm tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-left tw-font-medium tw-tabular-nums tw-text-iron-100 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
+                        className="tw-font-inherit tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-left tw-text-meta tw-font-medium tw-tabular-nums tw-text-iron-100 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
                       >
-                        <span className="tw-min-w-0 tw-break-words">
+                        <span className="tw-min-w-0 [overflow-wrap:anywhere]">
                           {formatDecimal(locale, level.unit_price)}
                         </span>
                         <ChevronDownIcon
@@ -146,15 +148,29 @@ export default function MarketDepthPriceLevels({
                           }
                         />
                       </button>
+                      <div className="tw-mb-3 tw-flex tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-text-xs tw-text-iron-400 sm:tw-hidden">
+                        <span>
+                          {t(locale, "marketDepth.table.quantityShort")}{" "}
+                          <span className="tw-tabular-nums tw-text-iron-300">
+                            {formatInteger(locale, level.quantity)}
+                          </span>
+                        </span>
+                        <span>
+                          {t(locale, "marketDepth.table.cumulativeShort")}{" "}
+                          <span className="tw-tabular-nums">
+                            {formatInteger(locale, level.cumulative_quantity)}
+                          </span>
+                        </span>
+                      </div>
                     </td>
-                    <td className="tw-break-words tw-px-0 tw-py-2.5 tw-tabular-nums tw-text-iron-300 sm:tw-px-3">
+                    <td className="tw-hidden tw-break-words tw-px-0 tw-py-2.5 tw-tabular-nums tw-text-iron-300 sm:tw-table-cell sm:tw-px-3">
                       {formatInteger(locale, level.quantity)}
                     </td>
-                    <td className="tw-break-words tw-px-0 tw-py-2.5 tw-tabular-nums tw-text-iron-500 sm:tw-pl-3">
+                    <td className="tw-hidden tw-break-words tw-px-0 tw-py-2.5 tw-tabular-nums tw-text-iron-400 sm:tw-table-cell sm:tw-pl-3">
                       {formatInteger(locale, level.cumulative_quantity)}
                     </td>
                     {tradeActionsAvailable && (
-                      <td className="tw-break-words tw-py-0 tw-pl-2">
+                      <td className="tw-break-words tw-py-1 tw-pl-3 tw-align-top sm:tw-align-middle">
                         <MarketDepthLevelAction
                           order={singleOrder}
                           side={side}
@@ -178,7 +194,7 @@ export default function MarketDepthPriceLevels({
                       colSpan={tradeActionsAvailable ? 4 : 3}
                       className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-px-0 tw-py-0 tw-text-left"
                     >
-                      <div id={panelId} className="tw-pl-3">
+                      <div id={panelId} className="tw-pl-3 sm:tw-pl-4">
                         {open && (
                           <MarketDepthOrderDetails
                             orders={levelOrders}
@@ -206,7 +222,7 @@ export default function MarketDepthPriceLevels({
         <button
           type="button"
           onClick={() => setShowAll((current) => !current)}
-          className="tw-mt-3 tw-min-h-11 tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-400 tw-underline-offset-4 tw-transition hover:tw-text-white hover:tw-underline focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          className="tw-font-inherit tw-mt-2 tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-meta tw-font-medium tw-text-iron-300 tw-transition hover:tw-bg-white/5 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
         >
           {showAll
             ? t(locale, "marketDepth.levels.showFewer")

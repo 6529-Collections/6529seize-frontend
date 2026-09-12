@@ -24,15 +24,18 @@ Gradients set; Pebbles opens its trait-set planner. Collected and Pebbles Trait
 Sets also link to relevant collecting goals.
 
 Supported artwork pages place a priced **Collect** action near the artwork summary,
-before **About this artwork** and [**Listings & offers**](feature-card-market-depth.md).
+before artwork details and [**Listings & offers**](feature-card-market-depth.md).
 The actions appear in the order **Collect**, **Make an offer**, then **List**.
 The lowest supported listing is selected automatically. **Deliver to · Change**
 appears below Collect and lets you choose the receiving wallet; additional listings
 remain available under **Other listings**. Collect checks the selected order again before showing exact
 terms for wallet approval. A changed order requires another review.
-**View listings & offers** opens the card's collapsed market section and moves
-focus to its heading. The lowest listing and highest offer remain visible in
-the collapsed summary.
+**View listings & offers** selects the card's **Listings & offers** tab and moves
+focus to the market. The price summary and order levels appear immediately,
+without a second accordion. Switching tabs retains selections and active reviews.
+Memes, Gradients and Pebbles use the same trading controls and review layout.
+Memes and Meme Lab show traits, metadata and original files below the description
+in **Overview**; existing `focus=the-art` links still reach that artwork information.
 
 Listing prices load before you connect a wallet. While a price is unavailable,
 the Collect area shows whether listings are loading, could not be loaded, or contain
@@ -105,26 +108,37 @@ card page.
 
 ### Review an individual purchase
 
-The purchase summary shows the artwork, quantity, paying wallet and destination.
-Wallet names from the collecting profile appear with their full checksummed
-addresses and a copy control. When the same wallet pays and receives, it appears
-once under **Pay with & deliver to**. A different destination appears separately.
+The purchase summary shows the artwork and quantity, with separate **Pay with**
+and **Deliver to** rows even when both use the same wallet. A confirmed profile
+wallet name or an abbreviated address identifies each wallet. Click or tap its
+row to reveal the full checksummed address and copy control. Check the destination
+address before continuing, especially for a wallet outside your profile.
 
 **Purchase price** includes the signed order fees. **Network fee cap** covers
 the quoted purchase transaction and any required approvals. For an ETH purchase
-with complete fee caps, **Maximum total** adds the price and those caps. The
-summary rounds caps upward; **Transaction details** preserves the exact amounts,
-seller proceeds, fee recipients, approval scope and contract information.
+with complete fee caps, **Maximum total** adds the price and those caps. Summary
+caps round upward without changing the amounts submitted for approval.
 If a cap is unavailable, the summary says **Not available yet** and does not show
 a complete maximum. WETH prices and ETH network fees stay separate.
 
-The purchase review stays available while you read. **Continue to wallet** gets
-a fresh execution quote and compares it with the reviewed terms. Changes to
-price, fees, approval scope or other terms require another review before the
-wallet opens. A reset quote shows **Refresh quote** and keeps the purchase
-choices while current terms load. Refresh cannot run alongside an active wallet
-confirmation. Quote freshness is separate from the listing's expiry: a refreshed
-quote does not extend the listing.
+Open **Price breakdown** for seller proceeds and the fees already included in
+the purchase price. Its nested **Exact amounts** shows the unrounded network fee
+cap, approval fee caps and maximum where available. **Contract details** keeps
+the NFT contract, exchange, fee recipients, approval scope and order identifiers
+available separately. Known Ethereum addresses have names such as **The Memes**,
+**6529 Gradient**, **NextGen**, **Seaport 1.6** and **OpenSea** for their applicable
+roles. Expand a contract row for its full address, copy it or open its explorer
+link. An unfamiliar address keeps a generic label; a display name does not replace
+checking the exact address or grant permission to spend.
+
+The review stays available while you read. **Continue in wallet** checks current
+terms and refreshes the execution quote when needed. If the reviewed terms still
+match, it proceeds to the wallet without a separate quote-refresh step. Changed
+prices, fees, quantities, destinations, approval scopes or network fee caps require
+you to review and continue again. The same checks apply to listings, offers,
+accepting an offer, cancellation and supported multiple-item purchases. Checking
+terms never signs or sends a transaction by itself. Quote freshness is separate
+from the signed order's expiry; refreshing does not extend that order.
 
 ### Complete a profile set
 
@@ -178,10 +192,13 @@ can still cost gas. The site does not silently replace an unavailable listing,
 remove an item or split your purchase into several transactions. If the
 selection cannot be bought together, edit it and review again.
 
-The review shows the full purchase price, fees and gas reserve. A quote that
-expires requires a refreshed review. Changing the selection, quantity, payer or
-delivery addresses also requires another review. Orders retains the purchase
-until its receipt confirms all selected deliveries.
+The review shows each artwork's quantity and delivery allocations, the paying
+wallet, purchase price, network fee cap and maximum where available. Price and
+contract breakdowns preserve each order's exact fees and identity. **Continue in
+wallet** rechecks every selected order together. A quote that aged while you read
+is refreshed automatically; changed terms require another review. Changing the
+selection, quantity, payer or delivery addresses also requires another review.
+Orders retains the purchase until its receipt confirms all selected deliveries.
 
 ### Make or accept an offer
 
@@ -407,8 +424,8 @@ on-chain autonomous mandate.
 - A plan initially checks one best exact listing per artwork. Finishing that
   scan does not exhaust market depth. Additional copies may need other orders.
 - A changed profile membership, catalog or recipient requires a fresh plan.
-- The quote review timer measures freshness. It does not expire an already
-  signed offer. The order's own expiry and chain state determine its lifetime.
+- Execution quote freshness does not expire an already signed offer. The order's
+  own expiry and chain state determine its lifetime.
 - ERC-721 approvals can be token-specific. ERC-1155 approval is collection-wide.
   The review identifies the actual spender and permission scope. WETH approvals
   use bounded amounts rather than default unlimited allowances.
@@ -422,8 +439,9 @@ Loading, retry and review stay in the same dialog. **Close** or **Escape** retur
 you to the card. Closing while it loads cancels that attempt; the review will
 not open later when loading finishes.
 
-If an order changes, refresh its available terms and review again. The site
-does not substitute a different NFT into an exact-item purchase.
+If current terms differ when you continue, the review shows the changed terms
+before requesting wallet approval. Review them and continue again if you accept
+them. The site does not substitute a different NFT into an exact-item purchase.
 
 Preparation errors distinguish an unreachable service, expired authentication,
 changed profile or delivery wallets, unsupported terms and invalid trade details.
@@ -443,7 +461,8 @@ wallet**, and select **Check this transaction**. The site verifies the exact
 sender, NFT action and transaction details before accepting it. This also works
 for an approval and when local browser recovery data is unavailable. A hash
 that cannot yet be verified remains available for another check; checking it
-does not send a replacement transaction.
+does not send a replacement transaction. A failed recovery check shows an error
+while retaining the unresolved transaction for another attempt.
 
 Orders created here retain their original terms for direct on-chain cancellation
 even when the marketplace provider is unavailable. Cancellation costs gas and

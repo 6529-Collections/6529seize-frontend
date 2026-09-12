@@ -45,7 +45,7 @@ branches.
    `2K`, high-res (`8K` mobile or `16K` desktop), or `Live`.
 8. Use media actions: light viewer, dark viewer, `Download`, `Open in new tab`,
    and `Fullscreen`.
-9. Switch token detail views (`About`, `Provenance`, `Display Center`,
+9. Switch token detail views (`About`, `Listings & offers`, `Provenance`, `Display Center`,
    `Rarity`) when needed.
 10. If the token was opened from a profile's Collected tab, use
     `Back to {profile}'s collected` to restore that list's filters, page, and
@@ -61,6 +61,8 @@ branches.
   to slug paths.
 - Unsupported collection view segments resolve to `Overview`.
 - Unsupported token view segments resolve to `About`.
+- `/nextgen/token/{token}/listings-and-offers` opens the market directly.
+  Previous/next token arrows preserve this view and the existing query context.
 - If indexed token data is missing or pending, token routes fall back to the
   on-chain token panel.
 - The in-app share action removes profile-return context from token URLs, so a
@@ -71,6 +73,13 @@ branches.
 
 - Discovery path: `/nextgen` -> collection -> `/art` -> `/nextgen/token/{token}`.
 - Direct token path: shared `/nextgen/token/{token}` URL to media controls.
+- Pebbles collecting: use **Collect**, **Make an offer** or the holding wallet's
+  **List** action on the token page. **View listings & offers** selects the
+  **Listings & offers** tab from About, Provenance, Display Center or Rarity.
+  The price levels appear immediately without another accordion. Switching
+  views keeps the market selection and review available.
+  See [Listings and Offers](../media/feature-card-market-depth.md) for exact-order
+  selection and [Collecting Tools](../media/collecting.md) for wallet review.
 - Trait-set detour: `Trait Sets` preview or full `/trait-sets` -> filtered
   `/art` -> token.
 - Mint branch path: collection countdown `MINT`/`BURN TO MINT` -> `/mint`.

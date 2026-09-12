@@ -2,9 +2,7 @@
 
 import type { NFT } from "@/entities/INFT";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
-import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
 import CollectDetailActions from "@/components/collect/CollectDetailActions";
-import { MEMES_CONTRACT } from "@/constants/constants";
 import { parseNftDescriptionToHtml } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import {
@@ -62,7 +60,6 @@ export function MemePageLiveSubMenu(props: {
   marketRefreshVersion?: number | undefined;
 }) {
   if (props.show) {
-    const locale = props.locale ?? DEFAULT_LOCALE;
     const nft = props.nft;
 
     return (
@@ -71,12 +68,6 @@ export function MemePageLiveSubMenu(props: {
           <>
             <MemePageCardDescription nft={nft} />
             <MemeCardFileType nft={nft} />
-            <MarketDepthPanel
-              contract={MEMES_CONTRACT}
-              tokenId={nft.id}
-              locale={locale}
-              refreshKey={props.marketRefreshVersion ?? 0}
-            />
           </>
         )}
       </>

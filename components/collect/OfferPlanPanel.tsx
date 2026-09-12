@@ -1,5 +1,7 @@
 "use client";
 
+import marketplaceFont from "./marketplace-font.module.css";
+
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
@@ -489,7 +491,7 @@ function OfferPlanContents({
   return (
     <section
       aria-labelledby={`${id}-title`}
-      className="tw-min-w-0 tw-space-y-5"
+      className={`${marketplaceFont["surface"] ?? ""} tw-min-w-0 tw-space-y-5`}
     >
       <div>
         <h2
@@ -501,7 +503,7 @@ function OfferPlanContents({
             blended ? "collect.blend.title" : "collect.offerPlan.title"
           )}
         </h2>
-        <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-relaxed tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(locale, introKey)}
         </p>
       </div>
@@ -510,7 +512,7 @@ function OfferPlanContents({
           event.preventDefault();
           void analyzePrices();
         }}
-        className="tw-space-y-3"
+        className="tw-space-y-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4 sm:tw-p-5"
       >
         <OfferPlanPricing
           value={controls}
@@ -532,7 +534,7 @@ function OfferPlanContents({
           {reason}
         </p>
       )}
-      <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-3">
+      <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-2">
         <label className="tw-min-w-0 tw-basis-full tw-space-y-1 tw-text-xs tw-text-iron-300 sm:tw-flex-1">
           <span>{t(locale, "collect.offerPlan.findNFT")}</span>
           <input

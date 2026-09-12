@@ -190,7 +190,11 @@ it.each(["offer", "list"] as const)(
     fireEvent.change(screen.getByLabelText("Expiry date and time"), {
       target: { value: chosen },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Review exact terms" }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: action === "offer" ? "Review offer" : "Review listing",
+      })
+    );
     expect(p.onPrepare).toHaveBeenCalledWith(
       expect.objectContaining({
         expiryHours: "custom",
@@ -221,7 +225,7 @@ it("blocks a custom expiry that became too soon while the form stayed open", () 
       />
     );
     clock.mockReturnValue(now + 2 * 60_000);
-    fireEvent.click(screen.getByRole("button", { name: "Review exact terms" }));
+    fireEvent.click(screen.getByRole("button", { name: "Review offer" }));
     expect(p.onPrepare).not.toHaveBeenCalled();
     expect(screen.getByLabelText("Expiry date and time")).toHaveAttribute(
       "aria-invalid",

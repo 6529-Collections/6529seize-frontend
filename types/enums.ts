@@ -100,6 +100,7 @@ export enum NextgenCollectionView {
   PROVENANCE = "Provenance",
   DISPLAY_CENTER = "Display Center",
   RARITY = "Rarity",
+  LISTINGS_AND_OFFERS = "Listings & offers",
   OVERVIEW = "Overview",
   TOP_TRAIT_SETS = "Trait Sets",
 }

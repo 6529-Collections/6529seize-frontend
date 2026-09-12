@@ -15,6 +15,7 @@ import {
 import { mainnet } from "viem/chains";
 import {
   validateMarketBatchOperation,
+  validateMarketBatchOperationForRefresh,
   marketBatchReviewTerms,
   marketBatchLiteral,
 } from "./market-batch-validation";
@@ -174,7 +175,9 @@ export async function confirmMarketBatch(
           })
         )
           throw new Error("MARKET_BROADCAST_UNKNOWN");
+        assertConnection();
         const capability = await fetchMarketBatchCapabilities();
+        assertConnection();
         if (
           capability.available !== true ||
           !marketBatchLiteral(capability.execution_policy, "ALL_OR_REVERT") ||
@@ -183,6 +186,7 @@ export async function confirmMarketBatch(
         )
           throw new Error("MARKET_ACTION_DISABLED");
         let current = await fetchMarketBatch(operation.id);
+        assertConnection();
         assertIdentity(current, operation);
         clearResolvedBatchSend(current);
         const prior = readMarketBatch(expected.profile_id, current.id);
@@ -198,27 +202,34 @@ export async function confirmMarketBatch(
         }
         if (batchSendAttempt(current))
           throw new Error("MARKET_BROADCAST_UNKNOWN");
-        if (current.revision !== operation.revision) {
-          onOperation(current);
-          return "UPDATED_REVIEW";
-        }
         if (!marketBatchLiteral(current.state, "REVIEW")) {
           onOperation(current);
           return "COMPLETE";
         }
-        validateMarketBatchOperation(current, expected, options.profileWallets);
+        validateMarketBatchOperationForRefresh(
+          operation,
+          expected,
+          options.profileWallets
+        );
+        validateMarketBatchOperationForRefresh(
+          current,
+          expected,
+          options.profileWallets
+        );
+        assertConnection();
         const refreshed = await continueMarketBatch(current.id);
+        assertConnection();
         assertIdentity(refreshed, operation);
+        if (batchSendAttempt(refreshed))
+          throw new Error("MARKET_BROADCAST_UNKNOWN");
         validateMarketBatchOperation(
           refreshed,
           expected,
           options.profileWallets
         );
-        if (batchSendAttempt(refreshed))
-          throw new Error("MARKET_BROADCAST_UNKNOWN");
-        assertConnection();
         if (
-          marketBatchReviewTerms(refreshed) !== marketBatchReviewTerms(current)
+          marketBatchReviewTerms(refreshed) !==
+          marketBatchReviewTerms(operation)
         ) {
           onOperation(refreshed);
           return "UPDATED_REVIEW";

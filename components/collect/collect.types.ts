@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import type { CollectPurchaseAmounts } from "./collect-review-amounts";
 
 /** Display models only. API adapters must use the generated marketplace contract. */
@@ -126,6 +127,7 @@ export interface CollectTradeDraft {
 export type CollectTradeStage =
   | "review"
   | "preparing"
+  | "wallet"
   | "approval"
   | "signature"
   | "publishing"
@@ -144,6 +146,9 @@ export interface CollectReviewFact {
 }
 
 export interface CollectPurchaseReviewView {
+  readonly chainId?: number;
+  readonly nftContract?: string;
+  readonly exchangeContract?: string;
   readonly amounts: CollectPurchaseAmounts;
   readonly currency: "ETH" | "WETH";
   readonly artworkLabel: string;
@@ -172,6 +177,10 @@ export interface CollectTradeReview {
   readonly title: string;
   readonly media?: ReactNode;
   readonly purchase?: CollectPurchaseReviewView | undefined;
+  readonly orderReview?: {
+    readonly operation: ApiMarketOperation;
+    readonly walletName?: string | undefined;
+  };
   readonly facts: readonly CollectReviewFact[];
   readonly technicalFacts: readonly CollectReviewFact[];
   readonly totalLabel: string;

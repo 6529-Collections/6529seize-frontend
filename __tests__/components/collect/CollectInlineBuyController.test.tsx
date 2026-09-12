@@ -321,7 +321,7 @@ it("automatically selects the cheapest exact listing, refreshes it, validates, a
   expect(mockSave).toHaveBeenCalledWith("profile", "operation", { request });
   expect(mockConfirm).not.toHaveBeenCalled();
   fireEvent.click(
-    await screen.findByRole("button", { name: "Continue to wallet" })
+    await screen.findByRole("button", { name: "Continue in wallet" })
   );
   await waitFor(() =>
     expect(mockConfirm).toHaveBeenCalledWith(operation, request)

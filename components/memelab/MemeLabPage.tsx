@@ -447,10 +447,6 @@ export default function MemeLabPageComponent({
   }
 
   function printContent() {
-    if (activeTab === MEME_FOCUS.THE_ART) {
-      return nft ? <MemeLabAdditionalDetailsContent nft={nft} /> : null;
-    }
-
     if (activeTab === MEME_FOCUS.COLLECTORS) {
       return (
         <MemeLabCollectors
@@ -473,7 +469,12 @@ export default function MemeLabPageComponent({
     }
 
     if (activeTab === MEME_FOCUS.LIVE) {
-      return <MemeLabOverview nft={nft} />;
+      return (
+        <>
+          <MemeLabOverview nft={nft} />
+          {nft && <MemeLabAdditionalDetailsContent nft={nft} />}
+        </>
+      );
     }
 
     if (activeTab === MEME_FOCUS.HISTORY) {
@@ -639,6 +640,16 @@ export default function MemeLabPageComponent({
             <NftDetailTabSection
               activeFocus={routeFocus}
               locale={locale}
+              persistentContent={
+                <MarketDepthPanel
+                  contract={MEMELAB_CONTRACT}
+                  tokenId={nft.id}
+                  locale={locale}
+                  embedded
+                  active={activeTab === MEME_FOCUS.MARKET}
+                  onReveal={() => setActiveMemeLabTab(MEME_FOCUS.MARKET)}
+                />
+              }
               navigation={
                 <>
                   <MemeLabPageTabs
@@ -652,11 +663,6 @@ export default function MemeLabPageComponent({
               }
             >
               {printContent()}
-              <MarketDepthPanel
-                contract={MEMELAB_CONTRACT}
-                tokenId={nft.id}
-                locale={locale}
-              />
             </NftDetailTabSection>
           </>
         )}

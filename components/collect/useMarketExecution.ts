@@ -36,6 +36,7 @@ import {
 import { readMarketIntent, saveMarketIntent } from "./market-operation-storage";
 import { withMarketOperationLock } from "./market-operation-lock";
 import { marketReviewTerms } from "./market-review-terms";
+import { isFreshMarketReviewExpiry } from "./market-review-expiry";
 import { marketExecutionError } from "./market-execution-errors";
 import {
   clearResolvedMarketSend,
@@ -131,7 +132,7 @@ async function executeReviewedMarketOperation(options: {
     const fees = await reviewedGasLimits(client, transaction, estimatedGas);
     assertConnection();
     validateMarketOperation(operation, expected);
-    setStage(approval ? "approval" : "submitted");
+    setStage(approval ? "approval" : "wallet");
     const { hash } = await sendReviewedMarketTransaction({
       operation,
       expected,
@@ -141,7 +142,7 @@ async function executeReviewedMarketOperation(options: {
       onOperation,
     });
     // The server journals approval hashes too, so reload/device changes cannot reopen a send.
-    setStage("reconciling");
+    setStage("submitted");
     onOperation(
       await submitMarketTransaction(operation.id, { transaction_hash: hash })
     );
@@ -260,6 +261,18 @@ async function assertMarketActionEnabled(expected: ApiMarketPrepareRequest) {
     throw new Error("MARKET_ACTION_DISABLED");
 }
 
+function assertMarketOperationIdentity(
+  operation: ApiMarketOperation,
+  reviewed: ApiMarketOperation
+) {
+  if (
+    operation.id !== reviewed.id ||
+    operation.profile_id !== reviewed.profile_id ||
+    operation.wallet.toLowerCase() !== reviewed.wallet.toLowerCase()
+  )
+    throw new Error("MARKET_REVIEW_MISMATCH");
+}
+
 export function useMarketExecution(
   onOperation: (operation: ApiMarketOperation) => void
 ) {
@@ -287,6 +300,7 @@ export function useMarketExecution(
     if (busy.current || !client || !wallet) return;
     busy.current = true;
     setMessage(undefined);
+    setStage("preparing");
     try {
       await withMarketOperationLock(operation.id, async () => {
         const assertConnection = () => {
@@ -296,15 +310,11 @@ export function useMarketExecution(
         assertConnection();
         await assertMarketActionEnabled(expected);
         let current = await fetchMarketOperation(operation.id);
+        assertMarketOperationIdentity(current, operation);
         clearResolvedMarketSend(current);
         if (marketOperationSendAttempt(current))
           throw new Error("MARKET_BROADCAST_UNKNOWN");
-        if (current.revision !== operation.revision) {
-          onOperation(current);
-          setStage(null);
-          setMessage(t(locale, "collect.trade.refreshReview"));
-          return;
-        }
+        // Revisions can change with quote metadata; reviewed terms are compared below.
         const prior = readMarketIntent(expected.profile_id, current.id);
         if (prior?.transactionHash) {
           setStage("reconciling");
@@ -338,14 +348,20 @@ export function useMarketExecution(
           onOperation(current);
           return;
         }
-        if (["BUY", "ACCEPT", "CANCEL"].includes(current.kind)) {
+        if (
+          ["BUY", "ACCEPT", "CANCEL"].includes(current.kind) ||
+          !isFreshMarketReviewExpiry(current.expires_at)
+        ) {
           // The old snapshot binds the user's intent, not execution authority.
           // Only the fresh continuation below can reach the wallet.
           validateMarketOperationForRefresh(current, expected);
           const refreshed = await continueMarketOperation(current.id);
           assertConnection();
+          assertMarketOperationIdentity(refreshed, operation);
+          if (marketOperationSendAttempt(refreshed))
+            throw new Error("MARKET_BROADCAST_UNKNOWN");
           validateMarketOperation(refreshed, expected);
-          if (marketReviewTerms(refreshed) !== marketReviewTerms(current)) {
+          if (marketReviewTerms(refreshed) !== marketReviewTerms(operation)) {
             onOperation(refreshed);
             setStage(null);
             setMessage(t(locale, "collect.trade.refreshReview"));
@@ -363,7 +379,20 @@ export function useMarketExecution(
         ) {
           const continued = await continueMarketOperation(current.id);
           assertConnection();
+          assertMarketOperationIdentity(continued, operation);
+          if (marketOperationSendAttempt(continued))
+            throw new Error("MARKET_BROADCAST_UNKNOWN");
+          validateMarketOperation(continued, expected);
           onOperation(continued);
+          if (marketReviewTerms(continued) !== marketReviewTerms(current)) {
+            setStage(null);
+            setMessage(t(locale, "collect.trade.refreshReview"));
+            return;
+          }
+          current = continued;
+        }
+        if (marketReviewTerms(current) !== marketReviewTerms(operation)) {
+          onOperation(current);
           setStage(null);
           setMessage(t(locale, "collect.trade.refreshReview"));
           return;
@@ -390,6 +419,7 @@ export function useMarketExecution(
       setMessage(marketExecutionError(error, locale));
       setStage(null);
     } finally {
+      setStage(null);
       busy.current = false;
     }
   };
