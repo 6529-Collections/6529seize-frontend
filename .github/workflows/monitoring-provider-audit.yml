@@ -11,10 +11,16 @@ concurrency:
 
 jobs:
   audit:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Require main
+        shell: bash
+        run: |
+          if [ "$GITHUB_REF" != refs/heads/main ]; then
+            echo '::error::Run this read-only audit from main.'
+            exit 1
+          fi
       - name: Read Sentry monitoring capabilities
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -24,6 +30,7 @@ jobs:
           node --input-type=module <<'NODE'
           import { appendFileSync } from 'node:fs';
 
+          async function main() {
           const token = process.env.SENTRY_AUTH_TOKEN;
           if (!token) {
             console.error('Sentry monitoring audit: no configured token.');
@@ -59,17 +66,20 @@ jobs:
             : [];
           const permitted = new Set(scopes);
           const safeProjects = Array.isArray(projects.data)
-            ? projects.data.filter(value => typeof value.id === 'string' && /^\d+$/.test(value.id)
+            ? projects.data.filter(value => value && typeof value.id === 'string' && /^\d+$/.test(value.id)
               && typeof value.slug === 'string' && /^[a-z0-9-]+$/.test(value.slug))
               .map(value => ({ id: value.id, slug: value.slug }))
             : [];
           const summary = {
             authenticationStatus: identity.status,
-            scopes,
+            scopeMetadataAvailable: Array.isArray(identity.data?.auth?.scopes),
             projectStatus: project.status,
             projectsStatus: projects.status,
             projects: safeProjects,
-            mayConfigureAlerts: ['alerts:write', 'project:admin', 'project:write'].some(value => permitted.has(value)),
+            hasAlertWriteScope: permitted.has('alerts:write'),
+            hasLegacyOrgWriteScope: permitted.has('org:write'),
+            hasProjectReadScope: permitted.has('project:read'),
+            hasOrgReadScope: permitted.has('org:read'),
             uptimeStatus: uptime.status,
             uptimeMonitorsOnFirstPage: Array.isArray(uptime.data) ? uptime.data.length : null,
             cronStatus: crons.status,
@@ -79,6 +89,13 @@ jobs:
           };
           const output = JSON.stringify(summary, null, 2);
           console.log(output);
-          appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Sentry monitoring access\n\nRead-only audit; no provider settings changed.\n\n\`\`\`json\n${output}\n\`\`\`\n`);
+          const summaryPath = process.env.GITHUB_STEP_SUMMARY;
+          if (!summaryPath) throw new Error('SUMMARY_PATH_UNAVAILABLE');
+          appendFileSync(summaryPath, `## Sentry monitoring access\n\nRead-only audit; no provider settings changed. Scope flags report token metadata, not verified mutation permissions.\n\n\`\`\`json\n${output}\n\`\`\`\n`);
           if (identity.status !== 200) process.exitCode = 1;
+          }
+          main().catch(() => {
+            console.error('Sentry monitoring audit failed; sensitive diagnostic details suppressed.');
+            process.exitCode = 1;
+          });
           NODE
