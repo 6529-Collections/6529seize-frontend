@@ -208,32 +208,40 @@ export default function OfferPlanItem({
           </div>
         ) : (
           <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-end tw-gap-3 lg:tw-flex-nowrap">
-            <label className="tw-min-w-0 tw-max-w-48 tw-flex-[1_1_10rem] tw-space-y-1 tw-text-xs tw-text-iron-300">
+            <label className="tw-min-w-0 tw-max-w-48 tw-flex-[1_1_10rem] tw-space-y-2 tw-text-xs tw-text-iron-300">
               <span>{t(locale, "collect.offerPlan.unitPrice")}</span>
-              <input
-                inputMode="decimal"
-                autoComplete="off"
-                maxLength={41}
-                value={row.unitPriceEth}
-                disabled={disabled}
-                aria-label={t(locale, "collect.offerPlan.priceFor", {
-                  title: title,
-                })}
-                aria-invalid={hasPrice && issue === "price"}
-                aria-describedby={
-                  hasPrice && issue === "price" ? `${id}-error` : undefined
-                }
-                onChange={(event) =>
-                  onChange({
-                    ...row,
-                    unitPriceEth: event.target.value,
-                    pinned: true,
-                  })
-                }
-                className={OFFER_INPUT_CLASS}
-              />
+              <span className="tw-relative tw-block">
+                <input
+                  inputMode="decimal"
+                  autoComplete="off"
+                  maxLength={41}
+                  value={row.unitPriceEth}
+                  disabled={disabled}
+                  aria-label={t(locale, "collect.offerPlan.priceFor", {
+                    title: title,
+                  })}
+                  aria-invalid={hasPrice && issue === "price"}
+                  aria-describedby={
+                    hasPrice && issue === "price" ? `${id}-error` : undefined
+                  }
+                  onChange={(event) =>
+                    onChange({
+                      ...row,
+                      unitPriceEth: event.target.value,
+                      pinned: true,
+                    })
+                  }
+                  className={`${OFFER_INPUT_CLASS} tw-pr-14 tw-tabular-nums`}
+                />
+                <span
+                  aria-hidden="true"
+                  className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-3 tw-flex tw-items-center tw-text-xs tw-text-iron-400"
+                >
+                  WETH
+                </span>
+              </span>
             </label>
-            <label className="tw-w-20 tw-shrink-0 tw-space-y-1 tw-text-xs tw-text-iron-300">
+            <label className="tw-w-20 tw-shrink-0 tw-space-y-2 tw-text-xs tw-text-iron-300">
               <span>{t(locale, "collect.trade.quantity")}</span>
               <input
                 inputMode="numeric"
@@ -251,7 +259,7 @@ export default function OfferPlanItem({
                 onChange={(event) =>
                   onChange({ ...row, quantity: event.target.value })
                 }
-                className={OFFER_INPUT_CLASS}
+                className={`${OFFER_INPUT_CLASS} tw-tabular-nums`}
               />
             </label>
             <button
@@ -295,7 +303,7 @@ export default function OfferPlanItem({
             aria-label={t(locale, "collect.offerPlan.resetFor", {
               title: title,
             })}
-            className="tw-min-h-6 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-text-iron-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
+            className="tw-min-h-11 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-text-iron-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
           >
             {t(locale, "collect.offerPlan.reset")}
           </button>
@@ -305,7 +313,7 @@ export default function OfferPlanItem({
         <details className="tw-mt-2 tw-text-xs tw-leading-relaxed tw-text-iron-400">
           <summary
             aria-label={t(locale, "collect.offerPlan.detailsFor", { title })}
-            className="tw-min-h-6 tw-cursor-pointer tw-rounded-md tw-py-1 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            className="tw-min-h-11 tw-cursor-pointer tw-rounded-md tw-py-3 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
             {t(locale, "collect.offerPlan.details")}
           </summary>

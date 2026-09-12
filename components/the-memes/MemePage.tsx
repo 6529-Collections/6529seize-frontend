@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
 import { getDistributionDetailHref } from "@/components/distribution/distributionRouteParams";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
@@ -90,7 +91,7 @@ const MemePageReferencesSubMenu = dynamic(() =>
 const ACTIVITY_PAGE_SIZE = 25;
 const VISIBLE_MEME_TABS = [
   MEME_FOCUS.LIVE,
-  MEME_FOCUS.THE_ART,
+  MEME_FOCUS.MARKET,
   MEME_FOCUS.COLLECTORS,
   MEME_FOCUS.HISTORY,
   MEME_FOCUS.REFERENCES,
@@ -239,7 +240,7 @@ export default function MemePage({
     ) {
       return MEME_FOCUS.HISTORY;
     }
-    return focusParam;
+    return focusParam === MEME_FOCUS.THE_ART ? MEME_FOCUS.LIVE : focusParam;
   }, [focusParam]);
 
   const activeTab = resolvedRouterFocus ?? MEME_FOCUS.LIVE;
@@ -588,7 +589,7 @@ export default function MemePage({
             locale={locale}
             marketRefreshVersion={marketRefreshVersion}
           />
-          {activeTab === MEME_FOCUS.THE_ART && nft && nftMeta && (
+          {activeTab === MEME_FOCUS.LIVE && nft && nftMeta && (
             <MemePageArt show nft={nft} nftMeta={nftMeta} locale={locale} />
           )}
           {(activeTab === MEME_FOCUS.REFERENCES ||
@@ -770,6 +771,17 @@ export default function MemePage({
             <NftDetailTabSection
               activeFocus={routeFocus}
               locale={locale}
+              persistentContent={
+                <MarketDepthPanel
+                  contract={MEMES_CONTRACT}
+                  tokenId={nft.id}
+                  locale={locale}
+                  refreshKey={marketRefreshVersion}
+                  embedded
+                  active={activeTab === MEME_FOCUS.MARKET}
+                  onReveal={() => setActiveMemeTab(MEME_FOCUS.MARKET)}
+                />
+              }
               navigation={
                 <>
                   {printTabs()}

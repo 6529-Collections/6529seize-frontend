@@ -15,7 +15,6 @@ import { t } from "@/i18n/messages";
 import {
   fetchMarketBatchCapabilities,
   prepareMarketBatch,
-  continueMarketBatch,
 } from "@/services/api/market-batch-api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
@@ -108,7 +107,6 @@ function ScopedBatchController({
   const [editedOperationId, setEditedOperationId] = useState<string>();
   const [preparing, setPreparing] = useState(false),
     [error, setError] = useState<string>();
-  const [now, setNow] = useState(() => Date.now());
   const mounted = useRef(false),
     pending = useRef(false);
   const scopeIsActive = () => mounted.current;
@@ -156,13 +154,7 @@ function ScopedBatchController({
     retry: false,
   });
   const activeOperation = operation ?? resume.data?.operation ?? null;
-  const activeOperationId = activeOperation?.id;
   const expected = preparedRequest ?? resume.data?.request ?? null;
-  useEffect(() => {
-    if (!activeOperationId) return;
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, [activeOperationId]);
   const polling = useQuery({
     queryKey: [
       QueryKey.MARKET_OPERATION,
@@ -299,46 +291,21 @@ function ScopedBatchController({
       if (mounted.current) setPreparing(false);
     }
   };
-  const refresh = async () => {
-    if (
-      !displayed ||
-      !expected ||
-      pending.current ||
-      execution.busy ||
-      batchSendAttempt(displayed)
-    )
-      return;
-    pending.current = true;
-    setPreparing(true);
-    setError(undefined);
-    try {
-      const value = await continueMarketBatch(displayed.id);
-      validateMarketBatchOperation(
-        value,
-        expected,
-        collectProfileWallets(auth.connectedProfile).map((item) => item.wallet)
-      );
-      if (value.id !== displayed.id) throw new Error("MARKET_REVIEW_MISMATCH");
-      receive(value);
-    } catch (failure) {
-      if (mounted.current) setError(marketPreparationError(failure, locale));
-    } finally {
-      pending.current = false;
-      if (mounted.current) setPreparing(false);
-    }
-  };
   const unresolved = displayed
     ? batchSendAttempt(displayed) !== undefined
     : false;
-  const expired =
-    displayed?.state === ApiMarketBatchOperationStateEnum.Review &&
-    displayed.expires_at <= now;
-  let operationDisabledReason: string | undefined;
-  if (unresolved)
-    operationDisabledReason = t(locale, "collect.trade.broadcastUnknown");
-  else if (expired)
-    operationDisabledReason = t(locale, "collect.trade.expired");
+  const operationDisabledReason = unresolved
+    ? t(locale, "collect.trade.broadcastUnknown")
+    : undefined;
   const reviewDisabledReason = disabledReason ?? operationDisabledReason;
+  const walletNames =
+    displayed?.profile_id === auth.connectedProfile?.id
+      ? Object.fromEntries(
+          collectProfileWallets(auth.connectedProfile)
+            .filter((wallet) => wallet.display)
+            .map((wallet) => [wallet.wallet.toLowerCase(), wallet.display])
+        )
+      : undefined;
   const content = (
     <div className="tw-space-y-5 tw-p-5 sm:tw-p-6">
       {(reason === "collect.trade.connectSigner" ||
@@ -386,8 +353,9 @@ function ScopedBatchController({
           busy={preparing || execution.busy}
           disabledReason={reviewDisabledReason}
           message={error ?? execution.message}
+          walletNames={walletNames}
           onConfirm={async () => {
-            if (expected && !disabledReason && !unresolved && !expired)
+            if (expected && !disabledReason && !unresolved)
               await execution.confirm(displayed, expected);
           }}
           onEdit={() => {
@@ -409,20 +377,6 @@ function ScopedBatchController({
           onClose={onClose}
         />
       )}
-      {displayed &&
-        expired &&
-        displayed.state === ApiMarketBatchOperationStateEnum.Review &&
-        !unresolved && (
-          <Button
-            variant="secondary"
-            disabled={preparing || execution.busy || !expected}
-            onClick={() => {
-              void refresh();
-            }}
-          >
-            {t(locale, "collect.retry")}
-          </Button>
-        )}
       {displayed && unresolved && (
         <CollectTransactionRecovery
           disabled={execution.busy}

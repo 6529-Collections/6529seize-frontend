@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import { useState, type ReactElement } from "react";
 import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
+import NftDetailTabSection from "@/components/nft-navigation/NftDetailTabSection";
 import { commonApiFetch } from "@/services/api/common-api";
 import { revealMarketDepth } from "@/components/nft-market-depth/market-depth-disclosure";
 
@@ -190,6 +191,88 @@ describe("MarketDepthPanel", () => {
     );
     expect(level).toHaveAttribute("aria-expanded", "true");
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("opens an embedded book immediately and retains row state across tab changes", async () => {
+    fetchMock.mockResolvedValue(depth());
+    const onReveal = jest.fn();
+    const view = (active: boolean) => (
+      <MarketDepthPanel
+        contract="0x1"
+        tokenId="7"
+        embedded
+        active={active}
+        onReveal={onReveal}
+      />
+    );
+    const { rerender } = render(view(true));
+    const row = await screen.findByRole("button", {
+      name: "Listings at 1.25 ETH",
+    });
+    expect(
+      screen.queryByRole("button", { name: "Listings & offers" })
+    ).not.toBeInTheDocument();
+    fireEvent.click(row);
+    rerender(view(false));
+    expect(row).not.toBeVisible();
+    const panel = screen.getByRole("region", { hidden: true });
+    panel.scrollIntoView = jest.fn();
+    act(() => revealMarketDepth("0x1", "7"));
+    expect(onReveal).toHaveBeenCalledTimes(1);
+    expect(panel).not.toHaveFocus();
+    rerender(view(true));
+    expect(panel).toHaveFocus();
+    expect(panel.scrollIntoView).toHaveBeenCalledWith({
+      block: "start",
+      behavior: expect.stringMatching(/smooth|instant/),
+    });
+    expect(row).toBeVisible();
+    expect(row).toHaveAttribute("aria-expanded", "true");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    rerender(view(false));
+    const outside = document.createElement("button");
+    document.body.append(outside);
+    outside.focus();
+    rerender(view(true));
+    expect(outside).toHaveFocus();
+    outside.remove();
+  });
+
+  it("keeps the owning tab navigation in view when revealing an already active market", async () => {
+    fetchMock.mockResolvedValue(depth());
+    render(
+      <NftDetailTabSection
+        activeFocus="listings-and-offers"
+        locale="en-US"
+        navigation={<button type="button">Overview</button>}
+        persistentContent={
+          <MarketDepthPanel contract="0x1" tokenId="7" embedded />
+        }
+      >
+        {null}
+      </NftDetailTabSection>
+    );
+    await screen.findByRole("button", { name: "Listings at 1.25 ETH" });
+    const panel = screen.getByRole("region", { name: "Listings & offers" });
+    const tab = screen.getByRole("button", { name: "Overview" });
+    const section = tab.closest<HTMLElement>("[data-nft-detail-tab-section]");
+    expect(section).not.toBeNull();
+    if (!section) throw new Error("Missing owning tab section");
+    const scrollSection = jest.fn();
+    section.scrollIntoView = scrollSection;
+    const scrollPanel = jest.fn();
+    panel.scrollIntoView = scrollPanel;
+    for (const expectedCalls of [1, 2]) {
+      tab.focus();
+      act(() => revealMarketDepth("0x1", "7"));
+      expect(panel).toHaveFocus();
+      expect(scrollSection).toHaveBeenCalledTimes(expectedCalls);
+      expect(scrollSection).toHaveBeenLastCalledWith({
+        block: "start",
+        behavior: expect.stringMatching(/smooth|instant/),
+      });
+      expect(scrollPanel).not.toHaveBeenCalled();
+    }
   });
 
   it("opens only the matching NFT and focuses its heading with reduced-motion-aware scrolling", async () => {
