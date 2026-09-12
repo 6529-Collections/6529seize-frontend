@@ -19,15 +19,12 @@ import type {
 } from "./collect.types";
 import CollectTradeActions from "./CollectTradeActions";
 import { CollectTradeDialog } from "./CollectTradeSheet";
+import CollectOwnerAction from "./CollectOwnerAction";
+import { collectProfileWallets } from "./collect-recipient.helpers";
 
 const CollectTradeController = lazy(() => import("./CollectTradeController"));
 const MAX_DETAIL_LOOKUP_PAGES = 100;
-const ACTIONS: readonly CollectActionView[] = [
-  { action: "buy" },
-  { action: "offer" },
-  { action: "list" },
-  { action: "accept" },
-];
+const ACTIONS: readonly CollectActionView[] = [{ action: "accept" }];
 
 interface CollectDetailActionsProps {
   readonly collection: Exclude<CollectCollection, "all">;
@@ -70,9 +67,13 @@ function DetailTrade({
   action,
   onClose,
   onMarketChange,
+  inlineBuy = false,
+  onList,
 }: Omit<CollectDetailActionsProps, "title"> & {
   readonly action: CollectTradeAction;
   readonly onClose: () => void;
+  readonly inlineBuy?: boolean;
+  readonly onList?: (trigger: HTMLButtonElement) => void;
 }) {
   const family = {
     memes: ApiCollectFamily.Memes,
@@ -138,17 +139,22 @@ function DetailTrade({
     <Suspense fallback={<PendingTrade locale={locale} />}>
       <CollectTradeController
         presentation="contents"
+        layout={inlineBuy ? "inline-buy" : "standard"}
         asset={lookup.data}
         action={action}
         onClose={onClose}
         {...(onMarketChange ? { onMarketChange } : {})}
       />
+      {inlineBuy && onList && (
+        <CollectOwnerAction assetKey={lookup.data.asset_key} onList={onList} />
+      )}
     </Suspense>
   );
 }
 
 function DetailActions(props: CollectDetailActionsProps) {
   const [action, setAction] = useState<CollectTradeAction | null>(null);
+  const [purchaseSession, setPurchaseSession] = useState(0);
   const opener = useRef<HTMLButtonElement | null>(null);
   const close = () => {
     const trigger = opener.current;
@@ -158,7 +164,37 @@ function DetailActions(props: CollectDetailActionsProps) {
     });
   };
   return (
-    <div>
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2">
+      <DetailTrade
+        key={purchaseSession}
+        collection={props.collection}
+        tokenId={props.tokenId}
+        locale={props.locale}
+        action="buy"
+        inlineBuy
+        onClose={() => setPurchaseSession((value) => value + 1)}
+        onList={(trigger) => {
+          opener.current = trigger;
+          setAction("list");
+        }}
+        {...(props.onMarketChange
+          ? { onMarketChange: props.onMarketChange }
+          : {})}
+      />
+      <button
+        type="button"
+        aria-label={t(props.locale, "collect.actionFor", {
+          action: t(props.locale, "collect.menu.offer"),
+          title: props.title,
+        })}
+        onClick={(event) => {
+          opener.current = event.currentTarget;
+          setAction("offer");
+        }}
+        className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-sm tw-font-medium tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white"
+      >
+        {t(props.locale, "collect.menu.offer")}
+      </button>
       <CollectTradeActions
         actions={ACTIONS}
         title={props.title}
@@ -189,11 +225,10 @@ function DetailActions(props: CollectDetailActionsProps) {
 
 function ProfileDetailActions(props: CollectDetailActionsProps) {
   const { connectedProfile } = useAuth();
-  const membership =
-    connectedProfile?.wallets
-      ?.map((wallet) => wallet.wallet.toLowerCase())
-      .sort()
-      .join(":") ?? "public";
+  const membership = collectProfileWallets(connectedProfile)
+    .map((wallet) => wallet.wallet.toLowerCase())
+    .sort((left, right) => left.localeCompare(right))
+    .join(":");
   return (
     <DetailActions
       key={`${props.collection}:${props.tokenId}:${connectedProfile?.id ?? "public"}:${membership}`}

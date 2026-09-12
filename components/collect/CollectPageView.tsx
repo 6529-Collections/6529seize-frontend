@@ -5,12 +5,13 @@ import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
+import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useId, useState, type ReactNode } from "react";
-import CollectArtworkCard from "./CollectArtworkCard";
-import CollectGoalNavigation, {
-  getCollectIntentOptions,
-} from "./CollectGoalNavigation";
+import { useState, type ReactNode } from "react";
+import CollectArtworkCard, {
+  type CollectArtworkSelection,
+} from "./CollectArtworkCard";
+import CollectGoalNavigation from "./CollectGoalNavigation";
 import CollectPlanPanel from "./CollectPlanPanel";
 import type {
   CollectCatalogView,
@@ -42,6 +43,14 @@ interface CollectPageViewProps {
   readonly profile: CollectProfileView | null;
   readonly plan: CollectPlanView | null;
   readonly goalContent?: ReactNode;
+  readonly workspaceContent?: ReactNode;
+  readonly workspaceActive?: boolean;
+  readonly showCollections?: boolean;
+  readonly showListings?: boolean;
+  readonly selectionFor?:
+    | ((id: string) => CollectArtworkSelection | undefined)
+    | undefined;
+  readonly selectionSummary?: ReactNode;
   readonly onCollectionChange: (collection: CollectCollection) => void;
   readonly onIntentChange: (intent: CollectIntent) => void;
   readonly onConnect: () => void;
@@ -49,6 +58,7 @@ interface CollectPageViewProps {
   readonly onLoadMore: () => void;
   readonly onTrade: (artworkId: string, action: CollectTradeAction) => void;
   readonly onReviewPlan: (planId: string, revision: string) => void;
+  readonly onPlanOffers?: (() => void) | undefined;
 }
 
 function Listings({
@@ -57,9 +67,10 @@ function Listings({
   onRetry,
   onLoadMore,
   onTrade,
+  selectionFor,
 }: Pick<
   CollectPageViewProps,
-  "catalog" | "onRetry" | "onLoadMore" | "onTrade"
+  "catalog" | "onRetry" | "onLoadMore" | "onTrade" | "selectionFor"
 > & { readonly locale: SupportedLocale }) {
   if (catalog.status === "loading") {
     return (
@@ -112,6 +123,7 @@ function Listings({
             artwork={artwork}
             locale={locale}
             onTrade={onTrade}
+            selection={selectionFor?.(artwork.id)}
           />
         ))}
       </div>
@@ -132,36 +144,48 @@ function Listings({
 
 export default function CollectPageView(props: CollectPageViewProps) {
   const locale = useBrowserLocale();
-  const browseLabelId = useId();
+  const collectionLink = COLLECTIONS.find(({ id }) => id === props.collection);
+  const showListings =
+    props.showListings ?? (props.intent === "lowest" || props.intent === "tdh");
   const [planOpen, setPlanOpen] = useState(false);
-  const intentOptions = getCollectIntentOptions(props.intent);
+  const planOffers = props.onPlanOffers
+    ? () => {
+        setPlanOpen(false);
+        props.onPlanOffers?.();
+      }
+    : undefined;
+  let contentClass = showListings ? "tw-max-w-[1080px]" : "tw-max-w-3xl";
+  if (props.plan)
+    contentClass =
+      "tw-grid tw-items-start tw-gap-6 xl:tw-grid-cols-[minmax(0,1fr)_360px]";
   return (
     <div className="tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-pb-28 tw-pt-6 tw-text-iron-100 md:tw-px-6 lg:tw-px-8">
       <header className="tw-mb-7 tw-space-y-3">
-        <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-tracking-tight">
-          {t(locale, "collect.title")}
-        </h1>
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-2">
+          <h1 className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-3xl tw-font-semibold tw-tracking-tight">
+            {t(locale, "collect.title")}
+          </h1>
+          {collectionLink && (
+            <Link
+              href={collectionLink.href}
+              className="tw-inline-flex tw-min-h-11 tw-min-w-11 tw-shrink-0 tw-items-center tw-justify-end tw-gap-2 tw-rounded-lg tw-py-2 tw-text-xs tw-text-iron-300 tw-no-underline hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+            >
+              <span className="tw-sr-only sm:tw-not-sr-only">
+                {t(locale, "collect.viewCollection", {
+                  collection: t(
+                    locale,
+                    `collect.collection.${collectionLink.id}`
+                  ),
+                })}
+              </span>
+              <ArrowUpRightIcon className="tw-size-4" aria-hidden="true" />
+            </Link>
+          )}
+        </div>
         <p className="tw-m-0 tw-max-w-2xl tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(locale, "collect.description")}
         </p>
-        <nav
-          aria-labelledby={browseLabelId}
-          className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1 tw-text-xs"
-        >
-          <span id={browseLabelId} className="tw-text-iron-500">
-            {t(locale, "collect.browseArtwork")}
-          </span>
-          {COLLECTIONS.map(({ id, href }) => (
-            <Link
-              key={id}
-              href={href}
-              className="tw-py-2 tw-text-iron-300 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-            >
-              {t(locale, `collect.collection.${id}`)}
-            </Link>
-          ))}
-        </nav>
-        {props.profile ? (
+        {props.profile && (
           <div>
             <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-primary-300">
               {t(locale, "collect.profileScope", {
@@ -172,15 +196,6 @@ export default function CollectPageView(props: CollectPageViewProps) {
               {t(locale, "collect.profileScopeDetail")}
             </p>
           </div>
-        ) : (
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-            <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-              {t(locale, "collect.connectDescription")}
-            </p>
-            <Button variant="secondary" size="sm" onClick={props.onConnect}>
-              {t(locale, "collect.connect")}
-            </Button>
-          </div>
         )}
       </header>
       <CollectGoalNavigation
@@ -189,143 +204,109 @@ export default function CollectPageView(props: CollectPageViewProps) {
         locale={locale}
         onIntentChange={props.onIntentChange}
       />
-      {(intentOptions.length > 0 || props.intent === "tdh") && (
-        <div className="tw-mb-6 tw-max-w-sm">
-          {intentOptions.length > 0 && (
-            <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
-              <span>{t(locale, "collect.chooseGoal")}</span>
-              <select
-                value={props.intent}
-                onChange={(event) => {
-                  const intent = intentOptions.find(
-                    (value) => value === event.target.value
-                  );
-                  if (intent) props.onIntentChange(intent);
-                }}
-                className="tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+      {!props.workspaceActive &&
+        props.showCollections !== false &&
+        (props.intent === "lowest" || props.intent === "tdh") && (
+          <div
+            role="group"
+            aria-label={t(locale, "collect.collections")}
+            className="tw-mb-6 tw-flex tw-flex-wrap tw-gap-2"
+          >
+            {COLLECTIONS.map(({ id }) => (
+              <Button
+                key={id}
+                variant={props.collection === id ? "primary" : "tertiary"}
+                size="sm"
+                aria-pressed={props.collection === id}
+                onClick={() => props.onCollectionChange(id)}
+                className="tw-min-h-11"
               >
-                {intentOptions.map((intent) => (
-                  <option key={intent} value={intent}>
-                    {t(locale, `collect.intent.${intent}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          {props.intent === "tdh" && (
-            <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
-              <span>{t(locale, "collect.collections")}</span>
-              <select
-                value={props.collection}
-                onChange={(event) => {
-                  const collection = COLLECTIONS.find(
-                    ({ id }) => id === event.target.value
-                  );
-                  if (collection) props.onCollectionChange(collection.id);
-                }}
-                className="tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                {t(locale, `collect.collection.${id}`)}
+              </Button>
+            ))}
+          </div>
+        )}
+      <div hidden={!props.workspaceActive} className="tw-max-w-4xl">
+        {props.workspaceContent}
+      </div>
+      <div hidden={props.workspaceActive}>
+        <div className={contentClass}>
+          <div className="tw-min-w-0">
+            {props.goalContent !== undefined && props.goalContent !== null && (
+              <div className="tw-mb-6">{props.goalContent}</div>
+            )}
+            {showListings && (
+              <section
+                aria-label={t(
+                  locale,
+                  props.intent === "tdh"
+                    ? "collect.intent.tdh"
+                    : "collect.navigation.lowest"
+                )}
               >
-                {COLLECTIONS.map(({ id }) => (
-                  <option key={id} value={id}>
-                    {t(locale, `collect.collection.${id}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-        </div>
-      )}
-      {props.intent === "lowest" && (
-        <div
-          role="group"
-          aria-label={t(locale, "collect.collections")}
-          className="tw-mb-6 tw-flex tw-flex-wrap tw-gap-2"
-        >
-          {COLLECTIONS.map(({ id }) => (
-            <Button
-              key={id}
-              variant={props.collection === id ? "primary" : "tertiary"}
-              size="sm"
-              aria-pressed={props.collection === id}
-              onClick={() => props.onCollectionChange(id)}
-              className="tw-min-h-11"
-            >
-              {t(locale, `collect.collection.${id}`)}
-            </Button>
-          ))}
-        </div>
-      )}
-      <div
-        className={
-          props.plan
-            ? "tw-grid tw-items-start tw-gap-6 xl:tw-grid-cols-[minmax(0,1fr)_360px]"
-            : "tw-max-w-[1080px]"
-        }
-      >
-        <div className="tw-min-w-0">
-          {props.goalContent !== undefined && props.goalContent !== null && (
-            <div className="tw-mb-6">{props.goalContent}</div>
-          )}
-          {props.intent === "lowest" && (
-            <section aria-label={t(locale, "collect.navigation.lowest")}>
-              <Listings
-                catalog={props.catalog}
+                <Listings
+                  catalog={props.catalog}
+                  locale={locale}
+                  onRetry={props.onRetry}
+                  onLoadMore={props.onLoadMore}
+                  onTrade={props.onTrade}
+                  selectionFor={props.selectionFor}
+                />
+              </section>
+            )}
+          </div>
+          {props.plan && (
+            <aside className="tw-sticky tw-top-5 tw-hidden xl:tw-block">
+              <CollectPlanPanel
+                plan={props.plan}
                 locale={locale}
-                onRetry={props.onRetry}
-                onLoadMore={props.onLoadMore}
-                onTrade={props.onTrade}
+                onReview={props.onReviewPlan}
+                onPlanOffers={planOffers}
               />
-            </section>
+            </aside>
           )}
         </div>
-        {props.plan && (
-          <aside className="tw-sticky tw-top-5 tw-hidden xl:tw-block">
-            <CollectPlanPanel
-              plan={props.plan}
-              locale={locale}
-              onReview={props.onReviewPlan}
-            />
-          </aside>
+        {props.selectionSummary}
+        {props.plan && !Boolean(props.selectionSummary) && (
+          <>
+            <div className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-40 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/95 tw-px-4 tw-pb-[calc(env(safe-area-inset-bottom)+0.75rem)] tw-pt-3 xl:tw-hidden">
+              <div className="tw-mx-auto tw-flex tw-max-w-3xl tw-items-center tw-justify-between tw-gap-4">
+                <div className="tw-min-w-0">
+                  <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+                    {props.plan.coverageLabel}
+                  </p>
+                  <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-semibold tw-tabular-nums">
+                    {props.plan.totalLabel ??
+                      t(locale, "collect.plan.priceUnavailable")}
+                  </p>
+                </div>
+                <Button
+                  variant="action"
+                  size="lg"
+                  onClick={() => setPlanOpen(true)}
+                >
+                  {t(locale, "collect.plan.open")}
+                </Button>
+              </div>
+            </div>
+            <MobileWrapperDialog
+              title={t(locale, "collect.plan.title")}
+              isOpen={planOpen}
+              onClose={() => setPlanOpen(false)}
+              tabletModal
+              hideOnDesktopHover={false}
+              enableDragToClose={false}
+            >
+              <CollectPlanPanel
+                plan={props.plan}
+                locale={locale}
+                onReview={props.onReviewPlan}
+                onPlanOffers={planOffers}
+              />
+            </MobileWrapperDialog>
+          </>
         )}
       </div>
-      {props.plan && (
-        <>
-          <div className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-40 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/95 tw-px-4 tw-pb-[calc(env(safe-area-inset-bottom)+0.75rem)] tw-pt-3 xl:tw-hidden">
-            <div className="tw-mx-auto tw-flex tw-max-w-3xl tw-items-center tw-justify-between tw-gap-4">
-              <div className="tw-min-w-0">
-                <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-                  {props.plan.coverageLabel}
-                </p>
-                <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-semibold tw-tabular-nums">
-                  {props.plan.totalLabel ??
-                    t(locale, "collect.plan.priceUnavailable")}
-                </p>
-              </div>
-              <Button
-                variant="action"
-                size="lg"
-                onClick={() => setPlanOpen(true)}
-              >
-                {t(locale, "collect.plan.open")}
-              </Button>
-            </div>
-          </div>
-          <MobileWrapperDialog
-            title={t(locale, "collect.plan.title")}
-            isOpen={planOpen}
-            onClose={() => setPlanOpen(false)}
-            tabletModal
-            hideOnDesktopHover={false}
-            enableDragToClose={false}
-          >
-            <CollectPlanPanel
-              plan={props.plan}
-              locale={locale}
-              onReview={props.onReviewPlan}
-            />
-          </MobileWrapperDialog>
-        </>
-      )}
     </div>
   );
 }

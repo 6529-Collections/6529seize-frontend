@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 
 const mockFetchListings = jest.fn();
 const mockFetchAssets = jest.fn();
+const mockFetchTdhListings = jest.fn();
 
 jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => ({
   QueryKey: { MARKET_LISTINGS: "market-listings" },
@@ -15,6 +16,8 @@ jest.mock("@/services/api/market-api", () => ({
 }));
 jest.mock("@/services/api/collect-api", () => ({
   fetchCollectAssets: (...args: unknown[]) => mockFetchAssets(...args),
+  fetchCollectTdhListings: (...args: unknown[]) =>
+    mockFetchTdhListings(...args),
 }));
 
 const entry = { asset: { asset_key: "asset-one" } };
@@ -31,6 +34,11 @@ function setupClient() {
 beforeEach(() => {
   jest.clearAllMocks();
   mockFetchListings.mockResolvedValue({ entries: [], next: null });
+  mockFetchTdhListings.mockResolvedValue({
+    entries: [],
+    next: null,
+    snapshot_id: "snapshot",
+  });
 });
 
 it.each<CollectIntent>([
@@ -38,7 +46,6 @@ it.each<CollectIntent>([
   "season",
   "artist",
   "pebbles_set",
-  "tdh",
   "explore",
   "specific",
 ])("does not browse or expose cached listings in %s mode", (intent) => {
@@ -59,6 +66,68 @@ it.each<CollectIntent>([
   });
   expect(mockFetchListings).not.toHaveBeenCalled();
   expect(mockFetchAssets).not.toHaveBeenCalled();
+});
+
+it("loads TDH listings immediately without an account, budget or time horizon and keeps price cache separate", async () => {
+  const { client, wrapper } = setupClient();
+  client.setQueryData(["market-listings", "memes"], {
+    pages: [{ entries: [{ asset: { asset_key: "price-only" } }], next: null }],
+    pageParams: [null],
+  });
+  const tdhEntry = {
+    asset: { asset_key: "tdh-nft" },
+    order: { quantity: "1" },
+    rate_hundredths: "125",
+  };
+  mockFetchTdhListings.mockResolvedValue({
+    entries: [tdhEntry],
+    next: null,
+    snapshot_id: "tdh-snapshot",
+  });
+  const { result } = renderHook(() => useCollectCatalog("memes", "tdh"), {
+    wrapper,
+  });
+  await waitFor(() => expect(result.current.entries).toHaveLength(1));
+  expect(result.current.entries[0]).toEqual({
+    asset: tdhEntry.asset,
+    order: tdhEntry.order,
+    tdh: tdhEntry,
+  });
+  expect(result.current.tdhSnapshot?.snapshot_id).toBe("tdh-snapshot");
+  expect(mockFetchTdhListings).toHaveBeenCalledWith(
+    "memes",
+    null,
+    expect.any(AbortSignal)
+  );
+  expect(mockFetchListings).not.toHaveBeenCalled();
+  expect(mockFetchAssets).not.toHaveBeenCalled();
+});
+
+it("restarts TDH pagination after a changed snapshot instead of reusing the obsolete cursor", async () => {
+  const { wrapper } = setupClient();
+  mockFetchTdhListings
+    .mockResolvedValueOnce({
+      entries: [],
+      next: "old-cursor",
+      snapshot_id: "old",
+    })
+    .mockRejectedValueOnce(new Error("Listings changed"))
+    .mockResolvedValueOnce({ entries: [], next: null, snapshot_id: "new" });
+  const { result } = renderHook(() => useCollectCatalog("memes", "tdh"), {
+    wrapper,
+  });
+  await waitFor(() => expect(result.current.hasMore).toBe(true));
+  act(() => result.current.loadMore());
+  await waitFor(() => expect(result.current.failed).toBe(true));
+  act(() => result.current.retry());
+  await waitFor(() =>
+    expect(result.current.tdhSnapshot?.snapshot_id).toBe("new")
+  );
+  expect(mockFetchTdhListings.mock.calls.map((call) => call[1])).toEqual([
+    null,
+    "old-cursor",
+    null,
+  ]);
 });
 
 it("loads only observed listings with their cursor and abort signal", async () => {

@@ -7,6 +7,7 @@ import { parseEther } from "viem";
 import type { CollectTradeAction, CollectTradeDraft } from "./collect.types";
 import { MARKET_WETH, MARKET_ZERO } from "./market-validation";
 import { isCollectProfileWallet } from "./collect-recipient.helpers";
+import { collectOrderExpiry } from "./collect-order-expiry";
 
 export function marketConnectionReason(options: {
   readonly capabilityEnabled: boolean;
@@ -17,7 +18,7 @@ export function marketConnectionReason(options: {
   readonly canSign: boolean;
   readonly address: string | undefined;
   readonly profile: ApiIdentity | null;
-  readonly operation: ApiMarketOperation | null;
+  readonly operation: Pick<ApiMarketOperation, "wallet" | "profile_id"> | null;
   readonly hasExpected: boolean;
   readonly cancelTarget: ApiMarketOperation | undefined;
 }) {
@@ -90,8 +91,7 @@ export function buildMarketRequest(options: {
   };
   if (selectedOrder) request.order = selectedOrder.identity;
   if (action === "list" || action === "offer")
-    request.expires_at =
-      Math.floor(Date.now() / 1000) + Number(draft.expiryHours) * 3600;
+    request.expires_at = collectOrderExpiry(draft.expiryHours);
   if (cancelTarget?.order)
     request.order = {
       protocol_address: cancelTarget.order.protocol_address,

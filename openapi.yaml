@@ -3354,6 +3354,45 @@ paths:
           description: Profile or catalog unavailable
         "503":
           description: Required snapshot or provider unavailable
+  /collect/offer-analyses:
+    post:
+      tags:
+        - Collect
+      summary: analyze Per NFT Offers
+      description: >-
+        Private analysis only. Every selected NFT has explicit WETH terms for a
+        separate fresh single-offer review. No funds are reserved and no order
+        is signed or published.
+      operationId: analyzeCollectOffers
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-offer-analysis.handlers"
+          name: handleAnalyzeCollectOffers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCollectOfferAnalysisRequest"
+      responses:
+        "200":
+          description: Explicit per-NFT prices, exclusions and funding comparison
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectOfferAnalysis"
+        "400":
+          description: Invalid amounts, quantities, method or expiry
+        "403":
+          description: Direct profile and paying-wallet authorization required
+        "503":
+          description: Required catalog, holdings or funding snapshot unavailable
   /collect/plans:
     post:
       tags:
@@ -3559,6 +3598,57 @@ paths:
           description: Profile not authorized
         "503":
           description: Source unavailable
+  /collect/tdh-listings:
+    get:
+      tags:
+        - Collect
+      summary: Browse listings by cost per base TDH accrual rate
+      description: >-
+        Compares the best supported ETH ask for each NFT across a completed
+        indexed collection snapshot. Base TDH accrual is per full held day and
+        excludes profile multipliers, inherited seller history, and gas. A fresh
+        executable quote is always required before purchase.
+      operationId: getCollectTdhListings
+      security:
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-tdh-listings.handlers"
+          name: handleGetCollectTdhListings
+      parameters:
+        - name: family
+          in: query
+          schema:
+            $ref: "#/components/schemas/ApiCollectFamily"
+        - name: cursor
+          in: query
+          schema:
+            type: string
+            maxLength: 2048
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 48
+            default: 24
+      responses:
+        "200":
+          description: Ranked indexed listings and source coverage
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectTdhListings"
+        "400":
+          description: Invalid request
+        "409":
+          description: Listings changed; restart pagination
+        "503":
+          description: Indexed source unavailable
   /collect/tdh-ranking:
     post:
       tags:
@@ -3594,6 +3684,47 @@ paths:
           description: Profile not authorized
         "503":
           description: Source unavailable
+  /collect/tdh-target-plans:
+    post:
+      tags:
+        - Collect
+      summary: Estimate a purchase budget for a profile TDH target
+      description: >-
+        Read-only bounded search over captured native ETH listings. Replays
+        every evaluated portfolio with the official TDH projector and verified
+        profile snapshot. Best found is not a global minimum or a promise of
+        future TDH. Gas is unquoted until fresh batch review. No orders are
+        posted or executed.
+      operationId: createCollectTdhTargetPlan
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-tdh-target.handlers"
+          name: handleCreateCollectTdhTargetPlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCollectTdhTargetRequest"
+      responses:
+        "200":
+          description: Verified future baseline and best evaluated portfolio
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectTdhTargetPlan"
+        "400":
+          description: Invalid target, horizon, recipient or budget
+        "403":
+          description: Profile not authorized
+        "503":
+          description: Official source unavailable or analysis work window exceeded
   /collect/rules:
     post:
       tags:
@@ -8442,14 +8573,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ApiMarketPrepareRequest"
+              $ref: "#/components/schemas/ApiMarketOperationPrepareRequest"
       responses:
         "200":
           description: Current reviewed trade state
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMarketOperation"
+                $ref: "#/components/schemas/ApiMarketOperationResult"
         "400":
           description: Invalid trade terms
         "403":
@@ -8506,6 +8637,16 @@ paths:
             minimum: 1
             maximum: 50
             default: 20
+        - name: include_batches
+          in: query
+          description: >-
+            Opt in to multi-artwork operations. Omitted/false preserves legacy
+            single-artwork history. Batch history omits execution payloads and
+            reviewed seller components; fetch the operation by ID before review
+            or recovery. Follow next when a page is limited by response size.
+          schema:
+            type: boolean
+            default: false
   /market/operations/{id}:
     get:
       tags:
@@ -8535,7 +8676,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMarketOperation"
+                $ref: "#/components/schemas/ApiMarketOperationResult"
         "400":
           description: Invalid trade terms
         "403":
@@ -8575,7 +8716,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMarketOperation"
+                $ref: "#/components/schemas/ApiMarketOperationResult"
         "400":
           description: Invalid trade terms
         "403":
@@ -8623,7 +8764,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMarketOperation"
+                $ref: "#/components/schemas/ApiMarketOperationResult"
         "400":
           description: Invalid attempt
         "403":
@@ -8667,7 +8808,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMarketOperation"
+                $ref: "#/components/schemas/ApiMarketOperationResult"
         "400":
           description: Invalid acknowledgement
         "403":
@@ -8709,7 +8850,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMarketOperation"
+                $ref: "#/components/schemas/ApiMarketOperationResult"
         "400":
           description: Invalid trade terms
         "403":
@@ -8755,7 +8896,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMarketOperation"
+                $ref: "#/components/schemas/ApiMarketOperationResult"
         "400":
           description: Invalid trade terms
         "403":
@@ -8766,6 +8907,29 @@ paths:
           description: Trade state or idempotency conflict
         "503":
           description: Trading unavailable
+  /market/batch-capabilities:
+    get:
+      tags:
+        - Marketplace
+      summary: Get atomic batch purchase capabilities
+      operationId: getMarketBatchCapabilities
+      x-6529-router:
+        enabled: true
+        auth: optional
+        cache: false
+        typeImportGroup: market
+        handler:
+          import: "@/api/marketplace/marketplace.handlers"
+          name: handleGetMarketBatchCapabilities
+      responses:
+        "200":
+          description: >-
+            Technical bounds do not guarantee a selection fits current gas or
+            quote validity limits.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketBatchCapabilities"
   /media/resolve:
     post:
       tags:
@@ -20409,6 +20573,344 @@ components:
         - pebbles_trait_set
         - pebbles_ultimate
         - exact
+    ApiCollectOfferAnalysis:
+      type: object
+      required:
+        - analysis_id
+        - policy_version
+        - created_at
+        - valid_until
+        - profile_id
+        - wallet
+        - recipient
+        - currency
+        - rows
+        - totals
+        - coverage
+        - signing_policy
+        - policy_description
+      properties:
+        analysis_id:
+          type: string
+        policy_version:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+        valid_until:
+          type: integer
+          format: int64
+          description: >-
+            Analysis freshness boundary in Unix milliseconds, at most sixty
+            seconds. Never an authorization lifetime.
+        profile_id:
+          type: string
+        wallet:
+          type: string
+        recipient:
+          type: string
+        currency:
+          type: string
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectOfferAnalysisRow"
+        totals:
+          $ref: "#/components/schemas/ApiCollectOfferAnalysisTotals"
+        coverage:
+          $ref: "#/components/schemas/ApiCollectOfferAnalysisCoverage"
+        signing_policy:
+          type: string
+          description: >-
+            INDIVIDUAL_OFFERS. Every offer is independently fillable; no atomic
+            group offer protocol is implied.
+        policy_description:
+          type: string
+          description: >-
+            Transparent versioned opening and allocation rule, without fill
+            probabilities or fair-value claims.
+    ApiCollectOfferAnalysisAsset:
+      type: object
+      additionalProperties: false
+      required:
+        - asset_key
+        - quantity
+      properties:
+        asset_key:
+          type: string
+          minLength: 1
+          maxLength: 150
+        quantity:
+          type: string
+          pattern: ^[1-9][0-9]*$
+          maxLength: 78
+          description: Exact positive quantity. ERC721 quantity must be one.
+        manual_unit_amount_wei:
+          type: string
+          pattern: ^[1-9][0-9]*$
+          maxLength: 78
+          description: >-
+            Explicit gross WETH price per NFT unit. Required on every NFT in
+            manual mode; otherwise preserved as a manual pin.
+    ApiCollectOfferAnalysisCoverage:
+      type: object
+      required:
+        - complete
+        - indexed_complete
+        - evaluated_order_count
+        - applicable_order_count
+        - external_orders
+        - funding_reserved
+        - execution_verified
+      properties:
+        complete:
+          type: boolean
+          description: >-
+            Always false; indexed observations do not exhaust the live
+            marketplace.
+        indexed_complete:
+          type: boolean
+        evaluated_order_count:
+          type: integer
+        applicable_order_count:
+          type: integer
+        external_orders:
+          type: string
+          description: NOT_COMPREHENSIVE.
+        funding_reserved:
+          type: boolean
+          description: Always false.
+        execution_verified:
+          type: boolean
+          description: Always false. Fresh single-offer review is required.
+    ApiCollectOfferAnalysisMethod:
+      type: object
+      additionalProperties: false
+      required:
+        - kind
+      properties:
+        kind:
+          type: string
+          enum:
+            - manual
+            - match_bid
+            - improve_bid
+            - discount_ask
+            - goal
+        basis_points:
+          type: integer
+          minimum: 0
+          maximum: 100000
+          description: >-
+            Required only for improve_bid or discount_ask. Discounts must be
+            below 10000 basis points. Positive improvements round upward to the
+            next wei; discounts round downward.
+    ApiCollectOfferAnalysisRequest:
+      type: object
+      additionalProperties: false
+      description: >-
+        Offers currently require recipient to equal the paying wallet. An
+        external-recipient acknowledgment does not enable unsupported offer
+        gifting.
+      required:
+        - profile_id
+        - wallet
+        - recipient
+        - acknowledge_external_recipient
+        - expires_at
+        - assets
+        - method
+      properties:
+        profile_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        acknowledge_external_recipient:
+          type: boolean
+        expires_at:
+          type: integer
+          format: int64
+          description: >-
+            Proposed order expiry in Unix seconds, five minutes to thirty days
+            after analysis. Fresh single-offer review validates it again.
+        assets:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/ApiCollectOfferAnalysisAsset"
+        method:
+          $ref: "#/components/schemas/ApiCollectOfferAnalysisMethod"
+        max_total_weth_wei:
+          type: string
+          pattern: ^[1-9][0-9]*$
+          maxLength: 78
+          description: >-
+            Maximum NEW group commitment, required for goal allocation. Existing
+            tracked payer liabilities are separately deducted from balance. A
+            total budget is never manual pricing.
+    ApiCollectOfferAnalysisRow:
+      type: object
+      required:
+        - asset_key
+        - quantity
+        - pinned
+        - status
+        - selected
+        - reason_codes
+        - references
+      properties:
+        asset:
+          $ref: "#/components/schemas/ApiCollectAsset"
+          description: >-
+            Authoritative catalog metadata for a supported NFT. Absent only when
+            the asset key is unsupported.
+        asset_key:
+          type: string
+        quantity:
+          type: string
+        pinned:
+          type: boolean
+        status:
+          type: string
+          enum:
+            - PRICED
+            - UNAVAILABLE
+            - EXCLUDED_BUDGET
+            - PIN_CONFLICT
+        unit_amount_wei:
+          type: string
+          description: >-
+            Exact gross WETH amount per NFT unit. Missing means unresolved,
+            never zero.
+        total_amount_wei:
+          type: string
+          description: >-
+            Unit amount multiplied by exact quantity. Maximum buyer debit,
+            including any fees later allocated within that debit.
+        selected:
+          type: boolean
+          description: >-
+            Included within this analysis capacity. Selection does not reserve
+            funds or authorize signing.
+        reason_codes:
+          type: array
+          items:
+            type: string
+        references:
+          type: array
+          maxItems: 2
+          items:
+            $ref: "#/components/schemas/ApiCollectOfferPriceReference"
+        prepare_request:
+          $ref: "#/components/schemas/ApiMarketPrepareRequest"
+          description: >-
+            Unsigned proposal for the existing single-offer endpoint. amount_wei
+            is the full quantity total, not the per-unit amount. A fresh review
+            and explicit signature are required.
+    ApiCollectOfferAnalysisTotals:
+      type: object
+      required:
+        - proposed_weth_wei
+        - tracked_payer_liability_wei
+        - weth_balance_wei
+        - available_weth_wei
+        - unallocated_weth_wei
+      properties:
+        proposed_weth_wei:
+          type: string
+        tracked_payer_liability_wei:
+          type: string
+          description: >-
+            All tracked liabilities for this paying wallet and WETH, across
+            profiles and unresolved states. External signed orders are not
+            comprehensively known.
+        weth_balance_wei:
+          type: string
+        available_weth_wei:
+          type: string
+          description: >-
+            Nonnegative balance less tracked liabilities, as observed during
+            analysis.
+        budget_wei:
+          type: string
+        unallocated_weth_wei:
+          type: string
+          description: >-
+            Remaining capacity within both the optional new-commitment budget
+            and the observed uncommitted balance.
+    ApiCollectOfferPriceReference:
+      type: object
+      required:
+        - kind
+        - order_hash
+        - protocol_address
+        - maker
+        - currency
+        - quantity
+        - unit_amount_wei
+        - total_amount_wei
+        - observed_at
+        - expires_at
+        - source
+        - eligibility
+        - verification
+        - funding
+      properties:
+        kind:
+          type: string
+          enum:
+            - bid
+            - ask
+        order_hash:
+          type: string
+        protocol_address:
+          type: string
+        maker:
+          type: string
+        currency:
+          type: string
+          description: >-
+            Canonical WETH for bids; ETH or WETH for asks. Native asks are
+            explicitly compared to WETH offers at nominal one-to-one units,
+            without promising conversion or acceptance.
+        quantity:
+          type: string
+        unit_amount_wei:
+          type: string
+        total_amount_wei:
+          type: string
+        observed_at:
+          type: integer
+          format: int64
+          description: Conservative source observation time in Unix milliseconds.
+        expires_at:
+          type: integer
+          format: int64
+          description: Referenced order expiry in Unix milliseconds.
+        source:
+          type: string
+          description: OpenSea.
+        eligibility:
+          type: string
+          description: >-
+            EXACT_TOKEN_TERMS means supported signed-order shape, hash, exact
+            token and requested-quantity economics were checked. Criteria
+            references are excluded.
+        verification:
+          type: string
+          description: >-
+            OBSERVED_NOT_CHAIN_VERIFIED. No live order signature, funding,
+            counter, approval, zone authorization or fulfillment guarantee.
+        funding:
+          type: string
+          description: UNKNOWN. A quoted maker balance is not checked during analysis.
     ApiCollectPlan:
       type: object
       additionalProperties: false
@@ -20504,6 +21006,10 @@ components:
       properties:
         budget_wei:
           type: string
+          description: >-
+            Optional analysis cost cap including estimated gas. Omit to estimate
+            the cost of all missing NFTs. This does not authorize execution or
+            change any transaction spending limit.
           pattern: ^(0|[1-9][0-9]{0,77})$
           maxLength: 78
         recipient:
@@ -20512,7 +21018,6 @@ components:
         expected_analysis_id:
           type: string
       required:
-        - budget_wei
         - recipient
     ApiCollectPlanRemaining:
       type: object
@@ -20990,6 +21495,104 @@ components:
       required:
         - candidate_id
         - reason
+    ApiCollectTdhListing:
+      type: object
+      additionalProperties: false
+      properties:
+        asset:
+          $ref: "#/components/schemas/ApiCollectAsset"
+        order:
+          $ref: "#/components/schemas/ApiMarketTradeOrder"
+        available_quantity:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+        purchase_quantity:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          description: >-
+            Exact fill quantity described by the order and purchase cost. One
+            copy when every signed item supports an exact unit fill; otherwise
+            the indivisible lot.
+        purchase_cost_wei:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          description: Signed ETH price including listing fees, excluding gas.
+        rate_hundredths:
+          type: string
+          pattern: ^[1-9][0-9]*$
+          description: >-
+            Indexed base TDH per full held day per copy, multiplied by 100 after
+            production rate rounding.
+        base_tdh_per_day_hundredths:
+          type: string
+          pattern: ^[1-9][0-9]*$
+          description: >-
+            Rate hundredths multiplied by the exact purchase quantity.
+            Accumulated TDH and profile boosts are excluded.
+      required:
+        - asset
+        - order
+        - available_quantity
+        - purchase_quantity
+        - purchase_cost_wei
+        - rate_hundredths
+        - base_tdh_per_day_hundredths
+    ApiCollectTdhListings:
+      type: object
+      additionalProperties: false
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectTdhListing"
+        family:
+          $ref: "#/components/schemas/ApiCollectFamily"
+        next:
+          type: string
+          nullable: true
+        snapshot_id:
+          type: string
+        catalog_version:
+          type: string
+        observed_at:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum:
+            - fresh
+            - stale
+            - unavailable
+        indexed_ask_count:
+          type: integer
+          format: int64
+        evaluated_ask_count:
+          type: integer
+          format: int64
+        ranked_nft_count:
+          type: integer
+          format: int64
+        coverage_complete:
+          type: boolean
+          description: >-
+            All asks in the available completed index partitions were considered
+            within the read bound. This is not a guarantee of exhaustive live
+            marketplace coverage or executability.
+        source:
+          type: string
+      required:
+        - entries
+        - family
+        - next
+        - snapshot_id
+        - catalog_version
+        - observed_at
+        - status
+        - indexed_ask_count
+        - evaluated_ask_count
+        - ranked_nft_count
+        - coverage_complete
+        - source
     ApiCollectTdhProjection:
       type: object
       additionalProperties: false
@@ -21225,6 +21828,227 @@ components:
         - profile_id
         - horizon_days
         - acquisitions
+    ApiCollectTdhTargetCoverage:
+      type: object
+      required:
+        - indexed_ask_count
+        - evaluated_ask_count
+        - candidate_count
+        - excluded_ask_count
+        - index_complete
+        - market_complete
+        - observed_at
+      properties:
+        indexed_ask_count:
+          type: integer
+          minimum: 0
+        evaluated_ask_count:
+          type: integer
+          minimum: 0
+        candidate_count:
+          type: integer
+          minimum: 0
+        excluded_ask_count:
+          type: integer
+          minimum: 0
+          description: >-
+            Captured asks excluded for unsupported shape, own inventory, source
+            age, bounds or duplicate identity.
+        index_complete:
+          type: boolean
+          description: >-
+            Every requested family has a fresh, completely read captured ask
+            snapshot.
+        market_complete:
+          type: boolean
+          enum:
+            - false
+          description: A captured OpenSea index never claims complete live market coverage.
+        observed_at:
+          type: string
+          nullable: true
+    ApiCollectTdhTargetItem:
+      type: object
+      required:
+        - asset
+        - order
+        - quantity
+        - recipient
+      properties:
+        asset:
+          $ref: "#/components/schemas/ApiCollectAsset"
+        order:
+          $ref: "#/components/schemas/ApiMarketTradeOrder"
+        quantity:
+          type: string
+          pattern: ^[1-9][0-9]{0,3}$
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+    ApiCollectTdhTargetPlan:
+      type: object
+      required:
+        - plan_id
+        - request
+        - status
+        - projection
+        - target_total_tdh
+        - shortfall_tdh
+        - purchase_cost_wei
+        - signed_fees_wei
+        - gas_estimate_wei
+        - funding_estimate_wei
+        - items
+        - catalog_version
+        - valid_until
+        - coverage
+        - search
+        - assumptions
+      properties:
+        plan_id:
+          type: string
+          description: >-
+            Content hash of this transient analysis. Not a marketplace operation
+            id.
+        request:
+          $ref: "#/components/schemas/ApiCollectTdhTargetRequest"
+        status:
+          type: string
+          enum:
+            - NO_PURCHASE_NEEDED
+            - TARGET_MET_BEST_FOUND
+            - NOT_FOUND_WITHIN_SEARCH
+        projection:
+          $ref: "#/components/schemas/ApiCollectTdhProjection"
+        target_total_tdh:
+          type: string
+        shortfall_tdh:
+          type: string
+        purchase_cost_wei:
+          type: string
+          description: >-
+            Exact captured listing subtotal for selected quantities, including
+            signed fees. Not a current executable quote.
+        signed_fees_wei:
+          type: string
+          description: Fee component already included in purchase_cost_wei.
+        gas_estimate_wei:
+          type: string
+          nullable: true
+          description: Null until fresh batch review; zero when no purchase is needed.
+        funding_estimate_wei:
+          type: string
+          nullable: true
+          description: Null while gas is unquoted; zero when no purchase is needed.
+        items:
+          type: array
+          maxItems: 128
+          items:
+            $ref: "#/components/schemas/ApiCollectTdhTargetItem"
+        catalog_version:
+          type: string
+        valid_until:
+          type: string
+          nullable: true
+          description: >-
+            Earliest selected listing expiry or captured index freshness
+            deadline. Review must refresh exact orders.
+        coverage:
+          $ref: "#/components/schemas/ApiCollectTdhTargetCoverage"
+        search:
+          $ref: "#/components/schemas/ApiCollectTdhTargetSearch"
+        assumptions:
+          type: array
+          items:
+            type: string
+    ApiCollectTdhTargetRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - profile_id
+        - recipient
+        - target_tdh
+        - horizon_days
+      properties:
+        profile_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+          description: A wallet in this profile's confirmed consolidation.
+        target_tdh:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,15})$
+          description: Whole boosted TDH units, at most 9007199254740991.
+        target_mode:
+          type: string
+          enum:
+            - TOTAL_AT_DEADLINE
+            - ADDITIONAL_OVER_BASELINE
+          default: TOTAL_AT_DEADLINE
+          description: Additional TDH is measured against the future no-purchase baseline.
+        horizon_days:
+          type: integer
+          enum:
+            - 1
+            - 30
+            - 90
+            - 365
+          description: Deadline is UTC midnight this many calendar days after analysis.
+        families:
+          type: array
+          minItems: 1
+          maxItems: 3
+          items:
+            $ref: "#/components/schemas/ApiCollectFamily"
+          description: Distinct families only. Defaults to all supported families.
+        budget_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          description: >-
+            Optional uint256 purchase subtotal ceiling including signed fees,
+            excluding unquoted gas.
+    ApiCollectTdhTargetSearch:
+      type: object
+      required:
+        - optimality
+        - evaluated_count
+        - evaluation_limit
+        - work_used
+        - work_limit
+        - stop_reason
+      properties:
+        optimality:
+          type: string
+          enum:
+            - BEST_FOUND
+        evaluated_count:
+          type: integer
+          minimum: 0
+        evaluation_limit:
+          type: integer
+          enum:
+            - 128
+        work_used:
+          type: integer
+          minimum: 0
+        work_limit:
+          type: integer
+          enum:
+            - 10000000
+        stop_reason:
+          type: string
+          enum:
+            - COMPLETE
+            - EVALUATION_LIMIT
+            - WORK_LIMIT
+            - TIME_LIMIT
+            - FRONTIER_LIMIT
+          description: >-
+            COMPLETE means the scheduled heuristic frontier ended, not
+            exhaustive global optimality.
     ApiCollectTrait:
       type: object
       additionalProperties: false
@@ -23617,7 +24441,9 @@ components:
           items:
             $ref: "#/components/schemas/ApiWaveParticipationRequirement"
         required_metadata:
-          description: "The metadata that must be provided by the participant. \nEmpty array if nothing is required.\n"
+          description: >-
+            The metadata that must be provided by the participant. Empty array
+            if nothing is required.
           type: array
           items:
             $ref: "#/components/schemas/ApiWaveRequiredMetadata"
@@ -26241,6 +27067,459 @@ components:
           nullable: true
           allOf:
             - $ref: "#/components/schemas/ApiDmUnreadConversationState"
+    ApiMarketBatchAllocation:
+      type: object
+      additionalProperties: false
+      properties:
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        quantity:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+        acknowledge_external_recipient:
+          type: boolean
+        recipient_in_profile:
+          type: boolean
+      required:
+        - recipient
+        - quantity
+        - acknowledge_external_recipient
+    ApiMarketBatchAllocationRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        quantity:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+        acknowledge_external_recipient:
+          type: boolean
+      required:
+        - recipient
+        - quantity
+        - acknowledge_external_recipient
+    ApiMarketBatchCapabilities:
+      type: object
+      additionalProperties: false
+      properties:
+        available:
+          type: boolean
+        execution_policy:
+          type: string
+          enum:
+            - ALL_OR_REVERT
+        currency:
+          type: string
+          enum:
+            - "0x0000000000000000000000000000000000000000"
+        payer_type:
+          type: string
+          enum:
+            - EOA
+        max_orders:
+          type: integer
+          format: int64
+          enum:
+            - 128
+        max_allocations:
+          type: integer
+          format: int64
+          enum:
+            - 256
+        max_calldata_bytes:
+          type: integer
+          format: int64
+          enum:
+            - 1048576
+        restricted_erc1155_max_order_quantity:
+          type: string
+          enum:
+            - "1"
+        requires_complete_simulation:
+          type: boolean
+          enum:
+            - true
+      required:
+        - available
+        - execution_policy
+        - currency
+        - payer_type
+        - max_orders
+        - max_allocations
+        - max_calldata_bytes
+        - restricted_erc1155_max_order_quantity
+        - requires_complete_simulation
+    ApiMarketBatchItem:
+      type: object
+      additionalProperties: false
+      properties:
+        asset_key:
+          type: string
+          minLength: 1
+          maxLength: 150
+        order:
+          $ref: "#/components/schemas/ApiMarketIdentity"
+        quantity: &ref_12
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+        amount_wei: *ref_12
+        allocations:
+          type: array
+          minItems: 1
+          maxItems: 256
+          items:
+            $ref: "#/components/schemas/ApiMarketBatchAllocation"
+        reviewed_order:
+          $ref: "#/components/schemas/ApiMarketOrderToSign"
+        net_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        fees:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketFee"
+      required:
+        - asset_key
+        - order
+        - quantity
+        - amount_wei
+        - allocations
+    ApiMarketBatchItemRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        asset_key:
+          type: string
+          minLength: 1
+          maxLength: 150
+        order:
+          $ref: "#/components/schemas/ApiMarketIdentity"
+        quantity: &ref_13
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+        amount_wei: *ref_13
+        allocations:
+          type: array
+          minItems: 1
+          maxItems: 256
+          items:
+            $ref: "#/components/schemas/ApiMarketBatchAllocationRequest"
+      required:
+        - asset_key
+        - order
+        - quantity
+        - amount_wei
+        - allocations
+    ApiMarketBatchMirrorTerms:
+      type: object
+      additionalProperties: false
+      properties:
+        start_time: &ref_14
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        end_time: *ref_14
+        salt: *ref_14
+      required:
+        - start_time
+        - end_time
+        - salt
+    ApiMarketBatchOperation:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        revision:
+          type: string
+        state:
+          type: string
+          enum:
+            - PREPARING
+            - REVIEW
+            - APPROVAL
+            - AWAITING_SIGNATURE
+            - PUBLISHING
+            - LIVE
+            - SUBMITTED
+            - MINED
+            - CONFIRMED
+            - FAILED
+            - UNKNOWN
+            - CANCEL_PENDING
+            - CANCELLED
+            - EXPIRED
+        profile_id:
+          type: string
+        wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        currency:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        total_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        transaction:
+          $ref: "#/components/schemas/ApiMarketBatchTransaction"
+        transaction_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        expires_at:
+          type: integer
+          format: int64
+          description: >-
+            Review refresh deadline as Unix milliseconds; not an onchain
+            cancellation or expiry.
+        updated_at:
+          type: integer
+          format: int64
+        error_code:
+          type: string
+        block_number:
+          type: integer
+          format: int64
+        block_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        send_attempt:
+          $ref: "#/components/schemas/ApiMarketBatchSendAttempt"
+        potential_liability_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        kind:
+          type: string
+          enum:
+            - BUY_BATCH
+        execution_policy:
+          type: string
+          enum:
+            - ALL_OR_REVERT
+        mirror_terms:
+          $ref: "#/components/schemas/ApiMarketBatchMirrorTerms"
+        block_timestamp:
+          type: integer
+          format: int64
+        items:
+          type: array
+          minItems: 1
+          maxItems: 128
+          items:
+            $ref: "#/components/schemas/ApiMarketBatchItem"
+        approval_transactions:
+          type: array
+          maxItems: 0
+          items:
+            $ref: "#/components/schemas/ApiMarketTransaction"
+        settlement:
+          $ref: "#/components/schemas/ApiMarketBatchSettlement"
+      required:
+        - id
+        - revision
+        - state
+        - profile_id
+        - wallet
+        - currency
+        - total_wei
+        - expires_at
+        - updated_at
+        - potential_liability_wei
+        - kind
+        - execution_policy
+        - items
+        - approval_transactions
+    ApiMarketBatchPrepareRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        kind:
+          type: string
+          enum:
+            - BUY_BATCH
+        profile_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        currency:
+          type: string
+          enum:
+            - "0x0000000000000000000000000000000000000000"
+        execution_policy:
+          type: string
+          enum:
+            - ALL_OR_REVERT
+        amount_wei:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+        items:
+          type: array
+          minItems: 1
+          maxItems: 128
+          items:
+            $ref: "#/components/schemas/ApiMarketBatchItemRequest"
+      required:
+        - kind
+        - profile_id
+        - wallet
+        - currency
+        - execution_policy
+        - amount_wei
+        - items
+    ApiMarketBatchSendAttempt:
+      type: object
+      additionalProperties: false
+      properties:
+        attempt_id:
+          type: string
+          format: uuid
+        purpose:
+          type: string
+          enum:
+            - APPROVAL
+            - TRANSACTION
+        transaction_digest:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        snapshot_block:
+          type: integer
+          format: int64
+          minimum: 0
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - REJECTED
+            - RESOLVED
+        transaction:
+          $ref: "#/components/schemas/ApiMarketBatchTransaction"
+        transaction_hash:
+          type: string
+          nullable: true
+          pattern: ^0x[0-9a-fA-F]{64}$
+      required:
+        - attempt_id
+        - purpose
+        - transaction_digest
+        - snapshot_block
+        - status
+        - transaction
+        - transaction_hash
+    ApiMarketBatchSettlement:
+      type: object
+      additionalProperties: false
+      properties:
+        outcome:
+          type: string
+          enum:
+            - ALL_SELECTED
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketBatchSettlementItem"
+        transaction_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        block_number: &ref_15
+          type: integer
+          format: int64
+        block_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        safe_block_number: *ref_15
+      required:
+        - outcome
+        - items
+        - transaction_hash
+        - block_number
+        - block_hash
+    ApiMarketBatchSettlementItem:
+      type: object
+      additionalProperties: false
+      properties:
+        asset_key:
+          type: string
+        order:
+          $ref: "#/components/schemas/ApiMarketIdentity"
+        filled_quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        allocations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketBatchAllocation"
+      required:
+        - asset_key
+        - order
+        - filled_quantity
+        - allocations
+    ApiMarketBatchTransaction:
+      type: object
+      additionalProperties: false
+      properties:
+        chain_id:
+          type: integer
+          format: int64
+        to:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        value:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        data:
+          type: string
+          pattern: ^0x[0-9a-fA-F]*$
+          maxLength: 2097154
+        purpose:
+          type: string
+          enum:
+            - APPROVE_NFT
+            - APPROVE_CURRENCY
+            - FULFILL
+            - CANCEL
+        approval_scope:
+          type: string
+          enum:
+            - TOKEN
+            - COLLECTION
+            - CURRENCY_AMOUNT
+        gas_limit:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        max_fee_per_gas:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        gas_reserve_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        sender:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+      required:
+        - chain_id
+        - sender
+        - to
+        - value
+        - data
+        - purpose
     ApiMarketComponents:
       type: object
       additionalProperties: false
@@ -26532,7 +27811,7 @@ components:
         operations:
           type: array
           items:
-            $ref: "#/components/schemas/ApiMarketOperation"
+            $ref: "#/components/schemas/ApiMarketOperationResult"
         next:
           type: string
           nullable: true
@@ -26686,6 +27965,32 @@ components:
         - expires_at
         - updated_at
         - potential_liability_wei
+    ApiMarketOperationPrepareRequest:
+      oneOf:
+        - $ref: "#/components/schemas/ApiMarketPrepareRequest"
+        - $ref: "#/components/schemas/ApiMarketBatchPrepareRequest"
+      discriminator:
+        propertyName: kind
+        mapping:
+          BUY: "#/components/schemas/ApiMarketPrepareRequest"
+          LIST: "#/components/schemas/ApiMarketPrepareRequest"
+          OFFER: "#/components/schemas/ApiMarketPrepareRequest"
+          ACCEPT: "#/components/schemas/ApiMarketPrepareRequest"
+          CANCEL: "#/components/schemas/ApiMarketPrepareRequest"
+          BUY_BATCH: "#/components/schemas/ApiMarketBatchPrepareRequest"
+    ApiMarketOperationResult:
+      oneOf:
+        - $ref: "#/components/schemas/ApiMarketOperation"
+        - $ref: "#/components/schemas/ApiMarketBatchOperation"
+      discriminator:
+        propertyName: kind
+        mapping:
+          BUY: "#/components/schemas/ApiMarketOperation"
+          LIST: "#/components/schemas/ApiMarketOperation"
+          OFFER: "#/components/schemas/ApiMarketOperation"
+          ACCEPT: "#/components/schemas/ApiMarketOperation"
+          CANCEL: "#/components/schemas/ApiMarketOperation"
+          BUY_BATCH: "#/components/schemas/ApiMarketBatchOperation"
     ApiMarketOrder:
       type: object
       required:
@@ -27091,6 +28396,27 @@ components:
         recipient:
           type: string
           pattern: ^0x[0-9a-fA-F]{40}$
+        purchase_quantity:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+          description: >-
+            Supported initial purchase quantity: one exact edition when every
+            signed payment permits it, otherwise the complete available lot.
+        quantity_step:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+          description: >-
+            Supported UI quantity step: one when exact per-edition fills are
+            supported, otherwise the complete available lot.
+        available_quantity:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+          description: >-
+            Available quantity independent of the quantity used to quote
+            total_wei and fees.
       required:
         - identity
         - asset_key
@@ -31942,9 +33268,9 @@ components:
           items:
             $ref: "#/components/schemas/ApiWaveParticipationRequirement"
         required_metadata:
-          description: |
-            The metadata that must be provided by the participant. 
-            Empty array if nothing is required.
+          description: >-
+            The metadata that must be provided by the participant. Empty array
+            if nothing is required.
           type: array
           items:
             $ref: "#/components/schemas/ApiWaveRequiredMetadata"
@@ -33106,9 +34432,9 @@ components:
           minimum: 1
           nullable: true
         required_metadata:
-          description: |
-            The metadata that must be provided by the participant. 
-            Empty array if nothing is required.
+          description: >-
+            The metadata that must be provided by the participant. Empty array
+            if nothing is required.
           type: array
           items:
             $ref: "#/components/schemas/ApiWaveRequiredMetadata"

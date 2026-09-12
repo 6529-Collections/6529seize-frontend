@@ -5,6 +5,7 @@ import { Capacitor } from "@capacitor/core";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import { ApiMarketOperationStateEnum } from "@/generated/models/ApiMarketOperation";
+import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
 import type { ApiMarketTransaction } from "@/generated/models/ApiMarketTransaction";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
 import { fetchCollectCapabilities } from "@/services/api/collect-api";
@@ -93,6 +94,12 @@ async function executeReviewedMarketOperation(options: {
   operation: ApiMarketOperation;
   expected: ApiMarketPrepareRequest;
   assertConnection: () => void;
+  onCommitment:
+    | ((
+        operation: ApiMarketOperation,
+        expected: ApiMarketPrepareRequest
+      ) => void)
+    | undefined;
   setStage: (stage: CollectTradeStage) => void;
   onOperation: (operation: ApiMarketOperation) => void;
 }) {
@@ -102,6 +109,7 @@ async function executeReviewedMarketOperation(options: {
     operation,
     expected,
     assertConnection,
+    onCommitment,
     setStage,
     onOperation,
   } = options;
@@ -150,6 +158,10 @@ async function executeReviewedMarketOperation(options: {
       ...marketTypedData(operation.order.components),
       account,
     });
+    assertConnection();
+    validateMarketOperation(operation, expected);
+    if (operation.kind === ApiMarketKind.Offer)
+      onCommitment?.(operation, expected);
     setStage("publishing");
     onOperation(await submitMarketSignature(operation.id, { signature }));
   }
@@ -264,15 +276,22 @@ export function useMarketExecution(
   }, [auth, connection, wallet]);
   const confirm = async (
     operation: ApiMarketOperation,
-    expected: ApiMarketPrepareRequest
+    expected: ApiMarketPrepareRequest,
+    assertIntent?: () => void,
+    onCommitment?: (
+      operation: ApiMarketOperation,
+      expected: ApiMarketPrepareRequest
+    ) => void
   ) => {
     if (busy.current || !client || !wallet) return;
     busy.current = true;
     setMessage(undefined);
     try {
       await withMarketOperationLock(operation.id, async () => {
-        const assertConnection = () =>
+        const assertConnection = () => {
           assertMarketExecutionConnection(live.current, expected, wallet);
+          assertIntent?.();
+        };
         assertConnection();
         await assertMarketActionEnabled(expected);
         let current = await fetchMarketOperation(operation.id);
@@ -306,10 +325,12 @@ export function useMarketExecution(
           });
           if (receipt.status !== "success")
             throw new Error("MARKET_APPROVAL_REVERTED");
+          assertConnection();
           onOperation(await continueMarketOperation(current.id));
           setStage(null);
           return;
         }
+        assertConnection();
         if (
           !["REVIEW", "APPROVAL", "AWAITING_SIGNATURE"].includes(current.state)
         ) {
@@ -319,6 +340,7 @@ export function useMarketExecution(
         validateMarketOperation(current, expected);
         if (["BUY", "ACCEPT", "CANCEL"].includes(current.kind)) {
           const refreshed = await continueMarketOperation(current.id);
+          assertConnection();
           validateMarketOperation(refreshed, expected);
           if (marketReviewTerms(refreshed) !== marketReviewTerms(current)) {
             onOperation(refreshed);
@@ -334,7 +356,9 @@ export function useMarketExecution(
           current.state === ApiMarketOperationStateEnum.Review &&
           current.approval_transactions.length === 0
         ) {
-          onOperation(await continueMarketOperation(current.id));
+          const continued = await continueMarketOperation(current.id);
+          assertConnection();
+          onOperation(continued);
           setStage(null);
           setMessage(t(locale, "collect.trade.refreshReview"));
           return;
@@ -351,6 +375,7 @@ export function useMarketExecution(
           operation: current,
           expected,
           assertConnection,
+          onCommitment,
           setStage,
           onOperation,
         });

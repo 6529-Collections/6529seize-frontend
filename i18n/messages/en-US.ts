@@ -48,6 +48,7 @@ import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
 import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
+import { COLLECT_TDH_TARGET_MESSAGES } from "@/i18n/messages/collect-tdh-target";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -2780,6 +2781,7 @@ const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 export const EN_US_MESSAGES = {
   ...artworkShareMessages,
   ...COLLECT_MESSAGES,
+  ...COLLECT_TDH_TARGET_MESSAGES,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,

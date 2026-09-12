@@ -100,7 +100,7 @@ beforeEach(() => {
   mockCreate.mockResolvedValue(scanning);
   mockAdvance.mockResolvedValue(ready);
 });
-it.each(["", "not-a-number", "1e3", "0", "-1", "1.0000000000000000001"])(
+it.each([" ", "not-a-number", "1e3", "0", "-1", "1.0000000000000000001"])(
   "rejects invalid controller budget %s before parsing or requesting a plan",
   (budgetEth) => {
     const onPlan = jest.fn();
@@ -111,6 +111,13 @@ it.each(["", "not-a-number", "1e3", "0", "-1", "1.0000000000000000001"])(
     expect(onPlan).not.toHaveBeenCalled();
   }
 );
+it("omits a blank analysis cap instead of converting it to a spending limit", async () => {
+  mockCreate.mockResolvedValue(ready);
+  mount(jest.fn(), "");
+  fireEvent.click(screen.getByRole("button", { name: "Preview plan" }));
+  await waitFor(() => expect(mockCreate).toHaveBeenCalled());
+  expect(mockCreate.mock.calls[0][0].options).toEqual({ recipient: address });
+});
 it("sends a profile goal and separate recipient, then advances the catalog scan to a ready plan", async () => {
   const onPlan = jest.fn();
   mount(onPlan);
@@ -145,6 +152,7 @@ it("cannot replace a changed destination with an earlier in-flight plan response
   mount(onPlan);
   fireEvent.click(screen.getByRole("button", { name: "Preview plan" }));
   await waitFor(() => expect(mockAdvance).toHaveBeenCalled());
+  fireEvent.click(screen.getByRole("button", { name: "Change" }));
   fireEvent.change(screen.getByLabelText("Delivery address"), {
     target: { value: "0x2222222222222222222222222222222222222222" },
   });
@@ -217,4 +225,51 @@ it("keeps large scans moving promptly while checked assets advance", async () =>
   } finally {
     jest.useRealTimers();
   }
+});
+
+it("does not expose or continue an earlier analysis after changing the goal revision", async () => {
+  let finish: ((value: ApiCollectPlan) => void) | undefined;
+  mockCreate.mockImplementation(
+    () =>
+      new Promise<ApiCollectPlan>((resolve) => {
+        finish = resolve;
+      })
+  );
+  const onPlan = jest.fn();
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  const content = (revision: number) => (
+    <QueryClientProvider client={client}>
+      <CollectGoalsController
+        revision={revision}
+        draft={{
+          intent: "season",
+          definitionId: "1",
+          targetCount: "2",
+          budgetEth: "1.25",
+          horizonDays: "30",
+          includeCollaborations: true,
+        }}
+        catalog={catalog}
+        profile={{ id: "profile", primary_wallet: address } as ApiIdentity}
+        onChange={jest.fn()}
+        onPlan={onPlan}
+        onConnect={jest.fn()}
+      />
+    </QueryClientProvider>
+  );
+  const view = render(content(0));
+  fireEvent.click(screen.getByRole("button", { name: "Preview plan" }));
+  await waitFor(() => expect(mockCreate).toHaveBeenCalledTimes(1));
+  view.rerender(content(1));
+  expect(screen.getByRole("button", { name: "Preview plan" })).toBeEnabled();
+  await act(async () => {
+    finish?.(scanning);
+  });
+  expect(onPlan).toHaveBeenLastCalledWith(null);
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  expect(mockAdvance).not.toHaveBeenCalled();
+  view.rerender(content(2));
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
 });
