@@ -51,6 +51,16 @@ export default function CollectArtworkCard({
         </div>
       </Link>
       <div className="tw-mt-auto tw-space-y-2 tw-pb-4">
+        {artwork.valueMetric && (
+          <div className="tw-min-w-0 tw-space-y-1 tw-pb-1 [overflow-wrap:anywhere]">
+            <p className="tw-m-0 tw-text-lg tw-font-semibold tw-tabular-nums tw-leading-6 tw-tracking-tight tw-text-iron-50 sm:tw-text-xl">
+              {artwork.valueMetric.value}
+            </p>
+            <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300">
+              {artwork.valueMetric.label}
+            </p>
+          </div>
+        )}
         {artwork.ownedLabel !== null && (
           <p className="tw-m-0 tw-text-xs tw-text-iron-300">
             {artwork.ownedLabel}

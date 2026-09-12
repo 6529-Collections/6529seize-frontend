@@ -24,12 +24,15 @@ Gradients set; Pebbles opens its trait-set planner. Collected and Pebbles Trait
 Sets also link to relevant collecting goals.
 
 Supported artwork pages place a priced **Collect** action near the artwork summary,
-before the longer description and [**Listings and Offers**](feature-card-market-depth.md).
+before **About this artwork** and [**Listings & offers**](feature-card-market-depth.md).
 The actions appear in the order **Collect**, **Make an offer**, then **List**.
 The lowest supported listing is selected automatically. **Deliver to · Change**
 appears below Collect and lets you choose the receiving wallet; additional listings
 remain available under **Other listings**. Collect checks the selected order again before showing exact
 terms for wallet approval. A changed order requires another review.
+**View listings & offers** opens the card's collapsed market section and moves
+focus to its heading. The lowest listing and highest offer remain visible in
+the collapsed summary.
 
 Listing prices load before you connect a wallet. While a price is unavailable,
 the Collect area shows whether listings are loading, could not be loaded, or contain
@@ -69,9 +72,12 @@ card page.
    Leave the budget cap blank to estimate the full goal. An entered cap includes
    estimated gas. This is an analysis constraint; collecting still requires a fresh
    price review and wallet approval.
-   Results appear below the controls. Missing requirements come first, with
+   Results appear below the controls. Missing requirements with available
+   purchases come first, followed by requirements without priced availability, with
    the quantity priced for your goal, the proposed purchase quantity and its
-   price. **Already in your profile** expands the holdings that already meet
+   price. Artwork thumbnails and names link to their card pages. Compact estimates
+   retain full amounts in accessible text and purchase review; rounding does not
+   change the amounts used for review. **Already in your profile** expands the holdings that already meet
    the goal. The results show the purchase cost, gas reserve and projected
    profile completion before any purchase.
    With a budget cap, compare **Within your budget** and **Available for your
@@ -82,8 +88,9 @@ card page.
    requirements visible; a missing price is never treated as zero cost.
 4. Choose a strategy directly in the results: **Collect now**, **At WETH offer**,
    **WETH + %**, **Ask − %**, or **Blended**. The offer choices open the
-   corresponding calculation controls; enter the percentage or budget and
-   calculate before reviewing individual NFT prices.
+   corresponding pricing controls. Proposed prices update automatically after
+   selecting a method or editing its inputs; no initial calculation click is
+   needed. Review the resulting individual NFT prices before continuing.
    With **Collect now**, select some or all proposed purchases. This brings them into
    one review with quantities, delivery addresses and an estimated total.
    **Review live total** checks every selected order and shows the exact price,
@@ -178,7 +185,7 @@ until its receipt confirms all selected deliveries.
 
 ### Make or accept an offer
 
-Exact-token offers use WETH and receive NFTs in the signing wallet. A signature
+New offers specify exact NFTs, use WETH and receive NFTs in the signing wallet. A signature
 can authorize a later fill while you are away. Required offer fees, listing
 creator support, and the exact fees signed into existing orders are shown in
 review. There is no additional 6529 platform fee.
@@ -190,6 +197,22 @@ wallet activity can still change the available balance. Offers are not escrow.
 Filling one offer can consume WETH allowance needed by another; review balances
 and approval amounts before continuing with remaining offers.
 
+On a supported artwork page, **Sell** or **Accept offer** can also use a
+collection-wide offer or a trait offer whose eligibility can be verified. The
+NFT on that page is the one being sold; no separate token choice is needed.
+The site checks that NFT against the signed offer before opening review. An
+unverified trait or unsupported order remains unavailable. The holding wallet
+must sign, and sale proceeds go to that wallet.
+
+### Choose an offer or listing expiry
+
+Choose 1, 7 or 30 days, or **Custom…**. A custom expiry uses the
+displayed local time zone and preserves the exact date and time you choose.
+It must be at least five minutes away and within the supported 30-day window.
+Invalid calendar dates and local times that are missing or repeated during a
+daylight-saving change require another time. Refreshing a quote does not move
+the order's expiry. An expired signed order cannot be extended by refreshing.
+
 ### Plan offers for selected NFTs
 
 Select NFTs in Lowest listings or TDH, then choose **Plan offers**. A completion
@@ -199,13 +222,13 @@ offer plan uses the chosen artworks rather than making offers on every
 alternative.
 
 **Enter each price** is the default. Set **WETH per NFT** for each artwork,
-its quantity and a default expiry of 1, 7 or 30 days. Open **Details & expiry**
+its quantity and a default expiry of 1, 7 or 30 days or a custom date and time. Open **Details & expiry**
 to change an individual NFT's expiry. For editions, the unit price is
 multiplied by the number of copies. A budget constrains an allocation; it does
 not replace the individual NFT prices. Search the plan and select all or only
 the NFTs you want to offer on.
 
-Other **Price method** choices calculate proposed prices once:
+Other **Price method** choices populate proposed prices automatically:
 
 - **Match observed WETH offer** uses an applicable observed offer for that NFT.
 - **Above observed WETH offer** adds your chosen percentage to that reference.
@@ -220,8 +243,9 @@ that manual choice. Missing or stale references need a manual price or another
 calculation; the site does not invent a price. Observed orders are references,
 not confirmation that their makers are funded or that a seller will accept.
 
-Choose **Check amounts and WETH** for manual prices, or **Calculate prices** for
-the other methods. Funding belongs to the paying wallet; WETH in other profile
+Choose **Check amounts and WETH** for manual prices. Calculated methods update
+after their inputs change; **Refresh prices** requests another check. These
+updates propose prices and never publish orders. Funding belongs to the paying wallet; WETH in other profile
 wallets is not pooled. The check accounts for that wallet's potential offer
 exposure. **Review offer** opens one NFT's exact quantity, price, fees and expiry
 for wallet authorization. Quantity is fixed during this review; return to the
@@ -240,13 +264,33 @@ starts a separate workspace.
 ### Combine purchases and offers
 
 Choose **Blended** in the completion results to decide how to acquire each NFT.
-Rows start as offers using Conservative allocation. Switch an NFT to **Collect now**
-when the plan has exact, priced listings for its entire requested quantity.
-Partial listing coverage remains an offer choice; the page does not silently
-reduce the number of copies you requested.
+Choose **Conservative**, **Base** or **Aggressive**. Each NFT's own observed WETH
+bid and exact listed cost determine its proposed price and whether to buy or
+offer; Base is the initial choice.
 
-The purchase summary shows ETH separately from the WETH offer budget. Calculate
-offer prices for the offer rows, and review the purchase rows together. These
+- **Conservative** matches the observed bid and suggests buying when the gap is
+  at most 2% of the listed cost. With only a listing, it proposes 70% of that cost.
+- **Base** proposes one third of the way from bid to listed cost and suggests
+  buying when the gap is at most 8%. With only a listing, it proposes 85%.
+- **Aggressive** proposes two thirds of the way from bid to listed cost and
+  suggests buying when the gap is at most 20%, or when only a listing is available.
+
+With only a bid, each strategy matches it. Without usable references, enter a
+price. Conflicting bid and listing prices need a refresh or manual choice.
+For editions, proposals use the cost of the full requested quantity and round
+the per-edition offer down. These are editable pricing defaults, not forecasts
+of acceptance or investment value.
+
+Manual prices and buy-or-offer choices stay yours when changing strategy.
+Switch an NFT to **Collect now** when exact, priced listings cover its entire
+requested quantity. Partial coverage does not silently reduce the requested
+copies. If any selected purchase becomes unavailable, refresh it before reviewing
+the selection; the site does not drop that NFT and purchase the rest.
+
+The purchase summary shows ETH separately from the WETH offer budget. Generated
+offer amounts receive a separate funding and budget check before **Review offer**
+becomes available; your manual prices remain unchanged through that check.
+Review the purchase rows together. These
 are separate transactions and signatures; there is no combined budget guarantee
 or all-or-revert guarantee across purchases and offers.
 
@@ -276,6 +320,32 @@ For an indivisible lot, the displayed price and rate cover its exact quantity.
 Open **How TDH value works** for the source snapshot and coverage. Indexed prices
 can change, and a bounded comparison identifies when more indexed asks were
 outside its coverage. The site checks a fresh executable quote before purchase.
+
+### Link a daily TDH rate and purchase budget
+
+In **TDH**, **Find your daily TDH** links **Base TDH per day** and
+**Purchase budget (ETH)**. Edit either field and the other updates from indexed
+listings after a short pause. The field you edited remains the target or cap;
+the calculated field shows the result for the actual NFT quantities found.
+Choose **Recalculate** to refresh the current target or budget without re-entering it.
+Connect your profile to calculate and choose a delivery wallet within that profile.
+
+The daily rate is the new NFTs' base earning rate per full held day, before
+personal boosts. Listing fees are included in the purchase cost; gas is quoted
+at review. Discrete NFTs can leave budget unused or overshoot a daily target.
+A remaining shortfall stays visible. The search reports the best plan found
+within its coverage, not a guaranteed global minimum.
+
+Personal effects show the profile's boost and boosted daily rate before and
+after the proposed purchase, separately from the base rate. The change to TDH
+already accumulated by existing holdings is also separate: it is a stock
+adjustment, not additional daily earnings. Changes retain their sign rather
+than being presented as an automatic gain.
+
+**Review purchase** uses the exact proposed NFTs. **Plan offers for these artworks**
+is available when delivery matches the paying wallet. Offers require separate
+signatures and add TDH only after they fill. Use **Reach target TDH** for a future
+total on a particular date rather than a daily earning rate.
 
 ### Reach target TDH
 

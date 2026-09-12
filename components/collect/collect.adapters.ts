@@ -177,6 +177,12 @@ export function collectAnalysisView(
     requirements: analysis.requirements.map((requirement) => ({
       id: requirement.id,
       label: requirement.label,
+      ...(requirement.asset_keys.length === 1
+        ? {
+            assetKey: requirement.asset_keys[0]!,
+            artworkKeys: requirement.asset_keys,
+          }
+        : {}),
       detail: t(locale, "collect.goal.requirement", {
         owned: formatDecimalString(locale, requirement.owned_quantity),
         target: formatDecimalString(locale, requirement.target_quantity),

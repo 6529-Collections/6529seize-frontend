@@ -34,7 +34,7 @@ interface Commitment {
   readonly published: boolean;
 }
 type ReviewedOffer = Omit<OfferPlanReview, "expiryHours"> & {
-  readonly expiryHours: "24" | "168" | "720";
+  readonly expiryHours: "24" | "168" | "720" | "custom";
 };
 
 const PENDING_PAGE_SIZE = 8;
@@ -61,6 +61,7 @@ function OfferWorkspace({
   strategySessionKey,
   blended,
   buyOptions,
+  buyObservedAt,
   buyLockedAssetKeys,
   onReviewBuys,
 }: Props) {
@@ -243,6 +244,7 @@ function OfferWorkspace({
         strategySessionKey={strategySessionKey}
         blended={blended}
         buyOptions={buyOptions}
+        buyObservedAt={buyObservedAt}
         buyLockedAssetKeys={buyLockedAssetKeys}
         onReviewBuys={onReviewBuys}
         profile={auth.connectedProfile}
@@ -259,7 +261,7 @@ function OfferWorkspace({
           amountWei: operation.total_wei,
         }))}
         onReviewOffer={(offer) => {
-          const expiryHours = (["24", "168", "720"] as const).find(
+          const expiryHours = (["24", "168", "720", "custom"] as const).find(
             (hours) => hours === offer.expiryHours
           );
           if (expiryHours) setReview({ offer: { ...offer, expiryHours } });
@@ -277,6 +279,9 @@ function OfferWorkspace({
           fixedOfferQuantity={review.offer.quantity}
           initialUnitPriceEth={review.offer.unitPriceEth}
           initialExpiryHours={review.offer.expiryHours}
+          {...(review.offer.expiryDateTime === undefined
+            ? {}
+            : { initialExpiryDateTime: review.offer.expiryDateTime })}
           {...(review.offer.maximumOfferAmountWei === undefined
             ? {}
             : {

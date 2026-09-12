@@ -15,6 +15,31 @@ const artwork: CollectArtworkView = {
   actions: [{ action: "offer" }],
 };
 
+it("shows daily TDH value prominently while keeping the exact purchase price and selection reachable", () => {
+  const onToggle = jest.fn();
+  render(
+    <CollectArtworkCard
+      artwork={{
+        ...artwork,
+        priceLabel: "0.0123456789 ETH",
+        priceDescription: "Price for 3 copies",
+        valueMetric: { value: "≈ 125", label: "base TDH/day per ETH" },
+      }}
+      locale="en-US"
+      onTrade={jest.fn()}
+      selection={{ selected: false, onToggle }}
+    />
+  );
+  expect(screen.getByText("≈ 125")).toBeVisible();
+  expect(screen.getByText("base TDH/day per ETH")).toBeVisible();
+  expect(screen.getByText("0.0123456789 ETH")).toBeVisible();
+  expect(screen.getByText("Price for 3 copies")).toBeVisible();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Add Test artwork to selection" })
+  );
+  expect(onToggle).toHaveBeenCalledTimes(1);
+});
+
 it("keeps artwork navigation separate from compact transaction actions", async () => {
   const user = userEvent.setup();
   const onTrade = jest.fn();
