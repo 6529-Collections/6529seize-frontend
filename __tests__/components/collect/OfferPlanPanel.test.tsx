@@ -57,6 +57,56 @@ function setMethod(value: string) {
   fireEvent.click(screen.getByRole("option", { name: labels[value] ?? value }));
 }
 
+it("automatically calculates a reference preset and never starts an offer review", async () => {
+  const p = props();
+  render(<OfferPlanPanel {...p} initialMethod="improve_bid" />);
+  await waitFor(() => expect(p.analyze).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(priceInput(1)).toHaveValue("0.1"));
+  expect(p.analyze.mock.calls[0]?.[0].controls).toMatchObject({
+    method: "improve_bid",
+    percent: "5",
+  });
+  expect(p.onReviewOffer).not.toHaveBeenCalled();
+});
+
+it("debounces percentage edits and preserves an explicitly pinned NFT price", async () => {
+  const p = props();
+  render(<OfferPlanPanel {...p} />);
+  setPrice(1, "0.25");
+  setMethod("improve_bid");
+  const percent = screen.getByRole("textbox", { name: "Above offer (%)" });
+  fireEvent.change(percent, { target: { value: "10" } });
+  fireEvent.change(percent, { target: { value: "12" } });
+  await waitFor(() => expect(p.analyze).toHaveBeenCalledTimes(1));
+  expect(p.analyze.mock.calls[0]?.[0].controls.percent).toBe("12");
+  await waitFor(() => expect(priceInput(2)).toHaveValue("0.1"));
+  expect(priceInput(1)).toHaveValue("0.25");
+});
+
+it("discards an in-flight automatic response when the percentage changes and calculates the newest choice", async () => {
+  const p = props();
+  let completeFirst!: (result: OfferPlanAnalysisView) => void;
+  p.analyze.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        completeFirst = resolve;
+      })
+  );
+  render(<OfferPlanPanel {...p} initialMethod="improve_bid" />);
+  await waitFor(() => expect(p.analyze).toHaveBeenCalledTimes(1));
+  fireEvent.change(screen.getByRole("textbox", { name: "Above offer (%)" }), {
+    target: { value: "15" },
+  });
+  await act(async () => {
+    completeFirst(offerAnalysis());
+  });
+  expect(priceInput(1)).toHaveValue("");
+  await waitFor(() => expect(p.analyze).toHaveBeenCalledTimes(2));
+  expect(p.analyze.mock.calls[1]?.[0].controls.percent).toBe("15");
+  await waitFor(() => expect(priceInput(1)).toHaveValue("0.1"));
+  expect(p.onReviewOffer).not.toHaveBeenCalled();
+});
+
 it("requires each manual price and never substitutes a total budget or automatic signature", async () => {
   const p = props();
   render(<OfferPlanPanel {...p} />);
@@ -97,7 +147,7 @@ it("preserves manual pins when a formula runs and leaves missing references unre
   render(<OfferPlanPanel {...p} />);
   setPrice(1, "0.25");
   setMethod("match_bid");
-  fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
+  fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
   await waitFor(() =>
     expect(
       screen.getByText("No usable WETH offer reference. Enter a price.")
@@ -136,7 +186,7 @@ it("keeps unlisted metadata-pending NFTs editable and resolves their metadata fr
     screen.getByRole("textbox", { name: "WETH price per NFT for NFT #1" })
   ).toBeEnabled();
   setMethod("match_bid");
-  fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
+  fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
   expect(
     await screen.findByRole("textbox", {
       name: "WETH price per NFT for Artwork 1",
@@ -154,7 +204,7 @@ it("discards a late analysis after changing the active profile", async () => {
   );
   const { rerender } = render(<OfferPlanPanel {...p} />);
   setMethod("match_bid");
-  fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
+  fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
   rerender(
     <OfferPlanPanel {...p} profile={{ ...OFFER_PROFILE, id: "other" }} />
   );
@@ -221,7 +271,7 @@ it("discards an in-flight allocation when another offer is published", async () 
   );
   const { rerender } = render(<OfferPlanPanel {...p} />);
   setMethod("match_bid");
-  fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
+  fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
   rerender(
     <OfferPlanPanel
       {...p}
@@ -284,7 +334,7 @@ it.each(["improve_bid", "discount_ask"])(
     render(<OfferPlanPanel {...p} />);
     setPrice(1, "0.2");
     setMethod(method);
-    fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
+    fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
     await waitFor(() => expect(priceInput(2)).toHaveValue("0.1"));
     fireEvent.change(
       screen.getByRole("textbox", {
@@ -308,7 +358,7 @@ it("requires a new allocation after changing the goal budget, preserving manual 
     screen.getByRole("textbox", { name: "Offer budget (WETH)" }),
     { target: { value: "0.5" } }
   );
-  fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
+  fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
   await waitFor(() => expect(priceInput(2)).toHaveValue("0.1"));
   fireEvent.change(
     screen.getByRole("textbox", { name: "Offer budget (WETH)" }),
@@ -357,14 +407,13 @@ it("uses a compact keyboard-accessible pricing chooser without submitting analys
 it("keeps per-NFT expiry in details and preserves each explicit price, quantity, and expiry at review", () => {
   const p = props();
   render(<OfferPlanPanel {...p} />);
-  expect(
-    screen.getByRole("combobox", { name: "Default expiry" })
-  ).toBeVisible();
+  expect(screen.getByRole("button", { name: "Default expiry" })).toBeVisible();
   const expiry = screen.getByLabelText("Offer expiry for Artwork 1");
   expect(expiry).not.toBeVisible();
   fireEvent.click(screen.getByLabelText("Details and expiry for Artwork 1"));
   expect(expiry).toBeVisible();
-  fireEvent.change(expiry, { target: { value: "24" } });
+  fireEvent.click(expiry);
+  fireEvent.click(screen.getByRole("option", { name: "1 day" }));
   setPrice(1, "0.125");
   fireEvent.change(
     screen.getByRole("textbox", { name: "Offer quantity for Artwork 1" }),
@@ -381,8 +430,46 @@ it("keeps per-NFT expiry in details and preserves each explicit price, quantity,
       expiryHours: "24",
     })
   );
-  expect(screen.getByLabelText("Offer expiry for Artwork 2")).toHaveValue(
-    "168"
+  expect(screen.getByLabelText("Offer expiry for Artwork 2")).toHaveTextContent(
+    "7 days"
   );
   expect(p.analyze).not.toHaveBeenCalled();
+});
+
+it("links an invalid per-NFT custom expiry to its visible row error", () => {
+  const p = props();
+  render(<OfferPlanPanel {...p} />);
+  setPrice(1, "0.125");
+  fireEvent.click(screen.getByLabelText("Details and expiry for Artwork 1"));
+  const expiry = screen.getByLabelText("Offer expiry for Artwork 1");
+  fireEvent.click(expiry);
+  fireEvent.click(screen.getByRole("option", { name: "Custom…" }));
+  fireEvent.change(screen.getByLabelText("Expiry date and time"), {
+    target: { value: "" },
+  });
+
+  const error = screen.getByText(/^Choose .*expiry/, {
+    selector: 'p[role="status"]',
+  });
+  const customError = screen.getByRole("alert");
+  expect(expiry).toHaveAccessibleName("Offer expiry for Artwork 1");
+  expect(expiry).toHaveAttribute("aria-invalid", "true");
+  expect(expiry).toHaveAttribute("aria-errormessage", error.id);
+  expect(expiry).toHaveAttribute("aria-describedby", customError.id);
+  expect(expiry).toHaveAccessibleDescription(customError.textContent!);
+  expect(priceInput(1)).toHaveValue("0.125");
+  expect(reviewButton(1)).toBeDisabled();
+  expect(p.onReviewOffer).not.toHaveBeenCalled();
+
+  fireEvent.click(expiry);
+  fireEvent.click(screen.getByRole("option", { name: "1 day" }));
+  expect(expiry).toHaveAccessibleName("Offer expiry for Artwork 1");
+  expect(expiry).toHaveAttribute("aria-invalid", "false");
+  expect(expiry).not.toHaveAttribute("aria-describedby");
+  expect(expiry).not.toHaveAttribute("aria-errormessage");
+  expect(error).not.toBeInTheDocument();
+  expect(customError).not.toBeInTheDocument();
+  expect(priceInput(1)).toHaveValue("0.125");
+  expect(reviewButton(1)).toBeEnabled();
+  expect(p.onReviewOffer).not.toHaveBeenCalled();
 });

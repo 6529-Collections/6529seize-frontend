@@ -641,7 +641,7 @@ describe("MemeLabPageComponent", () => {
     const { rerender } = render(page());
 
     const detailsButton = await screen.findByRole("button", {
-      name: "Additional details",
+      name: "About this artwork",
     });
     expect(detailsButton).toHaveAttribute("aria-expanded", "false");
     const detailsPanelId = detailsButton.getAttribute("aria-controls") ?? "";
@@ -653,13 +653,21 @@ describe("MemeLabPageComponent", () => {
     expect(
       detailsButton.compareDocumentPosition(screen.getByTestId("market-depth"))
     ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    const focus = jest.spyOn(detailsButton, "focus");
     fireEvent.click(detailsButton);
+    expect(focus).toHaveBeenLastCalledWith({ preventScroll: true });
+    expect(detailsButton).toHaveFocus();
     expect(detailsButton).toHaveAttribute("aria-expanded", "true");
     expect(document.getElementById(detailsPanelId)).toHaveAttribute(
       "aria-hidden",
       "false"
     );
     fireEvent.click(detailsButton);
+    expect(focus).toHaveBeenCalledTimes(2);
+    expect(detailsButton).toHaveFocus();
+    expect(document.getElementById(detailsPanelId)).toHaveClass(
+      "[overflow-anchor:none]"
+    );
 
     mockSearchParamsWithFocus(MEME_FOCUS.THE_ART);
 
@@ -669,7 +677,7 @@ describe("MemeLabPageComponent", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: "Additional details" })
+        screen.getByRole("button", { name: "About this artwork" })
       ).toHaveAttribute("aria-expanded", "true");
     });
 
@@ -681,7 +689,7 @@ describe("MemeLabPageComponent", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: "Additional details" })
+        screen.getByRole("button", { name: "About this artwork" })
       ).toHaveAttribute("aria-expanded", "false");
     });
   });
@@ -959,7 +967,7 @@ describe("MemeLabPageComponent", () => {
     await waitFor(() => {
       expect(screen.getAllByTestId("nft-image")).toHaveLength(2);
       expect(
-        screen.getByRole("button", { name: "Additional details" })
+        screen.getByRole("button", { name: "About this artwork" })
       ).toHaveAttribute("aria-expanded", "true");
       expect(
         screen.getByRole("link", {

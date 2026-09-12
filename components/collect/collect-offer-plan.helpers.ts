@@ -2,8 +2,12 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
 import { formatEther, parseEther } from "viem";
 import { isPositiveEthAmount } from "./collect-form.validation";
-import { collectProfileWallets } from "./collect-recipient.helpers";
+import {
+  collectProfileWallets,
+  isCollectProfileWallet,
+} from "./collect-recipient.helpers";
 import { collectAssetIdentity } from "./collect.adapters";
+import { resolveCollectOrderExpiry } from "./collect-order-expiry";
 import type {
   CollectOfferSelection,
   OfferPlanPrice,
@@ -14,7 +18,23 @@ import type {
 } from "./collect-offer-plan.types";
 
 const UINT_MAX = 2n ** 256n - 1n;
-export const OFFER_EXPIRY_HOURS = ["24", "168", "720"] as const;
+export const COLLECT_ANALYSIS_CLOCK_SKEW_MS = 15_000;
+
+export function offerPlanDisabledReason(
+  disabledReason: string | undefined,
+  profile: ApiIdentity | null,
+  payingWallet: string | undefined,
+  connectSignerMessage: string
+): string | undefined {
+  return (
+    disabledReason ??
+    (!profile?.id ||
+    !payingWallet ||
+    !isCollectProfileWallet(profile, payingWallet)
+      ? connectSignerMessage
+      : undefined)
+  );
+}
 
 function offerSelectionKey(row: CollectOfferSelection): string {
   return row.assetKey ?? row.asset?.asset_key ?? "";
@@ -50,8 +70,7 @@ export function offerRowTotal(row: OfferPlanRow): bigint | null {
 export function offerRowIssue(row: OfferPlanRow) {
   if (offerQuantity(row) === null) return "quantity";
   if (offerRowTotal(row) === null) return "price";
-  if (!OFFER_EXPIRY_HOURS.some((hours) => hours === row.expiryHours))
-    return "expiry";
+  if (resolveCollectOrderExpiry(row) === null) return "expiry";
   return null;
 }
 

@@ -215,9 +215,14 @@ export function marketDepthOfferIsExecutable(options: {
   const { asset, depthOrder, order, profileWallets, nowSeconds } = options;
   return (
     depthOrder.side === ApiMarketOrderSideEnum.Bid &&
-    depthOrder.scope === ApiMarketOrderScopeEnum.Token &&
-    depthOrder.applicability === ApiMarketOrderApplicabilityEnum.Token &&
-    depthOrder.token_id === asset.token_id &&
+    ((depthOrder.scope === ApiMarketOrderScopeEnum.Token &&
+      depthOrder.applicability === ApiMarketOrderApplicabilityEnum.Token &&
+      depthOrder.token_id === asset.token_id) ||
+      (depthOrder.scope === ApiMarketOrderScopeEnum.Collection &&
+        depthOrder.applicability ===
+          ApiMarketOrderApplicabilityEnum.Collection) ||
+      (depthOrder.scope === ApiMarketOrderScopeEnum.Trait &&
+        depthOrder.applicability === ApiMarketOrderApplicabilityEnum.Token)) &&
     order.asset_key === asset.asset_key &&
     order.side === ApiMarketTradeOrderSideEnum.Offer &&
     same(order.identity.protocol_address, MARKET_SEAPORT) &&
