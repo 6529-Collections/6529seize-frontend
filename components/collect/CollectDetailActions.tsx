@@ -19,6 +19,7 @@ import type {
   CollectTradeAction,
 } from "./collect.types";
 import CollectTradeActions from "./CollectTradeActions";
+import styles from "./marketplace-font.module.css";
 import { CollectTradeDialog } from "./CollectTradeSheet";
 import CollectOwnerAction from "./CollectOwnerAction";
 import { collectProfileWallets } from "./collect-recipient.helpers";
@@ -183,7 +184,7 @@ function DetailActions(props: CollectDetailActionsProps) {
   const viewMarket = (
     <button
       type="button"
-      className={ACTION_CLASS}
+      className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-text-[13px] tw-font-normal tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100"
       onClick={() =>
         revealMarketDepth(
           {
@@ -213,7 +214,7 @@ function DetailActions(props: CollectDetailActionsProps) {
     });
   };
   return (
-    <div className="tw-w-full">
+    <div className={`${styles["surface"] ?? ""} tw-w-full`}>
       <DetailTrade
         key={purchaseSession}
         collection={props.collection}
@@ -224,7 +225,6 @@ function DetailActions(props: CollectDetailActionsProps) {
         onClose={() => setPurchaseSession((value) => value + 1)}
         renderSecondaryActions={(assetKey) => (
           <>
-            {viewMarket}
             <button
               ref={visibleOffer}
               type="button"
@@ -272,7 +272,6 @@ function DetailActions(props: CollectDetailActionsProps) {
             : "tw-hidden"
         }
       >
-        {viewMarket}
         <button
           type="button"
           aria-label={t(props.locale, "collect.actionFor", {
@@ -297,6 +296,7 @@ function DetailActions(props: CollectDetailActionsProps) {
           }}
         />
       </div>
+      <div className="tw-mt-1">{viewMarket}</div>
       {action && (
         <CollectTradeDialog open title={props.title} onClose={close}>
           <DetailTrade

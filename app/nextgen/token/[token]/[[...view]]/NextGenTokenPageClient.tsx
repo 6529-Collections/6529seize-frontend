@@ -13,17 +13,14 @@ import type {
 import { NextgenCollectionView } from "@/types/enums";
 import { useEffect, useState } from "react";
 import { getNextgenTitle } from "../../../title-utils";
+import {
+  getNextgenTokenView,
+  getNextgenTokenViewSegment,
+} from "@/components/nextGen/collections/nextgenToken/nextgen-token-view.helpers";
 
 function getTokenViewFromPathname(pathname: string): NextgenCollectionView {
   const viewSegment = pathname.split("/").filter(Boolean)[3] ?? "";
-  const normalizedView = viewSegment.toLowerCase().replaceAll("-", " ");
-  const matchedView = [
-    NextgenCollectionView.PROVENANCE,
-    NextgenCollectionView.DISPLAY_CENTER,
-    NextgenCollectionView.RARITY,
-  ].find((view) => view.toLowerCase() === normalizedView);
-
-  return matchedView ?? NextgenCollectionView.ABOUT;
+  return getNextgenTokenView(viewSegment);
 }
 
 export default function NextGenTokenPageClient({
@@ -71,7 +68,7 @@ export default function NextGenTokenPageClient({
 
     let newPath = `/nextgen/token/${tokenId}`;
     if (nextView !== NextgenCollectionView.ABOUT) {
-      newPath += `/${nextView.toLowerCase().replaceAll(" ", "-")}`;
+      newPath += `/${getNextgenTokenViewSegment(nextView)}`;
     }
     newPath += globalThis.location.search;
     setTokenView(nextView);

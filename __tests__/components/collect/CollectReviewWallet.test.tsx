@@ -12,65 +12,74 @@ import { getAddress } from "viem";
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
-
 const ADDRESS = "0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0";
 const OTHER_ADDRESS = "0xfdf8bcf56af0584026f9db963381db72c5cc8e3b";
 const originalClipboard = Object.getOwnPropertyDescriptor(
   navigator,
   "clipboard"
 );
-
 afterEach(() => {
-  if (originalClipboard) {
+  if (originalClipboard)
     Object.defineProperty(navigator, "clipboard", originalClipboard);
-  } else {
-    Reflect.deleteProperty(navigator, "clipboard");
-  }
+  else Reflect.deleteProperty(navigator, "clipboard");
 });
-
 function clipboard(writeText: (text: string) => Promise<void>) {
   Object.defineProperty(navigator, "clipboard", {
     configurable: true,
     value: { writeText },
   });
 }
+function disclose() {
+  fireEvent.click(screen.getByText("Deliver to"));
+}
 
-it("shows the trusted name and full checksum by default, without a link or disclosure", () => {
+it("shows a trusted name and keeps the exact checksum in a tap disclosure", () => {
   render(
     <CollectReviewWallet
       address={ADDRESS}
       name="punk6529bot.eth"
-      label="Pay with & deliver to"
-      detail="2 editions"
+      label="Deliver to"
+      detail="Outside the collecting profile"
     />
   );
   expect(screen.getByText("punk6529bot.eth")).toBeVisible();
   const fullAddress = screen.getByText(getAddress(ADDRESS));
+  expect(fullAddress).not.toBeVisible();
+  expect(
+    screen.getByRole("button", {
+      name: "Copy wallet address",
+      hidden: true,
+    })
+  ).not.toBeVisible();
+  expect(screen.getByText("Outside the collecting profile")).toBeVisible();
+  disclose();
   expect(fullAddress).toBeVisible();
   expect(fullAddress).toHaveAttribute("dir", "ltr");
   expect(fullAddress).toHaveClass("tw-break-all", "tw-select-text");
-  expect(screen.getByText("2 editions")).toBeVisible();
   expect(screen.queryByRole("link")).not.toBeInTheDocument();
   const button = screen.getByRole("button", { name: "Copy wallet address" });
   expect(button).toHaveAccessibleDescription(
-    `Pay with & deliver to punk6529bot.eth ${getAddress(ADDRESS)}`
+    `Deliver to ${getAddress(ADDRESS)}`
   );
   expect(button).toHaveClass("tw-size-11", "tw-shrink-0");
 });
 
-it("keeps an unnamed or address-named destination exact without duplicate addresses", () => {
+it("uses an abbreviated unnamed wallet without losing or duplicating the full exact address", () => {
   const { rerender } = render(
     <CollectReviewWallet address={ADDRESS} label="Deliver to" />
   );
+  expect(screen.getByText("0xf58f…2FD0")).toBeVisible();
   expect(screen.getAllByText(getAddress(ADDRESS))).toHaveLength(1);
+  expect(screen.getByText(getAddress(ADDRESS))).not.toBeVisible();
   rerender(
     <CollectReviewWallet address={ADDRESS} name={ADDRESS} label="Deliver to" />
   );
   expect(screen.getAllByText(getAddress(ADDRESS))).toHaveLength(1);
-  expect(screen.queryByText(ADDRESS)).not.toBeInTheDocument();
+  disclose();
+  expect(screen.getByText(getAddress(ADDRESS))).toBeVisible();
 });
 
-it("copies the exact checksummed address with the keyboard, never the supplied name", async () => {
+it("copies the exact checksum with the keyboard after opening, never the supplied name", async () => {
   const user = userEvent.setup();
   const writeText = jest.fn(async (_text: string) => {});
   clipboard(writeText);
@@ -81,6 +90,7 @@ it("copies the exact checksummed address with the keyboard, never the supplied n
       label="Pay with"
     />
   );
+  fireEvent.click(screen.getByText("Pay with"));
   await user.tab();
   expect(screen.getByRole("button")).toHaveFocus();
   await user.keyboard("{Enter}");
@@ -92,19 +102,19 @@ it("copies the exact checksummed address with the keyboard, never the supplied n
 });
 
 it.each(["missing", "rejected"])(
-  "shows truthful feedback for a %s clipboard and preserves the selectable full address",
+  "shows truthful feedback for a %s clipboard and preserves selectable exact text",
   async (failure) => {
-    if (failure === "missing") {
+    if (failure === "missing")
       Object.defineProperty(navigator, "clipboard", {
         configurable: true,
         value: undefined,
       });
-    } else {
+    else
       clipboard(async () => {
         throw new Error("Private clipboard failure detail");
       });
-    }
     render(<CollectReviewWallet address={ADDRESS} label="Deliver to" />);
+    disclose();
     fireEvent.click(
       screen.getByRole("button", { name: "Copy wallet address" })
     );
@@ -134,6 +144,7 @@ it("does not announce an old clipboard result for a changed authoritative wallet
       label="Deliver to"
     />
   );
+  disclose();
   fireEvent.click(screen.getByRole("button", { name: "Copy wallet address" }));
   rerender(
     <CollectReviewWallet
@@ -143,8 +154,8 @@ it("does not announce an old clipboard result for a changed authoritative wallet
     />
   );
   await act(async () => finishCopy?.());
-  expect(screen.getByRole("status")).toBeEmptyDOMElement();
+  expect(screen.getByRole("status", { hidden: true })).toBeEmptyDOMElement();
   expect(screen.getByText("second.eth")).toBeVisible();
-  expect(screen.getByText(getAddress(OTHER_ADDRESS))).toBeVisible();
+  expect(screen.getByText(getAddress(OTHER_ADDRESS))).not.toBeVisible();
   expect(screen.queryByText(getAddress(ADDRESS))).not.toBeInTheDocument();
 });

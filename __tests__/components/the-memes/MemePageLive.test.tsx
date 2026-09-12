@@ -698,7 +698,7 @@ describe("MemePageLiveSubMenu details", () => {
     expect(onMarketChange).toHaveBeenCalledTimes(1);
   });
 
-  it("uses its parent market refresh version without duplicating actions", () => {
+  it("keeps description separate from the parent market tab and its actions", () => {
     render(
       <MemePageLiveSubMenu
         show
@@ -709,15 +709,8 @@ describe("MemePageLiveSubMenu details", () => {
     expect(
       screen.queryByRole("button", { name: "Collect artwork" })
     ).not.toBeInTheDocument();
-    expect(screen.getByTestId("market-depth")).toHaveAttribute(
-      "data-refresh-key",
-      "3"
-    );
-    expect(
-      screen
-        .getByText("d")
-        .compareDocumentPosition(screen.getByTestId("market-depth"))
-    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(screen.queryByTestId("market-depth")).not.toBeInTheDocument();
+    expect(screen.getByText("d")).toBeVisible();
   });
 
   it("renders the media type badge", () => {
@@ -734,7 +727,7 @@ describe("MemePageLiveSubMenu details", () => {
     expect(screen.getByText("Interactive - HTML")).toBeInTheDocument();
   });
 
-  it("keeps artwork details out of Overview", () => {
+  it("leaves the parent Overview responsible for artwork details", () => {
     render(
       <MemePageLiveSubMenu show nft={createNft()} nftMeta={createMeta()} />
     );
@@ -742,6 +735,6 @@ describe("MemePageLiveSubMenu details", () => {
       screen.queryByRole("button", { name: /about this artwork/i })
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId("meme-page-art")).not.toBeInTheDocument();
-    expect(screen.getByTestId("market-depth")).toBeInTheDocument();
+    expect(screen.queryByTestId("market-depth")).not.toBeInTheDocument();
   });
 });

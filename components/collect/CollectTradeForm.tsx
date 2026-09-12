@@ -2,15 +2,22 @@
 
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import { useId, useState } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import CollectRecipientPicker from "./CollectRecipientPicker";
 import CollectOrderExpiryPicker from "./CollectOrderExpiryPicker";
-import { COLLECT_INPUT_CLASS } from "./CollectGoalForm";
 import { validateCollectTrade } from "./collect-form.validation";
 import type { CollectTradeAction, CollectTradeDraft } from "./collect.types";
 import { isCollectProfileWallet } from "./collect-recipient.helpers";
+
+const INPUT_CLASS =
+  "tw-block tw-min-h-11 tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-tabular-nums tw-text-iron-100 placeholder:tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50";
+
+const REVIEW_LABELS: Partial<Record<CollectTradeAction, MessageKey>> = {
+  offer: "collect.trade.reviewOffer",
+  list: "collect.trade.reviewListing",
+};
 
 interface CollectTradeFormProps {
   readonly action: CollectTradeAction;
@@ -54,10 +61,46 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
   const message = invalid
     ? t(locale, `collect.trade.invalid.${invalid}`, { max: props.maxQuantity })
     : props.error;
+  const quantityField = (
+    <div className="tw-min-w-0 tw-space-y-2">
+      <label className="tw-block tw-space-y-2 tw-text-xs tw-text-iron-300">
+        <span>{t(locale, "collect.trade.quantity")}</span>
+        <input
+          disabled={props.loading}
+          readOnly={fixedOfferQuantity}
+          inputMode="numeric"
+          autoComplete="off"
+          value={props.draft.quantity}
+          maxLength={21}
+          onChange={
+            fixedOfferQuantity
+              ? undefined
+              : (event) => change({ quantity: event.target.value })
+          }
+          aria-invalid={invalid === "quantity"}
+          aria-describedby={[
+            invalid === "quantity" ? `${id}-error` : undefined,
+            fixedOfferQuantity ? fixedQuantityHintId : undefined,
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          className={INPUT_CLASS}
+        />
+      </label>
+      {fixedOfferQuantity && (
+        <span
+          id={fixedQuantityHintId}
+          className="tw-block tw-text-xs tw-leading-5 tw-text-iron-400"
+        >
+          {t(locale, "collect.trade.editQuantityInPlan")}
+        </span>
+      )}
+    </div>
+  );
   return (
     <form
       noValidate
-      className="tw-space-y-4"
+      className="tw-space-y-5"
       onSubmit={(event) => {
         event.preventDefault();
         const nextError = validateCollectTrade(
@@ -82,67 +125,42 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
             })
           : t(locale, "collect.orders.maker", { wallet: props.makerLabel })}
       </p>
-      {props.action === "offer" && (
-        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {t(locale, "collect.trade.offerRecipient")}
-        </p>
-      )}
-      {props.action !== "cancel" && (
-        <>
-          <label className="tw-block tw-space-y-2 tw-text-sm tw-text-iron-200">
-            <span>{t(locale, "collect.trade.quantity")}</span>
-            <input
-              disabled={props.loading}
-              readOnly={fixedOfferQuantity}
-              inputMode="numeric"
-              autoComplete="off"
-              value={props.draft.quantity}
-              maxLength={21}
-              onChange={
-                fixedOfferQuantity
-                  ? undefined
-                  : (event) => change({ quantity: event.target.value })
-              }
-              aria-invalid={invalid === "quantity"}
-              aria-describedby={[
-                invalid === "quantity" ? `${id}-error` : undefined,
-                fixedOfferQuantity ? fixedQuantityHintId : undefined,
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              className={COLLECT_INPUT_CLASS}
-            />
-          </label>
-          {fixedOfferQuantity && (
-            <span
-              id={fixedQuantityHintId}
-              className="tw-block tw-text-xs tw-leading-5 tw-text-iron-400"
-            >
-              {t(locale, "collect.trade.editQuantityInPlan")}
-            </span>
-          )}
-        </>
-      )}
+      {!hasPrice && props.action !== "cancel" && quantityField}
       {hasPrice && (
         <>
-          <label className="tw-block tw-space-y-2 tw-text-sm tw-text-iron-200">
-            <span>
-              {t(locale, "collect.trade.unitPrice", {
-                currency: props.currencyLabel,
-              })}
-            </span>
-            <input
-              disabled={props.loading}
-              inputMode="decimal"
-              autoComplete="off"
-              maxLength={40}
-              value={props.draft.unitPriceEth}
-              onChange={(event) => change({ unitPriceEth: event.target.value })}
-              aria-invalid={invalid === "price"}
-              aria-describedby={invalid === "price" ? `${id}-error` : undefined}
-              className={COLLECT_INPUT_CLASS}
-            />
-          </label>
+          <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_5.5rem] tw-items-start tw-gap-3">
+            <label className="tw-block tw-min-w-0 tw-space-y-2 tw-text-xs tw-text-iron-300">
+              <span>
+                {t(locale, "collect.trade.unitPrice", {
+                  currency: props.currencyLabel,
+                })}
+              </span>
+              <span className="tw-relative tw-block">
+                <input
+                  disabled={props.loading}
+                  inputMode="decimal"
+                  autoComplete="off"
+                  maxLength={40}
+                  value={props.draft.unitPriceEth}
+                  onChange={(event) =>
+                    change({ unitPriceEth: event.target.value })
+                  }
+                  aria-invalid={invalid === "price"}
+                  aria-describedby={
+                    invalid === "price" ? `${id}-error` : undefined
+                  }
+                  className={`${INPUT_CLASS} tw-pr-16`}
+                />
+                <span
+                  aria-hidden="true"
+                  className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-3 tw-flex tw-items-center tw-text-xs tw-text-iron-400"
+                >
+                  {props.currencyLabel}
+                </span>
+              </span>
+            </label>
+            {quantityField}
+          </div>
           <CollectOrderExpiryPicker
             value={props.draft}
             disabled={props.loading}
@@ -169,9 +187,16 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
         </fieldset>
       )}
       {hasPrice && (
-        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-          {t(locale, "collect.trade.orderWarning")}
-        </p>
+        <div className="tw-space-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-4">
+          {props.action === "offer" && (
+            <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300">
+              {t(locale, "collect.trade.offerRecipient")}
+            </p>
+          )}
+          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+            {t(locale, "collect.trade.orderWarning")}
+          </p>
+        </div>
       )}
       {props.action === "cancel" && (
         <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
@@ -218,7 +243,8 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
       <Button
         type="submit"
         variant="action"
-        size="lg"
+        size="md"
+        className="tw-min-h-12 tw-text-sm tw-font-medium"
         fullWidth
         loading={props.loading}
         disabled={
@@ -226,7 +252,7 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
           (external && !props.draft.acknowledgeExternalRecipient)
         }
       >
-        {t(locale, "collect.trade.prepare")}
+        {t(locale, REVIEW_LABELS[props.action] ?? "collect.trade.prepare")}
       </Button>
     </form>
   );

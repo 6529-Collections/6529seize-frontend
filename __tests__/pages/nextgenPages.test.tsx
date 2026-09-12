@@ -38,18 +38,28 @@ jest.mock(
 
 type MockNextGenTokenProps = {
   readonly returnTo?: string | null | undefined;
+  readonly view: NextgenCollectionView;
   readonly setView: (view?: NextgenCollectionView) => void;
 };
 
 jest.mock("@/components/nextGen/collections/nextgenToken/NextGenToken", () => ({
   __esModule: true,
   default: (props: MockNextGenTokenProps) => (
-    <button
-      type="button"
-      data-testid="token-component"
-      data-return-to={props.returnTo}
-      onClick={() => props.setView(NextgenCollectionView.RARITY)}
-    />
+    <>
+      <button
+        type="button"
+        data-testid="token-component"
+        data-return-to={props.returnTo}
+        data-view={props.view}
+        onClick={() => props.setView(NextgenCollectionView.RARITY)}
+      />
+      <button
+        type="button"
+        onClick={() => props.setView(NextgenCollectionView.LISTINGS_AND_OFFERS)}
+      >
+        Listings &amp; offers
+      </button>
+    </>
   ),
 }));
 
@@ -244,6 +254,43 @@ describe("NextGen Client Components", () => {
   });
 
   describe("NextGenTokenPageClient", () => {
+    it("keeps market navigation and browser history aligned while preserving return context", () => {
+      window.history.replaceState({}, "", "/nextgen/token/123?returnTo=owner");
+      renderWithAuth(<NextGenTokenPageClient {...mockTokenPageClientProps} />);
+      const tokenView = screen.getByTestId("token-component");
+      fireEvent.click(
+        screen.getByRole("button", { name: "Listings & offers" })
+      );
+      expect(window.location.pathname).toBe(
+        "/nextgen/token/123/listings-and-offers"
+      );
+      expect(window.location.search).toBe("?returnTo=owner");
+      expect(tokenView).toHaveAttribute(
+        "data-view",
+        NextgenCollectionView.LISTINGS_AND_OFFERS
+      );
+      window.history.replaceState(
+        {},
+        "",
+        "/nextgen/token/123/provenance?returnTo=owner"
+      );
+      fireEvent(window, new PopStateEvent("popstate"));
+      expect(screen.getByTestId("token-component")).toBe(tokenView);
+      expect(tokenView).toHaveAttribute(
+        "data-view",
+        NextgenCollectionView.PROVENANCE
+      );
+      window.history.replaceState(
+        {},
+        "",
+        "/nextgen/token/123/listings-and-offers?returnTo=owner"
+      );
+      fireEvent(window, new PopStateEvent("popstate"));
+      expect(tokenView).toHaveAttribute(
+        "data-view",
+        NextgenCollectionView.LISTINGS_AND_OFFERS
+      );
+    });
     it("renders with token - shows token component and navigation", () => {
       renderWithAuth(<NextGenTokenPageClient {...mockTokenPageClientProps} />);
       expect(screen.getByTestId("navigation-header")).toBeInTheDocument();

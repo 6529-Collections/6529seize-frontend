@@ -7,8 +7,10 @@
 - Tab changes and card arrows keep URL query state and update in place.
 - Primary and History tab switches keep the tab row visible and show the new
   section from its top, including while its content loads.
-- `Details`, immediately after `Overview`, contains original files, metadata,
-  properties, and artwork statistics. Existing `focus=the-art` links open it.
+- `Overview` contains original files, metadata, properties and artwork statistics
+  below the description. Existing `focus=the-art` links open Overview.
+- `Listings & offers`, immediately after Overview, shows the market summary and
+  price levels directly. Switching tabs retains the market selection and review.
 - If a numeric `{id}` does not resolve to a published card, the route shows
   the shared next-mint fallback panel plus subscription awareness for that
   upcoming card.
@@ -30,17 +32,18 @@
 
 - Supported `focus` values map to the visible detail UI as follows:
 
-| Focus Value         | User-Visible Area                                  |
-| ------------------- | -------------------------------------------------- |
-| `live`              | `Overview` primary tab                             |
-| `your-cards`        | `History` primary tab, `Your Transactions` sub-tab |
-| `the-art`           | `Details` primary tab                              |
-| `references`        | `References` primary tab                           |
-| `collectors`        | `Collectors` primary tab                           |
-| `history`           | `History` primary tab, default history sub-tab     |
-| `your-transactions` | `History` primary tab, `Your Transactions` sub-tab |
-| `activity`          | `History` primary tab, `Card Activity` sub-tab     |
-| `timeline`          | `History` primary tab, `Timeline` sub-tab          |
+| Focus Value           | User-Visible Area                                  |
+| --------------------- | -------------------------------------------------- |
+| `live`                | `Overview` primary tab                             |
+| `your-cards`          | `History` primary tab, `Your Transactions` sub-tab |
+| `the-art`             | `Overview` primary tab, including artwork details  |
+| `listings-and-offers` | `Listings & offers` primary tab                    |
+| `references`          | `References` primary tab                           |
+| `collectors`          | `Collectors` primary tab                           |
+| `history`             | `History` primary tab, default history sub-tab     |
+| `your-transactions`   | `History` primary tab, `Your Transactions` sub-tab |
+| `activity`            | `History` primary tab, `Card Activity` sub-tab     |
+| `timeline`            | `History` primary tab, `Timeline` sub-tab          |
 
 - Missing or invalid `focus` opens `Overview`.
 - `Your Transactions` appears only when the connected wallet has transactions
@@ -70,11 +73,11 @@
 11. The header calendar period strip uses the active supported `locale` for
     period labels, season-link accessible text, locale-preserving season
     links, and period number formatting.
-12. Details, references, collectors, activity, and timeline code
-    load only when first opened; Details content is mounted when selected.
+12. Artwork details load with Overview. References, collectors, activity and
+    timeline code load when first opened. The market stays mounted across tabs.
 13. The header Art Viewer uses the active supported `locale` for media action
     accessible names and save dialog titles.
-14. `Details` rows use the active supported `locale` for
+14. Artwork detail rows in `Overview` use the active supported `locale` for
     section headings, metric labels, empty states, open/download labels, and
     TDH/rank number formatting.
 15. If a numeric card id is unresolved, the route removes `focus`, hides tab
@@ -97,7 +100,7 @@
 - Keep the same tab while stepping through cards with previous/next arrows.
 - Open an unresolved numeric card URL and use the fallback mint timing panel.
 - Open `Your Cards` to check personal ownership and transfer history.
-- Open `Details` to review original media, Arweave links/downloads, properties,
+- Open `Overview` to review original media, Arweave links/downloads, properties,
   and file details.
 
 ## Edge Cases
@@ -109,7 +112,7 @@
 - `Your Cards` shows wallet-specific empty states:
   - No wallet connected: prompt to connect a wallet.
   - Wallet connected with no editions: ownership empty-state message.
-- `Details` resolves animation media from metadata when top-level `animation`
+- Artwork details in Overview resolve animation media when top-level `animation`
   is blank but metadata provides `animation` or `animation_url`.
 - Only available original media links appear, with matching open/download
   actions.
@@ -143,7 +146,7 @@
 - Header Art Viewer fullscreen/open/download/downloading/close controls,
   previous/next media buttons, and save dialog titles are routed through the
   progressive i18n helpers.
-- `Details` section headings, metric labels, empty states,
+- Artwork detail section headings, metric labels, empty states,
   open/download labels, and TDH/rank number formatting are routed through the
   progressive i18n helpers. Property trait names/values and media URLs remain
   source-data copy.
@@ -168,7 +171,7 @@
   reviewed translations are added.
 - Primary tabs expose selected state with `aria-pressed`; History tabs use the
   shared tablist pattern with `aria-selected` and arrow-key navigation.
-- Deferred loading applies to Details, References, Collectors,
+- Deferred loading applies to artwork details, References, Collectors,
   Card Activity, and Timeline; first open can be slower than later switches.
 - Fallback panel is the compact card-route view and is fixed to local timezone.
 - Fallback panel includes the same subscription awareness widget used on home

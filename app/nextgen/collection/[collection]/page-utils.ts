@@ -27,7 +27,9 @@ export async function fetchCollection(
 export function getCollectionView(view: string): NextgenCollectionView {
   const normalizedView = view.toLowerCase();
   const entry = Object.entries(NextgenCollectionView).find(
-    ([key]) => key.toLowerCase() === normalizedView
+    ([key, value]) =>
+      value !== NextgenCollectionView.LISTINGS_AND_OFFERS &&
+      key.toLowerCase() === normalizedView
   );
 
   if (entry) {

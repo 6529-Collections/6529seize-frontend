@@ -17,7 +17,7 @@ import type {
 import CollectOrderExpiryPicker from "./CollectOrderExpiryPicker";
 
 export const OFFER_INPUT_CLASS =
-  "tw-min-h-11 tw-min-w-0 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50";
+  "tw-min-h-11 tw-min-w-0 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50";
 
 const OFFER_METHODS = {
   manual: "collect.offerPlan.method.manual",
@@ -52,7 +52,7 @@ export default function OfferPlanPricing({
       className="tw-m-0 tw-min-w-0 tw-space-y-3 tw-border-0 tw-p-0"
     >
       <legend className="tw-sr-only">{pricingLabel}</legend>
-      <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
         {blended ? (
           <fieldset className="tw-m-0 tw-min-w-0 tw-space-y-2 tw-border-0 tw-p-0">
             <legend className="tw-mb-2 tw-text-xs tw-text-iron-300">

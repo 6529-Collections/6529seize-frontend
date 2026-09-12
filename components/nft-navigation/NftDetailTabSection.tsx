@@ -10,11 +10,13 @@ export default function NftDetailTabSection({
   navigation,
   children,
   locale,
+  persistentContent,
 }: {
   readonly activeFocus: string;
   readonly navigation: ReactNode;
   readonly children: ReactNode;
   readonly locale: SupportedLocale;
+  readonly persistentContent?: ReactNode;
 }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const previousFocus = useRef(activeFocus);
@@ -30,6 +32,7 @@ export default function NftDetailTabSection({
   return (
     <div
       ref={sectionRef}
+      data-nft-detail-tab-section
       className="tw-min-h-[calc(100dvh-2rem)] tw-scroll-mt-4"
     >
       {navigation}
@@ -44,6 +47,7 @@ export default function NftDetailTabSection({
         >
           {children}
         </Suspense>
+        {persistentContent}
       </div>
     </div>
   );

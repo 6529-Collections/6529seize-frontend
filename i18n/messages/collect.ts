@@ -213,7 +213,7 @@ export const COLLECT_MESSAGES = {
   "collect.offerPlan.budget": "Offer budget (WETH)",
   "collect.offerPlan.defaultExpiry": "Default expiry",
   "collect.offerPlan.expiry": "Expiry",
-  "collect.offerPlan.unitPrice": "WETH per NFT",
+  "collect.offerPlan.unitPrice": "Price per NFT",
   "collect.offerPlan.tokenFallback": "NFT #{token}",
   "collect.offerPlan.selectNFT": "Select {title} for an offer",
   "collect.offerPlan.priceFor": "WETH price per NFT for {title}",
@@ -518,7 +518,7 @@ export const COLLECT_MESSAGES = {
   "collect.trade.checkFailed":
     "This payload did not match your reviewed trade. Nothing was sent to your wallet.",
   "collect.trade.refreshReview":
-    "The trade was refreshed. Review all details before continuing.",
+    "Terms changed. Review the updated details before continuing.",
   "collect.trade.walletFailed":
     "The wallet action did not finish. Check Orders before trying again.",
   "collect.trade.pendingHash":
@@ -527,6 +527,32 @@ export const COLLECT_MESSAGES = {
   "collect.trade.cancelled": "Order cancelled",
   "collect.menuLabel": "Collect",
   "collect.review.summary": "Purchase summary",
+  "collect.review.exactAmounts": "Exact amounts",
+  "collect.review.exchangeContract": "Exchange contract",
+  "collect.review.approvalContract": "Approval contract",
+  "collect.review.marketplaceFee": "Marketplace fee",
+  "collect.review.unknownContract": "Unknown contract",
+  "collect.review.unknownRecipient": "Unknown recipient",
+  "collect.review.copyAddress": "Copy {label} address",
+  "collect.review.openExplorer": "Open {label} on Etherscan",
+  "collect.review.openSeaFee": "OpenSea fee",
+  "collect.review.atMost": "At most",
+  "collect.review.sellFrom": "Sell from",
+  "collect.review.receiveTo": "Receive payment",
+  "collect.review.signWith": "Sign with",
+  "collect.review.orderTerms": "Order details",
+  "collect.review.edit.buy": "Edit purchase",
+  "collect.review.edit.offer": "Edit offer",
+  "collect.review.edit.list": "Edit listing",
+  "collect.review.edit.accept": "Back to offers",
+  "collect.review.edit.cancel": "Back to order",
+  "collect.review.orderNet": "You receive",
+  "collect.review.feesIncluded": "Fees included",
+  "collect.review.offerNote":
+    "If accepted, this offer delivers to your paying wallet.",
+  "collect.trade.reviewOffer": "Review offer",
+  "collect.trade.reviewListing": "Review listing",
+  "collect.orders.details": "Order details",
   "collect.review.copies": "Quantity: {quantity}",
   "collect.review.payWith": "Pay with",
   "collect.review.deliverTo": "Deliver to",
@@ -538,8 +564,7 @@ export const COLLECT_MESSAGES = {
   "collect.review.networkCap": "Network fee cap",
   "collect.review.upTo": "Up to {amount}",
   "collect.review.maximum": "Maximum total",
-  "collect.review.maximumNote":
-    "Includes the purchase and network fee cap. Actual network cost may be lower.",
+  "collect.review.maximumNote": "Actual network cost may be lower.",
   "collect.review.exactNote":
     "Fee caps are rounded up in the summary. Exact amounts are shown here.",
   "collect.review.gasUnknown": "Not available yet",
@@ -563,7 +588,7 @@ export const COLLECT_MESSAGES = {
   "collect.review.quoteRefreshRequired":
     "Refresh quote to continue. Your purchase choices are kept.",
   "collect.trade.refreshRequired":
-    "Refresh the review to continue with current terms.",
+    "Current terms could not be verified. Please try again.",
   "collect.trade.refreshing": "Refreshing review…",
   "collect.review.refreshQuote": "Refresh quote",
   "collect.review.total.buy": "Purchase price",
@@ -742,7 +767,7 @@ export const COLLECT_MESSAGES = {
   "collect.trade.expired":
     "This review has expired. Refresh it before continuing.",
   "collect.trade.refresh": "Refresh review",
-  "collect.trade.continue": "Continue to wallet",
+  "collect.trade.continue": "Continue in wallet",
   "collect.trade.close": "Close",
   "collect.trade.orderWarning":
     "A signed order can be filled while you are away until it expires or is effectively cancelled.",
@@ -752,6 +777,7 @@ export const COLLECT_MESSAGES = {
     "A wallet approval and an order signature are separate permissions.",
   "collect.trade.stage.review": "Review the exact terms",
   "collect.trade.stage.preparing": "Checking the action",
+  "collect.trade.stage.wallet": "Confirm in your wallet",
   "collect.trade.stage.approval": "Approval requested in your wallet",
   "collect.trade.stage.signature": "Signature requested in your wallet",
   "collect.trade.stage.publishing": "Publishing the signed order",

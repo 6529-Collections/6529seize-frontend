@@ -23,6 +23,7 @@ export enum MEME_FOCUS {
   LIVE = "live",
   YOUR_CARDS = "your-cards",
   THE_ART = "the-art",
+  MARKET = "listings-and-offers",
   REFERENCES = "references",
   COLLECTORS = "collectors",
   HISTORY = "history",
@@ -51,7 +52,9 @@ export function getMemeFocusLabel(
     case MEME_FOCUS.YOUR_CARDS:
       return t(locale, "theMemes.detail.tabs.yourCards");
     case MEME_FOCUS.THE_ART:
-      return t(locale, "theMemes.detail.tabs.details");
+      return t(locale, "theMemes.detail.tabs.overview");
+    case MEME_FOCUS.MARKET:
+      return t(locale, "marketDepth.disclosure");
     case MEME_FOCUS.REFERENCES:
       return t(locale, "theMemes.detail.tabs.references");
     case MEME_FOCUS.COLLECTORS:
@@ -72,7 +75,7 @@ export function getMemeFocusLabel(
 export const MEME_TABS: MemeTab[] = [
   { focus: MEME_FOCUS.LIVE },
   { focus: MEME_FOCUS.YOUR_CARDS },
-  { focus: MEME_FOCUS.THE_ART },
+  { focus: MEME_FOCUS.MARKET },
   { focus: MEME_FOCUS.REFERENCES },
   { focus: MEME_FOCUS.COLLECTORS },
   { focus: MEME_FOCUS.HISTORY },
