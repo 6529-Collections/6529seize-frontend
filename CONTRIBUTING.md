@@ -115,6 +115,11 @@ aliases. Keep narrowing in a direct accessible chain so the scope is visible
 to both readers and the rule. Run `6529 run test:e2e-selectors` when changing
 this policy.
 
+Same-repository PRs run both selector commands in the installed quality lane.
+Fork PRs retain the existing untrusted-PR policy and skip installed app checks;
+run the commands locally and validate the contribution on a maintainer-owned
+branch before merging. This gate does not expand dependency execution on forks.
+
 Use focused checks for narrow changes. Use `6529 run build` when changes touch
 build-time behavior, generated API models, Next.js configuration, routing, or
 deployment-sensitive code.
