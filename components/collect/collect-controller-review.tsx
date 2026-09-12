@@ -1,7 +1,10 @@
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
-import { assertCollectOfferAmount } from "./collect-offer-policy";
+import {
+  assertCollectOfferAmount,
+  assertCollectOfferQuantity,
+} from "./collect-offer-policy";
 import { marketExecutionError } from "./market-execution-errors";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -14,11 +17,13 @@ import { MARKET_ZERO } from "./market-validation";
 export function collectOfferLimitReason(
   expected: ApiMarketPrepareRequest | null,
   maximumOfferAmountWei: string | undefined,
-  locale: SupportedLocale
+  locale: SupportedLocale,
+  fixedOfferQuantity?: string
 ): string | undefined {
   if (!expected) return undefined;
   try {
     assertCollectOfferAmount(expected, maximumOfferAmountWei);
+    assertCollectOfferQuantity(expected, fixedOfferQuantity);
     return undefined;
   } catch (failure) {
     return marketExecutionError(failure, locale);

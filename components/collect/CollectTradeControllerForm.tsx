@@ -32,6 +32,7 @@ interface CollectTradeControllerFormProps {
   readonly ordersFailed: boolean;
   readonly makerLabel: string;
   readonly recipientProfile: ApiIdentity | null;
+  readonly fixedOfferQuantity?: string | undefined;
   readonly disabledReason: string | undefined;
   readonly preparing: boolean;
   readonly error: string | undefined;
@@ -184,6 +185,9 @@ function StandardTradeForm({
           : "WETH"
       }
       recipientProfile={props.recipientProfile}
+      {...(props.action === "offer" && props.fixedOfferQuantity !== undefined
+        ? { fixedOfferQuantity: props.fixedOfferQuantity }
+        : {})}
       disabledReason={
         props.disabledReason ??
         (props.needsOrder && !props.selectedOrder

@@ -18,6 +18,7 @@ interface CollectTradeFormProps {
   readonly makerLabel: string;
   readonly currencyLabel: "ETH" | "WETH";
   readonly recipientProfile: ApiIdentity | null;
+  readonly fixedOfferQuantity?: string | undefined;
   readonly disabledReason?: string | undefined;
   readonly loading: boolean;
   readonly error?: string | undefined;
@@ -31,6 +32,9 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
   const [invalid, setInvalid] =
     useState<ReturnType<typeof validateCollectTrade>>(null);
   const hasPrice = props.action === "list" || props.action === "offer";
+  const fixedOfferQuantity =
+    props.action === "offer" && props.fixedOfferQuantity !== undefined;
+  const fixedQuantityHintId = `${id}-fixed-quantity`;
   const hasRecipient = props.action === "buy";
   const external =
     hasRecipient &&
@@ -82,22 +86,40 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
         </p>
       )}
       {props.action !== "cancel" && (
-        <label className="tw-block tw-space-y-2 tw-text-sm tw-text-iron-200">
-          <span>{t(locale, "collect.trade.quantity")}</span>
-          <input
-            disabled={props.loading}
-            inputMode="numeric"
-            autoComplete="off"
-            value={props.draft.quantity}
-            maxLength={21}
-            onChange={(event) => change({ quantity: event.target.value })}
-            aria-invalid={invalid === "quantity"}
-            aria-describedby={
-              invalid === "quantity" ? `${id}-error` : undefined
-            }
-            className={COLLECT_INPUT_CLASS}
-          />
-        </label>
+        <>
+          <label className="tw-block tw-space-y-2 tw-text-sm tw-text-iron-200">
+            <span>{t(locale, "collect.trade.quantity")}</span>
+            <input
+              disabled={props.loading}
+              readOnly={fixedOfferQuantity}
+              inputMode="numeric"
+              autoComplete="off"
+              value={props.draft.quantity}
+              maxLength={21}
+              onChange={
+                fixedOfferQuantity
+                  ? undefined
+                  : (event) => change({ quantity: event.target.value })
+              }
+              aria-invalid={invalid === "quantity"}
+              aria-describedby={[
+                invalid === "quantity" ? `${id}-error` : undefined,
+                fixedOfferQuantity ? fixedQuantityHintId : undefined,
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              className={COLLECT_INPUT_CLASS}
+            />
+          </label>
+          {fixedOfferQuantity && (
+            <span
+              id={fixedQuantityHintId}
+              className="tw-block tw-text-xs tw-leading-5 tw-text-iron-400"
+            >
+              {t(locale, "collect.trade.editQuantityInPlan")}
+            </span>
+          )}
+        </>
       )}
       {hasPrice && (
         <>
