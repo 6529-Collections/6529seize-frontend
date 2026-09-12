@@ -385,6 +385,14 @@ export function validateMarketOperation(
   });
 }
 
+function validateOfferOrderHash(operation: ApiMarketOperation): void {
+  assert(
+    operation.order &&
+      operation.order_hash &&
+      same(operation.order_hash, operation.order.order_hash)
+  );
+}
+
 /** Validate a published offer without treating its old review deadline as order expiry. */
 export function validatePublishedMarketOffer(
   operation: ApiMarketOperation,
@@ -401,11 +409,7 @@ export function validatePublishedMarketOffer(
     requireFreshReview: false,
     requireActiveOrder: operation.state === ApiMarketOperationStateEnum.Live,
   });
-  assert(
-    operation.order &&
-      operation.order_hash &&
-      same(operation.order_hash, operation.order.order_hash)
-  );
+  validateOfferOrderHash(operation);
   if (operation.state === ApiMarketOperationStateEnum.Confirmed) {
     const settlement = operation.settlement;
     assert(
@@ -418,6 +422,35 @@ export function validatePublishedMarketOffer(
         uint(operation.potential_liability_wei) === 0n
     );
   }
+}
+
+/** Validate an offer whose signature may already have been sent for publication. */
+export function validateCommittedMarketOffer(
+  operation: ApiMarketOperation,
+  expected: ApiMarketPrepareRequest,
+  now = Date.now()
+): void {
+  if (
+    operation.state === ApiMarketOperationStateEnum.Live ||
+    operation.state === ApiMarketOperationStateEnum.Confirmed
+  ) {
+    validatePublishedMarketOffer(operation, expected, now);
+    return;
+  }
+  const awaitingSignature =
+    operation.state === ApiMarketOperationStateEnum.AwaitingSignature;
+  assert(
+    expected.kind === ApiMarketKind.Offer &&
+      operation.kind === ApiMarketKind.Offer &&
+      (awaitingSignature ||
+        operation.state === ApiMarketOperationStateEnum.Publishing ||
+        operation.state === ApiMarketOperationStateEnum.Unknown)
+  );
+  validateMarketOperationBindings(operation, expected, now, {
+    requireFreshReview: awaitingSignature,
+    requireActiveOrder: awaitingSignature,
+  });
+  validateOfferOrderHash(operation);
 }
 
 function validateApprovalTransaction(

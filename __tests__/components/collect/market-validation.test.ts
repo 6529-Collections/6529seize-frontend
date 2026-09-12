@@ -18,6 +18,7 @@ import {
   MARKET_ZERO_HASH,
   MARKET_WETH,
   marketTypedData,
+  validateCommittedMarketOffer,
   validateMarketOperation,
   validatePublishedMarketOffer,
   validateMarketTransaction,
@@ -262,6 +263,114 @@ describe("independent marketplace review validation", () => {
     expect(() =>
       validateMarketOperation(f.operation, f.request, f.operation.expires_at)
     ).toThrow();
+  });
+
+  it("accepts an exact awaiting-signature offer commitment", () => {
+    const f = offerFixture();
+    f.operation.state = ApiMarketOperationStateEnum.AwaitingSignature;
+    expect(() =>
+      validateCommittedMarketOffer(f.operation, f.request, NOW)
+    ).not.toThrow();
+  });
+
+  it("rejects a stale or expired pre-submit offer commitment", () => {
+    const stale = offerFixture();
+    stale.operation.state = ApiMarketOperationStateEnum.AwaitingSignature;
+    stale.operation.expires_at = NOW;
+    expect(() =>
+      validateCommittedMarketOffer(stale.operation, stale.request, NOW)
+    ).toThrow();
+
+    const expired = offerFixture();
+    expired.operation.state = ApiMarketOperationStateEnum.AwaitingSignature;
+    expect(() =>
+      validateCommittedMarketOffer(
+        expired.operation,
+        expired.request,
+        Number(expired.operation.order!.components.end_time) * 1000
+      )
+    ).toThrow();
+  });
+
+  it.each([
+    ApiMarketOperationStateEnum.Publishing,
+    ApiMarketOperationStateEnum.Unknown,
+  ])("reserves an expired unresolved %s offer", (state) => {
+    const f = offerFixture();
+    f.operation.state = state;
+    f.operation.expires_at = NOW - 1;
+    expect(() =>
+      validateCommittedMarketOffer(
+        f.operation,
+        f.request,
+        Number(f.operation.order!.components.end_time) * 1000
+      )
+    ).not.toThrow();
+  });
+
+  it.each([
+    ApiMarketOperationStateEnum.Review,
+    ApiMarketOperationStateEnum.Approval,
+    ApiMarketOperationStateEnum.Failed,
+    ApiMarketOperationStateEnum.Expired,
+    ApiMarketOperationStateEnum.Cancelled,
+  ])("rejects the non-commitment %s state", (state) => {
+    const f = offerFixture();
+    f.operation.state = state;
+    expect(() =>
+      validateCommittedMarketOffer(f.operation, f.request, NOW)
+    ).toThrow();
+  });
+
+  it("retains full financial, actor, NFT and row-hash bindings", () => {
+    const mutations: Array<(fixture: ReturnType<typeof offerFixture>) => void> =
+      [
+        (f) => {
+          f.operation.total_wei = "999";
+        },
+        (f) => {
+          f.operation.wallet = "0x2222222222222222222222222222222222222222";
+        },
+        (f) => {
+          f.operation.order!.components.consideration[0]!.identifier_or_criteria =
+            "2";
+          reseal(f.operation);
+          f.operation.order_hash = f.operation.order!.order_hash;
+        },
+        (f) => {
+          f.operation.order_hash = MARKET_ZERO_HASH;
+        },
+      ];
+    for (const mutate of mutations) {
+      const f = offerFixture();
+      f.operation.state = ApiMarketOperationStateEnum.Publishing;
+      mutate(f);
+      expect(() =>
+        validateCommittedMarketOffer(f.operation, f.request, NOW)
+      ).toThrow();
+    }
+  });
+
+  it("dispatches live and confirmed offers through publication proof", () => {
+    const live = offerFixture();
+    expect(() =>
+      validateCommittedMarketOffer(live.operation, live.request, NOW)
+    ).not.toThrow();
+
+    const confirmed = offerFixture();
+    confirmed.operation.state = ApiMarketOperationStateEnum.Confirmed;
+    expect(() =>
+      validateCommittedMarketOffer(confirmed.operation, confirmed.request, NOW)
+    ).toThrow();
+    confirmed.operation.potential_liability_wei = "0";
+    confirmed.operation.settlement = {
+      filled_quantity: confirmed.request.quantity,
+      remaining_quantity: "0",
+      safe_block_number: 22_000_000,
+    };
+    expect(() =>
+      validateCommittedMarketOffer(confirmed.operation, confirmed.request, NOW)
+    ).not.toThrow();
   });
 
   it("accepts a live published offer after its review deadline", () => {

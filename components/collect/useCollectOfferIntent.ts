@@ -6,7 +6,7 @@ import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import type { CollectTradeAction, CollectTradeDraft } from "./collect.types";
 import { assertCollectOfferAmount } from "./collect-offer-policy";
-import { validatePublishedMarketOffer } from "./market-validation";
+import { validateCommittedMarketOffer } from "./market-validation";
 
 interface OfferIntentOptions {
   readonly action: CollectTradeAction;
@@ -21,6 +21,12 @@ interface OfferIntentOptions {
   readonly operation: ApiMarketOperation | null;
   readonly expected: ApiMarketPrepareRequest | null;
   readonly onPublished: ((operation: ApiMarketOperation) => void) | undefined;
+  readonly onCommitment?:
+    | ((
+        operation: ApiMarketOperation,
+        expected: ApiMarketPrepareRequest
+      ) => void)
+    | undefined;
 }
 
 /** Keep one offer's asynchronous work bound to its committed actor and draft. */
@@ -34,6 +40,7 @@ export function useCollectOfferIntent(options: OfferIntentOptions) {
     proxy: options.proxy,
     draft: options.draft,
     maximum: options.maximumOfferAmountWei,
+    commitmentRequired: options.onCommitment !== undefined,
   });
   const generation = useMemo(() => ({ identity }), [identity]);
   const current = useRef<{
@@ -50,6 +57,7 @@ export function useCollectOfferIntent(options: OfferIntentOptions) {
       : null
   );
   const observed = useRef(new Set<string>());
+  const reserved = useRef(new Set<string>());
   const newest = useRef<ApiMarketOperation | null>(null);
 
   useLayoutEffect(() => {
@@ -108,6 +116,32 @@ export function useCollectOfferIntent(options: OfferIntentOptions) {
       throw new Error("MARKET_REVIEW_MISMATCH");
   };
 
+  const notifyCommitment = (
+    operation: ApiMarketOperation,
+    request: ApiMarketPrepareRequest
+  ) => {
+    const onCommitment = current.current?.options.onCommitment;
+    if (!onCommitment || reserved.current.has(operation.id)) return;
+    reserved.current.add(operation.id);
+    try {
+      onCommitment(operation, request);
+    } catch (failure) {
+      reserved.current.delete(operation.id);
+      throw failure;
+    }
+  };
+
+  // Called synchronously after a signature returns, before it can reach the
+  // market. A failed reservation must prevent the publication request.
+  const reserve = (
+    operation: ApiMarketOperation,
+    request: ApiMarketPrepareRequest
+  ) => {
+    guardReview(operation, request);
+    validateCommittedMarketOffer(operation, request);
+    notifyCommitment(operation, request);
+  };
+
   useEffect(() => {
     const { operation, expected, onPublished } = options;
     if (options.action !== "offer" || !operation || !expected) return;
@@ -122,14 +156,24 @@ export function useCollectOfferIntent(options: OfferIntentOptions) {
       )
         return;
       newest.current = operation;
-      validatePublishedMarketOffer(operation, expected);
+      // A persisted awaiting-signature row does not establish that a signature
+      // was sent. Only the explicit pre-publication event can reserve that row.
+      if (
+        !["PUBLISHING", "UNKNOWN", "LIVE", "CONFIRMED"].includes(
+          operation.state
+        )
+      )
+        return;
+      validateCommittedMarketOffer(operation, expected);
     } catch {
       return;
     }
+    notifyCommitment(operation, expected);
+    if (!["LIVE", "CONFIRMED"].includes(operation.state)) return;
     if (!onPublished || observed.current.has(operation.id)) return;
     observed.current.add(operation.id);
     onPublished(operation);
   });
 
-  return { generation, guard, bind, guardReview };
+  return { generation, guard, bind, guardReview, reserve };
 }

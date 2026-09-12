@@ -32,6 +32,7 @@ const mockConfirm = jest.fn();
 const mockSave = jest.fn();
 const mockValidate = jest.fn();
 const mockValidatePublished = jest.fn();
+const mockValidateCommitted = jest.fn();
 let mockProfileId = "profile-one";
 let mockLatestForm: ComponentProps<typeof CollectTradeForm> | null = null;
 let mockLatestSheet: ComponentProps<typeof CollectTradeSheet> | null = null;
@@ -127,6 +128,8 @@ jest.mock("@/components/collect/market-validation", () => {
     validateMarketOperation: (...args: unknown[]) => mockValidate(...args),
     validatePublishedMarketOffer: (...args: unknown[]) =>
       mockValidatePublished(...args),
+    validateCommittedMarketOffer: (...args: unknown[]) =>
+      mockValidateCommitted(...args),
   };
 });
 jest.mock("@/components/collect/market.adapters", () => ({
@@ -242,6 +245,7 @@ beforeEach(() => {
   mockValidatePublished.mockImplementation(() => {
     throw new Error("NOT_PUBLISHED");
   });
+  mockValidateCommitted.mockImplementation(() => undefined);
   mockPrepare.mockImplementation((request: ApiMarketPrepareRequest) =>
     Promise.resolve(preparedOperation(request))
   );
@@ -399,6 +403,53 @@ it("passes a live intent guard to offer confirmation", async () => {
 
   changeDraft({ unitPriceEth: "0.7" });
   expect(guard).toThrow("MARKET_CONNECTION_CHANGED");
+});
+
+it("passes the exact offer intent to the optional commitment callback", async () => {
+  const onCommitment = jest.fn();
+  mockPrepare.mockImplementation((request: ApiMarketPrepareRequest) =>
+    Promise.resolve({
+      ...preparedOperation(request),
+      state: ApiMarketOperationStateEnum.AwaitingSignature,
+    })
+  );
+  mockConfirm.mockImplementation(
+    async (
+      operation: ApiMarketOperation,
+      expected: ApiMarketPrepareRequest,
+      guard?: () => void,
+      reserve?: (
+        operation: ApiMarketOperation,
+        expected: ApiMarketPrepareRequest
+      ) => void
+    ) => {
+      guard?.();
+      reserve?.(operation, expected);
+    }
+  );
+
+  render(controller({ onCommitment }));
+  prepareDraft();
+  await waitFor(() => expect(mockLatestSheet?.review).not.toBeNull());
+  const review = mockLatestSheet!.review!;
+
+  await act(async () => {
+    await mockLatestSheet!.onConfirm(review.id, review.revision);
+  });
+
+  expect(mockConfirm).toHaveBeenCalledTimes(1);
+  expect(mockConfirm.mock.calls[0]).toHaveLength(4);
+  const confirmedOperation = mockConfirm.mock.calls[0][0] as ApiMarketOperation;
+  const confirmedExpected = mockConfirm.mock
+    .calls[0][1] as ApiMarketPrepareRequest;
+  expect(onCommitment).toHaveBeenCalledWith(
+    confirmedOperation,
+    confirmedExpected
+  );
+  expect(mockValidateCommitted).toHaveBeenCalledWith(
+    confirmedOperation,
+    confirmedExpected
+  );
 });
 
 it("keeps non-offer confirmation on the two-argument execution contract", async () => {

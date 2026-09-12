@@ -26,6 +26,23 @@ jest.mock("@/components/collect/market-validation", () => {
         throw new Error("NOT_PUBLISHED");
       }
     },
+    validateCommittedMarketOffer: (operation: {
+      kind: string;
+      state: string;
+    }) => {
+      if (
+        operation.kind !== "OFFER" ||
+        ![
+          "AWAITING_SIGNATURE",
+          "PUBLISHING",
+          "UNKNOWN",
+          "LIVE",
+          "CONFIRMED",
+        ].includes(operation.state)
+      ) {
+        throw new Error("NOT_COMMITTED");
+      }
+    },
   };
 });
 
@@ -49,6 +66,12 @@ interface OfferIntentOptions {
   readonly operation: ApiMarketOperation | null;
   readonly expected: ApiMarketPrepareRequest | null;
   readonly onPublished: ((operation: ApiMarketOperation) => void) | undefined;
+  readonly onCommitment?:
+    | ((
+        operation: ApiMarketOperation,
+        expected: ApiMarketPrepareRequest
+      ) => void)
+    | undefined;
 }
 
 function draft(overrides: Partial<CollectTradeDraft> = {}): CollectTradeDraft {
@@ -122,6 +145,7 @@ function options(
     operation: null,
     expected: null,
     onPublished: undefined,
+    onCommitment: undefined,
     ...overrides,
   };
 }
@@ -146,6 +170,70 @@ describe("useCollectOfferIntent", () => {
     expect(() =>
       result.current.guard({ ...expected, amount_wei: "201" })
     ).toThrow("MARKET_OFFER_LIMIT_EXCEEDED");
+  });
+
+  it("reserves the exact full offer total once", () => {
+    const expected = request();
+    const awaiting = operation({
+      state: ApiMarketOperationStateEnum.AwaitingSignature,
+    });
+    const onCommitment = jest.fn();
+    const { result } = renderIntent(
+      options({
+        initialOperation: awaiting,
+        expected,
+        onCommitment,
+      })
+    );
+
+    expect(() => result.current.reserve(awaiting, expected)).not.toThrow();
+    expect(() => result.current.reserve(awaiting, expected)).not.toThrow();
+    expect(onCommitment).toHaveBeenCalledTimes(1);
+    expect(onCommitment).toHaveBeenCalledWith(awaiting, expected);
+  });
+
+  it("only reserves an awaiting signature after explicit reserve", () => {
+    const expected = request();
+    const awaiting = operation({
+      state: ApiMarketOperationStateEnum.AwaitingSignature,
+    });
+    const onCommitment = jest.fn();
+    const onPublished = jest.fn();
+    const { result } = renderIntent(
+      options({
+        initialOperation: awaiting,
+        operation: awaiting,
+        expected,
+        onPublished,
+        onCommitment,
+      })
+    );
+
+    expect(onCommitment).not.toHaveBeenCalled();
+    expect(onPublished).not.toHaveBeenCalled();
+    result.current.reserve(awaiting, expected);
+    expect(onCommitment).toHaveBeenCalledWith(awaiting, expected);
+    expect(onPublished).not.toHaveBeenCalled();
+  });
+
+  it("reserves a recovered unknown operation without publishing it", async () => {
+    const unknown = operation({ state: ApiMarketOperationStateEnum.Unknown });
+    const onCommitment = jest.fn();
+    const onPublished = jest.fn();
+
+    renderIntent(
+      options({
+        initialOperation: unknown,
+        operation: unknown,
+        expected: request(),
+        onPublished,
+        onCommitment,
+      })
+    );
+
+    await waitFor(() => expect(onCommitment).toHaveBeenCalledTimes(1));
+    expect(onCommitment).toHaveBeenCalledWith(unknown, request());
+    expect(onPublished).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -198,11 +286,13 @@ describe("useCollectOfferIntent", () => {
       state: ApiMarketOperationStateEnum.Publishing,
     });
     const onPublished = jest.fn();
+    const onCommitment = jest.fn();
     const initial = options({
       initialOperation: publishing,
       operation: publishing,
       expected,
       onPublished,
+      onCommitment,
     });
     const { rerender } = renderIntent(initial);
 
@@ -214,9 +304,85 @@ describe("useCollectOfferIntent", () => {
     rerender({ current: { ...initial, operation: live } });
 
     await waitFor(() => expect(onPublished).toHaveBeenCalledTimes(1));
+    expect(onCommitment).toHaveBeenCalledTimes(1);
     expect(onPublished).toHaveBeenCalledWith(live);
     rerender({ current: { ...initial, operation: live } });
     expect(onPublished).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not consume a reservation when its callback throws", () => {
+    const expected = request();
+    const awaiting = operation({
+      state: ApiMarketOperationStateEnum.AwaitingSignature,
+    });
+    const onCommitment = jest.fn().mockImplementationOnce(() => {
+      throw new Error("COMMITMENT_STORAGE_UNAVAILABLE");
+    });
+    const { result } = renderIntent(
+      options({
+        initialOperation: awaiting,
+        expected,
+        onCommitment,
+      })
+    );
+
+    expect(() => result.current.reserve(awaiting, expected)).toThrow(
+      "COMMITMENT_STORAGE_UNAVAILABLE"
+    );
+    expect(() => result.current.reserve(awaiting, expected)).not.toThrow();
+    expect(onCommitment).toHaveBeenCalledTimes(2);
+  });
+
+  it("blocks late actor and over-cap reservation attempts", () => {
+    const expected = request();
+    const awaiting = operation({
+      state: ApiMarketOperationStateEnum.AwaitingSignature,
+    });
+    const onCommitment = jest.fn();
+    const initial = options({
+      initialOperation: awaiting,
+      expected,
+      onCommitment,
+    });
+    const { result, rerender } = renderIntent(initial);
+    const reserve = result.current.reserve;
+
+    expect(() => reserve(awaiting, { ...expected, amount_wei: "201" })).toThrow(
+      "MARKET_OFFER_LIMIT_EXCEEDED"
+    );
+    rerender({
+      current: {
+        ...initial,
+        profileId: PROFILE_B,
+        draft: draft({ unitPriceEth: "0.2" }),
+      },
+    });
+    expect(() => reserve(awaiting, expected)).toThrow(
+      "MARKET_CONNECTION_CHANGED"
+    );
+    expect(onCommitment).not.toHaveBeenCalled();
+  });
+
+  it("invalidates a captured reserve when commitment is removed", () => {
+    const expected = request();
+    const awaiting = operation({
+      state: ApiMarketOperationStateEnum.AwaitingSignature,
+    });
+    const onCommitment = jest.fn();
+    const initial = options({
+      initialOperation: awaiting,
+      expected,
+      onCommitment,
+    });
+    const { result, rerender } = renderIntent(initial);
+    const reserve = result.current.reserve;
+
+    rerender({ current: { ...initial, onCommitment: undefined } });
+
+    expect(() => reserve(awaiting, expected)).toThrow(
+      "MARKET_CONNECTION_CHANGED"
+    );
+    expect(onCommitment).not.toHaveBeenCalled();
   });
 
   it("publishes an initially recovered live operation once", async () => {

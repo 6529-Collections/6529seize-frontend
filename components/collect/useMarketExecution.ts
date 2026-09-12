@@ -5,6 +5,7 @@ import { Capacitor } from "@capacitor/core";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import { ApiMarketOperationStateEnum } from "@/generated/models/ApiMarketOperation";
+import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
 import type { ApiMarketTransaction } from "@/generated/models/ApiMarketTransaction";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
 import { fetchCollectCapabilities } from "@/services/api/collect-api";
@@ -93,6 +94,12 @@ async function executeReviewedMarketOperation(options: {
   operation: ApiMarketOperation;
   expected: ApiMarketPrepareRequest;
   assertConnection: () => void;
+  onCommitment:
+    | ((
+        operation: ApiMarketOperation,
+        expected: ApiMarketPrepareRequest
+      ) => void)
+    | undefined;
   setStage: (stage: CollectTradeStage) => void;
   onOperation: (operation: ApiMarketOperation) => void;
 }) {
@@ -102,6 +109,7 @@ async function executeReviewedMarketOperation(options: {
     operation,
     expected,
     assertConnection,
+    onCommitment,
     setStage,
     onOperation,
   } = options;
@@ -151,6 +159,9 @@ async function executeReviewedMarketOperation(options: {
       account,
     });
     assertConnection();
+    validateMarketOperation(operation, expected);
+    if (operation.kind === ApiMarketKind.Offer)
+      onCommitment?.(operation, expected);
     setStage("publishing");
     onOperation(await submitMarketSignature(operation.id, { signature }));
   }
@@ -266,7 +277,11 @@ export function useMarketExecution(
   const confirm = async (
     operation: ApiMarketOperation,
     expected: ApiMarketPrepareRequest,
-    assertIntent?: () => void
+    assertIntent?: () => void,
+    onCommitment?: (
+      operation: ApiMarketOperation,
+      expected: ApiMarketPrepareRequest
+    ) => void
   ) => {
     if (busy.current || !client || !wallet) return;
     busy.current = true;
@@ -360,6 +375,7 @@ export function useMarketExecution(
           operation: current,
           expected,
           assertConnection,
+          onCommitment,
           setStage,
           onOperation,
         });
