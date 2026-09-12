@@ -20,12 +20,19 @@ function git(args, cwd) {
 function callText(source, message) {
   const lines = source.replaceAll("\r\n", "\n").split("\n");
   const selected = lines.slice(message.line - 1, message.endLine);
-  selected[selected.length - 1] = selected.at(-1).slice(0, message.endColumn - 1);
+  selected[selected.length - 1] = selected
+    .at(-1)
+    .slice(0, message.endColumn - 1);
   selected[0] = selected[0].slice(message.column - 1);
   return selected.join("\n");
 }
 
-export function newViolations(currentSource, currentMessages, baseSource, baseMessages) {
+export function newViolations(
+  currentSource,
+  currentMessages,
+  baseSource,
+  baseMessages
+) {
   // No editable grandfather list: the trusted base tree supplies the allowance.
   // Match exact calls per file, including receiver/arguments, with multiplicity.
   const remaining = new Map();
@@ -44,18 +51,44 @@ export function newViolations(currentSource, currentMessages, baseSource, baseMe
   });
 }
 
-export async function lintSelectors({ cwd = process.cwd(), baseRef = "origin/main" } = {}) {
+export async function lintSelectors({
+  cwd = process.cwd(),
+  baseRef = "origin/main",
+} = {}) {
   // CI supplies its fetched exact BASE_SHA. Locally compare with the merge base
   // so unrelated main changes do not alter this branch's legacy allowance.
   const baseSha = git(["merge-base", baseRef, "HEAD"], cwd).trim();
-  if (!/^[a-f0-9]{40}$/u.test(baseSha)) throw new Error("Cannot resolve selector lint base SHA.");
-  const files = [...new Set(git([
-    "ls-files", "--cached", "--others", "--exclude-standard", "-z", "--", "tests", "e2e",
-  ], cwd).split("\0"))].filter((file) => SOURCE_FILE.test(file));
-  const baseFiles = new Set(git([
-    "ls-tree", "-r", "--name-only", "-z", baseSha, "--", "tests", "e2e",
-  ], cwd).split("\0"));
-  const eslint = new ESLint({ cwd, overrideConfigFile: true, overrideConfig: config, allowInlineConfig: false });
+  if (!/^[a-f0-9]{40}$/u.test(baseSha))
+    throw new Error("Cannot resolve selector lint base SHA.");
+  const files = [
+    ...new Set(
+      git(
+        [
+          "ls-files",
+          "--cached",
+          "--others",
+          "--exclude-standard",
+          "-z",
+          "--",
+          "tests",
+          "e2e",
+        ],
+        cwd
+      ).split("\0")
+    ),
+  ].filter((file) => SOURCE_FILE.test(file));
+  const baseFiles = new Set(
+    git(
+      ["ls-tree", "-r", "--name-only", "-z", baseSha, "--", "tests", "e2e"],
+      cwd
+    ).split("\0")
+  );
+  const eslint = new ESLint({
+    cwd,
+    overrideConfigFile: true,
+    overrideConfig: config,
+    allowInlineConfig: false,
+  });
   const failures = [];
   let checked = 0;
   let legacy = 0;
@@ -66,10 +99,18 @@ export async function lintSelectors({ cwd = process.cwd(), baseRef = "origin/mai
     const [result] = await eslint.lintText(source, { filePath: file });
     checked += 1;
     if (result.messages.length === 0) continue;
-    const baseSource = baseFiles.has(file) ? git(["show", `${baseSha}:${file}`], cwd) : "";
+    const baseSource = baseFiles.has(file)
+      ? git(["show", `${baseSha}:${file}`], cwd)
+      : "";
     const [baseResult] = await eslint.lintText(baseSource, { filePath: file });
-    if (baseResult.fatalErrorCount > 0) throw new Error(`Cannot parse selector lint base: ${file}`);
-    const added = newViolations(source, result.messages, baseSource, baseResult.messages);
+    if (baseResult.fatalErrorCount > 0)
+      throw new Error(`Cannot parse selector lint base: ${file}`);
+    const added = newViolations(
+      source,
+      result.messages,
+      baseSource,
+      baseResult.messages
+    );
     legacy += result.messages.length - added.length;
     failures.push(...added.map((message) => ({ file, ...message })));
   }
@@ -81,15 +122,24 @@ async function main() {
   if (args.length > 0 && (args.length !== 2 || args[0] !== "--base-ref")) {
     throw new Error("Usage: lint-e2e-selectors.mjs [--base-ref <ref>]");
   }
-  const result = await lintSelectors({ baseRef: args[1] ?? process.env.BASE_SHA ?? "origin/main" });
+  const result = await lintSelectors({
+    baseRef: args[1] ?? process.env.BASE_SHA ?? "origin/main",
+  });
   for (const failure of result.failures) {
-    console.error(`${failure.file}:${failure.line}:${failure.column} ${failure.message}`);
+    console.error(
+      `${failure.file}:${failure.line}:${failure.column} ${failure.message}`
+    );
   }
-  console.log(`E2E selectors: ${result.checked} files, ${result.legacy} unchanged legacy calls, ${result.failures.length} new violations (base ${result.baseSha.slice(0, 12)}).`);
+  console.log(
+    `E2E selectors: ${result.checked} files, ${result.legacy} unchanged legacy calls, ${result.failures.length} new violations (base ${result.baseSha.slice(0, 12)}).`
+  );
   process.exitCode = result.failures.length > 0 ? 1 : 0;
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
   main().catch((error) => {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;

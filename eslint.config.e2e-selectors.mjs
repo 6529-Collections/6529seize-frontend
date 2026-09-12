@@ -11,7 +11,9 @@ export default [
     },
     // Exceptions belong in the documented rule, not file-wide suppressions.
     linterOptions: { noInlineConfig: true },
-    plugins: { "e2e-selectors": { rules: { "prefer-accessible": preferAccessible } } },
+    plugins: {
+      "e2e-selectors": { rules: { "prefer-accessible": preferAccessible } },
+    },
     rules: { "e2e-selectors/prefer-accessible": "error" },
   },
 ];

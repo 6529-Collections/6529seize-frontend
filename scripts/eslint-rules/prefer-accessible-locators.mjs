@@ -16,7 +16,11 @@ function methodName(node) {
 }
 
 function unwrap(node) {
-  while (["ChainExpression", "TSNonNullExpression", "TSAsExpression"].includes(node?.type)) {
+  while (
+    ["ChainExpression", "TSNonNullExpression", "TSAsExpression"].includes(
+      node?.type
+    )
+  ) {
     node = node.expression;
   }
   return node;
@@ -31,7 +35,8 @@ function hasAccessibleScope(node) {
 }
 
 function staticString(node) {
-  if (node?.type === "Literal" && typeof node.value === "string") return node.value;
+  if (node?.type === "Literal" && typeof node.value === "string")
+    return node.value;
   if (node?.type === "TemplateLiteral" && node.expressions.length === 0) {
     return node.quasis[0].value.cooked;
   }
@@ -40,8 +45,14 @@ function staticString(node) {
 
 function isDocumentSelector(selector) {
   // Document state and metadata have no user-facing accessible locator.
-  return selector === "html" || selector === "body" || selector === "head" ||
-    /^meta\[(?:name|property)=(?:"[^"\r\n]+"|'[^'\r\n]+')\]$/u.test(selector ?? "");
+  return (
+    selector === "html" ||
+    selector === "body" ||
+    selector === "head" ||
+    /^meta\[(?:name|property)=(?:"[^"\r\n]+"|'[^'\r\n]+')\]$/u.test(
+      selector ?? ""
+    )
+  );
 }
 
 export default {
@@ -49,7 +60,8 @@ export default {
     type: "suggestion",
     schema: [],
     messages: {
-      accessible: "Start with getByRole/getByLabel or another getBy* query. CSS/XPath narrowing is allowed in a direct chain under that accessible query; document metadata and html/body/head are explicit exceptions.",
+      accessible:
+        "Start with getByRole/getByLabel or another getBy* query. CSS/XPath narrowing is allowed in a direct chain under that accessible query; document metadata and html/body/head are explicit exceptions.",
     },
   },
   create(context) {
