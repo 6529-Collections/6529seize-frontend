@@ -30,6 +30,7 @@ import type { CollectTradeStage } from "./collect.types";
 import {
   marketTypedData,
   validateMarketOperation,
+  validateMarketOperationForRefresh,
   validateMarketTransaction,
 } from "./market-validation";
 import { readMarketIntent, saveMarketIntent } from "./market-operation-storage";
@@ -337,8 +338,10 @@ export function useMarketExecution(
           onOperation(current);
           return;
         }
-        validateMarketOperation(current, expected);
         if (["BUY", "ACCEPT", "CANCEL"].includes(current.kind)) {
+          // The old snapshot binds the user's intent, not execution authority.
+          // Only the fresh continuation below can reach the wallet.
+          validateMarketOperationForRefresh(current, expected);
           const refreshed = await continueMarketOperation(current.id);
           assertConnection();
           validateMarketOperation(refreshed, expected);
@@ -350,6 +353,8 @@ export function useMarketExecution(
           }
           current = refreshed;
           onOperation(refreshed);
+        } else {
+          validateMarketOperation(current, expected);
         }
         if (
           ["LIST", "OFFER"].includes(current.kind) &&
@@ -415,5 +420,6 @@ export function useMarketExecution(
       busy.current = false;
     }
   };
-  return { confirm, recoverTransaction, stage, message };
+  const clearMessage = () => setMessage(undefined);
+  return { confirm, recoverTransaction, stage, message, clearMessage };
 }

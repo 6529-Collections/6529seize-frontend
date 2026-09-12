@@ -448,8 +448,8 @@ function CollectTradeControllerContent({
     locale,
     disabledReason,
     profileId: connectedProfile?.id ?? undefined,
+    profile: connectedProfile ?? null,
     asset,
-    inlineBuy,
   });
   const stage = reviewStage(displayedOperation, execution.stage, preparing);
   const form = (
@@ -537,14 +537,18 @@ function CollectTradeControllerContent({
         }
         message={execution.message ?? (displayedOperation ? error : undefined)}
         onClose={onClose}
-        onRefresh={() => {
+        onRefresh={async () => {
           if (displayedOperation) {
-            void continueMarketOperation(displayedOperation.id).then(
-              receiveOperation,
-              (failure: unknown) =>
-                setError(marketPreparationError(failure, locale))
-            );
-          } else if (!fixedOrder) void orders.refetch();
+            setError(undefined);
+            execution.clearMessage();
+            try {
+              receiveOperation(
+                await continueMarketOperation(displayedOperation.id)
+              );
+            } catch (failure) {
+              setError(marketPreparationError(failure, locale));
+            }
+          } else if (!fixedOrder) await orders.refetch();
           else setError(t(locale, "collect.trade.exactOrderChanged"));
         }}
         onConfirm={async (id, revision) => {
