@@ -1,4 +1,133 @@
 export const COLLECT_MESSAGES = {
+  "collect.offerPlan.title": "Plan offers",
+  "collect.offerPlan.intro":
+    "Set a price for each NFT, then review and sign the offers you choose. Accepted offers deliver to your paying wallet.",
+  "collect.offerPlan.pricing": "Price method",
+  "collect.offerPlan.method.manual": "Enter each price",
+  "collect.offerPlan.method.matchBid": "Match observed WETH offer",
+  "collect.offerPlan.method.improveBid": "Above observed WETH offer",
+  "collect.offerPlan.method.discountAsk": "Below observed ask",
+  "collect.offerPlan.method.goal": "Conservative allocation",
+  "collect.offerPlan.help.manual":
+    "Enter the amount you want to offer for each NFT. Each price is yours to choose.",
+  "collect.offerPlan.help.match_bid":
+    "Use the highest applicable WETH offer in the observed index for each NFT. Missing references need your own price.",
+  "collect.offerPlan.help.improve_bid":
+    "Calculate each price above its observed WETH offer once. Future offers will not be followed automatically.",
+  "collect.offerPlan.help.discount_ask":
+    "Calculate each price below its observed ask. Native ETH asks are compared with WETH at 1:1, before any wrapping costs.",
+  "collect.offerPlan.help.goal":
+    "Allocate your budget to conservative opening offers supported by the available evidence. Unused WETH stays uncommitted; edited prices stay pinned.",
+  "collect.offerPlan.improvement": "Above offer (%)",
+  "collect.offerPlan.discount": "Below ask (%)",
+  "collect.offerPlan.budget": "Offer budget (WETH)",
+  "collect.offerPlan.defaultExpiry": "Default expiry",
+  "collect.offerPlan.expiry": "Expiry",
+  "collect.offerPlan.unitPrice": "WETH per NFT",
+  "collect.offerPlan.tokenFallback": "NFT #{token}",
+  "collect.offerPlan.selectNFT": "Select {title} for an offer",
+  "collect.offerPlan.priceFor": "WETH price per NFT for {title}",
+  "collect.offerPlan.quantityFor": "Offer quantity for {title}",
+  "collect.offerPlan.expiryFor": "Offer expiry for {title}",
+  "collect.offerPlan.reviewFor": "Review offer for {title}",
+  "collect.offerPlan.review": "Review offer",
+  "collect.offerPlan.published": "Offer published",
+  "collect.offerPlan.pinned": "Your price · kept when recalculating",
+  "collect.offerPlan.reset": "Use calculated price",
+  "collect.offerPlan.resetFor": "Use a calculated price for {title}",
+  "collect.offerPlan.details": "Pricing details",
+  "collect.offerPlan.weth": "{amount} WETH",
+  "collect.offerPlan.observedBid":
+    "Observed offer: {amount} {currency} per NFT at {time}.",
+  "collect.offerPlan.observedAsk":
+    "Observed ask: {amount} {currency} per NFT at {time}.",
+  "collect.offerPlan.reason.manual": "You set this price.",
+  "collect.offerPlan.reason.matchBid":
+    "Matches the applicable observed WETH offer.",
+  "collect.offerPlan.reason.improveBid":
+    "Calculated above the applicable observed WETH offer.",
+  "collect.offerPlan.reason.discountAsk":
+    "Calculated below the applicable observed ask.",
+  "collect.offerPlan.reason.goal":
+    "A conservative opening proposal within the allocation policy.",
+  "collect.offerPlan.reason.noBid":
+    "No usable WETH offer reference. Enter a price.",
+  "collect.offerPlan.reason.noAsk": "No usable ask reference. Enter a price.",
+  "collect.offerPlan.reason.stale":
+    "The market reference is too old. Recalculate or enter a price.",
+  "collect.offerPlan.reason.unsupported":
+    "This NFT cannot be priced by this method.",
+  "collect.offerPlan.reason.insufficientEvidence":
+    "Too little evidence for an automatic opening price. Enter a price.",
+  "collect.offerPlan.reason.amount":
+    "The amount cannot be represented safely. Enter a smaller price.",
+  "collect.offerPlan.reason.budget":
+    "This offer exceeds the available plan budget.",
+  "collect.offerPlan.reason.funding":
+    "The paying wallet needs more available WETH for these offers.",
+  "collect.offerPlan.reason.pinConflict":
+    "Your pinned price conflicts with the budget or available WETH. Your price has been kept.",
+  "collect.offerPlan.reason.unavailable":
+    "No automatic price is available. Enter your own price.",
+  "collect.offerPlan.reason.observed":
+    "This reference is an observation; its funding and execution have not been verified.",
+  "collect.offerPlan.reason.ethComparison":
+    "The native ETH ask is compared with WETH at 1:1, before wrapping costs.",
+  "collect.offerPlan.reason.unknown":
+    "Additional pricing information is unavailable. Check the price before reviewing this offer.",
+  "collect.offerPlan.invalid.quantity":
+    "Enter 1–100 copies for a Meme, or 1 for a unique NFT.",
+  "collect.offerPlan.invalid.price":
+    "Enter a positive WETH price with up to 18 decimal places.",
+  "collect.offerPlan.invalid.expiry": "Choose an expiry of 1, 7 or 30 days.",
+  "collect.offerPlan.invalid.discount":
+    "Enter a discount from 0% to 99.99%, with at most two decimal places.",
+  "collect.offerPlan.invalid.improvement":
+    "Enter an improvement from 0% to 1000%, with at most two decimal places.",
+  "collect.offerPlan.invalid.budget":
+    "Enter a positive WETH budget with up to 18 decimal places.",
+  "collect.offerPlan.selectSome": "Select at least one NFT.",
+  "collect.offerPlan.enterEachPrice":
+    "Enter a valid price for every selected NFT or pinned row.",
+  "collect.offerPlan.analysisFailed":
+    "These offers could not be analyzed. Your edits have been kept. Try again.",
+  "collect.offerPlan.empty": "Select NFTs to plan offers.",
+  "collect.offerPlan.checkAmounts": "Check amounts and WETH",
+  "collect.offerPlan.calculate": "Calculate prices",
+  "collect.offerPlan.calculating": "Calculating…",
+  "collect.offerPlan.findNFT": "Find an NFT in this plan",
+  "collect.offerPlan.selectAll": "Select all",
+  "collect.offerPlan.clearSelection": "Clear selection",
+  "collect.offerPlan.selectionCount": "{selected} of {total} NFTs selected",
+  "collect.offerPlan.nfts": "NFT offer prices",
+  "collect.offerPlan.noMatches": "No selected NFTs match this search.",
+  "collect.offerPlan.pages": "Offer plan pages",
+  "collect.offerPlan.previous": "Previous",
+  "collect.offerPlan.next": "Next",
+  "collect.offerPlan.pageCount": "Page {current} of {total}",
+  "collect.offerPlan.proposed": "Proposed offers ({count})",
+  "collect.offerPlan.unpriced": "{count} selected NFTs still need a price.",
+  "collect.offerPlan.overBudget":
+    "These offers exceed your plan budget. Adjust your prices, selection or budget.",
+  "collect.offerPlan.overFunding":
+    "These offers exceed the paying wallet’s available WETH at the last check. Adjust them or add WETH, then check again.",
+  "collect.offerPlan.fundingSnapshot":
+    "Tracked commitments: {commitments} · available: {available}, checked at {time}.",
+  "collect.offerPlan.howItWorks": "How these offers work",
+  "collect.offerPlan.independent":
+    "Each offer is reviewed and signed separately. Sellers can accept independently, so some NFTs may be acquired while others are not. There is no automatic signing or repricing.",
+  "collect.offerPlan.observed":
+    "Price references are observed exact-token order terms. Bidder funding, live execution and seller acceptance are not verified by this analysis. Missing references never become invented prices.",
+  "collect.offerPlan.liability":
+    "Every open offer can be accepted. Tracked commitments cover this site’s paying-wallet ledger; offers made elsewhere may add liability. WETH balances are not pooled across your profile’s wallets. Fresh offer review checks funding before signing.",
+  "collect.offerPlan.policy": "Calculation policy: {policy}.",
+  "collect.offerPlan.publishedUnknown":
+    "Check the actual committed offer amounts before allocating more of this budget.",
+  "collect.offerPlan.committed": "Already published from this plan: {amount}.",
+  "collect.offerPlan.pendingCommitment":
+    "Awaiting offer status from this plan: {amount}.",
+  "collect.offerPlan.checkPending": "Check offer status · NFT #{token}",
+  "collect.offerPlan.pending": "Awaiting offer status",
   "collect.buy.splitDelivery": "Split delivery",
   "collect.plan.batchDescription":
     "Selected listings complete together in one transaction. Price and gas are checked before you confirm.",

@@ -3235,6 +3235,45 @@ paths:
           description: Profile or catalog unavailable
         "503":
           description: Required snapshot or provider unavailable
+  /collect/offer-analyses:
+    post:
+      tags:
+        - Collect
+      summary: analyze Per NFT Offers
+      description: >-
+        Private analysis only. Every selected NFT has explicit WETH terms for a
+        separate fresh single-offer review. No funds are reserved and no order
+        is signed or published.
+      operationId: analyzeCollectOffers
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-offer-analysis.handlers"
+          name: handleAnalyzeCollectOffers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCollectOfferAnalysisRequest"
+      responses:
+        "200":
+          description: Explicit per-NFT prices, exclusions and funding comparison
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectOfferAnalysis"
+        "400":
+          description: Invalid amounts, quantities, method or expiry
+        "403":
+          description: Direct profile and paying-wallet authorization required
+        "503":
+          description: Required catalog, holdings or funding snapshot unavailable
   /collect/catalog:
     get:
       tags:
@@ -20033,6 +20072,340 @@ components:
         - candidate_count
         - evaluated_at
         - method
+    ApiCollectOfferAnalysis:
+      type: object
+      required:
+        - analysis_id
+        - policy_version
+        - created_at
+        - valid_until
+        - profile_id
+        - wallet
+        - recipient
+        - currency
+        - rows
+        - totals
+        - coverage
+        - signing_policy
+        - policy_description
+      properties:
+        analysis_id:
+          type: string
+        policy_version:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+        valid_until:
+          type: integer
+          format: int64
+          description: >-
+            Analysis freshness boundary in Unix milliseconds, at most sixty
+            seconds. Never an authorization lifetime.
+        profile_id:
+          type: string
+        wallet:
+          type: string
+        recipient:
+          type: string
+        currency:
+          type: string
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCollectOfferAnalysisRow"
+        totals:
+          $ref: "#/components/schemas/ApiCollectOfferAnalysisTotals"
+        coverage:
+          $ref: "#/components/schemas/ApiCollectOfferAnalysisCoverage"
+        signing_policy:
+          type: string
+          description: >-
+            INDIVIDUAL_OFFERS. Every offer is independently fillable; no atomic
+            group offer protocol is implied.
+        policy_description:
+          type: string
+          description: >-
+            Transparent versioned opening and allocation rule, without fill
+            probabilities or fair-value claims.
+    ApiCollectOfferAnalysisAsset:
+      type: object
+      additionalProperties: false
+      required:
+        - asset_key
+        - quantity
+      properties:
+        asset_key:
+          type: string
+          minLength: 1
+          maxLength: 150
+        quantity:
+          type: string
+          pattern: ^[1-9][0-9]*$
+          maxLength: 78
+          description: Exact positive quantity. ERC721 quantity must be one.
+        manual_unit_amount_wei:
+          type: string
+          pattern: ^[1-9][0-9]*$
+          maxLength: 78
+          description: >-
+            Explicit gross WETH price per NFT unit. Required on every NFT in
+            manual mode; otherwise preserved as a manual pin.
+    ApiCollectOfferAnalysisCoverage:
+      type: object
+      required:
+        - complete
+        - indexed_complete
+        - evaluated_order_count
+        - applicable_order_count
+        - external_orders
+        - funding_reserved
+        - execution_verified
+      properties:
+        complete:
+          type: boolean
+          description: >-
+            Always false; indexed observations do not exhaust the live
+            marketplace.
+        indexed_complete:
+          type: boolean
+        evaluated_order_count:
+          type: integer
+        applicable_order_count:
+          type: integer
+        external_orders:
+          type: string
+          description: NOT_COMPREHENSIVE.
+        funding_reserved:
+          type: boolean
+          description: Always false.
+        execution_verified:
+          type: boolean
+          description: Always false. Fresh single-offer review is required.
+    ApiCollectOfferAnalysisMethod:
+      type: object
+      additionalProperties: false
+      required:
+        - kind
+      properties:
+        kind:
+          type: string
+          enum:
+            - manual
+            - match_bid
+            - improve_bid
+            - discount_ask
+            - goal
+        basis_points:
+          type: integer
+          minimum: 0
+          maximum: 100000
+          description: >-
+            Required only for improve_bid or discount_ask. Discounts must be
+            below 10000 basis points. Positive improvements round upward to the
+            next wei; discounts round downward.
+    ApiCollectOfferAnalysisRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - profile_id
+        - wallet
+        - recipient
+        - acknowledge_external_recipient
+        - expires_at
+        - assets
+        - method
+      properties:
+        profile_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        recipient:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        acknowledge_external_recipient:
+          type: boolean
+        expires_at:
+          type: integer
+          format: int64
+          description: >-
+            Proposed order expiry in Unix seconds, five minutes to thirty days
+            after analysis. Fresh single-offer review validates it again.
+        assets:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/ApiCollectOfferAnalysisAsset"
+        method:
+          $ref: "#/components/schemas/ApiCollectOfferAnalysisMethod"
+        max_total_weth_wei:
+          type: string
+          pattern: ^[1-9][0-9]*$
+          maxLength: 78
+          description: >-
+            Maximum NEW group commitment, required for goal allocation. Existing
+            tracked payer liabilities are separately deducted from balance. A
+            total budget is never manual pricing.
+    ApiCollectOfferAnalysisRow:
+      type: object
+      required:
+        - asset_key
+        - quantity
+        - pinned
+        - status
+        - selected
+        - reason_codes
+        - references
+      properties:
+        asset:
+          $ref: "#/components/schemas/ApiCollectAsset"
+          description: >-
+            Authoritative catalog metadata for a supported NFT. Absent only when
+            the asset key is unsupported.
+        asset_key:
+          type: string
+        quantity:
+          type: string
+        pinned:
+          type: boolean
+        status:
+          type: string
+          enum:
+            - PRICED
+            - UNAVAILABLE
+            - EXCLUDED_BUDGET
+            - PIN_CONFLICT
+        unit_amount_wei:
+          type: string
+          description: >-
+            Exact gross WETH amount per NFT unit. Missing means unresolved,
+            never zero.
+        total_amount_wei:
+          type: string
+          description: >-
+            Unit amount multiplied by exact quantity. Maximum buyer debit,
+            including any fees later allocated within that debit.
+        selected:
+          type: boolean
+          description: >-
+            Included within this analysis capacity. Selection does not reserve
+            funds or authorize signing.
+        reason_codes:
+          type: array
+          items:
+            type: string
+        references:
+          type: array
+          maxItems: 2
+          items:
+            $ref: "#/components/schemas/ApiCollectOfferPriceReference"
+        prepare_request:
+          $ref: "#/components/schemas/ApiMarketPrepareRequest"
+          description: >-
+            Unsigned proposal for the existing single-offer endpoint. amount_wei
+            is the full quantity total, not the per-unit amount. A fresh review
+            and explicit signature are required.
+    ApiCollectOfferAnalysisTotals:
+      type: object
+      required:
+        - proposed_weth_wei
+        - tracked_payer_liability_wei
+        - weth_balance_wei
+        - available_weth_wei
+        - unallocated_weth_wei
+      properties:
+        proposed_weth_wei:
+          type: string
+        tracked_payer_liability_wei:
+          type: string
+          description: >-
+            All tracked liabilities for this paying wallet and WETH, across
+            profiles and unresolved states. External signed orders are not
+            comprehensively known.
+        weth_balance_wei:
+          type: string
+        available_weth_wei:
+          type: string
+          description: >-
+            Nonnegative balance less tracked liabilities, as observed during
+            analysis.
+        budget_wei:
+          type: string
+        unallocated_weth_wei:
+          type: string
+          description: >-
+            Remaining capacity within both the optional new-commitment budget
+            and the observed uncommitted balance.
+    ApiCollectOfferPriceReference:
+      type: object
+      required:
+        - kind
+        - order_hash
+        - protocol_address
+        - maker
+        - currency
+        - quantity
+        - unit_amount_wei
+        - total_amount_wei
+        - observed_at
+        - expires_at
+        - source
+        - eligibility
+        - verification
+        - funding
+      properties:
+        kind:
+          type: string
+          enum:
+            - bid
+            - ask
+        order_hash:
+          type: string
+        protocol_address:
+          type: string
+        maker:
+          type: string
+        currency:
+          type: string
+          description: >-
+            Canonical WETH for bids; ETH or WETH for asks. Native asks are
+            explicitly compared to WETH offers at nominal one-to-one units,
+            without promising conversion or acceptance.
+        quantity:
+          type: string
+        unit_amount_wei:
+          type: string
+        total_amount_wei:
+          type: string
+        observed_at:
+          type: integer
+          format: int64
+          description: Conservative source observation time in Unix milliseconds.
+        expires_at:
+          type: integer
+          format: int64
+          description: Referenced order expiry in Unix milliseconds.
+        source:
+          type: string
+          description: OpenSea.
+        eligibility:
+          type: string
+          description: >-
+            EXACT_TOKEN_TERMS means supported signed-order shape, hash, exact
+            token and requested-quantity economics were checked. Criteria
+            references are excluded.
+        verification:
+          type: string
+          description: >-
+            OBSERVED_NOT_CHAIN_VERIFIED. No live order signature, funding,
+            counter, approval, zone authorization or fulfillment guarantee.
+        funding:
+          type: string
+          description: UNKNOWN. A quoted maker balance is not checked during analysis.
     ApiCollectAnalysis:
       type: object
       additionalProperties: false
