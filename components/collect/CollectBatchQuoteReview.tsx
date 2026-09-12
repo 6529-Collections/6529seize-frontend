@@ -51,7 +51,7 @@ function QuotedItem({
     <li className="tw-space-y-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-4">
       <div className="tw-flex tw-items-start tw-gap-3">
         {selection && (
-          <div className="tw-flex tw-size-14 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-900 [&_img]:tw-max-h-full [&_img]:tw-object-contain">
+          <div className="tw-relative tw-flex tw-size-14 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-900 [&_img]:tw-max-h-full [&_img]:tw-object-contain">
             <CollectAssetMedia
               src={selection.asset.image_url}
               name={selection.asset.name}

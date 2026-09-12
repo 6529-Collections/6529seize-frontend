@@ -7,7 +7,7 @@ import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useId, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import CollectArtworkCard, {
   type CollectArtworkSelection,
 } from "./CollectArtworkCard";

@@ -106,6 +106,20 @@ async function mockCatalog(page: Page, state = { fail: false }) {
       });
       return;
     }
+    if (url.pathname === "/api/market/batch-capabilities") {
+      await route.fulfill({
+        json: {
+          available: true,
+          chain_id: 1,
+          currency: ZERO,
+          execution_policy: "ALL_OR_REVERT",
+          max_orders: 128,
+          max_allocations: 256,
+          max_calldata_bytes: 1048576,
+        },
+      });
+      return;
+    }
     if (url.pathname === "/api/collect/assets") {
       if (state.fail)
         await route.fulfill({
@@ -164,7 +178,8 @@ async function mockCatalog(page: Page, state = { fail: false }) {
             purchase_quantity: "1",
             purchase_cost_wei: item.order.total_wei,
             rate_hundredths: item.asset.token_id === "2" ? "400" : "100",
-            base_tdh_per_day_hundredths: item.asset.token_id === "2" ? "400" : "100",
+            base_tdh_per_day_hundredths:
+              item.asset.token_id === "2" ? "400" : "100",
           })),
         },
       });
@@ -198,7 +213,7 @@ test.beforeEach(async ({ baseURL, context }) => {
   ]);
 });
 
-test("observed listings open a wallet-gated review through compact actions", async ({
+test("listing selection carries across browsing and opens one wallet-gated purchase review", async ({
   page,
 }, info) => {
   const mutations = await mockCatalog(page);
@@ -208,124 +223,112 @@ test("observed listings open a wallet-gated review through compact actions", asy
   await expect(
     page.getByRole("heading", { name: "Build your collection", exact: true })
   ).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Catalog artwork 1" })
-  ).toBeVisible();
-  const firstArtwork = page.getByRole("article").filter({
-    has: page.getByRole("heading", { name: "Catalog artwork 1" }),
-  });
-  await firstArtwork.scrollIntoViewIfNeeded();
-  await expect
-    .poll(() =>
-      firstArtwork
-        .locator("img")
-        .evaluateAll((images) =>
-          images.some(
-            (image) =>
-              image instanceof HTMLImageElement &&
-              image.complete &&
-              image.naturalWidth > 0
-          )
-        )
-    )
-    .toBe(true);
-  await noHorizontalOverflow(page);
-  await page.screenshot({
-    path: info.outputPath("collect-catalog.png"),
-    fullPage: true,
-  });
-  await expect(
-    page.getByRole("heading", { name: "Catalog artwork 2" })
-  ).toBeVisible();
-  const buyButton = page.getByRole("button", {
-    name: "Collect Catalog artwork 2",
+  const addFirst = page.getByRole("button", {
+    name: "Add Catalog artwork 1 to selection",
     exact: true,
   });
-  await buyButton.focus();
-  await buyButton.press("Enter");
-  await expect(page.getByRole("dialog")).toHaveCount(1);
+  await addFirst.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  const selection = page.getByRole("region", {
+    name: "Purchase selection",
+    exact: true,
+  });
   await expect(
-    page
-      .getByRole("dialog")
-      .getByRole("heading", { name: "Catalog artwork 2", exact: true })
+    selection.getByText("1 selected", { exact: true })
   ).toBeVisible();
+  await page
+    .getByRole("button", {
+      name: "Add Catalog artwork 2 to selection",
+      exact: true,
+    })
+    .click();
   await expect(
-    page
-      .getByRole("dialog")
-      .getByRole("button", { name: "Connect wallet", exact: true })
+    selection.getByText("2 selected", { exact: true })
   ).toBeVisible();
+  await expect(selection).toBeInViewport();
+  await noHorizontalOverflow(page);
   await page.screenshot({
-    path: info.outputPath("collect-wallet-required.png"),
+    path: info.outputPath("collect-catalog-selection.png"),
     fullPage: true,
   });
-  await noHorizontalOverflow(page);
-  await expect
-    .poll(() =>
-      page
-        .getByRole("dialog")
-        .evaluate((dialog) => dialog.contains(document.activeElement))
-    )
-    .toBe(true);
-  await expect(page.getByRole("dialog")).toHaveAttribute("aria-modal", "true");
-  const backgroundBuyButton = page.getByRole("button", {
-    name: "Collect Catalog artwork 2",
+  await page.getByRole("button", { name: "TDH", exact: true }).click();
+  await expect(
+    selection.getByText("2 selected", { exact: true })
+  ).toBeVisible();
+  await page
+    .getByRole("button", {
+      name: "Remove Catalog artwork 1 from selection",
+      exact: true,
+    })
+    .click();
+  await expect(
+    selection.getByText("1 selected", { exact: true })
+  ).toBeVisible();
+  await page
+    .getByRole("button", {
+      name: "Add Catalog artwork 1 to selection",
+      exact: true,
+    })
+    .click();
+  const review = selection.getByRole("button", {
+    name: "Review purchase",
     exact: true,
-    includeHidden: true,
   });
+  await review.focus();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toHaveCount(1);
+  await expect(dialog).toHaveAttribute("aria-modal", "true");
+  await expect(
+    dialog.getByRole("button", { name: "Connect wallet", exact: true })
+  ).toBeVisible();
+  await expect(
+    dialog.getByRole("button", { name: "Review live total", exact: true })
+  ).toBeDisabled();
+  const all = dialog.getByRole("checkbox", { name: "Select all", exact: true });
+  await expect(all).toBeChecked();
+  await dialog
+    .getByRole("checkbox", { name: "Select Catalog artwork 1", exact: true })
+    .uncheck();
+  await expect(
+    dialog.getByText("1 of 2 selected", { exact: true })
+  ).toBeVisible();
+  await all.check();
+  await expect(
+    dialog.getByText("2 of 2 selected", { exact: true })
+  ).toBeVisible();
   await expect
     .poll(() =>
-      backgroundBuyButton.evaluate((button) => {
-        let element: Element | null = button;
-        while (element) {
-          if (element instanceof HTMLElement && element.inert) return true;
-          element = element.parentElement;
-        }
-        return false;
-      })
-    )
-    .toBe(true);
-  await backgroundBuyButton.focus();
-  await expect
-    .poll(() =>
-      page
-        .getByRole("dialog")
-        .evaluate((dialog) => dialog.contains(document.activeElement))
+      dialog.evaluate((node) => node.contains(document.activeElement))
     )
     .toBe(true);
   await page.keyboard.press("Tab");
   await expect
     .poll(() =>
-      page
-        .getByRole("dialog")
-        .evaluate((dialog) => dialog.contains(document.activeElement))
+      dialog.evaluate((node) => node.contains(document.activeElement))
     )
     .toBe(true);
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-  await expect(buyButton).toBeFocused();
-  const actions = page.getByRole("button", {
-    name: "More trading actions for Catalog artwork 2",
+  const backgroundReview = page.getByRole("button", {
+    name: "Review purchase",
+    exact: true,
+    includeHidden: true,
   });
-  await actions.click();
-  await expect(
-    page.getByRole("menuitem", { name: "List for sale: Catalog artwork 2" })
-  ).toBeVisible();
+  await expect
+    .poll(() =>
+      backgroundReview.evaluate((node) => Boolean(node.closest("[inert]")))
+    )
+    .toBe(true);
+  await noHorizontalOverflow(page);
   await page.screenshot({
-    path: info.outputPath("collect-actions.png"),
+    path: info.outputPath("collect-selection-review.png"),
     fullPage: true,
   });
-  await page
-    .getByRole("menuitem", { name: "Make an offer: Catalog artwork 2" })
-    .click();
-  await expect(page.getByRole("dialog")).toHaveCount(1);
-  await expect(
-    page
-      .getByRole("dialog")
-      .getByRole("button", { name: "Connect wallet", exact: true })
-  ).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-  await expect(actions).toBeFocused();
+  await expect(dialog).toHaveCount(0);
+  await expect(review).toBeFocused();
+  await selection.getByRole("button", { name: "Clear", exact: true }).click();
+  await expect(selection).toHaveCount(0);
   expect(mutations).toEqual([]);
 });
 

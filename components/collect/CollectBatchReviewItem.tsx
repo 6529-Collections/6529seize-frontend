@@ -77,7 +77,7 @@ export default function CollectBatchReviewItem({
             className="tw-size-4 tw-accent-primary-500"
           />
         </label>
-        <div className="tw-flex tw-size-14 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-900 [&_img]:tw-max-h-full [&_img]:tw-object-contain">
+        <div className="tw-relative tw-flex tw-size-14 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-900 [&_img]:tw-max-h-full [&_img]:tw-object-contain">
           <CollectAssetMedia
             src={item.asset.image_url}
             name={item.asset.name}
