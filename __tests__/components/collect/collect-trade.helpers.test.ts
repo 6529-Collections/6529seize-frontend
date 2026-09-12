@@ -38,6 +38,40 @@ const connection = {
   hasExpected: true,
   cancelTarget: undefined,
 };
+it.each(["offer", "list"] as const)(
+  "keeps a 30-day %s inside the API duration cap when the fresh block lags",
+  (action) => {
+    const now = 1_900_000_000_000;
+    const clock = jest.spyOn(Date, "now").mockReturnValue(now);
+    try {
+      const request = buildMarketRequest({
+        profile,
+        wallet,
+        action,
+        assetKey: operation.asset_key,
+        selectedOrder: null,
+        cancelTarget: undefined,
+        draft: {
+          quantity: "1",
+          unitPriceEth: "1",
+          expiryHours: "720",
+          recipient: wallet,
+        },
+      });
+      for (const blockLagSeconds of [12, 60, 120]) {
+        const latestBlockTimestamp = now / 1000 - blockLagSeconds;
+        expect(request.expires_at).toBeLessThanOrEqual(
+          latestBlockTimestamp + 30 * 24 * 3600
+        );
+        expect(request.expires_at).toBeGreaterThan(
+          latestBlockTimestamp + 29 * 24 * 3600
+        );
+      }
+    } finally {
+      clock.mockRestore();
+    }
+  }
+);
 it("keeps historical operations inspectable but prevents resuming an old-profile intent", () => {
   expect(marketConnectionReason({ ...connection, operation })).toBe(
     "collect.trade.originalProfile"
