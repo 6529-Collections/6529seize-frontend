@@ -1,6 +1,15 @@
 import CollectTradeController from "@/components/collect/CollectTradeController";
 import { CollectTradeDialog } from "@/components/collect/CollectTradeSheet";
-import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
+import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
+import {
+  type ApiMarketOperation,
+  ApiMarketOperationStateEnum,
+} from "@/generated/models/ApiMarketOperation";
+import {
+  ApiMarketSendAttemptPurposeEnum,
+  ApiMarketSendAttemptStatusEnum,
+} from "@/generated/models/ApiMarketSendAttempt";
+import { ApiMarketTransactionPurposeEnum } from "@/generated/models/ApiMarketTransaction";
 import type {
   CollectTradeDraft,
   CollectTradeReview,
@@ -118,12 +127,12 @@ jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
   ),
 }));
 
-const operation = {
+const operation: ApiMarketOperation = {
   id: "operation",
   profile_id: "original-profile",
   revision: "revision",
-  state: "REVIEW",
-  kind: "BUY",
+  state: ApiMarketOperationStateEnum.Review,
+  kind: ApiMarketKind.Buy,
   asset_key: "1:0x33fd426905f149f8376e227d0c9d3340aad17af1:545",
   quantity: "1",
   wallet: "0x1111111111111111111111111111111111111111",
@@ -137,8 +146,23 @@ const operation = {
   potential_liability_wei: "0",
   expires_at: 0,
   updated_at: 0,
-  send_attempt: { status: "ACTIVE" },
-} as ApiMarketOperation;
+  send_attempt: {
+    attempt_id: "00000000-0000-4000-8000-000000000001",
+    purpose: ApiMarketSendAttemptPurposeEnum.Transaction,
+    transaction_digest: `0x${"a".repeat(64)}`,
+    snapshot_block: 1,
+    status: ApiMarketSendAttemptStatusEnum.Active,
+    transaction: {
+      chain_id: 1,
+      to: "0x0000000000000068F116a894984e2DB1123eB395",
+      value: "1000000000000000000",
+      data: "0x1234",
+      purpose: ApiMarketTransactionPurposeEnum.Fulfill,
+      sender: "0x1111111111111111111111111111111111111111",
+    },
+    transaction_hash: null,
+  },
+};
 beforeEach(() => {
   jest.clearAllMocks();
   mockQueries.length = 0;
