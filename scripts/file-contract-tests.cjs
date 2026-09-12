@@ -13,6 +13,13 @@ const CONTRACTS = [
     inputs: [/^(?:app|components)\/.*\.tsx$/u, /^tailwind\.config\./u],
   },
   {
+    test: "__tests__/scripts/changed-file-gates.test.ts",
+    inputs: [
+      /^package\.json$/u,
+      /^scripts\/(?:require-6529-command|changed-file-gates)\.cjs$/u,
+    ],
+  },
+  {
     test: "__tests__/contracts/waves-multi-competition-phase-1.test.ts",
     inputs: [
       /^(?:app|components|contexts|helpers|hooks|lib|services|utils)\/.*\.[cm]?[jt]sx?$/u,
