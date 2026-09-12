@@ -7,7 +7,7 @@ import { ApiCollectOfferPriceReferenceKindEnum } from "@/generated/models/ApiCol
 import { isAddress } from "viem";
 import { collectAssetIdentity } from "./collect.adapters";
 import {
-  OFFER_EXPIRY_HOURS,
+  COLLECT_ANALYSIS_CLOCK_SKEW_MS,
   offerBasisPoints,
   offerQuantity,
   offerRowTotal,
@@ -20,7 +20,7 @@ import type {
   OfferPriceMethod,
 } from "./collect-offer-plan.types";
 import { MARKET_WETH, MARKET_ZERO } from "./market-validation";
-import { collectOrderExpiry } from "./collect-order-expiry";
+import { resolveCollectOrderExpiry } from "./collect-order-expiry";
 
 const UINT_MAX = 2n ** 256n - 1n;
 const METHODS: Record<OfferPriceMethod, ApiCollectOfferAnalysisMethodKindEnum> =
@@ -49,7 +49,7 @@ function timestamp(value: number): string {
   return new Date(value).toISOString();
 }
 
-/** A goal cap funds only the unsent proposals; actual published commitments stay spent. */
+/** An explicit cap funds only unsent proposals; actual commitments stay spent. */
 export function buildOfferAnalysisRequest(
   input: OfferPlanAnalysisInput,
   now = Date.now()
@@ -59,9 +59,8 @@ export function buildOfferAnalysisRequest(
   requireValid(
     new Set(input.rows.map((row) => row.assetKey)).size === input.rows.length
   );
-  requireValid(
-    OFFER_EXPIRY_HOURS.some((hours) => hours === input.controls.expiryHours)
-  );
+  const expiresAt = resolveCollectOrderExpiry(input.controls, now);
+  requireValid(expiresAt !== null);
   const kind = METHODS[input.controls.method];
   requireValid(
     Object.values(ApiCollectOfferAnalysisMethodKindEnum).includes(kind)
@@ -90,19 +89,18 @@ export function buildOfferAnalysisRequest(
     };
   });
   const committed = uint(input.committedAmountWei);
-  const budget =
-    input.controls.method === "goal"
-      ? offerUnitWei(input.controls.budgetEth)
-      : null;
+  const hasBudget = input.controls.budgetEth.trim().length > 0;
+  const budget = hasBudget ? offerUnitWei(input.controls.budgetEth) : null;
   requireValid(
-    input.controls.method !== "goal" || (budget !== null && budget > committed)
+    (!hasBudget && input.controls.method !== "goal") ||
+      (budget !== null && budget > committed)
   );
   return {
     profile_id: input.profileId,
     wallet: input.wallet,
     recipient: input.wallet,
     acknowledge_external_recipient: false,
-    expires_at: collectOrderExpiry(input.controls.expiryHours, now),
+    expires_at: expiresAt,
     assets,
     method: { kind, ...(points === null ? {} : { basis_points: points }) },
     ...(budget === null
@@ -113,7 +111,9 @@ export function buildOfferAnalysisRequest(
 
 function priceView(
   row: ApiCollectOfferAnalysisRow,
-  expected: ApiCollectOfferAnalysisRequest["assets"][number]
+  expected: ApiCollectOfferAnalysisRequest["assets"][number],
+  createdAt: number,
+  validUntil: number
 ): OfferPlanPrice {
   requireValid(
     row.asset_key === expected.asset_key && row.quantity === expected.quantity
@@ -196,10 +196,16 @@ function priceView(
         quantity = uint(reference.quantity);
       requireValid(
         amount > 0n &&
-          quantity > 0n &&
+          quantity === BigInt(expected.quantity) &&
           uint(reference.total_amount_wei) === amount * quantity
       );
-      requireValid(reference.expires_at > reference.observed_at);
+      timestamp(reference.observed_at);
+      timestamp(reference.expires_at);
+      requireValid(
+        reference.observed_at <= createdAt &&
+          validUntil <= reference.expires_at &&
+          validUntil <= reference.observed_at + 3600000
+      );
       return {
         kind: reference.kind,
         amountWei: amount.toString(),
@@ -235,6 +241,7 @@ export function offerAnalysisView(
     validUntil = timestamp(result.valid_until);
   requireValid(
     result.valid_until > now &&
+      result.created_at <= now + COLLECT_ANALYSIS_CLOCK_SKEW_MS &&
       result.valid_until > result.created_at &&
       result.valid_until <= result.created_at + 60000
   );
@@ -255,7 +262,7 @@ export function offerAnalysisView(
   const prices = result.rows.map((row) => {
     const asset = expected.get(row.asset_key);
     requireValid(asset);
-    return priceView(row, asset);
+    return priceView(row, asset, result.created_at, result.valid_until);
   });
   const totals = result.totals;
   const proposed = uint(totals.proposed_weth_wei),

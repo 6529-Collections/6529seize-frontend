@@ -150,6 +150,10 @@ export * from '../models/ApiCollectCapabilities';
 export * from '../models/ApiCollectCapability';
 export * from '../models/ApiCollectCatalog';
 export * from '../models/ApiCollectCatalogTdhSnapshot';
+export * from '../models/ApiCollectDailyTdhPersonalEffects';
+export * from '../models/ApiCollectDailyTdhPlan';
+export * from '../models/ApiCollectDailyTdhRequest';
+export * from '../models/ApiCollectDailyTdhSearch';
 export * from '../models/ApiCollectFacet';
 export * from '../models/ApiCollectFamily';
 export * from '../models/ApiCollectHolding';
@@ -1009,6 +1013,10 @@ import { ApiCollectCapabilities  , ApiCollectCapabilitiesProfileScopeEnum     , 
 import { ApiCollectCapability, ApiCollectCapabilityActionEnum     } from '../models/ApiCollectCapability';
 import { ApiCollectCatalog } from '../models/ApiCollectCatalog';
 import { ApiCollectCatalogTdhSnapshot } from '../models/ApiCollectCatalogTdhSnapshot';
+import { ApiCollectDailyTdhPersonalEffects } from '../models/ApiCollectDailyTdhPersonalEffects';
+import { ApiCollectDailyTdhPlan  , ApiCollectDailyTdhPlanStatusEnum                     } from '../models/ApiCollectDailyTdhPlan';
+import { ApiCollectDailyTdhRequest   , ApiCollectDailyTdhRequestModeEnum     } from '../models/ApiCollectDailyTdhRequest';
+import { ApiCollectDailyTdhSearch  , ApiCollectDailyTdhSearchStopReasonEnum  , ApiCollectDailyTdhSearchOptimalityEnum   } from '../models/ApiCollectDailyTdhSearch';
 import { ApiCollectFacet, ApiCollectFacetTraitEnum    } from '../models/ApiCollectFacet';
 import { ApiCollectFamily } from '../models/ApiCollectFamily';
 import { ApiCollectHolding } from '../models/ApiCollectHolding';
@@ -1346,7 +1354,7 @@ import { ApiMediaResolveRequest } from '../models/ApiMediaResolveRequest';
 import { ApiMediaResolveResponse } from '../models/ApiMediaResolveResponse';
 import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
 import { ApiMemeCardDropMapping } from '../models/ApiMemeCardDropMapping';
-import { ApiMemesExtendedData                             , ApiMemesExtendedDataTokenTypeEnum                               } from '../models/ApiMemesExtendedData';
+import { ApiMemesExtendedData                                   , ApiMemesExtendedDataTokenTypeEnum                               } from '../models/ApiMemesExtendedData';
 import { ApiMemesExtendedDataPage } from '../models/ApiMemesExtendedDataPage';
 import { ApiMemesMintStat } from '../models/ApiMemesMintStat';
 import { ApiMemesMintStatsPage } from '../models/ApiMemesMintStatsPage';
@@ -1786,6 +1794,10 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCollectCapabilitiesProfileScopeEnum",
     "ApiCollectCapabilitiesCreatorFeesEnum",
     "ApiCollectCapabilityActionEnum",
+    "ApiCollectDailyTdhPlanStatusEnum",
+    "ApiCollectDailyTdhRequestModeEnum",
+    "ApiCollectDailyTdhSearchStopReasonEnum",
+    "ApiCollectDailyTdhSearchOptimalityEnum",
     "ApiCollectFacetTraitEnum",
     "ApiCollectFamily",
     "ApiCollectKind",
@@ -2135,6 +2147,10 @@ let typeMap: {[index: string]: any} = {
     "ApiCollectCapability": ApiCollectCapability,
     "ApiCollectCatalog": ApiCollectCatalog,
     "ApiCollectCatalogTdhSnapshot": ApiCollectCatalogTdhSnapshot,
+    "ApiCollectDailyTdhPersonalEffects": ApiCollectDailyTdhPersonalEffects,
+    "ApiCollectDailyTdhPlan": ApiCollectDailyTdhPlan,
+    "ApiCollectDailyTdhRequest": ApiCollectDailyTdhRequest,
+    "ApiCollectDailyTdhSearch": ApiCollectDailyTdhSearch,
     "ApiCollectFacet": ApiCollectFacet,
     "ApiCollectHolding": ApiCollectHolding,
     "ApiCollectOfferAnalysis": ApiCollectOfferAnalysis,

@@ -4013,6 +4013,50 @@ paths:
           description: Profile not authorized
         "503":
           description: Official source unavailable or analysis work window exceeded
+  /collect/tdh-daily-plans:
+    post:
+      tags:
+        - Collect
+      summary: Find a best available portfolio for a daily TDH objective or ETH budget
+      description: >-
+        Read-only bounded search over captured native ETH listings. Daily base
+        TDH rates are integer hundredths (divide by 100); boosted daily TDH
+        rates are integer ten-thousandths (divide by 10000). These are nominal
+        daily rates, not a forecast of the change at the next UTC TDH snapshot.
+        Acquired editions are revalued as stock at acquisition time. Gas remains
+        unknown until fresh review, and this endpoint never prepares, signs or
+        submits an order. A third-party recipient does not add the acquisition's
+        personal TDH benefit to the requesting profile.
+      operationId: createCollectDailyTdhPlan
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-daily-tdh.handlers"
+          name: handleCreateCollectDailyTdhPlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCollectDailyTdhRequest"
+      responses:
+        "200":
+          description: Verified baseline and best evaluated portfolio
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectDailyTdhPlan"
+        "400":
+          description: Invalid mode, target, recipient, families or budget
+        "403":
+          description: Profile not authorized
+        "503":
+          description: Official source unavailable or analysis work window exceeded
   /collect/rules:
     post:
       tags:
@@ -21778,6 +21822,243 @@ components:
               format: int64
             block_timestamp:
               type: string
+    ApiCollectDailyTdhPersonalEffects:
+      type: object
+      required:
+        - counts_toward_profile
+        - baseline_base_tdh_per_day_hundredths
+        - proposed_base_tdh_per_day_hundredths
+        - baseline_boost
+        - proposed_boost
+        - baseline_boosted_tdh_per_day_ten_thousandths
+        - proposed_boosted_tdh_per_day_ten_thousandths
+        - additional_boosted_tdh_per_day_ten_thousandths
+        - changed_boost_on_existing_tdh
+      properties:
+        counts_toward_profile:
+          type: boolean
+          description: False when the acquisition recipient is outside the profile.
+        baseline_base_tdh_per_day_hundredths:
+          type: string
+          pattern: ^(0|[1-9][0-9]*)$
+        proposed_base_tdh_per_day_hundredths:
+          type: string
+          pattern: ^(0|[1-9][0-9]*)$
+        baseline_boost:
+          type: number
+        proposed_boost:
+          type: number
+        baseline_boosted_tdh_per_day_ten_thousandths:
+          type: string
+          pattern: ^(0|[1-9][0-9]*)$
+          description: Integer ten-thousandths of boosted TDH per day; divide by 10000.
+        proposed_boosted_tdh_per_day_ten_thousandths:
+          type: string
+          pattern: ^(0|[1-9][0-9]*)$
+          description: Integer ten-thousandths of boosted TDH per day; divide by 10000.
+        additional_boosted_tdh_per_day_ten_thousandths:
+          type: string
+          pattern: ^(0|-?[1-9][0-9]*)$
+          description: >-
+            Signed integer change in ten-thousandths of boosted TDH per day;
+            divide by 10000.
+        changed_boost_on_existing_tdh:
+          type: number
+          description: >-
+            Change in the existing profile's boosted TDH stock attributable to
+            revaluing existing holdings after the acquisition. This is not daily
+            accrual.
+    ApiCollectDailyTdhPlan:
+      type: object
+      required:
+        - plan_id
+        - request
+        - status
+        - base_tdh_per_day_hundredths
+        - shortfall_base_tdh_per_day_hundredths
+        - purchase_cost_wei
+        - signed_fees_wei
+        - remaining_budget_wei
+        - gas_estimate_wei
+        - funding_estimate_wei
+        - items
+        - personal_effects
+        - catalog_version
+        - valid_until
+        - coverage
+        - search
+        - snapshot_block
+        - snapshot_timestamp
+        - acquisition_timestamp
+        - rules_version
+        - assumptions
+      properties:
+        plan_id:
+          type: string
+          description: >-
+            Content hash of this transient analysis, not a marketplace operation
+            id.
+        request:
+          $ref: "#/components/schemas/ApiCollectDailyTdhRequest"
+        status:
+          type: string
+          enum:
+            - NO_PURCHASE_NEEDED
+            - TARGET_MET_BEST_FOUND
+            - PARTIAL
+            - BUDGET_ALLOCATED_BEST_FOUND
+            - NO_LISTINGS
+        base_tdh_per_day_hundredths:
+          type: string
+          pattern: ^(0|[1-9][0-9]*)$
+          description: Integer hundredths of nominal base TDH per day; divide by 100.
+        shortfall_base_tdh_per_day_hundredths:
+          type: string
+          nullable: true
+          pattern: ^(0|[1-9][0-9]*)$
+          description: Null for ETH budget mode; otherwise target shortfall in hundredths.
+        purchase_cost_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: >-
+            Captured listing subtotal including signed fees; fresh review is
+            required.
+        signed_fees_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: Fee component already included in purchase_cost_wei.
+        remaining_budget_wei:
+          type: string
+          nullable: true
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: Remaining budget for ETH budget mode; null for base TDH target mode.
+        gas_estimate_wei:
+          type: string
+          nullable: true
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: Null until fresh order review; zero when no purchase is needed.
+        funding_estimate_wei:
+          type: string
+          nullable: true
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: Null while gas is unknown; zero when no purchase is needed.
+        items:
+          type: array
+          maxItems: 128
+          items:
+            $ref: "#/components/schemas/ApiCollectTdhTargetItem"
+        personal_effects:
+          $ref: "#/components/schemas/ApiCollectDailyTdhPersonalEffects"
+        catalog_version:
+          type: string
+        valid_until:
+          type: string
+          nullable: true
+          description: >-
+            Earliest selected listing expiry or captured index freshness
+            deadline. Review must refresh exact orders.
+        coverage:
+          $ref: "#/components/schemas/ApiCollectTdhTargetCoverage"
+        search:
+          $ref: "#/components/schemas/ApiCollectDailyTdhSearch"
+        snapshot_block:
+          type: integer
+          minimum: 0
+        snapshot_timestamp:
+          type: string
+          description: Timestamp of the official profile and collection snapshot inputs.
+        acquisition_timestamp:
+          type: string
+          description: >-
+            Modeled acquisition time used to revalue owned and purchased
+            editions as stock under the current rules.
+        rules_version:
+          type: string
+        assumptions:
+          type: array
+          items:
+            type: string
+    ApiCollectDailyTdhRequest:
+      type: object
+      additionalProperties: false
+      description: >-
+        BASE_TDH_TARGET requires only target_base_tdh_per_day_hundredths;
+        ETH_BUDGET requires only budget_wei. Supplying neither, both, or the
+        field belonging to the other mode is invalid.
+      required:
+        - profile_id
+        - recipient
+        - mode
+      properties:
+        profile_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        recipient:
+          type: string
+          pattern: ^0x(?!0{40}$)[0-9a-fA-F]{40}$
+          description: >-
+            Nonzero acquisition recipient. A recipient outside the requesting
+            profile does not contribute personal TDH benefit to that profile.
+        families:
+          type: array
+          minItems: 1
+          maxItems: 3
+          default:
+            - memes
+            - gradients
+            - pebbles
+          items:
+            $ref: "#/components/schemas/ApiCollectFamily"
+          description: Distinct families only. Defaults to all supported families.
+        mode:
+          type: string
+          enum:
+            - BASE_TDH_TARGET
+            - ETH_BUDGET
+        target_base_tdh_per_day_hundredths:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,15})$
+          description: >-
+            Required only for BASE_TDH_TARGET. Integer hundredths of nominal
+            base TDH per day (divide by 100), at most 9007199254740991.
+        budget_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: >-
+            Required only for ETH_BUDGET. Uint256 purchase subtotal ceiling
+            including signed fees and excluding unquoted gas.
+    ApiCollectDailyTdhSearch:
+      type: object
+      required:
+        - evaluated_portfolios
+        - candidate_count
+        - stop_reason
+        - optimality
+      properties:
+        evaluated_portfolios:
+          type: integer
+          minimum: 0
+        candidate_count:
+          type: integer
+          minimum: 0
+        stop_reason:
+          type: string
+          enum:
+            - COMPLETE
+            - TIME_LIMIT
+            - EVALUATION_LIMIT
+        optimality:
+          type: string
+          enum:
+            - BEST_FOUND
+          description: Best evaluated portfolio; not a globally optimal guarantee.
     ApiCollectedStats:
       type: object
       required:
@@ -29929,9 +30210,57 @@ components:
           type: integer
           format: int64
           description: Positive rank for TDH-recorded cards, or -1 when unranked.
+        research_holdings:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Holdings of the configured 6529 Research address
+            0xc2Ce4CCeF11A8171f443745cEa3BceEAadD750C7 only. Null before the
+            research-aware supply metrics have been computed.
+        research_holdings_rank:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Supply rank by research holdings, with shared values sharing a rank
+            and the next rank skipped (1, 1, 3). -1 is unranked; null means not
+            yet computed.
+        edition_size_ex_research:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Edition supply excluding burned tokens and holdings of the
+            configured 6529 Research address. Null before computation.
+        edition_size_ex_research_rank:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Lower-supply rank for edition_size_ex_research, with shared values
+            sharing a rank and the next rank skipped (1, 1, 3). -1 is unranked;
+            null means not yet computed.
+        edition_size_ex_museum_and_research:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Edition supply excluding burned tokens and the union of Museum and
+            configured 6529 Research holdings. A token held by both predicates
+            is excluded once. Null before computation.
+        edition_size_ex_museum_and_research_rank:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Lower-supply rank for edition_size_ex_museum_and_research, with
+            shared values sharing a rank and the next rank skipped (1, 1, 3). -1
+            is unranked; null means not yet computed.
         edition_size_cleaned:
           type: integer
           format: int64
+          description: Existing Museum-only cleaned edition supply.
         edition_size_cleaned_rank:
           type: integer
           format: int64

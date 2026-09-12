@@ -39,7 +39,10 @@ jest.mock("@/services/api/collect-api", () => ({
   fetchCollectCatalog: jest.fn(),
 }));
 jest.mock("@tanstack/react-query", () => ({
-  useQuery: () => mockCatalogQuery,
+  useQuery: (options: { queryKey: readonly unknown[] }) =>
+    options.queryKey.includes("plan-metadata")
+      ? { data: [] }
+      : mockCatalogQuery,
 }));
 jest.mock("@/components/collect/useCollectCatalog", () => ({
   useCollectCatalog: (...args: unknown[]) => mockDiscovery(...args),

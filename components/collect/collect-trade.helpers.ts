@@ -7,7 +7,7 @@ import { parseEther } from "viem";
 import type { CollectTradeAction, CollectTradeDraft } from "./collect.types";
 import { MARKET_WETH, MARKET_ZERO } from "./market-validation";
 import { isCollectProfileWallet } from "./collect-recipient.helpers";
-import { collectOrderExpiry } from "./collect-order-expiry";
+import { resolveCollectOrderExpiry } from "./collect-order-expiry";
 
 export function marketConnectionReason(options: {
   readonly capabilityEnabled: boolean;
@@ -90,8 +90,11 @@ export function buildMarketRequest(options: {
       !inProfile && draft.acknowledgeExternalRecipient === true,
   };
   if (selectedOrder) request.order = selectedOrder.identity;
-  if (action === "list" || action === "offer")
-    request.expires_at = collectOrderExpiry(draft.expiryHours);
+  if (action === "list" || action === "offer") {
+    const expiry = resolveCollectOrderExpiry(draft);
+    if (expiry === null) throw new Error("MARKET_ORDER_EXPIRY_INVALID");
+    request.expires_at = expiry;
+  }
   if (cancelTarget?.order)
     request.order = {
       protocol_address: cancelTarget.order.protocol_address,
