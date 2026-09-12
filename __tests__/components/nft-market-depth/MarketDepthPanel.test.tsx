@@ -9,6 +9,10 @@ import { useState } from "react";
 import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
 import { commonApiFetch } from "@/services/api/common-api";
 
+jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
+  useNftPurchasingVisibility: () => ({ hideNftPurchasing: false }),
+}));
+
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
   getStructuredApiErrorStatus: (error: unknown) =>

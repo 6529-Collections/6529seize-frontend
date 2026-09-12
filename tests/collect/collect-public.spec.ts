@@ -57,8 +57,8 @@ const listings = assets.slice(0, 2).map((asset, index) => ({
     side: "LISTING",
     quantity: "1",
     currency: ZERO,
-    total_wei: index ? "20000000000000000" : "10000000000000000",
-    net_wei: index ? "20000000000000000" : "10000000000000000",
+    total_wei: index ? "24217345000000000" : "10000000000000000",
+    net_wei: index ? "24217345000000000" : "10000000000000000",
     fees: [],
     start_time: "1",
     end_time: "2000000000",
@@ -196,10 +196,30 @@ async function mockCatalog(page: Page, state = { fail: false }) {
 
 async function noHorizontalOverflow(page: Page) {
   expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth + 1
-    )
-  ).toBe(true);
+    await page.evaluate(() => document.documentElement.scrollWidth)
+  ).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
+}
+
+async function listingActionsFit(page: Page) {
+  await noHorizontalOverflow(page);
+  for (const id of [1, 2]) {
+    const action = page.getByRole("button", {
+      name: `Add Catalog artwork ${id} to selection`,
+      exact: true,
+    });
+    const card = page.locator("article").filter({ has: action });
+    const actionBounds = (await action.boundingBox())!;
+    const cardBounds = (await card.boundingBox())!;
+    expect(actionBounds.width).toBeGreaterThanOrEqual(44);
+    expect(actionBounds.height).toBeGreaterThanOrEqual(44);
+    expect(actionBounds.x).toBeGreaterThanOrEqual(cardBounds.x);
+    expect(actionBounds.x + actionBounds.width).toBeLessThanOrEqual(
+      cardBounds.x + cardBounds.width + 1
+    );
+    await expect(
+      card.getByText(id === 1 ? "0.01 ETH" : "0.024217345 ETH", { exact: true })
+    ).toBeVisible();
+  }
 }
 
 test.beforeEach(async ({ baseURL, context }) => {
@@ -412,8 +432,20 @@ test("set planning is the default and navigation opens observed listings", async
     .getByRole("button", { name: "Lowest listings", exact: true })
     .click();
   await expect(page.getByText("0.01 ETH", { exact: true })).toBeVisible();
-  await expect(page.getByText("0.02 ETH", { exact: true })).toBeVisible();
-  await noHorizontalOverflow(page);
+  await expect(
+    page.getByText("0.024217345 ETH", { exact: true })
+  ).toBeVisible();
+  const viewport = page.viewportSize()!;
+  const widths = viewport.width < 640 ? [320, 390] : [viewport.width];
+  for (const width of widths) {
+    await page.setViewportSize({ ...viewport, width });
+    await listingActionsFit(page);
+    await page.screenshot({
+      path: info.outputPath(`collect-listing-prices-${width}.png`),
+      fullPage: true,
+    });
+  }
+  await page.setViewportSize(viewport);
   await page.screenshot({
     path: info.outputPath("collect-lowest.png"),
     fullPage: true,
@@ -527,7 +559,17 @@ test("TDH opens Memes listings immediately and keeps projection as a separate ke
   await expect(page.getByRole("article").first()).toContainText(
     "Catalog artwork 2"
   );
-  await noHorizontalOverflow(page);
+  const viewport = page.viewportSize()!;
+  const widths = viewport.width < 640 ? [320, 390] : [viewport.width];
+  for (const width of widths) {
+    await page.setViewportSize({ ...viewport, width });
+    await listingActionsFit(page);
+    await page.screenshot({
+      path: info.outputPath(`collect-tdh-prices-${width}.png`),
+      fullPage: true,
+    });
+  }
+  await page.setViewportSize(viewport);
   await page.screenshot({
     path: info.outputPath("collect-tdh-listings.png"),
     fullPage: true,

@@ -10,6 +10,11 @@ import { Fragment, useId, useState } from "react";
 import { formatDecimal, formatInteger } from "./market-depth-format";
 import { getLevelOrders } from "./market-depth-orders";
 import MarketDepthOrderDetails from "./MarketDepthOrderDetails";
+import {
+  MarketDepthLevelAction,
+  MarketDepthOrderFeedback,
+  useMarketDepthTradeActionsAvailable,
+} from "./MarketDepthOrderAction";
 
 const MAX_LEVELS = 5;
 
@@ -38,6 +43,10 @@ export default function MarketDepthPriceLevels({
 }) {
   const [showAll, setShowAll] = useState(false);
   const [openPrice, setOpenPrice] = useState<string | null>(null);
+  const tradeActionsAvailable = useMarketDepthTradeActionsAvailable();
+  const priceWidth = tradeActionsAvailable ? "tw-w-[36%]" : "tw-w-[38%]";
+  const quantityWidth = tradeActionsAvailable ? "tw-w-[16%]" : "tw-w-[31%]";
+  const totalWidth = tradeActionsAvailable ? "tw-w-[16%]" : "tw-w-[31%]";
   const disclosureId = useId();
   const visibleLevels = showAll ? levels : levels.slice(0, MAX_LEVELS);
   const label = t(
@@ -55,34 +64,55 @@ export default function MarketDepthPriceLevels({
               currency: currencyLabel,
             })}
           </caption>
-          <thead className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+          <thead className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-text-[11px] tw-font-medium tw-text-iron-500">
             <tr>
               <th
                 scope="col"
-                className="tw-w-[38%] tw-px-0 tw-py-2.5 tw-text-left sm:tw-pr-3"
+                className={`${priceWidth} tw-px-0 tw-py-2.5 tw-text-left sm:tw-pr-3`}
               >
                 {t(locale, "marketDepth.table.price")}
               </th>
               <th
                 scope="col"
                 aria-label={t(locale, "marketDepth.table.quantity")}
-                className="tw-w-[31%] tw-px-0 tw-py-2.5 sm:tw-px-3"
+                className={`${quantityWidth} tw-py-2.5 tw-pl-0 tw-pr-1 sm:tw-px-3`}
               >
                 {t(locale, "marketDepth.table.quantityShort")}
               </th>
               <th
                 scope="col"
                 aria-label={t(locale, "marketDepth.table.cumulative")}
-                className="tw-w-[31%] tw-px-0 tw-py-2.5 sm:tw-pl-3"
+                className={`${totalWidth} tw-px-0 tw-py-2.5 sm:tw-pl-3`}
               >
                 {t(locale, "marketDepth.table.cumulativeShort")}
               </th>
+              {tradeActionsAvailable && (
+                <th scope="col" className="tw-w-[32%] tw-py-2.5">
+                  <span className="tw-sr-only">
+                    {t(locale, "marketDepth.table.action")}
+                  </span>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
             {visibleLevels.map((level) => {
               const open = openPrice === level.unit_price;
               const panelId = disclosureId + "-" + level.unit_price;
+              const levelOrders = getLevelOrders(
+                orders,
+                currency,
+                side,
+                level.unit_price
+              );
+              const singleOrder =
+                level.order_count === 1 && levelOrders.length === 1 && !error
+                  ? levelOrders[0]
+                  : undefined;
+              const toggleDetails = () => {
+                setOpenPrice(open ? null : level.unit_price);
+                if (!open) onLoadOrders();
+              };
               return (
                 <Fragment key={level.unit_price}>
                   <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-white/5">
@@ -102,10 +132,7 @@ export default function MarketDepthPriceLevels({
                           }
                         )}
                         title={level.unit_price}
-                        onClick={() => {
-                          setOpenPrice(open ? null : level.unit_price);
-                          if (!open) onLoadOrders();
-                        }}
+                        onClick={toggleDetails}
                         className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-sm tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-left tw-font-medium tw-tabular-nums tw-text-iron-100 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
                       >
                         <span className="tw-min-w-0 tw-break-words">
@@ -126,28 +153,44 @@ export default function MarketDepthPriceLevels({
                     <td className="tw-break-words tw-px-0 tw-py-2.5 tw-tabular-nums tw-text-iron-500 sm:tw-pl-3">
                       {formatInteger(locale, level.cumulative_quantity)}
                     </td>
+                    {tradeActionsAvailable && (
+                      <td className="tw-break-words tw-py-0 tw-pl-2">
+                        <MarketDepthLevelAction
+                          order={singleOrder}
+                          side={side}
+                          locale={locale}
+                          open={open}
+                          panelId={panelId}
+                          onClick={toggleDetails}
+                        />
+                      </td>
+                    )}
                   </tr>
+                  {tradeActionsAvailable && singleOrder && (
+                    <MarketDepthOrderFeedback
+                      order={singleOrder}
+                      locale={locale}
+                      tableRow
+                    />
+                  )}
                   <tr hidden={!open}>
                     <td
-                      colSpan={3}
+                      colSpan={tradeActionsAvailable ? 4 : 3}
                       className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-px-0 tw-py-0 tw-text-left"
                     >
                       <div id={panelId} className="tw-pl-3">
                         {open && (
                           <MarketDepthOrderDetails
-                            orders={getLevelOrders(
-                              orders,
-                              currency,
-                              side,
-                              level.unit_price
-                            )}
+                            orders={levelOrders}
                             expectedCount={level.order_count}
                             locale={locale}
                             isLoading={isLoading}
                             error={error}
                             onRetry={onLoadOrders}
                             onRefresh={onRefresh}
-                            enableTradeActions
+                            enableTradeActions={
+                              tradeActionsAvailable && !singleOrder
+                            }
                           />
                         )}
                       </div>

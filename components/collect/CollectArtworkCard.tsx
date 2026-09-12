@@ -57,8 +57,8 @@ export default function CollectArtworkCard({
           </p>
         )}
         {artwork.priceLabel && (
-          <div className="tw-flex tw-items-start tw-justify-between tw-gap-2">
-            <div>
+          <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-2">
+            <div className="tw-min-w-0 tw-max-w-full [overflow-wrap:anywhere]">
               <p className="tw-m-0 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-100">
                 {artwork.priceLabel}
               </p>
@@ -92,7 +92,7 @@ export default function CollectArtworkCard({
                 }
                 title={selection.disabledReason}
                 onClick={selection.onToggle}
-                className="tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-transparent tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/40 desktop-hover:hover:tw-text-white"
+                className="tw-ml-auto tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-transparent tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/40 desktop-hover:hover:tw-text-white"
               >
                 {selection.selected ? (
                   <CheckIcon aria-hidden="true" className="tw-size-4" />

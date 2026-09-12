@@ -344,6 +344,12 @@ it.each(["loading", "error"])(
     renderActions();
     const { dialog, trigger, user } = await openOffer();
     await within(dialog).findByRole(state === "loading" ? "status" : "alert");
+    // Finish the dialog's scheduled opening focus before keyboard interaction.
+    await act(async () => {
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => resolve());
+      });
+    });
     const close = within(dialog).getByRole("button", { name: "Close" });
     close.focus();
     await user.keyboard("{Enter}");

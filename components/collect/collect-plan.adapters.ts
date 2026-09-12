@@ -1,18 +1,60 @@
 import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
+import type { ApiCollectAcquisitionPlan } from "@/generated/models/ApiCollectAcquisitionPlan";
+import type { ApiCollectPlanLeg } from "@/generated/models/ApiCollectPlanLeg";
 import { ApiCollectPlanStateEnum } from "@/generated/models/ApiCollectPlan";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { collectAnalysisView } from "./collect.adapters";
-import type { CollectPlanView, CollectProfileView } from "./collect.types";
+import type {
+  CollectPlanScenario,
+  CollectPlanView,
+  CollectProfileView,
+} from "./collect.types";
+import { formatDecimalString, formatNumber } from "@/i18n/format";
+import { collectPlanSelectionCost } from "./collect-plan-selection.helpers";
 import { marketAmount } from "./market.adapters";
 import { MARKET_ZERO } from "./market-validation";
 
-export function collectCostPlanView(
+export function collectPlanForScenario(
   plan: ApiCollectPlan,
+  scenario: CollectPlanScenario
+): ApiCollectPlan {
+  if (scenario === "available" && plan.available_result)
+    return { ...plan, result: plan.available_result };
+  return plan;
+}
+
+function copyCount(legs: readonly ApiCollectPlanLeg[]): string {
+  return legs
+    .reduce((total, leg) => total + BigInt(leg.quantity), 0n)
+    .toString();
+}
+
+function scenarioView(
+  id: CollectPlanScenario,
+  label: string,
+  result: ApiCollectAcquisitionPlan,
+  locale: SupportedLocale
+) {
+  return {
+    id,
+    label,
+    priceLabel: marketAmount(result.total_cost_wei, MARKET_ZERO),
+    detail: t(locale, "collect.plan.scenario.detail", {
+      count: formatNumber(locale, result.legs.length),
+      remaining: formatNumber(locale, result.remaining_requirements.length),
+    }),
+  };
+}
+
+export function collectCostPlanView(
+  source: ApiCollectPlan,
   profile: CollectProfileView,
   title: string,
-  locale: SupportedLocale
+  locale: SupportedLocale,
+  scenario: CollectPlanScenario = "budget"
 ): CollectPlanView | null {
+  const plan = collectPlanForScenario(source, scenario);
   const base = collectAnalysisView(plan.analysis, profile, title, locale);
   if (!base || plan.profile_id !== profile.id) return null;
   const ready = plan.state === ApiCollectPlanStateEnum.Ready;
@@ -34,18 +76,95 @@ export function collectCostPlanView(
         ? "collect.goal.complete"
         : "collect.plan.noPurchases"
     );
+  const purchaseTotal = collectPlanSelectionCost(plan.result.legs);
+  const total = BigInt(plan.result.total_cost_wei);
+  const gas =
+    purchaseTotal !== null && total >= BigInt(purchaseTotal)
+      ? (total - BigInt(purchaseTotal)).toString()
+      : null;
+  const available = source.available_result ?? source.result;
   return {
     ...base,
     id: plan.id,
     revision: plan.revision,
-    requirements: base.requirements.map((requirement) => ({
-      ...requirement,
-      status:
-        requirement.status !== "owned" && !remaining.has(requirement.id)
-          ? "selected"
-          : requirement.status,
-    })),
+    requirements: base.requirements.map((requirement, index) => {
+      const keys = new Set(plan.analysis.requirements[index]?.asset_keys ?? []);
+      const purchased = plan.result.legs.filter((leg) =>
+        keys.has(leg.asset_key)
+      );
+      const priced = available.legs.filter((leg) => keys.has(leg.asset_key));
+      const cost = collectPlanSelectionCost(
+        purchased.length > 0 ? purchased : priced
+      );
+      let availabilityLabel = t(
+        locale,
+        ready ? "collect.plan.notPriced" : "collect.plan.checkingAvailability"
+      );
+      if (priced.length > 0)
+        availabilityLabel = t(locale, "collect.plan.availableCopies", {
+          count: formatDecimalString(locale, copyCount(priced)),
+        });
+      let purchaseLabel: string | undefined;
+      if (purchased.length > 0)
+        purchaseLabel = t(locale, "collect.plan.buyCopies", {
+          count: formatDecimalString(locale, copyCount(purchased)),
+        });
+      else if (
+        priced.length > 0 &&
+        source.budget_wei !== undefined &&
+        scenario === "budget"
+      )
+        purchaseLabel = t(locale, "collect.plan.outsideBudget");
+      return {
+        ...requirement,
+        status:
+          requirement.status !== "owned" && !remaining.has(requirement.id)
+            ? "selected"
+            : requirement.status,
+        availabilityLabel,
+        ...(cost !== null && (purchased.length > 0 || priced.length > 0)
+          ? { priceLabel: marketAmount(cost, MARKET_ZERO) }
+          : {}),
+        ...(purchaseLabel ? { purchaseLabel } : {}),
+      };
+    }),
     totalLabel: marketAmount(plan.result.total_cost_wei, MARKET_ZERO),
+    ...(purchaseTotal !== null
+      ? { purchaseTotalLabel: marketAmount(purchaseTotal, MARKET_ZERO) }
+      : {}),
+    ...(gas !== null
+      ? { gasReserveLabel: marketAmount(gas, MARKET_ZERO) }
+      : {}),
+    outcomeLabel: plan.analysis.counts_toward_profile
+      ? t(locale, "collect.plan.outcome", {
+          owned: formatNumber(
+            locale,
+            plan.result.projected_profile_satisfied_count
+          ),
+          total: formatNumber(locale, plan.analysis.required_count),
+        })
+      : t(locale, "collect.plan.giftOutcome"),
+    scenario,
+    ...(source.available_result && source.budget_wei !== undefined
+      ? {
+          scenarios: [
+            scenarioView(
+              "budget",
+              t(locale, "collect.plan.scenario.budget", {
+                budget: marketAmount(source.budget_wei, MARKET_ZERO),
+              }),
+              source.result,
+              locale
+            ),
+            scenarioView(
+              "available",
+              t(locale, "collect.plan.scenario.available"),
+              source.available_result,
+              locale
+            ),
+          ],
+        }
+      : {}),
     blockers: [],
     assumptions: [
       ...base.assumptions,

@@ -63,7 +63,9 @@ it("requires each manual price and never substitutes a total budget or automatic
   expect(
     screen.queryByRole("textbox", { name: "Offer budget (WETH)" })
   ).not.toBeInTheDocument();
+  expect(screen.getByText("Prices needed: 2")).toBeInTheDocument();
   setPrice(1, "0.1");
+  expect(screen.getByText("Prices needed: 1")).toBeInTheDocument();
   fireEvent.click(
     screen.getByRole("button", { name: "Check amounts and WETH" })
   );

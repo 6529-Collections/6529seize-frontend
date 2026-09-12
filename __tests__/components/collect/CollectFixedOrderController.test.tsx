@@ -326,6 +326,23 @@ it("allows an exact-order retry after a transient prepare failure with the same 
   expect(mockPrepare.mock.calls[1]).toEqual(firstAttempt);
 });
 
+it("does not mislabel a recipient-scope conflict as a changed fixed order", async () => {
+  mockPrepare.mockRejectedValueOnce(
+    Object.assign(new Error("private server details"), {
+      status: 409,
+      response: { body: JSON.stringify({ code: "RECIPIENT_SCOPE_CHANGED" }) },
+    })
+  );
+  renderController();
+  await waitUntilReady();
+  prepareDraft();
+  await waitFor(() =>
+    expect(mockLatestForm?.error).toContain("Your profile's wallets changed")
+  );
+  expect(mockLatestForm?.error).not.toContain("private server details");
+  expect(mockSave).not.toHaveBeenCalled();
+});
+
 it("does not prepare after the actor changes while exact refresh is pending", async () => {
   let resolveExact!: (value: ApiMarketTradeOrder) => void;
   mockFetchExact.mockReturnValueOnce(

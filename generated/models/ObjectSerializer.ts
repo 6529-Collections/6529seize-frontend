@@ -968,7 +968,7 @@ import { ApiCollectOfferAnalysisRequest } from '../models/ApiCollectOfferAnalysi
 import { ApiCollectOfferAnalysisRow    , ApiCollectOfferAnalysisRowStatusEnum         } from '../models/ApiCollectOfferAnalysisRow';
 import { ApiCollectOfferAnalysisTotals } from '../models/ApiCollectOfferAnalysisTotals';
 import { ApiCollectOfferPriceReference, ApiCollectOfferPriceReferenceKindEnum                } from '../models/ApiCollectOfferPriceReference';
-import { ApiCollectPlan , ApiCollectPlanStateEnum                } from '../models/ApiCollectPlan';
+import { ApiCollectPlan , ApiCollectPlanStateEnum                  } from '../models/ApiCollectPlan';
 import { ApiCollectPlanLeg } from '../models/ApiCollectPlanLeg';
 import { ApiCollectPlanOptions } from '../models/ApiCollectPlanOptions';
 import { ApiCollectPlanRemaining } from '../models/ApiCollectPlanRemaining';

@@ -467,7 +467,7 @@ it("discards a late prepare response after a profile switch and starts a fresh i
 
 it("retries an unchanged prepare with the exact request, expiry, and key", async () => {
   mockPrepare
-    .mockRejectedValueOnce(new Error("response lost"))
+    .mockRejectedValueOnce(new TypeError("Failed to fetch"))
     .mockImplementation((request: ApiMarketPrepareRequest) =>
       Promise.resolve(preparedOperation(request))
     );
@@ -476,7 +476,11 @@ it("retries an unchanged prepare with the exact request, expiry, and key", async
   await waitFor(() => expect(mockPrepare).toHaveBeenCalledTimes(1));
   const firstRequest = mockPrepare.mock.calls[0][0] as ApiMarketPrepareRequest;
   const firstKey = mockPrepare.mock.calls[0][1];
-  await waitFor(() => expect(mockLatestForm?.error).toBeDefined());
+  await waitFor(() =>
+    expect(mockLatestForm?.error).toContain(
+      "The trading service could not be reached"
+    )
+  );
 
   jest.spyOn(Date, "now").mockReturnValue(1_800_003_600_000);
   prepareDraft();
