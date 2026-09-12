@@ -4,6 +4,12 @@ import os from "node:os";
 import path from "node:path";
 
 const ROOT = process.cwd();
+const gitBash = path.join(
+  process.env["ProgramFiles"] ?? "",
+  "Git/bin/bash.exe"
+);
+const bash =
+  process.platform === "win32" && fs.existsSync(gitBash) ? gitBash : "bash";
 const { scripts } = JSON.parse(
   fs.readFileSync(path.join(ROOT, "package.json"), "utf8")
 ) as { scripts: Record<string, string> };
@@ -19,7 +25,7 @@ const GATES = [
 const PROBE = [
   'const fs = require("node:fs");',
   'fs.appendFileSync("gate-invocations.log", JSON.stringify({',
-  '  args: process.argv.slice(2), base: process.env.ESLINT_PLUGIN_DIFF_COMMIT',
+  "  args: process.argv.slice(2), base: process.env.ESLINT_PLUGIN_DIFF_COMMIT",
   '}) + "\\n");',
   'if (process.argv.includes("src/fail.ts")) process.exit(2);',
 ].join("\n");
@@ -69,7 +75,7 @@ function runGate(root: string, gate: string) {
   fs.writeFileSync(log, "");
   // Execute the actual package command, including its wrapper guard, against
   // an isolated repository and recording CLI. Never format/lint app fixtures.
-  const result = spawnSync("bash", ["-c", scripts[gate]!], {
+  const result = spawnSync(bash, ["-c", scripts[gate]!], {
     cwd: root,
     env: process.env,
     encoding: "utf8",
@@ -84,8 +90,10 @@ function runGate(root: string, gate: string) {
 }
 
 function createLargeChange(root: string) {
-  const files = Array.from({ length: 420 }, (_, index) =>
-    `src/[locale]/(group)/space and & symbols/${index}-${"segment".repeat(9)}.ts`
+  const files = Array.from(
+    { length: 420 },
+    (_, index) =>
+      `src/[locale]/(group)/space and & symbols/${index}-${"segment".repeat(9)}.ts`
   );
   for (const file of files) write(root, file, "export {};\n");
   write(root, "generated/excluded.ts", "export {};\n");
