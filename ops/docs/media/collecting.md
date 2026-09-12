@@ -2,7 +2,7 @@
 
 ## Overview
 
-Collecting tools help you complete profile sets, buy selected NFTs, plan offers
+Collecting tools help you complete profile sets, collect selected NFTs, plan offers
 and explore TDH. Browse individual artworks on The Memes, 6529 Gradient and NextGen
 Pebbles collection pages, and review trades on the artwork's own page.
 Collecting belongs to your profile: holdings across its confirmed consolidated
@@ -23,25 +23,26 @@ opens the full Memes set when no season is selected. Gradients opens the full
 Gradients set; Pebbles opens its trait-set planner. Collected and Pebbles Trait
 Sets also link to relevant collecting goals.
 
-Supported artwork pages place a priced **Buy** action near the artwork summary,
+Supported artwork pages place a priced **Collect** action near the artwork summary,
 before the longer description and [**Listings and Offers**](feature-card-market-depth.md).
+The actions appear in the order **Collect**, **Make an offer**, then **List**.
 The lowest supported listing is selected automatically. **Deliver to · Change**
-lets you choose the receiving wallet; additional listings remain available under
-**Other listings**. Buy checks the selected order again before showing exact
+appears below Collect and lets you choose the receiving wallet; additional listings
+remain available under **Other listings**. Collect checks the selected order again before showing exact
 terms for wallet approval. A changed order requires another review.
 
 Listing prices load before you connect a wallet. While a price is unavailable,
-the Buy area shows whether listings are loading, could not be loaded, or contain
+the Collect area shows whether listings are loading, could not be loaded, or contain
 no supported orders. **Connect wallet** remains available; connecting is required
 before reviewing a purchase.
 
-**Make an offer** is visible beside buying. **List for sale** appears when a
+**Make an offer** is visible beside Collect. **List** appears when a
 confirmed wallet in the profile holds the NFT. Connect that holding wallet to
 list it; profile consolidation does not grant another wallet permission to sign.
-Before connecting, **List for sale** opens the wallet connection flow so ownership
+Before connecting, **List** opens the wallet connection flow so ownership
 can be checked.
 The more-actions menu contains **Review offers**.
-If ownership is still loading, **List for sale** stays visible but unavailable.
+If ownership is still loading, **List** stays visible but unavailable.
 If that check fails, choose **Try again** beside the action.
 
 The **View The Memes**, **View Gradients** or **View Pebbles** link returns to the
@@ -66,7 +67,7 @@ card page.
    Copies per NFT is the total you want to hold of each required NFT, including
    copies already in your profile.
    Leave the budget cap blank to estimate the full goal. An entered cap includes
-   estimated gas. This is an analysis constraint; buying still requires a fresh
+   estimated gas. This is an analysis constraint; collecting still requires a fresh
    price review and wallet approval.
    Review missing requirements, checked artworks, unavailable items and the
    proposed purchases. A partial plan leaves its unfilled requirements visible.
@@ -99,12 +100,12 @@ includes. Open an artwork for its card page, or select its **+** to add it to
 your purchase selection. The control becomes a checkmark; select it again to
 remove that NFT. The selection stays available while switching between Lowest
 listings and TDH, with its actions kept in view while you scroll.
-**Review purchase** lets you buy some or all selected items;
+**Review purchase** lets you collect some or all selected items;
 **Plan offers** opens a price plan for those NFTs.
 No listing results does not mean that no orders exist elsewhere. If the listing
 source cannot be loaded, use **Try again** or return to the collection page.
 
-### Buy for another wallet
+### Collect for another wallet
 
 **Deliver to** shows the selected destination compactly. Choose **Change** to
 open the mint-style picker with your profile's confirmed wallets. Choose one,
@@ -121,7 +122,7 @@ delivery address for the selection. You can change the destination of each NFT
 and split an edition purchase across addresses. Each allocation must have a
 valid address and the allocated quantities must equal the purchased quantity.
 
-### Buy a selection together
+### Collect a selection together
 
 Select NFTs from Lowest listings, TDH or a completion plan, then open
 **Review purchase**. Select all or keep only the items you want, and check the
@@ -266,7 +267,7 @@ purchase. Pause and expiry retain unresolved operations. A page timeout is not
 proof that a purchase was never sent.
 
 Confirmed acquisitions count permanently toward the rule. Selling or moving
-those NFTs later does not cause the rule to buy replacements. The limits apply
+those NFTs later does not cause the rule to collect replacements. The limits apply
 to this preparation workflow, not arbitrary external wallet transactions or an
 on-chain autonomous mandate.
 

@@ -11,6 +11,7 @@ import { t } from "@/i18n/messages";
 import { fetchCollectAssets } from "@/services/api/collect-api";
 import { useQuery } from "@tanstack/react-query";
 import { lazy, Suspense, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { collectAssetIdentity } from "./collect.adapters";
 import type {
   CollectActionView,
@@ -25,6 +26,9 @@ import { collectProfileWallets } from "./collect-recipient.helpers";
 const CollectTradeController = lazy(() => import("./CollectTradeController"));
 const MAX_DETAIL_LOOKUP_PAGES = 100;
 const ACTIONS: readonly CollectActionView[] = [{ action: "accept" }];
+const OFFER_MESSAGE_KEY = "collect.menu.offer" as const;
+const ACTION_CLASS =
+  "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-text-sm tw-font-medium tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-white";
 
 interface CollectDetailActionsProps {
   readonly collection: Exclude<CollectCollection, "all">;
@@ -60,27 +64,20 @@ function PendingTrade({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-function DetailTrade({
-  collection,
-  tokenId,
-  locale,
-  action,
-  onClose,
-  onMarketChange,
-  inlineBuy = false,
-  onList,
-}: Omit<CollectDetailActionsProps, "title"> & {
-  readonly action: CollectTradeAction;
-  readonly onClose: () => void;
-  readonly inlineBuy?: boolean;
-  readonly onList?: (trigger: HTMLButtonElement) => void;
-}) {
-  const family = {
+function collectFamily(collection: Exclude<CollectCollection, "all">) {
+  return {
     memes: ApiCollectFamily.Memes,
     gradients: ApiCollectFamily.Gradients,
     pebbles: ApiCollectFamily.Pebbles,
   }[collection];
-  const lookup = useQuery({
+}
+
+function useCollectDetailAsset(
+  collection: Exclude<CollectCollection, "all">,
+  tokenId: string
+) {
+  const family = collectFamily(collection);
+  return useQuery({
     queryKey: [QueryKey.COLLECT_ASSETS, "detail", family, tokenId],
     queryFn: async ({ signal }) => {
       const inspected = new Set<string>();
@@ -117,7 +114,31 @@ function DetailTrade({
     retry: false,
     staleTime: 0,
   });
-  if (lookup.isPending) return <PendingTrade locale={locale} />;
+}
+
+function DetailTrade({
+  collection,
+  tokenId,
+  locale,
+  action,
+  onClose,
+  onMarketChange,
+  inlineBuy = false,
+  renderSecondaryActions,
+}: Omit<CollectDetailActionsProps, "title"> & {
+  readonly action: CollectTradeAction;
+  readonly onClose: () => void;
+  readonly inlineBuy?: boolean;
+  readonly renderSecondaryActions?: (assetKey: string | undefined) => ReactNode;
+}) {
+  const lookup = useCollectDetailAsset(collection, tokenId);
+  const secondaryActions = renderSecondaryActions?.(lookup.data?.asset_key);
+  if (lookup.isPending)
+    return (
+      <div className="tw-w-full tw-space-y-3">
+        <PendingTrade locale={locale} />
+      </div>
+    );
   if (lookup.isError)
     return (
       <div className="tw-space-y-2 tw-px-4 md:tw-px-6">
@@ -143,28 +164,32 @@ function DetailTrade({
         asset={lookup.data}
         action={action}
         onClose={onClose}
+        {...(inlineBuy && Boolean(secondaryActions)
+          ? { secondaryActions }
+          : {})}
         {...(onMarketChange ? { onMarketChange } : {})}
       />
-      {inlineBuy && onList && (
-        <CollectOwnerAction assetKey={lookup.data.asset_key} onList={onList} />
-      )}
     </Suspense>
   );
 }
 
 function DetailActions(props: CollectDetailActionsProps) {
+  const inlineLookup = useCollectDetailAsset(props.collection, props.tokenId);
   const [action, setAction] = useState<CollectTradeAction | null>(null);
   const [purchaseSession, setPurchaseSession] = useState(0);
   const opener = useRef<HTMLButtonElement | null>(null);
+  const visibleOffer = useRef<HTMLButtonElement | null>(null);
   const close = () => {
     const trigger = opener.current;
     setAction(null);
     queueMicrotask(() => {
-      if (trigger?.isConnected) trigger.focus();
+      const target =
+        trigger?.closest("[hidden]") === null ? trigger : visibleOffer.current;
+      if (target?.isConnected) target.focus();
     });
   };
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2">
+    <div className="tw-w-full">
       <DetailTrade
         key={purchaseSession}
         collection={props.collection}
@@ -173,37 +198,79 @@ function DetailActions(props: CollectDetailActionsProps) {
         action="buy"
         inlineBuy
         onClose={() => setPurchaseSession((value) => value + 1)}
-        onList={(trigger) => {
-          opener.current = trigger;
-          setAction("list");
-        }}
+        renderSecondaryActions={(assetKey) => (
+          <>
+            <button
+              ref={visibleOffer}
+              type="button"
+              aria-label={t(props.locale, "collect.actionFor", {
+                action: t(props.locale, OFFER_MESSAGE_KEY),
+                title: props.title,
+              })}
+              onClick={(event) => {
+                opener.current = event.currentTarget;
+                setAction("offer");
+              }}
+              className={ACTION_CLASS}
+            >
+              {t(props.locale, OFFER_MESSAGE_KEY)}
+            </button>
+            {assetKey && (
+              <CollectOwnerAction
+                assetKey={assetKey}
+                onList={(trigger) => {
+                  opener.current = trigger;
+                  setAction("list");
+                }}
+              />
+            )}
+            <CollectTradeActions
+              actions={ACTIONS}
+              title={props.title}
+              locale={props.locale}
+              onTrade={(nextAction, trigger) => {
+                opener.current = trigger;
+                setAction(nextAction);
+              }}
+            />
+          </>
+        )}
         {...(props.onMarketChange
           ? { onMarketChange: props.onMarketChange }
           : {})}
       />
-      <button
-        type="button"
-        aria-label={t(props.locale, "collect.actionFor", {
-          action: t(props.locale, "collect.menu.offer"),
-          title: props.title,
-        })}
-        onClick={(event) => {
-          opener.current = event.currentTarget;
-          setAction("offer");
-        }}
-        className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-sm tw-font-medium tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white"
+      <div
+        hidden={inlineLookup.data !== undefined}
+        className={
+          inlineLookup.data === undefined
+            ? "tw-flex tw-flex-wrap tw-items-center tw-gap-2"
+            : "tw-hidden"
+        }
       >
-        {t(props.locale, "collect.menu.offer")}
-      </button>
-      <CollectTradeActions
-        actions={ACTIONS}
-        title={props.title}
-        locale={props.locale}
-        onTrade={(nextAction, trigger) => {
-          opener.current = trigger;
-          setAction(nextAction);
-        }}
-      />
+        <button
+          type="button"
+          aria-label={t(props.locale, "collect.actionFor", {
+            action: t(props.locale, OFFER_MESSAGE_KEY),
+            title: props.title,
+          })}
+          onClick={(event) => {
+            opener.current = event.currentTarget;
+            setAction("offer");
+          }}
+          className={ACTION_CLASS}
+        >
+          {t(props.locale, OFFER_MESSAGE_KEY)}
+        </button>
+        <CollectTradeActions
+          actions={ACTIONS}
+          title={props.title}
+          locale={props.locale}
+          onTrade={(nextAction, trigger) => {
+            opener.current = trigger;
+            setAction(nextAction);
+          }}
+        />
+      </div>
       {action && (
         <CollectTradeDialog open title={props.title} onClose={close}>
           <DetailTrade

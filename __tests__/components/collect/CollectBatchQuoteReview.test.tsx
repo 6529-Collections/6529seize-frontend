@@ -52,7 +52,7 @@ it("shows exact per-NFT prices, full allocated wallets and maximum total with ga
       "Unused gas is not charged. A failed transaction can still use gas."
     )
   ).toBeVisible();
-  fireEvent.click(screen.getByRole("button", { name: /^Buy / }));
+  fireEvent.click(screen.getByRole("button", { name: /^Collect / }));
   expect(p.onConfirm).toHaveBeenCalledTimes(1);
   fireEvent.click(screen.getByRole("button", { name: "Edit purchase" }));
   expect(p.onEdit).toHaveBeenCalledTimes(1);
@@ -61,13 +61,13 @@ it("shows exact per-NFT prices, full allocated wallets and maximum total with ga
 it("cannot confirm without a reviewed gas cap, while busy, or with a controller blocker", () => {
   const p = props();
   const rendered = render(<CollectBatchQuoteReview {...p} busy />);
-  fireEvent.click(screen.getByRole("button", { name: /^Buy / }));
+  fireEvent.click(screen.getByRole("button", { name: /^Collect / }));
   expect(p.onConfirm).not.toHaveBeenCalled();
   rendered.rerender(
     <CollectBatchQuoteReview {...p} disabledReason="Review changed" />
   );
   expect(screen.getByText("Review changed")).toBeVisible();
-  expect(screen.getByRole("button", { name: /^Buy / })).toBeDisabled();
+  expect(screen.getByRole("button", { name: /^Collect / })).toBeDisabled();
   rendered.rerender(<CollectBatchQuoteReview {...p} canEdit={false} />);
   expect(
     screen.queryByRole("button", { name: "Edit purchase" })
@@ -76,7 +76,7 @@ it("cannot confirm without a reviewed gas cap, while busy, or with a controller 
   delete operation.transaction;
   rendered.rerender(<CollectBatchQuoteReview {...p} operation={operation} />);
   expect(screen.getByText("Gas quote unavailable")).toBeVisible();
-  expect(screen.getByRole("button", { name: /^Buy / })).toBeDisabled();
+  expect(screen.getByRole("button", { name: /^Collect / })).toBeDisabled();
   rendered.rerender(
     <CollectBatchQuoteReview
       {...p}
@@ -87,6 +87,6 @@ it("cannot confirm without a reviewed gas cap, while busy, or with a controller 
     />
   );
   expect(
-    screen.queryByRole("button", { name: /^Buy / })
+    screen.queryByRole("button", { name: /^Collect / })
   ).not.toBeInTheDocument();
 });

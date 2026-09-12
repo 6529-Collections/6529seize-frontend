@@ -23,6 +23,7 @@ interface UseCollectTradeOrdersOptions {
   readonly operation: ApiMarketOperation | null;
   readonly layout: "standard" | "inline-buy";
   readonly initialOrder?: ApiMarketTradeOrder | undefined;
+  readonly fixedOrder?: boolean | undefined;
   readonly initialQuantity?: string | undefined;
   readonly initialRecipient?: string | undefined;
   readonly initialUnitPriceEth?: string | undefined;
@@ -38,6 +39,7 @@ export function useCollectTradeOrders({
   operation,
   layout,
   initialOrder,
+  fixedOrder = false,
   initialQuantity,
   initialRecipient,
   initialUnitPriceEth,
@@ -67,7 +69,7 @@ export function useCollectTradeOrders({
         action === "buy" ? "LISTING" : "OFFER",
         signal
       ),
-    enabled: needsOrder && !operation && Boolean(assetKey),
+    enabled: needsOrder && !fixedOrder && !operation && Boolean(assetKey),
     staleTime: 0,
   });
   const buyOrders = inlineBuy
@@ -82,7 +84,7 @@ export function useCollectTradeOrders({
       })
     : [];
   const selectedOrder =
-    chosenOrder ?? (inlineBuy ? (buyOrders[0] ?? null) : null);
+    chosenOrder ?? (inlineBuy && !fixedOrder ? (buyOrders[0] ?? null) : null);
   const automaticQuantity = selectedOrder
     ? collectOrderPurchaseQuantity(selectedOrder)
     : null;

@@ -16,6 +16,7 @@ import { MARKET_ZERO } from "./market-validation";
 type Props = ComponentProps<typeof CollectTradeForm> & {
   readonly amountWei: string | null;
   readonly orderOptions?: ReactNode;
+  readonly secondaryActions?: ReactNode;
   readonly quantityStep?: string;
   readonly onSplitDelivery?: (() => void) | undefined;
 };
@@ -64,15 +65,6 @@ export default function CollectInlineBuyForm(props: Props) {
           props.onPrepare(props.draft);
       }}
     >
-      <CollectDeliveryControl
-        profile={props.recipientProfile}
-        payingWallet={props.makerLabel}
-        value={recipient}
-        disabled={props.loading}
-        invalid={invalid === "recipient"}
-        errorId={`${id}-error`}
-        onChange={(value) => change({ recipient: value })}
-      />
       {props.maxQuantity !== (props.quantityStep ?? "1") && (
         <label className="tw-flex tw-items-center tw-gap-3 tw-text-xs tw-text-iron-300">
           <span>{t(locale, "collect.trade.quantity")}</span>
@@ -134,23 +126,35 @@ export default function CollectInlineBuyForm(props: Props) {
           {props.disabledReason}
         </p>
       )}
-      <Button
-        type="submit"
-        variant="action"
-        size="lg"
-        loading={props.loading}
-        disabled={
-          props.amountWei === null ||
-          Boolean(props.disabledReason) ||
-          (external && !props.draft.acknowledgeExternalRecipient)
-        }
-      >
-        {props.amountWei === null
-          ? t(locale, "collect.action.buy")
-          : t(locale, "collect.buy.atPrice", {
-              price: marketAmount(props.amountWei, MARKET_ZERO),
-            })}
-      </Button>
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+        <Button
+          type="submit"
+          variant="action"
+          size="lg"
+          loading={props.loading}
+          disabled={
+            props.amountWei === null ||
+            Boolean(props.disabledReason) ||
+            (external && !props.draft.acknowledgeExternalRecipient)
+          }
+        >
+          {props.amountWei === null
+            ? t(locale, "collect.action.buy")
+            : t(locale, "collect.buy.atPrice", {
+                price: marketAmount(props.amountWei, MARKET_ZERO),
+              })}
+        </Button>
+        {props.secondaryActions}
+      </div>
+      <CollectDeliveryControl
+        profile={props.recipientProfile}
+        payingWallet={props.makerLabel}
+        value={recipient}
+        disabled={props.loading}
+        invalid={invalid === "recipient"}
+        errorId={`${id}-error`}
+        onChange={(value) => change({ recipient: value })}
+      />
       {props.onSplitDelivery && (
         <button
           type="button"
