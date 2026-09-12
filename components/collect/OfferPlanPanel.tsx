@@ -2,10 +2,9 @@
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatDecimalString, formatInteger, formatTime } from "@/i18n/format";
+import { formatInteger } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import { formatEther } from "viem";
 import { isCollectProfileWallet } from "./collect-recipient.helpers";
 import {
   applyOfferPrices,
@@ -33,6 +32,8 @@ import { collectPlanSelectionCost } from "./collect-plan-selection.helpers";
 import { MARKET_BATCH_LIMITS } from "./market-batch-validation";
 import OfferPlanItem from "./OfferPlanItem";
 import OfferPlanBuySummary from "./OfferPlanBuySummary";
+import OfferPlanCommitmentSummary from "./OfferPlanCommitmentSummary";
+import OfferPlanExplanation from "./OfferPlanExplanation";
 import OfferPlanPricing, { OFFER_INPUT_CLASS } from "./OfferPlanPricing";
 import { useCollectPlanMetadata } from "./CollectPlanMetadataProvider";
 import { matchingCollectAsset } from "./collect-plan-metadata";
@@ -232,10 +233,6 @@ function OfferPlanContents({
                 code === "BLEND_invalid_quantity"
             )
       ));
-  const money = (amount: bigint | string) =>
-    t(locale, "collect.offerPlan.weth", {
-      amount: formatDecimalString(locale, formatEther(BigInt(amount))),
-    });
   const automaticKey = JSON.stringify([
     controls.method,
     controls.blendTier,
@@ -726,92 +723,21 @@ function OfferPlanContents({
             onReview={handleReviewBuys}
           />
         )}
-        <div className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-2">
-          <span className="tw-text-sm tw-text-iron-300">
-            {t(locale, "collect.offerPlan.proposed", {
-              count: formatInteger(locale, totals.priced),
-            })}
-          </span>
-          <strong className="tw-break-all tw-text-base tw-font-medium tw-tabular-nums tw-text-iron-100">
-            {money(totals.amount)}
-          </strong>
-        </div>
-        {totals.unresolved > 0 && (
-          <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-            {t(locale, "collect.offerPlan.unpriced", {
-              count: formatInteger(locale, totals.unresolved),
-            })}
-          </p>
-        )}
-        {publishedAmount !== null && publishedAmount > 0n && (
-          <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-            {t(locale, "collect.offerPlan.committed", {
-              amount: money(publishedAmount),
-            })}
-          </p>
-        )}
-        {pendingAmount !== null && pendingAmount > 0n && (
-          <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-            {t(locale, "collect.offerPlan.pendingCommitment", {
-              amount: money(pendingAmount),
-            })}
-          </p>
-        )}
-        {pendingOffers
-          .filter((offer) =>
+        <OfferPlanCommitmentSummary
+          totals={totals}
+          publishedAmount={publishedAmount}
+          pendingAmount={pendingAmount}
+          visiblePendingOffers={pendingOffers.filter((offer) =>
             visible.some((row) => row.assetKey === offer.assetKey)
-          )
-          .map((offer) => (
-            <button
-              key={offer.operationId}
-              type="button"
-              className={TEXT_BUTTON}
-              disabled={busy || !onReviewPending}
-              onClick={() => onReviewPending?.(offer)}
-            >
-              {t(locale, "collect.offerPlan.checkPending", {
-                token: offer.assetKey.split(":")[2] ?? "—",
-              })}
-            </button>
-          ))}
-        {exceedsBudget && (
-          <p role="alert" className="tw-m-0 tw-text-sm tw-text-error">
-            {t(locale, "collect.offerPlan.overBudget")}
-          </p>
-        )}
-        {fundingConflict && (
-          <p role="alert" className="tw-m-0 tw-text-sm tw-text-error">
-            {t(locale, "collect.offerPlan.overFunding")}
-          </p>
-        )}
-        {analysis && (
-          <p className="tw-m-0 tw-text-xs tw-leading-relaxed tw-text-iron-400">
-            {t(locale, "collect.offerPlan.fundingSnapshot", {
-              commitments: money(analysis.trackedLiabilityWei),
-              available: money(analysis.availableWei),
-              time: formatTime(locale, analysis.createdAt),
-            })}
-          </p>
-        )}
+          )}
+          busy={busy}
+          onReviewPending={onReviewPending}
+          exceedsBudget={exceedsBudget}
+          fundingConflict={fundingConflict}
+          analysis={analysis}
+        />
       </div>
-      <details className="tw-text-xs tw-leading-relaxed tw-text-iron-400">
-        <summary className="tw-min-h-6 tw-cursor-pointer tw-rounded-md tw-py-1 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
-          {t(locale, "collect.offerPlan.howItWorks")}
-        </summary>
-        <p>{t(locale, "collect.offerPlan.independent")}</p>
-        <p>{t(locale, "collect.offerPlan.observed")}</p>
-        <p>{t(locale, "collect.offerPlan.liability")}</p>
-        {analysis && (
-          <>
-            <p>{analysis.policyDescription}</p>
-            <p>
-              {t(locale, "collect.offerPlan.policy", {
-                policy: analysis.policy,
-              })}
-            </p>
-          </>
-        )}
-      </details>
+      <OfferPlanExplanation analysis={analysis} />
     </section>
   );
 }

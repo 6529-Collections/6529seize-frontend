@@ -6,7 +6,9 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import CollectPlanMetadataProvider from "@/components/collect/CollectPlanMetadataProvider";
+import CollectPlanMetadataProvider, {
+  useCollectPlanMetadata,
+} from "@/components/collect/CollectPlanMetadataProvider";
 import OfferPlanPanel from "@/components/collect/OfferPlanPanel";
 import { fetchCollectAssets } from "@/services/api/collect-api";
 import type { ApiCollectAssetsPage } from "@/generated/models/ApiCollectAssetsPage";
@@ -29,6 +31,113 @@ jest.mock("@/components/collect/CollectAssetMedia", () => ({
     <span role="img" aria-label={name} />
   ),
 }));
+
+beforeEach(() => {
+  jest.mocked(fetchCollectAssets).mockReset();
+});
+
+function MetadataNames() {
+  const { assets } = useCollectPlanMetadata();
+  return (
+    <span>{[...assets.values()].map((asset) => asset.name).join(", ")}</span>
+  );
+}
+
+test("loads canonical metadata when AbortSignal.any and timeout are unavailable", async () => {
+  const methods = ["any", "timeout"] as const;
+  const original = methods.map((method) =>
+    Object.getOwnPropertyDescriptor(AbortSignal, method)
+  );
+  for (const method of methods)
+    Object.defineProperty(AbortSignal, method, {
+      configurable: true,
+      value: undefined,
+    });
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: Infinity } },
+  });
+  let view: ReturnType<typeof render> | undefined;
+  try {
+    const asset = offerAsset(1);
+    jest.mocked(fetchCollectAssets).mockResolvedValueOnce({
+      count: 1,
+      page: 1,
+      next: false,
+      catalog_version: "v1",
+      data: [asset],
+    });
+    view = render(
+      <QueryClientProvider client={client}>
+        <CollectPlanMetadataProvider
+          assetKeys={[asset.asset_key]}
+          knownAssets={[]}
+          catalog={undefined}
+        >
+          <MetadataNames />
+        </CollectPlanMetadataProvider>
+      </QueryClientProvider>
+    );
+    expect(await screen.findByText(asset.name)).toBeVisible();
+    expect(fetchCollectAssets).toHaveBeenCalledTimes(1);
+    expect(fetchCollectAssets).toHaveBeenCalledWith(
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
+  } finally {
+    view?.unmount();
+    client.clear();
+    methods.forEach((method, index) => {
+      const descriptor = original[index];
+      if (descriptor) Object.defineProperty(AbortSignal, method, descriptor);
+      else Reflect.deleteProperty(AbortSignal, method);
+    });
+  }
+});
+
+test("forwards query cancellation and discards late metadata after unmount", async () => {
+  const asset = offerAsset(1);
+  let complete!: (page: ApiCollectAssetsPage) => void;
+  let requestSignal: AbortSignal | undefined;
+  jest.mocked(fetchCollectAssets).mockImplementationOnce(({ signal }) => {
+    requestSignal = signal;
+    return new Promise((resolve) => {
+      complete = resolve;
+    });
+  });
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: Infinity } },
+  });
+  const view = render(
+    <QueryClientProvider client={client}>
+      <CollectPlanMetadataProvider
+        assetKeys={[asset.asset_key]}
+        knownAssets={[]}
+        catalog={undefined}
+      >
+        <MetadataNames />
+      </CollectPlanMetadataProvider>
+    </QueryClientProvider>
+  );
+  await waitFor(() => expect(requestSignal).toBeDefined());
+  expect(requestSignal?.aborted).toBe(false);
+  view.unmount();
+  expect(requestSignal?.aborted).toBe(true);
+  await act(async () => {
+    complete({
+      count: 1,
+      page: 1,
+      next: false,
+      catalog_version: "v1",
+      data: [asset],
+    });
+  });
+  expect(
+    client
+      .getQueryCache()
+      .getAll()
+      .every((query) => query.state.data === undefined)
+  ).toBe(true);
+  client.clear();
+});
 
 test("late canonical artwork metadata supplies thumbnail, artist and token without resetting an edited offer", async () => {
   const asset = {

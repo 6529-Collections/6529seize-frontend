@@ -4,10 +4,7 @@ import { resolveCollectCustomExpiry } from "./collect-custom-expiry";
 // wall-clock time by up to two minutes. Keep the requested expiry within that cap.
 const COLLECT_ORDER_EXPIRY_MARGIN_SECONDS = 120;
 
-export function collectOrderExpiry(
-  expiryHours: string,
-  now = Date.now()
-): number {
+function collectOrderExpiry(expiryHours: string, now = Date.now()): number {
   return (
     Math.floor(now / 1000) +
     Number(expiryHours) * 3600 -

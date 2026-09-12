@@ -487,3 +487,56 @@ it("checks the actual click time before reviewing purchases even before the expi
     clock.mockRestore();
   }
 });
+
+it("accepts a fresh refresh result when the prior analysis expires while the refresh is pending", async () => {
+  jest.useFakeTimers();
+  const p = props();
+  const { unmount } = render(<OfferPlanPanel {...p} blended buyOptions={[]} />);
+  try {
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(350);
+    });
+    expect(review(1)).toBeEnabled();
+    expect(p.analyze).toHaveBeenCalledTimes(2);
+    let resolveObserved!: (value: OfferPlanAnalysisView) => void;
+    p.analyze.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveObserved = resolve;
+        })
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Refresh prices" }));
+    expect(review(1)).toBeDisabled();
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(60_000);
+    });
+    expect(p.analyze).toHaveBeenCalledTimes(3);
+    expect(p.onReviewOffer).not.toHaveBeenCalled();
+    await act(async () => {
+      resolveObserved(
+        offerAnalysis(
+          [1, 2].map((id) => ({
+            ...offerPrice(id),
+            references: [
+              {
+                kind: "bid",
+                currency: "WETH",
+                amountWei: "100000000000000000",
+                observedAt: new Date().toISOString(),
+              },
+            ],
+          }))
+        )
+      );
+    });
+    expect(p.analyze).toHaveBeenCalledTimes(4);
+    expect(review(1)).toBeEnabled();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(p.onReviewOffer).not.toHaveBeenCalled();
+    fireEvent.click(review(1));
+    expect(p.onReviewOffer).toHaveBeenCalledTimes(1);
+  } finally {
+    unmount();
+    jest.useRealTimers();
+  }
+});

@@ -12,6 +12,7 @@ import CollectAssetMedia from "./CollectAssetMedia";
 import { collectAssetHref } from "./collect.adapters";
 import { collectBuyAmount, collectListingKey } from "./collect-buy.helpers";
 import { collectPlanAmount } from "./collect-plan-amounts";
+import { PhotoIcon } from "@heroicons/react/24/outline";
 
 export default function CollectTdhDailyResults({
   plan,
@@ -48,11 +49,12 @@ export default function CollectTdhDailyResults({
       {plan.items.length > 0 ? (
         <>
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-            <Button onClick={onReview}>
+            <Button className="tw-min-h-11" onClick={onReview}>
               {t(locale, "collect.tdhTarget.review")}
             </Button>
             {onPlanOffers && (
               <Button
+                className="tw-min-h-11"
                 variant="tertiary"
                 onClick={onPlanOffers}
                 disabled={Boolean(offersDisabledReason)}
@@ -70,55 +72,70 @@ export default function CollectTdhDailyResults({
             {t(locale, "collect.tdhTarget.reviewHint")}
           </p>
           <ol className="tw-m-0 tw-list-none tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/10 tw-p-0">
-            {plan.items.slice(0, visible).map((item) => (
-              <li
-                key={collectListingKey(item.order)}
-                className="tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-py-3"
-              >
-                <Link
-                  href={collectAssetHref(item.asset)}
-                  className="tw-relative tw-block tw-size-12 tw-shrink-0 tw-overflow-hidden tw-rounded-sm"
+            {plan.items.slice(0, visible).map((item) => {
+              const amount = collectBuyAmount(item.order, item.quantity);
+              return (
+                <li
+                  key={collectListingKey(item.order)}
+                  className="tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-py-3"
                 >
-                  <CollectAssetMedia
-                    src={item.asset.image_url}
-                    name={item.asset.name}
-                  />
-                </Link>
-                <div className="tw-min-w-0 tw-flex-1">
                   <Link
                     href={collectAssetHref(item.asset)}
-                    className="tw-break-words tw-text-sm tw-text-iron-100 tw-no-underline hover:tw-underline"
+                    aria-label={t(locale, "collect.artworkLink", {
+                      title: item.asset.name,
+                    })}
+                    className="tw-relative tw-block tw-size-12 tw-shrink-0 tw-overflow-hidden tw-rounded-sm"
                   >
-                    {item.asset.name}
-                  </Link>
-                  <p className="tw-m-0 tw-mt-1 tw-text-xs tw-text-iron-400">
-                    {t(
-                      locale,
-                      item.quantity === "1"
-                        ? "collect.tdhTarget.oneEdition"
-                        : "collect.tdhTarget.quantity",
-                      { quantity: formatDecimalString(locale, item.quantity) }
+                    {item.asset.image_url ? (
+                      <CollectAssetMedia
+                        src={item.asset.image_url}
+                        name={item.asset.name}
+                      />
+                    ) : (
+                      <span
+                        aria-hidden="true"
+                        className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-iron-950 tw-text-iron-600"
+                      >
+                        <PhotoIcon className="tw-size-5" />
+                      </span>
                     )}
-                  </p>
-                </div>
-                <details className="tw-max-w-[45%] tw-text-right tw-text-sm tw-tabular-nums tw-text-iron-200 [overflow-wrap:anywhere]">
-                  <summary className="tw-min-h-11 tw-cursor-pointer tw-rounded-lg tw-py-3 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
-                    {eth(collectBuyAmount(item.order, item.quantity) ?? "0")}
-                  </summary>
-                  <span className="tw-text-xs tw-text-iron-400">
-                    {
-                      collectPlanAmount(
+                  </Link>
+                  <div className="tw-min-w-0 tw-flex-1">
+                    <Link
+                      href={collectAssetHref(item.asset)}
+                      className="tw-break-words tw-text-sm tw-text-iron-100 tw-no-underline hover:tw-underline"
+                    >
+                      {item.asset.name}
+                    </Link>
+                    <p className="tw-m-0 tw-mt-1 tw-text-xs tw-text-iron-400">
+                      {t(
                         locale,
-                        collectBuyAmount(item.order, item.quantity) ?? "0"
-                      ).exact
-                    }
-                  </span>
-                </details>
-              </li>
-            ))}
+                        item.quantity === "1"
+                          ? "collect.tdhTarget.oneEdition"
+                          : "collect.tdhTarget.quantity",
+                        { quantity: formatDecimalString(locale, item.quantity) }
+                      )}
+                    </p>
+                  </div>
+                  {amount === null ? (
+                    <span className="tw-text-iron-400">—</span>
+                  ) : (
+                    <details className="tw-max-w-[45%] tw-text-right tw-text-sm tw-tabular-nums tw-text-iron-200 [overflow-wrap:anywhere]">
+                      <summary className="tw-min-h-11 tw-cursor-pointer tw-rounded-lg tw-py-3 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+                        {eth(amount)}
+                      </summary>
+                      <span className="tw-text-xs tw-text-iron-400">
+                        {collectPlanAmount(locale, amount).exact}
+                      </span>
+                    </details>
+                  )}
+                </li>
+              );
+            })}
           </ol>
           {visible < plan.items.length && (
             <Button
+              className="tw-min-h-11"
               variant="tertiary"
               onClick={() => setVisible((count) => count + 12)}
             >

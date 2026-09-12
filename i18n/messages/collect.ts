@@ -123,7 +123,8 @@ export const COLLECT_MESSAGES = {
     "Connect your profile to calculate a purchase plan.",
   "collect.tdhDaily.connectAction": "Connect profile",
   "collect.tdhDaily.derivedTarget": "Calculated from your ETH budget",
-  "collect.tdhDaily.derivedBudget": "Calculated from your daily target",
+  "collect.tdhDaily.derivedBudget":
+    "Calculated from your daily target; rounded up to 4 decimals",
   "collect.plan.exactAmounts": "Exact amounts",
   "collect.plan.exactPurchases": "NFT purchases",
   "collect.plan.exactGas": "Network fee reserve",

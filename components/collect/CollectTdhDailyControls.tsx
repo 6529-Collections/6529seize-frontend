@@ -147,7 +147,12 @@ export default function CollectTdhDailyControls({
           <p className="tw-m-0 tw-text-sm tw-text-iron-300">
             {t(locale, "collect.tdhDaily.connect")}
           </p>
-          <Button variant="secondary" size="sm" onClick={onConnect}>
+          <Button
+            className="tw-min-h-11"
+            variant="secondary"
+            size="sm"
+            onClick={onConnect}
+          >
             {t(locale, "collect.tdhDaily.connectAction")}
           </Button>
         </div>
@@ -180,7 +185,12 @@ export default function CollectTdhDailyControls({
           <p role="alert" className="tw-m-0 tw-text-sm tw-text-iron-300">
             {t(locale, "collect.tdhDaily.failed")}
           </p>
-          <Button variant="secondary" size="sm" onClick={onRetry}>
+          <Button
+            className="tw-min-h-11"
+            variant="secondary"
+            size="sm"
+            onClick={onRetry}
+          >
             {t(locale, "collect.tdhDaily.retry")}
           </Button>
         </div>

@@ -6,13 +6,9 @@ const MIN_DURATION_SECONDS = 300;
 // thirty days. Its accepted block can lag wall time by up to two minutes.
 const MAX_DURATION_SECONDS = 30 * 86_400 - 120;
 
-export type CollectCustomExpiryIssue =
-  | "invalid"
-  | "ambiguous"
-  | "tooSoon"
-  | "tooLate";
+type CollectCustomExpiryIssue = "invalid" | "ambiguous" | "tooSoon" | "tooLate";
 
-export type CollectCustomExpiryResult =
+type CollectCustomExpiryResult =
   | { readonly issue: null; readonly expiresAt: number }
   | { readonly issue: CollectCustomExpiryIssue; readonly expiresAt: null };
 

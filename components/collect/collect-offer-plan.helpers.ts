@@ -16,7 +16,6 @@ import type {
 
 const UINT_MAX = 2n ** 256n - 1n;
 export const COLLECT_ANALYSIS_CLOCK_SKEW_MS = 15_000;
-export const OFFER_EXPIRY_HOURS = ["24", "168", "720"] as const;
 
 function offerSelectionKey(row: CollectOfferSelection): string {
   return row.assetKey ?? row.asset?.asset_key ?? "";

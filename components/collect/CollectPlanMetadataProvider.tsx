@@ -3,6 +3,7 @@
 import { createContext, useContext, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import { createFetchDeadline } from "@/lib/fetch/fetchDeadline";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
 import type { ApiCollectCatalog } from "@/generated/models/ApiCollectCatalog";
 import {
@@ -44,11 +45,20 @@ export default function CollectPlanMetadataProvider({
       catalog?.version,
       needed,
     ],
-    queryFn: ({ signal }) =>
-      loadCollectPlanMetadata(
-        needed,
-        AbortSignal.any([signal, AbortSignal.timeout(15_000)])
-      ),
+    queryFn: async ({ signal }) => {
+      const deadline = createFetchDeadline(
+        signal,
+        15_000,
+        () => new Error("Collecting metadata timed out")
+      );
+      try {
+        return await deadline.run(() =>
+          loadCollectPlanMetadata(needed, deadline.signal)
+        );
+      } finally {
+        deadline.dispose();
+      }
+    },
     enabled: needed.length > 0,
     staleTime: 5 * 60_000,
     retry: 1,

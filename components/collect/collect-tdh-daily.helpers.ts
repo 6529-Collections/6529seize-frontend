@@ -269,9 +269,13 @@ export function validateCollectDailyTdhPlan(
 export function collectDailyTdhEstimate(
   plan: ApiCollectDailyTdhPlan
 ): CollectTdhDailyEstimate<ApiCollectDailyTdhPlan> {
+  const cost = BigInt(plan.purchase_cost_wei);
+  const displayStep = 10n ** 14n;
   return {
     dailyTdh: formatUnits(BigInt(plan.base_tdh_per_day_hundredths), 2),
-    purchaseEth: formatEther(BigInt(plan.purchase_cost_wei)),
+    purchaseEth: formatEther(
+      ((cost + displayStep - 1n) / displayStep) * displayStep
+    ),
     payload: plan,
   };
 }

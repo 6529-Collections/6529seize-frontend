@@ -16,7 +16,7 @@ import {
   resolveCollectCustomExpiry,
 } from "./collect-custom-expiry";
 
-export interface CollectOrderExpiryValue {
+interface CollectOrderExpiryValue {
   readonly expiryHours: string;
   readonly expiryDateTime?: string;
 }
@@ -64,6 +64,7 @@ export default function CollectOrderExpiryPicker({
   return (
     <div className="tw-min-w-0 tw-space-y-2">
       <label
+        id={`${id}-duration-label`}
         htmlFor={`${id}-duration`}
         className="tw-block tw-text-sm tw-text-iron-200"
       >
@@ -91,7 +92,7 @@ export default function CollectOrderExpiryPicker({
               event.currentTarget.click();
             }
           }}
-          aria-label={fieldLabel}
+          aria-labelledby={`${id}-duration-label`}
           aria-invalid={invalid}
           aria-describedby={invalid ? errorId : undefined}
           className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
@@ -146,11 +147,11 @@ export default function CollectOrderExpiryPicker({
             onChange={(event) =>
               onChange({ ...value, expiryDateTime: event.target.value })
             }
-            aria-invalid={invalid}
+            aria-invalid={Boolean(localError)}
             aria-describedby={[
               `${id}-zone`,
               `${id}-instant`,
-              invalid ? `${id}-invalid` : undefined,
+              localError ? `${id}-invalid` : undefined,
             ]
               .filter(Boolean)
               .join(" ")}

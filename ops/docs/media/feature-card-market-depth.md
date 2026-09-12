@@ -15,8 +15,9 @@ in Listings & offers, without a second set of prices or a market-cap estimate
 in the artwork details.
 
 **About this artwork** contains traits, metadata and original files where
-available. It opens initially and can be collapsed independently of the market
-section. Collapsing a section keeps its selection and active review state.
+available. It starts collapsed on ordinary artwork URLs; existing artwork-focus
+links open it. You can expand or collapse it independently of the market section.
+Collapsing a section keeps its selection and active review state.
 
 On Memes cards, supply shows **Edition size**, **Ex. research** and
 **Ex. museum & research**, alongside **Holding wallets**. Excluded counts remove

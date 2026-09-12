@@ -68,6 +68,14 @@ it("validates current exact multi-edition acquisitions and preserves actual amou
     purchaseEth: "0.2",
   });
 });
+
+it("rounds the derived ETH input upward for display without changing the exact basket", () => {
+  const plan = dailyPlan();
+  plan.purchase_cost_wei = "200000000000000010";
+  const estimate = collectDailyTdhEstimate(plan);
+  expect(estimate.purchaseEth).toBe("0.2001");
+  expect(estimate.payload.purchase_cost_wei).toBe("200000000000000010");
+});
 it.each([
   [
     "profile",

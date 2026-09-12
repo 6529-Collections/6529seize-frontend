@@ -513,7 +513,7 @@ it("does not treat proposal amounts as affordability or consume tracked commitme
 
 it("allows bounded server observation skew but never gives expired evidence a grace period", () => {
   const future = new Date(NOW + 15000).toISOString();
-  const shifted = {
+  const shifted: OfferPlanAnalysisView = {
     ...analysis(),
     createdAt: future,
     prices: [

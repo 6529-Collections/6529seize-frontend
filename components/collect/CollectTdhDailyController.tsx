@@ -134,7 +134,11 @@ function DailyController<T>({ calculate, onConnect, renderResult }: Props<T>) {
           if (currentOutcome.current === current) action();
         })}
       {estimate && (
-        <Button variant="tertiary" onClick={onRecalculate}>
+        <Button
+          className="tw-min-h-11"
+          variant="tertiary"
+          onClick={onRecalculate}
+        >
           {t(locale, "collect.tdhDaily.recalculate")}
         </Button>
       )}

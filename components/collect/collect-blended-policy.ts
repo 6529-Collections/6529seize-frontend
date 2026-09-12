@@ -12,7 +12,7 @@ import type {
 
 export type BlendTier = "conservative" | "base" | "aggressive";
 export type BlendRoute = "buy" | "offer";
-export type BlendReason =
+type BlendReason =
   | "excluded"
   | "locked"
   | "invalid_quantity"
@@ -43,7 +43,7 @@ export interface BlendedPolicyInput {
   readonly routeOverrides?: ReadonlyMap<string, BlendRoute> | undefined;
 }
 
-export interface BlendedRowProposal {
+interface BlendedRowProposal {
   readonly assetKey: string;
   readonly route: BlendRoute | "manual" | "locked" | "excluded";
   readonly unitAmountWei: string | null;
@@ -52,7 +52,7 @@ export interface BlendedRowProposal {
   readonly sourceValidUntil: string | null;
 }
 
-export interface BlendedPolicyProposal {
+interface BlendedPolicyProposal {
   readonly rows: readonly BlendedRowProposal[];
   /** Includes explicit buy choices even when their evidence needs refreshing. */
   readonly buyKeys: ReadonlySet<string>;
