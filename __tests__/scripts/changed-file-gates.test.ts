@@ -85,8 +85,6 @@ interface Invocation {
 function runGate(root: string, gate: string) {
   const log = path.join(root, "gate-invocations.log");
   fs.writeFileSync(log, "");
-  if (!pnpmPath)
-    throw new Error("Run this test through the 6529 package wrapper.");
   // Exercise pnpm's real platform shell, including cmd.exe on Windows. Clear
   // any parent wrapper override so Bash cannot hide broken package quoting.
   const env = { ...process.env };
@@ -96,17 +94,37 @@ function runGate(root: string, gate: string) {
   }
   env["npm_config_userconfig"] = path.join(root, ".npmrc");
   env["npm_config_shell_emulator"] = "false";
-  const nativePnpm = pnpmPath.toLowerCase().endsWith(".exe");
-  const result = spawnSync(
-    nativePnpm ? pnpmPath : process.execPath,
-    [...(nativePnpm ? [] : [pnpmPath]), "run", gate],
-    {
-      cwd: root,
-      env,
-      encoding: "utf8",
-      timeout: 30000,
-    }
-  );
+  // `6529 exec jest` does not set npm_execpath. Use the installed pnpm on PATH
+  // in that lane, excluding the repo shim that would reset our fixture cwd.
+  const pathKey = Object.keys(env).find((key) => key.toLowerCase() === "path");
+  if (pathKey) {
+    env[pathKey] = env[pathKey]!.split(path.delimiter)
+      .filter(
+        (directory) =>
+          path.resolve(directory).toLowerCase() !==
+          path.join(ROOT, "bin").toLowerCase()
+      )
+      .join(path.delimiter);
+  }
+  const nativePnpm = pnpmPath?.toLowerCase().endsWith(".exe");
+  const windowsFallback = !pnpmPath && process.platform === "win32";
+  const command = windowsFallback
+    ? (process.env["ComSpec"] ?? "cmd.exe")
+    : pnpmPath
+      ? nativePnpm
+        ? pnpmPath
+        : process.execPath
+      : "pnpm";
+  // Only fixed gate names enter cmd.exe; selected paths remain native Node args.
+  const args = windowsFallback
+    ? ["/d", "/s", "/c", `pnpm run ${gate}`]
+    : [...(pnpmPath && !nativePnpm ? [pnpmPath] : []), "run", gate];
+  const result = spawnSync(command, args, {
+    cwd: root,
+    env,
+    encoding: "utf8",
+    timeout: 30000,
+  });
   const calls = fs
     .readFileSync(log, "utf8")
     .split("\n")
