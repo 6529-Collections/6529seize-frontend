@@ -34,6 +34,7 @@ describe.each(["server", "edge"] as const)(
 
     it("keeps an actionable error while removing credentials and the Next request query", async () => {
       const event: ErrorEvent = {
+        type: undefined,
         exception: {
           values: [{ type: "Error", value: "Synthetic server failure" }],
         },
