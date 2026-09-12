@@ -1,4 +1,9 @@
 export const COLLECT_MESSAGES = {
+  "collect.offerWorkspace.back": "Back to collecting",
+  "collect.offerWorkspace.plan": "Plan offers",
+  "collect.offerWorkspace.planMissing": "Make offers for missing NFTs",
+  "collect.offerWorkspace.alternatives":
+    "For trait sets, offers cover the NFTs chosen in your plan. Other matching NFTs remain alternatives.",
   "collect.offerPlan.title": "Plan offers",
   "collect.offerPlan.intro":
     "Set a price for each NFT, then review and sign the offers you choose. Accepted offers deliver to your paying wallet.",
@@ -200,7 +205,7 @@ export const COLLECT_MESSAGES = {
   "collect.buy.listingChanged":
     "This listing changed or is no longer available. Review the current price before buying.",
   "collect.buy.editPurchase": "Edit purchase",
-  "collect.selection.title": "Purchase selection",
+  "collect.selection.title": "Selected NFTs",
   "collect.selection.count": "{count} selected",
   "collect.selection.estimate": "Estimated {price} · gas added at review",
   "collect.selection.clear": "Clear",
@@ -335,7 +340,7 @@ export const COLLECT_MESSAGES = {
   "collect.intent.tdh": "Lowest cost TDH",
   "collect.tdhBrowse.scope": "Ranked by base TDH/day per ETH.",
   "collect.tdhBrowse.value": "≈ {value} base TDH/day per ETH",
-  "collect.tdhBrowse.target": "Project profile TDH",
+  "collect.tdhBrowse.target": "Reach target TDH",
   "collect.tdhBrowse.explain": "How TDH value works",
   "collect.tdhBrowse.method":
     "Compares each NFT’s best supported ETH listing using its current base TDH accrual per full held day. Listing fees are included; gas is checked at purchase. Each listing is verified again before checkout.",
