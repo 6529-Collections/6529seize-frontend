@@ -48,10 +48,12 @@ describe("filesystem contract selection", () => {
     ).toEqual([`__tests__/scripts/${test}.test.ts`]);
   });
 
-  it("selects both production deployment and daily canary contracts", () => {
-    expect(selectFileContractTests([".github/workflows/production-e2e.yml"])).toEqual([
-      "__tests__/scripts/production-canary-workflow.test.ts",
+  it("selects both daily canary and publication contracts", () => {
+    expect(
+      selectFileContractTests([".github/workflows/production-e2e.yml"]).sort()
+    ).toEqual([
       "__tests__/scripts/museum-publication-compatibility.test.ts",
+      "__tests__/scripts/production-canary-workflow.test.ts",
     ]);
   });
 

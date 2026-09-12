@@ -14,9 +14,19 @@ const steps = workflow.jobs.readonly.steps as {
   if?: string;
   env?: Record<string, string>;
 }[];
-const source = steps.find((step) => step.id === "source")!;
-const gitBash = path.join(process.env["ProgramFiles"] ?? "", "Git/bin/bash.exe");
-const bash = process.platform === "win32" && fs.existsSync(gitBash) ? gitBash : "bash";
+function requiredStep(name: string) {
+  const step = steps.find((candidate) => candidate.name === name);
+  if (!step)
+    throw new Error(`Production E2E workflow step is missing: ${name}`);
+  return step;
+}
+const source = requiredStep("Resolve exact deployed SHA");
+const gitBash = path.join(
+  process.env["ProgramFiles"] ?? "",
+  "Git/bin/bash.exe"
+);
+const bash =
+  process.platform === "win32" && fs.existsSync(gitBash) ? gitBash : "bash";
 const repository = "6529-Collections/6529seize-frontend";
 const sha = "a".repeat(40);
 const deployment = {
@@ -31,24 +41,59 @@ const deployment = {
   head_sha: sha,
 };
 
-function resolveSource(options: {
-  event?: string;
-  ref?: string;
-  run?: Record<string, unknown>;
-  jobs?: Record<string, unknown>[];
-  emptyHistory?: boolean;
-} = {}) {
+function resolveSource(
+  options: {
+    event?: string;
+    ref?: string;
+    run?: Record<string, unknown>;
+    jobs?: Record<string, unknown>[];
+    emptyHistory?: boolean;
+  } = {}
+) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "production-canary-"));
   try {
-    fs.writeFileSync(path.join(root, "run.json"), JSON.stringify({ ...deployment, ...options.run }));
-    fs.writeFileSync(path.join(root, "jobs.json"), JSON.stringify({ jobs: options.jobs ?? [{
-      name: "Deploy verified production artifact", status: "completed", conclusion: "success",
-    }] }));
-    fs.writeFileSync(path.join(root, "runs.json"), JSON.stringify({ workflow_runs: options.emptyHistory ? [] : [
-      { id: 101, status: "completed", conclusion: "success", run_started_at: "2026-09-12T05:00:00Z" },
-      { id: 100, status: "completed", conclusion: "success", run_started_at: "2026-09-11T05:00:00Z" },
-    ] }));
-    const result = spawnSync(bash, ["-c", `
+    fs.writeFileSync(
+      path.join(root, "run.json"),
+      JSON.stringify({ ...deployment, ...options.run })
+    );
+    fs.writeFileSync(
+      path.join(root, "jobs.json"),
+      JSON.stringify({
+        jobs: options.jobs ?? [
+          {
+            name: "Deploy verified production artifact",
+            status: "completed",
+            conclusion: "success",
+          },
+        ],
+      })
+    );
+    fs.writeFileSync(
+      path.join(root, "runs.json"),
+      JSON.stringify({
+        workflow_runs: options.emptyHistory
+          ? []
+          : [
+              {
+                id: 101,
+                status: "completed",
+                conclusion: "success",
+                run_started_at: "2026-09-12T05:00:00Z",
+              },
+              {
+                id: 100,
+                status: "completed",
+                conclusion: "success",
+                run_started_at: "2026-09-11T05:00:00Z",
+              },
+            ],
+      })
+    );
+    const result = spawnSync(
+      bash,
+      [
+        "-c",
+        `
 gh() {
   case "$2" in
     */actions/workflows/*) cat "$FIXTURE_ROOT/runs.json" ;;
@@ -57,25 +102,32 @@ gh() {
   esac
 }
 ${source.run}
-`], {
-      encoding: "utf8",
-      timeout: 10_000,
-      env: {
-        ...process.env,
-        EVENT_NAME: options.event ?? "schedule",
-        AUTOMATIC_DEPLOY_RUN_ID: "99",
-        GITHUB_REF: options.ref ?? "refs/heads/main",
-        GITHUB_REPOSITORY: repository,
-        FIXTURE_ROOT: root.replaceAll("\\", "/"),
-        RUNNER_TEMP: root.replaceAll("\\", "/"),
-        GITHUB_OUTPUT: path.join(root, "output").replaceAll("\\", "/"),
-      },
-    });
+`,
+      ],
+      {
+        encoding: "utf8",
+        timeout: 10_000,
+        env: {
+          ...process.env,
+          EVENT_NAME: options.event ?? "schedule",
+          AUTOMATIC_DEPLOY_RUN_ID: "99",
+          GITHUB_REF: options.ref ?? "refs/heads/main",
+          GITHUB_REPOSITORY: repository,
+          FIXTURE_ROOT: root.replaceAll("\\", "/"),
+          RUNNER_TEMP: root.replaceAll("\\", "/"),
+          GITHUB_OUTPUT: path.join(root, "output").replaceAll("\\", "/"),
+        },
+      }
+    );
     expect(result.error).toBeUndefined();
     return {
       status: result.status,
-      output: fs.existsSync(path.join(root, "output")) ? fs.readFileSync(path.join(root, "output"), "utf8") : "",
-      selected: fs.existsSync(path.join(root, "selected-run")) ? fs.readFileSync(path.join(root, "selected-run"), "utf8") : "",
+      output: fs.existsSync(path.join(root, "output"))
+        ? fs.readFileSync(path.join(root, "output"), "utf8")
+        : "",
+      selected: fs.existsSync(path.join(root, "selected-run"))
+        ? fs.readFileSync(path.join(root, "selected-run"), "utf8")
+        : "",
     };
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
@@ -92,7 +144,10 @@ describe("daily production canary", () => {
   });
 
   it("preserves exact run selection for manual and post-deploy dispatch", () => {
-    const result = resolveSource({ event: "workflow_dispatch", emptyHistory: true });
+    const result = resolveSource({
+      event: "workflow_dispatch",
+      emptyHistory: true,
+    });
     expect(result.status).toBe(0);
     expect(result.selected).toContain("/actions/runs/99");
   });
@@ -105,7 +160,15 @@ describe("daily production canary", () => {
     { run: { conclusion: "failure" } },
     { run: { head_sha: "invalid" } },
     { jobs: [] },
-    { jobs: [{ name: "Deploy verified production artifact", status: "completed", conclusion: "failure" }] },
+    {
+      jobs: [
+        {
+          name: "Deploy verified production artifact",
+          status: "completed",
+          conclusion: "failure",
+        },
+      ],
+    },
   ])("rejects invalid deployment provenance: %j", (options) => {
     const result = resolveSource(options);
     expect(result.status).not.toBe(0);
@@ -115,19 +178,33 @@ describe("daily production canary", () => {
   it("runs all cron packs using the shared source, publication and evidence controls", () => {
     expect(workflow.on.schedule).toEqual([{ cron: "30 5 * * *" }]);
     expect(workflow.on.workflow_dispatch.inputs.scope).toMatchObject({
-      options: ["post-deploy", "canary"], default: "post-deploy",
+      options: ["post-deploy", "canary"],
+      default: "post-deploy",
     });
-    expect(workflow.concurrency).toEqual({ group: "production-e2e", "cancel-in-progress": false });
-    const run = steps.find((step) => step.name === "Run daily read-only production canary packs")!;
+    expect(workflow.concurrency).toEqual({
+      group: "production-e2e",
+      "cancel-in-progress": false,
+    });
+    const run = requiredStep("Run daily read-only production canary packs");
     expect(run.run).toContain("--env production --trigger cron");
     expect(run.run).toContain("--parallel 3 --retry-failed-packs 1");
     expect(run.run).not.toContain("--exclude-pack");
     expect(run.env).toMatchObject({
       DEPLOYMENT_E2E_SOURCE_SHA: "${{ steps.source.outputs.sha }}",
-      MUSEUM_PUBLICATION_EXPECTED_COMMIT: "${{ steps.museum-publication.outputs.publication_commit }}",
+      MUSEUM_PUBLICATION_EXPECTED_COMMIT:
+        "${{ steps.museum-publication.outputs.publication_commit }}",
     });
-    expect(steps.find((step) => step.name === "Require the selected production deployment to still be live")?.if).toBeUndefined();
-    expect(workflow.jobs["notify-canary-failure"].if).toContain("needs.readonly.result == 'failure'");
+    expect(
+      requiredStep(
+        "Require the selected production deployment to still be live"
+      ).if
+    ).toBeUndefined();
+    expect(requiredStep("Verify exact deployed source").run).toContain(
+      'git merge-base --is-ancestor "$EXPECTED_SHA" origin/main'
+    );
+    expect(workflow.jobs["notify-canary-failure"].if).toContain(
+      "needs.readonly.result == 'failure'"
+    );
     const notification = workflow.jobs["notify-canary-failure"].steps.at(-1);
     expect(notification.env.CI_PIPELINES_ALERT_TYPE).toBe("workflow");
     expect(notification.env.CI_PIPELINES_PARENT_DEPLOY_RUN_ID).toBeUndefined();
