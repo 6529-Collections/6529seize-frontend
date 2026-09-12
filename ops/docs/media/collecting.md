@@ -34,6 +34,8 @@ terms for wallet approval. A changed order requires another review.
 confirmed wallet in the profile holds the NFT. Connect that holding wallet to
 list it; profile consolidation does not grant another wallet permission to sign.
 The more-actions menu contains **Review offers**.
+If ownership is still loading, **List for sale** stays visible but unavailable.
+If that check fails, choose **Try again** beside the action.
 
 The **View The Memes**, **View Gradients** or **View Pebbles** link returns to the
 current collection page. On narrow screens it appears as an arrow with the same
@@ -59,8 +61,10 @@ card page.
    price review and wallet approval.
    Review missing requirements, checked artworks, unavailable items and the
    proposed purchases. A partial plan leaves its unfilled requirements visible.
-4. Select an exact artwork and available order. Review quantity, currency,
-   total price, fees, signing wallet and recipient before proceeding.
+4. Select some or all proposed purchases. **Review purchase** brings them into
+   one review with quantities, delivery addresses and an estimated total.
+   **Review live total** checks every selected order and shows the exact price,
+   fees and gas reserve before wallet approval.
 5. Approve the required token permission if needed, then review and authorize
    the purchase transaction or fixed-price order signature in your wallet.
 6. Follow the result in Orders. A sent transaction, a mined transaction and a
@@ -81,8 +85,11 @@ trait requirements with one token. Artist goals let you include collaborations.
 Choose **Lowest listings**, then The Memes, Gradients or Pebbles. This tool shows
 observed listings with prices and quantities, showing each NFT once at its lowest
 supported purchase price. An indivisible lot says how many copies its price
-includes. Open an artwork for its card page,
-or select **Collect** to check the current order and review a purchase. No listing
+includes. Open an artwork for its card page, or select its **+** to add it to
+your purchase selection. The control becomes a checkmark; select it again to
+remove that NFT. The selection stays available while switching between Lowest
+listings and TDH. **Review purchase** lets you buy some or all selected items.
+No listing
 results does not mean that no orders exist elsewhere. If the listing source
 cannot be loaded, use **Try again** or return to the collection page.
 
@@ -98,8 +105,28 @@ There is no separate onward transfer. A Safe can receive a purchase from a
 supported paying wallet.
 
 A gift outside your profile is shown as a gift. It does not increase your
-profile's projected completion or TDH. One recipient is selected per purchase;
-a completion plan with several orders requires separate reviewed purchases.
+profile's projected completion or TDH. A multiple-item review starts with one
+delivery address for the selection. You can change the destination of each NFT
+and split an edition purchase across addresses. Each allocation must have a
+valid address and the allocated quantities must equal the purchased quantity.
+
+### Buy a selection together
+
+Select NFTs from Lowest listings, TDH or a completion plan, then open
+**Review purchase**. Select all or keep only the items you want, and check the
+delivery addresses. The first total is an estimate; **Review live total**
+requests current executable terms for every selected order.
+
+Supported selections are purchased in one Ethereum transaction. Every selected
+purchase and delivery succeeds together, or the transaction reverts. A revert
+can still cost gas. The site does not silently replace an unavailable listing,
+remove an item or split your purchase into several transactions. If the
+selection cannot be bought together, edit it and review again.
+
+The review shows the full purchase price, fees and gas reserve. A quote that
+expires requires a refreshed review. Changing the selection, quantity, payer or
+delivery addresses also requires another review. Orders retains the purchase
+until its receipt confirms all selected deliveries.
 
 ### Make or accept an offer
 
@@ -215,8 +242,9 @@ to trade your assets.
 Automatic wallet execution is not available. Programmatic preparation still
 requires the owner to review and authorize each purchase or order. Signed limit
 orders can be filled by others until effective cancellation or expiry.
-Multiple-order purchases use separate reviewed transactions. These controls do
-not create collection-wide or trait-group offers.
+Multiple-order purchases require supported exact ETH listings and a successful
+simulation of the whole selection. These controls do not create collection-wide
+or trait-group offers.
 
 ## Related Pages
 
