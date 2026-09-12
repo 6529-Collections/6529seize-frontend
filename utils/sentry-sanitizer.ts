@@ -32,7 +32,7 @@ const SENTRY_IDENTIFIER_CONTAINER_PATTERN = /^(?:author|media)[_-]/;
 const SENTRY_ROUTE_PLACEHOLDER_PATTERN =
   /^(?::[a-z][a-z0-9_-]*|\[\[?(?:\.\.\.)?[a-z][a-z0-9_-]*\]?\])$/i;
 const URL_VALUE_KEY_PATTERN =
-  /^(?:from|http\.target|http\.url|targetUrl|to|url|url\.full|url\.path)$/i;
+  /^(?:from|http\.target|http\.url|request_path|targetUrl|to|url|url\.full|url\.path)$/i;
 const URL_DETAIL_KEY_PATTERN =
   /^(?:http\.(?:fragment|query)|url\.(?:fragment|query))$/i;
 const HOST_VALUE_KEY_PATTERN = /^(?:http\.host|server\.address|url\.domain)$/i;

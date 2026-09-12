@@ -24,11 +24,8 @@ Sentry.init({
   ...(dsn && { dsn }),
   enabled: Boolean(dsn),
 
-  // Define how likely traces are sampled.
-  tracesSampleRate: 0.1,
-
-  // Enable logs to be sent to Sentry
-  enableLogs: true,
+  // Error capture only; browser performance remains in client Sentry and RUM.
+  enableLogs: false,
 
   // Default to NOT sending PII unless explicitly reviewed and required.
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
