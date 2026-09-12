@@ -134,6 +134,14 @@ export * from '../models/ApiCollectFacet';
 export * from '../models/ApiCollectFamily';
 export * from '../models/ApiCollectHolding';
 export * from '../models/ApiCollectKind';
+export * from '../models/ApiCollectOfferAnalysis';
+export * from '../models/ApiCollectOfferAnalysisAsset';
+export * from '../models/ApiCollectOfferAnalysisCoverage';
+export * from '../models/ApiCollectOfferAnalysisMethod';
+export * from '../models/ApiCollectOfferAnalysisRequest';
+export * from '../models/ApiCollectOfferAnalysisRow';
+export * from '../models/ApiCollectOfferAnalysisTotals';
+export * from '../models/ApiCollectOfferPriceReference';
 export * from '../models/ApiCollectPlan';
 export * from '../models/ApiCollectPlanLeg';
 export * from '../models/ApiCollectPlanOptions';
@@ -947,6 +955,14 @@ import { ApiCollectFacet, ApiCollectFacetTraitEnum    } from '../models/ApiColle
 import { ApiCollectFamily } from '../models/ApiCollectFamily';
 import { ApiCollectHolding } from '../models/ApiCollectHolding';
 import { ApiCollectKind } from '../models/ApiCollectKind';
+import { ApiCollectOfferAnalysis } from '../models/ApiCollectOfferAnalysis';
+import { ApiCollectOfferAnalysisAsset } from '../models/ApiCollectOfferAnalysisAsset';
+import { ApiCollectOfferAnalysisCoverage } from '../models/ApiCollectOfferAnalysisCoverage';
+import { ApiCollectOfferAnalysisMethod, ApiCollectOfferAnalysisMethodKindEnum    } from '../models/ApiCollectOfferAnalysisMethod';
+import { ApiCollectOfferAnalysisRequest } from '../models/ApiCollectOfferAnalysisRequest';
+import { ApiCollectOfferAnalysisRow    , ApiCollectOfferAnalysisRowStatusEnum         } from '../models/ApiCollectOfferAnalysisRow';
+import { ApiCollectOfferAnalysisTotals } from '../models/ApiCollectOfferAnalysisTotals';
+import { ApiCollectOfferPriceReference, ApiCollectOfferPriceReferenceKindEnum                } from '../models/ApiCollectOfferPriceReference';
 import { ApiCollectPlan , ApiCollectPlanStateEnum                } from '../models/ApiCollectPlan';
 import { ApiCollectPlanLeg } from '../models/ApiCollectPlanLeg';
 import { ApiCollectPlanOptions } from '../models/ApiCollectPlanOptions';
@@ -1682,6 +1698,9 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCollectFacetTraitEnum",
     "ApiCollectFamily",
     "ApiCollectKind",
+    "ApiCollectOfferAnalysisMethodKindEnum",
+    "ApiCollectOfferAnalysisRowStatusEnum",
+    "ApiCollectOfferPriceReferenceKindEnum",
     "ApiCollectPlanStateEnum",
     "ApiCollectRuleModeEnum",
     "ApiCollectRuleStateEnum",
@@ -1990,6 +2009,14 @@ let typeMap: {[index: string]: any} = {
     "ApiCollectCatalogTdhSnapshot": ApiCollectCatalogTdhSnapshot,
     "ApiCollectFacet": ApiCollectFacet,
     "ApiCollectHolding": ApiCollectHolding,
+    "ApiCollectOfferAnalysis": ApiCollectOfferAnalysis,
+    "ApiCollectOfferAnalysisAsset": ApiCollectOfferAnalysisAsset,
+    "ApiCollectOfferAnalysisCoverage": ApiCollectOfferAnalysisCoverage,
+    "ApiCollectOfferAnalysisMethod": ApiCollectOfferAnalysisMethod,
+    "ApiCollectOfferAnalysisRequest": ApiCollectOfferAnalysisRequest,
+    "ApiCollectOfferAnalysisRow": ApiCollectOfferAnalysisRow,
+    "ApiCollectOfferAnalysisTotals": ApiCollectOfferAnalysisTotals,
+    "ApiCollectOfferPriceReference": ApiCollectOfferPriceReference,
     "ApiCollectPlan": ApiCollectPlan,
     "ApiCollectPlanLeg": ApiCollectPlanLeg,
     "ApiCollectPlanOptions": ApiCollectPlanOptions,
