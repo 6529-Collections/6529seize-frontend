@@ -43,9 +43,12 @@ describe("artwork documentation modules", () => {
     expect(within(document).getByRole("textbox", { name: "Text" })).toHaveValue(
       "The complete production account."
     );
-    expect(
-      screen.queryByRole("group", { name: "Full accounts & documents" })
-    ).toBeNull();
+    const collection = screen.getByRole("group", {
+      name: "Full accounts & documents",
+    });
+    expect(collection).toContainElement(document);
+    expect(collection.querySelector("legend")).toHaveClass("tw-sr-only");
+    expect(document.querySelector("legend")).not.toHaveClass("tw-sr-only");
   });
   it("names the nested video duration group while retaining the Type control's label", () => {
     const context = documentationFixture();
