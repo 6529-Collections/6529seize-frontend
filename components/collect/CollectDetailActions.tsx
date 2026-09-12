@@ -241,7 +241,11 @@ function DetailActions(props: CollectDetailActionsProps) {
       />
       <div
         hidden={inlineLookup.data !== undefined}
-        className="tw-flex tw-flex-wrap tw-items-center tw-gap-2"
+        className={
+          inlineLookup.data === undefined
+            ? "tw-flex tw-flex-wrap tw-items-center tw-gap-2"
+            : "tw-hidden"
+        }
       >
         <button
           type="button"

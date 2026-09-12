@@ -74,17 +74,20 @@ interface AcceptedOffer {
   readonly order: ApiMarketTradeOrder;
   readonly quantity: string;
   readonly maximumQuantity: string;
+  readonly opener: HTMLButtonElement;
+}
+
+interface AcceptAttempt {
+  readonly controller: AbortController;
+  readonly generation: number;
+  readonly orderKey: string;
 }
 
 interface TradeContextValue {
-  readonly supported: boolean;
   readonly selected: readonly MarketDepthListingSelection[];
   readonly rowStates: Readonly<Record<string, RowState>>;
   readonly selectionBusy: boolean;
-  readonly toggleListing: (
-    order: ApiMarketOrder,
-    trigger: HTMLButtonElement
-  ) => void;
+  readonly toggleListing: (order: ApiMarketOrder) => void;
   readonly updateQuantity: (order: ApiMarketOrder, quantity: string) => void;
   readonly acceptOffer: (
     order: ApiMarketOrder,
@@ -95,9 +98,8 @@ interface TradeContextValue {
 
 const TradeContext = createContext<TradeContextValue | null>(null);
 
-function same(left: string, right: string): boolean {
-  return left.toLowerCase() === right.toLowerCase();
-}
+const same = (left: string, right: string) =>
+  left.toLowerCase() === right.toLowerCase();
 
 function rowMatches(
   item: MarketDepthListingSelection,
@@ -116,10 +118,8 @@ function actionWallets(
   const wallets: string[] = collectProfileWallets(profile).map(
     (item) => item.wallet
   );
-  if (
-    connectedAddress &&
-    !wallets.some((wallet) => same(wallet, connectedAddress))
-  )
+  if (!connectedAddress) return wallets;
+  if (!wallets.some((wallet) => same(wallet, connectedAddress)))
     wallets.push(connectedAddress);
   return wallets;
 }
@@ -127,43 +127,26 @@ function actionWallets(
 function rowErrorState(error: unknown, locale: SupportedLocale): RowState {
   const code = error instanceof Error ? error.message : "";
   const status = getStructuredApiErrorStatus(error);
+  let key: Parameters<typeof t>[1] = "marketDepth.trade.checkFailed";
   if (code === "MARKET_DEPTH_OWNER_REQUIRED")
-    return {
-      busy: false,
-      error: true,
-      connectAction: true,
-      message: t(locale, "marketDepth.trade.ownerRequired"),
-    };
-  if (code === "MARKET_DEPTH_OVERLAP")
-    return {
-      busy: false,
-      error: true,
-      message: t(locale, "marketDepth.trade.overlap"),
-    };
-  if (code === "MARKET_DEPTH_SELECTION_LIMIT")
-    return {
-      busy: false,
-      error: true,
-      message: t(locale, "marketDepth.trade.limit", {
-        count: formatNumber(locale, MARKET_BATCH_LIMITS.orders),
-      }),
-    };
-  if (code === "MARKET_DEPTH_UNSUPPORTED" || status === 400)
-    return {
-      busy: false,
-      error: true,
-      message: t(locale, "marketDepth.trade.unsupported"),
-    };
-  if (code === "MARKET_DEPTH_CHANGED" || status === 409)
-    return {
-      busy: false,
-      error: true,
-      message: t(locale, "marketDepth.trade.changed"),
-    };
+    key = "marketDepth.trade.ownerRequired";
+  else if (code === "MARKET_DEPTH_OVERLAP") key = "marketDepth.trade.overlap";
+  else if (code === "MARKET_DEPTH_SELECTION_LIMIT")
+    key = "marketDepth.trade.limit";
+  else if (code === "MARKET_DEPTH_UNSUPPORTED" || status === 400)
+    key = "marketDepth.trade.unsupported";
+  else if (code === "MARKET_DEPTH_CHANGED" || status === 409)
+    key = "marketDepth.trade.changed";
   return {
     busy: false,
     error: true,
-    message: t(locale, "marketDepth.trade.checkFailed"),
+    connectAction: code === "MARKET_DEPTH_OWNER_REQUIRED",
+    message:
+      key === "marketDepth.trade.limit"
+        ? t(locale, key, {
+            count: formatNumber(locale, MARKET_BATCH_LIMITS.orders),
+          })
+        : t(locale, key),
   };
 }
 
@@ -256,7 +239,8 @@ function SupportedMarketDepthTradeProvider({
   const [reviewState, setReviewState] = useState<RowState>({ busy: false });
   const assetRef = useRef<ApiCollectAsset | null>(null);
   const abortControllers = useRef(new Set<AbortController>());
-  const actionOpener = useRef<HTMLButtonElement | null>(null);
+  const acceptGeneration = useRef(0);
+  const acceptAttempt = useRef<AcceptAttempt | null>(null);
   const reviewOpener = useRef<HTMLButtonElement | null>(null);
 
   const setSelected = useCallback(
@@ -325,9 +309,10 @@ function SupportedMarketDepthTradeProvider({
   const runForRow = useCallback(
     async (
       order: ApiMarketOrder,
-      work: (signal: AbortSignal) => Promise<void>
+      work: (signal: AbortSignal) => Promise<void>,
+      suppliedController?: AbortController
     ) => {
-      const controller = new AbortController();
+      const controller = suppliedController ?? new AbortController();
       abortControllers.current.add(controller);
       setRowStates((current) => ({
         ...current,
@@ -356,15 +341,26 @@ function SupportedMarketDepthTradeProvider({
     [locale]
   );
 
+  const invalidateAcceptAttempt = useCallback(() => {
+    acceptGeneration.current += 1;
+    const current = acceptAttempt.current;
+    if (!current) return;
+    current.controller.abort();
+    acceptAttempt.current = null;
+    setRowStates((states) => ({
+      ...states,
+      [current.orderKey]: { busy: false },
+    }));
+  }, []);
+
   const profileWallets = useMemo(
     () => actionWallets(auth.connectedProfile, connection.address),
     [auth.connectedProfile, connection.address]
   );
 
   const toggleListing = useCallback(
-    (depthOrder: ApiMarketOrder, trigger: HTMLButtonElement) => {
+    (depthOrder: ApiMarketOrder) => {
       if (reviewBusyRef.current) return;
-      actionOpener.current = trigger;
       const existing = selectedRef.current.find((item) =>
         rowMatches(item, depthOrder)
       );
@@ -419,48 +415,79 @@ function SupportedMarketDepthTradeProvider({
 
   const acceptOffer = useCallback(
     (depthOrder: ApiMarketOrder, trigger: HTMLButtonElement) => {
-      actionOpener.current = trigger;
-      void runForRow(depthOrder, async (signal) => {
+      invalidateAcceptAttempt();
+      const controller = new AbortController();
+      const generation = acceptGeneration.current;
+      acceptAttempt.current = {
+        controller,
+        generation,
+        orderKey: depthOrder.order_key,
+      };
+      const assertCurrentIntent = () => {
+        controller.signal.throwIfAborted();
         if (
-          !auth.connectedProfile?.id ||
-          !connection.address ||
-          auth.isAuthenticated !== true ||
-          auth.activeProfileProxy
+          acceptGeneration.current !== generation ||
+          acceptAttempt.current?.controller !== controller
         )
-          throw new Error("MARKET_DEPTH_OWNER_REQUIRED");
-        const { asset, order } = await resolveOrder(
-          depthOrder,
-          ApiMarketTradeOrderSideEnum.Offer,
-          signal
-        );
-        if (
-          !marketDepthOfferIsExecutable({
-            asset,
+          throw new Error("MARKET_DEPTH_CHANGED");
+      };
+      void runForRow(
+        depthOrder,
+        async (signal) => {
+          assertCurrentIntent();
+          if (
+            !auth.connectedProfile?.id ||
+            !connection.address ||
+            auth.isAuthenticated !== true ||
+            auth.activeProfileProxy
+          )
+            throw new Error("MARKET_DEPTH_OWNER_REQUIRED");
+          const { asset, order } = await resolveOrder(
             depthOrder,
+            ApiMarketTradeOrderSideEnum.Offer,
+            signal
+          );
+          assertCurrentIntent();
+          if (
+            !marketDepthOfferIsExecutable({
+              asset,
+              depthOrder,
+              order,
+              profileWallets,
+              nowSeconds: Date.now() / 1000,
+            })
+          )
+            throw new Error("MARKET_DEPTH_UNSUPPORTED");
+          const ownership = await fetchCollectAssetOwnership(
+            auth.connectedProfile.id,
+            asset.asset_key,
+            signal
+          );
+          assertCurrentIntent();
+          const maximumQuantity = signerOfferQuantityCap({
+            analysis: ownership,
+            profileId: auth.connectedProfile.id,
+            wallet: connection.address,
+            assetKey: asset.asset_key,
             order,
-            profileWallets,
-            nowSeconds: Date.now() / 1000,
-          })
-        )
-          throw new Error("MARKET_DEPTH_UNSUPPORTED");
-        const ownership = await fetchCollectAssetOwnership(
-          auth.connectedProfile.id,
-          asset.asset_key,
-          signal
-        );
-        signal.throwIfAborted();
-        const maximumQuantity = signerOfferQuantityCap({
-          analysis: ownership,
-          profileId: auth.connectedProfile.id,
-          wallet: connection.address,
-          assetKey: asset.asset_key,
-          order,
-        });
-        if (!maximumQuantity) throw new Error("MARKET_DEPTH_OWNER_REQUIRED");
-        const quantity = collectOrderPurchaseQuantity(order);
-        if (!quantity || BigInt(quantity) > BigInt(maximumQuantity))
-          throw new Error("MARKET_DEPTH_UNSUPPORTED");
-        setAcceptedOffer({ asset, order, quantity, maximumQuantity });
+          });
+          if (!maximumQuantity) throw new Error("MARKET_DEPTH_OWNER_REQUIRED");
+          const quantity = collectOrderPurchaseQuantity(order);
+          if (!quantity || BigInt(quantity) > BigInt(maximumQuantity))
+            throw new Error("MARKET_DEPTH_UNSUPPORTED");
+          assertCurrentIntent();
+          setAcceptedOffer({
+            asset,
+            order,
+            quantity,
+            maximumQuantity,
+            opener: trigger,
+          });
+        },
+        controller
+      ).finally(() => {
+        if (acceptAttempt.current?.controller === controller)
+          acceptAttempt.current = null;
       });
     },
     [
@@ -468,6 +495,7 @@ function SupportedMarketDepthTradeProvider({
       auth.connectedProfile,
       auth.isAuthenticated,
       connection.address,
+      invalidateAcceptAttempt,
       profileWallets,
       resolveOrder,
       runForRow,
@@ -534,7 +562,6 @@ function SupportedMarketDepthTradeProvider({
 
   const value = useMemo<TradeContextValue>(
     () => ({
-      supported: true,
       selected,
       rowStates,
       selectionBusy: reviewState.busy,
@@ -621,10 +648,13 @@ function SupportedMarketDepthTradeProvider({
               maximumOrderQuantity={acceptedOffer.maximumQuantity}
               fixedOrder
               onClose={() => {
+                const opener = acceptedOffer.opener;
+                invalidateAcceptAttempt();
                 setAcceptedOffer(null);
-                restoreFocus(actionOpener.current);
+                restoreFocus(opener);
               }}
               onMarketChange={() => {
+                invalidateAcceptAttempt();
                 setAcceptedOffer(null);
                 onMarketChange();
               }}
@@ -645,7 +675,7 @@ export function MarketDepthOrderAction({
 }) {
   const quantityErrorId = useId();
   const context = useContext(TradeContext);
-  if (!context?.supported) return null;
+  if (!context) return null;
   const state = context.rowStates[order.order_key];
   const selected = context.selected.find((item) => rowMatches(item, order));
   const criteriaOffer =
@@ -704,7 +734,7 @@ export function MarketDepthOrderAction({
               disabled={Boolean(state?.busy) || context.selectionBusy}
               onClick={(event) =>
                 order.side === ApiMarketOrderSideEnum.Ask
-                  ? context.toggleListing(order, event.currentTarget)
+                  ? context.toggleListing(order)
                   : context.acceptOffer(order, event.currentTarget)
               }
             >
