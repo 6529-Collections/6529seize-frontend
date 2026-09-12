@@ -6,6 +6,7 @@ import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
+import type { ReactNode } from "react";
 import CollectInlineBuyForm from "./CollectInlineBuyForm";
 import CollectTradeForm from "./CollectTradeForm";
 import { CollectOrderBook } from "./CollectOrderPicker";
@@ -22,6 +23,8 @@ interface CollectTradeControllerFormProps {
   readonly action: CollectTradeAction;
   readonly asset: ApiCollectAsset | undefined;
   readonly needsOrder: boolean;
+  readonly fixedOrder?: boolean;
+  readonly maximumOrderQuantity?: string | undefined;
   readonly inlineBuy: boolean;
   readonly draft: CollectTradeDraft;
   readonly chosenOrder: ApiMarketTradeOrder | null;
@@ -36,6 +39,7 @@ interface CollectTradeControllerFormProps {
   readonly disabledReason: string | undefined;
   readonly preparing: boolean;
   readonly error: string | undefined;
+  readonly secondaryActions?: ReactNode;
   readonly onChange: (draft: CollectTradeDraft) => void;
   readonly onQuantityEdited: () => void;
   readonly onClearSelectedOrder: () => void;
@@ -109,14 +113,14 @@ function InlineTradeForm({
   const inlineDraftChange = (next: CollectTradeDraft) => {
     if (next.quantity !== props.draft.quantity) {
       props.onQuantityEdited();
-      props.onClearSelectedOrder();
+      if (!props.fixedOrder) props.onClearSelectedOrder();
     } else if (!props.chosenOrder && props.selectedOrder) {
       props.onRestoreSelectedOrder(props.selectedOrder);
     }
     props.onChange(next);
   };
   const inlineOrderOptions =
-    props.buyOrders.length > 1 ? (
+    !props.fixedOrder && props.buyOrders.length > 1 ? (
       <details>
         <summary className="tw-min-h-11 tw-cursor-pointer tw-py-3 tw-text-xs tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
           {t(props.locale, "collect.buy.otherListings")}
@@ -136,9 +140,11 @@ function InlineTradeForm({
       action="buy"
       draft={props.draft}
       maxQuantity={
+        (props.fixedOrder ? props.maximumOrderQuantity : undefined) ??
         (props.selectedOrder
           ? collectOrderAvailableQuantity(props.selectedOrder)
-          : null) ?? "1"
+          : null) ??
+        "1"
       }
       quantityStep={
         props.selectedOrder
@@ -156,6 +162,7 @@ function InlineTradeForm({
       disabledReason={noInlineOrder ?? props.disabledReason}
       loading={props.preparing}
       error={props.error}
+      secondaryActions={props.secondaryActions}
       onChange={inlineDraftChange}
       onPrepare={props.onPrepare}
       onSplitDelivery={props.onSplitDelivery}
@@ -174,7 +181,10 @@ function StandardTradeForm({
       action={props.action}
       draft={props.draft}
       maxQuantity={
-        props.selectedOrder?.quantity ??
+        (props.fixedOrder ? props.maximumOrderQuantity : undefined) ??
+        (props.selectedOrder
+          ? collectOrderAvailableQuantity(props.selectedOrder)
+          : null) ??
         (props.asset?.family.toString() === "memes" ? "100" : "1")
       }
       makerLabel={props.makerLabel}
@@ -213,7 +223,7 @@ export default function CollectTradeControllerForm(
 
   return (
     <>
-      {props.needsOrder && !props.inlineBuy && (
+      {props.needsOrder && !props.inlineBuy && !props.fixedOrder && (
         <StandardOrderBook
           loading={props.ordersLoading}
           failed={props.ordersFailed}
@@ -229,6 +239,7 @@ export default function CollectTradeControllerForm(
       )}
       {tradeForm}
       {props.inlineBuy &&
+        !props.fixedOrder &&
         !props.ordersLoading &&
         (!props.selectedOrder ||
           props.error !== undefined ||

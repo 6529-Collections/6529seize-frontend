@@ -55,7 +55,7 @@ it("never enables a purchase with an unavailable action", () => {
   expect(screen.getByText("Listing is no longer available")).toBeVisible();
 });
 
-it("retains the quoted price and keeps Buy directly reachable", () => {
+it("retains the quoted price and keeps Collect directly reachable", () => {
   const onTrade = jest.fn();
   render(
     <CollectArtworkCard
@@ -110,7 +110,7 @@ it("keeps disabled secondary actions unavailable and explains why", async () => 
     })
   );
   const action = await screen.findByRole("menuitem", {
-    name: "List for sale: Test artwork. Trading unavailable",
+    name: "List: Test artwork. Trading unavailable",
   });
   expect(action).toBeDisabled();
   await user.click(action);

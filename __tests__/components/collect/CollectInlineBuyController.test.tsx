@@ -230,12 +230,12 @@ it("shows an observed listing to a guest after loading without preparing or conn
   expect(await screen.findByRole("status")).toHaveTextContent(
     "Loading listings"
   );
-  expect(await screen.findByRole("button", { name: "Buy" })).toBeDisabled();
+  expect(await screen.findByRole("button", { name: "Collect" })).toBeDisabled();
   await act(async () => {
     resolveOrders({ orders: [order] });
   });
 
-  const buy = await screen.findByRole("button", { name: "Buy 0.1 ETH" });
+  const buy = await screen.findByRole("button", { name: "Collect 0.1 ETH" });
   expect(buy).toBeDisabled();
   expect(screen.getByRole("button", { name: "Connect wallet" })).toBeEnabled();
   fireEvent.submit(buy.closest("form")!);
@@ -255,7 +255,7 @@ it("keeps a guest order error visible and offers refresh without preparing", asy
     )
   );
   expect(screen.getByRole("button", { name: "Refresh orders" })).toBeEnabled();
-  expect(screen.getByRole("button", { name: "Buy" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Collect" })).toBeDisabled();
   expect(screen.getByRole("button", { name: "Connect wallet" })).toBeEnabled();
   expect(mockPrepare).not.toHaveBeenCalled();
   expect(mockConfirm).not.toHaveBeenCalled();
@@ -269,11 +269,11 @@ it("keeps a guest empty order state visible and offers refresh without preparing
 
   await waitFor(() =>
     expect(screen.getByRole("status")).toHaveTextContent(
-      "No listings available to buy."
+      "No NFTs are currently available to collect."
     )
   );
   expect(screen.getByRole("button", { name: "Refresh orders" })).toBeEnabled();
-  expect(screen.getByRole("button", { name: "Buy" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Collect" })).toBeDisabled();
   expect(screen.getByRole("button", { name: "Connect wallet" })).toBeEnabled();
   expect(mockPrepare).not.toHaveBeenCalled();
   expect(mockConfirm).not.toHaveBeenCalled();
@@ -291,7 +291,7 @@ it("automatically selects the cheapest exact listing, refreshes it, validates, a
     ],
   });
   renderBuy();
-  const buy = await screen.findByRole("button", { name: "Buy 0.1 ETH" });
+  const buy = await screen.findByRole("button", { name: "Collect 0.1 ETH" });
   await waitFor(() => expect(buy).toBeEnabled());
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   fireEvent.click(buy);
@@ -312,7 +312,7 @@ it("automatically selects the cheapest exact listing, refreshes it, validates, a
   );
   expect(mockSave).toHaveBeenCalledWith("profile", "operation", { request });
   expect(mockConfirm).not.toHaveBeenCalled();
-  fireEvent.click(await screen.findByRole("button", { name: "Buy 0.1 ETH" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Collect 0.1 ETH" }));
   await waitFor(() =>
     expect(mockConfirm).toHaveBeenCalledWith(operation, request)
   );
@@ -322,7 +322,7 @@ it("shows a changed price without preparing or substituting until the user accep
     orders: [{ ...order, total_wei: "200000000000000000" }],
   });
   renderBuy();
-  const buy = await screen.findByRole("button", { name: "Buy 0.1 ETH" });
+  const buy = await screen.findByRole("button", { name: "Collect 0.1 ETH" });
   await waitFor(() => expect(buy).toBeEnabled());
   fireEvent.click(buy);
   expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -330,7 +330,7 @@ it("shows a changed price without preparing or substituting until the user accep
   );
   expect(mockPrepare).not.toHaveBeenCalled();
   expect(mockConfirm).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole("button", { name: "Buy 0.2 ETH" }));
+  fireEvent.click(screen.getByRole("button", { name: "Collect 0.2 ETH" }));
   await waitFor(() => expect(mockPrepare).toHaveBeenCalledTimes(1));
   expect(mockPrepare.mock.calls[0][0]).toEqual(
     expect.objectContaining({
@@ -349,7 +349,7 @@ it("does not silently switch to a different listing after the selected one disap
     ],
   });
   renderBuy();
-  const buy = await screen.findByRole("button", { name: "Buy 0.1 ETH" });
+  const buy = await screen.findByRole("button", { name: "Collect 0.1 ETH" });
   await waitFor(() => expect(buy).toBeEnabled());
   fireEvent.click(buy);
   expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -361,11 +361,11 @@ it("does not silently switch to a different listing after the selected one disap
 it("reuses the same prepare key and exact request after a lost response", async () => {
   mockPrepare.mockRejectedValueOnce(new Error("response lost"));
   renderBuy();
-  const buy = await screen.findByRole("button", { name: "Buy 0.1 ETH" });
+  const buy = await screen.findByRole("button", { name: "Collect 0.1 ETH" });
   await waitFor(() => expect(buy).toBeEnabled());
   fireEvent.click(buy);
   await screen.findByRole("alert");
-  fireEvent.click(screen.getByRole("button", { name: "Buy 0.1 ETH" }));
+  fireEvent.click(screen.getByRole("button", { name: "Collect 0.1 ETH" }));
   await waitFor(() => expect(mockPrepare).toHaveBeenCalledTimes(2));
   expect(mockPrepare.mock.calls[1]).toEqual(mockPrepare.mock.calls[0]);
   expect(mockConfirm).not.toHaveBeenCalled();
@@ -383,7 +383,7 @@ it("defaults an older full-lot listing to the whole quantity and hides unsupport
     ],
   });
   renderBuy();
-  const buy = await screen.findByRole("button", { name: "Buy 0.2 ETH" });
+  const buy = await screen.findByRole("button", { name: "Collect 0.2 ETH" });
   await waitFor(() => expect(buy).toBeEnabled());
   expect(screen.getByText("Quantity: 2")).toBeVisible();
   expect(

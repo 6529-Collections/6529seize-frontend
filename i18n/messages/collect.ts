@@ -148,7 +148,7 @@ export const COLLECT_MESSAGES = {
   "collect.selection.limit": "Review up to {count} listings in one purchase.",
   "collect.batchReview.quoteTitle": "Your purchase",
   "collect.batchReview.atomic":
-    "All selected NFTs will be bought and delivered in one transaction, or none will be bought.",
+    "All selected NFTs will be collected and delivered in one transaction, or none will be collected.",
   "collect.batchReview.quotedQuantity": "Quantity {quantity}",
   "collect.batchReview.deliveryCopies": "Deliver {quantity}",
   "collect.batchReview.outsideProfile": "Outside this profile",
@@ -195,7 +195,7 @@ export const COLLECT_MESSAGES = {
     "Combine copies for the same wallet into one destination.",
   "collect.batchReview.invalid.consent":
     "Check each destination outside your profile before continuing.",
-  "collect.buy.atPrice": "Buy {price}",
+  "collect.buy.atPrice": "Collect {price}",
   "collect.buy.deliverTo": "Deliver to",
   "collect.buy.changeDelivery": "Change",
   "collect.buy.doneDelivery": "Done",
@@ -204,7 +204,7 @@ export const COLLECT_MESSAGES = {
   "collect.buy.includedFees": "Fees included in price",
   "collect.buy.lotPrice": "Price for {quantity} copies",
   "collect.buy.listingChanged":
-    "This listing changed or is no longer available. Review the current price before buying.",
+    "This listing changed or is no longer available. Review the current price before you collect.",
   "collect.buy.editPurchase": "Edit purchase",
   "collect.selection.title": "Selected NFTs",
   "collect.selection.count": "{count} selected",
@@ -221,7 +221,7 @@ export const COLLECT_MESSAGES = {
   "collect.acquire": "Collect",
   "collect.acquireFor": "Collect {title}",
   "collect.menu.offer": "Make an offer",
-  "collect.menu.list": "List for sale",
+  "collect.menu.list": "List",
   "collect.menu.accept": "Review offers",
   "collect.disabledAction": "{action}. {reason}",
   "collect.moreActions": "More trading actions for {title}",
@@ -262,7 +262,7 @@ export const COLLECT_MESSAGES = {
     "Includes {count} confirmed wallets in this profile.",
   "collect.goal.complete": "This goal is complete.",
   "collect.goal.quoteNeeded":
-    "Check available orders for each missing artwork before buying.",
+    "Check available orders for each missing artwork before you collect.",
   "collect.goal.pricingUnavailable":
     "Price optimization is not available yet. You can explore the catalog and check individual orders.",
   "collect.goal.tdhUnavailable":
@@ -371,7 +371,7 @@ export const COLLECT_MESSAGES = {
   "collect.connect": "Connect wallet",
   "collect.loading": "Loading artwork",
   "collect.buy.loadingListings": "Loading listings",
-  "collect.buy.noListings": "No listings available to buy.",
+  "collect.buy.noListings": "No NFTs are currently available to collect.",
   "collect.retry": "Try again",
   "collect.empty.title": "No artwork matches yet",
   "collect.empty.description":
@@ -379,10 +379,12 @@ export const COLLECT_MESSAGES = {
   "collect.noPrice": "Check current orders",
   "collect.loadMore": "Load more artwork",
   "collect.artworkLink": "View {title}",
-  "collect.action.buy": "Buy",
+  "collect.action.buy": "Collect",
   "collect.action.offer": "Make offer",
   "collect.action.list": "List",
   "collect.action.accept": "Accept offer",
+  "collect.trade.exactOrderChanged":
+    "This order could not be verified with the terms you selected. Close this review, refresh Listings and Offers, and select it again.",
   "collect.action.cancel": "Cancel order",
   "collect.actionFor": "{action}: {title}",
   "collect.plan.title": "Your plan",

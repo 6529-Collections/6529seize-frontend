@@ -109,7 +109,7 @@ export const PUBLIC_REVIEW_ARTISTS_AND_ROLES_MESSAGES = {
   "publicReview.forArtistsGuide.actors.services.description":
     "File storage, websites, services that provide random results, and marketplaces work outside the contracts. Stream can record links and evidence. It cannot keep a service online or force a marketplace to pay royalties.",
   "publicReview.forArtistsGuide.sales.heading": "How sales and payments work",
-  "publicReview.forArtistsGuide.sales.buy.title": "How collectors buy",
+  "publicReview.forArtistsGuide.sales.buy.title": "How collecting works",
   "publicReview.forArtistsGuide.sales.buy.description":
     "Collectors pay the signed fixed price or bid in an auction. The current signed sale paths use ETH. Before launch, check the auction end time, cancellation rules, and refund rules.",
   "publicReview.forArtistsGuide.sales.money.title": "Where the money goes",

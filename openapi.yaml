@@ -8545,6 +8545,69 @@ paths:
           description: Trade state or idempotency conflict
         "503":
           description: Trading unavailable
+  /market/orders/{order_hash}:
+    get:
+      tags:
+        - Marketplace
+      summary: Resolve an exact market order
+      description: >-
+        Resolve one supported listing or offer by its exact signed identity,
+        including orders outside the limited discovery results. Checks signed
+        terms, asset, side, remaining quantity and current chain status. This is
+        public discovery, not a reservation or authorization to trade;
+        authenticated preparation still revalidates the complete transaction.
+      operationId: getMarketOrder
+      security:
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache: false
+        typeImportGroup: market
+        handler:
+          import: "@/api/marketplace/marketplace.handlers"
+          name: handleGetMarketOrder
+      parameters:
+        - name: order_hash
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-fA-F]{64}$
+        - name: asset_key
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 150
+        - name: protocol_address
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-fA-F]{40}$
+        - name: side
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - LISTING
+              - OFFER
+      responses:
+        "200":
+          description: Exact observed order with supported fill quantities and signed fees
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketTradeOrder"
+        "400":
+          description: Malformed order identity or query
+        "409":
+          description: Unsupported, mismatched or unavailable order or asset
+        "503":
+          description: Provider or chain status could not be verified in time
   /market/operations:
     post:
       tags:

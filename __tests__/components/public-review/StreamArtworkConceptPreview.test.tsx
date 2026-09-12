@@ -15,7 +15,9 @@ describe("StreamArtworkConceptPreview", () => {
       screen.queryByRole("heading", { name: "See a Stream artwork" })
     ).not.toBeInTheDocument();
     expect(
-      screen.getByText("Nothing here buys, signs, uploads, or saves anything.")
+      screen.getByText(
+        "This preview does not collect, sign, upload, or save anything."
+      )
     ).toBeInTheDocument();
     expect(
       screen.getAllByRole("img", {
@@ -58,7 +60,7 @@ describe("StreamArtworkConceptPreview", () => {
       "Signal / No. 1 · 1 of 1 · 1.00 ETH"
     );
     expect(
-      within(collectorView).queryByRole("button", { name: /Buy/ })
+      within(collectorView).queryByRole("button", { name: /Collect/ })
     ).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Next: History" }));

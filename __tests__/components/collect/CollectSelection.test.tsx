@@ -227,7 +227,6 @@ it("returns focus to the remounted selection offer trigger after each workspace 
   for (let visit = 0; visit < 2; visit++) {
     const original = screen.getByRole("button", {
       name: "Plan offers",
-      exact: true,
     });
     await user.click(original);
     expect(original).not.toBeInTheDocument();
@@ -236,7 +235,6 @@ it("returns focus to the remounted selection offer trigger after each workspace 
     );
     const replacement = screen.getByRole("button", {
       name: "Plan offers",
-      exact: true,
     });
     expect(replacement).not.toBe(original);
     expect(replacement).toHaveFocus();
@@ -248,9 +246,7 @@ it("discards offer return focus when the collecting account changes", async () =
   const user = userEvent.setup();
   const { rerender } = render(<CollectPageClient />);
   await user.click(screen.getByRole("button", { name: "Artwork 1" }));
-  await user.click(
-    screen.getByRole("button", { name: "Plan offers", exact: true })
-  );
+  await user.click(screen.getByRole("button", { name: "Plan offers" }));
   mockProfile = {
     id: "other-profile",
     primary_wallet: "0x2222222222222222222222222222222222222222",
@@ -263,7 +259,5 @@ it("discards offer return focus when the collecting account changes", async () =
   const add = screen.getByRole("button", { name: "Artwork 1" });
   await user.click(add);
   expect(add).toHaveFocus();
-  expect(
-    screen.getByRole("button", { name: "Plan offers", exact: true })
-  ).not.toHaveFocus();
+  expect(screen.getByRole("button", { name: "Plan offers" })).not.toHaveFocus();
 });

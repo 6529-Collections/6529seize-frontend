@@ -15,6 +15,7 @@ import {
   getScopeLabel,
 } from "./market-depth-format";
 import { getOtherOrderCount, getOtherOrders } from "./market-depth-orders";
+import { MarketDepthOrderAction } from "./MarketDepthTradeActions";
 
 const INITIAL_ORDER_COUNT = 5;
 const QUIET_BUTTON =
@@ -29,6 +30,7 @@ interface OrderDetailsProps {
   readonly onRetry: () => void;
   readonly onRefresh: () => void;
   readonly showPrice?: boolean;
+  readonly enableTradeActions?: boolean;
 }
 
 function OrderInformation({
@@ -71,10 +73,12 @@ function IndividualOrder({
   order,
   locale,
   showPrice,
+  enableTradeActions,
 }: {
   readonly order: ApiMarketOrder;
   readonly locale: SupportedLocale;
   readonly showPrice: boolean;
+  readonly enableTradeActions: boolean;
 }) {
   return (
     <li className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-py-4 last:tw-border-b-0">
@@ -115,6 +119,9 @@ function IndividualOrder({
         {getApplicabilityLabel(locale, order.applicability)}
       </p>
       <OrderInformation order={order} locale={locale} />
+      {enableTradeActions && (
+        <MarketDepthOrderAction order={order} locale={locale} />
+      )}
     </li>
   );
 }
@@ -128,6 +135,7 @@ export default function MarketDepthOrderDetails({
   onRetry,
   onRefresh,
   showPrice = false,
+  enableTradeActions = false,
 }: OrderDetailsProps) {
   const [showAll, setShowAll] = useState(false);
   if (error) {
@@ -186,6 +194,7 @@ export default function MarketDepthOrderDetails({
             order={order}
             locale={locale}
             showPrice={showPrice}
+            enableTradeActions={enableTradeActions}
           />
         ))}
       </ul>
