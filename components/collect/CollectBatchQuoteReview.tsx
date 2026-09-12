@@ -177,11 +177,6 @@ export default function CollectBatchQuoteReview({
             ? t(locale, "collect.batchReview.gasUnavailable")
             : ethAmount(locale, gas)}
         </Fact>
-        {maximum !== null && (
-          <Fact label={t(locale, "collect.batchReview.maximumTotal")}>
-            {ethAmount(locale, maximum)}
-          </Fact>
-        )}
       </dl>
       <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
         {t(locale, "collect.batchReview.gasNote")}
@@ -248,7 +243,14 @@ export default function CollectBatchQuoteReview({
           {disabledReason}
         </p>
       )}
-      <div className="tw-flex tw-flex-wrap tw-gap-2">
+      <div className="tw-sticky tw-bottom-0 tw-z-20 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-3">
+        {maximum !== null && (
+          <dl className="tw-m-0 tw-w-full">
+            <Fact label={t(locale, "collect.batchReview.maximumTotal")}>
+              {ethAmount(locale, maximum)}
+            </Fact>
+          </dl>
+        )}
         {operation.state === ApiMarketBatchOperationStateEnum.Review && (
           <Button
             variant="action"

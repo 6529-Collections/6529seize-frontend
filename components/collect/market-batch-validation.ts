@@ -44,10 +44,10 @@ export const MARKET_BATCH_ABI = parseAbi([
   "function matchAdvancedOrders(AdvancedOrder[] orders, CriteriaResolver[] criteriaResolvers, Fulfillment[] fulfillments, address recipient) payable",
 ]);
 
-export function assertBatch(value: unknown): asserts value {
+function assertBatch(value: unknown): asserts value {
   if (!value) throw new Error("MARKET_REVIEW_MISMATCH");
 }
-export function batchUint(value: unknown): bigint {
+function batchUint(value: unknown): bigint {
   assertBatch(
     typeof value === "string" && /^(0|[1-9][0-9]{0,77})$/.test(value)
   );
@@ -55,7 +55,7 @@ export function batchUint(value: unknown): bigint {
   assertBatch(number < 2n ** 256n);
   return number;
 }
-export function batchSame(left: string, right: string): boolean {
+function batchSame(left: string, right: string): boolean {
   return left.toLowerCase() === right.toLowerCase();
 }
 function address(value: string): string {

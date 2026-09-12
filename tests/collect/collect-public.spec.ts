@@ -286,6 +286,9 @@ test("listing selection carries across browsing and opens one wallet-gated purch
   await expect(
     dialog.getByRole("button", { name: "Review live total", exact: true })
   ).toBeDisabled();
+  await expect(
+    dialog.getByRole("button", { name: "Review live total", exact: true })
+  ).toBeInViewport();
   const all = dialog.getByRole("checkbox", { name: "Select all", exact: true });
   await expect(all).toBeChecked();
   await dialog

@@ -6,7 +6,7 @@ import {
 } from "./market-send-attempt";
 import { validateMarketBatchRequest } from "./market-batch-validation";
 
-export interface SavedMarketBatch {
+interface SavedMarketBatch {
   readonly request: ApiMarketBatchPrepareRequest;
   readonly transactionHash?: Hex;
   readonly sendAttempt?: MarketSendAttempt;

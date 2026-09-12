@@ -213,7 +213,7 @@ function BatchReviewDraft({
           {disabledReason}
         </p>
       )}
-      <div className="tw-space-y-3 tw-pt-2">
+      <div className="tw-sticky tw-bottom-0 tw-z-20 tw-space-y-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-3">
         <div aria-live="polite" className="tw-space-y-1">
           <p className="tw-m-0 tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100">
             {total === null
