@@ -6,6 +6,7 @@ import { t } from "@/i18n/messages";
 export const ACTIVITY_PAGE_SIZE = 25;
 const MEME_LAB_TAB_FOCUSES = [
   MEME_FOCUS.LIVE,
+  MEME_FOCUS.THE_ART,
   MEME_FOCUS.COLLECTORS,
   MEME_FOCUS.HISTORY,
   MEME_FOCUS.REFERENCES,
@@ -34,10 +35,6 @@ export const MEME_LAB_HISTORY_TABS: {
 export function parseMemeLabFocus(
   focus: string | null
 ): MEME_FOCUS | undefined {
-  if (focus === MEME_FOCUS.THE_ART) {
-    return MEME_FOCUS.LIVE;
-  }
-
   if (
     focus === MEME_FOCUS.ACTIVITY ||
     focus === MEME_FOCUS.YOUR_TRANSACTIONS ||
@@ -148,6 +145,8 @@ export function getMemeLabDetailTabLabel(
   switch (focus) {
     case MEME_FOCUS.LIVE:
       return t(locale, "memeLab.detail.tabs.overview");
+    case MEME_FOCUS.THE_ART:
+      return t(locale, "memeLab.detail.tabs.details");
     case MEME_FOCUS.REFERENCES:
       return t(locale, "memeLab.detail.tabs.references");
     case MEME_FOCUS.COLLECTORS:

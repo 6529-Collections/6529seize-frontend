@@ -32,15 +32,17 @@ pagination.
 
 1. Open `/meme-lab/{id}`.
 2. The route reads `focus` and resolves one visible tab:
-   `Overview`, `Collectors`, `History`, or `References`.
+   `Overview`, `Details`, `Collectors`, `History`, or `References`.
 3. If `focus` is missing or unsupported, the page opens `Overview`.
 4. Switch tabs from the tab row; each switch rewrites `focus` in place while
-   preserving supported `locale` query values.
+   preserving supported `locale` query values. Primary and History tab switches
+   keep the tab row visible with the new section at its top.
 5. Use previous/next arrows to move to adjacent card IDs while keeping the
    current query string.
 6. On `Overview`, review card stats, collection links, ownership summary when
    connected, original media controls, and marketplace shortcuts when available.
-7. Legacy `focus=the-art` URLs open `Overview` with additional details expanded.
+7. `Details` contains original files, metadata, properties, and card details.
+   Existing `focus=the-art` URLs open this tab directly.
 8. On `Collectors`, review the holder leaderboard.
 9. On `References`, review linked The Memes cards referenced by the Meme Lab
    card.
@@ -79,12 +81,11 @@ pagination.
 - If card metadata does not resolve for `{id}`, the route can render only the
   page heading, with no inline not-found panel.
 - Previous/next arrows are disabled at the first and last available card index.
-- `The Art` can still open in animated mode when top-level `animation` is
-  blank but metadata provides `animation` or `animation_url`.
-- If only one original media URL resolves, `The Art` shows just that media
-  slide and its matching download/link row.
-- `File Type` and `Dimensions` rows appear only when the active `The Art`
-  slide has usable metadata values.
+- `Details` resolves animation media from metadata when top-level `animation`
+  is blank but metadata provides `animation` or `animation_url`.
+- Only available original media links appear, with matching open/download
+  actions.
+- File type and dimensions use available metadata; missing values show `N/A`.
 - `Card Activity` can show a loading spinner first, then an empty-state panel
   when no rows are available.
 - `/meme-lab/{id}/distribution` with non-positive or invalid IDs shows the
