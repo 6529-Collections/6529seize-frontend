@@ -7801,8 +7801,15 @@
         "Apply changes or Discard form changes before saving, publishing, switching panels, or Undo. Unapplied page, section, and design fields are not autosaved; browser recovery keeps the applied document. Finish or cancel an image upload before leaving its panel."
       ],
       "canonical_path": "/{user}/cms/builder",
-      "related_paths": ["/{user}"],
-      "tags": ["profiles", "cms", "sharing", "search"],
+      "related_paths": [
+        "/{user}"
+      ],
+      "tags": [
+        "profiles",
+        "cms",
+        "sharing",
+        "search"
+      ],
       "source_refs": [
         "components/profile-cms-builder/studio/StudioPageSettings.tsx",
         "components/profile-cms-builder/studio/StudioForm.tsx",
@@ -7929,8 +7936,14 @@
         "Use your own agent subscription or API account. The local adapter makes no model calls or background retries. File exchange does not require a session token; connected access uses a separate temporary key. Keep keys out of prompts and website files. Neither workflow requires wallet private keys or recovery phrases."
       ],
       "canonical_path": "/{user}/cms/builder",
-      "related_paths": ["/{user}"],
-      "tags": ["profiles", "cms", "agents"],
+      "related_paths": [
+        "/{user}"
+      ],
+      "tags": [
+        "profiles",
+        "cms",
+        "agents"
+      ],
       "source_refs": [
         "components/profile-cms-builder/agent/ProfileCmsAgentWorkspace.tsx",
         "components/profile-cms-builder/agent/CmsAgentConnection.tsx",
