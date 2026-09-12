@@ -11,7 +11,7 @@ import {
   ApiMarketBatchOperationExecutionPolicyEnum,
 } from "@/generated/models/ApiMarketBatchOperation";
 import type { ApiMarketComponents } from "@/generated/models/ApiMarketComponents";
-import { ApiMarketTransactionPurposeEnum } from "@/generated/models/ApiMarketTransaction";
+import { ApiMarketBatchTransactionPurposeEnum } from "@/generated/models/ApiMarketBatchTransaction";
 import { MARKET_BATCH_ABI } from "@/components/collect/market-batch-validation";
 import {
   MARKET_SEAPORT,
@@ -227,7 +227,7 @@ export function batchFixture() {
       sender: PAYER,
       to: MARKET_SEAPORT,
       value: "140",
-      purpose: ApiMarketTransactionPurposeEnum.Fulfill,
+      purpose: ApiMarketBatchTransactionPurposeEnum.Fulfill,
       gas_limit: "600000",
       max_fee_per_gas: "10",
       gas_reserve_wei: "6000000",

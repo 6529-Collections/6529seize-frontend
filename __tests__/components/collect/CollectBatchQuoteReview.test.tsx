@@ -27,6 +27,7 @@ function props() {
 it("shows exact per-NFT prices, full allocated wallets and maximum total with gas", () => {
   const p = props();
   render(<CollectBatchQuoteReview {...p} />);
+  expect(screen.getByRole("heading", { level: 2 })).toHaveFocus();
   expect(
     screen.getByText("Purchase total, including fees").parentElement
   ).toHaveTextContent(`${formatEther(BigInt(p.operation.total_wei))} ETH`);
@@ -65,7 +66,7 @@ it("cannot confirm without a reviewed gas cap, while busy, or with a controller 
   rendered.rerender(
     <CollectBatchQuoteReview {...p} disabledReason="Review changed" />
   );
-  expect(screen.getByRole("status")).toHaveTextContent("Review changed");
+  expect(screen.getByText("Review changed")).toBeVisible();
   expect(screen.getByRole("button", { name: /^Buy / })).toBeDisabled();
   rendered.rerender(<CollectBatchQuoteReview {...p} canEdit={false} />);
   expect(
@@ -85,5 +86,7 @@ it("cannot confirm without a reviewed gas cap, while busy, or with a controller 
       }}
     />
   );
-  expect(screen.getByRole("button", { name: /^Buy / })).toBeDisabled();
+  expect(
+    screen.queryByRole("button", { name: /^Buy / })
+  ).not.toBeInTheDocument();
 });

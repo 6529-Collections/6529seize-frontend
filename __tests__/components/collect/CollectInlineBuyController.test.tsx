@@ -8,6 +8,8 @@ import {
 } from "@/generated/models/ApiMarketTradeOrder";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type CollectBatchController from "@/components/collect/CollectBatchController";
+import type { ComponentProps } from "react";
 
 const payer = "0x1111111111111111111111111111111111111111";
 const seller = "0x2222222222222222222222222222222222222222";
@@ -46,6 +48,14 @@ const mockPrepare = jest.fn();
 const mockValidate = jest.fn();
 const mockConfirm = jest.fn();
 const mockSave = jest.fn();
+const mockBatch = jest.fn();
+jest.mock("@/components/collect/CollectBatchController", () => ({
+  __esModule: true,
+  default: (props: ComponentProps<typeof CollectBatchController>) => {
+    mockBatch(props);
+    return <button onClick={props.onClose}>Close split</button>;
+  },
+}));
 const operation = {
   id: "operation",
   profile_id: "profile",
@@ -290,4 +300,24 @@ it("defaults an older full-lot listing to the whole quantity and hides unsupport
   expect(mockPrepare.mock.calls[0][0]).toEqual(
     expect.objectContaining({ quantity: "2", amount_wei: "200000000000000000" })
   );
+});
+it("routes an explicit edition split to one batch with the exact selected lot and initial destination", async () => {
+  const lot = {
+    ...order,
+    quantity: "2",
+    total_wei: "200000000000000000",
+    net_wei: "200000000000000000",
+  };
+  mockFetchOrders.mockResolvedValue({ orders: [lot] });
+  renderBuy();
+  const split = await screen.findByRole("button", { name: "Split delivery" });
+  await waitFor(() => expect(split).toBeEnabled());
+  fireEvent.click(split);
+  const props = mockBatch.mock.calls.at(-1)![0] as ComponentProps<
+    typeof CollectBatchController
+  >;
+  expect(props.items).toEqual([{ asset, order: lot, quantity: "2" }]);
+  expect(props.initialRecipient).toBe(payer);
+  expect(mockPrepare).not.toHaveBeenCalled();
+  expect(mockConfirm).not.toHaveBeenCalled();
 });

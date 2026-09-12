@@ -83,6 +83,10 @@ jest.mock("@/components/collect/CollectTradeController", () => ({
   __esModule: true,
   default: () => null,
 }));
+jest.mock("@/components/collect/CollectBatchController", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 
 beforeEach(() => {
   jest.clearAllMocks();

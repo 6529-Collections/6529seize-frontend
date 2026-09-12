@@ -3,10 +3,10 @@
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
+import type { ApiMarketOperationResult } from "@/generated/models/ApiMarketOperationResult";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { fetchMyMarketOperations } from "@/services/api/market-api";
+import { fetchMarketHistoryWithBatches } from "@/services/api/market-batch-api";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import CollectOrdersView from "./CollectOrdersView";
@@ -14,23 +14,36 @@ import CollectTradeController from "./CollectTradeController";
 import CollectRulesPanel from "./CollectRulesPanel";
 import { marketOperationView } from "./market.adapters";
 import type { CollectTradeAction } from "./collect.types";
+import CollectBatchController from "./CollectBatchController";
+import { marketBatchOperationView } from "./market-batch.adapters";
+import { collectProfileWallets } from "./collect-recipient.helpers";
 
 export default function CollectOrdersClient() {
   const { connectedProfile } = useAuth();
-  return <ProfileOrders key={connectedProfile?.id ?? "public"} />;
+  const membership = collectProfileWallets(connectedProfile)
+    .map((wallet) => wallet.wallet.toLowerCase())
+    .sort((left, right) => left.localeCompare(right))
+    .join(":");
+  return (
+    <ProfileOrders key={`${connectedProfile?.id ?? "public"}:${membership}`} />
+  );
 }
 function ProfileOrders() {
   const locale = useBrowserLocale();
   const { connectedProfile, isAuthenticated } = useAuth();
   const { seizeConnect } = useSeizeConnectContext();
   const [selected, setSelected] = useState<{
-    operation: ApiMarketOperation;
+    operation: ApiMarketOperationResult;
     cancel: boolean;
   } | null>(null);
   const operations = useInfiniteQuery({
-    queryKey: [QueryKey.MARKET_MY_OPERATIONS, connectedProfile?.id],
+    queryKey: [
+      QueryKey.MARKET_MY_OPERATIONS,
+      connectedProfile?.id,
+      "include-batches",
+    ],
     queryFn: ({ signal, pageParam }) =>
-      fetchMyMarketOperations(signal, pageParam),
+      fetchMarketHistoryWithBatches(signal, pageParam),
     initialPageParam: null as string | null,
     getNextPageParam: (page) => page.next,
     enabled: isAuthenticated === true && Boolean(connectedProfile?.id),
@@ -40,13 +53,16 @@ function ProfileOrders() {
     operations.data?.pages.flatMap((page) => page.operations) ?? [];
   const select = (id: string, cancel: boolean) => {
     const operation = ownOperations.find((item) => item.id === id);
-    if (operation) setSelected({ operation, cancel });
+    if (operation && !(cancel && operation.kind === "BUY_BATCH"))
+      setSelected({ operation, cancel });
   };
   return (
     <>
       <CollectOrdersView
         orders={ownOperations.map((operation) =>
-          marketOperationView(operation, locale)
+          operation.kind === "BUY_BATCH"
+            ? marketBatchOperationView(operation, locale)
+            : marketOperationView(operation, locale)
         )}
         loading={isAuthenticated === true && operations.isPending}
         authenticated={isAuthenticated === true}
@@ -68,7 +84,15 @@ function ProfileOrders() {
       <CollectRulesPanel
         onOperation={(operation) => setSelected({ operation, cancel: false })}
       />
-      {selected && (
+      {selected?.operation.kind === "BUY_BATCH" && (
+        <CollectBatchController
+          key={selected.operation.id}
+          items={[]}
+          initialOperation={selected.operation}
+          onClose={() => setSelected(null)}
+        />
+      )}
+      {selected && selected.operation.kind !== "BUY_BATCH" && (
         <CollectTradeController
           key={`${selected.operation.id}:${selected.cancel}`}
           action={

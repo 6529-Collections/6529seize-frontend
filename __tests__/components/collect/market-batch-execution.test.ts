@@ -13,6 +13,7 @@ import { createMarketSendAttempt } from "@/components/collect/market-send-attemp
 import { ApiMarketBatchOperationStateEnum } from "@/generated/models/ApiMarketBatchOperation";
 import type { PublicClient, WalletClient } from "viem";
 import * as BatchCapabilities from "@/generated/models/ApiMarketBatchCapabilities";
+import { findResumableMarketBatch } from "@/components/collect/market-batch-resume";
 
 const enabledCapability: BatchCapabilities.ApiMarketBatchCapabilities = {
   available: true,
@@ -49,6 +50,10 @@ jest.mock("@/components/collect/market-operation-lock", () => ({
   withMarketOperationLock: (_id: string, callback: () => Promise<unknown>) =>
     callback(),
 }));
+jest.mock("@/components/collect/market-batch-resume", () => ({
+  marketBatchProfileLock: (profile: string) => `batch-profile:${profile}`,
+  findResumableMarketBatch: jest.fn(),
+}));
 const send = jest.mocked(sendReviewedMarketBatch),
   fetch = jest.mocked(api.fetchMarketBatch),
   refresh = jest.mocked(api.continueMarketBatch),
@@ -58,6 +63,7 @@ let serial = 0;
 beforeEach(() => {
   jest.clearAllMocks();
   localStorage.clear();
+  jest.mocked(findResumableMarketBatch).mockResolvedValue(null);
   jest.spyOn(Date, "now").mockReturnValue(NOW);
 });
 afterEach(() => jest.restoreAllMocks());
@@ -113,6 +119,27 @@ it("refreshes and simulates the complete exact transaction before one journaled 
   );
   expect(send).toHaveBeenCalledTimes(1);
   expect(submit).toHaveBeenCalledTimes(1);
+});
+it("never sends a second operation while an overlapping seller order has an unresolved purchase", async () => {
+  const f = setup();
+  jest.mocked(findResumableMarketBatch).mockResolvedValue({
+    operation: {
+      ...f.operation,
+      id: "prior-purchase",
+      state: ApiMarketBatchOperationStateEnum.Unknown,
+    },
+    request: f.request,
+  });
+  await expect(confirmMarketBatch(f.options)).rejects.toThrow(
+    "MARKET_BROADCAST_UNKNOWN"
+  );
+  expect(send).not.toHaveBeenCalled();
+  expect(f.client.call).not.toHaveBeenCalled();
+  expect(jest.mocked(findResumableMarketBatch)).toHaveBeenCalledWith(
+    f.request.profile_id,
+    f.request.items,
+    { excludeId: f.operation.id, includeReview: false }
+  );
 });
 it.each([
   "disabled",

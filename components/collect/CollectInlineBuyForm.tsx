@@ -17,6 +17,7 @@ type Props = ComponentProps<typeof CollectTradeForm> & {
   readonly amountWei: string | null;
   readonly orderOptions?: ReactNode;
   readonly quantityStep?: string;
+  readonly onSplitDelivery?: (() => void) | undefined;
 };
 
 export default function CollectInlineBuyForm(props: Props) {
@@ -147,6 +148,16 @@ export default function CollectInlineBuyForm(props: Props) {
               price: marketAmount(props.amountWei, MARKET_ZERO),
             })}
       </Button>
+      {props.onSplitDelivery && (
+        <button
+          type="button"
+          disabled={props.loading || Boolean(props.disabledReason)}
+          onClick={props.onSplitDelivery}
+          className="tw-min-h-11 tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-text-iron-400 tw-underline tw-decoration-iron-600 tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        >
+          {t(locale, "collect.buy.splitDelivery")}
+        </button>
+      )}
     </form>
   );
 }

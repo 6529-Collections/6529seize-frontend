@@ -14,7 +14,12 @@ import type { ReactNode } from "react";
 import { getAddress } from "viem";
 import CollectAssetMedia from "./CollectAssetMedia";
 import type { CollectSelectedListing } from "./collect-selection.helpers";
+import { marketBatchStage } from "./market-batch.adapters";
 import { collectBatchEthAmount as ethAmount } from "./collect-batch-review.helpers";
+
+function focusReviewHeading(element: HTMLHeadingElement | null) {
+  element?.focus();
+}
 
 function Fact({
   label,
@@ -136,9 +141,16 @@ export default function CollectBatchQuoteReview({
       className="tw-space-y-4"
     >
       <div className="tw-space-y-1">
-        <h2 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+        <h2
+          ref={focusReviewHeading}
+          tabIndex={-1}
+          className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100"
+        >
           {t(locale, "collect.batchReview.quoteTitle")}
         </h2>
+        <p role="status" className="tw-m-0 tw-text-sm tw-text-iron-200">
+          {t(locale, `collect.trade.stage.${marketBatchStage(operation)}`)}
+        </p>
         <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
           {t(locale, "collect.batchReview.atomic")}
         </p>
@@ -237,19 +249,21 @@ export default function CollectBatchQuoteReview({
         </p>
       )}
       <div className="tw-flex tw-flex-wrap tw-gap-2">
-        <Button
-          variant="action"
-          size="lg"
-          loading={busy}
-          disabled={!ready || Boolean(disabledReason)}
-          onClick={() => {
-            void onConfirm();
-          }}
-        >
-          {t(locale, "collect.buy.atPrice", {
-            price: ethAmount(locale, operation.total_wei),
-          })}
-        </Button>
+        {operation.state === ApiMarketBatchOperationStateEnum.Review && (
+          <Button
+            variant="action"
+            size="lg"
+            loading={busy}
+            disabled={!ready || Boolean(disabledReason)}
+            onClick={() => {
+              void onConfirm();
+            }}
+          >
+            {t(locale, "collect.buy.atPrice", {
+              price: ethAmount(locale, operation.total_wei),
+            })}
+          </Button>
+        )}
         {canEdit && (
           <Button
             variant="secondary"
