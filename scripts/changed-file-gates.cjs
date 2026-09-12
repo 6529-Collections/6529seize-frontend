@@ -33,7 +33,7 @@ function selectFiles(mode, env) {
   let revision = mode.revision;
   if (revision === "merge-base") {
     revision = git(["merge-base", "origin/main", "HEAD"]).trim();
-    if (!/^[a-f0-9]{40}$/u.test(revision)) {
+    if (!/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/u.test(revision)) {
       throw new Error("Unable to resolve merge-base with origin/main.");
     }
     if (mode.diffEnv) env.ESLINT_PLUGIN_DIFF_COMMIT = revision;

@@ -39,9 +39,13 @@ function git(root: string, args: string[]) {
   return result.stdout.trim();
 }
 
-function fixture() {
+function fixture(objectFormat: "sha1" | "sha256" = "sha1") {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "changed-file-gates-"));
-  git(root, ["init", "--initial-branch=main"]);
+  git(root, [
+    "init",
+    "--initial-branch=main",
+    `--object-format=${objectFormat}`,
+  ]);
   git(root, ["config", "user.name", "Test Fixture"]);
   git(root, ["config", "user.email", "fixture@example.invalid"]);
   git(root, ["config", "commit.gpgsign", "false"]);
@@ -121,6 +125,25 @@ function createLargeChange(root: string) {
   write(root, "generated/excluded.ts", "export {};\n");
   return files;
 }
+
+it("runs merge-base gates in a SHA-256 repository", () => {
+  const root = fixture("sha256");
+  try {
+    write(root, "src/untracked.ts", "export {};\n");
+    const base = git(root, ["rev-parse", "origin/main"]);
+    expect(base).toHaveLength(64);
+    for (const gate of ["lint:changed", "lint:changed:fix", "format:changed"]) {
+      const result = runGate(root, gate);
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(0);
+      expect(result.calls).toHaveLength(1);
+      expect(result.calls[0]!.args.at(-1)).toBe("src/untracked.ts");
+      if (gate.startsWith("lint:")) expect(result.calls[0]!.base).toBe(base);
+    }
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+}, 60000);
 
 describe.each(GATES)("%s command transport", (gate) => {
   let root: string;
