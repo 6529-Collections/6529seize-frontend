@@ -8,11 +8,22 @@ import {
   withdrawDropReport,
 } from "@/services/api/content-moderation-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import type { ReactNode } from "react";
+
+let mockProfileId: string | null = "profile-a";
+let mockProxyId: string | null = null;
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
+    connectedProfile: mockProfileId ? { id: mockProfileId } : null,
+    activeProfileProxy: mockProxyId ? { id: mockProxyId } : null,
     requestAuth: jest.fn().mockResolvedValue({ success: true }),
     setToast: jest.fn(),
   }),
@@ -75,6 +86,8 @@ const renderSettings = () => {
 describe("ReportsPreferencesSettings", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockProfileId = "profile-a";
+    mockProxyId = null;
     jest.mocked(withdrawDropReport).mockResolvedValue({
       drop_id: "drop-1",
       status: ApiContentModerationReportStatus.Withdrawn,
@@ -200,5 +213,47 @@ describe("ReportsPreferencesSettings", () => {
     await waitFor(() =>
       expect(withdrawDropReport).toHaveBeenCalledWith("drop-1")
     );
+  });
+
+  it("hides the previous profile's reports immediately while the new profile loads", async () => {
+    let finishNextProfile!: (reports: ApiContentModerationUserReport[]) => void;
+    jest
+      .mocked(fetchMyContentModerationReports)
+      .mockResolvedValueOnce([report({ author_handle: "private-profile-a" })])
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishNextProfile = resolve;
+          })
+      );
+    const view = renderSettings();
+    expect(await screen.findByText("@private-profile-a")).toBeVisible();
+
+    mockProfileId = "profile-b";
+    view.rerender(<ReportsPreferencesSettings />);
+    expect(screen.queryByText("@private-profile-a")).not.toBeInTheDocument();
+    await act(async () => {
+      finishNextProfile([report({ author_handle: "private-profile-b" })]);
+    });
+    expect(await screen.findByText("@private-profile-b")).toBeVisible();
+
+    mockProxyId = "proxy";
+    view.rerender(<ReportsPreferencesSettings />);
+    expect(screen.queryByText("@private-profile-b")).not.toBeInTheDocument();
+    expect(fetchMyContentModerationReports).toHaveBeenCalledTimes(2);
+  });
+
+  it("aborts an outstanding personal report request when signing out", async () => {
+    jest
+      .mocked(fetchMyContentModerationReports)
+      .mockImplementation(() => new Promise(() => undefined));
+    const view = renderSettings();
+    const signal = jest.mocked(fetchMyContentModerationReports).mock
+      .calls[0]?.[0]?.signal;
+    expect(signal?.aborted).toBe(false);
+    mockProfileId = null;
+    view.rerender(<ReportsPreferencesSettings />);
+    expect(signal?.aborted).toBe(true);
+    expect(fetchMyContentModerationReports).toHaveBeenCalledTimes(1);
   });
 });

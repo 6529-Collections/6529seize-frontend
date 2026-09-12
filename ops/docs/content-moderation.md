@@ -149,6 +149,9 @@ direct link to the exact post, using the direct-message route when applicable.
 Open reports can also be withdrawn there. Resolved reports show the public
 moderator outcome, but never expose AI assessment details, reply-parent
 evidence, internal notes or reasons, moderator identity, or other reporters.
+Personal report history is scoped to the signed-in profile. Switching profiles,
+signing out, or entering a proxy session clears the previous profile's cached
+reports and cancels its outstanding report requests.
 
 ## Posts from blocked profiles
 

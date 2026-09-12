@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   clearPrivateModerationQueries,
+  clearPersonalReportQueries,
   isPrivateModerationQuery,
 } from "@/services/content-moderation/content-moderation-query";
 import { getStructuredApiErrorStatus } from "@/services/api/common-api";
@@ -23,6 +24,7 @@ export const useContentModerationStateScope = (
     clearSubmissionRequestKeys();
     const keepProfileId = proxyId ? null : connectedProfileId;
     clearPrivateModerationQueries(queryClient, keepProfileId);
+    clearPersonalReportQueries(queryClient, keepProfileId);
     queryClient.removeQueries({
       queryKey: CONTENT_MODERATOR_ACCESS_QUERY_KEY,
       predicate: (query) =>

@@ -158,4 +158,6 @@ export const MODERATION_CHECK_MESSAGES = {
   "checks.reportReview": "Review evidence and decide",
   "contentModeration.moderator.tabs.checks": "Checks",
   "contentModeration.moderator.tabs.checksCompact": "Checks",
+  "contentModeration.approvalConsumed":
+    "This approval has already been used. Only a retry of the original submission can return the saved result.",
 } as const;

@@ -21,6 +21,9 @@ import { publicEnv } from "@/config/env";
 
 const mockQueryClient = {
   getQueryData: jest.fn(),
+  removeQueries: jest.fn(),
+  getMutationCache: () => ({ getAll: () => [] }),
+  getQueryCache: () => ({ subscribe: () => jest.fn() }),
 };
 const mockRouterReplace = jest.fn();
 const mockRouterPush = jest.fn();

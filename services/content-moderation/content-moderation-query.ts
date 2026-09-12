@@ -30,6 +30,16 @@ export const MY_CONTENT_MODERATION_REPORTS_QUERY_KEY = [
   "mine",
 ] as const;
 
+export const clearPersonalReportQueries = (
+  queryClient: QueryClient,
+  keepProfileId?: string | null
+): void => {
+  queryClient.removeQueries({
+    queryKey: MY_CONTENT_MODERATION_REPORTS_QUERY_KEY,
+    predicate: (query) => !keepProfileId || query.queryKey[2] !== keepProfileId,
+  });
+};
+
 const CONTENT_PRESENTATION_QUERY_ROOTS = [
   QueryKey.DROP,
   QueryKey.DROPS,

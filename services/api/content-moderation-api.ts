@@ -122,9 +122,11 @@ export const fetchContentModerationBlockActivity = ({
 export const fetchMyContentModerationReports = ({
   limit = 50,
   before,
+  signal,
 }: {
   readonly limit?: number | undefined;
   readonly before?: string | undefined;
+  readonly signal?: AbortSignal;
 } = {}): Promise<ApiContentModerationUserReport[]> =>
   commonApiFetch<ApiContentModerationUserReport[], Record<string, string>>({
     endpoint: "content-moderation/reports/mine",
@@ -132,6 +134,8 @@ export const fetchMyContentModerationReports = ({
       limit: String(limit),
       ...(before === undefined ? {} : { before }),
     },
+    signal,
+    cache: "no-store",
     errorMode: "structured",
   });
 

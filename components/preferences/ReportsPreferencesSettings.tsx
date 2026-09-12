@@ -163,10 +163,13 @@ function ReportRow({
 
 export default function ReportsPreferencesSettings() {
   const locale = useBrowserLocale();
+  const { connectedProfile, activeProfileProxy } = useAuth();
+  const profileId = activeProfileProxy === null ? connectedProfile?.id : null;
   const query = useInfiniteQuery({
-    queryKey: MY_CONTENT_MODERATION_REPORTS_QUERY_KEY,
-    queryFn: ({ pageParam }) =>
+    queryKey: [...MY_CONTENT_MODERATION_REPORTS_QUERY_KEY, profileId ?? null],
+    queryFn: ({ pageParam, signal }) =>
       fetchMyContentModerationReports({
+        signal,
         limit: PAGE_SIZE,
         ...(pageParam ? { before: pageParam } : {}),
       }),
@@ -174,8 +177,13 @@ export default function ReportsPreferencesSettings() {
     getNextPageParam: (page) =>
       page.length === PAGE_SIZE ? page.at(-1)?.cursor : undefined,
     retry: false,
+    enabled: Boolean(profileId),
+    gcTime: 0,
   });
-  const reports = useMemo(() => query.data?.pages.flat() ?? [], [query.data]);
+  const reports = useMemo(
+    () => (profileId ? (query.data?.pages.flat() ?? []) : []),
+    [profileId, query.data]
+  );
 
   return (
     <section
@@ -203,7 +211,10 @@ export default function ReportsPreferencesSettings() {
       {reports.length > 0 && (
         <ul className="tw-m-0 tw-mt-3 tw-list-none tw-p-0">
           {reports.map((report) => (
-            <ReportRow key={report.id} report={report} />
+            <ReportRow
+              key={`${profileId ?? "signed-out"}:${report.id}`}
+              report={report}
+            />
           ))}
         </ul>
       )}
