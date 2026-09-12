@@ -286,7 +286,7 @@
     "autoprefixer": "10.5.4",
     "babel-jest": "30.4.1",
     "babel-plugin-react-compiler": "1.0.0",
-    "baseline-browser-mapping": "2.10.10",
+    "baseline-browser-mapping": "2.11.0",
     "dotenv": "16.6.1",
     "esbuild": "0.28.1",
     "eslint": "9.39.4",
