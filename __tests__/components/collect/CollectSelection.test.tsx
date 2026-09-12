@@ -1,6 +1,7 @@
 import CollectPageClient from "@/components/collect/CollectPageClient";
 import type CollectPageView from "@/components/collect/CollectPageView";
 import type CollectBatchController from "@/components/collect/CollectBatchController";
+import type CollectOfferWorkspace from "@/components/collect/CollectOfferWorkspace";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
 import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
@@ -13,6 +14,7 @@ import {
   MARKET_ZERO,
 } from "@/components/collect/market-validation";
 import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { ComponentProps } from "react";
 
 let mockParams = new URLSearchParams("intent=lowest&collection=memes");
@@ -89,6 +91,18 @@ jest.mock("@/components/collect/CollectPageView", () => ({
           );
         })}
       {props.selectionSummary}
+      {props.workspaceContent}
+    </div>
+  ),
+}));
+jest.mock("@/components/collect/CollectOfferWorkspace", () => ({
+  __esModule: true,
+  default: ({
+    active,
+    onBack,
+  }: ComponentProps<typeof CollectOfferWorkspace>) => (
+    <div hidden={!active}>
+      <button onClick={onBack}>Back to collecting</button>
     </div>
   ),
 }));
@@ -204,4 +218,52 @@ it("discards unsigned selection when profile membership changes", () => {
     "aria-pressed",
     "false"
   );
+});
+
+it("returns focus to the remounted selection offer trigger after each workspace visit", async () => {
+  const user = userEvent.setup();
+  render(<CollectPageClient />);
+  await user.click(screen.getByRole("button", { name: "Artwork 1" }));
+  for (let visit = 0; visit < 2; visit++) {
+    const original = screen.getByRole("button", {
+      name: "Plan offers",
+      exact: true,
+    });
+    await user.click(original);
+    expect(original).not.toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Back to collecting" })
+    );
+    const replacement = screen.getByRole("button", {
+      name: "Plan offers",
+      exact: true,
+    });
+    expect(replacement).not.toBe(original);
+    expect(replacement).toHaveFocus();
+    expect(screen.getByText("1 selected")).toBeVisible();
+  }
+});
+
+it("discards offer return focus when the collecting account changes", async () => {
+  const user = userEvent.setup();
+  const { rerender } = render(<CollectPageClient />);
+  await user.click(screen.getByRole("button", { name: "Artwork 1" }));
+  await user.click(
+    screen.getByRole("button", { name: "Plan offers", exact: true })
+  );
+  mockProfile = {
+    id: "other-profile",
+    primary_wallet: "0x2222222222222222222222222222222222222222",
+    wallets: [],
+  } as unknown as ApiIdentity;
+  rerender(<CollectPageClient />);
+  expect(
+    screen.queryByRole("button", { name: "Back to collecting" })
+  ).not.toBeInTheDocument();
+  const add = screen.getByRole("button", { name: "Artwork 1" });
+  await user.click(add);
+  expect(add).toHaveFocus();
+  expect(
+    screen.getByRole("button", { name: "Plan offers", exact: true })
+  ).not.toHaveFocus();
 });

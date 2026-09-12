@@ -5,7 +5,13 @@ import { MOBILE_BOTTOM_NAV_DOCK_MEASUREMENT_WINDOW_MS } from "@/helpers/navigati
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useMeasuredMobileBottomNavDockBottom } from "@/hooks/useMeasuredMobileBottomNavDockBottom";
 import { t } from "@/i18n/messages";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type Ref,
+} from "react";
 import { createPortal } from "react-dom";
 import { marketAmount } from "./market.adapters";
 import { MARKET_ZERO } from "./market-validation";
@@ -19,12 +25,14 @@ export default function CollectSelectionBar({
   onReview,
   onClear,
   onPlanOffers,
+  planOffersRef,
   active = true,
 }: {
   readonly items: readonly CollectSelectedListing[];
   readonly onReview: () => void;
   readonly onClear: () => void;
   readonly onPlanOffers?: (() => void) | undefined;
+  readonly planOffersRef?: Ref<HTMLButtonElement> | undefined;
   readonly active?: boolean | undefined;
 }) {
   const locale = useBrowserLocale();
@@ -106,7 +114,12 @@ export default function CollectSelectionBar({
                   {t(locale, "collect.selection.clear")}
                 </Button>
                 {onPlanOffers && (
-                  <Button variant="secondary" size="sm" onClick={onPlanOffers}>
+                  <Button
+                    ref={planOffersRef}
+                    variant="secondary"
+                    size="sm"
+                    onClick={onPlanOffers}
+                  >
                     {t(locale, "collect.offerWorkspace.plan")}
                   </Button>
                 )}
