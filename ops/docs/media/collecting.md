@@ -17,7 +17,7 @@ wallets count together.
 
 ## Entry Points
 
-Open **Collecting tools** in the NFT navigation, or choose **Complete my set** on
+Open **Collect** in the NFT navigation, or choose **Complete my set** on
 a collection page. The Memes carries the selected season into the planner, or
 opens the full Memes set when no season is selected. Gradients opens the full
 Gradients set; Pebbles opens its trait-set planner. Collected and Pebbles Trait
@@ -95,6 +95,29 @@ card page.
    confirmed result are separate states.
 
 ## Common Scenarios
+
+### Review an individual purchase
+
+The purchase summary shows the artwork, quantity, paying wallet and destination.
+Wallet names from the collecting profile appear with their full checksummed
+addresses and a copy control. When the same wallet pays and receives, it appears
+once under **Pay with & deliver to**. A different destination appears separately.
+
+**Purchase price** includes the signed order fees. **Network fee cap** covers
+the quoted purchase transaction and any required approvals. For an ETH purchase
+with complete fee caps, **Maximum total** adds the price and those caps. The
+summary rounds caps upward; **Transaction details** preserves the exact amounts,
+seller proceeds, fee recipients, approval scope and contract information.
+If a cap is unavailable, the summary says **Not available yet** and does not show
+a complete maximum. WETH prices and ETH network fees stay separate.
+
+The purchase review stays available while you read. **Continue to wallet** gets
+a fresh execution quote and compares it with the reviewed terms. Changes to
+price, fees, approval scope or other terms require another review before the
+wallet opens. A reset quote shows **Refresh quote** and keeps the purchase
+choices while current terms load. Refresh cannot run alongside an active wallet
+confirmation. Quote freshness is separate from the listing's expiry: a refreshed
+quote does not extend the listing.
 
 ### Complete a profile set
 

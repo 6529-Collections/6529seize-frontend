@@ -17,7 +17,7 @@ describe("useSidebarSections", () => {
     );
     expect(nftsSection?.name).toBe("NFTs");
     expect(nftsSection?.items.map((item) => item.name)).toEqual([
-      "Collecting tools",
+      "Collect",
       "The Memes",
       "6529 Gradient",
       "NextGen",
@@ -60,7 +60,7 @@ describe("useSidebarSections", () => {
       (section) => section.key === "nfts"
     );
     expect(nftsSection?.items.map((item) => item.name)).toEqual([
-      "Collecting tools",
+      "Collect",
       "The Memes",
       "6529 Gradient",
       "NextGen",
