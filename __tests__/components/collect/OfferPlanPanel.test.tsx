@@ -46,9 +46,15 @@ function setPrice(id: number, value: string) {
   fireEvent.change(priceInput(id), { target: { value } });
 }
 function setMethod(value: string) {
-  fireEvent.change(screen.getByRole("combobox", { name: "Price method" }), {
-    target: { value },
-  });
+  const labels: Record<string, string> = {
+    manual: "Enter each price",
+    match_bid: "Match observed WETH offer",
+    improve_bid: "Above observed WETH offer",
+    discount_ask: "Below observed ask",
+    goal: "Conservative allocation",
+  };
+  fireEvent.click(screen.getByRole("button", { name: "Price method" }));
+  fireEvent.click(screen.getByRole("option", { name: labels[value] ?? value }));
 }
 
 it("requires each manual price and never substitutes a total budget or automatic signature", async () => {
@@ -309,4 +315,72 @@ it("requires a new allocation after changing the goal budget, preserving manual 
   expect(priceInput(1)).toHaveValue("0.2");
   expect(priceInput(2)).toHaveValue("");
   expect(reviewButton(2)).toBeDisabled();
+});
+
+it("uses a compact keyboard-accessible pricing chooser without submitting analysis", async () => {
+  const p = props();
+  render(<OfferPlanPanel {...p} />);
+  const trigger = screen.getByRole("button", { name: "Price method" });
+  expect(trigger).toHaveAccessibleDescription("Enter each price");
+  expect(
+    screen.queryByRole("combobox", { name: "Price method" })
+  ).not.toBeInTheDocument();
+  trigger.focus();
+  fireEvent.keyDown(trigger, { key: "Enter" });
+  const list = await screen.findByRole("listbox");
+  expect(list).toHaveAccessibleName(/Price method/);
+  expect(screen.getAllByRole("option")).toHaveLength(5);
+  await waitFor(() => expect(list).toHaveFocus());
+  fireEvent.keyDown(list, { key: "ArrowDown" });
+  await waitFor(() =>
+    expect(list).toHaveAttribute(
+      "aria-activedescendant",
+      screen.getByRole("option", { name: "Match observed WETH offer" }).id
+    )
+  );
+  fireEvent.keyDown(list, { key: "Enter" });
+  await waitFor(() =>
+    expect(trigger).toHaveTextContent("Match observed WETH offer")
+  );
+  await waitFor(() => expect(trigger).toHaveFocus());
+  fireEvent.keyDown(trigger, { key: "Enter" });
+  fireEvent.keyDown(await screen.findByRole("listbox"), { key: "Escape" });
+  await waitFor(() =>
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+  );
+  await waitFor(() => expect(trigger).toHaveFocus());
+  expect(p.analyze).not.toHaveBeenCalled();
+});
+
+it("keeps per-NFT expiry in details and preserves each explicit price, quantity, and expiry at review", () => {
+  const p = props();
+  render(<OfferPlanPanel {...p} />);
+  expect(
+    screen.getByRole("combobox", { name: "Default expiry" })
+  ).toBeVisible();
+  const expiry = screen.getByLabelText("Offer expiry for Artwork 1");
+  expect(expiry).not.toBeVisible();
+  fireEvent.click(screen.getByLabelText("Details and expiry for Artwork 1"));
+  expect(expiry).toBeVisible();
+  fireEvent.change(expiry, { target: { value: "24" } });
+  setPrice(1, "0.125");
+  fireEvent.change(
+    screen.getByRole("textbox", { name: "Offer quantity for Artwork 1" }),
+    {
+      target: { value: "2" },
+    }
+  );
+  fireEvent.click(reviewButton(1));
+  expect(p.onReviewOffer).toHaveBeenCalledWith(
+    expect.objectContaining({
+      asset: offerAsset(1),
+      unitPriceEth: "0.125",
+      quantity: "2",
+      expiryHours: "24",
+    })
+  );
+  expect(screen.getByLabelText("Offer expiry for Artwork 2")).toHaveValue(
+    "168"
+  );
+  expect(p.analyze).not.toHaveBeenCalled();
 });

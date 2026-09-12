@@ -40,7 +40,8 @@ export const COLLECT_MESSAGES = {
   "collect.offerPlan.pinned": "Your price · kept when recalculating",
   "collect.offerPlan.reset": "Use calculated price",
   "collect.offerPlan.resetFor": "Use a calculated price for {title}",
-  "collect.offerPlan.details": "Pricing details",
+  "collect.offerPlan.details": "Details & expiry",
+  "collect.offerPlan.detailsFor": "Details and expiry for {title}",
   "collect.offerPlan.weth": "{amount} WETH",
   "collect.offerPlan.observedBid":
     "Observed offer: {amount} {currency} per NFT at {time}.",
