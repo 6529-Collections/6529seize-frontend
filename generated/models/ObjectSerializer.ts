@@ -174,6 +174,11 @@ export * from '../models/ApiCollectTdhRanking';
 export * from '../models/ApiCollectTdhRankingRequest';
 export * from '../models/ApiCollectTdhRatio';
 export * from '../models/ApiCollectTdhRequest';
+export * from '../models/ApiCollectTdhTargetCoverage';
+export * from '../models/ApiCollectTdhTargetItem';
+export * from '../models/ApiCollectTdhTargetPlan';
+export * from '../models/ApiCollectTdhTargetRequest';
+export * from '../models/ApiCollectTdhTargetSearch';
 export * from '../models/ApiCollectTrait';
 export * from '../models/ApiCollectedStats';
 export * from '../models/ApiCollectedStatsSeason';
@@ -995,6 +1000,11 @@ import { ApiCollectTdhRanking          , ApiCollectTdhRankingOptimalityEnum  , A
 import { ApiCollectTdhRankingRequest    , ApiCollectTdhRankingRequestHorizonDaysEnum   } from '../models/ApiCollectTdhRankingRequest';
 import { ApiCollectTdhRatio } from '../models/ApiCollectTdhRatio';
 import { ApiCollectTdhRequest , ApiCollectTdhRequestHorizonDaysEnum    } from '../models/ApiCollectTdhRequest';
+import { ApiCollectTdhTargetCoverage } from '../models/ApiCollectTdhTargetCoverage';
+import { ApiCollectTdhTargetItem } from '../models/ApiCollectTdhTargetItem';
+import { ApiCollectTdhTargetPlan  , ApiCollectTdhTargetPlanStatusEnum                } from '../models/ApiCollectTdhTargetPlan';
+import { ApiCollectTdhTargetRequest   , ApiCollectTdhTargetRequestTargetModeEnum  , ApiCollectTdhTargetRequestHorizonDaysEnum     } from '../models/ApiCollectTdhTargetRequest';
+import { ApiCollectTdhTargetSearch, ApiCollectTdhTargetSearchOptimalityEnum   , ApiCollectTdhTargetSearchEvaluationLimitEnum   , ApiCollectTdhTargetSearchWorkLimitEnum  , ApiCollectTdhTargetSearchStopReasonEnum   } from '../models/ApiCollectTdhTargetSearch';
 import { ApiCollectTrait } from '../models/ApiCollectTrait';
 import { ApiCollectedStats } from '../models/ApiCollectedStats';
 import { ApiCollectedStatsSeason } from '../models/ApiCollectedStatsSeason';
@@ -1709,6 +1719,13 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCollectTdhRankingCandidateScopeEnum",
     "ApiCollectTdhRankingRequestHorizonDaysEnum",
     "ApiCollectTdhRequestHorizonDaysEnum",
+    "ApiCollectTdhTargetPlanStatusEnum",
+    "ApiCollectTdhTargetRequestTargetModeEnum",
+    "ApiCollectTdhTargetRequestHorizonDaysEnum",
+    "ApiCollectTdhTargetSearchOptimalityEnum",
+    "ApiCollectTdhTargetSearchEvaluationLimitEnum",
+    "ApiCollectTdhTargetSearchWorkLimitEnum",
+    "ApiCollectTdhTargetSearchStopReasonEnum",
     "ApiCommunityMembersSortOption",
     "ApiCompetitionCapability",
     "ApiCompetitionComputedPhase",
@@ -2049,6 +2066,11 @@ let typeMap: {[index: string]: any} = {
     "ApiCollectTdhRankingRequest": ApiCollectTdhRankingRequest,
     "ApiCollectTdhRatio": ApiCollectTdhRatio,
     "ApiCollectTdhRequest": ApiCollectTdhRequest,
+    "ApiCollectTdhTargetCoverage": ApiCollectTdhTargetCoverage,
+    "ApiCollectTdhTargetItem": ApiCollectTdhTargetItem,
+    "ApiCollectTdhTargetPlan": ApiCollectTdhTargetPlan,
+    "ApiCollectTdhTargetRequest": ApiCollectTdhTargetRequest,
+    "ApiCollectTdhTargetSearch": ApiCollectTdhTargetSearch,
     "ApiCollectTrait": ApiCollectTrait,
     "ApiCollectedStats": ApiCollectedStats,
     "ApiCollectedStatsSeason": ApiCollectedStatsSeason,
