@@ -3408,6 +3408,8 @@ export const EN_US_MESSAGES = {
   "theMemes.detail.tabs.overview": "Overview",
   "theMemes.detail.tabs.yourCards": "Your Cards",
   "theMemes.detail.tabs.theArt": "The Art",
+  "theMemes.detail.tabs.details": "Details",
+  "nftDetail.tabs.loading": "Loading section...",
   "theMemes.detail.tabs.references": "References",
   "theMemes.detail.tabs.collectors": "Collectors",
   "theMemes.detail.tabs.history": "History",

@@ -51,7 +51,7 @@ export function getMemeFocusLabel(
     case MEME_FOCUS.YOUR_CARDS:
       return t(locale, "theMemes.detail.tabs.yourCards");
     case MEME_FOCUS.THE_ART:
-      return t(locale, "theMemes.detail.tabs.theArt");
+      return t(locale, "theMemes.detail.tabs.details");
     case MEME_FOCUS.REFERENCES:
       return t(locale, "theMemes.detail.tabs.references");
     case MEME_FOCUS.COLLECTORS:

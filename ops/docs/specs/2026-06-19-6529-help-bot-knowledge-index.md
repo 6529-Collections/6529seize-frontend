@@ -33,6 +33,9 @@ current pages; those guides are not invented as historical snapshot routes.
 The collecting record describes results below the goal controls, priced
 quantities, costs and explicit budget-versus-available scenarios. **Collect now**
 opens purchase selection and **Make offers** opens per-NFT offer pricing.
+The card records preserve `focus=the-art` deep links to the Memes and Meme Lab
+**Details** tab. Primary and History tab changes keep the tab row visible and
+show the selected section from its top while deferred content loads.
 The Listings and Offers record distinguishes direct **Collect** and **Sell**
 actions for one order from the explicit choice among multiple orders at a price.
 The Collect navigation label opens the set planner. Individual purchase facts
