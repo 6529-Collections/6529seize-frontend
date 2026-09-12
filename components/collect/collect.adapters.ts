@@ -7,6 +7,7 @@ import type { ApiCollectCatalog } from "@/generated/models/ApiCollectCatalog";
 import { ApiCollectKind } from "@/generated/models/ApiCollectKind";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { formatDecimalString, formatNumber } from "@/i18n/format";
 import {
   MEMES_CONTRACT,
   GRADIENT_CONTRACT,
@@ -167,8 +168,8 @@ export function collectAnalysisView(
     title,
     profile,
     coverageLabel: t(locale, "collect.goal.coverage", {
-      owned: analysis.satisfied_count,
-      total: analysis.required_count,
+      owned: formatNumber(locale, analysis.satisfied_count),
+      total: formatNumber(locale, analysis.required_count),
     }),
     snapshotLabel: t(locale, "collect.goal.snapshot", {
       block: analysis.holdings_snapshot.block_number ?? "—",
@@ -177,8 +178,8 @@ export function collectAnalysisView(
       id: requirement.id,
       label: requirement.label,
       detail: t(locale, "collect.goal.requirement", {
-        owned: requirement.owned_quantity,
-        target: requirement.target_quantity,
+        owned: formatDecimalString(locale, requirement.owned_quantity),
+        target: formatDecimalString(locale, requirement.target_quantity),
       }),
       status: requirement.missing_quantity === "0" ? "owned" : "missing",
     })),

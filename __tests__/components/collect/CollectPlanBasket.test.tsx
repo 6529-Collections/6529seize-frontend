@@ -19,6 +19,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import type { ReactNode } from "react";
+import type { ApiCollectPlanLeg } from "@/generated/models/ApiCollectPlanLeg";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
@@ -122,7 +123,13 @@ function makePlan(recipient: string | null = recipientWallet): ApiCollectPlan {
     asset_scan_complete: true,
   };
 }
-function show(plan = makePlan(), onSettled = jest.fn(), onClose = jest.fn()) {
+function show(
+  plan = makePlan(),
+  onSettled = jest.fn(),
+  onClose = jest.fn(),
+  reviewLegs?: readonly ApiCollectPlanLeg[],
+  onDiscard?: () => void
+) {
   const client = new QueryClient({
     defaultOptions: { mutations: { retry: false } },
   });
@@ -133,11 +140,14 @@ function show(plan = makePlan(), onSettled = jest.fn(), onClose = jest.fn()) {
           plan={plan}
           onClose={onClose}
           onSettled={onSettled}
+          {...(reviewLegs ? { reviewLegs } : {})}
+          {...(onDiscard ? { onDiscard } : {})}
         />
       </QueryClientProvider>
     ),
     onSettled,
     onClose,
+    client,
   };
 }
 const check = () =>
@@ -162,6 +172,47 @@ it.each([null, "", "invalid", "0x0000000000000000000000000000000000000000"])(
     ).not.toBeInTheDocument();
   }
 );
+
+it("allows discarding the unprepared purchase draft before resolving any listing", () => {
+  const onDiscard = jest.fn();
+  show(makePlan(), jest.fn(), jest.fn(), undefined, onDiscard);
+  fireEvent.click(screen.getByRole("button", { name: /^Discard purchase/ }));
+  expect(onDiscard).toHaveBeenCalledTimes(1);
+  expect(resolve).not.toHaveBeenCalled();
+  expect(mockBatch).not.toHaveBeenCalled();
+});
+
+it("aborts a read-only listing lookup on discard and ignores its late completion", async () => {
+  let complete!: (items: CollectSelectedListing[]) => void;
+  resolve.mockReturnValueOnce(
+    new Promise((done) => {
+      complete = done;
+    })
+  );
+  const onDiscard = jest.fn();
+  show(makePlan(), jest.fn(), jest.fn(), undefined, onDiscard);
+  fireEvent.click(check());
+  await waitFor(() => expect(resolve).toHaveBeenCalledTimes(1));
+  const signal = resolve.mock.calls[0]![2];
+  fireEvent.click(screen.getByRole("button", { name: /^Discard purchase/ }));
+  expect(signal.aborted).toBe(true);
+  expect(onDiscard).toHaveBeenCalledTimes(1);
+  await act(async () => complete([]));
+  expect(mockBatch).not.toHaveBeenCalled();
+});
+
+it("does not expose discard once the batch controller has mounted", async () => {
+  const onDiscard = jest.fn();
+  show(makePlan(), jest.fn(), jest.fn(), undefined, onDiscard);
+  fireEvent.click(check());
+  await screen.findByRole("region", { name: "Batch review" });
+  expect(mockBatch).toHaveBeenCalled();
+  expect(
+    screen.queryByRole("button", { name: /^Discard purchase/ })
+  ).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Close dialog" }));
+  expect(onDiscard).not.toHaveBeenCalled();
+});
 it("resolves only chosen exact legs and retains one dialog through review and settlement", async () => {
   const plan = makePlan();
   const first = plan.result.legs[0]!;
@@ -204,6 +255,111 @@ it("lets the collector select all or none without per-leg purchase actions", () 
   expect(
     screen.queryByRole("button", { name: "Review purchase" })
   ).not.toBeInTheDocument();
+});
+
+it("shows only the requested exact subset and omits full-plan progress and save-rule claims", async () => {
+  const plan = makePlan();
+  const first = {
+    ...plan.result.legs[0]!,
+    unit_price_wei: "100000000000000000",
+  };
+  const second = {
+    ...first,
+    candidate_id: "two",
+    order_id: "hash-two",
+    asset_key: `${assetKey.slice(0, -1)}2`,
+    quantity: "3",
+    unit_price_wei: "200000000000000000",
+  };
+  plan.result.legs = [first, second];
+  plan.result.remaining_requirements = [
+    { requirement_id: "missing", missing_quantity: "1" },
+  ];
+  show(plan, jest.fn(), jest.fn(), [{ ...second }]);
+  expect(
+    screen.getByRole("heading", { name: "1 of 1 selected" })
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("Selected listings: 0.6 ETH · gas quoted at review")
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByText("1 requirements remain outside this basket.")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Save rule" })
+  ).not.toBeInTheDocument();
+  fireEvent.click(check());
+  await waitFor(() =>
+    expect(resolve).toHaveBeenCalledWith(
+      [second],
+      plan.analysis.account.wallets,
+      expect.any(AbortSignal)
+    )
+  );
+  expect(resolve.mock.calls[0]?.[0][0]).toBe(second);
+});
+
+it("hides full-plan progress and rules when ordinary checkboxes select only some legs", () => {
+  const plan = makePlan();
+  plan.result.legs.push({
+    ...plan.result.legs[0]!,
+    candidate_id: "two",
+    order_id: "hash-two",
+  });
+  plan.result.remaining_requirements = [
+    { requirement_id: "missing", missing_quantity: "1" },
+  ];
+  show(plan);
+  expect(screen.getByRole("button", { name: "Save rule" })).toBeInTheDocument();
+  expect(
+    screen.getByText("1 requirements remain outside this basket.")
+  ).toBeInTheDocument();
+  fireEvent.click(screen.getAllByRole("checkbox")[1]!);
+  expect(
+    screen.queryByRole("button", { name: "Save rule" })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("1 requirements remain outside this basket.")
+  ).not.toBeInTheDocument();
+});
+
+it("does not fall back to the full plan when a requested subset has changed terms", () => {
+  const plan = makePlan();
+  show(plan, jest.fn(), jest.fn(), [
+    { ...plan.result.legs[0]!, quantity: "2" },
+  ]);
+  expect(check()).toBeDisabled();
+  expect(
+    screen.queryByRole("button", { name: "Save rule" })
+  ).not.toBeInTheDocument();
+  expect(resolve).not.toHaveBeenCalled();
+});
+
+it("aborts old lookup and discards the old review when the same plan’s destination changes", async () => {
+  const plan = makePlan();
+  let finish!: (items: CollectSelectedListing[]) => void;
+  resolve.mockReturnValue(
+    new Promise((done) => {
+      finish = done;
+    })
+  );
+  const view = show(plan);
+  fireEvent.click(check());
+  await waitFor(() => expect(resolve).toHaveBeenCalledTimes(1));
+  const signal = resolve.mock.calls[0]![2];
+  const changed = {
+    ...plan,
+    result: { ...plan.result, recipient: `0x${"2".repeat(40)}` },
+  };
+  view.rerender(
+    <QueryClientProvider client={view.client}>
+      <CollectPlanBasket plan={changed} onClose={view.onClose} />
+    </QueryClientProvider>
+  );
+  expect(signal.aborted).toBe(true);
+  await act(async () => finish([]));
+  expect(mockBatch).not.toHaveBeenCalled();
+  expect(check()).toBeEnabled();
 });
 it("keeps every over-limit leg selected until the collector reduces it", () => {
   const plan = makePlan();
@@ -255,3 +411,28 @@ it.each(["close", "unmount"])(
     expect(mockBatch).not.toHaveBeenCalled();
   }
 );
+
+it("can retry a lookup after closing and resuming while the old request is still unresolved", async () => {
+  let finish!: (items: CollectSelectedListing[]) => void;
+  resolve.mockReturnValueOnce(
+    new Promise((done) => {
+      finish = done;
+    })
+  );
+  const view = show();
+  fireEvent.click(check());
+  await waitFor(() => expect(resolve).toHaveBeenCalledTimes(1));
+  const signal = resolve.mock.calls[0]![2];
+  fireEvent.click(screen.getByRole("button", { name: "Close dialog" }));
+  expect(signal.aborted).toBe(true);
+  expect(check()).toBeEnabled();
+  fireEvent.click(check());
+  await waitFor(() => expect(resolve).toHaveBeenCalledTimes(2));
+  await screen.findByRole("region", { name: "Batch review" });
+  const reviewed = mockBatch.mock.calls.at(-1);
+  await act(async () =>
+    finish([{ quantity: "99" }] as CollectSelectedListing[])
+  );
+  expect(mockBatch.mock.calls.at(-1)).toBe(reviewed);
+  expect(view.onClose).toHaveBeenCalledTimes(1);
+});

@@ -45,6 +45,7 @@ import {
   marketBatchProfileLock,
 } from "./market-batch-resume";
 import { withMarketOperationLock } from "./market-operation-lock";
+import { marketPreparationError } from "./market-preparation-errors";
 
 interface Props {
   readonly items: readonly CollectSelectedListing[];
@@ -291,8 +292,8 @@ function ScopedBatchController({
           priorPrepare.current = null;
         }
       );
-    } catch {
-      if (mounted.current) setError(t(locale, "collect.trade.checkFailed"));
+    } catch (failure) {
+      if (mounted.current) setError(marketPreparationError(failure, locale));
     } finally {
       pending.current = false;
       if (mounted.current) setPreparing(false);
@@ -319,8 +320,8 @@ function ScopedBatchController({
       );
       if (value.id !== displayed.id) throw new Error("MARKET_REVIEW_MISMATCH");
       receive(value);
-    } catch {
-      if (mounted.current) setError(t(locale, "collect.trade.checkFailed"));
+    } catch (failure) {
+      if (mounted.current) setError(marketPreparationError(failure, locale));
     } finally {
       pending.current = false;
       if (mounted.current) setPreparing(false);
