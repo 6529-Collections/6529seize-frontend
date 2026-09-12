@@ -12,6 +12,40 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
 }));
 
 describe("artwork documentation modules", () => {
+  it("names a document's nested group using its singular item label", () => {
+    const context = documentationFixture();
+    context.profile = museumProfile as never;
+    context.modules["context"]!.answers["documents"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: [
+        {
+          id: "document",
+          kind: "production_account",
+          title: "A document about the work",
+          language: "en",
+          text: "The complete production account.",
+        },
+      ],
+    } as never;
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="story"
+        onChange={jest.fn()}
+      />
+    );
+    fireEvent.click(screen.getByText("A document about the work"));
+    const document = screen.getByRole("group", { name: "Document" });
+    expect(document.querySelector("legend")).toHaveTextContent("Document");
+    expect(within(document).getByRole("textbox", { name: "Text" })).toHaveValue(
+      "The complete production account."
+    );
+    expect(
+      screen.queryByRole("group", { name: "Full accounts & documents" })
+    ).toBeNull();
+  });
   it("names the nested video duration group while retaining the Type control's label", () => {
     const context = documentationFixture();
     context.profile = museumProfile as never;
@@ -58,9 +92,7 @@ describe("artwork documentation modules", () => {
       />
     );
     expect(
-      within(
-        screen.getByRole("region", { name: "Caption" })
-      ).getByText(
+      within(screen.getByRole("region", { name: "Caption" })).getByText(
         "Give a reader a way into the work. Aim for 75–150 words in your chosen language."
       )
     ).toBeInTheDocument();

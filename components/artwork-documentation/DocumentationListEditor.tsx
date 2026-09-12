@@ -33,6 +33,7 @@ export default function ListEditor(
       <Editor
         {...props}
         hideLabel={false}
+        label={props.editor.item.label ?? props.label}
         id={`${props.id}-${index}`}
         editor={props.editor.item}
         value={entry}
