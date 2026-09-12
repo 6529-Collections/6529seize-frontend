@@ -425,6 +425,7 @@ export const COLLECT_MESSAGES = {
   "collect.goal.preview": "Build my plan",
   "collect.goal.connect": "Connect to build your profile’s plan",
   "collect.goal.noDefinitions": "No targets are available for this goal yet.",
+  "collect.goal.loadingDefinitions": "Loading collecting options…",
   "collect.goal.invalidCount": "Enter a whole number from 1 to 100.",
   "collect.goal.invalidBudget":
     "Enter an ETH amount greater than zero, with at most 18 decimal places.",
