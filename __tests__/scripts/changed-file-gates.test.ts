@@ -5,9 +5,9 @@ import path from "node:path";
 
 const ROOT = process.cwd();
 const pnpmPath = process.env["npm_execpath"];
-const { scripts } = JSON.parse(
+const { scripts, packageManager } = JSON.parse(
   fs.readFileSync(path.join(ROOT, "package.json"), "utf8")
-) as { scripts: Record<string, string> };
+) as { scripts: Record<string, string>; packageManager: string };
 const GATES = [
   "lint:changed",
   "lint:changed:fix",
@@ -65,6 +65,7 @@ function fixture(objectFormat: "sha1" | "sha256" = "sha1") {
     JSON.stringify({
       name: "gate-fixture",
       private: true,
+      packageManager,
       scripts: Object.fromEntries(GATES.map((gate) => [gate, scripts[gate]])),
     })
   );
@@ -106,25 +107,30 @@ function runGate(root: string, gate: string) {
       )
       .join(path.delimiter);
   }
-  const nativePnpm = pnpmPath?.toLowerCase().endsWith(".exe");
-  const windowsFallback = !pnpmPath && process.platform === "win32";
-  const command = windowsFallback
-    ? (process.env["ComSpec"] ?? "cmd.exe")
-    : pnpmPath
-      ? nativePnpm
-        ? pnpmPath
-        : process.execPath
-      : "pnpm";
-  // Only fixed gate names enter cmd.exe; selected paths remain native Node args.
-  const args = windowsFallback
-    ? ["/d", "/s", "/c", `pnpm run ${gate}`]
-    : [...(pnpmPath && !nativePnpm ? [pnpmPath] : []), "run", gate];
-  const result = spawnSync(command, args, {
+  const options = {
     cwd: root,
     env,
-    encoding: "utf8",
+    encoding: "utf8" as const,
     timeout: 30000,
-  });
+  };
+  let result;
+  if (pnpmPath) {
+    const nativePnpm = pnpmPath.toLowerCase().endsWith(".exe");
+    result = spawnSync(
+      nativePnpm ? pnpmPath : process.execPath,
+      [...(nativePnpm ? [] : [pnpmPath]), "run", gate],
+      options
+    );
+  } else if (process.platform === "win32") {
+    // Only fixed gate names enter cmd.exe; selected paths remain native Node args.
+    result = spawnSync(
+      "cmd.exe",
+      ["/d", "/s", "/c", `pnpm run ${gate}`],
+      options
+    );
+  } else {
+    result = spawnSync("pnpm", ["run", gate], options);
+  }
   const calls = fs
     .readFileSync(log, "utf8")
     .split("\n")
