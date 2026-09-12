@@ -60,6 +60,7 @@ it("waits for the server public projection and never falls back to private draft
         context={context}
         controller={controller}
         saveState="clean"
+        onNavigateSection={jest.fn()}
       />
     </QueryClientProvider>
   );
@@ -108,6 +109,7 @@ it("keeps reviewer notes separate for each lane and clears only the submitted la
         context={context}
         controller={controller}
         saveState="clean"
+        onNavigateSection={jest.fn()}
       />
     </QueryClientProvider>
   );
@@ -142,6 +144,55 @@ it("keeps reviewer notes separate for each lane and clears only the submitted la
   expect(rights.getByRole("textbox", { name: "Review note" })).toHaveValue(
     "Rights note"
   );
+  controller.dispose();
+  client.clear();
+});
+
+it("guides missing interview permission to its chapters and blocks confirmation until the issue clears", () => {
+  const context = documentationFixture();
+  context.issues = [
+    {
+      field: "asset:recording",
+      code: "INTERVIEW_PUBLICATION_PERMISSION_REQUIRED",
+      lane: "rights",
+    },
+  ];
+  const controller = new DocumentationDraftController(
+    context,
+    { read: jest.fn(), save: jest.fn() },
+    jest.fn()
+  );
+  const onNavigateSection = jest.fn();
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  const view = (current: typeof context) => (
+    <QueryClientProvider client={client}>
+      <DocumentationReview
+        context={current}
+        controller={controller}
+        saveState="clean"
+        onNavigateSection={onNavigateSection}
+      />
+    </QueryClientProvider>
+  );
+  const rendered = render(view(context));
+  expect(
+    screen.getByText(/record publication permission for each received/)
+  ).toHaveTextContent("Your uploaded files remain available.");
+  expect(screen.getByRole("checkbox")).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Confirm this version" })
+  ).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "The conversation" }));
+  expect(onNavigateSection).toHaveBeenLastCalledWith("conversation");
+  fireEvent.click(screen.getByRole("button", { name: "Credits & terms" }));
+  expect(onNavigateSection).toHaveBeenLastCalledWith("rights");
+  rendered.rerender(view({ ...context, issues: [] }));
+  expect(
+    screen.queryByText(/record publication permission for each received/)
+  ).toBeNull();
+  expect(screen.getByRole("checkbox")).toBeEnabled();
   controller.dispose();
   client.clear();
 });
