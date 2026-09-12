@@ -112,6 +112,11 @@ interface CollectTradeControllerProps {
   readonly onClose: () => void;
   readonly onSettled?: () => void;
   readonly onPublished?: (operation: ApiMarketOperation) => void;
+  /** Synchronously reserve the full offer amount; throwing prevents publication. */
+  readonly onCommitment?: (
+    operation: ApiMarketOperation,
+    expected: ApiMarketPrepareRequest
+  ) => void;
   readonly onMarketChange?: () => void;
   readonly presentation?: CollectTradePresentation;
   readonly layout?: "standard" | "inline-buy";
@@ -157,6 +162,7 @@ function CollectTradeControllerContent({
   onClose,
   onSettled,
   onPublished,
+  onCommitment,
   onMarketChange,
   presentation = "dialog",
   layout = "standard",
@@ -260,6 +266,7 @@ function CollectTradeControllerContent({
     operation: displayedOperation,
     expected,
     onPublished,
+    onCommitment,
   });
   const receiveOperation = (next: ApiMarketOperation) => {
     setOperation((prior) =>
@@ -503,9 +510,16 @@ function CollectTradeControllerContent({
                 setError(marketExecutionError(failure, locale));
                 return;
               }
-              await execution.confirm(displayedOperation, expected, () =>
-                offerIntent.guardReview(displayedOperation, expected)
-              );
+              const guard = () =>
+                offerIntent.guardReview(displayedOperation, expected);
+              if (onCommitment)
+                await execution.confirm(
+                  displayedOperation,
+                  expected,
+                  guard,
+                  offerIntent.reserve
+                );
+              else await execution.confirm(displayedOperation, expected, guard);
             } else await execution.confirm(displayedOperation, expected);
           }
         }}
