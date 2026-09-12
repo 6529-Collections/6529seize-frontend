@@ -17,10 +17,11 @@ import { analyzeCollectOffers } from "./analyze-collect-offers";
 import { collectProfileWallets } from "./collect-recipient.helpers";
 import type {
   CollectOfferSelection,
+  OfferPlanAcquisitionProps,
   OfferPlanReview,
 } from "./collect-offer-plan.types";
 
-interface Props {
+interface Props extends OfferPlanAcquisitionProps {
   readonly items: readonly CollectOfferSelection[];
   readonly hasAlternatives?: boolean;
   readonly active: boolean;
@@ -56,6 +57,12 @@ function OfferWorkspace({
   hasAlternatives = false,
   active,
   onBack,
+  initialMethod,
+  strategySessionKey,
+  blended,
+  buyOptions,
+  buyLockedAssetKeys,
+  onReviewBuys,
 }: Props) {
   const locale = useBrowserLocale();
   const auth = useAuth();
@@ -124,7 +131,10 @@ function OfferWorkspace({
       ref={workspace}
       tabIndex={-1}
       role="region"
-      aria-label={t(locale, "collect.offerPlan.title")}
+      aria-label={t(
+        locale,
+        blended === true ? "collect.blend.title" : "collect.offerPlan.title"
+      )}
       className="tw-space-y-5 focus:tw-outline-none"
     >
       <button
@@ -229,6 +239,12 @@ function OfferWorkspace({
       )}
       <OfferPlanPanel
         items={items}
+        initialMethod={initialMethod}
+        strategySessionKey={strategySessionKey}
+        blended={blended}
+        buyOptions={buyOptions}
+        buyLockedAssetKeys={buyLockedAssetKeys}
+        onReviewBuys={onReviewBuys}
         profile={auth.connectedProfile}
         payingWallet={connection.address}
         disabledReason={disabledReason}

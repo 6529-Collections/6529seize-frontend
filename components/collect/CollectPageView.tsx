@@ -1,13 +1,12 @@
 "use client";
 
-import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import CollectArtworkCard, {
   type CollectArtworkSelection,
 } from "./CollectArtworkCard";
@@ -18,6 +17,8 @@ import type {
   CollectCollection,
   CollectIntent,
   CollectPlanView,
+  CollectPlanScenario,
+  CollectAcquisitionStrategy,
   CollectProfileView,
   CollectTradeAction,
 } from "./collect.types";
@@ -43,6 +44,7 @@ interface CollectPageViewProps {
   readonly profile: CollectProfileView | null;
   readonly plan: CollectPlanView | null;
   readonly goalContent?: ReactNode;
+  readonly recoveryContent?: ReactNode;
   readonly workspaceContent?: ReactNode;
   readonly workspaceActive?: boolean;
   readonly showCollections?: boolean;
@@ -59,6 +61,12 @@ interface CollectPageViewProps {
   readonly onTrade: (artworkId: string, action: CollectTradeAction) => void;
   readonly onReviewPlan: (planId: string, revision: string) => void;
   readonly onPlanOffers?: (() => void) | undefined;
+  readonly onPlanScenarioChange?:
+    | ((scenario: CollectPlanScenario) => void)
+    | undefined;
+  readonly onPlanStrategyChange?:
+    | ((strategy: CollectAcquisitionStrategy) => void)
+    | undefined;
 }
 
 function Listings({
@@ -147,17 +155,8 @@ export default function CollectPageView(props: CollectPageViewProps) {
   const collectionLink = COLLECTIONS.find(({ id }) => id === props.collection);
   const showListings =
     props.showListings ?? (props.intent === "lowest" || props.intent === "tdh");
-  const [planOpen, setPlanOpen] = useState(false);
-  const planOffers = props.onPlanOffers
-    ? () => {
-        setPlanOpen(false);
-        props.onPlanOffers?.();
-      }
-    : undefined;
-  let contentClass = showListings ? "tw-max-w-[1080px]" : "tw-max-w-3xl";
-  if (props.plan)
-    contentClass =
-      "tw-grid tw-items-start tw-gap-6 xl:tw-grid-cols-[minmax(0,1fr)_360px]";
+  const contentClass =
+    showListings || props.plan ? "tw-max-w-[1080px]" : "tw-max-w-3xl";
   return (
     <div className="tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-pb-28 tw-pt-6 tw-text-iron-100 md:tw-px-6 lg:tw-px-8">
       <header className="tw-mb-7 tw-space-y-3">
@@ -198,6 +197,7 @@ export default function CollectPageView(props: CollectPageViewProps) {
           </div>
         )}
       </header>
+      {props.recoveryContent}
       <CollectGoalNavigation
         intent={props.intent}
         collection={props.collection}
@@ -256,56 +256,19 @@ export default function CollectPageView(props: CollectPageViewProps) {
             )}
           </div>
           {props.plan && (
-            <aside className="tw-sticky tw-top-5 tw-hidden xl:tw-block">
+            <div className="tw-mt-8">
               <CollectPlanPanel
                 plan={props.plan}
                 locale={locale}
                 onReview={props.onReviewPlan}
-                onPlanOffers={planOffers}
+                onPlanOffers={props.onPlanOffers}
+                onScenarioChange={props.onPlanScenarioChange}
+                onStrategyChange={props.onPlanStrategyChange}
               />
-            </aside>
+            </div>
           )}
         </div>
         {props.selectionSummary}
-        {props.plan && !Boolean(props.selectionSummary) && (
-          <>
-            <div className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-40 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/95 tw-px-4 tw-pb-[calc(env(safe-area-inset-bottom)+0.75rem)] tw-pt-3 xl:tw-hidden">
-              <div className="tw-mx-auto tw-flex tw-max-w-3xl tw-items-center tw-justify-between tw-gap-4">
-                <div className="tw-min-w-0">
-                  <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-                    {props.plan.coverageLabel}
-                  </p>
-                  <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-semibold tw-tabular-nums">
-                    {props.plan.totalLabel ??
-                      t(locale, "collect.plan.priceUnavailable")}
-                  </p>
-                </div>
-                <Button
-                  variant="action"
-                  size="lg"
-                  onClick={() => setPlanOpen(true)}
-                >
-                  {t(locale, "collect.plan.open")}
-                </Button>
-              </div>
-            </div>
-            <MobileWrapperDialog
-              title={t(locale, "collect.plan.title")}
-              isOpen={planOpen}
-              onClose={() => setPlanOpen(false)}
-              tabletModal
-              hideOnDesktopHover={false}
-              enableDragToClose={false}
-            >
-              <CollectPlanPanel
-                plan={props.plan}
-                locale={locale}
-                onReview={props.onReviewPlan}
-                onPlanOffers={planOffers}
-              />
-            </MobileWrapperDialog>
-          </>
-        )}
       </div>
     </div>
   );

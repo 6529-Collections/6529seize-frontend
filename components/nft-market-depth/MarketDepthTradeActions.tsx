@@ -3,20 +3,12 @@
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
-import {
-  collectOrderAvailableQuantity,
-  collectOrderPurchaseQuantity,
-} from "@/components/collect/collect-buy.helpers";
+import { collectOrderPurchaseQuantity } from "@/components/collect/collect-buy.helpers";
 import type { CollectSelectedListing } from "@/components/collect/collect-selection.helpers";
 import { collectProfileWallets } from "@/components/collect/collect-recipient.helpers";
 import { MARKET_BATCH_LIMITS } from "@/components/collect/market-batch-validation";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
-import {
-  ApiMarketOrderApplicabilityEnum,
-  ApiMarketOrderScopeEnum,
-  ApiMarketOrderSideEnum,
-  type ApiMarketOrder,
-} from "@/generated/models/ApiMarketOrder";
+import type { ApiMarketOrder } from "@/generated/models/ApiMarketOrder";
 import {
   ApiMarketTradeOrderSideEnum,
   type ApiMarketTradeOrder,
@@ -28,13 +20,10 @@ import { fetchCollectAssetOwnership } from "@/services/api/collect-api";
 import { fetchExactMarketOrder } from "@/services/api/market-api";
 import { getStructuredApiErrorStatus } from "@/services/api/common-api";
 import {
-  createContext,
   lazy,
   Suspense,
   useCallback,
-  useContext,
   useEffect,
-  useId,
   useMemo,
   useRef,
   useState,
@@ -52,22 +41,21 @@ import {
   type MarketDepthListingSelection,
 } from "./market-depth-trade.helpers";
 
+import {
+  ACTION_CLASS,
+  TradeContext,
+  rowMatches,
+  type RowState,
+  type TradeContextValue,
+} from "./MarketDepthOrderAction";
+export { MarketDepthOrderAction } from "./MarketDepthOrderAction";
+
 const CollectBatchController = lazy(
   () => import("@/components/collect/CollectBatchController")
 );
 const CollectTradeController = lazy(
   () => import("@/components/collect/CollectTradeController")
 );
-
-const ACTION_CLASS =
-  "tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-white";
-
-interface RowState {
-  readonly busy: boolean;
-  readonly message?: string;
-  readonly error?: boolean;
-  readonly connectAction?: boolean;
-}
 
 interface AcceptedOffer {
   readonly asset: ApiCollectAsset;
@@ -83,33 +71,8 @@ interface AcceptAttempt {
   readonly orderKey: string;
 }
 
-interface TradeContextValue {
-  readonly selected: readonly MarketDepthListingSelection[];
-  readonly rowStates: Readonly<Record<string, RowState>>;
-  readonly selectionBusy: boolean;
-  readonly toggleListing: (order: ApiMarketOrder) => void;
-  readonly updateQuantity: (order: ApiMarketOrder, quantity: string) => void;
-  readonly acceptOffer: (
-    order: ApiMarketOrder,
-    trigger: HTMLButtonElement
-  ) => void;
-  readonly connectOwnerWallet: () => void;
-}
-
-const TradeContext = createContext<TradeContextValue | null>(null);
-
 const same = (left: string, right: string) =>
   left.toLowerCase() === right.toLowerCase();
-
-function rowMatches(
-  item: MarketDepthListingSelection,
-  order: ApiMarketOrder
-): boolean {
-  return (
-    same(item.order.identity.protocol_address, order.protocol) &&
-    same(item.order.identity.order_hash, order.order_id)
-  );
-}
 
 function actionWallets(
   profile: ReturnType<typeof useAuth>["connectedProfile"],
@@ -663,119 +626,5 @@ function SupportedMarketDepthTradeProvider({
         )}
       </NftPurchasingGate>
     </TradeContext.Provider>
-  );
-}
-
-export function MarketDepthOrderAction({
-  order,
-  locale,
-}: {
-  readonly order: ApiMarketOrder;
-  readonly locale: SupportedLocale;
-}) {
-  const quantityErrorId = useId();
-  const context = useContext(TradeContext);
-  if (!context) return null;
-  const state = context.rowStates[order.order_key];
-  const selected = context.selected.find((item) => rowMatches(item, order));
-  const criteriaOffer =
-    order.side === ApiMarketOrderSideEnum.Bid &&
-    (order.scope !== ApiMarketOrderScopeEnum.Token ||
-      order.applicability !== ApiMarketOrderApplicabilityEnum.Token ||
-      order.token_id === null);
-  const available = selected
-    ? collectOrderAvailableQuantity(selected.order)
-    : null;
-  const invalidQuantity = Boolean(
-    selected &&
-    !marketDepthListingQuantityIsValid(
-      selected.asset,
-      selected.order,
-      selected.quantity
-    )
-  );
-  const listingActionKey = selected
-    ? "marketDepth.trade.remove"
-    : "marketDepth.trade.collect";
-
-  return (
-    <NftPurchasingGate>
-      <div className="tw-mt-3 tw-space-y-2">
-        {criteriaOffer ? (
-          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-            {t(locale, "marketDepth.trade.criteriaUnavailable")}
-          </p>
-        ) : (
-          <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-3">
-            {selected && (
-              <label className="tw-grid tw-gap-1 tw-text-xs tw-text-iron-400">
-                <span>{t(locale, "marketDepth.trade.quantity")}</span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={selected.quantity}
-                  aria-invalid={invalidQuantity}
-                  aria-describedby={
-                    invalidQuantity ? quantityErrorId : undefined
-                  }
-                  disabled={context.selectionBusy}
-                  maxLength={78}
-                  onChange={(event) =>
-                    context.updateQuantity(order, event.currentTarget.value)
-                  }
-                  className="tw-h-11 tw-w-24 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-text-sm tw-tabular-nums tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-                />
-              </label>
-            )}
-            <button
-              type="button"
-              className={ACTION_CLASS}
-              disabled={Boolean(state?.busy) || context.selectionBusy}
-              onClick={(event) =>
-                order.side === ApiMarketOrderSideEnum.Ask
-                  ? context.toggleListing(order)
-                  : context.acceptOffer(order, event.currentTarget)
-              }
-            >
-              {order.side === ApiMarketOrderSideEnum.Ask
-                ? t(locale, listingActionKey)
-                : t(locale, "marketDepth.trade.accept")}
-            </button>
-          </div>
-        )}
-        {selected && available && (
-          <p className="tw-m-0 tw-text-xs tw-text-iron-500">
-            {t(locale, "marketDepth.trade.available", { quantity: available })}
-          </p>
-        )}
-        {invalidQuantity && (
-          <p
-            id={quantityErrorId}
-            role="alert"
-            className="tw-m-0 tw-text-xs tw-text-rose-200"
-          >
-            {t(locale, "marketDepth.trade.quantityInvalid")}
-          </p>
-        )}
-        {state?.message && (
-          <p
-            role={state.error ? "alert" : "status"}
-            className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
-          >
-            {state.message}
-          </p>
-        )}
-        {state?.connectAction && (
-          <button
-            type="button"
-            className={ACTION_CLASS}
-            onClick={context.connectOwnerWallet}
-          >
-            {t(locale, "marketDepth.trade.connectOwner")}
-          </button>
-        )}
-      </div>
-    </NftPurchasingGate>
   );
 }
