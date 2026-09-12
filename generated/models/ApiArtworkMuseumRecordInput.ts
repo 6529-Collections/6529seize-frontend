@@ -19,8 +19,8 @@ export class ApiArtworkMuseumRecordInput {
     'effective_date'?: string;
     'event_status': ApiArtworkMuseumRecordInputEventStatusEnum;
     'statement'?: string;
-    'subject_ids': Array<string>;
-    'evidence_asset_ids': Array<string>;
+    'subject_ids': Set<string>;
+    'evidence_asset_ids': Set<string>;
     /**
     * Strictly validated against the selected museum record definition value_schema.
     */
@@ -65,13 +65,13 @@ export class ApiArtworkMuseumRecordInput {
         {
             "name": "subject_ids",
             "baseName": "subject_ids",
-            "type": "Array<string>",
+            "type": "Set<string>",
             "format": "uuid"
         },
         {
             "name": "evidence_asset_ids",
             "baseName": "evidence_asset_ids",
-            "type": "Array<string>",
+            "type": "Set<string>",
             "format": "uuid"
         },
         {

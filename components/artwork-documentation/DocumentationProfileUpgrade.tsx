@@ -69,7 +69,10 @@ export default function DocumentationProfileUpgrade({
     setBusy(true);
     setFailed(false);
     try {
-      if (!(await controller.flush())) return;
+      if (!(await controller.flush())) {
+        setFailed(true);
+        return;
+      }
       const current = controller.snapshot().context;
       const value = await previewDocumentationUpgrade(current.id);
       setPreview({ value, version: current.draft_version });

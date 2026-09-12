@@ -37,6 +37,26 @@ function Harness({
   );
 }
 beforeEach(() => jest.clearAllMocks());
+it("explains an unsaved draft instead of requesting an upgrade preview", async () => {
+  const context = documentationFixture();
+  const controller = new DocumentationDraftController(
+    context,
+    { save: jest.fn(), read: jest.fn() },
+    jest.fn()
+  );
+  jest.spyOn(controller, "flush").mockResolvedValue(false);
+  render(
+    <DocumentationProfileUpgrade context={context} controller={controller} />
+  );
+  const user = userEvent.setup();
+  await user.click(screen.getByText("Extend this artist record"));
+  await user.click(
+    screen.getByRole("button", { name: "Review the record update" })
+  );
+  expect(await screen.findByRole("alert")).toBeVisible();
+  expect(previewDocumentationUpgrade).not.toHaveBeenCalled();
+  controller.dispose();
+});
 it("previews before applying the versioned change to the same context and preserves confirmed revision identity", async () => {
   const user = userEvent.setup();
   const context = documentationFixture();
@@ -111,17 +131,15 @@ it("lets a legacy program owner review the same-program update, while a viewer g
   context.program_id = "6529NM-AP-01";
   context.profile.program_id = context.program_id;
   const proposed = { ...profile, program_id: context.program_id };
-  jest
-    .mocked(previewDocumentationUpgrade)
-    .mockResolvedValue({
-      current_profile: context.profile,
-      proposed_profile: proposed as never,
-      retained_fields: [],
-      blocking_fields: [],
-      notices: [],
-      added_required_fields: [],
-      removed_required_fields: [],
-    });
+  jest.mocked(previewDocumentationUpgrade).mockResolvedValue({
+    current_profile: context.profile,
+    proposed_profile: proposed as never,
+    retained_fields: [],
+    blocking_fields: [],
+    notices: [],
+    added_required_fields: [],
+    removed_required_fields: [],
+  });
   const result = render(<Harness initial={context} />);
   await user.click(screen.getByText("Extend this artist record"));
   await user.click(
@@ -141,17 +159,15 @@ it("does not offer to apply a preview bound to a different project", async () =>
   const user = userEvent.setup();
   const context = documentationFixture();
   context.program_id = "6529NM-AP-01";
-  jest
-    .mocked(previewDocumentationUpgrade)
-    .mockResolvedValue({
-      current_profile: context.profile,
-      proposed_profile: profile as never,
-      retained_fields: [],
-      blocking_fields: [],
-      notices: [],
-      added_required_fields: [],
-      removed_required_fields: [],
-    });
+  jest.mocked(previewDocumentationUpgrade).mockResolvedValue({
+    current_profile: context.profile,
+    proposed_profile: profile as never,
+    retained_fields: [],
+    blocking_fields: [],
+    notices: [],
+    added_required_fields: [],
+    removed_required_fields: [],
+  });
   render(<Harness initial={context} />);
   await user.click(screen.getByText("Extend this artist record"));
   await user.click(

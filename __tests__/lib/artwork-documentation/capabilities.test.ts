@@ -25,6 +25,35 @@ function limitedEditor() {
   });
   return context;
 }
+it("allows a public v3 instrument under original file grants while preserving legacy and sticky restrictions", () => {
+  const context = limitedEditor();
+  context.profile.version = 3;
+  context.profile.intake_mode = "publication_only" as never;
+  const asset = {
+    id: "public-consent",
+    role: "consent_instrument",
+    access_class: "artwork",
+    intended_visibility: "public_record",
+  };
+  const link = {
+    asset_id: asset.id,
+    role: asset.role,
+    intended_visibility: asset.intended_visibility,
+    manifest: asset,
+  } as ApiArtworkDocumentationAssetLink;
+  context.assets = [asset] as never;
+  context.asset_links = [link];
+  expect(canWriteDocumentationAssetRole(context, asset.role)).toBe(true);
+  expect(canReferenceDocumentationAssetLink(context, link)).toBe(true);
+  expect(canEditDocumentationAsset(context, asset.id)).toBe(true);
+  context.mutation_restricted_paths = [`asset-rights:${asset.id}`];
+  expect(canReferenceDocumentationAssetLink(context, link)).toBe(false);
+  expect(canEditDocumentationAsset(context, asset.id)).toBe(false);
+  context.mutation_restricted_paths = [];
+  context.profile.version = 2;
+  expect(canWriteDocumentationAssetRole(context, asset.role)).toBe(false);
+  expect(canReferenceDocumentationAssetLink(context, link)).toBe(false);
+});
 
 it.each(["mutation_capabilities", "mutation_restricted_paths"] as const)(
   "fails closed when %s is absent despite expanded reader capabilities",

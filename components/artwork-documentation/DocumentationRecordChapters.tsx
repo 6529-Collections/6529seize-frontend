@@ -29,13 +29,18 @@ import DocumentationProfileUpgrade from "./DocumentationProfileUpgrade";
 interface Props {
   readonly draft: ReturnType<typeof useDocumentationDraft>;
   readonly section: DocumentationSection;
+  readonly onNavigateSection: (section: DocumentationSection) => void;
 }
 const FILE_FIELDS = [
   "artwork.canonical_asset_id",
   "artwork.declared_dimensions",
   ...MODULE_FIELDS.files.map((field) => `files.${field.id}`),
 ];
-export function DocumentationWritingChapter({ draft, section }: Props) {
+export function DocumentationWritingChapter({
+  draft,
+  section,
+  onNavigateSection,
+}: Props) {
   const { context, controller } = draft;
   const draftRecord = documentationDraftRecord(context, draft.edits);
   const museum = isMuseumRecord(context.profile);
@@ -124,6 +129,7 @@ export function DocumentationWritingChapter({ draft, section }: Props) {
               controller={controller}
               saveState={draft.state}
               edits={draft.edits}
+              onNavigateSection={onNavigateSection}
             />
             {museum && (
               <DocumentationModules
@@ -258,7 +264,11 @@ function DocumentationFilesSection({ draft }: Pick<Props, "draft">) {
     </section>
   );
 }
-export function DocumentationReadingChapter({ draft, section }: Props) {
+export function DocumentationReadingChapter({
+  draft,
+  section,
+  onNavigateSection,
+}: Props) {
   const { context, controller } = draft;
   const museum = isMuseumRecord(context.profile);
   return section === "review" ? (
@@ -267,6 +277,7 @@ export function DocumentationReadingChapter({ draft, section }: Props) {
         context={context}
         controller={controller}
         saveState={draft.state}
+        onNavigateSection={onNavigateSection}
       />
       <DocumentationFeedback context={context} />
     </>

@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import DocumentationValueEditor from "@/components/artwork-documentation/DocumentationValueEditor";
+import { editorForSchema } from "@/lib/artwork-documentation/catalogue";
 import DocumentationModules from "@/components/artwork-documentation/DocumentationModules";
 import { documentationFixture } from "@/__tests__/fixtures/artwork-documentation";
 import type { ApiArtworkDocumentationOperation } from "@/generated/models/ApiArtworkDocumentationOperation";
@@ -561,4 +562,31 @@ describe("artwork documentation modules", () => {
     );
     expect(onChange).toHaveBeenLastCalledWith({ height: 800 });
   });
+  it.each([undefined, []])(
+    "shows a fresh object's inputs when required is %s",
+    (required) => {
+      const editor = editorForSchema(
+        {
+          type: "object",
+          properties: {
+            title: { type: "string", title: "Title" },
+            note: { type: "string", title: "Note" },
+          },
+          ...(required ? { required } : {}),
+        },
+        "fresh"
+      );
+      render(
+        <DocumentationValueEditor
+          id="fresh"
+          label="Fresh object"
+          editor={editor}
+          value={{}}
+          onChange={jest.fn()}
+        />
+      );
+      expect(screen.getByRole("textbox", { name: "Title" })).toBeVisible();
+      expect(screen.getByRole("textbox", { name: "Note" })).toBeVisible();
+    }
+  );
 });

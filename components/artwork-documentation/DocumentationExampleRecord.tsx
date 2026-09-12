@@ -17,13 +17,16 @@ export default function DocumentationExampleRecord() {
         <p className="tw-m-0 tw-text-sm tw-text-iron-400">
           {msg("museum.sampleLabel")}
         </p>
-        <h1 className="tw-mb-3 tw-mt-4 tw-font-serif tw-text-4xl tw-font-normal sm:tw-text-6xl">
+        <h1
+          lang="en"
+          className="tw-mb-3 tw-mt-4 tw-font-serif tw-text-4xl tw-font-normal sm:tw-text-6xl"
+        >
           {AN_ALTERATION_HEADER[0]}
         </h1>
-        <p className="tw-m-0 tw-text-lg tw-text-iron-200">
+        <p lang="en" className="tw-m-0 tw-text-lg tw-text-iron-200">
           {AN_ALTERATION_HEADER[1]}
         </p>
-        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400">
+        <p lang="en" className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400">
           {AN_ALTERATION_HEADER[2]}
         </p>
         <p className="tw-mb-0 tw-mt-6 tw-max-w-prose tw-text-base tw-leading-7 tw-text-iron-300">
@@ -50,6 +53,7 @@ export default function DocumentationExampleRecord() {
               {AN_ALTERATION_SECTIONS.map((section) => (
                 <li key={section.id}>
                   <a
+                    lang="en"
                     href={`#${section.id}`}
                     className="tw-block tw-min-h-11 tw-py-3 tw-text-sm tw-leading-6 tw-text-iron-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-primary-400"
                   >
@@ -81,6 +85,7 @@ export default function DocumentationExampleRecord() {
           {AN_ALTERATION_SECTIONS.map((section) => (
             <section
               key={section.id}
+              lang="en"
               id={section.id}
               className="tw-max-w-prose tw-scroll-mt-8"
               aria-labelledby={`${section.id}-title`}

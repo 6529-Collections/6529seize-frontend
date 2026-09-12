@@ -341,9 +341,17 @@ export function ArtworkDocumentationRecordView({
               )}
             </div>
             {canWrite ? (
-              <DocumentationWritingChapter draft={draft} section={section} />
+              <DocumentationWritingChapter
+                draft={draft}
+                section={section}
+                onNavigateSection={navigateSection}
+              />
             ) : (
-              <DocumentationReadingChapter draft={draft} section={section} />
+              <DocumentationReadingChapter
+                draft={draft}
+                section={section}
+                onNavigateSection={navigateSection}
+              />
             )}
             <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6">
               <DocumentationButton

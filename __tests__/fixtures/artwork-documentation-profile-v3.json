@@ -3722,7 +3722,7 @@
                 "title": "Color space"
               },
               "bit_depth": {
-                "type": "number",
+                "type": "integer",
                 "minimum": 1,
                 "maximum": 128,
                 "title": "Bit depth"
@@ -4234,13 +4234,13 @@
                 "title": "Sample rate hz"
               },
               "bit_depth": {
-                "type": "number",
+                "type": "integer",
                 "minimum": 1,
                 "maximum": 128,
                 "title": "Bit depth"
               },
               "channels": {
-                "type": "number",
+                "type": "integer",
                 "minimum": 1,
                 "maximum": 4096,
                 "title": "Channels"

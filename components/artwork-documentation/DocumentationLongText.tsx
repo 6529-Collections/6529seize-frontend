@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { formatNumber } from "@/i18n/format";
 import {
   DocumentationButton,
@@ -28,6 +28,9 @@ export default function DocumentationLongText(props: Props) {
   const [importError, setImportError] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const focusWriting = useRef(false);
+  const focusImportReview = useCallback((element: HTMLElement | null) => {
+    element?.focus();
+  }, []);
   const characters = Array.from(props.value).length;
   const writingRows = Math.min(
     14,
@@ -188,7 +191,9 @@ export default function DocumentationLongText(props: Props) {
       )}
       {imported !== null && !props.disabled && (
         <section
-          className="tw-mt-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-5"
+          ref={focusImportReview}
+          tabIndex={-1}
+          className="tw-mt-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-5 focus-visible:tw-outline focus-visible:tw-outline-primary-400"
           aria-label={msg("museum.importReview")}
         >
           <h4 className="tw-m-0 tw-text-base tw-font-medium">
@@ -234,7 +239,14 @@ export default function DocumentationLongText(props: Props) {
                 {msg("museum.importAppend")}
               </DocumentationButton>
             )}
-            <DocumentationButton secondary onClick={() => setImported(null)}>
+            <DocumentationButton
+              secondary
+              onClick={() => {
+                setImported(null);
+                setReading(false);
+                focusWriting.current = true;
+              }}
+            >
               {msg("museum.importDiscard")}
             </DocumentationButton>
           </div>

@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import type { ApiArtworkMuseumRecordDefinition } from "@/generated/models/ApiArtworkMuseumRecordDefinition";
-import type { ApiArtworkMuseumRecordInput } from "@/generated/models/ApiArtworkMuseumRecordInput";
+import { ApiArtworkMuseumRecordInputEventStatusEnum } from "@/generated/models/ApiArtworkMuseumRecordInput";
 import type { DocumentationDraftController } from "@/lib/artwork-documentation/draft-controller";
 import {
   editorForSchema,
@@ -22,6 +22,7 @@ import { documentationQueryKey } from "@/hooks/artwork-documentation/useArtworkD
 import {
   appendMuseumRecord,
   getMuseumRecords,
+  type MuseumRecordInput,
 } from "@/services/api/artwork-documentation-museum-api";
 import { getDocumentationContext } from "@/services/api/artwork-documentation-api";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
@@ -39,6 +40,23 @@ import DocumentationCatalogueValue, {
   documentationVisibleLabels,
 } from "./DocumentationCatalogueValue";
 
+function journalIds(
+  value: FieldValue | undefined,
+  fallback: string[]
+): string[] {
+  return Array.isArray(value)
+    ? value.filter((id): id is string => typeof id === "string")
+    : fallback;
+}
+
+function optionalJournalText(value: Record<string, FieldValue>) {
+  return Object.fromEntries(
+    ["effective_date", "statement", "supersedes_id"].flatMap((key) =>
+      typeof value[key] === "string" ? [[key, value[key]]] : []
+    )
+  );
+}
+
 export default function DocumentationMuseumJournal({
   context,
   controller,
@@ -50,6 +68,11 @@ export default function DocumentationMuseumJournal({
 }) {
   const { msg } = useDocumentationMessages();
   const { connectedProfile, actorKey } = useDocumentationActor();
+  const references = useMemo(() => documentationReferences(context), [context]);
+  const referenceLabels = useMemo(
+    () => new Map(references.map((item) => [item.id, item.label])),
+    [references]
+  );
   const query = useInfiniteQuery({
     queryKey: documentationQueryKey(
       connectedProfile?.id,
@@ -164,10 +187,7 @@ export default function DocumentationMuseumJournal({
                       ? { effective_date: record.payload.effective_date }
                       : {}),
                     subjects: record.payload.subject_ids.map(
-                      (id) =>
-                        documentationReferences(context).find(
-                          (item) => item.id === id
-                        )?.label ?? id
+                      (id) => referenceLabels.get(id) ?? id
                     ),
                     evidence: record.payload.evidence.map((item) => ({
                       filename:
@@ -207,6 +227,7 @@ export default function DocumentationMuseumJournal({
       )}
       {allowed.length > 0 && (
         <MuseumJournalComposer
+          references={references}
           context={context}
           controller={controller}
           definitions={definitions.filter((definition) =>
@@ -222,11 +243,13 @@ export default function DocumentationMuseumJournal({
 }
 
 function MuseumJournalComposer({
+  references,
   context,
   controller,
   definitions,
   onSaved,
 }: {
+  readonly references: ReturnType<typeof documentationReferences>;
   readonly context: ApiArtworkDocumentationContext;
   readonly controller: DocumentationDraftController;
   readonly definitions: readonly ApiArtworkMuseumRecordDefinition[];
@@ -240,6 +263,9 @@ function MuseumJournalComposer({
   const key = useRef({ payload: "", value: crypto.randomUUID() });
   const definition = definitions.find((item) => item.kind === kind);
   const value = recordValue(drafts[kind]);
+  const eventStatus = Object.values(
+    ApiArtworkMuseumRecordInputEventStatusEnum
+  ).find((status) => status === value["event_status"]);
   const details = definition
     ? editorForSchema(definition.value_schema, "details")
     : undefined;
@@ -247,10 +273,7 @@ function MuseumJournalComposer({
     !!definition &&
     typeof value["title"] === "string" &&
     !!value["title"].trim() &&
-    typeof value["event_status"] === "string" &&
-    ["planned", "completed", "cancelled", "unknown"].includes(
-      value["event_status"]
-    ) &&
+    eventStatus !== undefined &&
     matchesDocumentationSchema(value["details"], definition.value_schema);
   const changed = Object.keys(drafts).length > 0;
   useEffect(() => {
@@ -281,16 +304,18 @@ function MuseumJournalComposer({
     };
   }, [changed, msg]);
   const submit = async () => {
-    if (!valid) return;
+    if (!valid || typeof value["title"] !== "string") return;
     setBusy(true);
     setFailed(false);
-    const payload = {
-      ...value,
+    const payload: MuseumRecordInput = {
       kind,
-      subject_ids: value["subject_ids"] ?? [context.work_id],
-      evidence_asset_ids: value["evidence_asset_ids"] ?? [],
-      event_status: value["event_status"] ?? "unknown",
-    } as unknown as ApiArtworkMuseumRecordInput;
+      title: value["title"],
+      ...optionalJournalText(value),
+      subject_ids: journalIds(value["subject_ids"], [context.work_id]),
+      evidence_asset_ids: journalIds(value["evidence_asset_ids"], []),
+      event_status: eventStatus,
+      details: recordValue(value["details"]),
+    };
     const signature = JSON.stringify(payload);
     if (key.current.payload !== signature)
       key.current = { payload: signature, value: crypto.randomUUID() };
@@ -380,7 +405,7 @@ function MuseumJournalComposer({
                 setDrafts((previous) => ({ ...previous, [kind]: next }))
               }
               disabled={busy}
-              references={documentationReferences(context)}
+              references={references}
               assets={context.assets
                 .filter(
                   (asset) =>

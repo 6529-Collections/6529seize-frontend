@@ -1,4 +1,12 @@
 export const ARTWORK_DOCUMENTATION_MUSEUM_MESSAGES = {
+  "artworkDocumentation.museum.captionFile": "Captions",
+  "artworkDocumentation.museum.readTranscript": "Read the transcript",
+  "artworkDocumentation.museum.captionsUnavailable":
+    "The caption file could not be loaded. Try again, or read an available transcript below.",
+  "artworkDocumentation.museum.mediaAlternativeMissing":
+    "No captions or readable transcript are linked to this media. Add an appropriate alternative in The conversation or describe it in Presentation & care when the work contains speech or other essential sound.",
+  "artworkDocumentation.museum.interviewPermissionRequired":
+    "Before confirming or exporting, record publication permission for each received interview recording or transcript. Link each file to a session in The conversation with its publication permission, or record a publication grant for that specific file in Credits & terms. Your uploaded files remain available.",
   "artworkDocumentation.museum.recordIdentifier": "Record identifier",
   "artworkDocumentation.museum.dateNote":
     "What should we know about this date?",

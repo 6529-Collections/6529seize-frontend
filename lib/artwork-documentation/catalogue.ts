@@ -176,7 +176,9 @@ function structuredEditor(
         editorForSchema(value, name),
       ])
     ),
-    required: schema.required ?? [],
+    ...((schema.required?.length ?? 0) > 0
+      ? { required: schema.required }
+      : {}),
   };
 }
 export function editorForSchema(

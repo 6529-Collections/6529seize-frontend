@@ -95,6 +95,7 @@ export function ArtworkImage({
 
 function CanonicalPreview({
   context,
+  publication,
   assetId,
   compact = false,
   title,
@@ -126,8 +127,9 @@ function CanonicalPreview({
       <figure className="tw-m-0 tw-min-w-0">
         <DocumentationMediaPlayer
           key={asset.id}
-          contextId={context.id}
+          context={context}
           asset={asset}
+          publication={publication}
         />
         <figcaption className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
           {title} · {msg("editorial.finalArtwork")}
@@ -260,6 +262,7 @@ export default function DocumentationArtworkPreview({
     return (
       <CanonicalPreview
         context={context}
+        publication={publication}
         assetId={assetId}
         title={title}
         compact={compact}

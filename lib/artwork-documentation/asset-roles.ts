@@ -22,6 +22,8 @@ const MUSEUM_DOCUMENTATION_ASSET_ROLES = [
   "captions",
   "notebook",
   "publication",
+  "consent_instrument",
+  "rights_instrument",
 ] as const;
 
 function hasMuseumMedia(context: ApiArtworkDocumentationContext): boolean {

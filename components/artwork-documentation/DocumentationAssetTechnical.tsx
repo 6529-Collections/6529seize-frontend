@@ -9,7 +9,6 @@ import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-
 import { formatDate } from "@/i18n/format";
 import {
   DocumentationButton,
-  DocumentationNotice,
   useDocumentationMessages,
 } from "./DocumentationControls";
 import DocumentationRecordValue from "./DocumentationRecordValue";
@@ -48,6 +47,9 @@ export default function DocumentationAssetTechnical({
   });
   const technical =
     asset.technical_metadata ?? detail.data?.asset.technical_metadata;
+  let status = "";
+  if (opened && detail.isError) status = msg("museum.technicalUnavailable");
+  else if (opened && !technical && detail.isPending) status = msg("loading");
   return (
     <details
       className="tw-mt-3 tw-text-sm tw-text-iron-400"
@@ -59,21 +61,22 @@ export default function DocumentationAssetTechnical({
       <p className="tw-break-all">
         {msg("fileHash")}: {asset.sha256}
       </p>
-      {opened && !technical && detail.isPending && (
-        <p role="status">{msg("loading")}</p>
-      )}
+      <p
+        role="status"
+        aria-atomic="true"
+        className={status ? "tw-leading-7" : "tw-sr-only"}
+      >
+        {status}
+      </p>
       {opened && detail.isError && (
-        <DocumentationNotice error>
-          <p>{msg("museum.technicalUnavailable")}</p>
-          <DocumentationButton
-            secondary
-            onClick={() => {
-              void detail.refetch();
-            }}
-          >
-            {msg("retry")}
-          </DocumentationButton>
-        </DocumentationNotice>
+        <DocumentationButton
+          secondary
+          onClick={() => {
+            void detail.refetch();
+          }}
+        >
+          {msg("retry")}
+        </DocumentationButton>
       )}
       {technical && (
         <div className="tw-max-w-prose tw-space-y-5 tw-py-3">

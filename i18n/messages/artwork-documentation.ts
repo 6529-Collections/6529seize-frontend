@@ -239,7 +239,7 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
     "This step prepares the artwork's documentation. Mint arrangements will be handled separately.",
   "artworkDocumentation.upload": "Add an original file",
   "artworkDocumentation.uploadHelp":
-    "Keep the original dimensions; there is no need to upscale. The original is kept byte for byte. A preview, when available, is a separate file.",
+    "Add the file exactly as you want it preserved. The original is kept byte for byte. A preview, when available, is separate from the original.",
   "artworkDocumentation.uploadPrivacy":
     "Original files can contain location or other embedded information. They are restricted here; any preview is separate from the original.",
   "artworkDocumentation.uploadRole": "What is this file for?",

@@ -7,12 +7,37 @@ import {
   AN_ALTERATION_EXAMPLE_PATH,
   anAlterationExcerpt,
 } from "@/lib/artwork-documentation/an-alteration";
+import {
+  parseSection,
+  type DocumentationSection,
+} from "@/lib/artwork-documentation/registry";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
 
 describe("precise guidance from the supplied artist record", () => {
+  it("keeps an untrusted chapter value out of markup and the sample destination", () => {
+    const hostile = '\"><img src=x onerror=alert(1)>';
+    expect(parseSection(hostile)).toBe("artwork");
+    const { container } = render(
+      <DocumentationWorkedExample
+        context={documentationFixture()}
+        edits={[]}
+        section={hostile as DocumentationSection}
+      />
+    );
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "id",
+      `documentation-sample-${hostile}`
+    );
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      AN_ALTERATION_EXAMPLE_PATH
+    );
+    expect(container.querySelector("img,script,iframe")).toBeNull();
+  });
+
   it("opens the complete illustrated sample separately and never puts the whole record in a form disclosure", () => {
     const context = documentationFixture();
     const original = JSON.stringify(context);
@@ -45,9 +70,10 @@ describe("precise guidance from the supplied artist record", () => {
       .closest("details")!;
     expect(details).not.toHaveAttribute("open");
     fireEvent.click(details.querySelector("summary")!);
-    expect(details.querySelector("blockquote")?.textContent).toBe(
-      anAlterationExcerpt("artwork", "title")
-    );
+    const expected = anAlterationExcerpt("artwork", "title");
+    expect(expected).toBeTruthy();
+    expect(details.querySelector("blockquote")).not.toBeNull();
+    expect(details.querySelector("blockquote")?.textContent).toBe(expected);
     expect(details.querySelector("button")).toBeNull();
     expect(onChange).not.toHaveBeenCalled();
   });

@@ -40,6 +40,7 @@ import { pollDocumentationProcessing } from "@/lib/artwork-documentation/poll-pr
 import { getDocumentationContext } from "@/services/api/artwork-documentation-api";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
 import { formatNumber } from "@/i18n/format";
+import { formatFileSizeLabel } from "@/lib/link-preview/filePreviewI18n";
 import {
   DocumentationButton,
   DocumentationNotice,
@@ -117,8 +118,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
       abort.current?.abort();
     };
   }, []);
-  const sizeLabel = (size: number) =>
-    `${formatNumber(locale, size / (1024 * 1024), { maximumFractionDigits: 1 })} MiB`;
+  const sizeLabel = (size: number) => formatFileSizeLabel(size, locale) ?? "—";
   const busy =
     status === "queued" ||
     status === "uploading" ||
@@ -228,6 +228,14 @@ export default function DocumentationUpload({ context, controller }: Props) {
         transferRunning.current
       )
         return;
+      if (
+        selectedFile.size >
+        (controller.snapshot().context.profile.limits["asset_bytes"] ??
+          4294967296)
+      ) {
+        setStatus("failed");
+        return;
+      }
       transferRunning.current = true;
       const controllerAbort = new AbortController();
       abort.current = controllerAbort;
@@ -595,10 +603,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
                 </p>
                 {asset.state === "ready" && (
                   <>
-                    <DocumentationMediaPlayer
-                      contextId={context.id}
-                      asset={asset}
-                    />
+                    <DocumentationMediaPlayer context={context} asset={asset} />
                     <div className="tw-flex tw-flex-wrap tw-gap-3">
                       <DocumentationButton
                         secondary

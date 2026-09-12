@@ -206,6 +206,26 @@ function exportFixtures() {
     storageKey: `6529:artwork-documentation:dossier:viewer:${props.context.id}`,
   };
 }
+it("explains why dossier preparation stops when the artist draft cannot be saved", async () => {
+  const props = exportFixtures();
+  jest.spyOn(props.controller, "flush").mockResolvedValue(false);
+  render(
+    props.wrap(
+      <DocumentationDossier
+        context={props.context}
+        controller={props.controller}
+        active
+      />
+    )
+  );
+  await userEvent
+    .setup()
+    .click(await screen.findByRole("button", { name: "Prepare the dossier" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    /could not be prepared/
+  );
+  expect(createArtworkDossierExport).not.toHaveBeenCalled();
+});
 
 it("recovers a known export after refresh using an authorized read and never stores its download URL", async () => {
   const user = userEvent.setup();
@@ -500,6 +520,8 @@ it("preserves separate staff drafts across chapter changes and requires an expli
       expect.objectContaining({
         title: "A recorded decision",
         event_status: "planned",
+        subject_ids: expect.any(Array),
+        evidence_asset_ids: expect.any(Array),
       }),
       expect.any(String),
       expect.any(AbortSignal)

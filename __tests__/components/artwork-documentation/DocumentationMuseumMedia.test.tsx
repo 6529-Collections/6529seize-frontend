@@ -73,6 +73,8 @@ it.each(["audio/flac", "video/mp4"])(
   async (mime) => {
     const user = userEvent.setup();
     const result = setup(mime, true);
+    const status = screen.getByRole("status");
+    expect(status).toBeEmptyDOMElement();
     expect(downloadDocumentationAsset).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Open the player" }));
     await waitFor(() =>
@@ -88,8 +90,12 @@ it.each(["audio/flac", "video/mp4"])(
     expect(player).toHaveAttribute("controls");
     expect(player).not.toHaveAttribute("autoplay");
     fireEvent.error(player);
-    expect(screen.getByRole("status")).toHaveTextContent(/download|display/i);
+    expect(status).toBeInTheDocument();
+    expect(status).toHaveTextContent(/download|display/i);
     expect(result.container.querySelector("audio,video")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Try again" }));
+    expect(await screen.findByLabelText("The work")).toBeInTheDocument();
+    expect(downloadDocumentationAsset).toHaveBeenCalledTimes(2);
   }
 );
 
@@ -167,22 +173,20 @@ it("loads bounded file evidence only when its disclosure is opened, without gran
     technical_metadata: null,
     has_validation_report: true,
   } as unknown as ApiArtworkDocumentationAsset;
-  jest
-    .mocked(getDocumentationUpload)
-    .mockResolvedValue({
-      asset: {
-        ...asset,
-        technical_metadata: {
-          characterization: "partial",
-          detected_format: "TIFF",
-          measured_at: 1789200000000,
-          properties: {},
-          warnings: [],
-          format_registry: { status: "unidentified" },
-          c2pa: { status: "no_manifest" },
-        },
+  jest.mocked(getDocumentationUpload).mockResolvedValue({
+    asset: {
+      ...asset,
+      technical_metadata: {
+        characterization: "partial",
+        detected_format: "TIFF",
+        measured_at: 1789200000000,
+        properties: {},
+        warnings: [],
+        format_registry: { status: "unidentified" },
+        c2pa: { status: "no_manifest" },
       },
-    } as never);
+    },
+  } as never);
   render(
     <DocumentationAssetTechnical
       contextId="record"
@@ -226,8 +230,12 @@ it("keeps the checksum visible and retries an unavailable evidence read", async 
     />,
     { wrapper: QueryWrapper }
   );
+  const status = screen.getByRole("status", { hidden: true });
+  expect(status).toBeEmptyDOMElement();
   await user.click(screen.getByText("File integrity"));
   await screen.findByText(/measurements could not be loaded/);
+  expect(screen.getByRole("status")).toBe(status);
+  expect(status).toHaveTextContent(/measurements could not be loaded/);
   expect(screen.getByText(/kept-checksum/)).toBeVisible();
   await user.click(screen.getByRole("button", { name: "Try again" }));
   await waitFor(() => expect(getDocumentationUpload).toHaveBeenCalledTimes(2));

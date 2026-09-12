@@ -9,6 +9,12 @@ import {
   documentationHeaders,
 } from "./artwork-documentation-api";
 
+/** JSON uses unique arrays; the generated model represents these as runtime Sets. */
+export type MuseumRecordInput = Omit<
+  ApiArtworkMuseumRecordInput,
+  "subject_ids" | "evidence_asset_ids"
+> & { subject_ids: string[]; evidence_asset_ids: string[] };
+
 export const getMuseumRecords = (
   id: string,
   cursor?: string,
@@ -16,7 +22,7 @@ export const getMuseumRecords = (
 ) =>
   commonApiFetch<ApiArtworkMuseumRecords>({
     endpoint: `${documentationContextPath(id)}/museum-records`,
-    params: cursor ? { cursor } : {},
+    params: cursor ? { before: cursor } : {},
     signal,
     errorMode: "structured",
     cache: "no-store",
@@ -24,11 +30,11 @@ export const getMuseumRecords = (
 export const appendMuseumRecord = (
   id: string,
   version: number,
-  body: ApiArtworkMuseumRecordInput,
+  body: MuseumRecordInput,
   key: string,
   signal?: AbortSignal
 ) =>
-  commonApiPost<ApiArtworkMuseumRecordInput, ApiArtworkMuseumRecord>({
+  commonApiPost<MuseumRecordInput, ApiArtworkMuseumRecord>({
     endpoint: `${documentationContextPath(id)}/museum-records`,
     body,
     headers: documentationHeaders(version, key),

@@ -203,6 +203,14 @@ format can still download the original; a suitable display derivative can be
 added separately. HTML, SVG, code and executable materials never run inside the
 record. Large originals can use a separate display derivative.
 
+Linked WebVTT caption files appear in the native player after access is checked.
+When several are supplied, **Captions** selects the file. **Read the transcript**
+opens the readable transcript of a linked conversation. The record does not
+invent captions or transcribe media automatically. Missing or unavailable
+alternatives are explained beside the player; **Try again** requests fresh
+access after a loading problem. Public consent and rights documents can be
+deposited with the complete record as supporting materials.
+
 **File integrity** separates measured file properties and format identification
 from archival suitability, custody and authorship. Content Credentials show
 whether an embedded manifest was found and checked; signer trust and the truth
@@ -263,6 +271,13 @@ the artist. Save all changes first. Confirmation preserves that specific
 dated version so everyone can review the same account. It does not publish
 the work or make a proposed license effective.
 
+Before confirmation or dossier export, each received interview recording or
+transcript needs publication permission. In **The conversation**, link the file
+to the relevant session and record its publication permission. Alternatively,
+record a publication grant for that exact file in **Credits & terms**. A warning
+in the final chapter leads back to these sections. Files can be uploaded before
+these details are completed and remain available while you finish the record.
+
 Curatorial, technical and rights reviews are separate. Reviewers can discuss
 specific questions and request changes within their assigned access. A later
 edit creates a newer draft without changing the earlier confirmed revision.
@@ -272,7 +287,8 @@ Open a confirmed version to read its dated artwork record and the files selected
 for that version. **Confirmed record details** contains its identifying details
 and checksum. Returning to the current draft does not change the confirmed version.
 
-If your access allows it, **Manage this record** in **Review the record** offers
+If your access allows it, **Manage this record** in **The complete record**
+(**Review the record** on earlier forms) offers
 the archive or restore action. Archiving preserves the record; it does not
 publish it.
 

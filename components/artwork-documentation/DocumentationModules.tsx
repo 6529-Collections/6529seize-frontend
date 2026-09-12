@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { formatNumber } from "@/i18n/format";
 import { ApiArtworkDocumentationAnswerStatusEnum } from "@/generated/models/ApiArtworkDocumentationAnswer";
@@ -72,6 +72,10 @@ interface Props {
 
 export default function DocumentationModules(props: Props) {
   const { msg, locale } = useDocumentationMessages();
+  const references = useMemo(
+    () => documentationReferences(props.context, props.edits),
+    [props.context, props.edits]
+  );
   const required = requiredPaths(props.context, props.edits);
   const media = selectedDocumentationMedia(props.context, props.edits);
   for (const profile of documentationMediaProfiles(props.context.profile)) {
@@ -128,6 +132,7 @@ export default function DocumentationModules(props: Props) {
     <DocumentationAnswerField
       key={`${moduleId}.${field.id}`}
       {...props}
+      references={references}
       moduleId={moduleId}
       field={field}
       required={required.has(`${moduleId}.${field.id}`)}
@@ -229,6 +234,7 @@ export default function DocumentationModules(props: Props) {
 
 function DocumentationAnswerField(
   props: Props & {
+    readonly references: ReturnType<typeof documentationReferences>;
     readonly moduleId: ModuleId;
     readonly field: DocumentationField;
     readonly required: boolean;
@@ -470,7 +476,7 @@ function DocumentationAnswerField(
               disabled={disabled}
               assets={choices}
               examplePath={`${moduleId}.${field.id}`}
-              references={documentationReferences(context, edits)}
+              references={props.references}
               describedBy={(field.guidance ?? field.help) ? helpId : undefined}
               onChange={(value) => update({ value })}
             />

@@ -71,7 +71,9 @@ describe("complete document writing", () => {
     fireEvent.change(screen.getByLabelText("Import text"), {
       target: { files: [file] },
     });
-    await screen.findByRole("region", { name: "Review the imported text" });
+    expect(
+      await screen.findByRole("region", { name: "Review the imported text" })
+    ).toHaveFocus();
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getByRole("textbox", { name: "Full account" })).toHaveValue(
       "Existing account."
@@ -85,6 +87,19 @@ describe("complete document writing", () => {
         screen.queryByRole("region", { name: "Review the imported text" })
       ).not.toBeInTheDocument()
     );
+    expect(screen.getByRole("textbox", { name: "Full account" })).toHaveFocus();
+    fireEvent.change(screen.getByLabelText("Import text"), {
+      target: { files: [file] },
+    });
+    expect(
+      await screen.findByRole("region", { name: "Review the imported text" })
+    ).toHaveFocus();
+    const saved = onChange.mock.calls.length;
+    await user.click(
+      screen.getByRole("button", { name: "Discard import" })
+    );
+    expect(onChange).toHaveBeenCalledTimes(saved);
+    expect(screen.getByRole("textbox", { name: "Full account" })).toHaveFocus();
   });
   it("retains over-limit writing with a visible associated error instead of truncating", () => {
     render(<Harness onChange={jest.fn()} max={20} />);

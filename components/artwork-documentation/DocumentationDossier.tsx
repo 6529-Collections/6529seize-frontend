@@ -148,7 +148,10 @@ function DossierForActor({
     try {
       let pending = recovery?.request;
       if (!pending) {
-        if (!(await controller.flush())) return;
+        if (!(await controller.flush())) {
+          setFailed(true);
+          return;
+        }
         const current = controller.snapshot().context;
         const manifest = await getArtworkDossier(current.id, request.signal);
         if (!manifest.can_export) {
