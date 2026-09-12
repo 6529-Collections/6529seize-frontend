@@ -7,8 +7,12 @@ import YAML from "yaml";
 const workflow = YAML.parse(
   fs.readFileSync(".github/workflows/device-farm-qa.yml", "utf8")
 );
-const gitBash = path.join(process.env["ProgramFiles"] ?? "", "Git/bin/bash.exe");
-const bash = process.platform === "win32" && fs.existsSync(gitBash) ? gitBash : "bash";
+const gitBash = path.join(
+  process.env["ProgramFiles"] ?? "",
+  "Git/bin/bash.exe"
+);
+const bash =
+  process.platform === "win32" && fs.existsSync(gitBash) ? gitBash : "bash";
 
 function plan(overrides: Record<string, string> = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "device-farm-plan-"));
@@ -34,7 +38,10 @@ function plan(overrides: Record<string, string> = {}) {
     expect(result.status).toBe(0);
     return {
       output: Object.fromEntries(
-        fs.readFileSync(path.join(root, "outputs"), "utf8").trim().split("\n")
+        fs
+          .readFileSync(path.join(root, "outputs"), "utf8")
+          .trim()
+          .split("\n")
           .map((line) => line.split("="))
       ),
       log: result.stdout,
@@ -50,22 +57,38 @@ describe("Device Farm cadence and pack selection", () => {
       { cron: "0 4 * * 0,2-6" },
       { cron: "0 4 * * 1" },
     ]);
-    expect(plan({ EVENT_NAME: "schedule", SCHEDULE_CRON: "0 4 * * 0,2-6" }).output)
-      .toMatchObject({ web: "true", native: "false", "target-url": "https://6529.io" });
-    expect(plan({ EVENT_NAME: "schedule", SCHEDULE_CRON: "0 4 * * 1" }).output)
-      .toMatchObject({ web: "true", native: "true" });
-    expect(workflow.concurrency).toEqual({ group: "device-farm-qa", "cancel-in-progress": false });
+    expect(
+      plan({ EVENT_NAME: "schedule", SCHEDULE_CRON: "0 4 * * 0,2-6" }).output
+    ).toMatchObject({
+      web: "true",
+      native: "false",
+      "target-url": "https://6529.io",
+    });
+    expect(
+      plan({ EVENT_NAME: "schedule", SCHEDULE_CRON: "0 4 * * 1" }).output
+    ).toMatchObject({ web: "true", native: "true" });
+    expect(workflow.concurrency).toEqual({
+      group: "device-farm-qa",
+      "cancel-in-progress": false,
+    });
   });
 
   it.each([
     ["all", "true", "true"],
     ["web", "true", "false"],
     ["native", "false", "true"],
-  ])("preserves manual %s selection and staging target", (packs, web, native) => {
-    expect(plan({ PACKS_INPUT: packs, TARGET_INPUT: "staging" }).output).toEqual({
-      web, native, "target-url": "https://staging.6529.io",
-    });
-  });
+  ])(
+    "preserves manual %s selection and staging target",
+    (packs, web, native) => {
+      expect(
+        plan({ PACKS_INPUT: packs, TARGET_INPUT: "staging" }).output
+      ).toEqual({
+        web,
+        native,
+        "target-url": "https://staging.6529.io",
+      });
+    }
+  );
 
   it("makes missing provisioning visible and skips the affected packs", () => {
     const credentials = plan({ HAS_DEVICEFARM_CREDENTIALS: "false" });
