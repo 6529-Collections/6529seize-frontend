@@ -3,13 +3,16 @@
 import type { ApiCollectTdhListings } from "@/generated/models/ApiCollectTdhListings";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiCollectTdhTargetPlan } from "@/generated/models/ApiCollectTdhTargetPlan";
+import type { ApiCollectDailyTdhPlan } from "@/generated/models/ApiCollectDailyTdhPlan";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef } from "react";
 import CollectTdhBrowseContext from "./CollectTdhBrowseContext";
 import CollectTdhTargetController from "./CollectTdhTargetController";
+import CollectTdhDailyWorkspace from "./CollectTdhDailyWorkspace";
 import type { CollectSelectedListing } from "./collect-selection.helpers";
+import type { CollectCollection } from "./collect.types";
 
 export default function CollectTdhWorkspace({
   profile,
@@ -20,6 +23,8 @@ export default function CollectTdhWorkspace({
   onConnect,
   onReviewPurchase,
   onPlanOffers,
+  onDailyPlanOffers,
+  collection,
 }: {
   readonly profile: ApiIdentity | null;
   readonly payingWallet?: string | undefined;
@@ -32,6 +37,10 @@ export default function CollectTdhWorkspace({
     recipient: string
   ) => void;
   readonly onPlanOffers: (plan: ApiCollectTdhTargetPlan) => void;
+  readonly onDailyPlanOffers?:
+    | ((plan: ApiCollectDailyTdhPlan) => void)
+    | undefined;
+  readonly collection: CollectCollection;
 }) {
   const locale = useBrowserLocale();
   const toggle = useRef<HTMLButtonElement>(null);
@@ -79,7 +88,15 @@ export default function CollectTdhWorkspace({
           />
         </div>
       ) : (
-        <div className="tw-col-start-1 tw-row-start-1 tw-min-w-0">
+        <div className="tw-col-span-2 tw-min-w-0 tw-space-y-5">
+          <CollectTdhDailyWorkspace
+            profile={profile}
+            payingWallet={payingWallet}
+            collection={collection}
+            onConnect={onConnect}
+            onReviewPurchase={onReviewPurchase}
+            onPlanOffers={onDailyPlanOffers}
+          />
           <CollectTdhBrowseContext snapshot={snapshot} locale={locale} />
         </div>
       )}

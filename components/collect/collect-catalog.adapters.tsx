@@ -30,6 +30,7 @@ export function collectCatalogArtwork(
   const availability =
     entry.tdh?.available_quantity ??
     (order ? collectOrderAvailableQuantity(order) : null);
+  const tdhValue = entry.tdh ? collectTdhValueLabel(entry.tdh, locale) : null;
   let priceDescription: string | undefined;
   if (quantity && BigInt(quantity) > 1n) {
     priceDescription = t(locale, "collect.buy.lotPrice", {
@@ -63,9 +64,14 @@ export function collectCatalogArtwork(
     ownedLabel: null,
     priceLabel: order && price ? marketAmount(price, order.currency) : null,
     priceDescription,
-    sourceLabel: entry.tdh
-      ? collectTdhValueLabel(entry.tdh, locale)
-      : undefined,
+    ...(tdhValue === null
+      ? {}
+      : {
+          valueMetric: {
+            value: tdhValue,
+            label: t(locale, "collect.tdhBrowse.metricUnit"),
+          },
+        }),
     actions: (["buy", "offer", "list", "accept"] as const).map((action) => ({
       action,
       disabledReason: capabilities?.actions.some(

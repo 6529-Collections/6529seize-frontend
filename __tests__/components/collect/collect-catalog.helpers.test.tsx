@@ -129,3 +129,32 @@ it("labels indivisible lot prices and uses TDH's explicit availability", () => {
       .priceDescription
   ).toBe("12 available");
 });
+
+it("compares a TDH lot's total daily rate with its whole price and preserves that price", () => {
+  const lot = entry("1", "3000000000000000000", "a");
+  lot.order!.quantity = "3";
+  const view = collectCatalogArtwork(
+    {
+      ...lot,
+      tdh: {
+        asset: lot.asset,
+        order: lot.order!,
+        available_quantity: "3",
+        purchase_quantity: "3",
+        purchase_cost_wei: "3000000000000000000",
+        rate_hundredths: "125",
+        base_tdh_per_day_hundredths: "375",
+      },
+    },
+    undefined,
+    undefined,
+    "en-US"
+  );
+  expect(view.valueMetric).toEqual({
+    value: "≈ 1.25",
+    label: "base TDH/day per ETH",
+  });
+  expect(view.priceLabel).toBe("3 ETH");
+  expect(view.priceDescription).toBe("Price for 3 copies");
+  expect(view.sourceLabel).toBeUndefined();
+});

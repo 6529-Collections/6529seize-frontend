@@ -156,7 +156,7 @@ describe("market depth executable-order bridge", () => {
     ).toMatchObject({ quantity: "2" });
   });
 
-  it("accepts only exact-token WETH offers from another profile", () => {
+  it("accepts WETH offers bound to this NFT, including collection-wide offers from another profile", () => {
     const offer = tradeOrder({
       side: ApiMarketTradeOrderSideEnum.Offer,
       currency: MARKET_WETH,
@@ -187,7 +187,7 @@ describe("market depth executable-order bridge", () => {
         profileWallets: [],
         nowSeconds: 150,
       })
-    ).toBe(false);
+    ).toBe(true);
     expect(
       marketDepthOfferIsExecutable({
         asset,

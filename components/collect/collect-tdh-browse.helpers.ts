@@ -8,12 +8,17 @@ import { formatEther } from "viem";
 export function collectTdhValueLabel(
   listing: ApiCollectTdhListing,
   locale: SupportedLocale
-): string {
+): string | null {
+  if (
+    !/^[1-9]\d{0,77}$/.test(listing.purchase_cost_wei) ||
+    !/^[1-9]\d{0,77}$/.test(listing.base_tdh_per_day_hundredths)
+  )
+    return null;
   const cost = Number(formatEther(BigInt(listing.purchase_cost_wei)));
   const rate = Number(listing.base_tdh_per_day_hundredths) / 100;
   const value = rate / cost;
-  if (!Number.isFinite(value) || value <= 0) return "—";
-  return t(locale, "collect.tdhBrowse.value", {
+  if (!Number.isFinite(value) || value <= 0) return null;
+  return t(locale, "collect.tdhBrowse.metricValue", {
     value: formatNumber(locale, value, { maximumSignificantDigits: 5 }),
   });
 }
