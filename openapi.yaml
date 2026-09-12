@@ -5310,11 +5310,13 @@ paths:
         - name: subject_id
           in: query
           required: false
-          description: Exact opaque subject ID from the check; REP categories use the check ID, never category text.
+          description: >-
+            Exact opaque subject ID from the check; REP categories use the check
+            ID, never category text.
           schema:
             type: string
             maxLength: 200
-            pattern: '^[a-zA-Z0-9_:-]+$'
+            pattern: ^[a-zA-Z0-9_:-]+$
         - name: before
           in: query
           required: false
@@ -5799,6 +5801,11 @@ paths:
         - ContentModeration
       summary: Apply an authorized moderation decision to a drop.
       operationId: decideModeratedDrop
+      deprecated: true
+      description: >-
+        This unversioned mutation is retired. Open the report through
+        /content-moderation/checks/report/{report_id}, inspect its current
+        revision, and use /content-moderation/checks/{id}/actions.
       security:
         - bearerAuth: []
       parameters:
@@ -5814,14 +5821,10 @@ paths:
             schema:
               $ref: "#/components/schemas/ApiContentModerationDropDecisionRequest"
       responses:
-        "200":
-          description: Current moderation state
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiContentModerationDropDecisionResponse"
         "403":
           description: Moderator access required
+        "409":
+          description: MODERATION_REVIEW_REQUIRED; use the versioned review actions.
   /content-moderation/profiles/{profile_id}/status:
     get:
       tags:
@@ -5855,6 +5858,11 @@ paths:
         - ContentModeration
       summary: Suspend or reinstate a profile as an authorized moderator.
       operationId: setModeratedProfileStatus
+      deprecated: true
+      description: >-
+        This unversioned mutation is retired. Open the profile through
+        /content-moderation/checks/profile/{profile_id}, inspect its current
+        revision, and use /content-moderation/checks/{id}/actions.
       security:
         - bearerAuth: []
       parameters:
@@ -5870,14 +5878,10 @@ paths:
             schema:
               $ref: "#/components/schemas/ApiContentModerationProfileStatusRequest"
       responses:
-        "200":
-          description: Current profile status
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiContentModerationProfileStatusResponse"
         "403":
           description: Moderator access required
+        "409":
+          description: MODERATION_REVIEW_REQUIRED; use the versioned review actions.
   /content-moderation/profiles/suspended:
     get:
       tags:
@@ -29603,6 +29607,7 @@ components:
           enum:
             - ALLOW
             - BLOCK
+            - null
           nullable: true
         permit_expires_at:
           type: integer
@@ -29678,35 +29683,6 @@ components:
             - PROFILE_STATUS
         current_state:
           $ref: "#/components/schemas/ApiModerationCurrentState"
-    ApiModerationCurrentState:
-      type: object
-      required:
-        - profile_status
-        - drop_status
-        - published
-        - suppressed
-        - revision
-      properties:
-        profile_status:
-          type: string
-          nullable: true
-          enum:
-            - ACTIVE
-            - SUSPENDED
-        drop_status:
-          type: string
-          nullable: true
-          enum:
-            - VISIBLE
-            - AI_QUARANTINED
-            - MODERATOR_REMOVED
-        published:
-          type: boolean
-        suppressed:
-          type: boolean
-        revision:
-          type: string
-          nullable: true
     ApiModerationCheckPage:
       type: object
       required:
@@ -29740,6 +29716,37 @@ components:
         evaluator_failures_today:
           type: integer
           format: int64
+    ApiModerationCurrentState:
+      type: object
+      required:
+        - profile_status
+        - drop_status
+        - published
+        - suppressed
+        - revision
+      properties:
+        profile_status:
+          type: string
+          nullable: true
+          enum:
+            - ACTIVE
+            - SUSPENDED
+            - null
+        drop_status:
+          type: string
+          nullable: true
+          enum:
+            - VISIBLE
+            - AI_QUARANTINED
+            - MODERATOR_REMOVED
+            - null
+        published:
+          type: boolean
+        suppressed:
+          type: boolean
+        revision:
+          type: string
+          nullable: true
     ApiModerationEvaluation:
       type: object
       required:
