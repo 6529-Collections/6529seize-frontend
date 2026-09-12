@@ -38,6 +38,8 @@ before reviewing a purchase.
 **Make an offer** is visible beside buying. **List for sale** appears when a
 confirmed wallet in the profile holds the NFT. Connect that holding wallet to
 list it; profile consolidation does not grant another wallet permission to sign.
+Before connecting, **List for sale** opens the wallet connection flow so ownership
+can be checked.
 The more-actions menu contains **Review offers**.
 If ownership is still loading, **List for sale** stays visible but unavailable.
 If that check fails, choose **Try again** beside the action.

@@ -96,7 +96,7 @@ function getNoInlineOrderMessage({
   if (ordersFailed) return t(locale, "collect.error.orders");
   return t(
     locale,
-    ordersLoading ? "collect.buy.loadingListings" : "collect.trade.noOrders"
+    ordersLoading ? "collect.buy.loadingListings" : "collect.buy.noListings"
   );
 }
 

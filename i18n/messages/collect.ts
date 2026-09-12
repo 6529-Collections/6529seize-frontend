@@ -371,6 +371,7 @@ export const COLLECT_MESSAGES = {
   "collect.connect": "Connect wallet",
   "collect.loading": "Loading artwork",
   "collect.buy.loadingListings": "Loading listings",
+  "collect.buy.noListings": "No listings available to buy.",
   "collect.retry": "Try again",
   "collect.empty.title": "No artwork matches yet",
   "collect.empty.description":

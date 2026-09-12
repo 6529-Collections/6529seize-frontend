@@ -269,7 +269,7 @@ it("keeps a guest empty order state visible and offers refresh without preparing
 
   await waitFor(() =>
     expect(screen.getByRole("status")).toHaveTextContent(
-      "No executable orders were returned for this artwork."
+      "No listings available to buy."
     )
   );
   expect(screen.getByRole("button", { name: "Refresh orders" })).toBeEnabled();
