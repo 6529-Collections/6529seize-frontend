@@ -147,6 +147,26 @@ it("starts blend as offers and requires exact full-quantity listings before a Co
   ).not.toBeInTheDocument();
 });
 
+it("marks only the selected approach with a visible check while preserving radio names and focus", () => {
+  render(<OfferPlanPanel {...props()} blended initialMethod="goal" />);
+  const base = screen.getByRole("radio", { name: "Base" });
+  const conservative = screen.getByRole("radio", { name: "Conservative" });
+  const baseLabel = base.closest("label")!;
+  const conservativeLabel = conservative.closest("label")!;
+  expect(baseLabel.querySelector("svg")).toBeInTheDocument();
+  expect(baseLabel.querySelector("svg")!.parentElement).toHaveAttribute(
+    "aria-hidden",
+    "true"
+  );
+  expect(conservativeLabel.querySelector("svg")).not.toBeInTheDocument();
+  conservative.focus();
+  fireEvent.click(conservative);
+  expect(conservative).toBeChecked();
+  expect(conservative).toHaveFocus();
+  expect(conservativeLabel.querySelector("svg")).toBeInTheDocument();
+  expect(baseLabel.querySelector("svg")).not.toBeInTheDocument();
+});
+
 it("excludes buy NFTs from WETH allocation and returns exact purchase legs only on explicit review", async () => {
   const p = props();
   render(<OfferPlanPanel {...p} blended initialMethod="goal" />);

@@ -5,12 +5,12 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import { isCollectProfileWallet } from "./collect-recipient.helpers";
 import {
   applyOfferPrices,
   initialOfferRows,
   offerAnalysisIssue,
   offerPlanScope,
+  offerPlanDisabledReason,
   offerPlanTotals,
   offerPublishedTotal,
   offerRowIssue,
@@ -95,7 +95,7 @@ function OfferPlanContents({
   const locale = useBrowserLocale();
   const id = useId();
   const metadata = useCollectPlanMetadata();
-  const [storedRows, setRows] = useState(() => initialOfferRows(items));
+  const [storedRows, setStoredRows] = useState(() => initialOfferRows(items));
   const rows = storedRows.map((row) => ({
     ...row,
     asset:
@@ -132,13 +132,12 @@ function OfferPlanContents({
       ...pendingOffers.map((offer) => offer.assetKey),
     ]),
   ];
-  const reason =
-    disabledReason ??
-    (!profile?.id ||
-    !payingWallet ||
-    !isCollectProfileWallet(profile, payingWallet)
-      ? t(locale, "collect.trade.connectSigner")
-      : undefined);
+  const reason = offerPlanDisabledReason(
+    disabledReason,
+    profile,
+    payingWallet,
+    t(locale, "collect.trade.connectSigner")
+  );
   const publishedScope = JSON.stringify({
     keys: [...publishedAssetKeys].sort((a, b) => a.localeCompare(b)),
     offers: publishedOffers,
@@ -274,7 +273,7 @@ function OfferPlanContents({
     )
       return;
     changed();
-    setRows((current) =>
+    setStoredRows((current) =>
       current.map((row) => (row.assetKey === next.assetKey ? next : row))
     );
   };
@@ -296,7 +295,7 @@ function OfferPlanContents({
         ? [...new Set([...current, assetKey])]
         : current.filter((key) => key !== assetKey)
     );
-    setRows((current) =>
+    setStoredRows((current) =>
       current.map((row) =>
         row.pinned ||
         publishedAssetKeys.includes(row.assetKey) ||
@@ -312,7 +311,7 @@ function OfferPlanContents({
       next.expiryHours !== controls.expiryHours ||
       next.expiryDateTime !== controls.expiryDateTime
     )
-      setRows((current) =>
+      setStoredRows((current) =>
         current.map((row) =>
           !publishedAssetKeys.includes(row.assetKey) &&
           !buyLockedAssetKeys.includes(row.assetKey) &&
@@ -332,7 +331,7 @@ function OfferPlanContents({
       changedGoalBudget ||
       next.blendTier !== controls.blendTier
     )
-      setRows((current) =>
+      setStoredRows((current) =>
         current.map((row) =>
           row.pinned ||
           publishedAssetKeys.includes(row.assetKey) ||
@@ -360,6 +359,7 @@ function OfferPlanContents({
     setError(undefined);
     setAnalysis(null);
     const revision = ++generation.current;
+    const isCurrent = () => mounted.current && revision === generation.current;
     try {
       const input: OfferPlanAnalysisInput = {
         profileId: profile.id,
@@ -368,8 +368,6 @@ function OfferPlanContents({
         controls,
         committedAmountWei: (committed ?? 0n).toString(),
       };
-      const isCurrent = () =>
-        mounted.current && revision === generation.current;
       const blendedResult = blended
         ? await analyzeBlendedOffers({
             input,
@@ -389,14 +387,14 @@ function OfferPlanContents({
         : null;
       if (blended && !blendedResult) return;
       const result = blendedResult ? blendedResult.view : await analyze(input);
-      if (!mounted.current || revision !== generation.current) return;
+      if (!isCurrent()) return;
       const nextBuyKeys = blendedResult
         ? [...blendedResult.proposal.buyKeys]
         : buyKeys;
       const applyExcluded = blended
         ? [...publishedAssetKeys, ...buyLockedAssetKeys]
         : excludedOfferKeys;
-      setRows((current) => {
+      setStoredRows((current) => {
         const next = new Map(
           applyOfferPrices(
             current.filter((row) => !applyExcluded.includes(row.assetKey)),
@@ -420,8 +418,7 @@ function OfferPlanContents({
         view: result,
       });
     } catch {
-      if (mounted.current && revision === generation.current)
-        setError(t(locale, "collect.offerPlan.analysisFailed"));
+      if (isCurrent()) setError(t(locale, "collect.offerPlan.analysisFailed"));
     } finally {
       pending.current = false;
       if (mounted.current) setBusy(false);
@@ -554,7 +551,7 @@ function OfferPlanContents({
           className={TEXT_BUTTON}
           onClick={() => {
             changed();
-            setRows((current) =>
+            setStoredRows((current) =>
               current.map((row) =>
                 publishedAssetKeys.includes(row.assetKey) ||
                 buyLockedAssetKeys.includes(row.assetKey)
@@ -572,7 +569,7 @@ function OfferPlanContents({
           className={TEXT_BUTTON}
           onClick={() => {
             changed();
-            setRows((current) =>
+            setStoredRows((current) =>
               current.map((row) =>
                 publishedAssetKeys.includes(row.assetKey) ||
                 buyLockedAssetKeys.includes(row.assetKey)

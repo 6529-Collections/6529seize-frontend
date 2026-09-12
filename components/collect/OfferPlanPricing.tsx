@@ -77,6 +77,14 @@ export default function OfferPlanPricing({
                     aria-hidden="true"
                     className="tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-md peer-focus-visible:tw-outline peer-focus-visible:tw-outline-2 peer-focus-visible:tw-outline-primary-400"
                   />
+                  <span
+                    aria-hidden="true"
+                    className="tw-pointer-events-none tw-absolute tw-right-0.5 tw-top-0 tw-size-3"
+                  >
+                    {tier === (value.blendTier ?? "base") && (
+                      <CheckIcon className="tw-size-3" />
+                    )}
+                  </span>
                   {t(locale, `collect.blend.tier.${tier}`)}
                 </label>
               ))}

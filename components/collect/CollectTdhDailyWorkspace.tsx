@@ -38,7 +38,10 @@ interface Props {
 export default function CollectTdhDailyWorkspace(props: Props) {
   const membership = collectProfileWallets(props.profile)
     .map((wallet) => wallet.wallet.toLowerCase())
-    .sort()
+    .sort((left, right) => {
+      if (left < right) return -1;
+      return left > right ? 1 : 0;
+    })
     .join(":");
   const contextKey = `${props.profile?.id ?? "guest"}:${membership}:${props.payingWallet?.toLowerCase() ?? ""}:${props.collection}`;
   return <DailyWorkspace key={contextKey} {...props} />;

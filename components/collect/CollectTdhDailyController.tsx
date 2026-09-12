@@ -42,11 +42,18 @@ type Outcome<T> = {
 );
 
 /** Each edit chooses the driving field. Derived updates never start another request. */
-export default function CollectTdhDailyController<T>(props: Props<T>) {
-  return <DailyController key={props.contextKey} {...props} />;
+export default function CollectTdhDailyController<T>({
+  contextKey,
+  ...props
+}: Props<T>) {
+  return <DailyController key={contextKey} {...props} />;
 }
 
-function DailyController<T>({ calculate, onConnect, renderResult }: Props<T>) {
+function DailyController<T>({
+  calculate,
+  onConnect,
+  renderResult,
+}: Omit<Props<T>, "contextKey">) {
   const locale = useBrowserLocale();
   const [input, setInput] = useState<CollectTdhDailyInput>({
     mode: "daily_tdh",

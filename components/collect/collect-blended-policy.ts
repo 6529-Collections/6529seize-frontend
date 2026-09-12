@@ -299,6 +299,9 @@ export function proposeBlendedPolicy(
     sourceValidUntil:
       deadlines.length === 0
         ? null
-        : deadlines.reduce((left, right) => (left < right ? left : right)),
+        : deadlines.reduce(
+            (left, right) => (left < right ? left : right),
+            deadlines[0]!
+          ),
   };
 }

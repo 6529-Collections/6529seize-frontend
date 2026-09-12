@@ -46,7 +46,12 @@ const families = (collection: CollectCollection): ApiCollectFamily[] =>
     (family) => collection === "all" || family.toString() === collection
   );
 const sortedFamilies = (values: readonly ApiCollectFamily[] | undefined) =>
-  [...(values ?? [])].sort().join(":");
+  [...(values ?? [])]
+    .sort((left, right) => {
+      if (left < right) return -1;
+      return left > right ? 1 : 0;
+    })
+    .join(":");
 
 export function validCollectDailyInput(input: CollectTdhDailyInput): boolean {
   if (!isPositiveEthAmount(input.value)) return false;

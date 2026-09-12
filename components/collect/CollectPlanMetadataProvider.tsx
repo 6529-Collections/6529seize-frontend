@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { createFetchDeadline } from "@/lib/fetch/fetchDeadline";
@@ -30,14 +30,21 @@ export default function CollectPlanMetadataProvider({
   readonly catalog: ApiCollectCatalog | undefined;
   readonly children: ReactNode;
 }) {
-  const known = new Map(
-    knownAssets
-      .filter((asset) => matchingCollectAsset(asset.asset_key, asset))
-      .map((asset) => [asset.asset_key, asset])
+  const known = useMemo(
+    () =>
+      new Map(
+        knownAssets
+          .filter((asset) => matchingCollectAsset(asset.asset_key, asset))
+          .map((asset) => [asset.asset_key, asset])
+      ),
+    [knownAssets]
   );
   const needed = [...new Set(assetKeys)]
     .filter((key) => !known.has(key))
-    .sort();
+    .sort((left, right) => {
+      if (left < right) return -1;
+      return left > right ? 1 : 0;
+    });
   const metadata = useQuery({
     queryKey: [
       QueryKey.COLLECT_ASSETS,
@@ -63,9 +70,13 @@ export default function CollectPlanMetadataProvider({
     staleTime: 5 * 60_000,
     retry: 1,
   });
-  for (const asset of metadata.data ?? []) known.set(asset.asset_key, asset);
+  const value = useMemo(() => {
+    const assets = new Map(known);
+    for (const asset of metadata.data ?? []) assets.set(asset.asset_key, asset);
+    return { assets, catalog };
+  }, [known, metadata.data, catalog]);
   return (
-    <MetadataContext.Provider value={{ assets: known, catalog }}>
+    <MetadataContext.Provider value={value}>
       {children}
     </MetadataContext.Provider>
   );
