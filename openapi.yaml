@@ -5498,6 +5498,310 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionError"
+  /content-moderation/checks/access:
+    get:
+      tags:
+        - Content moderation
+      summary: getModerationAccess
+      operationId: getModerationAccess
+      security:
+        - bearerAuth: []
+      parameters: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleGetModerationAccess
+      responses:
+        "200":
+          description: Private developer response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationAccess"
+        "403":
+          description: Developer access required; proxies are not allowed
+        "409":
+          description: Reviewed revision changed or action key conflicts
+  /content-moderation/checks:
+    get:
+      tags:
+        - Content moderation
+      summary: getModerationChecks
+      operationId: getModerationChecks
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: subject_type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - REP_CATEGORY
+              - PROFILE_BIO
+              - GROUP_NAME
+              - DROP
+        - name: outcome
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ALLOW
+              - REJECT
+              - ERROR
+              - PENDING
+        - name: policy_family
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - PUBLIC_FIELDS
+              - WAVE_CONTENT
+        - name: trigger
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: review_status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - NEEDS_REVIEW
+              - REVIEWED
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: profile_id
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: subject_id
+          in: query
+          required: false
+          description: >-
+            Exact opaque subject ID from the check; REP categories use the check
+            ID, never category text.
+          schema:
+            type: string
+            maxLength: 200
+            pattern: ^[a-zA-Z0-9_:-]+$
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleGetModerationChecks
+      responses:
+        "200":
+          description: Private developer response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationCheckPage"
+        "403":
+          description: Developer access required; proxies are not allowed
+        "409":
+          description: Reviewed revision changed or action key conflicts
+  /content-moderation/checks/counts:
+    get:
+      tags:
+        - Content moderation
+      summary: getModerationCounts
+      operationId: getModerationCounts
+      security:
+        - bearerAuth: []
+      parameters: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleGetModerationCounts
+      responses:
+        "200":
+          description: Private developer response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationCounts"
+        "403":
+          description: Developer access required; proxies are not allowed
+        "409":
+          description: Reviewed revision changed or action key conflicts
+  /content-moderation/checks/{id}:
+    get:
+      tags:
+        - Content moderation
+      summary: getModerationCheck
+      operationId: getModerationCheck
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleGetModerationCheck
+      responses:
+        "200":
+          description: Private developer response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationCheckDetail"
+        "403":
+          description: Developer access required; proxies are not allowed
+        "409":
+          description: Reviewed revision changed or action key conflicts
+  /content-moderation/checks/{id}/actions:
+    post:
+      tags:
+        - Content moderation
+      summary: moderationCheckAction
+      operationId: moderationCheckAction
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleModerationCheckAction
+      responses:
+        "200":
+          description: Private developer response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationCheckDetail"
+        "403":
+          description: Developer access required; proxies are not allowed
+        "409":
+          description: Reviewed revision changed or action key conflicts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiModerationActionRequest"
+  /content-moderation/checks/report/{report_id}:
+    get:
+      tags:
+        - Content moderation
+      summary: getModerationReportCheck
+      operationId: getModerationReportCheck
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: report_id
+          in: path
+          required: true
+          schema:
+            type: string
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleGetModerationReportCheck
+      responses:
+        "200":
+          description: Private developer response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationCheckDetail"
+        "403":
+          description: Developer access required; proxies are not allowed
+        "409":
+          description: Reviewed revision changed or action key conflicts
+  /content-moderation/checks/profile/{profile_id}:
+    get:
+      tags:
+        - Content moderation
+      summary: getModerationProfileCheck
+      operationId: getModerationProfileCheck
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: profile_id
+          in: path
+          required: true
+          schema:
+            type: string
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleGetModerationProfileCheck
+      responses:
+        "200":
+          description: Private developer response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationCheckDetail"
+        "403":
+          description: Developer access required; proxies are not allowed
+        "409":
+          description: Reviewed revision changed or action key conflicts
   /content-moderation/blocked-profiles:
     get:
       tags:
@@ -5783,6 +6087,11 @@ paths:
         - ContentModeration
       summary: Apply an authorized moderation decision to a drop.
       operationId: decideModeratedDrop
+      deprecated: true
+      description: >-
+        This unversioned mutation is retired. Open the report through
+        /content-moderation/checks/report/{report_id}, inspect its current
+        revision, and use /content-moderation/checks/{id}/actions.
       security:
         - bearerAuth: []
       parameters:
@@ -5798,14 +6107,10 @@ paths:
             schema:
               $ref: "#/components/schemas/ApiContentModerationDropDecisionRequest"
       responses:
-        "200":
-          description: Current moderation state
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiContentModerationDropDecisionResponse"
         "403":
           description: Moderator access required
+        "409":
+          description: MODERATION_REVIEW_REQUIRED; use the versioned review actions.
   /content-moderation/profiles/{profile_id}/status:
     get:
       tags:
@@ -5839,6 +6144,11 @@ paths:
         - ContentModeration
       summary: Suspend or reinstate a profile as an authorized moderator.
       operationId: setModeratedProfileStatus
+      deprecated: true
+      description: >-
+        This unversioned mutation is retired. Open the profile through
+        /content-moderation/checks/profile/{profile_id}, inspect its current
+        revision, and use /content-moderation/checks/{id}/actions.
       security:
         - bearerAuth: []
       parameters:
@@ -5854,14 +6164,10 @@ paths:
             schema:
               $ref: "#/components/schemas/ApiContentModerationProfileStatusRequest"
       responses:
-        "200":
-          description: Current profile status
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiContentModerationProfileStatusResponse"
         "403":
           description: Moderator access required
+        "409":
+          description: MODERATION_REVIEW_REQUIRED; use the versioned review actions.
   /content-moderation/profiles/suspended:
     get:
       tags:
@@ -30003,6 +30309,357 @@ components:
       enum:
         - ACTIVE
         - SUSPENDED
+    ApiModerationAccess:
+      type: object
+      required:
+        - developer
+      properties:
+        developer:
+          type: boolean
+    ApiModerationAction:
+      type: string
+      enum:
+        - REEVALUATE
+        - ALLOW
+        - BLOCK
+        - REVOKE_OVERRIDE
+        - MARK_REVIEWED
+        - SUPPRESS
+        - RESTORE
+        - QUARANTINE
+        - REMOVE
+        - SUSPEND
+        - REINSTATE
+    ApiModerationActionRequest:
+      type: object
+      required:
+        - action
+        - reason
+        - expected_version
+        - idempotency_key
+      properties:
+        action:
+          $ref: "#/components/schemas/ApiModerationAction"
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        expected_version:
+          type: integer
+          format: int64
+          minimum: 1
+        idempotency_key:
+          type: string
+          format: uuid
+    ApiModerationAudit:
+      type: object
+      required:
+        - id
+        - created_at
+        - actor_profile_id
+        - action
+        - reason
+        - previous_state
+        - new_state
+        - metadata
+      properties:
+        id:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+        actor_profile_id:
+          type: string
+          nullable: true
+        action:
+          type: string
+        reason:
+          type: string
+          nullable: true
+        previous_state:
+          type: string
+          nullable: true
+        new_state:
+          type: string
+          nullable: true
+        metadata:
+          type: object
+          additionalProperties: true
+          nullable: true
+    ApiModerationCheck:
+      type: object
+      required:
+        - id
+        - subject_type
+        - subject_id
+        - author_profile_id
+        - actor_profile_id
+        - operation
+        - policy_family
+        - policy_version
+        - scope
+        - content_fingerprint
+        - outcome
+        - trigger
+        - review_status
+        - override
+        - permit_expires_at
+        - permit_consumed_at
+        - published_subject_id
+        - suppressed
+        - version
+        - created_at
+        - updated_at
+        - evidence_expires_at
+        - preview
+      properties:
+        id:
+          type: string
+        subject_type:
+          type: string
+          enum:
+            - REP_CATEGORY
+            - PROFILE_BIO
+            - GROUP_NAME
+            - DROP
+        subject_id:
+          type: string
+        author_profile_id:
+          type: string
+          nullable: true
+        actor_profile_id:
+          type: string
+          nullable: true
+        operation:
+          type: string
+        policy_family:
+          type: string
+          enum:
+            - PUBLIC_FIELDS
+            - WAVE_CONTENT
+        policy_version:
+          type: string
+        scope:
+          type: object
+          additionalProperties: true
+        content_fingerprint:
+          type: string
+        outcome:
+          type: string
+          enum:
+            - ALLOW
+            - REJECT
+            - ERROR
+            - PENDING
+        trigger:
+          type: string
+        review_status:
+          type: string
+          enum:
+            - NEEDS_REVIEW
+            - REVIEWED
+        override:
+          type: string
+          enum:
+            - ALLOW
+            - BLOCK
+            - null
+          nullable: true
+        permit_expires_at:
+          type: integer
+          format: int64
+          nullable: true
+        permit_consumed_at:
+          type: integer
+          format: int64
+          nullable: true
+        published_subject_id:
+          type: string
+          nullable: true
+        suppressed:
+          type: boolean
+        version:
+          type: integer
+          format: int64
+        created_at:
+          type: integer
+          format: int64
+        updated_at:
+          type: integer
+          format: int64
+        evidence_expires_at:
+          type: integer
+          format: int64
+          nullable: true
+        preview:
+          type: string
+          nullable: true
+    ApiModerationCheckDetail:
+      type: object
+      required:
+        - check
+        - evidence
+        - current_revision_matches
+        - evidence_expired
+        - evaluations
+        - audit
+        - allowed_actions
+        - action_effect
+        - current_state
+      properties:
+        check:
+          $ref: "#/components/schemas/ApiModerationCheck"
+        evidence:
+          type: object
+          additionalProperties: true
+          nullable: true
+        current_revision_matches:
+          type: boolean
+        evidence_expired:
+          type: boolean
+        evaluations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiModerationEvaluation"
+        audit:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiModerationAudit"
+        allowed_actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiModerationAction"
+        action_effect:
+          type: string
+          enum:
+            - GLOBAL_CATEGORY_RULE
+            - EXACT_RESUBMISSION_PERMIT
+            - PUBLISHED_DROP
+            - PUBLISHED_FIELD
+            - PROFILE_STATUS
+        current_state:
+          $ref: "#/components/schemas/ApiModerationCurrentState"
+    ApiModerationCheckPage:
+      type: object
+      required:
+        - items
+        - next_cursor
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiModerationCheck"
+        next_cursor:
+          type: string
+          nullable: true
+    ApiModerationCounts:
+      type: object
+      required:
+        - needs_review
+        - quarantined
+        - rejected_today
+        - evaluator_failures_today
+      properties:
+        needs_review:
+          type: integer
+          format: int64
+        quarantined:
+          type: integer
+          format: int64
+        rejected_today:
+          type: integer
+          format: int64
+        evaluator_failures_today:
+          type: integer
+          format: int64
+    ApiModerationCurrentState:
+      type: object
+      required:
+        - profile_status
+        - drop_status
+        - published
+        - suppressed
+        - revision
+      properties:
+        profile_status:
+          type: string
+          nullable: true
+          enum:
+            - ACTIVE
+            - SUSPENDED
+            - null
+        drop_status:
+          type: string
+          nullable: true
+          enum:
+            - VISIBLE
+            - AI_QUARANTINED
+            - MODERATOR_REMOVED
+            - null
+        published:
+          type: boolean
+        suppressed:
+          type: boolean
+        revision:
+          type: string
+          nullable: true
+    ApiModerationEvaluation:
+      type: object
+      required:
+        - id
+        - item_id
+        - retry_of
+        - trigger
+        - outcome
+        - provider
+        - model
+        - policy_version
+        - result
+        - cache_hit
+        - fallback
+        - started_at
+        - completed_at
+      properties:
+        id:
+          type: string
+        item_id:
+          type: string
+        retry_of:
+          type: string
+          nullable: true
+        trigger:
+          type: string
+        outcome:
+          type: string
+          enum:
+            - ALLOW
+            - REJECT
+            - ERROR
+            - PENDING
+        provider:
+          type: string
+          nullable: true
+        model:
+          type: string
+          nullable: true
+        policy_version:
+          type: string
+        result:
+          type: object
+          additionalProperties: true
+          nullable: true
+        cache_hit:
+          type: boolean
+        fallback:
+          type: string
+          nullable: true
+        started_at:
+          type: integer
+          format: int64
+        completed_at:
+          type: integer
+          format: int64
+          nullable: true
     ApiNft:
       type: object
       required:

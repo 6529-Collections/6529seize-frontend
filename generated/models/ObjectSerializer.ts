@@ -506,6 +506,16 @@ export * from '../models/ApiMintingClaimActionUpdateRequest';
 export * from '../models/ApiMintingClaimActionsResponse';
 export * from '../models/ApiMintingClaimsPhaseTotalItem';
 export * from '../models/ApiModeratedProfileStatus';
+export * from '../models/ApiModerationAccess';
+export * from '../models/ApiModerationAction';
+export * from '../models/ApiModerationActionRequest';
+export * from '../models/ApiModerationAudit';
+export * from '../models/ApiModerationCheck';
+export * from '../models/ApiModerationCheckDetail';
+export * from '../models/ApiModerationCheckPage';
+export * from '../models/ApiModerationCounts';
+export * from '../models/ApiModerationCurrentState';
+export * from '../models/ApiModerationEvaluation';
 export * from '../models/ApiNft';
 export * from '../models/ApiNftActivityEvent';
 export * from '../models/ApiNftActivityPage';
@@ -1352,6 +1362,16 @@ import { ApiMintingClaimActionUpdateRequest } from '../models/ApiMintingClaimAct
 import { ApiMintingClaimActionsResponse } from '../models/ApiMintingClaimActionsResponse';
 import { ApiMintingClaimsPhaseTotalItem } from '../models/ApiMintingClaimsPhaseTotalItem';
 import { ApiModeratedProfileStatus } from '../models/ApiModeratedProfileStatus';
+import { ApiModerationAccess } from '../models/ApiModerationAccess';
+import { ApiModerationAction } from '../models/ApiModerationAction';
+import { ApiModerationActionRequest     } from '../models/ApiModerationActionRequest';
+import { ApiModerationAudit } from '../models/ApiModerationAudit';
+import { ApiModerationCheck , ApiModerationCheckSubjectTypeEnum      , ApiModerationCheckPolicyFamilyEnum     , ApiModerationCheckOutcomeEnum   , ApiModerationCheckReviewStatusEnum  , ApiModerationCheckOverrideEnum            } from '../models/ApiModerationCheck';
+import { ApiModerationCheckDetail       , ApiModerationCheckDetailActionEffectEnum    } from '../models/ApiModerationCheckDetail';
+import { ApiModerationCheckPage } from '../models/ApiModerationCheckPage';
+import { ApiModerationCounts } from '../models/ApiModerationCounts';
+import { ApiModerationCurrentState, ApiModerationCurrentStateProfileStatusEnum  , ApiModerationCurrentStateDropStatusEnum      } from '../models/ApiModerationCurrentState';
+import { ApiModerationEvaluation    , ApiModerationEvaluationOutcomeEnum           } from '../models/ApiModerationEvaluation';
 import { ApiNft      , ApiNftTokenTypeEnum                               } from '../models/ApiNft';
 import { ApiNftActivityEvent , ApiNftActivityEventKindEnum                   } from '../models/ApiNftActivityEvent';
 import { ApiNftActivityPage } from '../models/ApiNftActivityPage';
@@ -1860,6 +1880,16 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiMediaUploadMimeType",
     "ApiMemesExtendedDataTokenTypeEnum",
     "ApiModeratedProfileStatus",
+    "ApiModerationAction",
+    "ApiModerationCheckSubjectTypeEnum",
+    "ApiModerationCheckPolicyFamilyEnum",
+    "ApiModerationCheckOutcomeEnum",
+    "ApiModerationCheckReviewStatusEnum",
+    "ApiModerationCheckOverrideEnum",
+    "ApiModerationCheckDetailActionEffectEnum",
+    "ApiModerationCurrentStateProfileStatusEnum",
+    "ApiModerationCurrentStateDropStatusEnum",
+    "ApiModerationEvaluationOutcomeEnum",
     "ApiNftTokenTypeEnum",
     "ApiNftActivityEventKindEnum",
     "ApiNftLinkMediaPreviewStatusEnum",
@@ -2419,6 +2449,15 @@ let typeMap: {[index: string]: any} = {
     "ApiMintingClaimActionUpdateRequest": ApiMintingClaimActionUpdateRequest,
     "ApiMintingClaimActionsResponse": ApiMintingClaimActionsResponse,
     "ApiMintingClaimsPhaseTotalItem": ApiMintingClaimsPhaseTotalItem,
+    "ApiModerationAccess": ApiModerationAccess,
+    "ApiModerationActionRequest": ApiModerationActionRequest,
+    "ApiModerationAudit": ApiModerationAudit,
+    "ApiModerationCheck": ApiModerationCheck,
+    "ApiModerationCheckDetail": ApiModerationCheckDetail,
+    "ApiModerationCheckPage": ApiModerationCheckPage,
+    "ApiModerationCounts": ApiModerationCounts,
+    "ApiModerationCurrentState": ApiModerationCurrentState,
+    "ApiModerationEvaluation": ApiModerationEvaluation,
     "ApiNft": ApiNft,
     "ApiNftActivityEvent": ApiNftActivityEvent,
     "ApiNftActivityPage": ApiNftActivityPage,
