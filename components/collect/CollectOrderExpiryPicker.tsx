@@ -2,6 +2,8 @@
 
 import { useId } from "react";
 import {
+  Description,
+  Field,
   Listbox,
   ListboxButton,
   ListboxOption,
@@ -62,7 +64,7 @@ export default function CollectOrderExpiryPicker({
       : null;
 
   return (
-    <div className="tw-min-w-0 tw-space-y-2">
+    <Field className="tw-min-w-0 tw-space-y-2">
       <label
         id={`${id}-duration-label`}
         htmlFor={`${id}-duration`}
@@ -94,7 +96,7 @@ export default function CollectOrderExpiryPicker({
           }}
           aria-labelledby={`${id}-duration-label`}
           aria-invalid={invalid}
-          aria-describedby={invalid ? errorId : undefined}
+          aria-errormessage={invalid ? errorId : undefined}
           className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
         >
           <span>{optionLabel(value.expiryHours)}</span>
@@ -181,16 +183,16 @@ export default function CollectOrderExpiryPicker({
               : t(locale, "collect.expiry.range")}
           </p>
           {localError && (
-            <p
+            <Description
               id={`${id}-invalid`}
               role="alert"
               className="tw-m-0 tw-text-xs tw-leading-5 tw-text-error"
             >
               {localError}
-            </p>
+            </Description>
           )}
         </div>
       )}
-    </div>
+    </Field>
   );
 }

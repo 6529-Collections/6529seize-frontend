@@ -435,3 +435,41 @@ it("keeps per-NFT expiry in details and preserves each explicit price, quantity,
   );
   expect(p.analyze).not.toHaveBeenCalled();
 });
+
+it("links an invalid per-NFT custom expiry to its visible row error", () => {
+  const p = props();
+  render(<OfferPlanPanel {...p} />);
+  setPrice(1, "0.125");
+  fireEvent.click(screen.getByLabelText("Details and expiry for Artwork 1"));
+  const expiry = screen.getByLabelText("Offer expiry for Artwork 1");
+  fireEvent.click(expiry);
+  fireEvent.click(screen.getByRole("option", { name: "Custom…" }));
+  fireEvent.change(screen.getByLabelText("Expiry date and time"), {
+    target: { value: "" },
+  });
+
+  const error = screen.getByText(/^Choose .*expiry/, {
+    selector: 'p[role="status"]',
+  });
+  const customError = screen.getByRole("alert");
+  expect(expiry).toHaveAccessibleName("Offer expiry for Artwork 1");
+  expect(expiry).toHaveAttribute("aria-invalid", "true");
+  expect(expiry).toHaveAttribute("aria-errormessage", error.id);
+  expect(expiry).toHaveAttribute("aria-describedby", customError.id);
+  expect(expiry).toHaveAccessibleDescription(customError.textContent!);
+  expect(priceInput(1)).toHaveValue("0.125");
+  expect(reviewButton(1)).toBeDisabled();
+  expect(p.onReviewOffer).not.toHaveBeenCalled();
+
+  fireEvent.click(expiry);
+  fireEvent.click(screen.getByRole("option", { name: "1 day" }));
+  expect(expiry).toHaveAccessibleName("Offer expiry for Artwork 1");
+  expect(expiry).toHaveAttribute("aria-invalid", "false");
+  expect(expiry).not.toHaveAttribute("aria-describedby");
+  expect(expiry).not.toHaveAttribute("aria-errormessage");
+  expect(error).not.toBeInTheDocument();
+  expect(customError).not.toBeInTheDocument();
+  expect(priceInput(1)).toHaveValue("0.125");
+  expect(reviewButton(1)).toBeEnabled();
+  expect(p.onReviewOffer).not.toHaveBeenCalled();
+});

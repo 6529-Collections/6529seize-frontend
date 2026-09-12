@@ -112,6 +112,30 @@ test("keeps different trait alternatives in each scenario's exact portfolio", ()
   });
 });
 
+test("shows the priced alternative artwork when the budget purchases no alternative", () => {
+  const source = scenarioPlan();
+  const pricedLeg = source.available_result!.legs[0]!;
+  source.analysis.requirements[0]!.asset_keys.push(
+    "1:0x33fd426905f149f8376e227d0c9d3340aad17af1:999"
+  );
+  source.result = { ...source.result, legs: [], total_cost_wei: "0" };
+
+  const view = collectCostPlanView(
+    source,
+    scenarioProfile,
+    "Trait goal",
+    "en-US"
+  )!;
+
+  expect(view.requirements[0]).toMatchObject({
+    purchaseLabel: "Outside this budget",
+    priceLabel: "0.2 ETH",
+    artworkKeys: [pricedLeg.asset_key],
+  });
+  expect(view.totalLabel).toBe("0 ETH");
+  expect(source.result.legs).toEqual([]);
+});
+
 test("supports older API responses and never invents a missing price", () => {
   const source = scenarioPlan();
   delete source.available_result;

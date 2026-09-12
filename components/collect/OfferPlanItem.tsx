@@ -316,6 +316,7 @@ export default function OfferPlanItem({
                 disabled={disabled}
                 label={t(locale, "collect.offerPlan.expiryFor", { title })}
                 invalid={issue === "expiry"}
+                errorId={`${id}-error`}
                 onChange={(next) => onChange({ ...row, ...next })}
               />
             </div>

@@ -270,7 +270,8 @@ export const COLLECT_MESSAGES = {
     "Enter 1–100 copies for a Meme, or 1 for a unique NFT.",
   "collect.offerPlan.invalid.price":
     "Enter a positive WETH price with up to 18 decimal places.",
-  "collect.offerPlan.invalid.expiry": "Choose an expiry of 1, 7 or 30 days.",
+  "collect.offerPlan.invalid.expiry":
+    "Choose a preset or a valid custom expiry between 5 minutes and 30 days from now.",
   "collect.offerPlan.invalid.discount":
     "Enter a discount from 0% to 99.99%, with at most two decimal places.",
   "collect.offerPlan.invalid.improvement":

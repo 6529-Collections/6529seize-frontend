@@ -23,9 +23,10 @@ On Memes cards, supply shows **Edition size**, **Ex. research** and
 **Ex. museum & research**, alongside **Holding wallets**. Excluded counts remove
 burned editions and the named reserve holdings; the combined count removes each
 reserve once. These counts do not describe editions listed for sale.
-**Supply details & rankings** explains the exclusions and shows their ranks.
-Smaller supplies rank first; equal supplies share a rank and the next rank skips
-those ties. A card without a recorded ranking shows **Unranked**.
+**Supply details & rankings** explains the exclusions and ranks **Ex. research**
+and **Ex. museum & research**. Smaller supplies rank first; equal supplies share a
+rank and the next rank skips those ties. A card without a recorded ranking shows
+**Unranked**.
 
 ## Read listings and offers
 

@@ -11,12 +11,7 @@ export default function MemeSupplyStats({
   readonly nftMeta: ApiMemesExtendedData;
   readonly locale: SupportedLocale;
 }) {
-  const supplyRows = [
-    {
-      label: t(locale, "theMemes.detail.live.edition.editionSize"),
-      value: nftMeta.edition_size,
-      rank: nftMeta.edition_size_rank,
-    },
+  const reserveSupplyRows = [
     {
       label: t(locale, "theMemes.detail.live.edition.exResearch"),
       value: nftMeta.edition_size_ex_research,
@@ -38,7 +33,11 @@ export default function MemeSupplyStats({
     <section className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-6 md:tw-py-8">
       <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-6">
         {[
-          ...supplyRows,
+          {
+            label: t(locale, "theMemes.detail.live.edition.editionSize"),
+            value: nftMeta.edition_size,
+          },
+          ...reserveSupplyRows,
           {
             label: t(locale, "theMemes.detail.live.edition.holdingWallets"),
             value: nftMeta.hodlers,
@@ -106,7 +105,7 @@ export default function MemeSupplyStats({
             </p>
           ) : (
             <dl className="tw-m-0 tw-space-y-2">
-              {supplyRows.map((row) => (
+              {reserveSupplyRows.map((row) => (
                 <div
                   key={row.label}
                   className="tw-flex tw-justify-between tw-gap-4"

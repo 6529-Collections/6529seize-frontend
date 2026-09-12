@@ -93,9 +93,8 @@ export function collectCostPlanView(
         keys.has(leg.asset_key)
       );
       const priced = available.legs.filter((leg) => keys.has(leg.asset_key));
-      const cost = collectPlanSelectionCost(
-        purchased.length > 0 ? purchased : priced
-      );
+      const displayedLegs = purchased.length > 0 ? purchased : priced;
+      const cost = collectPlanSelectionCost(displayedLegs);
       let availabilityLabel = t(
         locale,
         ready ? "collect.plan.notPriced" : "collect.plan.checkingAvailability"
@@ -129,7 +128,7 @@ export function collectCostPlanView(
         artworkKeys:
           keys.size === 1
             ? [...keys]
-            : [...new Set(purchased.map((leg) => leg.asset_key))],
+            : [...new Set(displayedLegs.map((leg) => leg.asset_key))],
         ...(cost !== null && (purchased.length > 0 || priced.length > 0)
           ? {
               priceLabel: collectPlanAmount(locale, cost).compact,

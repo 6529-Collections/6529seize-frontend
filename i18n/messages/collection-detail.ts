@@ -399,7 +399,7 @@ export const THE_MEMES_DETAIL_LIVE_MESSAGES = namespaceMessages(
     ],
     [
       "edition.rankHelp",
-      "Smallest supply ranks first. Equal supplies share a rank; the next rank skips those ties.",
+      "Supply after exclusions ranks from smallest to largest. Equal supplies share a rank; the next rank skips those ties.",
     ],
     ["edition.burnt", "burnt"],
     ["edition.exBurnt", "ex. burnt"],

@@ -487,7 +487,7 @@ describe("MemePageLiveRightMenu distribution link", () => {
     ).not.toHaveAttribute("open");
   });
 
-  it("uses ranked collection size and preserves shared supply ranks", () => {
+  it("shows shared ranks for excluded supply without presenting the TDH edition rank as raw supply", () => {
     render(
       <MemePageLiveRightMenu
         show
@@ -496,14 +496,18 @@ describe("MemePageLiveRightMenu distribution link", () => {
           ...createMeta(),
           collection_size: 498,
           ranked_collection_size: 497,
-          edition_size_rank: 1,
+          edition_size_rank: 99,
           edition_size_ex_research_rank: 1,
           edition_size_ex_museum_and_research_rank: 1,
         }}
       />
     );
-    expect(screen.getAllByText("Rank 1/497")).toHaveLength(3);
-    expect(screen.getByText(/Smallest supply ranks first/)).toBeInTheDocument();
+    expect(screen.getAllByText("Rank 1/497")).toHaveLength(2);
+    expect(screen.queryByText("Rank 99/497")).not.toBeInTheDocument();
+    expect(screen.queryByText("Edition size rank")).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/Supply after exclusions ranks from smallest to largest/)
+    ).toBeInTheDocument();
   });
 
   it("shows unavailable reserve counts without inventing zero and preserves pending TDH", () => {
