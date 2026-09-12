@@ -184,7 +184,16 @@ function OfferPlanContents({
             : row
         )
       );
-    if (next.method !== controls.method && next.method !== "manual")
+    const changedFormula =
+      (next.method === "improve_bid" || next.method === "discount_ask") &&
+      next.percent !== controls.percent;
+    const changedGoalBudget =
+      next.method === "goal" && next.budgetEth !== controls.budgetEth;
+    if (
+      (next.method !== controls.method && next.method !== "manual") ||
+      changedFormula ||
+      changedGoalBudget
+    )
       setRows((current) =>
         current.map((row) =>
           row.pinned || publishedAssetKeys.includes(row.assetKey)

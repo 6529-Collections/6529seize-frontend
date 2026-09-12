@@ -268,3 +268,45 @@ it("locks unresolved offers and counts their exact commitments after clearing se
   expect(onReviewPending).toHaveBeenCalledWith(pendingOffer);
   expect(p.onReviewOffer).not.toHaveBeenCalled();
 });
+
+it.each(["improve_bid", "discount_ask"])(
+  "clears generated prices after changing the %s percentage, preserving manual pins",
+  async (method) => {
+    const p = props();
+    render(<OfferPlanPanel {...p} />);
+    setPrice(1, "0.2");
+    setMethod(method);
+    fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
+    await waitFor(() => expect(priceInput(2)).toHaveValue("0.1"));
+    fireEvent.change(
+      screen.getByRole("textbox", {
+        name: method === "improve_bid" ? "Above offer (%)" : "Below ask (%)",
+      }),
+      { target: { value: "10" } }
+    );
+    expect(priceInput(1)).toHaveValue("0.2");
+    expect(priceInput(2)).toHaveValue("");
+    expect(reviewButton(2)).toBeDisabled();
+    expect(p.onReviewOffer).not.toHaveBeenCalled();
+  }
+);
+
+it("requires a new allocation after changing the goal budget, preserving manual pins", async () => {
+  const p = props();
+  render(<OfferPlanPanel {...p} />);
+  setPrice(1, "0.2");
+  setMethod("goal");
+  fireEvent.change(
+    screen.getByRole("textbox", { name: "Offer budget (WETH)" }),
+    { target: { value: "0.5" } }
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
+  await waitFor(() => expect(priceInput(2)).toHaveValue("0.1"));
+  fireEvent.change(
+    screen.getByRole("textbox", { name: "Offer budget (WETH)" }),
+    { target: { value: "1" } }
+  );
+  expect(priceInput(1)).toHaveValue("0.2");
+  expect(priceInput(2)).toHaveValue("");
+  expect(reviewButton(2)).toBeDisabled();
+});
