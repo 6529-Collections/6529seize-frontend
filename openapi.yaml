@@ -158,7 +158,9 @@ paths:
       tags:
         - ArtworkDocumentation
       summary: Read attributed museum records
-      description: Returns up to ten entries; pass next_cursor as before to read the next page.
+      description: >-
+        Returns up to ten entries; pass next_cursor as before to read the next
+        page.
       operationId: artworkDocumentationListMuseumRecords
       security:
         - bearerAuth: []
@@ -199,7 +201,6 @@ paths:
           description: Record changed; reload before retry
         "422":
           description: Invalid record or evidence
-
     post:
       tags:
         - ArtworkDocumentation
@@ -294,9 +295,10 @@ paths:
           description: Record unavailable
         "409":
           description: Record changed; reload before retry
+        "413":
+          description: Dossier record, asset or byte limit exceeded (DOSSIER_RECORD_LIMIT)
         "422":
           description: Invalid record or evidence
-
   /artwork-documentation/contexts/{id}/dossier/exports:
     post:
       tags:
@@ -351,6 +353,8 @@ paths:
           description: Record unavailable
         "409":
           description: Record changed; reload before retry
+        "413":
+          description: Dossier record, asset or byte limit exceeded (DOSSIER_RECORD_LIMIT)
         "422":
           description: Invalid record or evidence
         "428":
@@ -400,7 +404,6 @@ paths:
           description: Record changed; reload before retry
         "422":
           description: Invalid record or evidence
-
   /artwork-documentation/profiles:
     get:
       tags:
@@ -2083,7 +2086,9 @@ paths:
       tags:
         - ArtworkDocumentation
       summary: PreviewDocumentationUpgrade
-      description: Read-only compatibility preview; no Idempotency-Key or If-Match is required.
+      description: >-
+        Read-only compatibility preview; no Idempotency-Key or If-Match is
+        required.
       operationId: artworkDocumentationPreviewDocumentationUpgrade
       security:
         - bearerAuth: []
@@ -3081,7 +3086,9 @@ paths:
         "401":
           description: Authentication required
         "404":
-          description: Missing records and authenticated readers other than the artist both return 404.
+          description: >-
+            Missing records and authenticated readers other than the artist both
+            return 404.
   /auth/nonce:
     get:
       tags:
@@ -20048,7 +20055,7 @@ components:
       properties:
         source_sha256:
           type: string
-          pattern: "^[a-f0-9]{64}$"
+          pattern: ^[a-f0-9]{64}$
       required:
         - source_sha256
     ApiArtworkDossierFile:
