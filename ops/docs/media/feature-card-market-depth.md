@@ -9,6 +9,11 @@ starts collapsed unless a link opens those details directly. Listings and
 Offers gives you a quick Lowest listing and Highest offer view, then lets you
 inspect the quoted levels and the orders behind those prices.
 
+On Memes, Meme Lab and Gradient cards, artwork details retain mint, edition,
+collector and TDH information where applicable. Listing and offer summaries appear
+in Listings and Offers, without a second set of prices or a market-cap estimate
+in the artwork details.
+
 ## Read listings and offers
 
 The summaries show the lowest captured listing in ETH and the highest captured

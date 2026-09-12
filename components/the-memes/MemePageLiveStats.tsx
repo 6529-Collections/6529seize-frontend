@@ -636,29 +636,10 @@ export function MemeNftLivePanel({
           locale={locale}
         />
         <MarketMetric
-          label={t(locale, "theMemes.detail.live.market.floorPrice")}
-          value={nft.floor_price}
-          unit={ethUnit}
-          locale={locale}
-        />
-        <MarketMetric
-          label={t(locale, "theMemes.detail.live.market.marketCap")}
-          value={nft.market_cap}
-          decimals={100}
-          unit={ethUnit}
-          locale={locale}
-        />
-        <MarketMetric
           label={t(locale, "theMemes.detail.live.market.tdhRate")}
           value={nft.hodl_rate}
           decimals={100}
           displayValue={pendingTdhLabel}
-          locale={locale}
-        />
-        <MarketMetric
-          label={t(locale, "theMemes.detail.live.market.highestOffer")}
-          value={nft.highest_offer}
-          unit={ethUnit}
           locale={locale}
         />
         <MemeMarketplaceLinks nft={nft} locale={locale} />
