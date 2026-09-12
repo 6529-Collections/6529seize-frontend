@@ -9,8 +9,23 @@ const fs = require("node:fs");
 // deployment/agent-file contract lanes continue to own their selected suites.
 const CONTRACTS = [
   {
+    test: "__tests__/scripts/device-farm-workflow.test.ts",
+    inputs: [/^\.github\/workflows\/device-farm-qa\.yml$/u],
+  },
+  {
+    test: "__tests__/scripts/production-canary-workflow.test.ts",
+    inputs: [/^\.github\/workflows\/production-e2e\.yml$/u],
+  },
+  {
     test: "__tests__/contracts/hover-revealed-controls.test.ts",
     inputs: [/^(?:app|components)\/.*\.tsx$/u, /^tailwind\.config\./u],
+  },
+  {
+    test: "__tests__/scripts/changed-file-gates.test.ts",
+    inputs: [
+      /^package\.json$/u,
+      /^scripts\/(?:require-6529-command|changed-file-gates)\.cjs$/u,
+    ],
   },
   {
     test: "__tests__/contracts/waves-multi-competition-phase-1.test.ts",
