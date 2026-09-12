@@ -34,6 +34,7 @@ const mockValidate = jest.fn();
 const mockValidatePublished = jest.fn();
 const mockValidateCommitted = jest.fn();
 let mockProfileId = "profile-one";
+let mockStoredRequest: ApiMarketPrepareRequest | null = null;
 let mockLatestForm: ComponentProps<typeof CollectTradeForm> | null = null;
 let mockLatestSheet: ComponentProps<typeof CollectTradeSheet> | null = null;
 
@@ -113,7 +114,8 @@ jest.mock("@/components/collect/useMarketSettlement", () => ({
   useMarketSettlement: jest.fn(),
 }));
 jest.mock("@/components/collect/market-operation-storage", () => ({
-  readMarketIntent: () => null,
+  readMarketIntent: () =>
+    mockStoredRequest ? { request: mockStoredRequest } : null,
   saveMarketIntent: (...args: unknown[]) => mockSave(...args),
 }));
 jest.mock("@/components/collect/market-recovery", () => ({
@@ -236,6 +238,7 @@ function prepareDraft() {
 beforeEach(() => {
   jest.clearAllMocks();
   mockProfileId = "profile-one";
+  mockStoredRequest = null;
   mockLatestForm = null;
   mockLatestSheet = null;
   jest.spyOn(Date, "now").mockReturnValue(1_800_000_000_000);
@@ -311,6 +314,101 @@ it("accepts the exact full-quantity offer cap", async () => {
       amount_wei: "1000000000000000000",
     })
   );
+});
+
+it("rejects a lower quantity than the fixed allocation before prepare", async () => {
+  render(
+    controller({
+      fixedOfferQuantity: "2",
+      maximumOfferAmountWei: "1000000000000000000",
+    })
+  );
+  changeDraft({ quantity: "1", unitPriceEth: "0.5" });
+  prepareDraft();
+  await waitFor(() => expect(mockLatestForm?.error).toBeDefined());
+  expect(mockPrepare).not.toHaveBeenCalled();
+});
+
+it("accepts the exact fixed quantity and full offer cap", async () => {
+  render(
+    controller({
+      fixedOfferQuantity: "2",
+      maximumOfferAmountWei: "1000000000000000000",
+      initialQuantity: "2",
+      initialUnitPriceEth: "0.5",
+    })
+  );
+  prepareDraft();
+  await waitFor(() => expect(mockPrepare).toHaveBeenCalledTimes(1));
+  expect(mockPrepare.mock.calls[0][0]).toEqual(
+    expect.objectContaining({
+      kind: "OFFER",
+      quantity: "2",
+      amount_wei: "1000000000000000000",
+    })
+  );
+});
+
+it("uses the fixed offer quantity as the default draft and request", async () => {
+  render(
+    controller({
+      fixedOfferQuantity: "2",
+      maximumOfferAmountWei: "1000000000000000000",
+      initialUnitPriceEth: "0.5",
+    })
+  );
+  expect(mockLatestForm?.draft.quantity).toBe("2");
+
+  prepareDraft();
+  await waitFor(() => expect(mockPrepare).toHaveBeenCalledTimes(1));
+  expect(mockPrepare.mock.calls[0][0]).toEqual(
+    expect.objectContaining({
+      kind: "OFFER",
+      quantity: "2",
+      amount_wei: "1000000000000000000",
+    })
+  );
+});
+
+it("keeps quantity optional for the ordinary offer flow", async () => {
+  render(controller({ initialUnitPriceEth: "0.5" }));
+  prepareDraft();
+  await waitFor(() => expect(mockPrepare).toHaveBeenCalledTimes(1));
+  expect(mockPrepare.mock.calls[0][0]).toEqual(
+    expect.objectContaining({ kind: "OFFER", quantity: "1" })
+  );
+});
+
+it("rejects a recovered review with the wrong fixed quantity before execution", async () => {
+  const recoveredRequest = {
+    profile_id: "profile-one",
+    wallet: payer,
+    recipient: payer,
+    asset_key: asset.asset_key,
+    kind: "OFFER",
+    quantity: "1",
+    currency: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+    amount_wei: "500000000000000000",
+    expires_at: 1_900_000_000,
+    acknowledge_external_recipient: false,
+  } as ApiMarketPrepareRequest;
+  const recovered = preparedOperation(recoveredRequest);
+  mockStoredRequest = recoveredRequest;
+  render(
+    controller({
+      fixedOfferQuantity: "2",
+      initialOperation: recovered,
+      initialQuantity: "2",
+    })
+  );
+  const review = mockLatestSheet!.review!;
+
+  await act(async () => {
+    await mockLatestSheet!.onConfirm(review.id, review.revision);
+  });
+
+  expect(mockConfirm).not.toHaveBeenCalled();
+  expect(mockLatestForm?.error).toBeDefined();
 });
 
 it.each(["0", "not-a-limit"])(

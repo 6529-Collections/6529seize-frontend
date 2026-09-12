@@ -5,7 +5,10 @@ import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepar
 import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import type { CollectTradeAction, CollectTradeDraft } from "./collect.types";
-import { assertCollectOfferAmount } from "./collect-offer-policy";
+import {
+  assertCollectOfferAmount,
+  assertCollectOfferQuantity,
+} from "./collect-offer-policy";
 import { validateCommittedMarketOffer } from "./market-validation";
 
 interface OfferIntentOptions {
@@ -17,6 +20,7 @@ interface OfferIntentOptions {
   readonly authenticated: boolean;
   readonly proxy: boolean;
   readonly maximumOfferAmountWei: string | undefined;
+  readonly fixedOfferQuantity?: string | undefined;
   readonly initialOperation: ApiMarketOperation | undefined;
   readonly operation: ApiMarketOperation | null;
   readonly expected: ApiMarketPrepareRequest | null;
@@ -40,6 +44,7 @@ export function useCollectOfferIntent(options: OfferIntentOptions) {
     proxy: options.proxy,
     draft: options.draft,
     maximum: options.maximumOfferAmountWei,
+    quantity: options.fixedOfferQuantity,
     commitmentRequired: options.onCommitment !== undefined,
   });
   const generation = useMemo(() => ({ identity }), [identity]);
@@ -85,6 +90,7 @@ export function useCollectOfferIntent(options: OfferIntentOptions) {
     )
       throw new Error("MARKET_REVIEW_MISMATCH");
     assertCollectOfferAmount(request, live.options.maximumOfferAmountWei);
+    assertCollectOfferQuantity(request, live.options.fixedOfferQuantity);
   };
 
   const bind = (

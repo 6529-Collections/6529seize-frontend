@@ -99,6 +99,45 @@ it("keeps new offers signer-recipient only", () => {
   ).toBeInTheDocument();
 });
 
+it("locks a planned offer quantity and exposes the edit hint", () => {
+  const p = props();
+  render(
+    <CollectTradeForm
+      {...p}
+      action="offer"
+      currencyLabel="WETH"
+      fixedOfferQuantity="2"
+    />
+  );
+
+  const quantity = screen.getByRole("textbox", { name: "Quantity" });
+  expect(quantity).toHaveAttribute("readonly");
+  expect(quantity).toHaveAccessibleDescription("Edit in offer plan");
+  fireEvent.change(quantity, { target: { value: "3" } });
+  expect(p.onChange).not.toHaveBeenCalled();
+});
+
+it.each(["offer", "list"] as const)(
+  "keeps a standalone %s quantity editable without a fixed plan",
+  (action) => {
+    const p = props();
+    render(
+      <CollectTradeForm
+        {...p}
+        action={action}
+        currencyLabel={action === "offer" ? "WETH" : "ETH"}
+      />
+    );
+
+    const quantity = screen.getByDisplayValue("2");
+    expect(quantity).not.toHaveAttribute("readonly");
+    fireEvent.change(quantity, { target: { value: "3" } });
+    expect(p.onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ quantity: "3" })
+    );
+  }
+);
+
 it("labels one day and multiple days correctly", () => {
   render(<CollectTradeForm {...props()} action="offer" currencyLabel="WETH" />);
   expect(screen.getByRole("option", { name: "1 day" })).toHaveValue("24");

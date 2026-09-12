@@ -1,4 +1,7 @@
-import { assertCollectOfferAmount } from "@/components/collect/collect-offer-policy";
+import {
+  assertCollectOfferAmount,
+  assertCollectOfferQuantity,
+} from "@/components/collect/collect-offer-policy";
 import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
 import {
@@ -69,6 +72,51 @@ describe("collect offer amount policy", () => {
           currency: MARKET_ZERO,
         },
         "not-a-limit"
+      )
+    ).not.toThrow();
+  });
+});
+
+describe("collect offer quantity policy", () => {
+  it("accepts the exact fixed offer quantity", () => {
+    expect(() => assertCollectOfferQuantity(request(), "2")).not.toThrow();
+  });
+
+  it.each(["1", "3"])("rejects a changed offer quantity: %s", (quantity) => {
+    expect(() =>
+      assertCollectOfferQuantity({ ...request(), quantity }, "2")
+    ).toThrow("MARKET_OFFER_QUANTITY_CHANGED");
+  });
+
+  it.each(["", "0", "01", "-1", (UINT256_MAX + 1n).toString()])(
+    "rejects a malformed fixed quantity: %s",
+    (fixed) => {
+      expect(() => assertCollectOfferQuantity(request(), fixed)).toThrow(
+        "MARKET_OFFER_QUANTITY_CHANGED"
+      );
+    }
+  );
+
+  it.each(["0", "02", (UINT256_MAX + 1n).toString()])(
+    "rejects a noncanonical request quantity: %s",
+    (quantity) => {
+      expect(() =>
+        assertCollectOfferQuantity({ ...request(), quantity }, "2")
+      ).toThrow("MARKET_OFFER_QUANTITY_CHANGED");
+    }
+  );
+
+  it("does not apply quantity binding without a fixed quantity", () => {
+    expect(() =>
+      assertCollectOfferQuantity({ ...request(), quantity: "not-a-quantity" })
+    ).not.toThrow();
+  });
+
+  it("does not apply offer quantity binding to another action", () => {
+    expect(() =>
+      assertCollectOfferQuantity(
+        { ...request(), kind: ApiMarketKind.List, quantity: "not-a-quantity" },
+        "not-a-fixed-quantity"
       )
     ).not.toThrow();
   });

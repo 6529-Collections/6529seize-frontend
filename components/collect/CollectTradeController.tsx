@@ -108,6 +108,7 @@ interface CollectTradeControllerProps {
   readonly initialUnitPriceEth?: string;
   readonly initialExpiryHours?: "24" | "168" | "720";
   readonly maximumOfferAmountWei?: string;
+  readonly fixedOfferQuantity?: string;
   readonly cancelTarget?: ApiMarketOperation;
   readonly onClose: () => void;
   readonly onSettled?: () => void;
@@ -143,6 +144,7 @@ export default function CollectTradeController(
           props.initialUnitPriceEth,
           props.initialExpiryHours,
           props.maximumOfferAmountWei,
+          props.fixedOfferQuantity,
         ])
       : undefined;
   return <CollectTradeControllerContent key={key} {...props} />;
@@ -158,6 +160,7 @@ function CollectTradeControllerContent({
   initialUnitPriceEth,
   initialExpiryHours,
   maximumOfferAmountWei,
+  fixedOfferQuantity,
   cancelTarget,
   onClose,
   onSettled,
@@ -199,6 +202,7 @@ function CollectTradeControllerContent({
     initialOperation?.asset_key ??
     cancelTarget?.asset_key ??
     "";
+  const offerQuantity = action === "offer" ? fixedOfferQuantity : undefined;
   const {
     chosenOrder,
     setSelectedOrder,
@@ -216,7 +220,7 @@ function CollectTradeControllerContent({
     operation,
     layout,
     initialOrder,
-    initialQuantity,
+    initialQuantity: initialQuantity ?? offerQuantity,
     initialRecipient,
     initialUnitPriceEth,
     initialExpiryHours,
@@ -262,6 +266,7 @@ function CollectTradeControllerContent({
     authenticated: isAuthenticated === true,
     proxy: Boolean(activeProfileProxy),
     maximumOfferAmountWei,
+    fixedOfferQuantity,
     initialOperation,
     operation: displayedOperation,
     expected,
@@ -305,7 +310,7 @@ function CollectTradeControllerContent({
   const offerMaximum = action === "offer" ? maximumOfferAmountWei : undefined;
   const disabledReason = reasonKey
     ? t(locale, reasonKey)
-    : collectOfferLimitReason(expected, offerMaximum, locale);
+    : collectOfferLimitReason(expected, offerMaximum, locale, offerQuantity);
   const prepare = async (value: CollectTradeDraft) => {
     if (
       preparing ||
@@ -390,7 +395,10 @@ function CollectTradeControllerContent({
     } catch (failure) {
       setError(
         failure instanceof Error &&
-          failure.message === "MARKET_OFFER_LIMIT_EXCEEDED"
+          [
+            "MARKET_OFFER_LIMIT_EXCEEDED",
+            "MARKET_OFFER_QUANTITY_CHANGED",
+          ].includes(failure.message)
           ? marketExecutionError(failure, locale)
           : t(locale, "collect.error.prepare")
       );
@@ -415,6 +423,7 @@ function CollectTradeControllerContent({
       needsOrder={needsOrder}
       inlineBuy={inlineBuy}
       draft={draft}
+      fixedOfferQuantity={offerQuantity}
       chosenOrder={chosenOrder}
       selectedOrder={selectedOrder}
       orders={orders.data?.orders ?? []}

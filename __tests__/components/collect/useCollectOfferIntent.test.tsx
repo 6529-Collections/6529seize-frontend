@@ -62,6 +62,7 @@ interface OfferIntentOptions {
   readonly authenticated: boolean;
   readonly proxy: boolean;
   readonly maximumOfferAmountWei: string | undefined;
+  readonly fixedOfferQuantity?: string | undefined;
   readonly initialOperation: ApiMarketOperation | undefined;
   readonly operation: ApiMarketOperation | null;
   readonly expected: ApiMarketPrepareRequest | null;
@@ -141,6 +142,7 @@ function options(
     authenticated: true,
     proxy: false,
     maximumOfferAmountWei: "200",
+    fixedOfferQuantity: undefined,
     initialOperation: undefined,
     operation: null,
     expected: null,
@@ -278,6 +280,28 @@ describe("useCollectOfferIntent", () => {
     expect(() => guardAfterReturn(request())).toThrow(
       "MARKET_CONNECTION_CHANGED"
     );
+  });
+
+  it("invalidates a captured guard when the fixed quantity changes", () => {
+    const initial = options({ fixedOfferQuantity: "2" });
+    const { result, rerender } = renderIntent(initial);
+    const captured = result.current.guard;
+
+    expect(() => captured(request())).not.toThrow();
+    rerender({ current: { ...initial, fixedOfferQuantity: "3" } });
+
+    expect(() => captured(request())).toThrow("MARKET_CONNECTION_CHANGED");
+    expect(() =>
+      result.current.guard(request({ quantity: "3" }))
+    ).not.toThrow();
+  });
+
+  it("keeps the quantity guard optional", () => {
+    const { result } = renderIntent(options({ fixedOfferQuantity: undefined }));
+
+    expect(() =>
+      result.current.guard(request({ quantity: "1" }))
+    ).not.toThrow();
   });
 
   it("calls onPublished once when an operation moves from publishing to live", async () => {

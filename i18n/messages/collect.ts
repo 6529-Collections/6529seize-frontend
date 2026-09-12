@@ -117,6 +117,8 @@ export const COLLECT_MESSAGES = {
     "This trade could not be prepared. Refresh the available orders and try again.",
   "collect.error.offerLimit":
     "The total for all copies exceeds this offer's available budget. Check the quantity and price, or update the budget.",
+  "collect.error.offerQuantity":
+    "The quantity no longer matches the offer plan. Edit it in the offer plan and review again.",
   "collect.goal.ultimate": "Ultimate — Palette, Size and Traced",
   "collect.goal.coverage": "{owned} of {total} requirements complete",
   "collect.goal.snapshot": "Holdings checked at block {block}",
@@ -297,6 +299,7 @@ export const COLLECT_MESSAGES = {
     "Complete Palette, Size, Traced or Ultimate coverage across your profile. One Pebble can fill several missing values.",
   "collect.trade.title": "Review your action",
   "collect.trade.quantity": "Quantity",
+  "collect.trade.editQuantityInPlan": "Edit in offer plan",
   "collect.trade.unitPrice": "Unit price ({currency})",
   "collect.trade.duration": "Order duration",
   "collect.trade.durationDay": "{days} day",
