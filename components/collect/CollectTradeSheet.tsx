@@ -5,6 +5,11 @@ import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { formatDate } from "@/i18n/format";
+import CollectPurchaseSummary from "./CollectPurchaseSummary";
+import {
+  isFreshMarketReviewExpiry,
+  isValidMarketReviewExpiry,
+} from "./market-review-expiry";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type {
   CollectReviewFact,
@@ -23,7 +28,7 @@ interface CollectTradeSheetProps {
   readonly recoveryAction?: ReactNode;
   readonly message?: string | undefined;
   readonly onClose: () => void;
-  readonly onRefresh: () => void;
+  readonly onRefresh: () => void | Promise<void>;
   readonly onConfirm: (reviewId: string, revision: string) => Promise<void>;
   readonly presentation?: CollectTradePresentation;
   readonly compact?: boolean;
@@ -87,7 +92,7 @@ function Facts({ facts }: { readonly facts: readonly CollectReviewFact[] }) {
 function useReviewExpiry(expiresAt: number | null | undefined, open: boolean) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    if (!open || expiresAt === null || expiresAt === undefined) return;
+    if (!open || !isValidMarketReviewExpiry(expiresAt)) return;
     const initialTimer = globalThis.setTimeout(() => setNow(Date.now()), 0);
     const timer = globalThis.setInterval(() => setNow(Date.now()), 1000);
     return () => {
@@ -95,28 +100,63 @@ function useReviewExpiry(expiresAt: number | null | undefined, open: boolean) {
       globalThis.clearInterval(timer);
     };
   }, [expiresAt, open]);
-  return expiresAt !== null && expiresAt !== undefined && now >= expiresAt;
+  return !isFreshMarketReviewExpiry(expiresAt, now);
 }
 
 export default function CollectTradeSheet(props: CollectTradeSheetProps) {
   const locale = useBrowserLocale();
   const expired = useReviewExpiry(props.review?.expiresAt, props.open);
   const [confirming, setConfirming] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [localError, setLocalError] = useState(false);
   const inFlight = useRef(false);
   const { review } = props;
+  // A purchase is re-quoted and compared before opening the wallet. Its prior
+  // positive deadline limits execution freshness, not time spent reading.
+  const needsRefresh =
+    expired &&
+    (review?.action !== "buy" || !isValidMarketReviewExpiry(review.expiresAt));
   const pending = PENDING_STAGES.includes(props.stage);
   const canConfirm =
     review !== null &&
     props.stage === "review" &&
     !review.disabledReason &&
-    !expired &&
-    !confirming;
+    !needsRefresh &&
+    !confirming &&
+    !refreshing;
+  let refreshMessage = t(locale, "collect.trade.refreshRequired");
+  if (isValidMarketReviewExpiry(review?.expiresAt)) {
+    refreshMessage = t(locale, "collect.trade.expired");
+  }
+  if (review?.purchase) {
+    refreshMessage = t(locale, "collect.review.quoteRefreshRequired");
+  }
+  const refreshAction = review?.purchase
+    ? t(locale, "collect.review.refreshQuote")
+    : t(locale, "collect.trade.refresh");
+
+  const refresh = async () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setRefreshing(true);
+    setLocalError(false);
+    try {
+      await props.onRefresh();
+    } catch {
+      setLocalError(true);
+    } finally {
+      inFlight.current = false;
+      setRefreshing(false);
+    }
+  };
 
   const confirm = async () => {
     if (!canConfirm || inFlight.current) return;
-    if (review.expiresAt !== null && Date.now() >= review.expiresAt) {
-      props.onRefresh();
+    if (
+      !isFreshMarketReviewExpiry(review.expiresAt) &&
+      (review.action !== "buy" || !isValidMarketReviewExpiry(review.expiresAt))
+    ) {
+      await refresh();
       return;
     }
     inFlight.current = true;
@@ -142,7 +182,7 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
     >
       {review ? (
         <>
-          {!props.compact && (
+          {!props.compact && !review.purchase && (
             <div className="tw-flex tw-items-center tw-gap-4">
               {review.media !== undefined && review.media !== null && (
                 <div className="tw-relative tw-flex tw-size-20 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 [&_img]:tw-max-h-full [&_img]:tw-object-contain">
@@ -159,21 +199,34 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
               </div>
             </div>
           )}
-          <Facts facts={review.facts} />
-          <div
-            className={
-              props.compact
-                ? "tw-space-y-1"
-                : "tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4"
-            }
-          >
-            <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-              {review.totalDescription}
-            </p>
-            <p className="tw-mb-0 tw-mt-1 tw-text-2xl tw-font-semibold tw-tabular-nums">
-              {review.totalLabel}
-            </p>
-          </div>
+          {review.purchase ? (
+            <CollectPurchaseSummary
+              purchase={review.purchase}
+              title={review.title}
+              media={review.media}
+            />
+          ) : (
+            <>
+              <Facts facts={review.facts} />
+              <div
+                className={
+                  props.compact
+                    ? "tw-space-y-1"
+                    : "tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4"
+                }
+              >
+                <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
+                  {t(locale, `collect.review.total.${review.action}`)}
+                </p>
+                <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+                  {review.totalDescription}
+                </p>
+                <p className="tw-mb-0 tw-mt-1 tw-text-2xl tw-font-semibold tw-tabular-nums">
+                  {review.totalLabel}
+                </p>
+              </div>
+            </>
+          )}
           {(review.action === "list" || review.action === "offer") && (
             <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
               {t(locale, "collect.trade.orderWarning")}
@@ -191,7 +244,7 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
               ))}
             </ul>
           )}
-          {review.technicalFacts.length > 0 && (
+          {!review.purchase && review.technicalFacts.length > 0 && (
             <details>
               <summary className="tw-cursor-pointer tw-rounded tw-py-2 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
                 {t(locale, "collect.trade.details")}
@@ -201,7 +254,7 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
               </div>
             </details>
           )}
-          {review.expiresAt !== null && (
+          {!review.purchase && isValidMarketReviewExpiry(review.expiresAt) && (
             <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
               {t(locale, "collect.trade.expiry", {
                 time: formatDate(locale, review.expiresAt, {
@@ -211,12 +264,12 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
               })}
             </p>
           )}
-          {expired && props.stage === "review" && (
+          {needsRefresh && !confirming && props.stage === "review" && (
             <p
               role="status"
               className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300"
             >
-              {t(locale, "collect.trade.expired")}
+              {refreshMessage}
             </p>
           )}
           {review.disabledReason && (
@@ -250,14 +303,20 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
       )}
       {review && props.stage === "review" && (
         <div className="tw-sticky tw-bottom-0 tw-bg-iron-950 tw-py-3">
-          {expired ? (
+          {needsRefresh && !confirming ? (
             <Button
-              variant="secondary"
+              variant={review.purchase ? "action" : "secondary"}
               size="lg"
               fullWidth
-              onClick={props.onRefresh}
+              disabled={refreshing}
+              loading={refreshing}
+              onClick={() => {
+                void refresh();
+              }}
             >
-              {t(locale, "collect.trade.refresh")}
+              {refreshing
+                ? t(locale, "collect.trade.refreshing")
+                : refreshAction}
             </Button>
           ) : (
             <Button
@@ -270,7 +329,7 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
                 void confirm();
               }}
             >
-              {props.compact && review.action === "buy"
+              {props.compact && review.action === "buy" && !review.purchase
                 ? t(locale, "collect.buy.atPrice", { price: review.totalLabel })
                 : t(locale, "collect.trade.continue")}
             </Button>
@@ -283,7 +342,7 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
           <Button
             variant="secondary"
             size="sm"
-            disabled={confirming}
+            disabled={confirming || refreshing}
             onClick={props.onClose}
           >
             {t(

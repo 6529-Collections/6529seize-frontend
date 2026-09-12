@@ -20,6 +20,7 @@ import {
   marketTypedData,
   validateCommittedMarketOffer,
   validateMarketOperation,
+  validateMarketOperationForRefresh,
   validatePublishedMarketOffer,
   validateMarketTransaction,
 } from "@/components/collect/market-validation";
@@ -255,14 +256,107 @@ describe("independent marketplace review validation", () => {
     const f = fixture();
     expect(() =>
       validateMarketOperation(f.operation, f.request, f.operation.expires_at)
-    ).toThrow();
+    ).toThrow("MARKET_REVIEW_REFRESH_REQUIRED");
   });
+
+  it.each([
+    0,
+    null,
+    undefined,
+    NaN,
+    Infinity,
+    "1800000020000",
+    NOW / 1000,
+    8_640_000_000_000_001,
+  ])(
+    "rejects a missing or invalidated fresh review %p before signing",
+    (expiresAt) => {
+      const f = fixture();
+      Object.assign(f.operation, { expires_at: expiresAt });
+      expect(() =>
+        validateMarketOperation(f.operation, f.request, NOW)
+      ).toThrow("MARKET_REVIEW_REFRESH_REQUIRED");
+    }
+  );
+
+  it.each([
+    ApiMarketOperationStateEnum.Publishing,
+    ApiMarketOperationStateEnum.Unknown,
+    ApiMarketOperationStateEnum.Live,
+  ])(
+    "preserves the zero review sentinel for a committed %s offer without allowing fresh signing",
+    (state) => {
+      const f = offerFixture();
+      f.operation.state = state;
+      f.operation.expires_at = 0;
+      expect(() =>
+        validateCommittedMarketOffer(f.operation, f.request, NOW)
+      ).not.toThrow();
+      expect(() =>
+        validateMarketOperation(f.operation, f.request, NOW)
+      ).toThrow("MARKET_REVIEW_REFRESH_REQUIRED");
+    }
+  );
 
   it("keeps the fresh review deadline for signature validation", () => {
     const f = offerFixture();
     expect(() =>
       validateMarketOperation(f.operation, f.request, f.operation.expires_at)
     ).toThrow();
+  });
+
+  it.each([0, NOW - 1])(
+    "binds an old purchase review %p only for mandatory refresh",
+    (expiresAt) => {
+      const f = buyFixture();
+      f.operation.expires_at = expiresAt;
+      expect(() =>
+        validateMarketOperationForRefresh(f.operation, f.request, NOW)
+      ).not.toThrow();
+      expect(() =>
+        validateMarketOperation(f.operation, f.request, NOW)
+      ).toThrow("MARKET_REVIEW_REFRESH_REQUIRED");
+    }
+  );
+
+  it("keeps exact identity and price bindings when refreshing an old purchase", () => {
+    const mutations: Array<(operation: ApiMarketOperation) => void> = [
+      (operation) => {
+        operation.profile_id = "another-profile";
+      },
+      (operation) => {
+        operation.wallet = RECIPIENT;
+      },
+      (operation) => {
+        operation.recipient = PAYER;
+      },
+      (operation) => {
+        operation.total_wei = "999";
+      },
+      (operation) => {
+        operation.order!.order_hash = MARKET_ZERO_HASH;
+      },
+      (operation) => {
+        operation.fees[0]!.amount_wei = "49";
+      },
+    ];
+    for (const mutate of mutations) {
+      const f = buyFixture();
+      f.operation.expires_at = 0;
+      mutate(f.operation);
+      expect(() =>
+        validateMarketOperationForRefresh(f.operation, f.request, NOW)
+      ).toThrow("MARKET_REVIEW_MISMATCH");
+    }
+  });
+
+  it("does not authorize signing a listing or offer through the refresh-only validator", () => {
+    for (const f of [fixture(), offerFixture()]) {
+      f.operation.expires_at = 0;
+      expect(() =>
+        validateMarketOperationForRefresh(f.operation, f.request, NOW)
+      ).toThrow("MARKET_REVIEW_MISMATCH");
+    }
   });
 
   it("accepts an exact awaiting-signature offer commitment", () => {

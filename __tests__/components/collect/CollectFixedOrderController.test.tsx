@@ -124,6 +124,7 @@ jest.mock("@/components/collect/useMarketExecution", () => ({
     recoverTransaction: jest.fn(),
     stage: null,
     message: undefined,
+    clearMessage: jest.fn(),
   }),
 }));
 jest.mock("@/components/collect/useMarketSettlement", () => ({
