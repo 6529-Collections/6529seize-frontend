@@ -7,6 +7,13 @@ import { fireEvent, render, screen } from "@testing-library/react";
 let mockSearchParams = new URLSearchParams();
 const mockReplace = jest.fn();
 const mockDiscovery = jest.fn();
+const mockCatalogRefetch = jest.fn();
+let mockCatalogQuery = {
+  data: undefined,
+  isError: false,
+  isFetching: true,
+  refetch: mockCatalogRefetch,
+};
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => mockSearchParams,
@@ -32,7 +39,7 @@ jest.mock("@/services/api/collect-api", () => ({
   fetchCollectCatalog: jest.fn(),
 }));
 jest.mock("@tanstack/react-query", () => ({
-  useQuery: () => ({ data: undefined }),
+  useQuery: () => mockCatalogQuery,
 }));
 jest.mock("@/components/collect/useCollectCatalog", () => ({
   useCollectCatalog: (...args: unknown[]) => mockDiscovery(...args),
@@ -48,8 +55,12 @@ jest.mock("@/components/collect/CollectGoalsController", () => ({
     draft,
     onChange,
     completion,
+    catalogFailed,
+    onRetryCatalog,
   }: ComponentProps<typeof CollectGoalsController>) => (
     <div>
+      <output aria-label="Catalog failed">{String(catalogFailed)}</output>
+      <button onClick={onRetryCatalog}>Retry catalog</button>
       {completion && (
         <CollectCompletionControls
           {...completion}
@@ -91,6 +102,12 @@ jest.mock("@/components/collect/CollectBatchController", () => ({
 beforeEach(() => {
   jest.clearAllMocks();
   mockSearchParams = new URLSearchParams();
+  mockCatalogQuery = {
+    data: undefined,
+    isError: false,
+    isFetching: true,
+    refetch: mockCatalogRefetch,
+  };
   mockDiscovery.mockReturnValue({
     entries: [],
     pending: false,
@@ -100,6 +117,18 @@ beforeEach(() => {
     retry: jest.fn(),
     loadMore: jest.fn(),
   });
+});
+
+it("wires catalog retry and replaces a failed initial read with a pending retry", () => {
+  mockSearchParams = new URLSearchParams("intent=full_set");
+  mockCatalogQuery = { ...mockCatalogQuery, isError: true, isFetching: false };
+  const { rerender } = render(<CollectPageClient />);
+  expect(screen.getByLabelText("Catalog failed")).toHaveTextContent("true");
+  fireEvent.click(screen.getByRole("button", { name: "Retry catalog" }));
+  expect(mockCatalogRefetch).toHaveBeenCalledTimes(1);
+  mockCatalogQuery = { ...mockCatalogQuery, isFetching: true };
+  rerender(<CollectPageClient />);
+  expect(screen.getByLabelText("Catalog failed")).toHaveTextContent("false");
 });
 
 it("opens a Gradient full set from listing comparison with no leftover search", () => {

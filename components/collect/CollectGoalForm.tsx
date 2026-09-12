@@ -22,6 +22,8 @@ export const COLLECT_INPUT_CLASS =
 interface CollectGoalFormProps {
   readonly draft: CollectGoalDraft;
   readonly definitions: readonly CollectGoalOption[];
+  readonly definitionsStatus?: "loading" | "error" | "ready";
+  readonly onRetryDefinitions?: (() => void) | undefined;
   readonly profile: CollectProfileView | null;
   readonly loading: boolean;
   readonly error?: string | undefined;
@@ -47,6 +49,10 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
   );
   const showQuantity = ["season", "full_set", "artist"].includes(draft.intent);
   const needsDefinition = draft.intent !== "tdh";
+  const definitionsStatus = props.definitionsStatus ?? "ready";
+  const definitionsUnavailable =
+    needsDefinition &&
+    (definitionsStatus !== "ready" || props.definitions.length === 0);
   const showDefinition =
     needsDefinition && !(props.completion && draft.intent === "full_set");
   const definitionLabels: Partial<Record<CollectIntent, MessageKey>> = {
@@ -82,6 +88,7 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
       aria-label={title}
       onSubmit={(event) => {
         event.preventDefault();
+        if (props.loading || definitionsUnavailable) return;
         const invalid = validateCollectGoal(
           draft,
           props.showBudget !== false && !props.budgetOptional
@@ -126,7 +133,7 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
               locale={locale}
               value={draft.definitionId}
               definitions={props.definitions}
-              disabled={props.loading}
+              disabled={props.loading || definitionsStatus !== "ready"}
               invalid={invalidField === "definition"}
               {...(invalidField === "definition"
                 ? { errorId: `${id}-error` }
@@ -233,11 +240,40 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
           {t(locale, "collect.goal.pebblesNote")}
         </p>
       )}
-      {needsDefinition && props.definitions.length === 0 && (
-        <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-300">
-          {t(locale, "collect.goal.noDefinitions")}
+      {needsDefinition && definitionsStatus === "loading" && (
+        <p
+          role="status"
+          className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-300"
+        >
+          {t(locale, "collect.goal.loadingDefinitions")}
         </p>
       )}
+      {needsDefinition && definitionsStatus === "error" && (
+        <div
+          role="alert"
+          className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-3"
+        >
+          <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+            {t(locale, "collect.error.catalog")}
+          </p>
+          {props.onRetryDefinitions && (
+            <Button
+              variant="secondary"
+              className="tw-min-h-11"
+              onClick={props.onRetryDefinitions}
+            >
+              {t(locale, "collect.retry")}
+            </Button>
+          )}
+        </div>
+      )}
+      {needsDefinition &&
+        definitionsStatus === "ready" &&
+        props.definitions.length === 0 && (
+          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-300">
+            {t(locale, "collect.goal.noDefinitions")}
+          </p>
+        )}
       {(validationMessage ?? props.error) && (
         <p
           id={`${id}-error`}
@@ -263,7 +299,7 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
             variant="action"
             size="lg"
             loading={props.loading}
-            disabled={needsDefinition && props.definitions.length === 0}
+            disabled={definitionsUnavailable}
           >
             {t(locale, "collect.goal.preview")}
           </Button>

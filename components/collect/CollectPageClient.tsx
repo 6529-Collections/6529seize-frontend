@@ -354,6 +354,10 @@ function CollectCatalogController({
         draft={goalDraft}
         revision={goalState.revision}
         catalog={catalog.data}
+        catalogFailed={catalog.isError && !catalog.isFetching}
+        onRetryCatalog={() => {
+          void catalog.refetch();
+        }}
         profile={connectedProfile}
         completion={{
           collection: completionCollection,
@@ -416,6 +420,7 @@ function CollectCatalogController({
         selectionSummary={
           selection.length > 0 ? (
             <CollectSelectionBar
+              active={!offerWorkspaceActive}
               items={selection}
               onClear={() => setSelection([])}
               onReview={() => setBatch({ items: selection })}

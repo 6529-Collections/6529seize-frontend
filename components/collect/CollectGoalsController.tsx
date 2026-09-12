@@ -29,6 +29,8 @@ const MAX_SCAN_DELAY_MS = 5000;
 export default function CollectGoalsController({
   draft,
   catalog,
+  catalogFailed = false,
+  onRetryCatalog,
   profile,
   onChange,
   onPlan,
@@ -38,6 +40,8 @@ export default function CollectGoalsController({
 }: {
   readonly draft: CollectGoalDraft;
   readonly catalog: ApiCollectCatalog | undefined;
+  readonly catalogFailed?: boolean;
+  readonly onRetryCatalog?: () => void;
   readonly profile: ApiIdentity | null;
   readonly onChange: (draft: CollectGoalDraft) => void;
   readonly onPlan: (plan: ApiCollectPlan | null) => void;
@@ -158,6 +162,10 @@ export default function CollectGoalsController({
         budgetOptional
         {...(completion ? { completion } : {})}
         definitions={collectGoalOptions(catalog, draft, locale)}
+        definitionsStatus={
+          catalog ? "ready" : catalogFailed ? "error" : "loading"
+        }
+        onRetryDefinitions={onRetryCatalog}
         profile={
           profile?.id
             ? { id: profile.id, displayName: profile.handle ?? profile.display }

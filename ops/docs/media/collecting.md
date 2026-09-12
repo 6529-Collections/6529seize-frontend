@@ -61,6 +61,8 @@ card page.
 3. Choose the season, artist or Pebbles set when applicable. Type a name in
    the selector to filter its options; artist names can be searched directly.
    Set **Copies per NFT** and, optionally, a **Budget cap (ETH, optional)**.
+   Options show a loading state while the catalog arrives. If it cannot be
+   loaded, choose **Try again**; a failed request does not mean the set is empty.
    Copies per NFT is the total you want to hold of each required NFT, including
    copies already in your profile.
    Leave the budget cap blank to estimate the full goal. An entered cap includes
@@ -96,7 +98,8 @@ supported purchase price. An indivisible lot says how many copies its price
 includes. Open an artwork for its card page, or select its **+** to add it to
 your purchase selection. The control becomes a checkmark; select it again to
 remove that NFT. The selection stays available while switching between Lowest
-listings and TDH. **Review purchase** lets you buy some or all selected items;
+listings and TDH, with its actions kept in view while you scroll.
+**Review purchase** lets you buy some or all selected items;
 **Plan offers** opens a price plan for those NFTs.
 No listing results does not mean that no orders exist elsewhere. If the listing
 source cannot be loaded, use **Try again** or return to the collection page.
