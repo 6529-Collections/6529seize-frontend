@@ -74,7 +74,7 @@
     load only when first opened; Details content is mounted when selected.
 13. The header Art Viewer uses the active supported `locale` for media action
     accessible names and save dialog titles.
-14. The Art additional-details rows use the active supported `locale` for
+14. `Details` rows use the active supported `locale` for
     section headings, metric labels, empty states, open/download labels, and
     TDH/rank number formatting.
 15. If a numeric card id is unresolved, the route removes `focus`, hides tab
@@ -109,12 +109,11 @@
 - `Your Cards` shows wallet-specific empty states:
   - No wallet connected: prompt to connect a wallet.
   - Wallet connected with no editions: ownership empty-state message.
-- `The Art` can still open in animated mode when top-level `animation` is
-  blank but metadata provides `animation` or `animation_url`.
-- If only one original media URL resolves, `The Art` shows just that media
-  slide and its matching download/link row.
-- `File Type` and `Dimensions` rows appear only when the active `The Art`
-  slide has usable metadata values.
+- `Details` resolves animation media from metadata when top-level `animation`
+  is blank but metadata provides `animation` or `animation_url`.
+- Only available original media links appear, with matching open/download
+  actions.
+- File type and dimensions use available metadata; missing values show `N/A`.
 - If card fetches fail or resolve inconsistently, the route shows an inline
   `Try again` action.
 
@@ -133,7 +132,7 @@
 - During component-level migration, the optional `locale` query parameter can be
   used to smoke-test supported locales on this detail route. Missing or
   unsupported `locale` values fall back to `en-US`.
-- Overview live-stat labels, creator labels, additional-details controls, mint
+- Overview live-stat labels, creator labels, mint
   dates, counts, ranks, percentages, and market numbers are routed through the
   progressive i18n helpers.
 - Card Activity headings, dropdown labels/options, volume labels and ETH
@@ -144,7 +143,7 @@
 - Header Art Viewer fullscreen/open/download/downloading/close controls,
   previous/next media buttons, and save dialog titles are routed through the
   progressive i18n helpers.
-- The Art additional-details section headings, metric labels, empty states,
+- `Details` section headings, metric labels, empty states,
   open/download labels, and TDH/rank number formatting are routed through the
   progressive i18n helpers. Property trait names/values and media URLs remain
   source-data copy.
