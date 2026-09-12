@@ -540,7 +540,7 @@ function CollectTradeControllerContent({
         onRefresh={async () => {
           if (displayedOperation) {
             setError(undefined);
-            execution.clearMessage?.();
+            execution.clearMessage();
             try {
               receiveOperation(
                 await continueMarketOperation(displayedOperation.id)
