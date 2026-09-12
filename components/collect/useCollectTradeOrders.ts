@@ -27,7 +27,8 @@ interface UseCollectTradeOrdersOptions {
   readonly initialQuantity?: string | undefined;
   readonly initialRecipient?: string | undefined;
   readonly initialUnitPriceEth?: string | undefined;
-  readonly initialExpiryHours?: "24" | "168" | "720" | undefined;
+  readonly initialExpiryHours?: "24" | "168" | "720" | "custom" | undefined;
+  readonly initialExpiryDateTime?: string | undefined;
   readonly profile: ApiIdentity | null;
   readonly wallet?: string | undefined;
 }
@@ -44,6 +45,7 @@ export function useCollectTradeOrders({
   initialRecipient,
   initialUnitPriceEth,
   initialExpiryHours,
+  initialExpiryDateTime,
   profile,
   wallet,
 }: UseCollectTradeOrdersOptions) {
@@ -54,6 +56,9 @@ export function useCollectTradeOrders({
     quantity: initialQuantity ?? "1",
     unitPriceEth: action === "offer" ? (initialUnitPriceEth ?? "") : "",
     expiryHours: action === "offer" ? (initialExpiryHours ?? "168") : "168",
+    ...(initialExpiryDateTime === undefined
+      ? {}
+      : { expiryDateTime: initialExpiryDateTime }),
     recipient: initialRecipient ?? defaultCollectRecipient(profile, wallet),
   });
   const [quantityEdited, setQuantityEdited] = useState(

@@ -64,6 +64,7 @@ import {
 import type { CollectArtworkSelection } from "./CollectArtworkCard";
 import CollectOfferWorkspace from "./CollectOfferWorkspace";
 import CollectStrategyPicker from "./CollectStrategyPicker";
+import CollectPlanMetadataProvider from "./CollectPlanMetadataProvider";
 import type {
   CollectOfferSelection,
   OfferPriceMethod,
@@ -460,6 +461,7 @@ function CollectCatalogController({
   else if (intent === "tdh")
     goalContent = (
       <CollectTdhWorkspace
+        collection={collection}
         profile={connectedProfile}
         payingWallet={payingWallet}
         snapshot={discovery.tdhSnapshot}
@@ -471,6 +473,9 @@ function CollectCatalogController({
         onReviewPurchase={(items, recipient) => setBatch({ items, recipient })}
         onPlanOffers={(targetPlan) =>
           openOffers(collectSelectedOfferSelection(targetPlan.items))
+        }
+        onDailyPlanOffers={(dailyPlan) =>
+          openOffers(collectSelectedOfferSelection(dailyPlan.items))
         }
       />
     );
@@ -506,10 +511,28 @@ function CollectCatalogController({
   };
   let initialOfferMethod: OfferPriceMethod = "manual";
   const strategy = offerWorkspace?.strategy;
-  if (strategy === "blended") initialOfferMethod = "goal";
+  if (strategy === "blended") initialOfferMethod = "match_bid";
   else if (strategy && strategy !== "buy") initialOfferMethod = strategy;
   return (
-    <>
+    <CollectPlanMetadataProvider
+      catalog={catalog.data}
+      knownAssets={[
+        ...discovery.entries.map((entry) => entry.asset),
+        ...selection.map((item) => item.asset),
+        ...(offerWorkspace?.items.flatMap((item) =>
+          item.asset ? [item.asset] : []
+        ) ?? []),
+      ]}
+      assetKeys={[
+        ...(sourceCostPlan?.analysis.requirements.flatMap((requirement) =>
+          requirement.asset_keys.length === 1 ? requirement.asset_keys : []
+        ) ?? []),
+        ...(costPlan?.result.legs.map((leg) => leg.asset_key) ?? []),
+        ...(offerWorkspace?.items.flatMap((item) =>
+          item.assetKey ? [item.assetKey] : []
+        ) ?? []),
+      ]}
+    >
       <CollectPageView
         catalog={catalogView}
         collection={collection}
@@ -574,6 +597,11 @@ function CollectCatalogController({
                 blended={offerWorkspace.strategy === "blended"}
                 buyOptions={
                   workspacePlanMatches ? (costPlan?.result.legs ?? []) : []
+                }
+                buyObservedAt={
+                  workspacePlanMatches
+                    ? costPlan?.result.evaluated_at
+                    : undefined
                 }
                 buyLockedAssetKeys={blendedBuyLocks}
                 onReviewBuys={
@@ -730,6 +758,6 @@ function CollectCatalogController({
           }}
         />
       )}
-    </>
+    </CollectPlanMetadataProvider>
   );
 }

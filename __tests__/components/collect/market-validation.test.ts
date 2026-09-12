@@ -24,7 +24,16 @@ import {
   validatePublishedMarketOffer,
   validateMarketTransaction,
 } from "@/components/collect/market-validation";
-import { encodeFunctionData, hashStruct, hashTypedData, parseAbi } from "viem";
+import {
+  concat,
+  encodeFunctionData,
+  hashStruct,
+  hashTypedData,
+  keccak256,
+  parseAbi,
+  toHex,
+  type Hex,
+} from "viem";
 
 const MAKER = "0x1111111111111111111111111111111111111111";
 const PAYER = "0x2222222222222222222222222222222222222222";
@@ -193,6 +202,128 @@ function offerFixture() {
   operation.order_hash = operation.order!.order_hash;
   return { request, operation };
 }
+
+function criteriaAcceptFixture(
+  root = 0n,
+  proof: readonly Hex[] = [],
+  identifier = 1n
+) {
+  const { request, operation } = offerFixture();
+  request.kind = ApiMarketKind.Accept;
+  request.wallet = PAYER;
+  request.recipient = PAYER;
+  operation.kind = request.kind;
+  operation.wallet = PAYER;
+  operation.recipient = PAYER;
+  operation.potential_liability_wei = "0";
+  operation.nft_recipient = MAKER;
+  const nft = operation.order!.components.consideration[0]!;
+  nft.item_type = 5;
+  nft.identifier_or_criteria = root.toString();
+  reseal(operation);
+  request.order = {
+    protocol_address: MARKET_SEAPORT,
+    order_hash: operation.order!.order_hash,
+  };
+  const c = canonicalMarketComponents(operation.order!.components);
+  const { counter: _counter, ...parameters } = c;
+  operation.transaction = {
+    chain_id: 1,
+    sender: PAYER,
+    to: MARKET_SEAPORT,
+    value: "0",
+    purpose: ApiMarketTransactionPurposeEnum.Fulfill,
+    data: encodeFunctionData({
+      abi: MARKET_ABI,
+      functionName: "fulfillAdvancedOrder",
+      args: [
+        {
+          parameters: {
+            ...parameters,
+            totalOriginalConsiderationItems: BigInt(c.consideration.length),
+          },
+          numerator: 1n,
+          denominator: 1n,
+          signature: "0x1234",
+          extraData: "0x",
+        },
+        [
+          {
+            orderIndex: 0n,
+            side: 1,
+            index: 0n,
+            identifier,
+            criteriaProof: proof,
+          },
+        ],
+        MARKET_CONDUIT_KEY,
+        PAYER,
+      ],
+    }),
+  };
+  return { request, operation };
+}
+
+describe("collection and trait offer acceptance", () => {
+  it("binds a collection-wide offer to the current NFT before approval", () => {
+    const f = criteriaAcceptFixture();
+    expect(() =>
+      validateMarketOperation(f.operation, f.request, NOW)
+    ).not.toThrow();
+    expect(() =>
+      validateMarketTransaction(
+        f.operation.transaction!,
+        f.operation,
+        f.request
+      )
+    ).not.toThrow();
+    delete f.operation.transaction;
+    expect(() =>
+      validateMarketOperation(f.operation, f.request, NOW)
+    ).toThrow();
+  });
+  it("independently verifies the signed trait root", () => {
+    const leaf = keccak256(toHex(1n, { size: 32 }));
+    const sibling = keccak256(toHex(2n, { size: 32 }));
+    const root = BigInt(
+      keccak256(
+        concat(
+          BigInt(leaf) < BigInt(sibling) ? [leaf, sibling] : [sibling, leaf]
+        )
+      )
+    );
+    const valid = criteriaAcceptFixture(root, [sibling]);
+    expect(() =>
+      validateMarketOperation(valid.operation, valid.request, NOW)
+    ).not.toThrow();
+    for (const f of [
+      criteriaAcceptFixture(root, []),
+      criteriaAcceptFixture(root + 1n, [sibling]),
+      criteriaAcceptFixture(root, [leaf]),
+      criteriaAcceptFixture(0n, [sibling]),
+      criteriaAcceptFixture(0n, [], 2n),
+    ]) {
+      expect(() =>
+        validateMarketOperation(f.operation, f.request, NOW)
+      ).toThrow();
+    }
+  });
+  it("does not authorize creating a criteria offer or moving the NFT to another contract", () => {
+    const f = criteriaAcceptFixture();
+    f.request.kind = ApiMarketKind.Offer;
+    f.operation.kind = ApiMarketKind.Offer;
+    expect(() =>
+      validateMarketOperation(f.operation, f.request, NOW)
+    ).toThrow();
+    const moved = criteriaAcceptFixture();
+    moved.operation.order!.components.consideration[0]!.token = MARKET_WETH;
+    reseal(moved.operation);
+    moved.request.order!.order_hash = moved.operation.order!.order_hash;
+    expect(() =>
+      validateMarketOperation(moved.operation, moved.request, NOW)
+    ).toThrow();
+  });
+});
 
 describe("independent marketplace review validation", () => {
   it("accepts an exact allowlisted listing", () => {
