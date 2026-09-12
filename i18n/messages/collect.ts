@@ -467,7 +467,7 @@ export const COLLECT_MESSAGES = {
   "collect.plan.quantityPrice": "Availability · purchase total",
   "collect.plan.notPriced": "No purchase priced",
   "collect.plan.availableCopies": "{count} priced for your goal",
-  "collect.plan.buyCopies": "Buy {count}",
+  "collect.plan.buyCopies": "Collect {count}",
   "collect.plan.outsideBudget": "Outside this budget",
   "collect.plan.checkingAvailability": "Checking listings…",
   "collect.plan.availabilityScope":

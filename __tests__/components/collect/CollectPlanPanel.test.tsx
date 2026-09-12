@@ -28,7 +28,10 @@ test("leads with actionable missing NFTs and collapses owned holdings", () => {
   expect(screen.getByText("BOOM")).toBeVisible();
   expect(screen.getByText("The OMen")).not.toBeVisible();
   expect(screen.queryByText("Selected")).not.toBeInTheDocument();
-  expect(screen.getByText("Buy 1")).toBeVisible();
+  expect(screen.getByText("Collect 1")).toBeVisible();
+  expect(
+    screen.getByRole("group", { name: "Collection requirements" })
+  ).toBeVisible();
   expect(container.querySelectorAll("[class*='overflow-y']")).toHaveLength(0);
   fireEvent.click(
     screen.getByRole("button", { name: /Available for your goal/ })

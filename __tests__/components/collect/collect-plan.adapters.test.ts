@@ -21,7 +21,7 @@ test("keeps capped purchases as the default while showing the full-goal option",
   expect(view.gasReserveLabel).toBe("0.01 ETH");
   expect(view.requirements[0]).toMatchObject({
     availabilityLabel: "2 priced for your goal",
-    purchaseLabel: "Buy 1",
+    purchaseLabel: "Collect 1",
     priceLabel: "0.1 ETH",
   });
   expect(view.scenarios?.map((option) => option.priceLabel)).toEqual([
@@ -45,7 +45,7 @@ test("switches both displayed and reviewable quantities only on explicit scenari
     "available"
   )!;
   expect(view.totalLabel).toBe("0.21 ETH");
-  expect(view.requirements[0]?.purchaseLabel).toBe("Buy 2");
+  expect(view.requirements[0]?.purchaseLabel).toBe("Collect 2");
   expect(view.outcomeLabel).toBe(
     "After this purchase: 2 of 2 requirements complete"
   );

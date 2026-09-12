@@ -184,7 +184,7 @@ export default function CollectPlanPanel({
         </p>
       ))}
       {missing.length > 0 && (
-        <div aria-label={t(locale, "collect.plan.requirements")}>
+        <div role="group" aria-label={t(locale, "collect.plan.requirements")}>
           <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-2 tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-pb-3 tw-text-xs tw-text-iron-400">
             <span>
               {t(locale, "collect.plan.missingNfts", {
