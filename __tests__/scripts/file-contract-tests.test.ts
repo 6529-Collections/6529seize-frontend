@@ -43,6 +43,7 @@ describe("filesystem contract selection", () => {
     ["dependency-governance", "dependency-governance-workflow"],
     ["runner-benchmark", "runner-benchmark-workflow"],
     ["runner-benchmark-candidate", "runner-benchmark-workflow"],
+    ["device-farm-qa", "device-farm-workflow"],
   ])("selects the disk-reading suite for %s.yml", (workflow, test) => {
     expect(
       selectFileContractTests([`.github/workflows/${workflow}.yml`])

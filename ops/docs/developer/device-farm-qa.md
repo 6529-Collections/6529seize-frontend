@@ -42,7 +42,12 @@ README). Device Farm test spec files live in `tests/device-farm/testspecs/`.
 - `workflow_dispatch` with `target` (`production` default, or `staging`) and
   `packs` (`all` default, `web`, `native`). The native pack always exercises
   production content because the shell hardcodes `https://6529.io`.
-- Weekly schedule (Mondays 04:00 UTC): full pack against production.
+- Daily schedule (04:00 UTC): mobile web smoke against production. Monday's
+  full pack includes web smoke plus native Android smoke and fuzz; Tuesday
+  through Sunday run web only. The two schedules do not overlap.
+- Scheduled failures notify Discord and the shared CI wave receiver. Missing
+  credentials or a missing mobile repository token still produce explicit skip
+  notices; inspect the plan and pack results to distinguish a skip from a pass.
 - Post-release: `deploy-6529` may dispatch the workflow after production
   validation (`gh workflow run device-farm-qa.yml --ref main`) and record the
   run URL as release evidence. Non-gating unless the release is mobile-focused.
@@ -53,15 +58,14 @@ only, no authentication, no mutations — consistent with the
 
 ## Cost model
 
-Device Farm metered pricing is $0.17 per device-minute (first 1,000 minutes
-free on new accounts). The default regime is sized deliberately small:
+Metered use depends on the configured device pools and actual execution time.
+The schedule runs seven web passes and one native smoke/fuzz pass per week.
+Changing the web cadence from weekly to daily adds six web passes; the native
+cadence stays weekly. Check AWS billing and current Device Farm pricing when
+estimating cost rather than treating an old device-count estimate as a budget.
 
-- weekly full pack ≈ 2 Android + 1 iOS web jobs (~10 min each) + native smoke
-  and fuzz on 2 Android devices (~15 min each) ≈ 90 device-minutes ≈ $15/week.
-- `jobTimeoutMinutes` caps runaway runs (30 min web/smoke, 20 min fuzz).
-
-Increase cadence (e.g. nightly web smoke) only after the weekly signal proves
-stable; unmetered slots ($250/device/month) only pay off past ~25 runs/week.
+`jobTimeoutMinutes` caps each device job at 30 minutes for web/native smoke and
+20 minutes for fuzz. Queueing and test packaging are separate from device time.
 
 ## One-time provisioning
 
