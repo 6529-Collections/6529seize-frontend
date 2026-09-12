@@ -45,6 +45,19 @@ actual deployment.
 
 ## Workflow dispatch examples
 
+Production E2E also runs a daily read-only canary at 05:30 UTC. It resolves the
+most recently started successful production deployment, verifies its canonical
+deploy job and current live version, and checks out that exact source before
+running the manifest's production `cron` packs. It shares the post-deploy E2E
+concurrency group, installation steps, publication provenance, and artifacts.
+The canary runs the full cron set regardless of the previous deployment's change
+scope; only failures notify the shared CI wave receiver.
+
+To rerun that canary, dispatch Production E2E on `main` with `scope=canary` and
+the successful deployment run ID in `automatic_deploy_run_id`. The default
+`post-deploy` scope preserves ordinary deployment validation. Both modes reject
+a selected deployment that is no longer live.
+
 Run these only after the corresponding merge and within the authorized scope.
 Select the service needed by the change; `api` below is an example.
 

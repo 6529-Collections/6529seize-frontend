@@ -37,7 +37,6 @@ describe("filesystem contract selection", () => {
 
   it.each([
     ["staging-e2e", "museum-publication-compatibility"],
-    ["production-e2e", "museum-publication-compatibility"],
     ["museum-publication-compatibility", "museum-publication-compatibility"],
     ["coverage-floor", "coverage-floor"],
     ["dependency-governance", "dependency-governance-workflow"],
@@ -48,6 +47,15 @@ describe("filesystem contract selection", () => {
     expect(
       selectFileContractTests([`.github/workflows/${workflow}.yml`])
     ).toEqual([`__tests__/scripts/${test}.test.ts`]);
+  });
+
+  it("selects both daily canary and publication contracts", () => {
+    expect(
+      selectFileContractTests([".github/workflows/production-e2e.yml"]).sort()
+    ).toEqual([
+      "__tests__/scripts/museum-publication-compatibility.test.ts",
+      "__tests__/scripts/production-canary-workflow.test.ts",
+    ]);
   });
 
   it("selects baseline changes and deduplicates overlapping inputs", () => {
