@@ -1,4 +1,44 @@
 export const COLLECT_MESSAGES = {
+  "collect.blend.retainedPurchase": "Your purchase review is saved here.",
+  "collect.blend.previousPurchase":
+    "A purchase review from an earlier plan is still open. Its NFTs and destination have been kept.",
+  "collect.blend.discardPurchase": "Discard purchase draft",
+  "collect.blend.finishReview":
+    "Resume or discard the existing purchase review before starting another.",
+  "collect.blend.resumePriorPurchase": "Resume prior plan review",
+  "collect.blend.resumePurchase": "Resume purchase review",
+  "collect.blend.title": "Choose how to acquire each NFT",
+  "collect.blend.intro":
+    "Start with offers, or choose Collect now where your plan has listings for the full quantity. Review purchases and sign each offer separately.",
+  "collect.blend.acquireFor": "How to acquire {title}",
+  "collect.blend.offer": "Offer",
+  "collect.blend.selectNFT": "Select {title}",
+  "collect.blend.nfts": "NFT acquisition choices",
+  "collect.blend.noFullListing":
+    "No priced listing combination for this full quantity in your chosen plan.",
+  "collect.blend.reserved": "Reserved for purchase review",
+  "collect.blend.buyCost": "Observed listings: {amount} ETH",
+  "collect.blend.buyQuantity": "Quantity: {quantity} · includes listing fees",
+  "collect.blend.purchaseEstimate": "Purchase estimate: {amount} ETH",
+  "collect.blend.separateBudgets":
+    "Gas is quoted at purchase review. The WETH offer budget is separate.",
+  "collect.blend.reviewBuys": "Review purchases ({count})",
+  "collect.strategy.title": "How would you like to collect?",
+  "collect.strategy.buy": "Collect now",
+  "collect.strategy.match_bid": "At WETH offer",
+  "collect.strategy.improve_bid": "WETH + %",
+  "collect.strategy.discount_ask": "Ask − %",
+  "collect.strategy.blended": "Blended",
+  "collect.strategy.help.buy":
+    "Choose from the priced listings below and review one purchase.",
+  "collect.strategy.help.match_bid":
+    "Match the highest applicable WETH offer for each NFT. Review the calculated prices before signing.",
+  "collect.strategy.help.improve_bid":
+    "Choose how far above each NFT’s highest applicable WETH offer you want to bid.",
+  "collect.strategy.help.discount_ask":
+    "Choose a percentage below each NFT’s asking price. Offers are made in WETH.",
+  "collect.strategy.help.blended":
+    "Choose which NFTs to collect now and which to offer on. Review ETH purchases and WETH offers separately.",
   "collect.offerWorkspace.back": "Back to collecting",
   "collect.offerWorkspace.plan": "Plan offers",
   "collect.offerWorkspace.planMissing": "Make offers for missing NFTs",
@@ -112,7 +152,7 @@ export const COLLECT_MESSAGES = {
   "collect.offerPlan.next": "Next",
   "collect.offerPlan.pageCount": "Page {current} of {total}",
   "collect.offerPlan.proposed": "Proposed offers ({count})",
-  "collect.offerPlan.unpriced": "{count} selected NFTs still need a price.",
+  "collect.offerPlan.unpriced": "Prices needed: {count}",
   "collect.offerPlan.overBudget":
     "These offers exceed your plan budget. Adjust your prices, selection or budget.",
   "collect.offerPlan.overFunding":
@@ -249,7 +289,25 @@ export const COLLECT_MESSAGES = {
     "Your collection could not be checked. Try building the plan again.",
   "collect.error.orders": "Orders could not be loaded. Please try again.",
   "collect.error.prepare":
-    "This trade could not be prepared. Refresh the available orders and try again.",
+    "This trade could not be prepared. Please try again.",
+  "collect.error.prepareNetwork":
+    "The trading service could not be reached. Please try again.",
+  "collect.error.prepareAuth":
+    "Reconnect the paying or signing wallet for this profile, then try again.",
+  "collect.error.prepareService":
+    "The trading service could not verify this trade right now. Please try again shortly.",
+  "collect.error.prepareRateLimited":
+    "There have been too many requests. Wait a moment, then try again.",
+  "collect.error.prepareDetails":
+    "Some trade details could not be verified. Check the quantity, price and destination, then try again.",
+  "collect.error.prepareTerms":
+    "The current trade terms could not be verified. Check the price, quantity and paying wallet, then try again.",
+  "collect.error.prepareUnsupported":
+    "This trade uses terms that are not supported. Choose another order or review the offer details.",
+  "collect.error.prepareConnectionChanged":
+    "The active wallet or profile changed. Review the trade with your current wallet before continuing.",
+  "collect.error.prepareRecipientChanged":
+    "Your profile's wallets changed. Check the delivery address and review the trade again.",
   "collect.error.offerLimit":
     "The total for all copies exceeds this offer's available budget. Check the quantity and price, or update the budget.",
   "collect.error.offerQuantity":
@@ -257,7 +315,7 @@ export const COLLECT_MESSAGES = {
   "collect.goal.ultimate": "Ultimate — Palette, Size and Traced",
   "collect.goal.coverage": "{owned} of {total} requirements complete",
   "collect.goal.snapshot": "Holdings checked at block {block}",
-  "collect.goal.requirement": "{owned} of {target} owned by this profile",
+  "collect.goal.requirement": "Owned: {owned} · Goal: {target}",
   "collect.goal.confirmedWallets":
     "Includes {count} confirmed wallets in this profile.",
   "collect.goal.complete": "This goal is complete.",
@@ -391,14 +449,36 @@ export const COLLECT_MESSAGES = {
   "collect.plan.empty": "Start with a collecting goal",
   "collect.plan.emptyDescription":
     "See what your profile owns, what is missing and what you can collect next.",
-  "collect.plan.review": "Review plan",
+  "collect.plan.review": "Collect now",
+  "collect.plan.makeOffers": "Make offers",
+  "collect.plan.results": "Your collecting options",
+  "collect.plan.scenarios": "Purchase scenarios",
+  "collect.plan.scenario.available": "Available for your goal",
+  "collect.plan.scenario.budget": "Within {budget}",
+  "collect.plan.scenario.detail":
+    "Listings: {count} · Requirements remaining: {remaining}",
+  "collect.plan.outcome":
+    "After this purchase: {owned} of {total} requirements complete",
+  "collect.plan.giftOutcome":
+    "Delivery outside this profile does not complete its collecting goal.",
+  "collect.plan.costBreakdown": "NFTs {purchases} · gas reserve {gas}",
+  "collect.plan.missingNfts": "Still to collect ({count})",
+  "collect.plan.ownedNfts": "Already in your profile ({count})",
+  "collect.plan.quantityPrice": "Availability · purchase total",
+  "collect.plan.notPriced": "No purchase priced",
+  "collect.plan.availableCopies": "{count} priced for your goal",
+  "collect.plan.buyCopies": "Collect {count}",
+  "collect.plan.outsideBudget": "Outside this budget",
+  "collect.plan.checkingAvailability": "Checking listings…",
+  "collect.plan.availabilityScope":
+    "Availability covers the supported listings found for this goal. Other listings may exist. Matching NFTs can satisfy more than one set requirement; totals count each purchase once.",
   "collect.plan.open": "View plan",
   "collect.plan.estimate": "Estimated total",
   "collect.plan.priceUnavailable": "Price unavailable",
   "collect.plan.assumptions": "Plan assumptions",
   "collect.plan.requirements": "Collection requirements",
   "collect.plan.status.owned": "Owned",
-  "collect.plan.status.selected": "Selected",
+  "collect.plan.status.selected": "Priced for purchase",
   "collect.plan.status.missing": "Missing",
   "collect.plan.status.unavailable": "Unavailable",
   "collect.goal.definition": "Choose your target",

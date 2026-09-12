@@ -20994,6 +20994,22 @@ components:
           $ref: "#/components/schemas/ApiCollectAnalysis"
         result:
           $ref: "#/components/schemas/ApiCollectAcquisitionPlan"
+        available_result:
+          allOf:
+            - $ref: "#/components/schemas/ApiCollectAcquisitionPlan"
+          description: >-
+            Best bounded plan without a budget cap over the same captured
+            candidates and evaluation time as result. It does not represent
+            complete live market depth or a global minimum. Includes estimated
+            gas on the same basis as result; requires fresh purchase review.
+        budget_wei:
+          type: string
+          description: >-
+            The explicit analysis budget applied to result, including estimated
+            gas. Absent when no budget was supplied; available_result never uses
+            this cap. This does not authorize spending.
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
         checked_asset_count:
           type: integer
           format: int64

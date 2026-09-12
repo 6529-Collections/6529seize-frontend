@@ -3,6 +3,7 @@
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import Button from "@/components/utils/button/Button";
 import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
+import type { ApiCollectPlanLeg } from "@/generated/models/ApiCollectPlanLeg";
 import { ApiCollectTdhRequestHorizonDaysEnum } from "@/generated/models/ApiCollectTdhRequest";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -23,10 +24,17 @@ import { MARKET_BATCH_LIMITS } from "./market-batch-validation";
 import { marketAmount } from "./market.adapters";
 import { MARKET_ZERO } from "./market-validation";
 import CollectSaveRule from "./CollectSaveRule";
+import {
+  collectPlanReviewFingerprint,
+  collectPlanReviewLegs,
+} from "./collect-plan-review.helpers";
 
 interface Props {
   readonly plan: ApiCollectPlan;
+  readonly reviewLegs?: readonly ApiCollectPlanLeg[];
+  readonly open?: boolean;
   readonly onClose: () => void;
+  readonly onDiscard?: (() => void) | undefined;
   readonly onSettled?: () => void;
 }
 type Review =
@@ -37,18 +45,32 @@ type Review =
 
 export default function CollectPlanBasket(props: Props) {
   return (
-    <PlanBasket key={`${props.plan.id}:${props.plan.revision}`} {...props} />
+    <PlanBasket
+      key={`${collectPlanReviewFingerprint(props.plan)}:${JSON.stringify(props.reviewLegs)}`}
+      {...props}
+    />
   );
 }
 
-function PlanBasket({ plan, onClose, onSettled }: Props) {
+function PlanBasket({
+  plan,
+  reviewLegs,
+  open = true,
+  onClose,
+  onDiscard,
+  onSettled,
+}: Props) {
   const locale = useBrowserLocale(),
     id = useId();
+  const availableLegs = reviewLegs
+    ? collectPlanReviewLegs(plan, reviewLegs)
+    : plan.result.legs;
   const [selected, setSelected] = useState(
-    () => new Set(plan.result.legs.map((leg) => leg.candidate_id))
+    () => new Set(availableLegs.map((leg) => leg.candidate_id))
   );
   const [review, setReview] = useState<Review>({ status: "idle" });
   const pending = useRef<AbortController | null>(null);
+  const enteredBatch = useRef(false);
   const focusReview = useCallback(
     (node: HTMLDivElement | null) => node?.focus(),
     []
@@ -58,9 +80,7 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
   const validRecipient = Boolean(
     recipient && isAddress(recipient) && recipient.toLowerCase() !== zeroAddress
   );
-  const chosen = plan.result.legs.filter((leg) =>
-    selected.has(leg.candidate_id)
-  );
+  const chosen = availableLegs.filter((leg) => selected.has(leg.candidate_id));
   const total = collectPlanSelectionCost(chosen);
   const priceLabel =
     total === null
@@ -68,7 +88,8 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
       : t(locale, "collect.plan.selectionEstimate", {
           price: marketAmount(total, MARKET_ZERO),
         });
-  const all = chosen.length === plan.result.legs.length && chosen.length > 0;
+  const all = chosen.length === availableLegs.length && chosen.length > 0;
+  const fullPlanSelected = all && chosen.length === plan.result.legs.length;
   const overLimit = chosen.length > MARKET_BATCH_LIMITS.orders;
   const loading = review.status === "loading";
   const scenario = useMutation({ mutationFn: projectCollectTdh });
@@ -84,6 +105,8 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
   const settledProps = onSettled ? { onSettled } : {};
   const close = () => {
     pending.current?.abort();
+    pending.current = null;
+    if (review.status === "loading") setReview({ status: "idle" });
     onClose();
   };
   const toggle = (candidate: string) => {
@@ -107,7 +130,10 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
         plan.analysis.account.wallets,
         controller.signal
       );
-      if (!controller.signal.aborted) setReview({ status: "ready", items });
+      if (!controller.signal.aborted) {
+        enteredBatch.current = true;
+        setReview({ status: "ready", items });
+      }
     } catch (error) {
       if (!controller.signal.aborted)
         setReview({
@@ -123,7 +149,8 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
   return (
     <MobileWrapperDialog
       title={t(locale, "collect.plan.basket")}
-      isOpen
+      isOpen={open}
+      keepMounted
       onClose={close}
       tabletModal
       hideOnDesktopHover={false}
@@ -151,7 +178,7 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
             <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-100">
               {t(locale, "collect.batchReview.selected", {
                 selected: formatNumber(locale, chosen.length),
-                total: formatNumber(locale, plan.result.legs.length),
+                total: formatNumber(locale, availableLegs.length),
               })}
             </h2>
             <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
@@ -193,7 +220,7 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
                 setSelected(
                   all
                     ? new Set()
-                    : new Set(plan.result.legs.map((leg) => leg.candidate_id))
+                    : new Set(availableLegs.map((leg) => leg.candidate_id))
                 );
                 setReview({ status: "idle" });
               }}
@@ -202,7 +229,7 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
             {t(locale, "collect.batchReview.selectAll")}
           </label>
           <ul className="tw-m-0 tw-list-none tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-p-0">
-            {plan.result.legs.map((leg, index) => {
+            {availableLegs.map((leg, index) => {
               const cost = collectPlanLegCost(leg);
               const costLabel =
                 cost === null
@@ -262,14 +289,30 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
           >
             {t(locale, "collect.plan.checkSelection")}
           </Button>
-          <p className="tw-text-sm tw-text-iron-400">
-            {t(locale, "collect.plan.remaining", {
-              count: formatNumber(
-                locale,
-                plan.result.remaining_requirements.length
-              ),
-            })}
-          </p>
+          {onDiscard && (
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => {
+                if (enteredBatch.current) return;
+                pending.current?.abort();
+                pending.current = null;
+                onDiscard();
+              }}
+            >
+              {t(locale, "collect.blend.discardPurchase")}
+            </Button>
+          )}
+          {fullPlanSelected && (
+            <p className="tw-text-sm tw-text-iron-400">
+              {t(locale, "collect.plan.remaining", {
+                count: formatNumber(
+                  locale,
+                  plan.result.remaining_requirements.length
+                ),
+              })}
+            </p>
+          )}
           <Button
             variant="secondary"
             loading={scenario.isPending}
@@ -315,7 +358,9 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
                 </p>
               </div>
             )}
-          {validRecipient && <CollectSaveRule plan={plan} />}
+          {validRecipient && fullPlanSelected && (
+            <CollectSaveRule plan={plan} />
+          )}
         </div>
       )}
     </MobileWrapperDialog>

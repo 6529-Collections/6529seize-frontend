@@ -2,7 +2,7 @@ import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
 import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
 import type { ApiCollectPlanLeg } from "@/generated/models/ApiCollectPlanLeg";
 import { fetchCollectAssets } from "@/services/api/collect-api";
-import { fetchMarketOrders } from "@/services/api/market-api";
+import { fetchExactMarketOrder } from "@/services/api/market-api";
 import { collectAssetIdentity } from "./collect.adapters";
 import { collectBuyAmount, collectBuyListings } from "./collect-buy.helpers";
 import type { CollectSelectedListing } from "./collect-selection.helpers";
@@ -87,19 +87,19 @@ async function resolveLeg(
   if (asset.family !== ApiCollectFamily.Memes && leg.quantity !== "1")
     throw new Error("ORDER_GONE");
   signal.throwIfAborted();
-  const response = await fetchMarketOrders(leg.asset_key, "LISTING", signal);
-  signal.throwIfAborted();
-  const exact = response.orders.filter(
-    (order) =>
-      order.identity.order_hash.toLowerCase() === leg.order_id.toLowerCase() &&
-      order.identity.protocol_address.toLowerCase() === MARKET_SEAPORT
+  const order = await fetchExactMarketOrder(
+    leg.order_id,
+    MARKET_SEAPORT,
+    leg.asset_key,
+    "LISTING",
+    signal
   );
-  const order = exact[0];
+  signal.throwIfAborted();
   if (
-    exact.length !== 1 ||
-    !order ||
+    order.identity.order_hash.toLowerCase() !== leg.order_id.toLowerCase() ||
+    order.identity.protocol_address.toLowerCase() !== MARKET_SEAPORT ||
     collectBuyListings({
-      orders: exact,
+      orders: [order],
       assetKey: leg.asset_key,
       quantity: leg.quantity,
       profileWallets,

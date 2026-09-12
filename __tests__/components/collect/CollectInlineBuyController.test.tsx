@@ -312,7 +312,9 @@ it("automatically selects the cheapest exact listing, refreshes it, validates, a
   );
   expect(mockSave).toHaveBeenCalledWith("profile", "operation", { request });
   expect(mockConfirm).not.toHaveBeenCalled();
-  fireEvent.click(await screen.findByRole("button", { name: "Collect 0.1 ETH" }));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Collect 0.1 ETH" })
+  );
   await waitFor(() =>
     expect(mockConfirm).toHaveBeenCalledWith(operation, request)
   );
@@ -359,15 +361,53 @@ it("does not silently switch to a different listing after the selected one disap
   expect(mockConfirm).not.toHaveBeenCalled();
 });
 it("reuses the same prepare key and exact request after a lost response", async () => {
-  mockPrepare.mockRejectedValueOnce(new Error("response lost"));
+  mockPrepare.mockRejectedValueOnce(new TypeError("Failed to fetch"));
   renderBuy();
   const buy = await screen.findByRole("button", { name: "Collect 0.1 ETH" });
   await waitFor(() => expect(buy).toBeEnabled());
   fireEvent.click(buy);
-  await screen.findByRole("alert");
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "The trading service could not be reached"
+  );
   fireEvent.click(screen.getByRole("button", { name: "Collect 0.1 ETH" }));
   await waitFor(() => expect(mockPrepare).toHaveBeenCalledTimes(2));
   expect(mockPrepare.mock.calls[1]).toEqual(mockPrepare.mock.calls[0]);
+  expect(mockConfirm).not.toHaveBeenCalled();
+});
+
+it.each([
+  [401, "Reconnect the paying or signing wallet"],
+  [503, "could not verify this trade right now"],
+])("shows safe preparation recovery for HTTP %s", async (status, message) => {
+  mockPrepare.mockRejectedValueOnce(
+    Object.assign(new Error("private provider details"), {
+      status,
+      response: { body: { message: "private provider details" } },
+    })
+  );
+  renderBuy();
+  const buy = await screen.findByRole("button", { name: "Collect 0.1 ETH" });
+  await waitFor(() => expect(buy).toBeEnabled());
+  fireEvent.click(buy);
+  const alert = await screen.findByRole("alert");
+  expect(alert).toHaveTextContent(message);
+  expect(alert).not.toHaveTextContent("private provider details");
+  expect(mockSave).not.toHaveBeenCalled();
+  expect(mockConfirm).not.toHaveBeenCalled();
+});
+
+it("distinguishes a rejected response from a network failure without opening the wallet", async () => {
+  mockValidate.mockImplementationOnce(() => {
+    throw new Error("MARKET_REVIEW_MISMATCH");
+  });
+  renderBuy();
+  const buy = await screen.findByRole("button", { name: "Collect 0.1 ETH" });
+  await waitFor(() => expect(buy).toBeEnabled());
+  fireEvent.click(buy);
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "This payload did not match your reviewed trade"
+  );
+  expect(mockSave).not.toHaveBeenCalled();
   expect(mockConfirm).not.toHaveBeenCalled();
 });
 

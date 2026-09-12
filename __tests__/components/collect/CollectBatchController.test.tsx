@@ -148,6 +148,27 @@ function mount(initialOperation = false) {
   const rendered = render(content());
   return { ...rendered, rerenderScope: () => rendered.rerender(content()) };
 }
+
+it("explains a failed connection and retries the exact batch without signing", async () => {
+  mockPrepare.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+  mount();
+  const prepare = screen.getByRole("button", {
+    name: "Check selected purchases",
+  });
+  await waitFor(() => expect(prepare).toBeEnabled());
+  fireEvent.click(prepare);
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "The trading service could not be reached"
+  );
+  expect(mockConfirm).not.toHaveBeenCalled();
+  await waitFor(() => expect(prepare).toBeEnabled());
+  fireEvent.click(prepare);
+  await screen.findByRole("button", { name: /^Collect / });
+  expect(mockPrepare).toHaveBeenCalledTimes(2);
+  expect(mockPrepare.mock.calls[1]).toEqual(mockPrepare.mock.calls[0]);
+  expect(mockConfirm).not.toHaveBeenCalled();
+});
+
 it("prepares once, focuses review without signing, and preserves the edited destination when returning to the draft", async () => {
   mount();
   const draft = screen.getByLabelText("Delivery draft");
