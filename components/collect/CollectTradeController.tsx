@@ -27,6 +27,7 @@ import {
   prepareMarketOperation,
 } from "@/services/api/market-api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getStructuredApiErrorStatus } from "@/services/api/common-api";
 import { useRef, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -437,7 +438,12 @@ function CollectTradeControllerContent({
       } catch {
         return;
       }
-      if (fixedOrder) {
+      if (
+        fixedOrder &&
+        ((failure instanceof Error &&
+          failure.message === "MARKET_FIXED_ORDER_CHANGED") ||
+          getStructuredApiErrorStatus(failure) === 409)
+      ) {
         setError(t(locale, "collect.trade.exactOrderChanged"));
         return;
       }

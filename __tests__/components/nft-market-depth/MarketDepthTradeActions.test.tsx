@@ -202,6 +202,22 @@ describe("MarketDepthTradeActions", () => {
     });
   });
 
+  it("associates an invalid quantity message until the value is corrected", async () => {
+    renderAction(depthOrder());
+    fireEvent.click(screen.getByRole("button", { name: "Collect" }));
+    const quantity = await screen.findByRole("textbox", { name: "Quantity" });
+
+    fireEvent.change(quantity, { target: { value: "0" } });
+    const error = screen.getByRole("alert");
+    expect(quantity).toHaveAttribute("aria-invalid", "true");
+    expect(quantity).toHaveAttribute("aria-describedby", error.id);
+
+    fireEvent.change(quantity, { target: { value: "2" } });
+    expect(quantity).toHaveAttribute("aria-invalid", "false");
+    expect(quantity).not.toHaveAttribute("aria-describedby");
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
   it("never substitutes a changed exact response", async () => {
     mockFetchExactOrder.mockResolvedValue(
       executableOrder({ maker: "0x4444444444444444444444444444444444444444" })

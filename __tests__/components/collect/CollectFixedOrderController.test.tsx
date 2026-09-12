@@ -308,6 +308,24 @@ it("does not prepare when the exact offer changed", async () => {
   expect(mockSave).not.toHaveBeenCalled();
 });
 
+it("allows an exact-order retry after a transient prepare failure with the same idempotency key", async () => {
+  mockPrepare.mockRejectedValueOnce(new Error("temporary failure"));
+  renderController();
+  await waitUntilReady();
+  prepareDraft();
+  await waitFor(() =>
+    expect(mockLatestForm?.error).toContain("This trade could not be prepared")
+  );
+  expect(mockSave).not.toHaveBeenCalled();
+  const firstAttempt = mockPrepare.mock.calls[0];
+
+  prepareDraft();
+  await waitFor(() => expect(mockSave).toHaveBeenCalledTimes(1));
+  expect(mockFetchExact).toHaveBeenCalledTimes(2);
+  expect(mockPrepare).toHaveBeenCalledTimes(2);
+  expect(mockPrepare.mock.calls[1]).toEqual(firstAttempt);
+});
+
 it("does not prepare after the actor changes while exact refresh is pending", async () => {
   let resolveExact!: (value: ApiMarketTradeOrder) => void;
   mockFetchExact.mockReturnValueOnce(

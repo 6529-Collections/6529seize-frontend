@@ -46,7 +46,7 @@ export interface MarketDepthListingSelection {
   readonly quantity: string;
 }
 
-export type MarketDepthTradeMatch =
+type MarketDepthTradeMatch =
   | { readonly order: ApiMarketTradeOrder; readonly reason?: never }
   | { readonly order?: never; readonly reason: "changed" | "unsupported" };
 

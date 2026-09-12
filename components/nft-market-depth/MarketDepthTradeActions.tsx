@@ -34,6 +34,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -642,6 +643,7 @@ export function MarketDepthOrderAction({
   readonly order: ApiMarketOrder;
   readonly locale: SupportedLocale;
 }) {
+  const quantityErrorId = useId();
   const context = useContext(TradeContext);
   if (!context?.supported) return null;
   const state = context.rowStates[order.order_key];
@@ -684,6 +686,9 @@ export function MarketDepthOrderAction({
                   pattern="[0-9]*"
                   value={selected.quantity}
                   aria-invalid={invalidQuantity}
+                  aria-describedby={
+                    invalidQuantity ? quantityErrorId : undefined
+                  }
                   disabled={context.selectionBusy}
                   maxLength={78}
                   onChange={(event) =>
@@ -715,7 +720,11 @@ export function MarketDepthOrderAction({
           </p>
         )}
         {invalidQuantity && (
-          <p role="alert" className="tw-m-0 tw-text-xs tw-text-rose-200">
+          <p
+            id={quantityErrorId}
+            role="alert"
+            className="tw-m-0 tw-text-xs tw-text-rose-200"
+          >
             {t(locale, "marketDepth.trade.quantityInvalid")}
           </p>
         )}
