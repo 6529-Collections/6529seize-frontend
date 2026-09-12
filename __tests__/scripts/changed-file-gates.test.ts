@@ -119,6 +119,18 @@ describe.each(GATES)("%s command transport", (gate) => {
     expect(result.calls).toEqual([]);
   });
 
+  it("passes option-shaped filenames after the end-of-options delimiter", () => {
+    const file = "--config=other.js";
+    write(root, file, "export {};\n");
+    const result = runGate(root, gate);
+    expect(result.error).toBeUndefined();
+    expect(result.status).toBe(0);
+    expect(result.calls).toHaveLength(1);
+    const args = result.calls[0]!.args;
+    expect(args.indexOf("--")).toBeGreaterThanOrEqual(0);
+    expect(args.slice(args.indexOf("--") + 1)).toEqual([file]);
+  });
+
   it("batches large path sets without losing metacharacters or exclusions", () => {
     const files = createLargeChange(root);
     const result = runGate(root, gate);
