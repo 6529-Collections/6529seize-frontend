@@ -1,0 +1,101 @@
+name: Audit monitoring provider access
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: monitoring-provider-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require main
+        shell: bash
+        run: |
+          if [ "$GITHUB_REF" != refs/heads/main ]; then
+            echo '::error::Run this read-only audit from main.'
+            exit 1
+          fi
+      - name: Read Sentry monitoring capabilities
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { appendFileSync } from 'node:fs';
+
+          async function main() {
+          const token = process.env.SENTRY_AUTH_TOKEN;
+          if (!token) {
+            console.error('Sentry monitoring audit: no configured token.');
+            process.exit(1);
+          }
+          async function read(path) {
+            try {
+              const response = await fetch(`https://sentry.io/api/0/${path}`, {
+                headers: { Authorization: `Bearer ${token}` },
+                redirect: 'error',
+                signal: AbortSignal.timeout(15000),
+              });
+              if (!response.ok) {
+                await response.body?.cancel();
+                return { status: response.status };
+              }
+              return { status: response.status, data: await response.json() };
+            } catch {
+              // Never emit request URLs, headers, vendor bodies or exceptions.
+              return { status: 'unavailable' };
+            }
+          }
+          const [identity, project, projects, uptime, crons, rules] = await Promise.all([
+            read(''),
+            read('projects/seize-ff/6529-frontend/'),
+            read('organizations/seize-ff/projects/'),
+            read('organizations/seize-ff/uptime/'),
+            read('organizations/seize-ff/monitors/'),
+            read('projects/seize-ff/6529-frontend/rules/'),
+          ]);
+          const scopes = Array.isArray(identity.data?.auth?.scopes)
+            ? identity.data.auth.scopes.filter(value => typeof value === 'string' && /^[a-z]+:[a-z]+$/.test(value))
+            : [];
+          const permitted = new Set(scopes);
+          const safeProjects = Array.isArray(projects.data)
+            ? projects.data.filter(value => value && typeof value.id === 'string' && /^\d+$/.test(value.id)
+              && typeof value.slug === 'string' && /^[a-z0-9-]+$/.test(value.slug))
+              .map(value => ({ id: value.id, slug: value.slug }))
+            : [];
+          const summary = {
+            authenticationStatus: identity.status,
+            scopeMetadataAvailable: Array.isArray(identity.data?.auth?.scopes),
+            projectStatus: project.status,
+            projectsStatus: projects.status,
+            projects: safeProjects,
+            hasAlertWriteScope: permitted.has('alerts:write'),
+            hasLegacyOrgWriteScope: permitted.has('org:write'),
+            hasProjectReadScope: permitted.has('project:read'),
+            hasOrgReadScope: permitted.has('org:read'),
+            uptimeStatus: uptime.status,
+            uptimeMonitorsOnFirstPage: Array.isArray(uptime.data) ? uptime.data.length : null,
+            cronStatus: crons.status,
+            cronMonitorsOnFirstPage: Array.isArray(crons.data) ? crons.data.length : null,
+            rulesStatus: rules.status,
+            projectRulesOnFirstPage: Array.isArray(rules.data) ? rules.data.length : null,
+          };
+          const output = JSON.stringify(summary, null, 2);
+          console.log(output);
+          const summaryPath = process.env.GITHUB_STEP_SUMMARY;
+          if (!summaryPath) throw new Error('SUMMARY_PATH_UNAVAILABLE');
+          appendFileSync(summaryPath, `## Sentry monitoring access\n\nRead-only audit; no provider settings changed. Scope flags report token metadata, not verified mutation permissions.\n\n\`\`\`json\n${output}\n\`\`\`\n`);
+          if (identity.status !== 200) process.exitCode = 1;
+          }
+          main().catch(() => {
+            console.error('Sentry monitoring audit failed; sensitive diagnostic details suppressed.');
+            process.exitCode = 1;
+          });
+          NODE

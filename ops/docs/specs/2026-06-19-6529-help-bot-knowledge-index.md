@@ -35,6 +35,11 @@ quantities, costs and explicit budget-versus-available scenarios. **Collect now*
 opens purchase selection and **Make offers** opens per-NFT offer pricing.
 The Listings and Offers record distinguishes direct **Collect** and **Sell**
 actions for one order from the explicit choice among multiple orders at a price.
+The Collect navigation label opens the set planner. Individual purchase facts
+describe profile wallet names alongside full addresses, included order fees,
+network fee caps and conditional maximum totals. A purchase review can remain
+open past its execution quote: continuing gets fresh terms, while changed terms
+require review. A reset quote requires refresh without displaying an epoch date.
 
 Collecting strategy records cover Collect now, At WETH offer, WETH + %, Ask − %,
 and Blended. They distinguish per-NFT calculations, separate ETH purchase and

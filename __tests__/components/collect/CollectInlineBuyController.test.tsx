@@ -94,6 +94,13 @@ const operation = {
   revision: "r1",
   updated_at: 1,
   state: "REVIEW",
+  kind: "BUY",
+  wallet: payer,
+  asset_key: asset.asset_key,
+  net_wei: order.net_wei,
+  approval_transactions: [],
+  recipient_in_profile: true,
+  expires_at: Date.now() + 60_000,
   quantity: "1",
   recipient: payer,
   nft_recipient: payer,
@@ -143,6 +150,7 @@ jest.mock("@/components/collect/useMarketExecution", () => ({
   useMarketExecution: () => ({
     confirm: mockConfirm,
     recoverTransaction: jest.fn(),
+    clearMessage: jest.fn(),
     stage: null,
     message: undefined,
   }),
@@ -179,7 +187,7 @@ jest.mock("@/components/collect/market.adapters", () => ({
     totalLabel: "0.1 ETH",
     totalDescription: "Purchase amount",
     warnings: [],
-    expiresAt: null,
+    expiresAt: Date.now() + 60_000,
   }),
 }));
 function renderBuy() {
@@ -313,7 +321,7 @@ it("automatically selects the cheapest exact listing, refreshes it, validates, a
   expect(mockSave).toHaveBeenCalledWith("profile", "operation", { request });
   expect(mockConfirm).not.toHaveBeenCalled();
   fireEvent.click(
-    await screen.findByRole("button", { name: "Collect 0.1 ETH" })
+    await screen.findByRole("button", { name: "Continue to wallet" })
   );
   await waitFor(() =>
     expect(mockConfirm).toHaveBeenCalledWith(operation, request)

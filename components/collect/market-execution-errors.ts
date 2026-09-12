@@ -6,6 +6,8 @@ export function marketExecutionError(
   locale: SupportedLocale
 ): string {
   if (error instanceof Error) {
+    if (error.message === "MARKET_REVIEW_REFRESH_REQUIRED")
+      return t(locale, "collect.trade.refreshRequired");
     if (error.message === "MARKET_OFFER_QUANTITY_CHANGED")
       return t(locale, "collect.error.offerQuantity");
     if (error.message === "MARKET_OFFER_LIMIT_EXCEEDED")
