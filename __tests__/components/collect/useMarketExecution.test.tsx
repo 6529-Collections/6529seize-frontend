@@ -312,11 +312,154 @@ it.each(["revision-1", "revision-2"])(
     const { result } = renderHook(() => useMarketExecution(onOperation));
     await act(() => result.current.confirm(operation, expected));
     expect(mockContinue).toHaveBeenCalledWith(operation.id);
+    expect(mockValidate).toHaveBeenCalledWith(current, expected);
+    expect(mockValidate.mock.invocationCallOrder[0]).toBeLessThan(
+      mockSave.mock.invocationCallOrder[0]!
+    );
     expect(onOperation).toHaveBeenCalledWith(current);
     expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
     expect(mockWallet.signTypedData).not.toHaveBeenCalled();
   }
 );
+describe("legacy approval continuation recovery", () => {
+  beforeEach(() => {
+    persisted = { request: expected, approvalHash: hash };
+    mockClient.waitForTransactionReceipt.mockResolvedValue({
+      status: "success",
+    });
+    mockContinue.mockResolvedValue(operation);
+  });
+  afterEach(() => {
+    mockValidate.mockReset();
+  });
+
+  it.each<{ label: string; change: Partial<ApiMarketOperation> }>([
+    { label: "operation", change: { id: "different-operation" } },
+    { label: "profile", change: { profile_id: "different-profile" } },
+    {
+      label: "wallet",
+      change: { wallet: "0x2222222222222222222222222222222222222222" },
+    },
+  ])(
+    "retains the approval hash for a mismatched $label",
+    async ({ change }) => {
+      mockContinue.mockResolvedValueOnce({ ...operation, ...change });
+      const onOperation = jest.fn();
+      const { result } = renderHook(() => useMarketExecution(onOperation));
+      await act(() => result.current.confirm(operation, expected));
+      expect(persisted).toEqual({ request: expected, approvalHash: hash });
+      expect(mockSave).not.toHaveBeenCalled();
+      expect(mockValidate).not.toHaveBeenCalled();
+      expect(onOperation).not.toHaveBeenCalled();
+      expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+      expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(["wallet", "profile", "intent"])(
+    "retains recovery when the %s changes while continuation is pending",
+    async (change) => {
+      const pending = deferred<ApiMarketOperation>();
+      mockContinue.mockReturnValueOnce(pending.promise);
+      const onOperation = jest.fn();
+      const assertIntent = jest.fn();
+      const { result, rerender } = renderHook(() =>
+        useMarketExecution(onOperation)
+      );
+      let confirmation!: Promise<void>;
+      act(() => {
+        confirmation = result.current.confirm(
+          operation,
+          expected,
+          assertIntent
+        );
+      });
+      await waitFor(() => expect(mockContinue).toHaveBeenCalled());
+      const savedWhilePending = persisted;
+      if (change === "wallet") {
+        mockConnection.address = "0x2222222222222222222222222222222222222222";
+      } else if (change === "profile") {
+        mockAuth.connectedProfile.id = "different-profile";
+      } else {
+        assertIntent.mockImplementation(() => {
+          throw new Error("MARKET_CONNECTION_CHANGED");
+        });
+      }
+      rerender();
+      await act(async () => {
+        pending.resolve(operation);
+        await confirmation;
+      });
+      expect(savedWhilePending).toEqual({
+        request: expected,
+        approvalHash: hash,
+      });
+      expect(persisted).toEqual({ request: expected, approvalHash: hash });
+      expect(mockSave).not.toHaveBeenCalled();
+      expect(mockValidate).not.toHaveBeenCalled();
+      expect(onOperation).not.toHaveBeenCalled();
+      expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+      expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+    }
+  );
+
+  it("retains the approval hash when continuation fails", async () => {
+    mockContinue.mockRejectedValueOnce(new Error("Network unavailable"));
+    const onOperation = jest.fn();
+    const { result } = renderHook(() => useMarketExecution(onOperation));
+    await act(() => result.current.confirm(operation, expected));
+    expect(persisted).toEqual({ request: expected, approvalHash: hash });
+    expect(mockSave).not.toHaveBeenCalled();
+    expect(onOperation).not.toHaveBeenCalled();
+  });
+
+  it("retains recovery when fresh operation validation rejects the continuation", async () => {
+    mockValidate.mockImplementationOnce(() => {
+      throw new Error("MARKET_REVIEW_MISMATCH");
+    });
+    const onOperation = jest.fn();
+    const { result } = renderHook(() => useMarketExecution(onOperation));
+    await act(() => result.current.confirm(operation, expected));
+    expect(mockValidate).toHaveBeenCalledWith(operation, expected);
+    expect(persisted).toEqual({ request: expected, approvalHash: hash });
+    expect(mockSave).not.toHaveBeenCalled();
+    expect(onOperation).not.toHaveBeenCalled();
+    expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+    expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+  });
+
+  it("retains recovery when continuation reveals another unresolved send", async () => {
+    mockContinue.mockResolvedValueOnce({
+      ...operation,
+      send_attempt: {
+        attempt_id: "00000000-0000-4000-8000-000000000001",
+        purpose: "APPROVAL",
+        transaction_digest: hash,
+        snapshot_block: 1,
+        status: "ACTIVE",
+        transaction_hash: null,
+        transaction: {
+          chain_id: 1,
+          to: "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+          value: "0",
+          data: "0x1234",
+          purpose: "APPROVE_NFT",
+          sender: walletAddress,
+        },
+      },
+    });
+    const onOperation = jest.fn();
+    const { result } = renderHook(() => useMarketExecution(onOperation));
+    await act(() => result.current.confirm(operation, expected));
+    expect(persisted).toEqual({ request: expected, approvalHash: hash });
+    expect(mockSave).not.toHaveBeenCalled();
+    expect(mockValidate).not.toHaveBeenCalled();
+    expect(onOperation).not.toHaveBeenCalled();
+    expect(mockBegin).not.toHaveBeenCalled();
+    expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+    expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+  });
+});
 it("retains a legacy approval hash when its receipt is unavailable", async () => {
   mockRead.mockReturnValue({ request: expected, approvalHash: hash });
   mockClient.waitForTransactionReceipt.mockRejectedValue(

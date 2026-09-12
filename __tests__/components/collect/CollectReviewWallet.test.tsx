@@ -45,7 +45,12 @@ it("shows a trusted name and keeps the exact checksum in a tap disclosure", () =
   expect(screen.getByText("punk6529bot.eth")).toBeVisible();
   const fullAddress = screen.getByText(getAddress(ADDRESS));
   expect(fullAddress).not.toBeVisible();
-  expect(screen.getByRole("button")).not.toBeVisible();
+  expect(
+    screen.getByRole("button", {
+      name: "Copy wallet address",
+      hidden: true,
+    })
+  ).not.toBeVisible();
   expect(screen.getByText("Outside the collecting profile")).toBeVisible();
   disclose();
   expect(fullAddress).toBeVisible();

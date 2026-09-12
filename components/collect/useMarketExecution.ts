@@ -331,13 +331,23 @@ export function useMarketExecution(
             hash: prior.approvalHash,
             confirmations: 1,
           });
+          if (receipt.status !== "success") {
+            saveMarketIntent(expected.profile_id, current.id, {
+              request: expected,
+            });
+            throw new Error("MARKET_APPROVAL_REVERTED");
+          }
+          assertConnection();
+          const continued = await continueMarketOperation(current.id);
+          assertConnection();
+          assertMarketOperationIdentity(continued, operation);
+          if (marketOperationSendAttempt(continued))
+            throw new Error("MARKET_BROADCAST_UNKNOWN");
+          validateMarketOperation(continued, expected);
           saveMarketIntent(expected.profile_id, current.id, {
             request: expected,
           });
-          if (receipt.status !== "success")
-            throw new Error("MARKET_APPROVAL_REVERTED");
-          assertConnection();
-          onOperation(await continueMarketOperation(current.id));
+          onOperation(continued);
           setStage(null);
           return;
         }

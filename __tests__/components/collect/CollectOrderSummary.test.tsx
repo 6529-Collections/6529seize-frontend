@@ -7,6 +7,7 @@ import {
 } from "@/generated/models/ApiMarketOperation";
 import { ApiMarketTransactionPurposeEnum } from "@/generated/models/ApiMarketTransaction";
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import { getAddress } from "viem";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
@@ -39,11 +40,14 @@ const operation: ApiMarketOperation = {
   expires_at: 0,
   updated_at: 0,
 };
-function show(overrides: Partial<ApiMarketOperation> = {}) {
+function show(
+  overrides: Partial<ApiMarketOperation> = {},
+  action: CollectTradeReview["action"] = "offer"
+) {
   const review: CollectTradeReview = {
     id: "review",
     revision: "1",
-    action: "offer",
+    action,
     title: "Age of Memes",
     facts: [],
     technicalFacts: [{ label: "Approval scope", value: "Currency amount" }],
@@ -77,6 +81,25 @@ it("keeps offer payment, delivery and full liability inspectable before signing"
   fireEvent.click(breakdown);
   expect(screen.getByText("0.08")).toBeInTheDocument();
   expect(screen.queryByText("Network fee cap")).not.toBeInTheDocument();
+});
+it("shows the accepted NFT destination separately from the seller's payment wallet", () => {
+  const recipient = "0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0";
+  show({ kind: ApiMarketKind.Accept, nft_recipient: recipient }, "accept");
+
+  const delivery = screen.getByText("Deliver to").closest("details")!;
+  expect(within(delivery).queryByText("collector.eth")).not.toBeInTheDocument();
+  const address = within(delivery).getByText(getAddress(recipient));
+  expect(address).not.toBeVisible();
+  fireEvent.click(within(delivery).getByText("Deliver to"));
+  expect(address).toBeVisible();
+  expect(
+    within(delivery).getByRole("button", { name: "Copy wallet address" })
+  ).toHaveAccessibleDescription(`Deliver to ${getAddress(recipient)}`);
+
+  const payment = screen.getByText("Receive payment").closest("details")!;
+  expect(within(payment).getByText("collector.eth")).toBeVisible();
+  fireEvent.click(within(payment).getByText("Receive payment"));
+  expect(within(payment).getByText(wallet)).toBeVisible();
 });
 it("retains exact gas while the summary rounds the cap upward", () => {
   show({

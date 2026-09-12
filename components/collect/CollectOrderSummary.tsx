@@ -116,6 +116,18 @@ export default function CollectOrderSummary({
             name={walletName}
           />
         )}
+        {review.action === "accept" && operation.nft_recipient && (
+          <CollectReviewWallet
+            label={t(locale, "collect.review.deliverTo")}
+            address={operation.nft_recipient}
+            name={
+              operation.nft_recipient.toLowerCase() ===
+              operation.wallet.toLowerCase()
+                ? walletName
+                : undefined
+            }
+          />
+        )}
       </div>
       {operation.order && (
         <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
