@@ -24,6 +24,15 @@ function fields(block: CmsBlockV1): CmsBlockV1 & Record<string, unknown> {
   return block as CmsBlockV1 & Record<string, unknown>;
 }
 
+function rowFallback(block: CmsBlockV1): string | null {
+  const rows = fields(block)["rows"];
+  if (block.block_type !== "callout" || !Array.isArray(rows) || !rows.length)
+    return null;
+  return (rows as { label: string; value: string }[])
+    .map((row) => (row.label ? `${row.label}: ${row.value}` : row.value))
+    .join("\n");
+}
+
 describe.each(TEMPLATES)(
   "%s complete native document",
   (templateId, pageCount) => {
@@ -116,6 +125,16 @@ describe.each(TEMPLATES)(
             // Project illustrations recover their current authored fields, not
             // the preserved prose fallback from before those fields were edited.
             if (key === "content" && value["mockup_style"]) continue;
+            if (
+              key === "content" &&
+              typeof value[key] === "string" &&
+              value[key].trim() === rowFallback(block)
+            ) {
+              // Labels and values are checked individually below; duplicate
+              // fallback prose must not be required in addition to the record.
+              expect(section.querySelector("dl")).not.toBeNull();
+              continue;
+            }
             if (typeof value[key] === "string" && value[key]) {
               if (key === "title") {
                 expect(section.textContent).toContain(value[key]);

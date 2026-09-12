@@ -334,7 +334,7 @@
           "id": "organization-v2-home-029",
           "block_type": "callout",
           "title": "Open table. 12—4.",
-          "content": "Assembly House / Saturdays Open table. 12—4.",
+          "content": "Assembly House / Saturdays",
           "rows": [],
           "presentation": {
             "span": "full",
@@ -383,7 +383,7 @@
           "id": "organization-v2-home-033",
           "block_type": "callout",
           "title": "Neighbourhood Editions",
-          "content": "A community print project Neighbourhood Editions First edition / Autumn 2026",
+          "content": "A community print project\n\nFirst edition / Autumn 2026",
           "rows": [],
           "presentation": {
             "span": "full",
@@ -455,19 +455,19 @@
           "id": "organization-v2-home-039",
           "block_type": "callout",
           "title": "",
-          "content": "Ali Turner: Ali Turner Programme & partnerships\nJo Mercer: Jo Mercer Print studio & workshops\nNia Ellis: Nia Ellis Visitors & volunteers",
+          "content": "Ali Turner: Programme & partnerships\nJo Mercer: Print studio & workshops\nNia Ellis: Visitors & volunteers",
           "rows": [
             {
               "label": "Ali Turner",
-              "value": "Ali Turner Programme & partnerships"
+              "value": "Programme & partnerships"
             },
             {
               "label": "Jo Mercer",
-              "value": "Jo Mercer Print studio & workshops"
+              "value": "Print studio & workshops"
             },
             {
               "label": "Nia Ellis",
-              "value": "Nia Ellis Visitors & volunteers"
+              "value": "Visitors & volunteers"
             }
           ],
           "presentation": {
@@ -537,7 +537,7 @@
         {
           "id": "organization-v2-home-045",
           "block_type": "rich_text",
-          "content": "Workshop bookings & questions hello@assemblyhouse.example.org ↗",
+          "content": "Workshop bookings & questions hello@assemblyhouse.example.org",
           "presentation": {
             "span": "full",
             "role": "body",
@@ -548,7 +548,7 @@
         {
           "id": "organization-v2-home-046",
           "block_type": "callout",
-          "title": "hello@assemblyhouse.example.org ↗",
+          "title": "hello@assemblyhouse.example.org",
           "email": "hello@assemblyhouse.example.org",
           "content": "",
           "subject": "Enquiry",
@@ -591,7 +591,7 @@
       "blockId": "organization-v2-home-037"
     },
     {
-      "label": "Visit ↗",
+      "label": "Visit",
       "pageSlug": "home",
       "blockId": "organization-v2-home-040"
     }

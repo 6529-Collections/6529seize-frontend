@@ -377,7 +377,12 @@ function renderGallery(block: CmsBlockV1, context: RenderContext): string {
     ...stringArray(blockValue(block, "featured_asset_ids")),
   ];
   const items = recordArray(blockValue(block, "items"));
-  const artwork = ids
+  const recoveredIds = ids.length
+    ? ids
+    : items
+        .map((item) => text(item, "asset_id"))
+        .filter((assetId) => assetId.length > 0);
+  const artwork = recoveredIds
     .map((id) => {
       const index = items.findIndex((entry) => entry["asset_id"] === id);
       const item = index < 0 ? undefined : items.splice(index, 1)[0];
@@ -397,7 +402,8 @@ function renderGallery(block: CmsBlockV1, context: RenderContext): string {
 }
 
 function renderCallout(block: CmsBlockV1, context: RenderContext): string {
-  const rows = recordArray(blockValue(block, "rows"))
+  const entries = recordArray(blockValue(block, "rows"));
+  const rows = entries
     .map((row) => {
       const value = text(row, "value");
       const pageId = text(row, "page_id");
@@ -417,7 +423,17 @@ function renderCallout(block: CmsBlockV1, context: RenderContext): string {
     const headingMarkup = heading ? `<h3>${escapeHtml(heading)}</h3>` : "";
     return `<aside>${paragraphs(text(block, "mockup_kicker"))}${renderTitle(block)}${headingMarkup}${paragraphs(text(block, "mockup_period"))}${paragraphs(text(block, "mockup_description"))}${rowsMarkup}<footer>${paragraphs(text(block, "mockup_footer"))}</footer></aside>`;
   }
-  return `<aside>${renderAsset(text(block, "asset_id"), context)}${paragraphs(text(block, "tone"))}${renderTitle(block)}${paragraphs(text(block, "content") || text(block, "text"))}${rowsMarkup}${renderContact(block)}</aside>`;
+  const content = text(block, "content") || text(block, "text");
+  const rowFallback = entries
+    .map((row) => {
+      const label = text(row, "label");
+      const value = text(row, "value");
+      return label ? `${label}: ${value}` : value;
+    })
+    .join("\n");
+  const contentMarkup =
+    entries.length && content.trim() === rowFallback ? "" : paragraphs(content);
+  return `<aside>${renderAsset(text(block, "asset_id"), context)}${paragraphs(text(block, "tone"))}${renderTitle(block)}${contentMarkup}${rowsMarkup}${renderContact(block)}</aside>`;
 }
 
 function renderContact(block: CmsBlockV1): string {

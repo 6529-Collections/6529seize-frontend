@@ -1,6 +1,8 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 
 import StudioBlockInspector from "@/components/profile-cms-builder/studio/StudioBlockInspector";
+import { ApprovedBlock } from "@/components/profile-cms/approved-renderer/Blocks";
+import { createRendererContext } from "@/components/profile-cms/site-renderer/data";
 import {
   cmsPackageSchema,
   validateCmsPackageV1,
@@ -82,6 +84,31 @@ it("removes an artwork image's optional page link explicitly", () => {
   expect(result.block()).not.toHaveProperty("page_id");
   expect(result.block()?.["asset_id"]).toBe("asset-room-work");
 });
+
+it.each([true, false])(
+  "only toggles the list mode while preserving imported gallery values (enabled: %s)",
+  (enabled) => {
+    const imported = [
+      "filmstrip",
+      { layout: "future-mode" },
+      "grid",
+      "filmstrip",
+      42,
+    ];
+    const result = inspectBlock({
+      id: "imported-modes",
+      block_type: "gallery",
+      asset_ids: ["asset-room-work"],
+      items: [{ asset_id: "asset-room-work", title: "A work" }],
+      display_modes: enabled ? [...imported, "list", "list"] : imported,
+    });
+    fireEvent.click(screen.getByLabelText("Offer gallery and list views"));
+    fireEvent.click(screen.getByRole("button", { name: "Apply changes" }));
+    expect(result.block()?.["display_modes"]).toEqual(
+      enabled ? imported : [...imported, "list"]
+    );
+  }
+);
 
 it("preserves unannotated artworks and duplicate placements when editing one gallery caption", () => {
   const result = inspectBlock({
@@ -272,6 +299,45 @@ it.each(["Friday: 10:00", "Visits are by appointment."])(
     );
   }
 );
+
+it("clears a structured row label without rendering its value twice", () => {
+  const result = inspectBlock({
+    id: "hours",
+    block_type: "callout",
+    title: "Hours",
+    content: "Friday: 10:00",
+    rows: [{ label: "Friday", value: "10:00" }],
+  });
+  fireEvent.click(screen.getByText(/1\. Friday/));
+  fireEvent.change(screen.getByLabelText("Label"), { target: { value: "" } });
+  fireEvent.click(screen.getByRole("button", { name: "Apply changes" }));
+  expect(result.block()?.["content"]).toBe("10:00");
+  const rendered = render(
+    <ApprovedBlock
+      block={result.block()!}
+      context={createRendererContext(result.document()!, "en-US")}
+    />
+  );
+  expect(within(rendered.container).getAllByText("10:00")).toHaveLength(1);
+  expect(
+    within(rendered.container).queryByText(": 10:00")
+  ).not.toBeInTheDocument();
+});
+
+it("updates the canonical fallback of a reopened unlabeled row", () => {
+  const result = inspectBlock({
+    id: "hours",
+    block_type: "callout",
+    title: "Hours",
+    content: "10:00",
+    rows: [{ label: "", value: "10:00" }],
+  });
+  fireEvent.change(screen.getByLabelText("Value"), {
+    target: { value: "11:00" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Apply changes" }));
+  expect(result.block()?.["content"]).toBe("11:00");
+});
 
 it("clears a section target when changing a link's destination and edits enquiry subjects", () => {
   const result = inspectBlock({

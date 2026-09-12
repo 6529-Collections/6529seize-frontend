@@ -203,7 +203,7 @@ it("allows guests to choose a template and edit it with the real renderer", () =
   owner(false);
   showBuilder();
   fireEvent.click(screen.getByRole("button", { name: "Preview Personal" }));
-  click("Use this template");
+  click("Use this template: Personal");
   click("Pages");
   change("Page title", "My website");
   click("Apply");

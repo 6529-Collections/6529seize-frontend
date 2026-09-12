@@ -3,7 +3,10 @@ import { useMemo, useState } from "react";
 import CmsSiteRenderer from "@/components/profile-cms/CmsSiteRenderer";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
+import {
+  cmsPackageSchema,
+  type CmsPackageV1,
+} from "@/lib/profile-cms/protocol/v1";
 import {
   CMS_STUDIO_TEMPLATES,
   instantiateCmsStudioTemplate,
@@ -24,15 +27,39 @@ const FAMILIES: readonly (CmsStudioTemplateFamily | "all" | "memes")[] = [
   "memes",
 ];
 
-export default function StudioTemplateLibrary({
-  handle,
-  locale,
-  onUse,
-}: {
+interface StudioTemplateLibraryProps {
   readonly handle: string;
   readonly locale: SupportedLocale;
   readonly onUse: (document: CmsPackageV1) => void;
-}) {
+}
+
+export default function StudioTemplateLibrary(
+  props: StudioTemplateLibraryProps
+) {
+  if (
+    !cmsPackageSchema.shape.profile.shape.handle.safeParse(props.handle).success
+  )
+    return (
+      <section className="tw-space-y-3 tw-p-4 sm:tw-p-8">
+        <h2 className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-white">
+          {t(props.locale, "profileCms.studio.choose")}
+        </h2>
+        <p
+          role="alert"
+          className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300"
+        >
+          {t(props.locale, "profileCms.studio.invalidProfileHandle")}
+        </p>
+      </section>
+    );
+  return <AvailableTemplateLibrary {...props} />;
+}
+
+function AvailableTemplateLibrary({
+  handle,
+  locale,
+  onUse,
+}: StudioTemplateLibraryProps) {
   const [family, setFamily] = useState<(typeof FAMILIES)[number]>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = CMS_STUDIO_TEMPLATES.find(
@@ -155,6 +182,9 @@ export default function StudioTemplateLibrary({
                 </StudioButton>
                 <StudioButton
                   primary
+                  label={t(locale, "profileCms.studio.useTemplateNamed", {
+                    name: template.name,
+                  })}
                   onClick={() =>
                     onUse(instantiateCmsStudioTemplate(template.id, handle))
                   }
@@ -225,7 +255,13 @@ function TemplatePreview({
         <span className="-tw-order-1 tw-basis-full tw-text-base tw-font-semibold tw-text-white sm:tw-order-none sm:tw-basis-auto sm:tw-text-lg">
           {template.name}
         </span>
-        <StudioButton primary onClick={onUse}>
+        <StudioButton
+          primary
+          onClick={onUse}
+          label={t(locale, "profileCms.studio.useTemplateNamed", {
+            name: template.name,
+          })}
+        >
           {t(locale, "profileCms.studio.useTemplate")}
         </StudioButton>
       </div>

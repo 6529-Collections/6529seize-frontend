@@ -436,6 +436,65 @@ describe("CMS studio template library", () => {
     }
   });
 
+  it.each([
+    [
+      "artist-v2",
+      "artist-v2-studio-012",
+      ["2026", "2025", "2024", "2023", "2022"],
+    ],
+    [
+      "organization-v2",
+      "organization-v2-home-039",
+      ["Ali Turner", "Jo Mercer", "Nia Ellis"],
+    ],
+  ] as const)(
+    "keeps %s row labels out of their values and matches the archive fallback",
+    (templateId, blockId, labels) => {
+      const document = instantiateCmsStudioTemplate(
+        templateId,
+        "ExampleProfile",
+        NOW
+      );
+      const block = document.payload.pages
+        .flatMap((page) => page.blocks)
+        .find((item) => item.id === blockId);
+      expect(block).toBeDefined();
+      const data = fields(block!);
+      const rows = data["rows"] as { label: string; value: string }[];
+      expect(rows.map((row) => row.label)).toEqual(labels);
+      for (const row of rows) {
+        expect(row.value).not.toContain(row.label);
+        expect(row.value.length).toBeGreaterThan(0);
+      }
+      expect(data["content"]).toBe(
+        rows.map((row) => `${row.label}: ${row.value}`).join("\n")
+      );
+    }
+  );
+
+  it("keeps organization poster titles and contact decorations out of body copy", () => {
+    const document = instantiateCmsStudioTemplate(
+      "organization-v2",
+      "ExampleProfile",
+      NOW
+    );
+    const blocks = document.payload.pages.flatMap((page) => page.blocks);
+    for (const id of ["organization-v2-home-029", "organization-v2-home-033"]) {
+      const block = fields(blocks.find((item) => item.id === id)!);
+      expect(block["title"]).toBeTruthy();
+      expect(block["content"]).toBeTruthy();
+      expect(String(block["content"])).not.toContain(block["title"]);
+    }
+    expect(blocks).toContainEqual(
+      expect.objectContaining({
+        id: "organization-v2-home-046",
+        title: "hello@assemblyhouse.example.org",
+        email: "hello@assemblyhouse.example.org",
+      })
+    );
+    expect(canonicalizeJson(document.payload)).not.toContain("↗");
+  });
+
   it("keeps separate instantiations independent from the registry and each other", () => {
     const first = instantiateCmsStudioTemplate("signature", "OneProfile", NOW);
     const original = canonicalizeJson(CMS_STUDIO_TEMPLATES);
