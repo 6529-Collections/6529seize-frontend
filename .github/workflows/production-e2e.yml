@@ -392,7 +392,7 @@ jobs:
           CI_PIPELINES_ALERT_TYPE: workflow
           CI_PIPELINES_TARGET_ENV: production
           CI_PIPELINES_STATUS: failure
-          CI_PIPELINES_TITLE: "Production E2E: daily read-only canary failed"
+          CI_PIPELINES_TITLE: "Production E2E: read-only canary failed"
           CI_PIPELINES_SERVICE: web-canary
           CI_PIPELINES_SHA: ${{ needs.readonly.outputs.expected-sha }}
         run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs

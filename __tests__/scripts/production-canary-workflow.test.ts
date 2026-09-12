@@ -14,6 +14,7 @@ const steps = workflow.jobs.readonly.steps as {
   if?: string;
   env?: Record<string, string>;
 }[];
+/** Finds a named workflow step, with a useful failure when the contract drifts. */
 function requiredStep(name: string) {
   const step = steps.find((candidate) => candidate.name === name);
   if (!step)
@@ -41,6 +42,7 @@ const deployment = {
   head_sha: sha,
 };
 
+/** Exercises the deployed-source resolver against isolated GitHub API fixtures. */
 function resolveSource(
   options: {
     event?: string;
@@ -207,6 +209,9 @@ describe("daily production canary", () => {
     );
     const notification = workflow.jobs["notify-canary-failure"].steps.at(-1);
     expect(notification.env.CI_PIPELINES_ALERT_TYPE).toBe("workflow");
+    expect(notification.env.CI_PIPELINES_TITLE).toBe(
+      "Production E2E: read-only canary failed"
+    );
     expect(notification.env.CI_PIPELINES_PARENT_DEPLOY_RUN_ID).toBeUndefined();
   });
 });
