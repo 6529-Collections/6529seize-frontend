@@ -1,0 +1,5541 @@
+{
+  "pages": [
+    {
+      "slug": "home",
+      "title": "Mara’s wall.",
+      "description": "I’m a book designer in Bristol, interested in posters, portraiture and the communities that form around digital art. This is my selection, with notes on why I keep returning to each work.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "collector-v2-home-001",
+          "block_type": "rich_text",
+          "content": "A personal collection",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "hero",
+            "group": "collector-v2-home-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-home-002",
+          "block_type": "heading",
+          "text": "Mara’s wall.",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "hero",
+            "group": "collector-v2-home-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-home-003",
+          "block_type": "rich_text",
+          "content": "I’m a book designer in Bristol, interested in posters, portraiture and the communities that form around digital art. This is my selection, with notes on why I keep returning to each work.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "collector-v2-home-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-home-004",
+          "block_type": "image",
+          "asset_id": "meme-48",
+          "title": "Freedom to Explore by Cath Simard",
+          "caption": "",
+          "page_id": "page-work-48",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "feature",
+            "group": "collector-v2-home-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-home-005",
+          "block_type": "rich_text",
+          "content": "In focus / 01",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "feature",
+            "group": "collector-v2-home-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-home-006",
+          "block_type": "heading",
+          "text": "Freedom to Explore",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "feature",
+            "group": "collector-v2-home-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-home-007",
+          "block_type": "rich_text",
+          "content": "Cath Simard · The Memes #48",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "feature",
+            "group": "collector-v2-home-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-home-008",
+          "block_type": "rich_text",
+          "content": "I came to The Memes for the posters. Cath Simard made me look seriously at the photography. This is the work I show first when someone asks what I collect.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "feature",
+            "group": "collector-v2-home-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-home-009",
+          "block_type": "button_link",
+          "label": "View the work",
+          "page_id": "page-work-48",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "feature",
+            "group": "collector-v2-home-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-home-010",
+          "block_type": "heading",
+          "text": "From the collection",
+          "level": 2,
+          "presentation": {
+            "span": "two_thirds",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-home-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-home-011",
+          "block_type": "button_link",
+          "label": "Browse all 19 works",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "third",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-home-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-home-012",
+          "block_type": "gallery",
+          "asset_ids": ["meme-52", "meme-47", "meme-375"],
+          "items": [
+            {
+              "asset_id": "meme-52",
+              "title": "MEME FACTORY",
+              "subtitle": "Grant Riven Yun · The Memes #52",
+              "page_id": "page-work-52"
+            },
+            {
+              "asset_id": "meme-47",
+              "title": "EXIT STRATEGY",
+              "subtitle": "XCOPY · Still preview · Animated work · The Memes #47",
+              "page_id": "page-work-47"
+            },
+            {
+              "asset_id": "meme-375",
+              "title": "The Tree of Knowledge of Good and Evil",
+              "subtitle": "ACK · The Memes #375",
+              "page_id": "page-work-375"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        },
+        {
+          "id": "collector-v2-home-013",
+          "block_type": "heading",
+          "text": "Collected together",
+          "level": 2,
+          "presentation": {
+            "span": "two_thirds",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-home-group-4"
+          }
+        },
+        {
+          "id": "collector-v2-home-014",
+          "block_type": "button_link",
+          "label": "All four sets",
+          "page_id": "page-sets",
+          "presentation": {
+            "span": "third",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-home-group-4"
+          }
+        },
+        {
+          "id": "collector-v2-home-015",
+          "block_type": "image",
+          "asset_id": "meme-2",
+          "title": "SeizeJPGs by 6529er",
+          "caption": "",
+          "page_id": "page-set-posters",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-home-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-home-016",
+          "block_type": "image",
+          "asset_id": "meme-4",
+          "title": "NakamotoFreedom by 6529er",
+          "caption": "",
+          "page_id": "page-set-posters",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-home-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-home-017",
+          "block_type": "rich_text",
+          "content": "4 works",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "cards",
+            "group": "collector-v2-home-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-home-018",
+          "block_type": "heading",
+          "text": "The poster shelf",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-home-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-home-019",
+          "block_type": "rich_text",
+          "content": "Lettering, persuasion and public address",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-home-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-home-020",
+          "block_type": "button_link",
+          "label": "Explore the set",
+          "page_id": "page-set-posters",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-home-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-home-021",
+          "block_type": "image",
+          "asset_id": "meme-1",
+          "title": "6529Seizing by 6529er",
+          "caption": "",
+          "page_id": "page-set-portraits",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-home-group-6"
+          }
+        },
+        {
+          "id": "collector-v2-home-022",
+          "block_type": "image",
+          "asset_id": "meme-5",
+          "title": "rekt6529 by OSF",
+          "caption": "",
+          "page_id": "page-set-portraits",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-home-group-6"
+          }
+        },
+        {
+          "id": "collector-v2-home-023",
+          "block_type": "rich_text",
+          "content": "6 works",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "cards",
+            "group": "collector-v2-home-group-6"
+          }
+        },
+        {
+          "id": "collector-v2-home-024",
+          "block_type": "heading",
+          "text": "Faces and characters",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-home-group-6"
+          }
+        },
+        {
+          "id": "collector-v2-home-025",
+          "block_type": "rich_text",
+          "content": "Portraiture across six different visual languages",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-home-group-6"
+          }
+        },
+        {
+          "id": "collector-v2-home-026",
+          "block_type": "button_link",
+          "label": "Explore the set",
+          "page_id": "page-set-portraits",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-home-group-6"
+          }
+        },
+        {
+          "id": "collector-v2-home-027",
+          "block_type": "image",
+          "asset_id": "blitmap-1",
+          "title": "Rose by dom",
+          "caption": "",
+          "page_id": "page-set-blitmap",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-home-group-7"
+          }
+        },
+        {
+          "id": "collector-v2-home-028",
+          "block_type": "image",
+          "asset_id": "blitmap-4",
+          "title": "Psychic by Veenus",
+          "caption": "",
+          "page_id": "page-set-blitmap",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-home-group-7"
+          }
+        },
+        {
+          "id": "collector-v2-home-029",
+          "block_type": "rich_text",
+          "content": "3 works",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "cards",
+            "group": "collector-v2-home-group-7"
+          }
+        },
+        {
+          "id": "collector-v2-home-030",
+          "block_type": "heading",
+          "text": "Three Blitmaps",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-home-group-7"
+          }
+        },
+        {
+          "id": "collector-v2-home-031",
+          "block_type": "rich_text",
+          "content": "Small images, exact decisions",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-home-group-7"
+          }
+        },
+        {
+          "id": "collector-v2-home-032",
+          "block_type": "button_link",
+          "label": "Explore the set",
+          "page_id": "page-set-blitmap",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-home-group-7"
+          }
+        },
+        {
+          "id": "collector-v2-home-033",
+          "block_type": "rich_text",
+          "content": "From the notebook",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "note",
+            "group": "collector-v2-home-group-8"
+          }
+        },
+        {
+          "id": "collector-v2-home-034",
+          "block_type": "heading",
+          "text": "Scale in Freedom to Explore",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-home-group-8"
+          }
+        },
+        {
+          "id": "collector-v2-home-035",
+          "block_type": "rich_text",
+          "content": "Freedom to Explore links the landscapes and posters in this selection. Its statement about freedom carries a different weight inside an immersive setting.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-home-group-8"
+          }
+        },
+        {
+          "id": "collector-v2-home-036",
+          "block_type": "button_link",
+          "label": "Read the notebook",
+          "page_id": "page-notes",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-home-group-8"
+          }
+        }
+      ],
+      "navigationLabel": "The wall"
+    },
+    {
+      "slug": "collection",
+      "title": "The collection.",
+      "description": "The full selection, including works from The Memes and three original Blitmaps. Open a work for a closer view, my notes and its source record.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "collector-v2-collection-001",
+          "block_type": "rich_text",
+          "content": "19 works / 2 collections",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "hero",
+            "group": "collector-v2-collection-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-collection-002",
+          "block_type": "heading",
+          "text": "The collection.",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "hero",
+            "group": "collector-v2-collection-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-collection-003",
+          "block_type": "rich_text",
+          "content": "The full selection, including works from The Memes and three original Blitmaps. Open a work for a closer view, my notes and its source record.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "collector-v2-collection-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-collection-004",
+          "block_type": "gallery",
+          "asset_ids": [
+            "meme-48",
+            "meme-375",
+            "meme-2",
+            "meme-4",
+            "meme-9",
+            "meme-52",
+            "meme-1",
+            "meme-5",
+            "meme-37",
+            "meme-59",
+            "meme-118",
+            "meme-540",
+            "meme-47",
+            "meme-537",
+            "meme-103",
+            "meme-8",
+            "blitmap-1",
+            "blitmap-4",
+            "blitmap-13"
+          ],
+          "items": [
+            {
+              "asset_id": "meme-48",
+              "title": "Freedom to Explore",
+              "subtitle": "Cath Simard · The Memes #48",
+              "page_id": "page-work-48",
+              "category": "In focus"
+            },
+            {
+              "asset_id": "meme-375",
+              "title": "The Tree of Knowledge of Good and Evil",
+              "subtitle": "ACK · The Memes #375",
+              "page_id": "page-work-375",
+              "category": "In focus"
+            },
+            {
+              "asset_id": "meme-2",
+              "title": "SeizeJPGs",
+              "subtitle": "6529er · The Memes #2",
+              "page_id": "page-work-2",
+              "category": "Posters"
+            },
+            {
+              "asset_id": "meme-4",
+              "title": "NakamotoFreedom",
+              "subtitle": "6529er · The Memes #4",
+              "page_id": "page-work-4",
+              "category": "Posters"
+            },
+            {
+              "asset_id": "meme-9",
+              "title": "The Institutions Are Coming",
+              "subtitle": "6529er · The Memes #9",
+              "page_id": "page-work-9",
+              "category": "Posters"
+            },
+            {
+              "asset_id": "meme-52",
+              "title": "MEME FACTORY",
+              "subtitle": "Grant Riven Yun · The Memes #52",
+              "page_id": "page-work-52",
+              "category": "Posters"
+            },
+            {
+              "asset_id": "meme-1",
+              "title": "6529Seizing",
+              "subtitle": "6529er · The Memes #1",
+              "page_id": "page-work-1",
+              "category": "Faces"
+            },
+            {
+              "asset_id": "meme-5",
+              "title": "rekt6529",
+              "subtitle": "OSF · Still preview · Animated work · The Memes #5",
+              "page_id": "page-work-5",
+              "category": "Faces"
+            },
+            {
+              "asset_id": "meme-37",
+              "title": "Sgt. Pepe",
+              "subtitle": "Arsonic · The Memes #37",
+              "page_id": "page-work-37",
+              "category": "Faces"
+            },
+            {
+              "asset_id": "meme-59",
+              "title": "Greedy Morning",
+              "subtitle": "Tyronejkd · The Memes #59",
+              "page_id": "page-work-59",
+              "category": "Faces"
+            },
+            {
+              "asset_id": "meme-118",
+              "title": "The Socially Umpired Animals",
+              "subtitle": "Botto · The Memes #118",
+              "page_id": "page-work-118",
+              "category": "Faces"
+            },
+            {
+              "asset_id": "meme-540",
+              "title": "Tears of the Desert",
+              "subtitle": "Ebrahim_Elmi · The Memes #540",
+              "page_id": "page-work-540",
+              "category": "Faces"
+            },
+            {
+              "asset_id": "meme-47",
+              "title": "EXIT STRATEGY",
+              "subtitle": "XCOPY · Still preview · Animated work · The Memes #47",
+              "page_id": "page-work-47",
+              "category": "Screens"
+            },
+            {
+              "asset_id": "meme-537",
+              "title": "ＮＯ ＨＵＭＡＮ ＩＮＴＥＲＦＡＣＥ",
+              "subtitle": "MaNiC · Still preview · Animated work · The Memes #537",
+              "page_id": "page-work-537",
+              "category": "Screens"
+            },
+            {
+              "asset_id": "meme-103",
+              "title": "Don't Trust, Check.",
+              "subtitle": "Jack Butcher · The Memes #103",
+              "page_id": "page-work-103",
+              "category": "Screens"
+            },
+            {
+              "asset_id": "meme-8",
+              "title": "FirstGM",
+              "subtitle": "6529 · The Memes #8",
+              "page_id": "page-work-8",
+              "category": "Screens"
+            },
+            {
+              "asset_id": "blitmap-1",
+              "title": "Rose",
+              "subtitle": "dom · Blitmap #1",
+              "page_id": "page-work-b1",
+              "category": "Blitmap"
+            },
+            {
+              "asset_id": "blitmap-4",
+              "title": "Psychic",
+              "subtitle": "Veenus · Blitmap #4",
+              "page_id": "page-work-b4",
+              "category": "Blitmap"
+            },
+            {
+              "asset_id": "blitmap-13",
+              "title": "Jupiter",
+              "subtitle": "BigPapap · Blitmap #13",
+              "page_id": "page-work-b13",
+              "category": "Blitmap"
+            }
+          ],
+          "categories": ["In focus", "Posters", "Faces", "Screens", "Blitmap"],
+          "searchable": true,
+          "display_modes": ["grid", "list"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        }
+      ],
+      "navigationLabel": "Collection"
+    },
+    {
+      "slug": "sets",
+      "title": "Curated sets.",
+      "description": "I organise these works by the comparisons I want to make. The groupings change as I revise the notes; each set records the current arrangement.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "collector-v2-sets-001",
+          "block_type": "rich_text",
+          "content": "Four selections",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "hero",
+            "group": "collector-v2-sets-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-sets-002",
+          "block_type": "heading",
+          "text": "Curated sets.",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "hero",
+            "group": "collector-v2-sets-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-sets-003",
+          "block_type": "rich_text",
+          "content": "I organise these works by the comparisons I want to make. The groupings change as I revise the notes; each set records the current arrangement.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "collector-v2-sets-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-sets-004",
+          "block_type": "image",
+          "asset_id": "meme-2",
+          "title": "SeizeJPGs by 6529er",
+          "caption": "",
+          "page_id": "page-set-posters",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-sets-005",
+          "block_type": "image",
+          "asset_id": "meme-4",
+          "title": "NakamotoFreedom by 6529er",
+          "caption": "",
+          "page_id": "page-set-posters",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-sets-006",
+          "block_type": "rich_text",
+          "content": "4 works",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-sets-007",
+          "block_type": "heading",
+          "text": "The poster shelf",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-sets-008",
+          "block_type": "rich_text",
+          "content": "Lettering, persuasion and public address",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-sets-009",
+          "block_type": "button_link",
+          "label": "Explore the set",
+          "page_id": "page-set-posters",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-sets-010",
+          "block_type": "image",
+          "asset_id": "meme-1",
+          "title": "6529Seizing by 6529er",
+          "caption": "",
+          "page_id": "page-set-portraits",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-sets-011",
+          "block_type": "image",
+          "asset_id": "meme-5",
+          "title": "rekt6529 by OSF",
+          "caption": "",
+          "page_id": "page-set-portraits",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-sets-012",
+          "block_type": "rich_text",
+          "content": "6 works",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-sets-013",
+          "block_type": "heading",
+          "text": "Faces and characters",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-sets-014",
+          "block_type": "rich_text",
+          "content": "Portraiture across six different visual languages",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-sets-015",
+          "block_type": "button_link",
+          "label": "Explore the set",
+          "page_id": "page-set-portraits",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-sets-016",
+          "block_type": "image",
+          "asset_id": "meme-47",
+          "title": "EXIT STRATEGY by XCOPY",
+          "caption": "",
+          "page_id": "page-set-screens",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-4"
+          }
+        },
+        {
+          "id": "collector-v2-sets-017",
+          "block_type": "image",
+          "asset_id": "meme-537",
+          "title": "ＮＯ　ＨＵＭＡＮ　ＩＮＴＥＲＦＡＣＥ by MaNiC",
+          "caption": "",
+          "page_id": "page-set-screens",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-4"
+          }
+        },
+        {
+          "id": "collector-v2-sets-018",
+          "block_type": "rich_text",
+          "content": "4 works",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-4"
+          }
+        },
+        {
+          "id": "collector-v2-sets-019",
+          "block_type": "heading",
+          "text": "Screen culture",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-4"
+          }
+        },
+        {
+          "id": "collector-v2-sets-020",
+          "block_type": "rich_text",
+          "content": "Motion, verification and the social life of images",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-4"
+          }
+        },
+        {
+          "id": "collector-v2-sets-021",
+          "block_type": "button_link",
+          "label": "Explore the set",
+          "page_id": "page-set-screens",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-4"
+          }
+        },
+        {
+          "id": "collector-v2-sets-022",
+          "block_type": "image",
+          "asset_id": "blitmap-1",
+          "title": "Rose by dom",
+          "caption": "",
+          "page_id": "page-set-blitmap",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-sets-023",
+          "block_type": "image",
+          "asset_id": "blitmap-4",
+          "title": "Psychic by Veenus",
+          "caption": "",
+          "page_id": "page-set-blitmap",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-sets-024",
+          "block_type": "rich_text",
+          "content": "3 works",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-sets-025",
+          "block_type": "heading",
+          "text": "Three Blitmaps",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-sets-026",
+          "block_type": "rich_text",
+          "content": "Small images, exact decisions",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-sets-027",
+          "block_type": "button_link",
+          "label": "Explore the set",
+          "page_id": "page-set-blitmap",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "collector-v2-sets-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-sets-028",
+          "block_type": "rich_text",
+          "content": "Still finding their place",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "note",
+            "group": "collector-v2-sets-group-6"
+          }
+        },
+        {
+          "id": "collector-v2-sets-029",
+          "block_type": "heading",
+          "text": "Two works in focus",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-sets-group-6"
+          }
+        },
+        {
+          "id": "collector-v2-sets-030",
+          "block_type": "rich_text",
+          "content": "Freedom to Explore and The Tree of Knowledge of Good and Evil remain outside these groups. For now I prefer to give each its own space and return to the question of where it belongs.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-sets-group-6"
+          }
+        },
+        {
+          "id": "collector-v2-sets-031",
+          "block_type": "button_link",
+          "label": "Freedom to Explore ↗",
+          "page_id": "page-work-48",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-sets-group-6"
+          }
+        },
+        {
+          "id": "collector-v2-sets-032",
+          "block_type": "button_link",
+          "label": "The Tree of Knowledge of Good and Evil ↗",
+          "page_id": "page-work-375",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-sets-group-6"
+          }
+        }
+      ],
+      "navigationLabel": "Curated sets"
+    },
+    {
+      "slug": "set-posters",
+      "title": "The poster shelf",
+      "description": "The book projects on my desk often include campaign material and advertising. These four works use that visual language to address financial access, institutional buyers and the circulation of images. I keep them together when thinking about type, persuasion and who a poster is addressing.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-set-posters-001",
+          "block_type": "button_link",
+          "label": "← All curated sets",
+          "page_id": "page-sets",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-set-posters-002",
+          "block_type": "rich_text",
+          "content": "4 works / Curated set",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-set-posters-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-set-posters-003",
+          "block_type": "heading",
+          "text": "The poster shelf",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-set-posters-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-set-posters-004",
+          "block_type": "rich_text",
+          "content": "The book projects on my desk often include campaign material and advertising. These four works use that visual language to address financial access, institutional buyers and the circulation of images. I keep them together when thinking about type, persuasion and who a poster is addressing.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-posters-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-set-posters-005",
+          "block_type": "gallery",
+          "asset_ids": ["meme-2", "meme-4", "meme-9"],
+          "items": [
+            {
+              "asset_id": "meme-2",
+              "title": "SeizeJPGs by 6529er",
+              "subtitle": "",
+              "page_id": "page-work-2"
+            },
+            {
+              "asset_id": "meme-4",
+              "title": "NakamotoFreedom by 6529er",
+              "subtitle": "",
+              "page_id": "page-work-4"
+            },
+            {
+              "asset_id": "meme-9",
+              "title": "The Institutions Are Coming by 6529er",
+              "subtitle": "",
+              "page_id": "page-work-9"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        },
+        {
+          "id": "collector-v2-set-posters-006",
+          "block_type": "heading",
+          "text": "Notes on the selection",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-posters-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-set-posters-007",
+          "block_type": "rich_text",
+          "content": "I keep these together because they treat words as part of the composition. SeizeJPGs and NakamotoFreedom make their statements immediately; MEME FACTORY allows the landscape to hold attention after the headline has registered. The Institutions Are Coming brings a different tone to the group.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-posters-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-set-posters-008",
+          "block_type": "heading",
+          "text": "The works",
+          "level": 2,
+          "presentation": {
+            "span": "two_thirds",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-posters-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-set-posters-009",
+          "block_type": "rich_text",
+          "content": "4 in this set",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-set-posters-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-set-posters-010",
+          "block_type": "gallery",
+          "asset_ids": ["meme-2", "meme-4", "meme-9", "meme-52"],
+          "items": [
+            {
+              "asset_id": "meme-2",
+              "title": "SeizeJPGs",
+              "subtitle": "6529er · The Memes #2",
+              "page_id": "page-work-2"
+            },
+            {
+              "asset_id": "meme-4",
+              "title": "NakamotoFreedom",
+              "subtitle": "6529er · The Memes #4",
+              "page_id": "page-work-4"
+            },
+            {
+              "asset_id": "meme-9",
+              "title": "The Institutions Are Coming",
+              "subtitle": "6529er · The Memes #9",
+              "page_id": "page-work-9"
+            },
+            {
+              "asset_id": "meme-52",
+              "title": "MEME FACTORY",
+              "subtitle": "Grant Riven Yun · The Memes #52",
+              "page_id": "page-work-52"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        }
+      ],
+      "navigationLabel": "The poster shelf"
+    },
+    {
+      "slug": "set-portraits",
+      "title": "Faces and characters",
+      "description": "Portraits were my way into digital art. I was already collecting photography books and found an unexpected connection between the carefully composed portrait and the deliberately crude avatar. This set follows that interest through borrowed characters, caricature and Ebrahim_Elmi’s Tears of the Dese",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-set-portraits-001",
+          "block_type": "button_link",
+          "label": "← All curated sets",
+          "page_id": "page-sets",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-set-portraits-002",
+          "block_type": "rich_text",
+          "content": "6 works / Curated set",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-set-portraits-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-set-portraits-003",
+          "block_type": "heading",
+          "text": "Faces and characters",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-set-portraits-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-set-portraits-004",
+          "block_type": "rich_text",
+          "content": "Portraits were my way into digital art. I was already collecting photography books and found an unexpected connection between the carefully composed portrait and the deliberately crude avatar. This set follows that interest through borrowed characters, caricature and Ebrahim_Elmi’s Tears of the Desert.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-portraits-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-set-portraits-005",
+          "block_type": "gallery",
+          "asset_ids": ["meme-1", "meme-5", "meme-37"],
+          "items": [
+            {
+              "asset_id": "meme-1",
+              "title": "6529Seizing by 6529er",
+              "subtitle": "",
+              "page_id": "page-work-1"
+            },
+            {
+              "asset_id": "meme-5",
+              "title": "rekt6529 by OSF",
+              "subtitle": "",
+              "page_id": "page-work-5"
+            },
+            {
+              "asset_id": "meme-37",
+              "title": "Sgt. Pepe by Arsonic",
+              "subtitle": "",
+              "page_id": "page-work-37"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        },
+        {
+          "id": "collector-v2-set-portraits-006",
+          "block_type": "heading",
+          "text": "Notes on the selection",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-portraits-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-set-portraits-007",
+          "block_type": "rich_text",
+          "content": "This selection began with 6529Seizing and expanded as I encountered very different treatments of the face. Ebrahim_Elmi’s photograph sits alongside work by OSF, Arsonic, Tyronejkd and Botto. The comparison is editorial; it makes no claim that these artists share a method or intention.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-portraits-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-set-portraits-008",
+          "block_type": "heading",
+          "text": "The works",
+          "level": 2,
+          "presentation": {
+            "span": "two_thirds",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-portraits-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-set-portraits-009",
+          "block_type": "rich_text",
+          "content": "6 in this set",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-set-portraits-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-set-portraits-010",
+          "block_type": "gallery",
+          "asset_ids": [
+            "meme-1",
+            "meme-5",
+            "meme-37",
+            "meme-59",
+            "meme-118",
+            "meme-540"
+          ],
+          "items": [
+            {
+              "asset_id": "meme-1",
+              "title": "6529Seizing",
+              "subtitle": "6529er · The Memes #1",
+              "page_id": "page-work-1"
+            },
+            {
+              "asset_id": "meme-5",
+              "title": "rekt6529",
+              "subtitle": "OSF · Still preview · Animated work · The Memes #5",
+              "page_id": "page-work-5"
+            },
+            {
+              "asset_id": "meme-37",
+              "title": "Sgt. Pepe",
+              "subtitle": "Arsonic · The Memes #37",
+              "page_id": "page-work-37"
+            },
+            {
+              "asset_id": "meme-59",
+              "title": "Greedy Morning",
+              "subtitle": "Tyronejkd · The Memes #59",
+              "page_id": "page-work-59"
+            },
+            {
+              "asset_id": "meme-118",
+              "title": "The Socially Umpired Animals",
+              "subtitle": "Botto · The Memes #118",
+              "page_id": "page-work-118"
+            },
+            {
+              "asset_id": "meme-540",
+              "title": "Tears of the Desert",
+              "subtitle": "Ebrahim_Elmi · The Memes #540",
+              "page_id": "page-work-540"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        }
+      ],
+      "navigationLabel": "Faces and characters"
+    },
+    {
+      "slug": "set-screens",
+      "title": "Screen culture",
+      "description": "FirstGM is a social post preserved as an image. Putting it beside XCOPY, MaNiC and Jack Butcher records several ways crypto addresses its own audience: greeting, humour, spectacle and argument. For the animated works, the still image is only an entry point.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-set-screens-001",
+          "block_type": "button_link",
+          "label": "← All curated sets",
+          "page_id": "page-sets",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-set-screens-002",
+          "block_type": "rich_text",
+          "content": "4 works / Curated set",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-set-screens-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-set-screens-003",
+          "block_type": "heading",
+          "text": "Screen culture",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-set-screens-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-set-screens-004",
+          "block_type": "rich_text",
+          "content": "FirstGM is a social post preserved as an image. Putting it beside XCOPY, MaNiC and Jack Butcher records several ways crypto addresses its own audience: greeting, humour, spectacle and argument. For the animated works, the still image is only an entry point.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-screens-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-set-screens-005",
+          "block_type": "gallery",
+          "asset_ids": ["meme-47", "meme-537", "meme-103"],
+          "items": [
+            {
+              "asset_id": "meme-47",
+              "title": "EXIT STRATEGY by XCOPY",
+              "subtitle": "",
+              "page_id": "page-work-47"
+            },
+            {
+              "asset_id": "meme-537",
+              "title": "ＮＯ　ＨＵＭＡＮ　ＩＮＴＥＲＦＡＣＥ by MaNiC",
+              "subtitle": "",
+              "page_id": "page-work-537"
+            },
+            {
+              "asset_id": "meme-103",
+              "title": "Don't Trust, Check. by Jack Butcher",
+              "subtitle": "",
+              "page_id": "page-work-103"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        },
+        {
+          "id": "collector-v2-set-screens-006",
+          "block_type": "heading",
+          "text": "Notes on the selection",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-screens-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-set-screens-007",
+          "block_type": "rich_text",
+          "content": "EXIT STRATEGY and NO HUMAN INTERFACE need to be seen in their original moving formats. Don’t Trust, Check. joins FirstGM here because I read its network of coloured nodes as a question about how claims are checked across a community.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-screens-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-set-screens-008",
+          "block_type": "heading",
+          "text": "The works",
+          "level": 2,
+          "presentation": {
+            "span": "two_thirds",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-screens-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-set-screens-009",
+          "block_type": "rich_text",
+          "content": "4 in this set",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-set-screens-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-set-screens-010",
+          "block_type": "gallery",
+          "asset_ids": ["meme-47", "meme-537", "meme-103", "meme-8"],
+          "items": [
+            {
+              "asset_id": "meme-47",
+              "title": "EXIT STRATEGY",
+              "subtitle": "XCOPY · Still preview · Animated work · The Memes #47",
+              "page_id": "page-work-47"
+            },
+            {
+              "asset_id": "meme-537",
+              "title": "ＮＯ ＨＵＭＡＮ ＩＮＴＥＲＦＡＣＥ",
+              "subtitle": "MaNiC · Still preview · Animated work · The Memes #537",
+              "page_id": "page-work-537"
+            },
+            {
+              "asset_id": "meme-103",
+              "title": "Don't Trust, Check.",
+              "subtitle": "Jack Butcher · The Memes #103",
+              "page_id": "page-work-103"
+            },
+            {
+              "asset_id": "meme-8",
+              "title": "FirstGM",
+              "subtitle": "6529 · The Memes #8",
+              "page_id": "page-work-8"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        }
+      ],
+      "navigationLabel": "Screen culture"
+    },
+    {
+      "slug": "set-blitmap",
+      "title": "Three Blitmaps",
+      "description": "My interest in Blitmap comes from working at the other end of the scale: large printed pages assembled from many small decisions. These original works use a 32 × 32 grid, where a single pixel can change an edge or an expression.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-set-blitmap-001",
+          "block_type": "button_link",
+          "label": "← All curated sets",
+          "page_id": "page-sets",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-set-blitmap-002",
+          "block_type": "rich_text",
+          "content": "3 works / Curated set",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-set-blitmap-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-set-blitmap-003",
+          "block_type": "heading",
+          "text": "Three Blitmaps",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-set-blitmap-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-set-blitmap-004",
+          "block_type": "rich_text",
+          "content": "My interest in Blitmap comes from working at the other end of the scale: large printed pages assembled from many small decisions. These original works use a 32 × 32 grid, where a single pixel can change an edge or an expression.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-blitmap-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-set-blitmap-005",
+          "block_type": "gallery",
+          "asset_ids": ["blitmap-1", "blitmap-4", "blitmap-13"],
+          "items": [
+            {
+              "asset_id": "blitmap-1",
+              "title": "Rose by dom",
+              "subtitle": "",
+              "page_id": "page-work-b1"
+            },
+            {
+              "asset_id": "blitmap-4",
+              "title": "Psychic by Veenus",
+              "subtitle": "",
+              "page_id": "page-work-b4"
+            },
+            {
+              "asset_id": "blitmap-13",
+              "title": "Jupiter by BigPapap",
+              "subtitle": "",
+              "page_id": "page-work-b13"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        },
+        {
+          "id": "collector-v2-set-blitmap-006",
+          "block_type": "heading",
+          "text": "Notes on the selection",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-blitmap-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-set-blitmap-007",
+          "block_type": "rich_text",
+          "content": "I chose Rose, Psychic and Jupiter for their different treatment of familiar subjects. I keep the enlarged pixel edges visible rather than smoothing them for the screen. The original collection is public domain; the work records here retain the onchain creator names.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-blitmap-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-set-blitmap-008",
+          "block_type": "heading",
+          "text": "The works",
+          "level": 2,
+          "presentation": {
+            "span": "two_thirds",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-set-blitmap-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-set-blitmap-009",
+          "block_type": "rich_text",
+          "content": "3 in this set",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-set-blitmap-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-set-blitmap-010",
+          "block_type": "gallery",
+          "asset_ids": ["blitmap-1", "blitmap-4", "blitmap-13"],
+          "items": [
+            {
+              "asset_id": "blitmap-1",
+              "title": "Rose",
+              "subtitle": "dom · Blitmap #1",
+              "page_id": "page-work-b1"
+            },
+            {
+              "asset_id": "blitmap-4",
+              "title": "Psychic",
+              "subtitle": "Veenus · Blitmap #4",
+              "page_id": "page-work-b4"
+            },
+            {
+              "asset_id": "blitmap-13",
+              "title": "Jupiter",
+              "subtitle": "BigPapap · Blitmap #13",
+              "page_id": "page-work-b13"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        }
+      ],
+      "navigationLabel": "Three Blitmaps"
+    },
+    {
+      "slug": "notes",
+      "title": "Notebook.",
+      "description": "Working notes on the selection. I write these to remember what held my attention and what changed when I put one work beside another.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "collector-v2-notes-001",
+          "block_type": "rich_text",
+          "content": "Looking, pairing, revising",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "hero",
+            "group": "collector-v2-notes-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-notes-002",
+          "block_type": "heading",
+          "text": "Notebook.",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "hero",
+            "group": "collector-v2-notes-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-notes-003",
+          "block_type": "rich_text",
+          "content": "Working notes on the selection. I write these to remember what held my attention and what changed when I put one work beside another.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "collector-v2-notes-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-notes-004",
+          "block_type": "rich_text",
+          "content": "12 September 2026",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-notes-005",
+          "block_type": "image",
+          "asset_id": "meme-48",
+          "title": "Freedom to Explore by Cath Simard",
+          "caption": "",
+          "page_id": "page-work-48",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-notes-006",
+          "block_type": "heading",
+          "text": "Scale in Freedom to Explore",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-notes-007",
+          "block_type": "rich_text",
+          "content": "I selected Freedom to Explore as a link between the landscapes and posters on this wall. Its statement about freedom is explicit, but the immersive setting gives it a different weight from the emphatic lettering of SeizeJPGs.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-notes-008",
+          "block_type": "rich_text",
+          "content": "That relationship is easy to miss in a thumbnail. The figure establishes the scale of the cavern; at a larger size, the political statement becomes one element within a much more expansive image.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-notes-009",
+          "block_type": "button_link",
+          "label": "View Freedom to Explore",
+          "page_id": "page-work-48",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-notes-010",
+          "block_type": "rich_text",
+          "content": "8 September 2026",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-notes-011",
+          "block_type": "image",
+          "asset_id": "meme-52",
+          "title": "MEME FACTORY by Grant Riven Yun",
+          "caption": "",
+          "page_id": "page-work-52",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-notes-012",
+          "block_type": "heading",
+          "text": "MEME FACTORY and the poster format",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-notes-013",
+          "block_type": "rich_text",
+          "content": "MEME FACTORY combines the emphatic language of a poster with an unusually restrained industrial landscape. The power lines, trees and chimney bands reward attention after the headline has registered.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-notes-014",
+          "block_type": "rich_text",
+          "content": "I’ve paired it with Freedom to Explore to compare their treatment of place. Both embed a statement in a landscape, but their use of depth, colour and typography produces very different encounters.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-notes-015",
+          "block_type": "button_link",
+          "label": "View MEME FACTORY",
+          "page_id": "page-work-52",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-notes-016",
+          "block_type": "rich_text",
+          "content": "2 September 2026",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-4"
+          }
+        },
+        {
+          "id": "collector-v2-notes-017",
+          "block_type": "image",
+          "asset_id": "meme-47",
+          "title": "EXIT STRATEGY by XCOPY",
+          "caption": "",
+          "page_id": "page-work-47",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-4"
+          }
+        },
+        {
+          "id": "collector-v2-notes-018",
+          "block_type": "heading",
+          "text": "Keeping the original file in view",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-4"
+          }
+        },
+        {
+          "id": "collector-v2-notes-019",
+          "block_type": "rich_text",
+          "content": "A still image is useful when arranging a page, but it leaves out a defining part of an animated work. I keep the original records beside EXIT STRATEGY, rekt6529 and NO HUMAN INTERFACE so that the browsing format does not become a substitute for the work.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-4"
+          }
+        },
+        {
+          "id": "collector-v2-notes-020",
+          "block_type": "rich_text",
+          "content": "This also changes how I use the notebook. I can compare a printed proof of several stills, then return to the moving files before settling on a sequence. The final grouping needs to hold up in both situations.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-4"
+          }
+        },
+        {
+          "id": "collector-v2-notes-021",
+          "block_type": "button_link",
+          "label": "View EXIT STRATEGY",
+          "page_id": "page-work-47",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-4"
+          }
+        },
+        {
+          "id": "collector-v2-notes-022",
+          "block_type": "rich_text",
+          "content": "26 August 2026",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-notes-023",
+          "block_type": "image",
+          "asset_id": "blitmap-1",
+          "title": "Rose by dom",
+          "caption": "",
+          "page_id": "page-work-b1",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-notes-024",
+          "block_type": "heading",
+          "text": "A page for three Blitmaps",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-notes-025",
+          "block_type": "rich_text",
+          "content": "I added Rose, Psychic and Jupiter after trying a page of much smaller images. Enlarging the pixel grid made their different decisions about shape and colour easier to compare. I have kept the three at the same size.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-notes-026",
+          "block_type": "rich_text",
+          "content": "The shelf is deliberately separate from the poster and portrait groups. I want the collection labels and creator names to remain clear even when the works share a page.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-5"
+          }
+        },
+        {
+          "id": "collector-v2-notes-027",
+          "block_type": "button_link",
+          "label": "View Rose",
+          "page_id": "page-work-b1",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-notes-group-5"
+          }
+        }
+      ],
+      "navigationLabel": "Notebook"
+    },
+    {
+      "slug": "about",
+      "title": "About Mara.",
+      "description": "Book design, digital art and a growing printed index of both.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "collector-v2-about-001",
+          "block_type": "rich_text",
+          "content": "Bristol, UK",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "hero",
+            "group": "collector-v2-about-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-about-002",
+          "block_type": "heading",
+          "text": "About Mara.",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "hero",
+            "group": "collector-v2-about-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-about-003",
+          "block_type": "rich_text",
+          "content": "Book design, digital art and a growing printed index of both.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "collector-v2-about-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-about-004",
+          "block_type": "image",
+          "asset_id": "meme-375",
+          "title": "The Tree of Knowledge of Good and Evil by ACK",
+          "caption": "ACK · The Memes #375",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "biography",
+            "group": "collector-v2-about-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-about-005",
+          "block_type": "heading",
+          "text": "Mara Bell",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "biography",
+            "group": "collector-v2-about-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-about-006",
+          "block_type": "rich_text",
+          "content": "I’m an independent book designer based in Bristol. I work with small publishers and artists on photography books, exhibition catalogues and occasional pamphlets. My working week usually involves arranging images, discussing captions with an editor and making paper proofs before anything goes to press.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "biography",
+            "group": "collector-v2-about-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-about-007",
+          "block_type": "rich_text",
+          "content": "I came to digital art through the artists I was following, then stayed for the collecting communities. The early Memes particularly interested me because their poster language was familiar, while the arguments and the way the images circulated were new to me. This selection has since expanded to include photography, animation and work that borrows the conventions of portraiture.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "biography",
+            "group": "collector-v2-about-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-about-008",
+          "block_type": "rich_text",
+          "content": "The sets here reflect how I organise my own references. They change when I find a better pairing or return to something I had dismissed too quickly. Freedom to Explore and The Tree of Knowledge of Good and Evil sit outside those groups for now; both are works I want to spend more time with before deciding where they belong.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "biography",
+            "group": "collector-v2-about-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-about-009",
+          "block_type": "callout",
+          "title": "",
+          "content": "Looking at: The Memes, Blitmap, digital editions and artist books\nOn the desk: A printed catalogue of the current selection, with space for revised notes\nOn 6529: Following artists and comparing notes with collectors",
+          "rows": [
+            {
+              "label": "Looking at",
+              "value": "The Memes, Blitmap, digital editions and artist books"
+            },
+            {
+              "label": "On the desk",
+              "value": "A printed catalogue of the current selection, with space for revised notes"
+            },
+            {
+              "label": "On 6529",
+              "value": "Following artists and comparing notes with collectors"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "biography",
+            "group": "collector-v2-about-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-about-010",
+          "block_type": "rich_text",
+          "content": "Away from the screen, I collect artist books and visit print fairs. Correspondence about an artist, a book or a useful source is always welcome.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "biography",
+            "group": "collector-v2-about-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-about-011",
+          "block_type": "heading",
+          "text": "Get in touch",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "collector-v2-about-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-about-012",
+          "block_type": "rich_text",
+          "content": "For correspondence about art, books or the selection.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "collector-v2-about-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-about-013",
+          "block_type": "callout",
+          "title": "mara@example.org",
+          "email": "mara@example.org",
+          "content": "",
+          "subject": "Enquiry",
+          "form": false,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "collector-v2-about-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-example-disclosure",
+          "block_type": "rich_text",
+          "content": "Fictional collector. This selection does not imply NFT ownership.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note"
+          }
+        }
+      ],
+      "navigationLabel": "About"
+    },
+    {
+      "slug": "work-48",
+      "title": "Freedom to Explore",
+      "description": "I selected Freedom to Explore as a link between the landscapes and posters on this wall. Its statement about freedom is explicit, but the immersive setting gives it a different weight from the emphatic lettering of SeizeJPGs.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-48-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-48-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-48-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-48-003",
+          "block_type": "heading",
+          "text": "Freedom to Explore",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-48-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-48-004",
+          "block_type": "rich_text",
+          "content": "Cath Simard",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-48-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-48-005",
+          "block_type": "rich_text",
+          "content": "#48",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-48-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-48-006",
+          "block_type": "image",
+          "asset_id": "meme-48",
+          "title": "Freedom to Explore by Cath Simard",
+          "caption": "Artwork shown in its original proportions. Cath Simard · The Memes #48 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-48-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-48-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-48-008",
+          "block_type": "rich_text",
+          "content": "I selected Freedom to Explore as a link between the landscapes and posters on this wall. Its statement about freedom is explicit, but the immersive setting gives it a different weight from the emphatic lettering of SeizeJPGs.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-48-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-48-009",
+          "block_type": "button_link",
+          "label": "Back to the wall",
+          "page_id": "page-home",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-48-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-48-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Cath Simard\nCollection: The Memes #48\nOriginal: JPEG · 1,920 × 2,400 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: Open original image ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Cath Simard"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #48"
+            },
+            {
+              "label": "Original",
+              "value": "JPEG · 1,920 × 2,400 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "Open original image ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-48-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-48-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/48",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-48-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-48-012",
+          "block_type": "button_link",
+          "label": "Open original image ↗",
+          "href": "https://arweave.net/Ud4ZqHkPHMAtVhLvIa-0hpa9c3FH5NvBXxRl_XC8yFQ",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-48-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "Freedom to Explore"
+    },
+    {
+      "slug": "work-375",
+      "title": "The Tree of Knowledge of Good and Evil",
+      "description": "I tend to give this work its own page rather than place it in a crowded row. The familiar title provides an entry point, while the density of the image demands a slower reading. It is one of the works I return to when revising the sequence of this selection.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-375-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-375-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-375-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-375-003",
+          "block_type": "heading",
+          "text": "The Tree of Knowledge of Good and Evil",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-375-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-375-004",
+          "block_type": "rich_text",
+          "content": "ACK",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-375-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-375-005",
+          "block_type": "rich_text",
+          "content": "#375",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-375-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-375-006",
+          "block_type": "image",
+          "asset_id": "meme-375",
+          "title": "The Tree of Knowledge of Good and Evil by ACK",
+          "caption": "Artwork shown in its original proportions. ACK · The Memes #375 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-375-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-375-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-375-008",
+          "block_type": "rich_text",
+          "content": "I tend to give this work its own page rather than place it in a crowded row. The familiar title provides an entry point, while the density of the image demands a slower reading. It is one of the works I return to when revising the sequence of this selection.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-375-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-375-009",
+          "block_type": "button_link",
+          "label": "Back to the wall",
+          "page_id": "page-home",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-375-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-375-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: ACK\nCollection: The Memes #375\nOriginal: PNG · 5,500 × 5,940 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: Open original image ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "ACK"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #375"
+            },
+            {
+              "label": "Original",
+              "value": "PNG · 5,500 × 5,940 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "Open original image ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-375-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-375-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/375",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-375-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-375-012",
+          "block_type": "button_link",
+          "label": "Open original image ↗",
+          "href": "https://arweave.net/l8u02XnU5vLB2zvFoCKr4z2MUa5Dl4zeORP_OQWZ0fc",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-375-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "The Tree of Knowledge of Good and Evil"
+    },
+    {
+      "slug": "work-2",
+      "title": "SeizeJPGs",
+      "description": "Its hierarchy is immediate: slogan, fist, sunburst. I read it alongside MEME FACTORY as a contrasting use of the same poster format, with scale and emphasis handled quite differently.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-2-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-2-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-2-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-2-003",
+          "block_type": "heading",
+          "text": "SeizeJPGs",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-2-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-2-004",
+          "block_type": "rich_text",
+          "content": "6529er",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-2-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-2-005",
+          "block_type": "rich_text",
+          "content": "#2",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-2-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-2-006",
+          "block_type": "image",
+          "asset_id": "meme-2",
+          "title": "SeizeJPGs by 6529er",
+          "caption": "Artwork shown in its original proportions. 6529er · The Memes #2 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-2-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-2-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-2-008",
+          "block_type": "rich_text",
+          "content": "Its hierarchy is immediate: slogan, fist, sunburst. I read it alongside MEME FACTORY as a contrasting use of the same poster format, with scale and emphasis handled quite differently.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-2-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-2-009",
+          "block_type": "button_link",
+          "label": "In The poster shelf",
+          "page_id": "page-set-posters",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-2-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-2-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: 6529er\nCollection: The Memes #2\nOriginal: JPEG · 3,241 × 4,744 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: Open original image ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "6529er"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #2"
+            },
+            {
+              "label": "Original",
+              "value": "JPEG · 3,241 × 4,744 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "Open original image ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-2-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-2-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/2",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-2-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-2-012",
+          "block_type": "button_link",
+          "label": "Open original image ↗",
+          "href": "https://arweave.net/-MkTbohLWHDR66ufDwGJiTaBG1jZFMpTaTwwtLCPoSg",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-2-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "SeizeJPGs"
+    },
+    {
+      "slug": "work-4",
+      "title": "NakamotoFreedom",
+      "description": "I included NakamotoFreedom in the poster set because its demand is inseparable from its graphic treatment. It is useful to view it beside SeizeJPGs, then return to the quieter scene in MEME FACTORY.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-4-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-4-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-4-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-4-003",
+          "block_type": "heading",
+          "text": "NakamotoFreedom",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-4-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-4-004",
+          "block_type": "rich_text",
+          "content": "6529er",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-4-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-4-005",
+          "block_type": "rich_text",
+          "content": "#4",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-4-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-4-006",
+          "block_type": "image",
+          "asset_id": "meme-4",
+          "title": "NakamotoFreedom by 6529er",
+          "caption": "Artwork shown in its original proportions. 6529er · The Memes #4 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-4-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-4-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-4-008",
+          "block_type": "rich_text",
+          "content": "I included NakamotoFreedom in the poster set because its demand is inseparable from its graphic treatment. It is useful to view it beside SeizeJPGs, then return to the quieter scene in MEME FACTORY.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-4-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-4-009",
+          "block_type": "button_link",
+          "label": "In The poster shelf",
+          "page_id": "page-set-posters",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-4-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-4-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: 6529er\nCollection: The Memes #4\nOriginal: JPEG · 3,241 × 4,744 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: Open original image ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "6529er"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #4"
+            },
+            {
+              "label": "Original",
+              "value": "JPEG · 3,241 × 4,744 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "Open original image ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-4-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-4-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/4",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-4-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-4-012",
+          "block_type": "button_link",
+          "label": "Open original image ↗",
+          "href": "https://arweave.net/lYUFW-vRUNYZC0Mlw45_uua_9KzCF4vwE3-aRU-5SVI",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-4-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "NakamotoFreedom"
+    },
+    {
+      "slug": "work-9",
+      "title": "The Institutions Are Coming",
+      "description": "The title gives this work a deliberately expectant tone. I keep it with the posters because humour can make a public statement as effectively as a direct slogan.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-9-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-9-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-9-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-9-003",
+          "block_type": "heading",
+          "text": "The Institutions Are Coming",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-9-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-9-004",
+          "block_type": "rich_text",
+          "content": "6529er",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-9-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-9-005",
+          "block_type": "rich_text",
+          "content": "#9",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-9-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-9-006",
+          "block_type": "image",
+          "asset_id": "meme-9",
+          "title": "The Institutions Are Coming by 6529er",
+          "caption": "Artwork shown in its original proportions. 6529er · The Memes #9 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-9-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-9-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-9-008",
+          "block_type": "rich_text",
+          "content": "The title gives this work a deliberately expectant tone. I keep it with the posters because humour can make a public statement as effectively as a direct slogan.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-9-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-9-009",
+          "block_type": "button_link",
+          "label": "In The poster shelf",
+          "page_id": "page-set-posters",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-9-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-9-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: 6529er\nCollection: The Memes #9\nOriginal: JPEG · 2,161 × 2,991 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: Open original image ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "6529er"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #9"
+            },
+            {
+              "label": "Original",
+              "value": "JPEG · 2,161 × 2,991 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "Open original image ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-9-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-9-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/9",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-9-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-9-012",
+          "block_type": "button_link",
+          "label": "Open original image ↗",
+          "href": "https://arweave.net/ddmoXl2XeFoqk3qtc9cYElirXkUdZCVKxUvl5rv6c-Y",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-9-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "The Institutions Are Coming"
+    },
+    {
+      "slug": "work-52",
+      "title": "MEME FACTORY",
+      "description": "I value the contrast between the emphatic lettering and the restrained landscape. The power lines, trees and chimney bands reward attention after the headline has registered.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-52-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-52-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-52-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-52-003",
+          "block_type": "heading",
+          "text": "MEME FACTORY",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-52-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-52-004",
+          "block_type": "rich_text",
+          "content": "Grant Riven Yun",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-52-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-52-005",
+          "block_type": "rich_text",
+          "content": "#52",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-52-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-52-006",
+          "block_type": "image",
+          "asset_id": "meme-52",
+          "title": "MEME FACTORY by Grant Riven Yun",
+          "caption": "Artwork shown in its original proportions. Grant Riven Yun · The Memes #52 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-52-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-52-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-52-008",
+          "block_type": "rich_text",
+          "content": "I value the contrast between the emphatic lettering and the restrained landscape. The power lines, trees and chimney bands reward attention after the headline has registered.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-52-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-52-009",
+          "block_type": "button_link",
+          "label": "In The poster shelf",
+          "page_id": "page-set-posters",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-52-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-52-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Grant Riven Yun\nCollection: The Memes #52\nOriginal: JPEG · 4,250 × 5,667 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: Open original image ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Grant Riven Yun"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #52"
+            },
+            {
+              "label": "Original",
+              "value": "JPEG · 4,250 × 5,667 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "Open original image ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-52-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-52-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/52",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-52-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-52-012",
+          "block_type": "button_link",
+          "label": "Open original image ↗",
+          "href": "https://arweave.net/80j_EJJG_w432PJGDoHpT9ktH1MtZzzwqU995_ciG8c",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-52-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "MEME FACTORY"
+    },
+    {
+      "slug": "work-1",
+      "title": "6529Seizing",
+      "description": "A counterpart to SeizeJPGs: the slogan becomes part of a recognisable identity rather than the principal element of a poster. It was the starting point for my Faces and characters set.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-1-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-1-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-1-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-1-003",
+          "block_type": "heading",
+          "text": "6529Seizing",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-1-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-1-004",
+          "block_type": "rich_text",
+          "content": "6529er",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-1-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-1-005",
+          "block_type": "rich_text",
+          "content": "#1",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-1-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-1-006",
+          "block_type": "image",
+          "asset_id": "meme-1",
+          "title": "6529Seizing by 6529er",
+          "caption": "Artwork shown in its original proportions. 6529er · The Memes #1 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-1-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-1-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-1-008",
+          "block_type": "rich_text",
+          "content": "A counterpart to SeizeJPGs: the slogan becomes part of a recognisable identity rather than the principal element of a poster. It was the starting point for my Faces and characters set.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-1-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-1-009",
+          "block_type": "button_link",
+          "label": "In Faces and characters",
+          "page_id": "page-set-portraits",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-1-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-1-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: 6529er\nCollection: The Memes #1\nOriginal: JPEG · 3,241 × 4,744 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: Open original image ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "6529er"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #1"
+            },
+            {
+              "label": "Original",
+              "value": "JPEG · 3,241 × 4,744 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "Open original image ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-1-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-1-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/1",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-1-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-1-012",
+          "block_type": "button_link",
+          "label": "Open original image ↗",
+          "href": "https://arweave.net/eu-bNSvl6cRsi0DwZud2QRfOmaan-a6kI8OpWBkbyl0",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-1-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "6529Seizing"
+    },
+    {
+      "slug": "work-5",
+      "title": "rekt6529",
+      "description": "I included OSF’s work to widen the visual range of the portrait selection. The drawn skull changes the register of a group that also includes photographic, painted and pixel-based faces. I refer readers to the original animation as well as this still preview.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-5-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-5-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-5-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-5-003",
+          "block_type": "heading",
+          "text": "rekt6529",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-5-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-5-004",
+          "block_type": "rich_text",
+          "content": "OSF",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-5-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-5-005",
+          "block_type": "rich_text",
+          "content": "#5",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-5-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-5-006",
+          "block_type": "image",
+          "asset_id": "meme-5",
+          "title": "rekt6529 by OSF",
+          "caption": "Still preview of an animated work. OSF · The Memes #5 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-5-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-5-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-5-008",
+          "block_type": "rich_text",
+          "content": "I included OSF’s work to widen the visual range of the portrait selection. The drawn skull changes the register of a group that also includes photographic, painted and pixel-based faces. I refer readers to the original animation as well as this still preview.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-5-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-5-009",
+          "block_type": "button_link",
+          "label": "In Faces and characters",
+          "page_id": "page-set-portraits",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-5-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-5-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: OSF\nCollection: The Memes #5\nOriginal: GIF · 2,048 × 2,732 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: View original animation ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "OSF"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #5"
+            },
+            {
+              "label": "Original",
+              "value": "GIF · 2,048 × 2,732 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "View original animation ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-5-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-5-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/5",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-5-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-5-012",
+          "block_type": "button_link",
+          "label": "View original animation ↗",
+          "href": "https://arweave.net/WjpA-XWxKYVg6OI2TcOXZJpPw5Oh3wg-XhRyv9ZV3_s",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-5-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "rekt6529"
+    },
+    {
+      "slug": "work-37",
+      "title": "Sgt. Pepe",
+      "description": "Sgt. Pepe belongs here because of the references its audience brings to the image. I’m interested in that prior familiarity: how much of a picture we recognise before we have properly looked at it.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-37-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-37-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-37-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-37-003",
+          "block_type": "heading",
+          "text": "Sgt. Pepe",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-37-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-37-004",
+          "block_type": "rich_text",
+          "content": "Arsonic",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-37-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-37-005",
+          "block_type": "rich_text",
+          "content": "#37",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-37-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-37-006",
+          "block_type": "image",
+          "asset_id": "meme-37",
+          "title": "Sgt. Pepe by Arsonic",
+          "caption": "Artwork shown in its original proportions. Arsonic · The Memes #37 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-37-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-37-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-37-008",
+          "block_type": "rich_text",
+          "content": "Sgt. Pepe belongs here because of the references its audience brings to the image. I’m interested in that prior familiarity: how much of a picture we recognise before we have properly looked at it.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-37-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-37-009",
+          "block_type": "button_link",
+          "label": "In Faces and characters",
+          "page_id": "page-set-portraits",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-37-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-37-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Arsonic\nCollection: The Memes #37\nOriginal: JPEG · 4,480 × 5,720 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: Open original image ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Arsonic"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #37"
+            },
+            {
+              "label": "Original",
+              "value": "JPEG · 4,480 × 5,720 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "Open original image ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-37-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-37-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/37",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-37-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-37-012",
+          "block_type": "button_link",
+          "label": "Open original image ↗",
+          "href": "https://arweave.net/CLiT1eIwf-6ow_dVYBB61Nas0dow40cSUFjvSq_oyrs",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-37-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "Sgt. Pepe"
+    },
+    {
+      "slug": "work-59",
+      "title": "Greedy Morning",
+      "description": "This is one of the sharpest changes of surface in the portrait group. I placed it after OSF’s drawing in my working sequence, then moved it beside Sgt. Pepe to compare two treatments of a familiar character.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-59-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-59-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-59-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-59-003",
+          "block_type": "heading",
+          "text": "Greedy Morning",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-59-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-59-004",
+          "block_type": "rich_text",
+          "content": "Tyronejkd",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-59-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-59-005",
+          "block_type": "rich_text",
+          "content": "#59",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-59-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-59-006",
+          "block_type": "image",
+          "asset_id": "meme-59",
+          "title": "Greedy Morning by Tyronejkd",
+          "caption": "Artwork shown in its original proportions. Tyronejkd · The Memes #59 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-59-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-59-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-59-008",
+          "block_type": "rich_text",
+          "content": "This is one of the sharpest changes of surface in the portrait group. I placed it after OSF’s drawing in my working sequence, then moved it beside Sgt. Pepe to compare two treatments of a familiar character.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-59-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-59-009",
+          "block_type": "button_link",
+          "label": "In Faces and characters",
+          "page_id": "page-set-portraits",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-59-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-59-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Tyronejkd\nCollection: The Memes #59\nOriginal: PNG · 1,080 × 1,080 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: Open original image ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Tyronejkd"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #59"
+            },
+            {
+              "label": "Original",
+              "value": "PNG · 1,080 × 1,080 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "Open original image ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-59-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-59-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/59",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-59-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-59-012",
+          "block_type": "button_link",
+          "label": "Open original image ↗",
+          "href": "https://arweave.net/IIxWtf3rHHhXtp4JiywwQtebUBw4qQQ0HiGhArmgIjM",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-59-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "Greedy Morning"
+    },
+    {
+      "slug": "work-118",
+      "title": "The Socially Umpired Animals",
+      "description": "I keep Botto’s work within the portrait group without treating it as a photograph. Its figures bring a different kind of historical association to a selection otherwise rich in contemporary internet identities.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-118-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-118-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-118-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-118-003",
+          "block_type": "heading",
+          "text": "The Socially Umpired Animals",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-118-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-118-004",
+          "block_type": "rich_text",
+          "content": "Botto",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-118-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-118-005",
+          "block_type": "rich_text",
+          "content": "#118",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-118-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-118-006",
+          "block_type": "image",
+          "asset_id": "meme-118",
+          "title": "The Socially Umpired Animals by Botto",
+          "caption": "Artwork shown in its original proportions. Botto · The Memes #118 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-118-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-118-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-118-008",
+          "block_type": "rich_text",
+          "content": "I keep Botto’s work within the portrait group without treating it as a photograph. Its figures bring a different kind of historical association to a selection otherwise rich in contemporary internet identities.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-118-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-118-009",
+          "block_type": "button_link",
+          "label": "In Faces and characters",
+          "page_id": "page-set-portraits",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-118-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-118-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Botto\nCollection: The Memes #118\nOriginal: JPEG · 2,304 × 2,048 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: Open original image ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Botto"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #118"
+            },
+            {
+              "label": "Original",
+              "value": "JPEG · 2,304 × 2,048 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "Open original image ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-118-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-118-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/118",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-118-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-118-012",
+          "block_type": "button_link",
+          "label": "Open original image ↗",
+          "href": "https://arweave.net/puMJ1mrbD3lAv5QA9bT5Vzf-au45QMXQ16Y1CSHb1Gg",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-118-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "The Socially Umpired Animals"
+    },
+    {
+      "slug": "work-540",
+      "title": "Tears of the Desert",
+      "description": "The monochrome portrait changes the pace of this selection. I have kept its page relatively quiet so the photograph can be viewed at a useful size, with the artist’s record one step away.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-540-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-540-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-540-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-540-003",
+          "block_type": "heading",
+          "text": "Tears of the Desert",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-540-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-540-004",
+          "block_type": "rich_text",
+          "content": "Ebrahim_Elmi",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-540-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-540-005",
+          "block_type": "rich_text",
+          "content": "#540",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-540-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-540-006",
+          "block_type": "image",
+          "asset_id": "meme-540",
+          "title": "Tears of the Desert by Ebrahim_Elmi",
+          "caption": "Artwork shown in its original proportions. Ebrahim_Elmi · The Memes #540 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-540-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-540-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-540-008",
+          "block_type": "rich_text",
+          "content": "The monochrome portrait changes the pace of this selection. I have kept its page relatively quiet so the photograph can be viewed at a useful size, with the artist’s record one step away.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-540-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-540-009",
+          "block_type": "button_link",
+          "label": "In Faces and characters",
+          "page_id": "page-set-portraits",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-540-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-540-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Ebrahim_Elmi\nCollection: The Memes #540\nOriginal: JPEG · 4,620 × 6,155 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: Open original image ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Ebrahim_Elmi"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #540"
+            },
+            {
+              "label": "Original",
+              "value": "JPEG · 4,620 × 6,155 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "Open original image ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-540-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-540-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/540",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-540-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-540-012",
+          "block_type": "button_link",
+          "label": "Open original image ↗",
+          "href": "https://arweave.net/WILCqkT7L0Im3vGcTU7DalJ9cmnylnoC2n4w5b2T9rY",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-540-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "Tears of the Desert"
+    },
+    {
+      "slug": "work-47",
+      "title": "EXIT STRATEGY",
+      "description": "The static preview is only an introduction to this work. I use the source link when discussing it, because the original animation is part of the encounter and should not be replaced by a convenient thumbnail.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-47-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-47-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-47-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-47-003",
+          "block_type": "heading",
+          "text": "EXIT STRATEGY",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-47-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-47-004",
+          "block_type": "rich_text",
+          "content": "XCOPY",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-47-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-47-005",
+          "block_type": "rich_text",
+          "content": "#47",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-47-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-47-006",
+          "block_type": "image",
+          "asset_id": "meme-47",
+          "title": "EXIT STRATEGY by XCOPY",
+          "caption": "Still preview of an animated work. XCOPY · The Memes #47 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-47-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-47-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-47-008",
+          "block_type": "rich_text",
+          "content": "The static preview is only an introduction to this work. I use the source link when discussing it, because the original animation is part of the encounter and should not be replaced by a convenient thumbnail.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-47-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-47-009",
+          "block_type": "button_link",
+          "label": "In Screen culture",
+          "page_id": "page-set-screens",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-47-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-47-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: XCOPY\nCollection: The Memes #47\nOriginal: GIF · 2,091 × 3,000 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: View original animation ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "XCOPY"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #47"
+            },
+            {
+              "label": "Original",
+              "value": "GIF · 2,091 × 3,000 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "View original animation ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-47-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-47-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/47",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-47-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-47-012",
+          "block_type": "button_link",
+          "label": "View original animation ↗",
+          "href": "https://arweave.net/B_j9Z1NTIt5QUGx_TTnAh0F93BMQ1FRAnDEg-TrehaE",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-47-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "EXIT STRATEGY"
+    },
+    {
+      "slug": "work-537",
+      "title": "ＮＯ ＨＵＭＡＮ ＩＮＴＥＲＦＡＣＥ",
+      "description": "I placed MaNiC’s work in Screen culture because its studio scene is encountered through an animated digital file. The original record matters here; this page uses a still for browsing.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-537-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-537-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-537-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-537-003",
+          "block_type": "heading",
+          "text": "ＮＯ ＨＵＭＡＮ ＩＮＴＥＲＦＡＣＥ",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-537-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-537-004",
+          "block_type": "rich_text",
+          "content": "MaNiC",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-537-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-537-005",
+          "block_type": "rich_text",
+          "content": "#537",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-537-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-537-006",
+          "block_type": "image",
+          "asset_id": "meme-537",
+          "title": "ＮＯ　ＨＵＭＡＮ　ＩＮＴＥＲＦＡＣＥ by MaNiC",
+          "caption": "Still preview of an animated work. MaNiC · The Memes #537 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-537-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-537-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-537-008",
+          "block_type": "rich_text",
+          "content": "I placed MaNiC’s work in Screen culture because its studio scene is encountered through an animated digital file. The original record matters here; this page uses a still for browsing.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-537-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-537-009",
+          "block_type": "button_link",
+          "label": "In Screen culture",
+          "page_id": "page-set-screens",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-537-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-537-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: MaNiC\nCollection: The Memes #537\nOriginal: GIF · 1,000 × 1,000 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: View original animation ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "MaNiC"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #537"
+            },
+            {
+              "label": "Original",
+              "value": "GIF · 1,000 × 1,000 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "View original animation ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-537-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-537-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/537",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-537-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-537-012",
+          "block_type": "button_link",
+          "label": "View original animation ↗",
+          "href": "https://arweave.net/tqx3Gw4PZqYclMiyjtHydobRZi7IZYo989RQooU_6YA",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-537-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "ＮＯ ＨＵＭＡＮ ＩＮＴＥＲＦＡＣＥ"
+    },
+    {
+      "slug": "work-103",
+      "title": "Don't Trust, Check.",
+      "description": "I keep this beside FirstGM because I read the network as a model of verification between people. The coloured nodes and connecting lines shift my attention from the statement in the centre to the relationships around it.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-103-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-103-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-103-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-103-003",
+          "block_type": "heading",
+          "text": "Don't Trust, Check.",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-103-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-103-004",
+          "block_type": "rich_text",
+          "content": "Jack Butcher",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-103-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-103-005",
+          "block_type": "rich_text",
+          "content": "#103",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-103-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-103-006",
+          "block_type": "image",
+          "asset_id": "meme-103",
+          "title": "Don't Trust, Check. by Jack Butcher",
+          "caption": "Artwork shown in its original proportions. Jack Butcher · The Memes #103 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-103-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-103-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-103-008",
+          "block_type": "rich_text",
+          "content": "I keep this beside FirstGM because I read the network as a model of verification between people. The coloured nodes and connecting lines shift my attention from the statement in the centre to the relationships around it.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-103-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-103-009",
+          "block_type": "button_link",
+          "label": "In Screen culture",
+          "page_id": "page-set-screens",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-103-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-103-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Jack Butcher\nCollection: The Memes #103\nOriginal: PNG · 2,160 × 2,160 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: Open original image ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Jack Butcher"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #103"
+            },
+            {
+              "label": "Original",
+              "value": "PNG · 2,160 × 2,160 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "Open original image ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-103-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-103-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/103",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-103-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-103-012",
+          "block_type": "button_link",
+          "label": "Open original image ↗",
+          "href": "https://arweave.net/Z-6srTRuY8sCd6XZyWHwqmWtiW-LMgD6uVxZKvGOgqc",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-103-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "Don't Trust, Check."
+    },
+    {
+      "slug": "work-8",
+      "title": "FirstGM",
+      "description": "FirstGM is included for the greeting as much as the image. It records a form of everyday participation that can appear slight from outside a community and become recognisable through repetition.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-8-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-8-002",
+          "block_type": "rich_text",
+          "content": "The Memes",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-8-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-8-003",
+          "block_type": "heading",
+          "text": "FirstGM",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-8-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-8-004",
+          "block_type": "rich_text",
+          "content": "6529",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-8-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-8-005",
+          "block_type": "rich_text",
+          "content": "#8",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-8-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-8-006",
+          "block_type": "image",
+          "asset_id": "meme-8",
+          "title": "FirstGM by 6529",
+          "caption": "Artwork shown in its original proportions. 6529 · The Memes #8 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-8-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-8-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-8-008",
+          "block_type": "rich_text",
+          "content": "FirstGM is included for the greeting as much as the image. It records a form of everyday participation that can appear slight from outside a community and become recognisable through repetition.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-8-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-8-009",
+          "block_type": "button_link",
+          "label": "In Screen culture",
+          "page_id": "page-set-screens",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-8-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-8-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: 6529\nCollection: The Memes #8\nOriginal: JPEG · 1,170 × 806 px\nRights: CC0 / Public domain\nRecord: View on 6529 ↗\nMedia: Open original image ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "6529"
+            },
+            {
+              "label": "Collection",
+              "value": "The Memes #8"
+            },
+            {
+              "label": "Original",
+              "value": "JPEG · 1,170 × 806 px"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View on 6529 ↗"
+            },
+            {
+              "label": "Media",
+              "value": "Open original image ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-8-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-8-011",
+          "block_type": "button_link",
+          "label": "View on 6529 ↗",
+          "href": "https://6529.io/the-memes/8",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-8-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-8-012",
+          "block_type": "button_link",
+          "label": "Open original image ↗",
+          "href": "https://arweave.net/4lazG3i2tb7esEYqdAEa1s_lJ4gY2vIP_wR8S_jLpL4",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-8-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "FirstGM"
+    },
+    {
+      "slug": "work-b1",
+      "title": "Rose",
+      "description": "Rose was my starting point for this group. Its familiar subject makes the decisions at the edge of each shape easy to follow. I return to it when considering how much detail a small image actually needs.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-b1-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-b1-002",
+          "block_type": "rich_text",
+          "content": "Blitmap / Original",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-b1-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-b1-003",
+          "block_type": "heading",
+          "text": "Rose",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-b1-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-b1-004",
+          "block_type": "rich_text",
+          "content": "dom",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-b1-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-b1-005",
+          "block_type": "rich_text",
+          "content": "#1",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-b1-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-b1-006",
+          "block_type": "image",
+          "asset_id": "blitmap-1",
+          "title": "Rose by dom",
+          "caption": "Original pixel artwork, displayed with its grid preserved. dom · Blitmap #1 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-b1-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-b1-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-b1-008",
+          "block_type": "rich_text",
+          "content": "Rose was my starting point for this group. Its familiar subject makes the decisions at the edge of each shape easy to follow. I return to it when considering how much detail a small image actually needs.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-b1-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-b1-009",
+          "block_type": "button_link",
+          "label": "In Three Blitmaps",
+          "page_id": "page-set-blitmap",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-b1-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-b1-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: dom\nCollection: Blitmap #1\nOriginal: 32 × 32 pixel grid · Onchain SVG\nRights: CC0 / Public domain\nRecord: View token record ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "dom"
+            },
+            {
+              "label": "Collection",
+              "value": "Blitmap #1"
+            },
+            {
+              "label": "Original",
+              "value": "32 × 32 pixel grid · Onchain SVG"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View token record ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-b1-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-b1-011",
+          "block_type": "button_link",
+          "label": "View token record ↗",
+          "href": "https://etherscan.io/token/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63?a=1",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-b1-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "Rose"
+    },
+    {
+      "slug": "work-b4",
+      "title": "Psychic",
+      "description": "The restricted scale is part of the appeal. Viewed beside Rose, Psychic turns a similarly compact image into a different kind of object. I prefer to show both at the same size so that the comparison stays useful.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-b4-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-b4-002",
+          "block_type": "rich_text",
+          "content": "Blitmap / Original",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-b4-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-b4-003",
+          "block_type": "heading",
+          "text": "Psychic",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-b4-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-b4-004",
+          "block_type": "rich_text",
+          "content": "Veenus",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-b4-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-b4-005",
+          "block_type": "rich_text",
+          "content": "#4",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-b4-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-b4-006",
+          "block_type": "image",
+          "asset_id": "blitmap-4",
+          "title": "Psychic by Veenus",
+          "caption": "Original pixel artwork, displayed with its grid preserved. Veenus · Blitmap #4 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-b4-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-b4-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-b4-008",
+          "block_type": "rich_text",
+          "content": "The restricted scale is part of the appeal. Viewed beside Rose, Psychic turns a similarly compact image into a different kind of object. I prefer to show both at the same size so that the comparison stays useful.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-b4-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-b4-009",
+          "block_type": "button_link",
+          "label": "In Three Blitmaps",
+          "page_id": "page-set-blitmap",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-b4-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-b4-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Veenus\nCollection: Blitmap #4\nOriginal: 32 × 32 pixel grid · Onchain SVG\nRights: CC0 / Public domain\nRecord: View token record ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Veenus"
+            },
+            {
+              "label": "Collection",
+              "value": "Blitmap #4"
+            },
+            {
+              "label": "Original",
+              "value": "32 × 32 pixel grid · Onchain SVG"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View token record ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-b4-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-b4-011",
+          "block_type": "button_link",
+          "label": "View token record ↗",
+          "href": "https://etherscan.io/token/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63?a=4",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-b4-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "Psychic"
+    },
+    {
+      "slug": "work-b13",
+      "title": "Jupiter",
+      "description": "Jupiter introduces a much brighter colour pairing to this shelf. I placed it last in the sequence after trying it between the other two; the pink ground changed the balance of the whole group.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "collector-v2-work-b13-001",
+          "block_type": "button_link",
+          "label": "← Back to collection",
+          "page_id": "page-collection",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "collector-v2-work-b13-002",
+          "block_type": "rich_text",
+          "content": "Blitmap / Original",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "collector-v2-work-b13-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-b13-003",
+          "block_type": "heading",
+          "text": "Jupiter",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro",
+            "group": "collector-v2-work-b13-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-b13-004",
+          "block_type": "rich_text",
+          "content": "BigPapap",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-b13-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-b13-005",
+          "block_type": "rich_text",
+          "content": "#13",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-b13-group-1"
+          }
+        },
+        {
+          "id": "collector-v2-work-b13-006",
+          "block_type": "image",
+          "asset_id": "blitmap-13",
+          "title": "Jupiter by BigPapap",
+          "caption": "Original pixel artwork, displayed with its grid preserved. BigPapap · Blitmap #13 · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "collector-v2-work-b13-007",
+          "block_type": "heading",
+          "text": "Why I selected it",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-b13-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-b13-008",
+          "block_type": "rich_text",
+          "content": "Jupiter introduces a much brighter colour pairing to this shelf. I placed it last in the sequence after trying it between the other two; the pink ground changed the balance of the whole group.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-b13-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-b13-009",
+          "block_type": "button_link",
+          "label": "In Three Blitmaps",
+          "page_id": "page-set-blitmap",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "collector-v2-work-b13-group-3"
+          }
+        },
+        {
+          "id": "collector-v2-work-b13-010",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: BigPapap\nCollection: Blitmap #13\nOriginal: 32 × 32 pixel grid · Onchain SVG\nRights: CC0 / Public domain\nRecord: View token record ↗",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "BigPapap"
+            },
+            {
+              "label": "Collection",
+              "value": "Blitmap #13"
+            },
+            {
+              "label": "Original",
+              "value": "32 × 32 pixel grid · Onchain SVG"
+            },
+            {
+              "label": "Rights",
+              "value": "CC0 / Public domain"
+            },
+            {
+              "label": "Record",
+              "value": "View token record ↗"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "collector-v2-work-b13-group-2"
+          }
+        },
+        {
+          "id": "collector-v2-work-b13-011",
+          "block_type": "button_link",
+          "label": "View token record ↗",
+          "href": "https://etherscan.io/token/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63?a=13",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "collector-v2-work-b13-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "Jupiter"
+    }
+  ],
+  "navigation": [
+    {
+      "label": "The wall",
+      "pageSlug": "home"
+    },
+    {
+      "label": "Collection",
+      "pageSlug": "collection"
+    },
+    {
+      "label": "Curated sets",
+      "pageSlug": "sets"
+    },
+    {
+      "label": "Notebook",
+      "pageSlug": "notes"
+    },
+    {
+      "label": "About",
+      "pageSlug": "about"
+    }
+  ]
+}

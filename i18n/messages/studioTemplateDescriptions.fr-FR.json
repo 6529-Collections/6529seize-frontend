@@ -1,4 +1,10 @@
 {
+  "profileCms.studio.templateDescription.personal-v2": "Un portfolio personnel complet avec des études de cas, un parcours, des centres d’intérêt et des coordonnées.",
+  "profileCms.studio.templateDescription.artist-v2": "Un portfolio d’artiste avec trois séries, neuf œuvres individuelles, un parcours d’atelier, des éditions et des contacts.",
+  "profileCms.studio.templateDescription.collector-v2": "Une collection personnelle avec dix-neuf œuvres, quatre ensembles thématiques, des archives consultables et des notes de collection.",
+  "profileCms.studio.templateDescription.meme-v2": "Un club d’art numérique avec une affiche, une sélection d’œuvres, un projet de fanzine et un programme d’ateliers.",
+  "profileCms.studio.templateDescription.organization-v2": "Une structure gérée par des artistes, avec un programme d’événements, des projets, une équipe et des informations pratiques.",
+  "profileCms.studio.templateDescription.fund-v2": "Une structure de collection avec dix-sept œuvres, des notes d’exposition, un mandat, des membres et des comptes rendus de décisions.",
   "profileCms.studio.templateDescription.memes-collection": "Une sélection de The Memes par un collectionneur, avec des thèmes, des notes et les crédits des artistes.",
   "profileCms.studio.templateDescription.exhibition": "Une exposition de trois œuvres avec une introduction, un parcours en images et un catalogue.",
   "profileCms.studio.templateDescription.collection": "Une sélection d'œuvres, un catalogue thématique et une présentation des intérêts du collectionneur.",

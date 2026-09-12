@@ -24,3 +24,17 @@
 Validation for this release checks matching keys across each of the five studio,
 upload, wallet-import and template-description dictionaries. Published member
 writing remains authored content and is not automatically translated.
+
+## Independent recovery archive
+
+- Surface: `lib/profile-cms/recovery/static-site.ts`.
+- Current behavior: recovered HTML preserves authored page content, artwork
+  titles, credits and alternative text. The small archive navigation label
+  `6529 profile` is English; the archive does not load the application's locale
+  dictionaries.
+- Impact and fallback: non-English readers see that English navigation label.
+  This does not change the recovered document or its signed bytes.
+- Owner: frontend Website studio maintainers.
+- Follow-up: localize generated archive navigation from the document's declared
+  language while retaining exact authored content. Tracked with the CMS recovery
+  follow-up in PR #3984.

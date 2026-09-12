@@ -1,0 +1,398 @@
+.mat {
+  container: project-mockup / inline-size;
+  min-width: 0;
+  padding: clamp(16px, 4.5%, 48px);
+  overflow-wrap: anywhere;
+  background: #183ddd;
+  color: #fff;
+  font-family: "CMS Manrope", Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.mat p,
+.mat h2,
+.mat h3,
+.mat ul {
+  margin: 0;
+}
+
+.mat a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.mat a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+.planner {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #d9dfeb;
+  border-radius: 6px;
+  background: #fff;
+  color: #20272c;
+  box-shadow: 0 14px 30px #081d6b45;
+}
+
+.appBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 18px;
+  border-bottom: 1px solid #e3e6eb;
+}
+
+.appBar > p {
+  max-width: 48%;
+  color: #59606a;
+  font-size: 11px;
+  text-align: right;
+}
+
+.mat .appName {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #20272c;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.appMark {
+  display: grid;
+  flex: 0 0 22px;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: #183ddd;
+  color: #fff;
+  font-size: 19px;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(100px, 0.75fr) minmax(0, 3fr);
+  min-height: 286px;
+}
+
+.rail {
+  padding: 18px 12px;
+  border-right: 1px solid #e3e6eb;
+  background: #f6f7fa;
+  color: #565f6b;
+  font-size: 11px;
+}
+
+.rail .railActive {
+  margin: 0 -4px 28px;
+  padding: 7px 8px;
+  border-radius: 4px;
+  background: #e7edff;
+  color: #24409c;
+  font-weight: 600;
+}
+
+.railProjects {
+  display: grid;
+  gap: 14px;
+}
+
+.railProjects p {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.projectDot,
+.taskDot {
+  display: inline-block;
+  flex: 0 0 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6e82ce;
+}
+
+.railProjects p:nth-child(3n + 2) .projectDot {
+  background: #d08747;
+}
+
+.railProjects p:nth-child(3n) .projectDot {
+  background: #428272;
+}
+
+.taskPanel {
+  min-width: 0;
+  padding: 26px 22px 18px;
+}
+
+.taskHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mat .taskHeading h3 {
+  color: #20272c;
+  font-family: inherit;
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.04em;
+}
+
+.taskHeading p {
+  color: #59606a;
+  font-size: 11px;
+  text-align: right;
+}
+
+.taskPanel .taskDescription {
+  margin: 19px 0 9px;
+  color: #626b76;
+  font-size: 11px;
+}
+
+.tasks {
+  padding: 0;
+  list-style: none;
+}
+
+.tasks li {
+  display: grid;
+  grid-template-columns: 6px minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 9px;
+  min-height: 49px;
+  padding: 13px 0;
+  border-top: 1px solid #e7eaf0;
+}
+
+.taskLabel {
+  font-size: 11px;
+}
+
+.status {
+  max-width: 115px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: #e6eee9;
+  color: #28533c;
+  font-size: 11px;
+}
+
+.tasks li:nth-child(3n) .status {
+  background: #fff0d6;
+  color: #785413;
+}
+
+.taskFooter {
+  margin-top: 19px;
+  padding-top: 12px;
+  border-top: 1px solid #e7eaf0;
+  color: #626b76;
+  font-size: 11px;
+}
+
+.mat[data-cms-project-mockup="catalogue"] {
+  background: #ed927c;
+  color: #3c352b;
+}
+
+.catalogue {
+  padding: 22px 26px 20px;
+  background: #fffaf0;
+  color: #3c352b;
+  box-shadow: 7px 9px 0 #a550422b;
+}
+
+.catalogueBar {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #ded6c8;
+  color: #69594a;
+  font-size: 11px;
+  letter-spacing: 0.025em;
+}
+
+.catalogueBar p:last-child {
+  text-align: right;
+}
+
+.catalogueIntro {
+  padding: 24px 0 23px;
+}
+
+.mat .catalogueIntro h2 {
+  color: #382f23;
+  font-family: Georgia, serif;
+  font-size: clamp(27px, 5.5cqi, 39px);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+}
+
+.mat .catalogueIntro h3 {
+  color: #382f23;
+  margin-top: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.catalogueIntro p {
+  max-width: 42ch;
+  margin-top: 11px;
+  color: #706456;
+  font-size: 11px;
+}
+
+.books {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 17px;
+  padding: 0;
+  list-style: none;
+}
+
+.books li {
+  min-width: 0;
+}
+
+.bookCover {
+  display: flex;
+  min-height: 166px;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 18px 13px 14px;
+  border-left: 5px solid #00000018;
+  background: #e3a454;
+  color: #49331c;
+  box-shadow: 3px 4px 0 #47382017;
+}
+
+.mat .bookCover h3 {
+  color: inherit;
+  font-family: Georgia, serif;
+  font-size: clamp(15px, 2.9cqi, 21px);
+  font-weight: 400;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+}
+
+.bookRule {
+  width: 28px;
+  margin-top: 18px;
+  border-top: 1px solid currentColor;
+}
+
+.books li:nth-child(3n + 2) .bookCover {
+  background: #284a3d;
+  color: #fff4d8;
+}
+
+.books li:nth-child(3n) .bookCover {
+  background: #6b6e96;
+  color: #fff8e8;
+}
+
+.books .bookNote {
+  margin-top: 10px;
+  color: #685b4d;
+  font-size: 11px;
+  white-space: pre-line;
+}
+
+.catalogueFooter {
+  margin-top: 22px;
+  padding-top: 12px;
+  border-top: 1px solid #ded6c8;
+  color: #685b4d;
+  font-size: 11px;
+}
+
+@container project-mockup (max-width: 440px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  .rail {
+    display: none;
+  }
+
+  .taskPanel {
+    padding: 21px 16px 16px;
+  }
+
+  .appBar {
+    padding: 13px 15px;
+  }
+
+  .catalogue {
+    padding: 20px 18px 18px;
+  }
+
+  .books {
+    gap: 12px;
+  }
+
+  .bookCover {
+    min-height: 150px;
+    padding: 13px 8px;
+    border-left-width: 3px;
+  }
+}
+
+@container project-mockup (max-width: 290px) {
+  .appBar,
+  .taskHeading,
+  .catalogueBar {
+    flex-wrap: wrap;
+    gap: 6px 12px;
+  }
+
+  .appBar > p {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .tasks li {
+    grid-template-columns: 6px minmax(0, 1fr);
+  }
+
+  .status {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .books {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .books li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+    gap: 12px;
+  }
+
+  .bookCover {
+    min-height: 150px;
+    padding: 16px 12px;
+  }
+
+  .bookNote {
+    align-self: end;
+  }
+}

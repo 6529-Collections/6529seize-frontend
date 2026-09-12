@@ -56,7 +56,7 @@ async function openGallery() {
       title="Profile CMS builder"
     />
   );
-  await user.click(screen.getByRole("button", { name: "Preview Signature" }));
+  await user.click(screen.getByRole("button", { name: "Preview Personal" }));
   await user.click(screen.getByRole("button", { name: "Use this template" }));
   await user.click(screen.getByRole("button", { name: "Add your art" }));
   await user.type(

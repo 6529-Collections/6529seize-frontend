@@ -11,6 +11,239 @@ import {
 import { applyCmsDocumentOperation } from "@/lib/profile-cms/studio/document";
 import roomFixture from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/exhibition-room.package.json";
 
+it("edits gallery metadata and image order together without dropping item extensions", () => {
+  const result = inspectBlock({
+    id: "approved-gallery",
+    block_type: "gallery",
+    title: "My collection",
+    asset_ids: ["asset-room-work", "asset-room-poster"],
+    items: [
+      {
+        asset_id: "asset-room-work",
+        title: "First work",
+        subtitle: "Artist one",
+        category: "Paintings",
+        provenance: { note: "Preserve me" },
+      },
+      {
+        asset_id: "asset-room-poster",
+        title: "Second work",
+        subtitle: "Artist two",
+        category: "Prints",
+      },
+    ],
+    categories: ["Paintings", "Prints"],
+    presentation: { variant: "gallery", group: "collection", span: "full" },
+  });
+  const summaries = screen.getAllByText(/First work|Second work/);
+  summaries.forEach((summary) => fireEvent.click(summary));
+  fireEvent.change(screen.getAllByLabelText("Artwork title")[0]!, {
+    target: { value: "Revised title" },
+  });
+  fireEvent.click(screen.getAllByRole("button", { name: "Move down" })[0]!);
+  fireEvent.click(screen.getByRole("button", { name: "Apply changes" }));
+  expect(result.block()?.["asset_ids"]).toEqual([
+    "asset-room-poster",
+    "asset-room-work",
+  ]);
+  expect(result.block()?.["items"]).toEqual([
+    {
+      asset_id: "asset-room-poster",
+      title: "Second work",
+      subtitle: "Artist two",
+      category: "Prints",
+    },
+    {
+      asset_id: "asset-room-work",
+      title: "Revised title",
+      subtitle: "Artist one",
+      category: "Paintings",
+      provenance: { note: "Preserve me" },
+    },
+  ]);
+  expect(result.block()?.["presentation"]).toEqual({
+    variant: "gallery",
+    group: "collection",
+    span: "full",
+  });
+});
+
+it("removes an artwork image's optional page link explicitly", () => {
+  const result = inspectBlock({
+    id: "linked-image",
+    block_type: "image",
+    asset_id: "asset-room-work",
+    page_id: "page-nft",
+  });
+  fireEvent.change(screen.getByLabelText("Destination"), {
+    target: { value: "" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Apply changes" }));
+  expect(result.block()).not.toHaveProperty("page_id");
+  expect(result.block()?.["asset_id"]).toBe("asset-room-work");
+});
+
+it("preserves unannotated artworks and duplicate placements when editing one gallery caption", () => {
+  const result = inspectBlock({
+    id: "partial-captions",
+    block_type: "gallery",
+    title: "Collection",
+    asset_ids: ["asset-room-work", "asset-room-work", "asset-room-poster"],
+    items: [{ asset_id: "asset-room-work", title: "A work" }],
+  });
+  fireEvent.click(screen.getByText(/1\. A work/));
+  fireEvent.change(screen.getByLabelText("Artwork title"), {
+    target: { value: "New caption" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Apply changes" }));
+  expect(result.block()?.["asset_ids"]).toEqual([
+    "asset-room-work",
+    "asset-room-work",
+    "asset-room-poster",
+  ]);
+  expect(result.block()?.["items"]).toEqual([
+    { asset_id: "asset-room-work", title: "New caption" },
+  ]);
+});
+
+const MIXED_GALLERY_ORDER = [
+  "unannotated-before",
+  "asset-room-work",
+  "unannotated-between",
+  "asset-room-poster",
+  "unannotated-after",
+];
+const UNANNOTATED_IMAGES = [
+  "unannotated-before",
+  "unannotated-between",
+  "unannotated-after",
+];
+
+function inspectMixedGallery() {
+  return inspectBlock(
+    {
+      id: "mixed-gallery",
+      block_type: "gallery",
+      asset_ids: MIXED_GALLERY_ORDER,
+      categories: ["Imported category"],
+      items: [
+        {
+          asset_id: "asset-room-work",
+          title: "Annotated work",
+          imported: { keep: true },
+        },
+        { asset_id: "asset-room-poster", title: "Annotated poster" },
+      ],
+    },
+    UNANNOTATED_IMAGES
+  );
+}
+
+it("leaves unannotated artwork before, between and after annotated entries when only a title changes", () => {
+  const result = inspectMixedGallery();
+  fireEvent.click(screen.getByText(/1\. Annotated work/));
+  fireEvent.change(screen.getAllByLabelText("Artwork title")[0]!, {
+    target: { value: "Updated work" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Apply changes" }));
+  expect(result.block()?.["asset_ids"]).toEqual(MIXED_GALLERY_ORDER);
+  expect(result.block()?.["categories"]).toEqual(["Imported category"]);
+  expect(result.block()?.["items"]).toEqual([
+    {
+      asset_id: "asset-room-work",
+      title: "Updated work",
+      imported: { keep: true },
+    },
+    { asset_id: "asset-room-poster", title: "Annotated poster" },
+  ]);
+});
+
+it.each([
+  {
+    action: "move",
+    expected: [
+      "unannotated-before",
+      "asset-room-poster",
+      "unannotated-between",
+      "asset-room-work",
+      "unannotated-after",
+    ],
+  },
+  {
+    action: "remove",
+    expected: [
+      "unannotated-before",
+      "unannotated-between",
+      "asset-room-poster",
+      "unannotated-after",
+    ],
+  },
+  {
+    action: "replace",
+    expected: [
+      "unannotated-before",
+      "asset-room-poster",
+      "unannotated-between",
+      "asset-room-poster",
+      "unannotated-after",
+    ],
+  },
+  {
+    action: "add",
+    expected: [
+      "unannotated-before",
+      "asset-room-work",
+      "unannotated-between",
+      "asset-room-poster",
+      "asset-room-poster",
+      "unannotated-after",
+    ],
+  },
+])(
+  "preserves unannotated placements during an explicit artwork $action",
+  ({ action, expected }) => {
+    const result = inspectMixedGallery();
+    fireEvent.click(screen.getByText(/1\. Annotated work/));
+    if (action === "replace")
+      fireEvent.change(screen.getAllByLabelText("Choose image")[0]!, {
+        target: { value: "asset-room-poster" },
+      });
+    if (action === "move")
+      fireEvent.click(screen.getAllByRole("button", { name: "Move down" })[0]!);
+    if (action === "remove")
+      fireEvent.click(screen.getAllByRole("button", { name: "Remove" })[0]!);
+    if (action === "add")
+      fireEvent.click(screen.getByRole("button", { name: /Add artwork/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Apply changes" }));
+    expect(result.block()?.["asset_ids"]).toEqual(expected);
+  }
+);
+
+it("edits contact email and schedule entries through ordinary fields", () => {
+  const result = inspectBlock({
+    id: "contact",
+    block_type: "callout",
+    title: "Visit",
+    content: "Open by appointment.",
+    email: "studio@example.com",
+    subject: "Studio visit",
+    rows: [{ label: "Friday", value: "10:00–18:00", custom: true }],
+  });
+  fireEvent.change(screen.getByLabelText("Contact email"), {
+    target: { value: "hello@example.com" },
+  });
+  fireEvent.click(screen.getByText(/1\. Friday/));
+  fireEvent.change(screen.getByLabelText("Value"), {
+    target: { value: "11:00–19:00" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Apply changes" }));
+  expect(result.block()).toMatchObject({
+    email: "hello@example.com",
+    subject: "Studio visit",
+    rows: [{ label: "Friday", value: "11:00–19:00", custom: true }],
+  });
+});
+
 function inspector(content: unknown) {
   return inspectBlock({
     id: "block-imported-text",
@@ -19,8 +252,61 @@ function inspector(content: unknown) {
   }).block;
 }
 
-function inspectBlock(blockInput: CmsBlockV1 & Record<string, unknown>) {
+it.each(["Friday: 10:00", "Visits are by appointment."])(
+  "keeps derived row text current and preserves independent narrative: %s",
+  (content) => {
+    const result = inspectBlock({
+      id: "hours",
+      block_type: "callout",
+      title: "Hours",
+      content,
+      rows: [{ label: "Friday", value: "10:00" }],
+    });
+    fireEvent.click(screen.getByText(/1\. Friday/));
+    fireEvent.change(screen.getByLabelText("Value"), {
+      target: { value: "11:00" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Apply changes" }));
+    expect(result.block()?.["content"]).toBe(
+      content.startsWith("Friday:") ? "Friday: 11:00" : content
+    );
+  }
+);
+
+it("clears a section target when changing a link's destination and edits enquiry subjects", () => {
+  const result = inspectBlock({
+    id: "enquiry",
+    block_type: "button_link",
+    label: "Enquire",
+    page_id: "page-nft",
+    block_id: "old-section",
+    subject: "A work",
+  });
+  fireEvent.change(screen.getByLabelText("Destination"), {
+    target: { value: "external" },
+  });
+  fireEvent.change(screen.getByLabelText("Web address"), {
+    target: { value: "https://example.com/contact" },
+  });
+  fireEvent.change(screen.getByLabelText("Subject"), {
+    target: { value: "My work" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Apply changes" }));
+  expect(result.block()).not.toHaveProperty("block_id");
+  expect(result.block()).toMatchObject({
+    href: "https://example.com/contact",
+    subject: "My work",
+  });
+});
+
+function inspectBlock(
+  blockInput: CmsBlockV1 & Record<string, unknown>,
+  extraImageIds: readonly string[] = []
+) {
   const source = cmsPackageSchema.parse(roomFixture);
+  source.payload.assets.push(
+    ...extraImageIds.map((id) => ({ ...source.payload.assets[0]!, id }))
+  );
   source.payload.pages[0]!.blocks.push(blockInput);
   const document = withComputedCmsHashes(source);
   expect(validateCmsPackageV1(document, { enforceHashes: true }).valid).toBe(
@@ -303,6 +589,35 @@ it("preserves a structured button destination without offering a blank editable 
     block_type: "button_link",
     label: "Edited",
     href: target,
+  });
+});
+
+it("edits project mockup fields without discarding its rows or extension data", () => {
+  const rows = [{ label: "Type study", value: "In review" }];
+  const result = inspectBlock({
+    id: "block-mockup",
+    block_type: "callout",
+    title: "Fieldwork",
+    content: "Project planner",
+    mockup_style: "planner",
+    mockup_heading: "This week",
+    mockup_footer: "Thursday review",
+    rows,
+    extension: { preserved: true },
+  });
+  fireEvent.change(screen.getByRole("textbox", { name: "Mockup heading" }), {
+    target: { value: "The library" },
+  });
+  fireEvent.change(screen.getByRole("combobox", { name: "Mockup style" }), {
+    target: { value: "catalogue" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Apply changes" }));
+  expect(result.block()).toMatchObject({
+    mockup_heading: "The library",
+    mockup_style: "catalogue",
+    mockup_footer: "Thursday review",
+    rows,
+    extension: { preserved: true },
   });
 });
 

@@ -3,17 +3,14 @@ import {
   reviewCmsAgentCandidate,
   reviewCmsAgentFile,
 } from "@/lib/profile-cms/agent-review";
-import {
-  CMS_STUDIO_TEMPLATES,
-  instantiateCmsStudioTemplate,
-} from "@/lib/profile-cms/studio/templates";
+import { instantiateCmsStudioTemplate } from "@/lib/profile-cms/studio/templates";
 import {
   cmsPackageSchema,
   withComputedCmsHashes,
 } from "@/lib/profile-cms/protocol/v1";
 
 function fixture() {
-  return instantiateCmsStudioTemplate(CMS_STUDIO_TEMPLATES[0]!.id, "punk6529");
+  return instantiateCmsStudioTemplate("artist-v2", "punk6529");
 }
 
 it("reviews edits on a later page and preserves every other page and original source asset", () => {

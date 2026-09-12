@@ -14,12 +14,13 @@ import {
   type CmsDocumentOperation,
 } from "@/lib/profile-cms/studio/document";
 import { getCmsPublicPagePath } from "@/lib/profile-cms/runtime/routes";
+import { getCmsStudioPresentation } from "@/lib/profile-cms/studio/presentation";
 import StudioBlockInspector, {
   createStudioBlock,
   getStudioBlockLabel,
   STUDIO_BLOCK_LABELS,
 } from "./StudioBlockInspector";
-import { StudioButton } from "./StudioControls";
+import { StudioButton, StudioField, StudioSelect } from "./StudioControls";
 import StudioDesignPanel from "./StudioDesignPanel";
 import StudioPageSettings, {
   collectPageNavigationPaths,
@@ -71,7 +72,10 @@ export default function ProfileCmsStudioEditor({
   readonly onUploadBusyChange: (busy: boolean) => void;
 }) {
   const [showTemplates, setShowTemplates] = useState(initialShowTemplates);
-  const [panel, setPanel] = useState<StudioPanel>("pages");
+  const [panel, setPanel] = useState<StudioPanel>(
+    getCmsStudioPresentation(document)?.studio_design ? "content" : "pages"
+  );
+  const [pageSearch, setPageSearch] = useState("");
   const [pageId, setPageId] = useState(document.payload.pages[0]?.id ?? "");
   const [blockId, setBlockId] = useState<string | null>(null);
   const [phone, setPhone] = useState(false);
@@ -127,6 +131,9 @@ export default function ProfileCmsStudioEditor({
     document.payload.pages.find((item) => item.id === pageId) ??
     document.payload.pages[0];
   const block = page?.blocks.find((item) => item.id === blockId);
+  const approvedDesign = Boolean(
+    getCmsStudioPresentation(document)?.studio_design
+  );
   const navigate = (id: string) => {
     if (!guard()) return;
     setPageId(id);
@@ -281,19 +288,30 @@ export default function ProfileCmsStudioEditor({
     <div ref={formRegion} className="tw-space-y-6 tw-p-4">
       {panel === "pages" ? (
         <>
-          <ul className="tw-m-0 tw-list-none tw-space-y-2 tw-p-0">
-            {document.payload.pages.map((item) => (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  aria-current={page?.id === item.id ? "page" : undefined}
-                  onClick={() => navigate(item.id)}
-                  className={`tw-w-full tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-3 tw-text-left tw-text-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${page?.id === item.id ? "tw-border-primary-500 tw-bg-primary-500/10 tw-text-white" : "tw-border-transparent tw-bg-iron-950 tw-text-iron-300 hover:tw-bg-iron-800"}`}
-                >
-                  {item.metadata.navigation_label ?? item.metadata.title}
-                </button>
-              </li>
-            ))}
+          <StudioField
+            label={t(locale, "profileCms.approved.searchPages")}
+            value={pageSearch}
+            onChange={setPageSearch}
+          />
+          <ul className="tw-m-0 tw-max-h-72 tw-list-none tw-space-y-2 tw-overflow-y-auto tw-p-0">
+            {document.payload.pages
+              .filter((item) =>
+                item.metadata.title
+                  .toLocaleLowerCase(locale)
+                  .includes(pageSearch.toLocaleLowerCase(locale))
+              )
+              .map((item) => (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    aria-current={page?.id === item.id ? "page" : undefined}
+                    onClick={() => navigate(item.id)}
+                    className={`tw-w-full tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-3 tw-text-left tw-text-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${page?.id === item.id ? "tw-border-primary-500 tw-bg-primary-500/10 tw-text-white" : "tw-border-transparent tw-bg-iron-950 tw-text-iron-300 hover:tw-bg-iron-800"}`}
+                  >
+                    {item.metadata.navigation_label ?? item.metadata.title}
+                  </button>
+                </li>
+              ))}
           </ul>
           <StudioButton onClick={addPage}>
             ＋ {t(locale, "profileCms.studio.addPage")}
@@ -331,14 +349,20 @@ export default function ProfileCmsStudioEditor({
       ) : null}
       {panel === "content" && page ? (
         <>
-          <BlockList
-            page={page}
-            selectedBlockId={blockId}
-            locale={locale}
-            onSelect={(id) => {
-              if (id === blockId || guard()) setBlockId(id);
-            }}
-          />
+          <details open={!approvedDesign || !block} className="tw-min-w-0">
+            <summary className="tw-cursor-pointer tw-text-sm tw-font-medium tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+              {t(locale, "profileCms.studio.content")}
+            </summary>
+            <BlockList
+              page={page}
+              selectedBlockId={blockId}
+              detailed={approvedDesign}
+              locale={locale}
+              onSelect={(id) => {
+                if (id === blockId || guard()) setBlockId(id);
+              }}
+            />
+          </details>
           {block ? (
             <>
               <BlockActions
@@ -434,6 +458,7 @@ export default function ProfileCmsStudioEditor({
           onUse={(next) => {
             commit(next);
             navigate(next.payload.pages[0]?.id ?? "");
+            setPanel("content");
             setShowTemplates(false);
             onTemplateCreated();
           }}
@@ -474,7 +499,9 @@ export default function ProfileCmsStudioEditor({
           >
             {t(
               locale,
-              preview ? "profileCms.studio.edit" : "profileCms.studio.preview"
+              preview
+                ? "profileCms.approved.editContent"
+                : "profileCms.approved.viewSite"
             )}
           </StudioButton>
         </div>
@@ -487,11 +514,32 @@ export default function ProfileCmsStudioEditor({
           {error}
         </p>
       ) : null}
+      <div className="tw-flex tw-flex-wrap tw-items-end tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-p-4">
+        <div className="tw-w-full sm:tw-w-72">
+          <StudioSelect
+            label={t(locale, "profileCms.studio.selectedPage")}
+            value={page?.id ?? ""}
+            options={document.payload.pages.map((item) => ({
+              value: item.id,
+              label: item.metadata.navigation_label ?? item.metadata.title,
+            }))}
+            onChange={navigate}
+          />
+        </div>
+        <p className="tw-m-0 tw-max-w-lg tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(
+            locale,
+            preview
+              ? "profileCms.studio.previewHelp"
+              : "profileCms.approved.editHelp"
+          )}
+        </p>
+      </div>
       <div
         className={`tw-grid tw-grid-cols-1 ${preview ? "" : "lg:tw-grid-cols-[280px_minmax(0,1fr)]"}`}
       >
         {!preview ? (
-          <aside className="tw-min-w-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-black lg:tw-border-b-0 lg:tw-border-r">
+          <aside className="tw-min-w-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-black lg:tw-sticky lg:tw-top-4 lg:tw-max-h-[calc(100dvh-2rem)] lg:tw-self-start lg:tw-overflow-y-auto lg:tw-border-b-0 lg:tw-border-r">
             <div className="tw-flex tw-flex-wrap tw-gap-1 tw-p-3">
               {PANELS.map((item) => (
                 <StudioButton
@@ -530,6 +578,16 @@ export default function ProfileCmsStudioEditor({
                             if (!guard()) return;
                             setBlockId(id);
                             setPanel("content");
+                            globalThis.requestAnimationFrame(() => {
+                              const form =
+                                formRegion.current?.querySelector("form");
+                              form?.scrollIntoView({ block: "nearest" });
+                              form
+                                ?.querySelector<HTMLElement>(
+                                  "input,textarea,select"
+                                )
+                                ?.focus({ preventScroll: true });
+                            });
                           },
                         }),
                     onNavigatePage: navigate,
@@ -549,16 +607,18 @@ export default function ProfileCmsStudioEditor({
 function BlockList({
   page,
   selectedBlockId,
+  detailed,
   locale,
   onSelect,
 }: {
   readonly page: CmsPageV1;
   readonly selectedBlockId: string | null;
+  readonly detailed: boolean;
   readonly locale: SupportedLocale;
   readonly onSelect: (id: string) => void;
 }) {
   return (
-    <ul className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0">
+    <ul className="tw-m-0 tw-max-h-64 tw-list-none tw-space-y-1 tw-overflow-y-auto tw-p-0">
       {page.blocks.map((block) => (
         <li key={block.id}>
           <button
@@ -567,7 +627,10 @@ function BlockList({
             onClick={() => onSelect(block.id)}
             className={`tw-w-full tw-truncate tw-rounded-md tw-border-0 tw-px-3 tw-py-2 tw-text-left tw-text-xs focus-visible:tw-outline focus-visible:tw-outline-primary-400 ${selectedBlockId === block.id ? "tw-bg-iron-800 tw-text-white" : "tw-bg-iron-950 tw-text-iron-300 hover:tw-bg-iron-800"}`}
           >
-            {["title", "text", "label"]
+            {(detailed
+              ? ["title", "text", "label", "content", "caption"]
+              : ["title", "text", "label"]
+            )
               .map((key) => getString(block, key))
               .find((text) => text !== undefined && text.length > 0) ??
               t(locale, getStudioBlockLabel(block.block_type))}

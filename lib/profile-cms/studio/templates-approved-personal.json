@@ -1,0 +1,686 @@
+{
+  "pages": [
+    {
+      "slug": "home",
+      "title": "Mara Silva.",
+      "description": "I work with independent studios and community organisations on planning and publishing tools, from early research through interface design and delivery.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "personal-v2-home-001",
+          "block_type": "rich_text",
+          "content": "Independent product designer",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "hero",
+            "group": "personal-v2-home-group-1"
+          }
+        },
+        {
+          "id": "personal-v2-home-002",
+          "block_type": "heading",
+          "text": "Mara Silva.",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "hero",
+            "group": "personal-v2-home-group-1"
+          }
+        },
+        {
+          "id": "personal-v2-home-003",
+          "block_type": "rich_text",
+          "content": "London, via Porto · Working independently since 2024",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "personal-v2-home-group-1"
+          }
+        },
+        {
+          "id": "personal-v2-home-004",
+          "block_type": "heading",
+          "text": "I design software for small teams.",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "personal-v2-home-group-1"
+          }
+        },
+        {
+          "id": "personal-v2-home-005",
+          "block_type": "rich_text",
+          "content": "I work with independent studios and community organisations on planning and publishing tools, from early research through interface design and delivery.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "personal-v2-home-group-1"
+          }
+        },
+        {
+          "id": "personal-v2-home-006",
+          "block_type": "rich_text",
+          "content": "Research · Product design · Prototyping · Design systems",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "personal-v2-home-group-1"
+          }
+        },
+        {
+          "id": "personal-v2-home-007",
+          "block_type": "button_link",
+          "label": "See selected projects",
+          "page_id": "page-home",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "personal-v2-home-group-1"
+          },
+          "block_id": "personal-v2-home-008"
+        },
+        {
+          "id": "personal-v2-home-008",
+          "block_type": "heading",
+          "text": "Selected work",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-2"
+          }
+        },
+        {
+          "id": "personal-v2-home-009",
+          "block_type": "rich_text",
+          "content": "2025—2026",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-2"
+          }
+        },
+        {
+          "id": "personal-v2-home-010",
+          "block_type": "rich_text",
+          "content": "01 / PRODUCT DESIGN",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "personal-v2-home-group-3"
+          }
+        },
+        {
+          "id": "personal-v2-home-011",
+          "block_type": "heading",
+          "text": "Fieldwork",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "personal-v2-home-group-3"
+          }
+        },
+        {
+          "id": "personal-v2-home-012",
+          "block_type": "rich_text",
+          "content": "A studio planner that brings project deadlines, individual workloads, and review status into a single weekly view.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "personal-v2-home-group-3"
+          }
+        },
+        {
+          "id": "personal-v2-home-013",
+          "block_type": "callout",
+          "title": "",
+          "content": "Role: Research, UX, interface design\nTeam: Design lead, with two developers\nWhen: January–June 2026",
+          "rows": [
+            {
+              "label": "Role",
+              "value": "Research, UX, interface design"
+            },
+            {
+              "label": "Team",
+              "value": "Design lead, with two developers"
+            },
+            {
+              "label": "When",
+              "value": "January–June 2026"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "personal-v2-home-group-3"
+          }
+        },
+        {
+          "id": "personal-v2-home-014",
+          "block_type": "callout",
+          "title": "fieldwork",
+          "content": "f fieldwork North Studio / Workspace My week Projects People PINNED PROJECTS ● Identity ● Print ● Website This week 15—19 JUN Three projects in progress Status Identity / Review the type study In review Print / Send artwork to Jo Ready Website / Test the new menu In progress Next team check-in · Thursday, 10:00 MS JL AK",
+          "rows": [
+            {
+              "label": "Identity / Review the type study",
+              "value": "In review"
+            },
+            {
+              "label": "Print / Send artwork to Jo",
+              "value": "Ready"
+            },
+            {
+              "label": "Website / Test the new menu",
+              "value": "In progress"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "card",
+            "variant": "project",
+            "group": "personal-v2-home-group-3"
+          },
+          "mockup_style": "planner",
+          "mockup_kicker": "North Studio / Workspace",
+          "mockup_heading": "This week",
+          "mockup_period": "15—19 JUN",
+          "mockup_description": "Three projects in progress",
+          "mockup_footer": "Next team check-in · Thursday, 10:00"
+        },
+        {
+          "id": "personal-v2-home-015",
+          "block_type": "callout",
+          "title": "Read the case study",
+          "content": "The problem\n\nStudios were maintaining separate project boards and weekly schedules that routinely fell out of sync. A revised deadline could leave someone working from an obsolete plan.\n\nDesign and delivery\n\nI built scheduling around the existing task record, keeping ownership and review status visible throughout. After testing with three studio teams, I delivered a component library covering keyboard behaviour and empty states.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "personal-v2-home-group-3"
+          }
+        },
+        {
+          "id": "personal-v2-home-016",
+          "block_type": "rich_text",
+          "content": "02 / COMMUNITY PROJECT",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "personal-v2-home-group-4"
+          }
+        },
+        {
+          "id": "personal-v2-home-017",
+          "block_type": "heading",
+          "text": "The Reading Room",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "personal-v2-home-group-4"
+          }
+        },
+        {
+          "id": "personal-v2-home-018",
+          "block_type": "rich_text",
+          "content": "A lending catalogue for our Saturday reading group, replacing a neglected spreadsheet with a clear record of availability, borrowers, and returns.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "personal-v2-home-group-4"
+          }
+        },
+        {
+          "id": "personal-v2-home-019",
+          "block_type": "callout",
+          "title": "",
+          "content": "Role: Design and front-end prototype\nWith: The Saturday reading group\nWhen: September–November 2025",
+          "rows": [
+            {
+              "label": "Role",
+              "value": "Design and front-end prototype"
+            },
+            {
+              "label": "With",
+              "value": "The Saturday reading group"
+            },
+            {
+              "label": "When",
+              "value": "September–November 2025"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "personal-v2-home-group-4"
+          }
+        },
+        {
+          "id": "personal-v2-home-020",
+          "block_type": "callout",
+          "title": "The Reading Room",
+          "content": "THE SATURDAY READING GROUP CATALOGUE / 01 The Reading Room Browse the catalogue and arrange a loan at the next meeting. Ways of Seeing John Berger ● Available to borrow The Design of Everyday Things Don Norman With Lena · due 26 Sep Invisible Cities Italo Calvino ● Available to borrow NEXT MEETING 26 September · 11:00 Ways of Seeing Essays 1—3",
+          "rows": [
+            {
+              "label": "Ways of Seeing",
+              "value": "John Berger · Available to borrow"
+            },
+            {
+              "label": "The Design of Everyday Things",
+              "value": "Don Norman · With Lena · due 26 Sep"
+            },
+            {
+              "label": "Invisible Cities",
+              "value": "Italo Calvino · Available to borrow"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "card",
+            "variant": "project",
+            "group": "personal-v2-home-group-4"
+          },
+          "mockup_style": "catalogue",
+          "mockup_kicker": "THE SATURDAY READING GROUP",
+          "mockup_period": "CATALOGUE / 01",
+          "mockup_description": "Browse the catalogue and arrange a loan at the next meeting.",
+          "mockup_footer": "Next meeting · 26 September · 11:00 / Ways of Seeing · Essays 1—3"
+        },
+        {
+          "id": "personal-v2-home-021",
+          "block_type": "callout",
+          "title": "Read the case study",
+          "content": "Scope and priorities\n\nThe initial catalogue records each book’s owner, availability, and borrower. Ratings and reviews were outside the brief: the group needed a reliable lending record.\n\nDesigning for use at meetings\n\nI designed the mobile flow around the point of borrowing, with availability prominent and a short form that members can complete during a meeting. Recommendations can be added when a book is returned.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "personal-v2-home-group-4"
+          }
+        },
+        {
+          "id": "personal-v2-home-022",
+          "block_type": "rich_text",
+          "content": "Art & 6529",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "personal-v2-home-group-5"
+          }
+        },
+        {
+          "id": "personal-v2-home-023",
+          "block_type": "heading",
+          "text": "Notes on The Memes",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-5"
+          }
+        },
+        {
+          "id": "personal-v2-home-024",
+          "block_type": "rich_text",
+          "content": "I follow artists on 6529 and bring work from The Memes to our group’s art discussions. These two cards prompted a conversation about the relationship between image and text.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-5"
+          }
+        },
+        {
+          "id": "personal-v2-home-025",
+          "block_type": "callout",
+          "title": "From my notebook · 8 September",
+          "content": "I made postcard-sized studies of both compositions to compare how their phrases read at a distance. The exercise became a discussion of how a slogan changes our interpretation of an image.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "personal-v2-home-group-5"
+          }
+        },
+        {
+          "id": "personal-v2-home-026",
+          "block_type": "image",
+          "asset_id": "meme-48",
+          "title": "Freedom to Explore",
+          "caption": "Freedom to Explore Cath Simard · The Memes #48 Selected for our discussion of landscape photography and political language.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-5"
+          }
+        },
+        {
+          "id": "personal-v2-home-027",
+          "block_type": "image",
+          "asset_id": "meme-103",
+          "title": "Don’t Trust, Check.",
+          "caption": "Don’t Trust, Check. Jack Butcher · The Memes #103 We used this card to discuss how verification symbols acquire authority.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-5"
+          }
+        },
+        {
+          "id": "personal-v2-home-028",
+          "block_type": "rich_text",
+          "content": "Reference selections, not an ownership record. Both works are CC0 and credited to their artists.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-5"
+          }
+        },
+        {
+          "id": "personal-v2-home-029",
+          "block_type": "rich_text",
+          "content": "Experience",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "personal-v2-home-group-7"
+          }
+        },
+        {
+          "id": "personal-v2-home-030",
+          "block_type": "heading",
+          "text": "Experience & education",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-7"
+          }
+        },
+        {
+          "id": "personal-v2-home-031",
+          "block_type": "rich_text",
+          "content": "2024—NOW",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-7"
+          }
+        },
+        {
+          "id": "personal-v2-home-032",
+          "block_type": "rich_text",
+          "content": "Independent product designer",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-7"
+          }
+        },
+        {
+          "id": "personal-v2-home-033",
+          "block_type": "rich_text",
+          "content": "Research and interface design for planning, publishing, and community tools, with responsibility through developer handover.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-7"
+          }
+        },
+        {
+          "id": "personal-v2-home-034",
+          "block_type": "rich_text",
+          "content": "2021—2024",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-7"
+          }
+        },
+        {
+          "id": "personal-v2-home-035",
+          "block_type": "rich_text",
+          "content": "Product designer · Paper Office",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-7"
+          }
+        },
+        {
+          "id": "personal-v2-home-036",
+          "block_type": "rich_text",
+          "content": "Designed the document review workflow and contributed to the web application’s component library.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-7"
+          }
+        },
+        {
+          "id": "personal-v2-home-037",
+          "block_type": "rich_text",
+          "content": "2018—2021",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-7"
+          }
+        },
+        {
+          "id": "personal-v2-home-038",
+          "block_type": "rich_text",
+          "content": "Communication design",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-7"
+          }
+        },
+        {
+          "id": "personal-v2-home-039",
+          "block_type": "rich_text",
+          "content": "Studied communication design in Porto, specialising in editorial design, typography, and exhibition graphics.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-7"
+          }
+        },
+        {
+          "id": "personal-v2-home-040",
+          "block_type": "rich_text",
+          "content": "Outside work",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "personal-v2-home-group-8"
+          }
+        },
+        {
+          "id": "personal-v2-home-041",
+          "block_type": "heading",
+          "text": "Current interests",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-8"
+          }
+        },
+        {
+          "id": "personal-v2-home-042",
+          "block_type": "heading",
+          "text": "Reading / Ways of Seeing",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-9"
+          }
+        },
+        {
+          "id": "personal-v2-home-043",
+          "block_type": "rich_text",
+          "content": "I’m preparing a selection of magazine advertisements for our next discussion of Berger’s first three essays.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-9"
+          }
+        },
+        {
+          "id": "personal-v2-home-044",
+          "block_type": "heading",
+          "text": "Walking / A six-route guide",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-10"
+          }
+        },
+        {
+          "id": "personal-v2-home-045",
+          "block_type": "rich_text",
+          "content": "I’m developing a printed guide to six east London walks. The first follows the canal from Victoria Park to the river; its final stretch needs revision before I draw the map.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-10"
+          }
+        },
+        {
+          "id": "personal-v2-home-046",
+          "block_type": "heading",
+          "text": "Making / A 35mm photo booklet",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-11"
+          }
+        },
+        {
+          "id": "personal-v2-home-047",
+          "block_type": "rich_text",
+          "content": "I’m sequencing twelve photographs from four rolls of 35mm for a printed booklet, using a paper dummy to test the page turns.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "personal-v2-home-group-11"
+          }
+        },
+        {
+          "id": "personal-v2-home-048",
+          "block_type": "heading",
+          "text": "Have a project in mind?",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "personal-v2-home-group-12"
+          }
+        },
+        {
+          "id": "personal-v2-home-049",
+          "block_type": "rich_text",
+          "content": "Available for new projects from November 2026, in London or remotely.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "personal-v2-home-group-12"
+          }
+        },
+        {
+          "id": "personal-v2-home-050",
+          "block_type": "callout",
+          "title": "mara@example.org ↗",
+          "email": "mara@example.org",
+          "content": "",
+          "subject": "Enquiry",
+          "form": false,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "personal-v2-home-group-12"
+          }
+        },
+        {
+          "id": "personal-v2-home-051",
+          "block_type": "rich_text",
+          "content": "Fictional portfolio: Mara, the projects, and work history are sample content.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Mara Silva."
+    }
+  ],
+  "navigation": [
+    {
+      "label": "Work",
+      "pageSlug": "home",
+      "blockId": "personal-v2-home-008"
+    },
+    {
+      "label": "Art & 6529",
+      "pageSlug": "home",
+      "blockId": "personal-v2-home-022"
+    },
+    {
+      "label": "Contact ↗",
+      "pageSlug": "home",
+      "blockId": "personal-v2-home-048"
+    }
+  ]
+}

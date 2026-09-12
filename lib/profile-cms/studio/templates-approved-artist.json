@@ -1,0 +1,2599 @@
+{
+  "pages": [
+    {
+      "slug": "home",
+      "title": "Ada Mercer",
+      "description": "I make generative drawings, prints and light installations, working between London and Margate. My projects develop through coastal fieldwork, experiments with overprinted colour and observations of buildings after dark.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "artist-v2-home-001",
+          "block_type": "heading",
+          "text": "Ada Mercer",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "hero",
+            "group": "artist-v2-home-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-home-002",
+          "block_type": "rich_text",
+          "content": "Drawing · Print · Light / London & Margate",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "hero",
+            "group": "artist-v2-home-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-home-003",
+          "block_type": "rich_text",
+          "content": "I make generative drawings, prints and light installations, working between London and Margate. My projects develop through coastal fieldwork, experiments with overprinted colour and observations of buildings after dark.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "artist-v2-home-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-home-004",
+          "block_type": "image",
+          "asset_id": "ada-harbour-1",
+          "title": "Harbour Studies",
+          "caption": "Harbour Studies 2025–26 · Generative drawing View the project ↗",
+          "page_id": "page-series-harbour",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "artwork"
+          }
+        },
+        {
+          "id": "artist-v2-home-005",
+          "block_type": "button_link",
+          "label": "View the project ↗",
+          "page_id": "page-series-harbour",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-home-006",
+          "block_type": "gallery",
+          "asset_ids": ["ada-colour-1", "ada-night-1"],
+          "items": [
+            {
+              "asset_id": "ada-colour-1",
+              "title": "Colour Register",
+              "subtitle": "2024–25 · Screenprint",
+              "page_id": "page-series-colour"
+            },
+            {
+              "asset_id": "ada-night-1",
+              "title": "Night Windows",
+              "subtitle": "2023–25 · Light works",
+              "page_id": "page-series-night"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        },
+        {
+          "id": "artist-v2-home-007",
+          "block_type": "rich_text",
+          "content": "Forthcoming exhibition",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "note",
+            "group": "artist-v2-home-group-2"
+          }
+        },
+        {
+          "id": "artist-v2-home-008",
+          "block_type": "heading",
+          "text": "Harbour Studies",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "artist-v2-home-group-2"
+          }
+        },
+        {
+          "id": "artist-v2-home-009",
+          "block_type": "rich_text",
+          "content": "18 September–24 October 2026",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "artist-v2-home-group-2"
+          }
+        },
+        {
+          "id": "artist-v2-home-010",
+          "block_type": "rich_text",
+          "content": "Rook Passage Gallery, Margate",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "artist-v2-home-group-2"
+          }
+        },
+        {
+          "id": "artist-v2-home-011",
+          "block_type": "rich_text",
+          "content": "New drawings, working proofs and field notebooks from the harbour project.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "artist-v2-home-group-2"
+          }
+        },
+        {
+          "id": "artist-v2-home-012",
+          "block_type": "button_link",
+          "label": "Exhibition & studio information ↗",
+          "page_id": "page-studio",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "artist-v2-home-group-2"
+          }
+        }
+      ],
+      "navigationLabel": "Ada Mercer"
+    },
+    {
+      "slug": "works",
+      "title": "Works",
+      "description": "Three ongoing bodies of work, developed through drawing systems, print processes and illuminated structures.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "artist-v2-works-001",
+          "block_type": "rich_text",
+          "content": "Selected works · 2023–2026",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-works-002",
+          "block_type": "heading",
+          "text": "Works",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-works-003",
+          "block_type": "rich_text",
+          "content": "Three ongoing bodies of work, developed through drawing systems, print processes and illuminated structures.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-works-004",
+          "block_type": "gallery",
+          "asset_ids": [
+            "ada-harbour-1",
+            "ada-harbour-2",
+            "ada-harbour-3",
+            "ada-colour-1",
+            "ada-colour-2",
+            "ada-colour-3",
+            "ada-night-1",
+            "ada-night-2",
+            "ada-night-3"
+          ],
+          "items": [
+            {
+              "asset_id": "ada-harbour-1",
+              "title": "South Pier",
+              "subtitle": "Pigment ink on cotton paper",
+              "page_id": "page-work-harbour-1",
+              "category": "Harbour Studies"
+            },
+            {
+              "asset_id": "ada-harbour-2",
+              "title": "Turning Basin",
+              "subtitle": "Pigment ink on cotton paper",
+              "page_id": "page-work-harbour-2",
+              "category": "Harbour Studies"
+            },
+            {
+              "asset_id": "ada-harbour-3",
+              "title": "Tide Table",
+              "subtitle": "Pigment ink on cotton paper",
+              "page_id": "page-work-harbour-3",
+              "category": "Harbour Studies"
+            },
+            {
+              "asset_id": "ada-colour-1",
+              "title": "Register 04",
+              "subtitle": "Four-colour screenprint on cotton paper",
+              "page_id": "page-work-colour-1",
+              "category": "Colour Register"
+            },
+            {
+              "asset_id": "ada-colour-2",
+              "title": "Second Pass",
+              "subtitle": "Five-colour screenprint on cotton paper",
+              "page_id": "page-work-colour-2",
+              "category": "Colour Register"
+            },
+            {
+              "asset_id": "ada-colour-3",
+              "title": "Overprint No. 7",
+              "subtitle": "Four-colour screenprint on cotton paper",
+              "page_id": "page-work-colour-3",
+              "category": "Colour Register"
+            },
+            {
+              "asset_id": "ada-night-1",
+              "title": "Landing, 23:10",
+              "subtitle": "Translucent screens, architectural enclosures and programmed LED light",
+              "page_id": "page-work-night-1",
+              "category": "Night Windows"
+            },
+            {
+              "asset_id": "ada-night-2",
+              "title": "North Block",
+              "subtitle": "Translucent screens, architectural enclosures and programmed LED light",
+              "page_id": "page-work-night-2",
+              "category": "Night Windows"
+            },
+            {
+              "asset_id": "ada-night-3",
+              "title": "Window Sequence",
+              "subtitle": "Translucent screens, architectural enclosures and programmed LED light",
+              "page_id": "page-work-night-3",
+              "category": "Night Windows"
+            }
+          ],
+          "categories": ["Harbour Studies", "Colour Register", "Night Windows"],
+          "searchable": true,
+          "display_modes": ["grid", "list"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        }
+      ],
+      "navigationLabel": "Works"
+    },
+    {
+      "slug": "series-harbour",
+      "title": "Harbour Studies",
+      "description": "Drawings made around the harbour become instructions for a pen plotter. Each work develops a different set of routes, with line density adjusted through repeated paper proofs.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "artist-v2-series-harbour-001",
+          "block_type": "button_link",
+          "label": "← All works",
+          "page_id": "page-works",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-harbour-002",
+          "block_type": "rich_text",
+          "content": "2025–26 / Generative drawing",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "feature",
+            "group": "artist-v2-series-harbour-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-series-harbour-003",
+          "block_type": "heading",
+          "text": "Harbour Studies",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "feature",
+            "group": "artist-v2-series-harbour-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-series-harbour-004",
+          "block_type": "rich_text",
+          "content": "Drawings made around the harbour become instructions for a pen plotter. Each work develops a different set of routes, with line density adjusted through repeated paper proofs.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "feature",
+            "group": "artist-v2-series-harbour-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-series-harbour-005",
+          "block_type": "image",
+          "asset_id": "ada-harbour-1",
+          "title": "Harbour Studies by Ada Mercer",
+          "caption": "",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-series-harbour-006",
+          "block_type": "heading",
+          "text": "Development",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-harbour-007",
+          "block_type": "rich_text",
+          "content": "The project began with repeated walks along the coast at Margate. Notebook drawings were translated into plotting instructions, then revised against physical proofs. Pen speed, spacing and ink density are tested on paper throughout.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-harbour-008",
+          "block_type": "heading",
+          "text": "Exhibitions",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-harbour-009",
+          "block_type": "rich_text",
+          "content": "Selected drawings will be shown at Rook Passage Gallery, Margate, from 18 September to 24 October 2026.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-harbour-010",
+          "block_type": "button_link",
+          "label": "Studio & exhibitions ↗",
+          "page_id": "page-studio",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-harbour-011",
+          "block_type": "heading",
+          "text": "Works in the series",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-harbour-012",
+          "block_type": "button_link",
+          "label": "Enquire about the project ↗",
+          "page_id": "page-contact",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-harbour-013",
+          "block_type": "gallery",
+          "asset_ids": ["ada-harbour-1", "ada-harbour-2", "ada-harbour-3"],
+          "items": [
+            {
+              "asset_id": "ada-harbour-1",
+              "title": "South Pier",
+              "subtitle": "Pigment ink on cotton paper",
+              "page_id": "page-work-harbour-1",
+              "category": "Harbour Studies"
+            },
+            {
+              "asset_id": "ada-harbour-2",
+              "title": "Turning Basin",
+              "subtitle": "Pigment ink on cotton paper",
+              "page_id": "page-work-harbour-2",
+              "category": "Harbour Studies"
+            },
+            {
+              "asset_id": "ada-harbour-3",
+              "title": "Tide Table",
+              "subtitle": "Pigment ink on cotton paper",
+              "page_id": "page-work-harbour-3",
+              "category": "Harbour Studies"
+            }
+          ],
+          "categories": ["Harbour Studies"],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        }
+      ],
+      "navigationLabel": "Harbour Studies"
+    },
+    {
+      "slug": "series-colour",
+      "title": "Colour Register",
+      "description": "Screenprint separations are deliberately shifted between passes. Compositions are revised on paper, where each overlap produces a colour that cannot be assessed from the digital file alone.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "artist-v2-series-colour-001",
+          "block_type": "button_link",
+          "label": "← All works",
+          "page_id": "page-works",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-colour-002",
+          "block_type": "rich_text",
+          "content": "2024–25 / Screenprint",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "feature",
+            "group": "artist-v2-series-colour-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-series-colour-003",
+          "block_type": "heading",
+          "text": "Colour Register",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "feature",
+            "group": "artist-v2-series-colour-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-series-colour-004",
+          "block_type": "rich_text",
+          "content": "Screenprint separations are deliberately shifted between passes. Compositions are revised on paper, where each overlap produces a colour that cannot be assessed from the digital file alone.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "feature",
+            "group": "artist-v2-series-colour-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-series-colour-005",
+          "block_type": "image",
+          "asset_id": "ada-colour-1",
+          "title": "Colour Register by Ada Mercer",
+          "caption": "",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-series-colour-006",
+          "block_type": "heading",
+          "text": "Development",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-colour-007",
+          "block_type": "rich_text",
+          "content": "The series developed through repeated press sessions with a small set of screens. An initial arrangement is printed in several sequences before its separations are revised. Working proofs remain beside the press throughout each edition.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-colour-008",
+          "block_type": "heading",
+          "text": "Exhibitions",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-colour-009",
+          "block_type": "rich_text",
+          "content": "Works from the series were included in Systems in Print at Alder Yard Project Space, London, in 2025.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-colour-010",
+          "block_type": "button_link",
+          "label": "Studio & exhibitions ↗",
+          "page_id": "page-studio",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-colour-011",
+          "block_type": "heading",
+          "text": "Works in the series",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-colour-012",
+          "block_type": "button_link",
+          "label": "Enquire about the project ↗",
+          "page_id": "page-contact",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-colour-013",
+          "block_type": "gallery",
+          "asset_ids": ["ada-colour-1", "ada-colour-2", "ada-colour-3"],
+          "items": [
+            {
+              "asset_id": "ada-colour-1",
+              "title": "Register 04",
+              "subtitle": "Four-colour screenprint on cotton paper",
+              "page_id": "page-work-colour-1",
+              "category": "Colour Register"
+            },
+            {
+              "asset_id": "ada-colour-2",
+              "title": "Second Pass",
+              "subtitle": "Five-colour screenprint on cotton paper",
+              "page_id": "page-work-colour-2",
+              "category": "Colour Register"
+            },
+            {
+              "asset_id": "ada-colour-3",
+              "title": "Overprint No. 7",
+              "subtitle": "Four-colour screenprint on cotton paper",
+              "page_id": "page-work-colour-3",
+              "category": "Colour Register"
+            }
+          ],
+          "categories": ["Colour Register"],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        }
+      ],
+      "navigationLabel": "Colour Register"
+    },
+    {
+      "slug": "series-night",
+      "title": "Night Windows",
+      "description": "Window arrangements recorded on evening walks are rebuilt as modular compositions. Each illuminated work is tested at daylight and evening brightness before fabrication.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "artist-v2-series-night-001",
+          "block_type": "button_link",
+          "label": "← All works",
+          "page_id": "page-works",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-night-002",
+          "block_type": "rich_text",
+          "content": "2023–25 / Light works",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "feature",
+            "group": "artist-v2-series-night-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-series-night-003",
+          "block_type": "heading",
+          "text": "Night Windows",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "feature",
+            "group": "artist-v2-series-night-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-series-night-004",
+          "block_type": "rich_text",
+          "content": "Window arrangements recorded on evening walks are rebuilt as modular compositions. Each illuminated work is tested at daylight and evening brightness before fabrication.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "feature",
+            "group": "artist-v2-series-night-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-series-night-005",
+          "block_type": "image",
+          "asset_id": "ada-night-1",
+          "title": "Night Windows by Ada Mercer",
+          "caption": "",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-series-night-006",
+          "block_type": "heading",
+          "text": "Development",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-night-007",
+          "block_type": "rich_text",
+          "content": "The compositions begin as notebook records of windows, landings and stairwells. I translate them into arrangements of translucent screens and illuminated openings, testing the spacing and light levels in a scale model before installation.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-night-008",
+          "block_type": "heading",
+          "text": "Exhibitions",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-night-009",
+          "block_type": "rich_text",
+          "content": "The first presentation of the series took place at East Cut Rooms, Ramsgate, in 2024.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-night-010",
+          "block_type": "button_link",
+          "label": "Studio & exhibitions ↗",
+          "page_id": "page-studio",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-night-011",
+          "block_type": "heading",
+          "text": "Works in the series",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-night-012",
+          "block_type": "button_link",
+          "label": "Enquire about the project ↗",
+          "page_id": "page-contact",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-series-night-013",
+          "block_type": "gallery",
+          "asset_ids": ["ada-night-1", "ada-night-2", "ada-night-3"],
+          "items": [
+            {
+              "asset_id": "ada-night-1",
+              "title": "Landing, 23:10",
+              "subtitle": "Translucent screens, architectural enclosures and programmed LED light",
+              "page_id": "page-work-night-1",
+              "category": "Night Windows"
+            },
+            {
+              "asset_id": "ada-night-2",
+              "title": "North Block",
+              "subtitle": "Translucent screens, architectural enclosures and programmed LED light",
+              "page_id": "page-work-night-2",
+              "category": "Night Windows"
+            },
+            {
+              "asset_id": "ada-night-3",
+              "title": "Window Sequence",
+              "subtitle": "Translucent screens, architectural enclosures and programmed LED light",
+              "page_id": "page-work-night-3",
+              "category": "Night Windows"
+            }
+          ],
+          "categories": ["Night Windows"],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        }
+      ],
+      "navigationLabel": "Night Windows"
+    },
+    {
+      "slug": "work-harbour-1",
+      "title": "South Pier",
+      "description": "Developed from three walking routes along the pier; the plotting sequence follows their points of overlap.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "artist-v2-work-harbour-1-001",
+          "block_type": "button_link",
+          "label": "← Harbour Studies",
+          "page_id": "page-series-harbour",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-1-002",
+          "block_type": "rich_text",
+          "content": "Harbour Studies",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-1-003",
+          "block_type": "heading",
+          "text": "South Pier",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-1-004",
+          "block_type": "rich_text",
+          "content": "2026",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-1-005",
+          "block_type": "image",
+          "asset_id": "ada-harbour-1",
+          "title": "South Pier by Ada Mercer",
+          "caption": "",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-1-006",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Ada Mercer\nYear: 2026\nMaterials: Pigment ink on cotton paper\nDimensions: 56 × 76 cm Height × width",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Ada Mercer"
+            },
+            {
+              "label": "Year",
+              "value": "2026"
+            },
+            {
+              "label": "Materials",
+              "value": "Pigment ink on cotton paper"
+            },
+            {
+              "label": "Dimensions",
+              "value": "56 × 76 cm Height × width"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-1-007",
+          "block_type": "rich_text",
+          "content": "Developed from three walking routes along the pier; the plotting sequence follows their points of overlap.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-1-008",
+          "block_type": "rich_text",
+          "content": "An original pen-plotted drawing, signed and dated on the reverse. A reduced-format paper edition is also available.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-1-009",
+          "block_type": "button_link",
+          "label": "Enquire about this work ↗",
+          "page_id": "page-contact",
+          "subject": "Work: South Pier",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "South Pier"
+    },
+    {
+      "slug": "work-harbour-2",
+      "title": "Turning Basin",
+      "description": "A set of curved paths is repeated at changing intervals. This was the first drawing in the series to use two ink densities.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "artist-v2-work-harbour-2-001",
+          "block_type": "button_link",
+          "label": "← Harbour Studies",
+          "page_id": "page-series-harbour",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-2-002",
+          "block_type": "rich_text",
+          "content": "Harbour Studies",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-2-003",
+          "block_type": "heading",
+          "text": "Turning Basin",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-2-004",
+          "block_type": "rich_text",
+          "content": "2025",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-2-005",
+          "block_type": "image",
+          "asset_id": "ada-harbour-2",
+          "title": "Turning Basin by Ada Mercer",
+          "caption": "",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-2-006",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Ada Mercer\nYear: 2025\nMaterials: Pigment ink on cotton paper\nDimensions: 54 × 72 cm Height × width",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Ada Mercer"
+            },
+            {
+              "label": "Year",
+              "value": "2025"
+            },
+            {
+              "label": "Materials",
+              "value": "Pigment ink on cotton paper"
+            },
+            {
+              "label": "Dimensions",
+              "value": "54 × 72 cm Height × width"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-2-007",
+          "block_type": "rich_text",
+          "content": "A set of curved paths is repeated at changing intervals. This was the first drawing in the series to use two ink densities.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-2-008",
+          "block_type": "rich_text",
+          "content": "An original pen-plotted drawing. The studio can advise on archival mounting and glazing.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-2-009",
+          "block_type": "button_link",
+          "label": "Enquire about this work ↗",
+          "page_id": "page-contact",
+          "subject": "Work: Turning Basin",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Turning Basin"
+    },
+    {
+      "slug": "work-harbour-3",
+      "title": "Tide Table",
+      "description": "Daily tide intervals determine the spacing of the plotted lines. The final drawing was selected from twelve proofs.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "artist-v2-work-harbour-3-001",
+          "block_type": "button_link",
+          "label": "← Harbour Studies",
+          "page_id": "page-series-harbour",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-3-002",
+          "block_type": "rich_text",
+          "content": "Harbour Studies",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-3-003",
+          "block_type": "heading",
+          "text": "Tide Table",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-3-004",
+          "block_type": "rich_text",
+          "content": "2026",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-3-005",
+          "block_type": "image",
+          "asset_id": "ada-harbour-3",
+          "title": "Tide Table by Ada Mercer",
+          "caption": "",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-3-006",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Ada Mercer\nYear: 2026\nMaterials: Pigment ink on cotton paper\nDimensions: 50 × 70 cm Height × width",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Ada Mercer"
+            },
+            {
+              "label": "Year",
+              "value": "2026"
+            },
+            {
+              "label": "Materials",
+              "value": "Pigment ink on cotton paper"
+            },
+            {
+              "label": "Dimensions",
+              "value": "50 × 70 cm Height × width"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-3-007",
+          "block_type": "rich_text",
+          "content": "Daily tide intervals determine the spacing of the plotted lines. The final drawing was selected from twelve proofs.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-3-008",
+          "block_type": "rich_text",
+          "content": "An original drawing from the 2026 harbour sessions, signed and dated on the reverse.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-harbour-3-009",
+          "block_type": "button_link",
+          "label": "Enquire about this work ↗",
+          "page_id": "page-contact",
+          "subject": "Work: Tide Table",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Tide Table"
+    },
+    {
+      "slug": "work-colour-1",
+      "title": "Register 04",
+      "description": "Four separations printed from pale to dark, with a measured offset introduced on the final pass.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "artist-v2-work-colour-1-001",
+          "block_type": "button_link",
+          "label": "← Colour Register",
+          "page_id": "page-series-colour",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-1-002",
+          "block_type": "rich_text",
+          "content": "Colour Register",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-1-003",
+          "block_type": "heading",
+          "text": "Register 04",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-1-004",
+          "block_type": "rich_text",
+          "content": "2024",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-1-005",
+          "block_type": "image",
+          "asset_id": "ada-colour-1",
+          "title": "Register 04 by Ada Mercer",
+          "caption": "",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-1-006",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Ada Mercer\nYear: 2024\nMaterials: Four-colour screenprint on cotton paper\nDimensions: 50 × 70 cm Height × width",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Ada Mercer"
+            },
+            {
+              "label": "Year",
+              "value": "2024"
+            },
+            {
+              "label": "Materials",
+              "value": "Four-colour screenprint on cotton paper"
+            },
+            {
+              "label": "Dimensions",
+              "value": "50 × 70 cm Height × width"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-1-007",
+          "block_type": "rich_text",
+          "content": "Four separations printed from pale to dark, with a measured offset introduced on the final pass.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-1-008",
+          "block_type": "rich_text",
+          "content": "A studio proof from the original press sequence. The related edition uses the same separations.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-1-009",
+          "block_type": "button_link",
+          "label": "Enquire about this work ↗",
+          "page_id": "page-contact",
+          "subject": "Work: Register 04",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Register 04"
+    },
+    {
+      "slug": "work-colour-2",
+      "title": "Second Pass",
+      "description": "A second impression of the central colour changes the balance of the original composition. The exposed paper remains part of the palette.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "artist-v2-work-colour-2-001",
+          "block_type": "button_link",
+          "label": "← Colour Register",
+          "page_id": "page-series-colour",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-2-002",
+          "block_type": "rich_text",
+          "content": "Colour Register",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-2-003",
+          "block_type": "heading",
+          "text": "Second Pass",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-2-004",
+          "block_type": "rich_text",
+          "content": "2025",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-2-005",
+          "block_type": "image",
+          "asset_id": "ada-colour-2",
+          "title": "Second Pass by Ada Mercer",
+          "caption": "",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-2-006",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Ada Mercer\nYear: 2025\nMaterials: Five-colour screenprint on cotton paper\nDimensions: 50 × 70 cm Height × width",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Ada Mercer"
+            },
+            {
+              "label": "Year",
+              "value": "2025"
+            },
+            {
+              "label": "Materials",
+              "value": "Five-colour screenprint on cotton paper"
+            },
+            {
+              "label": "Dimensions",
+              "value": "50 × 70 cm Height × width"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-2-007",
+          "block_type": "rich_text",
+          "content": "A second impression of the central colour changes the balance of the original composition. The exposed paper remains part of the palette.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-2-008",
+          "block_type": "rich_text",
+          "content": "A signed studio proof. Registration and ink coverage vary slightly between impressions.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-2-009",
+          "block_type": "button_link",
+          "label": "Enquire about this work ↗",
+          "page_id": "page-contact",
+          "subject": "Work: Second Pass",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Second Pass"
+    },
+    {
+      "slug": "work-colour-3",
+      "title": "Overprint No. 7",
+      "description": "Made during a week of press trials using the same four screens. This version retains the wider registration shift tested on the third day.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "artist-v2-work-colour-3-001",
+          "block_type": "button_link",
+          "label": "← Colour Register",
+          "page_id": "page-series-colour",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-3-002",
+          "block_type": "rich_text",
+          "content": "Colour Register",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-3-003",
+          "block_type": "heading",
+          "text": "Overprint No. 7",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-3-004",
+          "block_type": "rich_text",
+          "content": "2025",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-3-005",
+          "block_type": "image",
+          "asset_id": "ada-colour-3",
+          "title": "Overprint No. 7 by Ada Mercer",
+          "caption": "",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-3-006",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Ada Mercer\nYear: 2025\nMaterials: Four-colour screenprint on cotton paper\nDimensions: 50 × 70 cm Height × width",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Ada Mercer"
+            },
+            {
+              "label": "Year",
+              "value": "2025"
+            },
+            {
+              "label": "Materials",
+              "value": "Four-colour screenprint on cotton paper"
+            },
+            {
+              "label": "Dimensions",
+              "value": "50 × 70 cm Height × width"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-3-007",
+          "block_type": "rich_text",
+          "content": "Made during a week of press trials using the same four screens. This version retains the wider registration shift tested on the third day.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-3-008",
+          "block_type": "rich_text",
+          "content": "A signed working proof retained from the Colour Register press sessions.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-colour-3-009",
+          "block_type": "button_link",
+          "label": "Enquire about this work ↗",
+          "page_id": "page-contact",
+          "subject": "Work: Overprint No. 7",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Overprint No. 7"
+    },
+    {
+      "slug": "work-night-1",
+      "title": "Landing, 23:10",
+      "description": "The first installation in the series separates the colours into freestanding planes. Its layout was developed from drawings of overlapping stairwell windows, allowing visitors to move between the screens.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "artist-v2-work-night-1-001",
+          "block_type": "button_link",
+          "label": "← Night Windows",
+          "page_id": "page-series-night",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-1-002",
+          "block_type": "rich_text",
+          "content": "Night Windows",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-1-003",
+          "block_type": "heading",
+          "text": "Landing, 23:10",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-1-004",
+          "block_type": "rich_text",
+          "content": "2023",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-1-005",
+          "block_type": "image",
+          "asset_id": "ada-night-1",
+          "title": "Landing, 23:10 by Ada Mercer",
+          "caption": "",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-1-006",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Ada Mercer\nYear: 2023\nMaterials: Translucent screens, architectural enclosures and programmed LED light\nDimensions: Dimensions variable; configured for the exhibition space",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Ada Mercer"
+            },
+            {
+              "label": "Year",
+              "value": "2023"
+            },
+            {
+              "label": "Materials",
+              "value": "Translucent screens, architectural enclosures and programmed LED light"
+            },
+            {
+              "label": "Dimensions",
+              "value": "Dimensions variable; configured for the exhibition space"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-1-007",
+          "block_type": "rich_text",
+          "content": "The first installation in the series separates the colours into freestanding planes. Its layout was developed from drawings of overlapping stairwell windows, allowing visitors to move between the screens.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-1-008",
+          "block_type": "rich_text",
+          "content": "The installation can be adapted to an enclosed gallery. The studio supplies a layout, lighting specification and installation plan for each presentation.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-1-009",
+          "block_type": "button_link",
+          "label": "Enquire about this work ↗",
+          "page_id": "page-contact",
+          "subject": "Work: Landing, 23:10",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Landing, 23:10"
+    },
+    {
+      "slug": "work-night-2",
+      "title": "North Block",
+      "description": "A sequence of recessed openings developed for the long wall at East Cut Rooms. Unequal spacing and separate light levels give each opening a different presence along the route through the gallery.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "artist-v2-work-night-2-001",
+          "block_type": "button_link",
+          "label": "← Night Windows",
+          "page_id": "page-series-night",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-2-002",
+          "block_type": "rich_text",
+          "content": "Night Windows",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-2-003",
+          "block_type": "heading",
+          "text": "North Block",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-2-004",
+          "block_type": "rich_text",
+          "content": "2024",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-2-005",
+          "block_type": "image",
+          "asset_id": "ada-night-2",
+          "title": "North Block by Ada Mercer",
+          "caption": "",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-2-006",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Ada Mercer\nYear: 2024\nMaterials: Translucent screens, architectural enclosures and programmed LED light\nDimensions: Dimensions variable; configured for the exhibition space",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Ada Mercer"
+            },
+            {
+              "label": "Year",
+              "value": "2024"
+            },
+            {
+              "label": "Materials",
+              "value": "Translucent screens, architectural enclosures and programmed LED light"
+            },
+            {
+              "label": "Dimensions",
+              "value": "Dimensions variable; configured for the exhibition space"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-2-007",
+          "block_type": "rich_text",
+          "content": "A sequence of recessed openings developed for the long wall at East Cut Rooms. Unequal spacing and separate light levels give each opening a different presence along the route through the gallery.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-2-008",
+          "block_type": "rich_text",
+          "content": "Temporary wall construction and lighting are specified for the host venue. The installation can be dismantled and reconfigured for a subsequent exhibition.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-2-009",
+          "block_type": "button_link",
+          "label": "Enquire about this work ↗",
+          "page_id": "page-contact",
+          "subject": "Work: North Block",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "North Block"
+    },
+    {
+      "slug": "work-night-3",
+      "title": "Window Sequence",
+      "description": "A broad illuminated opening is interrupted by a freestanding screen. The composition developed from experiments with viewing the same light source through two layers of translucent material.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "artist-v2-work-night-3-001",
+          "block_type": "button_link",
+          "label": "← Night Windows",
+          "page_id": "page-series-night",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-3-002",
+          "block_type": "rich_text",
+          "content": "Night Windows",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-3-003",
+          "block_type": "heading",
+          "text": "Window Sequence",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-3-004",
+          "block_type": "rich_text",
+          "content": "2025",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-3-005",
+          "block_type": "image",
+          "asset_id": "ada-night-3",
+          "title": "Window Sequence by Ada Mercer",
+          "caption": "",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-3-006",
+          "block_type": "callout",
+          "title": "",
+          "content": "Artist: Ada Mercer\nYear: 2025\nMaterials: Translucent screens, architectural enclosures and programmed LED light\nDimensions: Dimensions variable; configured for the exhibition space",
+          "rows": [
+            {
+              "label": "Artist",
+              "value": "Ada Mercer"
+            },
+            {
+              "label": "Year",
+              "value": "2025"
+            },
+            {
+              "label": "Materials",
+              "value": "Translucent screens, architectural enclosures and programmed LED light"
+            },
+            {
+              "label": "Dimensions",
+              "value": "Dimensions variable; configured for the exhibition space"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-3-007",
+          "block_type": "rich_text",
+          "content": "A broad illuminated opening is interrupted by a freestanding screen. The composition developed from experiments with viewing the same light source through two layers of translucent material.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-3-008",
+          "block_type": "rich_text",
+          "content": "Available for exhibition proposals. The studio prepares a site-specific layout and works with the host’s installation team.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-work-night-3-009",
+          "block_type": "button_link",
+          "label": "Enquire about this work ↗",
+          "page_id": "page-contact",
+          "subject": "Work: Window Sequence",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Window Sequence"
+    },
+    {
+      "slug": "studio",
+      "title": "Studio",
+      "description": "An independent practice in drawing, print and light, based between London and Margate.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "artist-v2-studio-001",
+          "block_type": "rich_text",
+          "content": "Practice & background",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-studio-002",
+          "block_type": "heading",
+          "text": "Studio",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-studio-003",
+          "block_type": "rich_text",
+          "content": "An independent practice in drawing, print and light, based between London and Margate.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-studio-004",
+          "block_type": "image",
+          "asset_id": "ada-studio",
+          "title": "Ada Mercer’s studio, with drawing and print work in progress",
+          "caption": "The Margate studio, 2026.",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-studio-005",
+          "block_type": "heading",
+          "text": "Ada Mercer",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-studio-006",
+          "block_type": "rich_text",
+          "content": "Born 1988",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-studio-007",
+          "block_type": "rich_text",
+          "content": "I began developing drawing systems in 2016 and established my independent print studio in 2019. My projects combine self-written software with physical tests of ink, paper and light, working between London and Margate.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-studio-008",
+          "block_type": "rich_text",
+          "content": "Harbour Studies draws on repeated walks along the coast; Colour Register developed through experiments with misaligned screenprints; Night Windows reconstructs patterns observed after dark. I work with specialist printers and fabricators on small editions and site-specific commissions.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-studio-009",
+          "block_type": "button_link",
+          "label": "Arrange a studio visit ↗",
+          "page_id": "page-contact",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-studio-010",
+          "block_type": "image",
+          "asset_id": "ada-installation",
+          "title": "Installation view of work by Ada Mercer",
+          "caption": "Selected work installed for a studio presentation.",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "artist-v2-studio-011",
+          "block_type": "heading",
+          "text": "Selected exhibitions & projects",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "timeline",
+            "group": "artist-v2-studio-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-studio-012",
+          "block_type": "callout",
+          "title": "",
+          "content": "2026: 2026 Harbour Studies Rook Passage Gallery, Margate · Solo exhibition\n2025: 2025 Systems in Print Alder Yard Project Space, London · Group exhibition\n2024: 2024 Night Windows East Cut Rooms, Ramsgate · Solo exhibition\n2023: 2023 Drawing Systems Rowan Press Workshop, London · Open studio and print release\n2022: 2022 Plotting Methods Merebank Print Lab, Kent · Research residency",
+          "rows": [
+            {
+              "label": "2026",
+              "value": "2026 Harbour Studies Rook Passage Gallery, Margate · Solo exhibition"
+            },
+            {
+              "label": "2025",
+              "value": "2025 Systems in Print Alder Yard Project Space, London · Group exhibition"
+            },
+            {
+              "label": "2024",
+              "value": "2024 Night Windows East Cut Rooms, Ramsgate · Solo exhibition"
+            },
+            {
+              "label": "2023",
+              "value": "2023 Drawing Systems Rowan Press Workshop, London · Open studio and print release"
+            },
+            {
+              "label": "2022",
+              "value": "2022 Plotting Methods Merebank Print Lab, Kent · Research residency"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "timeline",
+            "group": "artist-v2-studio-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-studio-013",
+          "block_type": "heading",
+          "text": "Selected press",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "artist-v2-studio-group-2"
+          }
+        },
+        {
+          "id": "artist-v2-studio-014",
+          "block_type": "rich_text",
+          "content": "“Ada Mercer: printing beyond the screen” Common Press Review · Interview, May 2025",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "artist-v2-studio-group-2"
+          }
+        },
+        {
+          "id": "artist-v2-studio-015",
+          "block_type": "rich_text",
+          "content": "“An evening with Night Windows” Studio Ledger · Studio visit, November 2024",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "artist-v2-studio-group-2"
+          }
+        },
+        {
+          "id": "artist-v2-example-disclosure",
+          "block_type": "rich_text",
+          "content": "Fictional artist and exhibition programme.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note"
+          }
+        }
+      ],
+      "navigationLabel": "Studio"
+    },
+    {
+      "slug": "editions",
+      "title": "Editions",
+      "description": "Small paper editions drawn from the three ongoing series. Each print is signed, numbered and checked in the studio before dispatch.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "artist-v2-editions-001",
+          "block_type": "rich_text",
+          "content": "Prints from the studio",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-editions-002",
+          "block_type": "heading",
+          "text": "Editions",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-editions-003",
+          "block_type": "rich_text",
+          "content": "Small paper editions drawn from the three ongoing series. Each print is signed, numbered and checked in the studio before dispatch.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-editions-004",
+          "block_type": "image",
+          "asset_id": "ada-harbour-1",
+          "title": "South Pier — paper edition",
+          "caption": "",
+          "page_id": "page-work-harbour-1",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "artist-v2-editions-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-editions-005",
+          "block_type": "heading",
+          "text": "South Pier",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "artist-v2-editions-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-editions-006",
+          "block_type": "rich_text",
+          "content": "£180 / Unframed",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "artist-v2-editions-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-editions-007",
+          "block_type": "rich_text",
+          "content": "A reduced-format print edition of the plotted drawing, proofed and approved in the studio.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "artist-v2-editions-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-editions-008",
+          "block_type": "callout",
+          "title": "Edition specifications",
+          "content": "Process Pigment print Paper 308 gsm cotton rag Sheet 40 × 50 cm Edition 40 + 4 artist’s proofs Finish Signed and numbered",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "artist-v2-editions-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-editions-009",
+          "block_type": "button_link",
+          "label": "Ask about availability ↗",
+          "page_id": "page-contact",
+          "subject": "Paper edition: South Pier",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "artist-v2-editions-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-editions-010",
+          "block_type": "image",
+          "asset_id": "ada-colour-1",
+          "title": "Register 04 — paper edition",
+          "caption": "",
+          "page_id": "page-work-colour-1",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "artist-v2-editions-group-2"
+          }
+        },
+        {
+          "id": "artist-v2-editions-011",
+          "block_type": "heading",
+          "text": "Register 04",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "artist-v2-editions-group-2"
+          }
+        },
+        {
+          "id": "artist-v2-editions-012",
+          "block_type": "rich_text",
+          "content": "£260 / Unframed",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "artist-v2-editions-group-2"
+          }
+        },
+        {
+          "id": "artist-v2-editions-013",
+          "block_type": "rich_text",
+          "content": "Printed from the same separations as the studio work. Slight registration differences are part of the edition.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "artist-v2-editions-group-2"
+          }
+        },
+        {
+          "id": "artist-v2-editions-014",
+          "block_type": "callout",
+          "title": "Edition specifications",
+          "content": "Process Four-colour screenprint Paper 300 gsm cotton paper Sheet 50 × 70 cm Edition 30 + 3 artist’s proofs Finish Signed and numbered",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "artist-v2-editions-group-2"
+          }
+        },
+        {
+          "id": "artist-v2-editions-015",
+          "block_type": "button_link",
+          "label": "Ask about availability ↗",
+          "page_id": "page-contact",
+          "subject": "Paper edition: Register 04",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "artist-v2-editions-group-2"
+          }
+        },
+        {
+          "id": "artist-v2-editions-016",
+          "block_type": "image",
+          "asset_id": "ada-night-1",
+          "title": "Landing, 23:10 — paper edition",
+          "caption": "",
+          "page_id": "page-work-night-1",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "artist-v2-editions-group-3"
+          }
+        },
+        {
+          "id": "artist-v2-editions-017",
+          "block_type": "heading",
+          "text": "Landing, 23:10",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "artist-v2-editions-group-3"
+          }
+        },
+        {
+          "id": "artist-v2-editions-018",
+          "block_type": "rich_text",
+          "content": "£220 / Unframed",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "artist-v2-editions-group-3"
+          }
+        },
+        {
+          "id": "artist-v2-editions-019",
+          "block_type": "rich_text",
+          "content": "A photographic print of the installation, produced as a separate signed edition.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "artist-v2-editions-group-3"
+          }
+        },
+        {
+          "id": "artist-v2-editions-020",
+          "block_type": "callout",
+          "title": "Edition specifications",
+          "content": "Process Pigment print Paper 310 gsm baryta paper Sheet 40 × 50 cm Edition 25 + 3 artist’s proofs Finish Signed and numbered",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "artist-v2-editions-group-3"
+          }
+        },
+        {
+          "id": "artist-v2-editions-021",
+          "block_type": "button_link",
+          "label": "Ask about availability ↗",
+          "page_id": "page-contact",
+          "subject": "Paper edition: Landing, 23:10",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "cards",
+            "group": "artist-v2-editions-group-3"
+          }
+        },
+        {
+          "id": "artist-v2-editions-022",
+          "block_type": "heading",
+          "text": "Ordering & delivery",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "artist-v2-editions-group-4"
+          }
+        },
+        {
+          "id": "artist-v2-editions-023",
+          "block_type": "rich_text",
+          "content": "Prices are in GBP and exclude delivery. Contact the studio for current availability, shipping and framing options. Paper editions are packed flat in archival materials.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "artist-v2-editions-group-4"
+          }
+        },
+        {
+          "id": "artist-v2-editions-024",
+          "block_type": "button_link",
+          "label": "Contact the studio ↗",
+          "page_id": "page-contact",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "artist-v2-editions-group-4"
+          }
+        },
+        {
+          "id": "artist-v2-editions-025",
+          "block_type": "rich_text",
+          "content": "Digital editions",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "note",
+            "group": "artist-v2-editions-group-5"
+          }
+        },
+        {
+          "id": "artist-v2-editions-026",
+          "block_type": "heading",
+          "text": "Night Windows",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "artist-v2-editions-group-5"
+          }
+        },
+        {
+          "id": "artist-v2-editions-027",
+          "block_type": "rich_text",
+          "content": "Digital editions of selected Night Windows compositions are available separately from the installations and paper prints. Contact the studio for the edition record and collecting information.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "artist-v2-editions-group-5"
+          }
+        },
+        {
+          "id": "artist-v2-editions-028",
+          "block_type": "button_link",
+          "label": "Enquire about digital editions ↗",
+          "page_id": "page-contact",
+          "subject": "Digital edition: Window Sequence",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "artist-v2-editions-group-5"
+          }
+        }
+      ],
+      "navigationLabel": "Editions"
+    },
+    {
+      "slug": "contact",
+      "title": "Contact",
+      "description": "For available works, editions or a commission, contact the studio with the work title or an outline of your project. For commissions, include the intended location, approximate dimensions and timetable.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "artist-v2-contact-001",
+          "block_type": "rich_text",
+          "content": "Available work · Commissions · Studio visits",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-contact-002",
+          "block_type": "heading",
+          "text": "Contact",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "artist-v2-contact-003",
+          "block_type": "rich_text",
+          "content": "For available works, editions or a commission, contact the studio with the work title or an outline of your project. For commissions, include the intended location, approximate dimensions and timetable.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "artist-v2-contact-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-contact-004",
+          "block_type": "callout",
+          "title": "studio@adamercer.example.org",
+          "email": "studio@adamercer.example.org",
+          "content": "",
+          "subject": "Enquiry",
+          "form": false,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "artist-v2-contact-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-contact-005",
+          "block_type": "heading",
+          "text": "Studio visits",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "artist-v2-contact-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-contact-006",
+          "block_type": "rich_text",
+          "content": "Visits to the Margate studio are available by appointment. Please mention any particular work you would like to see so it can be prepared in advance.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "artist-v2-contact-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-contact-007",
+          "block_type": "heading",
+          "text": "Print & press enquiries",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "artist-v2-contact-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-contact-008",
+          "block_type": "rich_text",
+          "content": "For publication images, interviews and exhibition material, include the publication name, intended use and deadline.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "artist-v2-contact-group-1"
+          }
+        },
+        {
+          "id": "artist-v2-contact-009",
+          "block_type": "callout",
+          "title": "Write to the studio",
+          "content": "Review your message here, then open it in your email app. Nothing is sent by this page.",
+          "email": "studio@adamercer.example.org",
+          "subject": "General enquiry",
+          "form": true,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "artist-v2-contact-group-1"
+          }
+        }
+      ],
+      "navigationLabel": "Contact"
+    }
+  ],
+  "navigation": [
+    {
+      "label": "Works",
+      "pageSlug": "works"
+    },
+    {
+      "label": "Studio",
+      "pageSlug": "studio"
+    },
+    {
+      "label": "Editions",
+      "pageSlug": "editions"
+    },
+    {
+      "label": "Contact",
+      "pageSlug": "contact"
+    }
+  ]
+}
