@@ -29,10 +29,11 @@ export async function findResumableMarketBatch(
   } = {}
 ) {
   const selected = new Set(items.map(orderKey));
+  const selectedAssets = new Set(items.map((item) => item.asset_key));
   const candidates = listSavedMarketBatches(profile).filter(
     ({ id, saved }) =>
       id !== options.excludeId &&
-      saved.request.items.some((item) => selected.has(orderKey(item)))
+      saved.request.items.some((item) => selectedAssets.has(item.asset_key))
   );
   let found: ResumableBatch | null = null;
   let review: ResumableBatch | null = null;
@@ -52,6 +53,7 @@ export async function findResumableMarketBatch(
       found = { operation, request: saved.request };
     } else if (
       options.includeReview !== false &&
+      saved.request.items.some((item) => selected.has(orderKey(item))) &&
       operation.state === "REVIEW" &&
       operation.expires_at > Date.now() &&
       (!review ||

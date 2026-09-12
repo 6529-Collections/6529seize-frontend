@@ -30,6 +30,13 @@ export async function fetchRecoverableMarketBatch(
   const operation = await fetchMarketBatch(id, signal);
   if (operation.profile_id !== profile)
     throw new Error("MARKET_PROFILE_CHANGED");
+  const original = readMarketBatch(profile, id);
+  if (
+    operation.id !== id ||
+    (original &&
+      operation.wallet.toLowerCase() !== original.request.wallet.toLowerCase())
+  )
+    throw new Error("MARKET_REVIEW_MISMATCH");
   clearResolvedBatchSend(operation);
   if (
     !batchNeedsPolling(operation) &&
