@@ -9,7 +9,7 @@ export const COLLECT_MESSAGES = {
   "collect.blend.resumePurchase": "Resume purchase review",
   "collect.blend.title": "Choose how to acquire each NFT",
   "collect.blend.intro":
-    "Start with offers, or choose Buy now where your plan has listings for the full quantity. Review purchases and sign each offer separately.",
+    "Start with offers, or choose Collect now where your plan has listings for the full quantity. Review purchases and sign each offer separately.",
   "collect.blend.acquireFor": "How to acquire {title}",
   "collect.blend.offer": "Offer",
   "collect.blend.selectNFT": "Select {title}",
@@ -24,7 +24,7 @@ export const COLLECT_MESSAGES = {
     "Gas is quoted at purchase review. The WETH offer budget is separate.",
   "collect.blend.reviewBuys": "Review purchases ({count})",
   "collect.strategy.title": "How would you like to collect?",
-  "collect.strategy.buy": "Buy now",
+  "collect.strategy.buy": "Collect now",
   "collect.strategy.match_bid": "At WETH offer",
   "collect.strategy.improve_bid": "WETH + %",
   "collect.strategy.discount_ask": "Ask − %",
@@ -38,7 +38,7 @@ export const COLLECT_MESSAGES = {
   "collect.strategy.help.discount_ask":
     "Choose a percentage below each NFT’s asking price. Offers are made in WETH.",
   "collect.strategy.help.blended":
-    "Choose which NFTs to buy now and which to offer on. Review ETH purchases and WETH offers separately.",
+    "Choose which NFTs to collect now and which to offer on. Review ETH purchases and WETH offers separately.",
   "collect.offerWorkspace.back": "Back to collecting",
   "collect.offerWorkspace.plan": "Plan offers",
   "collect.offerWorkspace.planMissing": "Make offers for missing NFTs",
@@ -449,7 +449,7 @@ export const COLLECT_MESSAGES = {
   "collect.plan.empty": "Start with a collecting goal",
   "collect.plan.emptyDescription":
     "See what your profile owns, what is missing and what you can collect next.",
-  "collect.plan.review": "Buy now",
+  "collect.plan.review": "Collect now",
   "collect.plan.makeOffers": "Make offers",
   "collect.plan.results": "Your collecting options",
   "collect.plan.scenarios": "Purchase scenarios",

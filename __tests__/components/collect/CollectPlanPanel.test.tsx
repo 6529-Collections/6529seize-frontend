@@ -34,7 +34,7 @@ test("leads with actionable missing NFTs and collapses owned holdings", () => {
     screen.getByRole("button", { name: /Available for your goal/ })
   );
   expect(onScenarioChange).toHaveBeenCalledWith("available");
-  fireEvent.click(screen.getByRole("button", { name: "Buy now" }));
+  fireEvent.click(screen.getByRole("button", { name: "Collect now" }));
   expect(onReview).toHaveBeenCalledWith(plan.id, plan.revision);
   fireEvent.click(screen.getByRole("button", { name: "Make offers" }));
   expect(onPlanOffers).toHaveBeenCalledTimes(1);

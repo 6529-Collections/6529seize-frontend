@@ -80,11 +80,11 @@ card page.
    cap for the review; its larger estimate is shown before continuing. Neither
    option guarantees complete market coverage. A partial plan leaves unfilled
    requirements visible; a missing price is never treated as zero cost.
-4. Choose a strategy directly in the results: **Buy now**, **At WETH offer**,
+4. Choose a strategy directly in the results: **Collect now**, **At WETH offer**,
    **WETH + %**, **Ask − %**, or **Blended**. The offer choices open the
    corresponding calculation controls; enter the percentage or budget and
    calculate before reviewing individual NFT prices.
-   With **Buy now**, select some or all proposed purchases. This brings them into
+   With **Collect now**, select some or all proposed purchases. This brings them into
    one review with quantities, delivery addresses and an estimated total.
    **Review live total** checks every selected order and shows the exact price,
    fees and gas reserve before wallet approval. To propose your own prices,
@@ -217,7 +217,7 @@ starts a separate workspace.
 ### Combine purchases and offers
 
 Choose **Blended** in the completion results to decide how to acquire each NFT.
-Rows start as offers using Conservative allocation. Switch an NFT to **Buy now**
+Rows start as offers using Conservative allocation. Switch an NFT to **Collect now**
 when the plan has exact, priced listings for its entire requested quantity.
 Partial listing coverage remains an offer choice; the page does not silently
 reduce the number of copies you requested.

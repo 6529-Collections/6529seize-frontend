@@ -50,7 +50,7 @@ function props() {
     ],
   };
 }
-const route = (id: number, name: "Buy now" | "Offer") =>
+const route = (id: number, name: "Collect now" | "Offer") =>
   within(
     screen.getByRole("group", { name: `How to acquire Artwork ${id}` })
   ).getByRole("button", { name });
@@ -103,11 +103,11 @@ it("initializes the clicked method once, preserves edits on rerender, and applie
   expect(p.onReviewOffer).not.toHaveBeenCalled();
 });
 
-it("starts blend as offers and requires exact full-quantity listings before a Buy now choice", () => {
+it("starts blend as offers and requires exact full-quantity listings before a Collect now choice", () => {
   render(<OfferPlanPanel {...props()} blended initialMethod="goal" />);
   expect(route(1, "Offer")).toHaveAttribute("aria-pressed", "true");
-  expect(route(1, "Buy now")).toBeEnabled();
-  expect(route(2, "Buy now")).toBeDisabled();
+  expect(route(1, "Collect now")).toBeEnabled();
+  expect(route(2, "Collect now")).toBeDisabled();
   expect(
     screen.getByText(
       "No priced listing combination for this full quantity in your chosen plan."
@@ -121,7 +121,7 @@ it("starts blend as offers and requires exact full-quantity listings before a Bu
 it("excludes buy NFTs from WETH allocation and returns exact purchase legs only on explicit review", async () => {
   const p = props();
   render(<OfferPlanPanel {...p} blended initialMethod="goal" />);
-  fireEvent.click(route(1, "Buy now"));
+  fireEvent.click(route(1, "Collect now"));
   fireEvent.change(
     screen.getByRole("textbox", { name: "Offer budget (WETH)" }),
     { target: { value: "0.15" } }
@@ -148,7 +148,7 @@ it("excludes buy NFTs from WETH allocation and returns exact purchase legs only 
   fireEvent.click(screen.getByRole("button", { name: "Review purchases (1)" }));
   expect(p.onReviewBuys).toHaveBeenCalledWith(p.buyOptions);
   expect(p.onReviewBuys.mock.calls[0]?.[0][0]).toBe(p.buyOptions[0]);
-  expect(route(1, "Buy now")).toHaveAttribute("aria-pressed", "true");
+  expect(route(1, "Collect now")).toHaveAttribute("aria-pressed", "true");
   fireEvent.click(review(2));
   expect(p.onReviewOffer).toHaveBeenCalledWith(
     expect.objectContaining({
@@ -165,7 +165,7 @@ it("never silently reuses calculated amounts after changing the buy/offer alloca
   fireEvent.click(screen.getByRole("button", { name: "Calculate prices" }));
   await waitFor(() => expect(price(1)).toHaveValue("0.1"));
   fireEvent.change(price(2), { target: { value: "0.125" } });
-  fireEvent.click(route(1, "Buy now"));
+  fireEvent.click(route(1, "Collect now"));
   fireEvent.click(route(1, "Offer"));
   expect(price(1)).toHaveValue("");
   expect(price(2)).toHaveValue("0.125");
@@ -204,7 +204,7 @@ it("keeps a reserved purchase excluded after a preset reset and even on an offer
   ).toBeDisabled();
 });
 
-it("keeps pending and published offer NFTs unavailable for Buy now", () => {
+it("keeps pending and published offer NFTs unavailable for Collect now", () => {
   const p = props();
   const { rerender } = render(
     <OfferPlanPanel
@@ -219,7 +219,7 @@ it("keeps pending and published offer NFTs unavailable for Buy now", () => {
       ]}
     />
   );
-  expect(route(1, "Buy now")).toBeDisabled();
+  expect(route(1, "Collect now")).toBeDisabled();
   rerender(
     <OfferPlanPanel
       {...p}
@@ -229,7 +229,7 @@ it("keeps pending and published offer NFTs unavailable for Buy now", () => {
       ]}
     />
   );
-  expect(route(1, "Buy now")).toBeDisabled();
+  expect(route(1, "Collect now")).toBeDisabled();
 });
 
 it("discards late allocation results after an external purchase reservation", async () => {

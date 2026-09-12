@@ -31,12 +31,12 @@ The Stream review record includes its four current entry guides and the
 current pages; those guides are not invented as historical snapshot routes.
 
 The collecting record describes results below the goal controls, priced
-quantities, costs and explicit budget-versus-available scenarios. **Buy now**
+quantities, costs and explicit budget-versus-available scenarios. **Collect now**
 opens purchase selection and **Make offers** opens per-NFT offer pricing.
 The Listings and Offers record distinguishes direct **Collect** and **Sell**
 actions for one order from the explicit choice among multiple orders at a price.
 
-Collecting strategy records cover Buy now, At WETH offer, WETH + %, Ask − %,
+Collecting strategy records cover Collect now, At WETH offer, WETH + %, Ask − %,
 and Blended. They distinguish per-NFT calculations, separate ETH purchase and
 WETH offer budgets, exact listing quantities, and reservations that do not imply
 a submitted or confirmed purchase.

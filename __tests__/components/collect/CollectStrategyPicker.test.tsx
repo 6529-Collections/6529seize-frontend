@@ -10,7 +10,7 @@ test("exposes all five acquisition strategies directly with an explicit selected
     screen.getByRole("group", { name: "How would you like to collect?" })
   );
   expect(options.getAllByRole("button")).toHaveLength(5);
-  expect(options.getByRole("button", { name: "Buy now" })).toHaveAttribute(
+  expect(options.getByRole("button", { name: "Collect now" })).toHaveAttribute(
     "aria-pressed",
     "true"
   );

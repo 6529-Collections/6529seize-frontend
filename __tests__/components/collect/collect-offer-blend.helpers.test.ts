@@ -44,7 +44,7 @@ it.each([
     "overflow cost",
     [leg({ quantity: "2", unit_price_wei: ((1n << 256n) - 1n).toString() })],
   ],
-] as const)("does not advertise Buy now for %s", (_label, legs) => {
+] as const)("does not advertise Collect now for %s", (_label, legs) => {
   expect(offerBuyOptions(rows("2"), legs).size).toBe(0);
 });
 
