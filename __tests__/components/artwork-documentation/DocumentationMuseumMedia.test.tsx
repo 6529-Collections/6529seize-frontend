@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { PropsWithChildren } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -29,7 +35,16 @@ jest.mock("@/services/api/artwork-documentation-assets-api", () => ({
 jest.mock("@/services/api/wave-drops-v2-api", () => ({
   fetchDropsV2ByIds: jest.fn(),
 }));
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  jest
+    .mocked(downloadDocumentationAsset)
+    .mockReset()
+    .mockResolvedValue({
+      url: "https://assets.invalid/scanned-original.mp4",
+      expires_at: Date.now() + 60000,
+    });
+});
 function QueryWrapper({ children }: PropsWithChildren) {
   return (
     <QueryClientProvider
@@ -112,6 +127,52 @@ it.each(["text/html", "image/svg+xml", "application/wasm"])(
     ).not.toBeInTheDocument();
   }
 );
+
+it("keeps a failed player unmounted until a deferred retry returns a fresh grant", async () => {
+  const user = userEvent.setup();
+  let resolveGrant:
+    | ((grant: Awaited<ReturnType<typeof downloadDocumentationAsset>>) => void)
+    | undefined;
+  jest
+    .mocked(downloadDocumentationAsset)
+    .mockResolvedValueOnce({
+      url: "https://assets.invalid/expired.mp4",
+      expires_at: 1,
+    })
+    .mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveGrant = resolve;
+        })
+    );
+  const result = setup("video/mp4", true);
+  await user.click(screen.getByRole("button", { name: "Open the player" }));
+  const expiredPlayer = await screen.findByLabelText("The work");
+  expect(expiredPlayer).toHaveAttribute(
+    "src",
+    "https://assets.invalid/expired.mp4"
+  );
+  fireEvent.error(expiredPlayer);
+  await user.click(screen.getByRole("button", { name: "Try again" }));
+  await waitFor(() =>
+    expect(downloadDocumentationAsset).toHaveBeenCalledTimes(2)
+  );
+  expect(result.container.querySelector("video")).toBeNull();
+  expect(screen.getByRole("button", { name: "Try again" })).toBeDisabled();
+  // A late event from the failed, detached element cannot poison the fresh grant.
+  fireEvent.error(expiredPlayer);
+  await act(async () =>
+    resolveGrant?.({
+      url: "https://assets.invalid/fresh.mp4",
+      expires_at: Date.now() + 60000,
+    })
+  );
+  expect(await screen.findByLabelText("The work")).toHaveAttribute(
+    "src",
+    "https://assets.invalid/fresh.mp4"
+  );
+  expect(screen.queryByText(/browser cannot play/)).toBeNull();
+});
 
 it("distinguishes checked manifest integrity from unassessed claims and restricts report download", () => {
   const asset = {

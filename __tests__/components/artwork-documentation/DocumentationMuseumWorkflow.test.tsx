@@ -426,6 +426,24 @@ it("read-only journal access shows entries without a writable composer", async (
 it("preserves separate staff drafts across chapter changes and requires an explicit event status", async () => {
   const user = userEvent.setup();
   const props = setup();
+  const evidence = {
+    id: "evidence-file",
+    filename: "Decision-source.txt",
+    role: "other_supporting",
+    intended_visibility: "public_record",
+    state: "ready",
+    size_bytes: 42,
+  };
+  props.context.assets = [evidence] as never;
+  props.context.asset_links = [
+    {
+      id: "evidence-link",
+      asset_id: evidence.id,
+      role: evidence.role,
+      intended_visibility: evidence.intended_visibility,
+      manifest: evidence,
+    },
+  ] as never;
   const definition = {
     kind: "catalogue",
     label: "Catalogue entry",
@@ -470,6 +488,14 @@ it("preserves separate staff drafts across chapter changes and requires an expli
     "A recorded decision"
   );
   await user.click(screen.getByText("Additional details (4)"));
+  await user.selectOptions(
+    screen.getByRole("listbox", { name: "Subject ids" }),
+    [props.context.work_id]
+  );
+  await user.selectOptions(
+    screen.getByRole("listbox", { name: "Evidence asset ids" }),
+    [evidence.id]
+  );
   const effectiveDate = screen.getByRole("textbox", { name: "Effective date" });
   expect(
     effectiveDate
@@ -520,8 +546,8 @@ it("preserves separate staff drafts across chapter changes and requires an expli
       expect.objectContaining({
         title: "A recorded decision",
         event_status: "planned",
-        subject_ids: expect.any(Array),
-        evidence_asset_ids: expect.any(Array),
+        subject_ids: [props.context.work_id],
+        evidence_asset_ids: [evidence.id],
       }),
       expect.any(String),
       expect.any(AbortSignal)

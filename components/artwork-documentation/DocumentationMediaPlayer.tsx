@@ -162,10 +162,11 @@ function MediaSession({
           secondary
           disabled={query.isFetching}
           onClick={() => {
-            setFailed(false);
             setFailedTrack(null);
             setAttempt((value) => value + 1);
-            void query.refetch();
+            void query.refetch().then((result) => {
+              if (result.isSuccess) setFailed(false);
+            });
           }}
         >
           {msg("retry")}

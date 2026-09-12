@@ -176,6 +176,7 @@ export function canReferenceDocumentationAssetLink(
   if (capabilities.confirm_as_artist) return true;
   if (
     ((context.profile.version !== 3 ||
+      !isPublicationOnly(context.profile) ||
       link.intended_visibility !== "public_record" ||
       link.manifest.access_class !==
         ApiArtworkDocumentationAssetAccessClassEnum.Artwork) &&
@@ -208,6 +209,7 @@ export function canEditDocumentationAsset(
     [asset, ...links].some(
       (item) =>
         (context.profile.version !== 3 ||
+          !isPublicationOnly(context.profile) ||
           item.intended_visibility !== "public_record" ||
           asset.access_class !==
             ApiArtworkDocumentationAssetAccessClassEnum.Artwork) &&
