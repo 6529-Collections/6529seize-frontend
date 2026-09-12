@@ -150,6 +150,7 @@ async function executeReviewedMarketOperation(options: {
       ...marketTypedData(operation.order.components),
       account,
     });
+    assertConnection();
     setStage("publishing");
     onOperation(await submitMarketSignature(operation.id, { signature }));
   }
@@ -264,15 +265,18 @@ export function useMarketExecution(
   }, [auth, connection, wallet]);
   const confirm = async (
     operation: ApiMarketOperation,
-    expected: ApiMarketPrepareRequest
+    expected: ApiMarketPrepareRequest,
+    assertIntent?: () => void
   ) => {
     if (busy.current || !client || !wallet) return;
     busy.current = true;
     setMessage(undefined);
     try {
       await withMarketOperationLock(operation.id, async () => {
-        const assertConnection = () =>
+        const assertConnection = () => {
           assertMarketExecutionConnection(live.current, expected, wallet);
+          assertIntent?.();
+        };
         assertConnection();
         await assertMarketActionEnabled(expected);
         let current = await fetchMarketOperation(operation.id);
@@ -306,10 +310,12 @@ export function useMarketExecution(
           });
           if (receipt.status !== "success")
             throw new Error("MARKET_APPROVAL_REVERTED");
+          assertConnection();
           onOperation(await continueMarketOperation(current.id));
           setStage(null);
           return;
         }
+        assertConnection();
         if (
           !["REVIEW", "APPROVAL", "AWAITING_SIGNATURE"].includes(current.state)
         ) {
@@ -319,6 +325,7 @@ export function useMarketExecution(
         validateMarketOperation(current, expected);
         if (["BUY", "ACCEPT", "CANCEL"].includes(current.kind)) {
           const refreshed = await continueMarketOperation(current.id);
+          assertConnection();
           validateMarketOperation(refreshed, expected);
           if (marketReviewTerms(refreshed) !== marketReviewTerms(current)) {
             onOperation(refreshed);
@@ -334,7 +341,9 @@ export function useMarketExecution(
           current.state === ApiMarketOperationStateEnum.Review &&
           current.approval_transactions.length === 0
         ) {
-          onOperation(await continueMarketOperation(current.id));
+          const continued = await continueMarketOperation(current.id);
+          assertConnection();
+          onOperation(continued);
           setStage(null);
           setMessage(t(locale, "collect.trade.refreshReview"));
           return;

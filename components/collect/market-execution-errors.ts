@@ -6,6 +6,8 @@ export function marketExecutionError(
   locale: SupportedLocale
 ): string {
   if (error instanceof Error) {
+    if (error.message === "MARKET_OFFER_LIMIT_EXCEEDED")
+      return t(locale, "collect.error.offerLimit");
     if (error.message === "MARKET_BROADCAST_UNKNOWN")
       return t(locale, "collect.trade.broadcastUnknown");
     if (error.message === "MARKET_RECOVERY_STORAGE_UNAVAILABLE")

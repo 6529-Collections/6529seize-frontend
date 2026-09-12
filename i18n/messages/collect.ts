@@ -249,6 +249,8 @@ export const COLLECT_MESSAGES = {
   "collect.error.orders": "Orders could not be loaded. Please try again.",
   "collect.error.prepare":
     "This trade could not be prepared. Refresh the available orders and try again.",
+  "collect.error.offerLimit":
+    "The total for all copies exceeds this offer's available budget. Check the quantity and price, or update the budget.",
   "collect.goal.ultimate": "Ultimate — Palette, Size and Traced",
   "collect.goal.coverage": "{owned} of {total} requirements complete",
   "collect.goal.snapshot": "Holdings checked at block {block}",

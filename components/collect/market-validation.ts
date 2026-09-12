@@ -5,7 +5,10 @@ import {
 } from "@/generated/models/ApiMarketTransaction";
 import type { ApiMarketComponents } from "@/generated/models/ApiMarketComponents";
 import type { ApiMarketOfferItem } from "@/generated/models/ApiMarketOfferItem";
-import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
+import {
+  ApiMarketOperationStateEnum,
+  type ApiMarketOperation,
+} from "@/generated/models/ApiMarketOperation";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
 import type { ApiMarketTransaction } from "@/generated/models/ApiMarketTransaction";
 import {
@@ -134,7 +137,8 @@ export function marketTypedData(input: ApiMarketComponents) {
 function validateMarketIntent(
   operation: ApiMarketOperation,
   expected: ApiMarketPrepareRequest,
-  now = Date.now()
+  now: number,
+  requireFreshReview: boolean
 ) {
   assert(
     operation.profile_id === expected.profile_id &&
@@ -148,7 +152,8 @@ function validateMarketIntent(
       same(operation.currency, expected.currency)
   );
   assert(
-    operation.expires_at > now && Number.isSafeInteger(operation.expires_at)
+    Number.isSafeInteger(operation.expires_at) &&
+      (!requireFreshReview || operation.expires_at > now)
   );
   assert(uint(operation.total_wei) === uint(expected.amount_wei));
   const [chain, contract, tokenId] = expected.asset_key.split(":");
@@ -223,7 +228,8 @@ type Components = ReturnType<typeof canonicalMarketComponents>;
 function validateOrderStructure(
   c: Components,
   expected: ApiMarketPrepareRequest,
-  now: number
+  now: number,
+  requireActiveOrder: boolean
 ) {
   assert(
     c.offer.length === 1 &&
@@ -238,11 +244,9 @@ function validateOrderStructure(
   assert(
     [MARKET_ZERO_HASH, MARKET_CONDUIT_KEY].includes(c.conduitKey.toLowerCase())
   );
-  assert(
-    c.startTime < c.endTime &&
-      c.startTime <= BigInt(Math.floor(now / 1000)) &&
-      c.endTime > BigInt(Math.floor(now / 1000))
-  );
+  const nowSeconds = BigInt(Math.floor(now / 1000));
+  assert(c.startTime < c.endTime && c.startTime <= nowSeconds);
+  if (requireActiveOrder) assert(c.endTime > nowSeconds);
   const creating =
     expected.kind === ApiMarketKind.List ||
     expected.kind === ApiMarketKind.Offer;
@@ -336,23 +340,84 @@ function validatePaymentFlow(
   });
 }
 
-export function validateMarketOperation(
+function validateMarketOperationBindings(
   operation: ApiMarketOperation,
   expected: ApiMarketPrepareRequest,
-  now = Date.now()
-): void {
-  const { contract, tokenId } = validateMarketIntent(operation, expected, now);
+  now: number,
+  options: {
+    readonly requireFreshReview: boolean;
+    readonly requireActiveOrder: boolean;
+  }
+) {
+  const { contract, tokenId } = validateMarketIntent(
+    operation,
+    expected,
+    now,
+    options.requireFreshReview
+  );
   const c = validateOrderHash(operation, expected);
   if (expected.kind === ApiMarketKind.Cancel) {
     assert(same(c.offerer, expected.wallet));
-    return;
+    return c;
   }
-  const { creating, listing } = validateOrderStructure(c, expected, now);
+  const { creating, listing } = validateOrderStructure(
+    c,
+    expected,
+    now,
+    options.requireActiveOrder
+  );
   const scale = validateTokenFlow(c, expected, contract, tokenId, {
     creating,
     listing,
   });
   validatePaymentFlow(c, operation, expected, listing, scale);
+  return c;
+}
+
+export function validateMarketOperation(
+  operation: ApiMarketOperation,
+  expected: ApiMarketPrepareRequest,
+  now = Date.now()
+): void {
+  validateMarketOperationBindings(operation, expected, now, {
+    requireFreshReview: true,
+    requireActiveOrder: true,
+  });
+}
+
+/** Validate a published offer without treating its old review deadline as order expiry. */
+export function validatePublishedMarketOffer(
+  operation: ApiMarketOperation,
+  expected: ApiMarketPrepareRequest,
+  now = Date.now()
+): void {
+  assert(
+    expected.kind === ApiMarketKind.Offer &&
+      operation.kind === ApiMarketKind.Offer &&
+      (operation.state === ApiMarketOperationStateEnum.Live ||
+        operation.state === ApiMarketOperationStateEnum.Confirmed)
+  );
+  validateMarketOperationBindings(operation, expected, now, {
+    requireFreshReview: false,
+    requireActiveOrder: operation.state === ApiMarketOperationStateEnum.Live,
+  });
+  assert(
+    operation.order &&
+      operation.order_hash &&
+      same(operation.order_hash, operation.order.order_hash)
+  );
+  if (operation.state === ApiMarketOperationStateEnum.Confirmed) {
+    const settlement = operation.settlement;
+    assert(
+      settlement &&
+        uint(settlement.filled_quantity) === uint(expected.quantity) &&
+        uint(settlement.remaining_quantity) === 0n &&
+        Number.isSafeInteger(settlement.safe_block_number) &&
+        settlement.safe_block_number !== undefined &&
+        settlement.safe_block_number > 0 &&
+        uint(operation.potential_liability_wei) === 0n
+    );
+  }
 }
 
 function validateApprovalTransaction(
