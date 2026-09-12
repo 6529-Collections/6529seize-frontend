@@ -30,6 +30,11 @@ lets you choose the receiving wallet; additional listings remain available under
 **Other listings**. Buy checks the selected order again before showing exact
 terms for wallet approval. A changed order requires another review.
 
+Listing prices load before you connect a wallet. While a price is unavailable,
+the Buy area shows whether listings are loading, could not be loaded, or contain
+no supported orders. **Connect wallet** remains available; connecting is required
+before reviewing a purchase.
+
 **Make an offer** is visible beside buying. **List for sale** appears when a
 confirmed wallet in the profile holds the NFT. Connect that holding wallet to
 list it; profile consolidation does not grant another wallet permission to sign.

@@ -7,7 +7,13 @@ import {
   type ApiMarketTradeOrder,
 } from "@/generated/models/ApiMarketTradeOrder";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import type CollectBatchController from "@/components/collect/CollectBatchController";
 import type { ComponentProps } from "react";
 
@@ -49,6 +55,32 @@ const mockValidate = jest.fn();
 const mockConfirm = jest.fn();
 const mockSave = jest.fn();
 const mockBatch = jest.fn();
+const mockSeizeConnect = jest.fn();
+const mockProfile = {
+  id: "profile",
+  primary_wallet: payer,
+  wallets: [{ wallet: payer, display: "payer.eth", tdh: 1 }],
+};
+const mockAuth: {
+  connectedProfile: typeof mockProfile | null;
+  isAuthenticated: boolean;
+  activeProfileProxy: object | null;
+} = {
+  connectedProfile: mockProfile,
+  isAuthenticated: true,
+  activeProfileProxy: null,
+};
+const mockConnection: {
+  address: string | undefined;
+  canSignActiveWallet: boolean;
+  isSafeWallet: boolean;
+  seizeConnect: jest.Mock;
+} = {
+  address: payer,
+  canSignActiveWallet: true,
+  isSafeWallet: false,
+  seizeConnect: mockSeizeConnect,
+};
 jest.mock("@/components/collect/CollectBatchController", () => ({
   __esModule: true,
   default: (props: ComponentProps<typeof CollectBatchController>) => {
@@ -71,23 +103,10 @@ const operation = {
   transaction: { gas_reserve_wei: "1000000000000000" },
 } as unknown as ApiMarketOperation;
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({
-    connectedProfile: {
-      id: "profile",
-      primary_wallet: payer,
-      wallets: [{ wallet: payer, display: "payer.eth", tdh: 1 }],
-    },
-    isAuthenticated: true,
-    activeProfileProxy: null,
-  }),
+  useAuth: () => mockAuth,
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({
-    address: payer,
-    canSignActiveWallet: true,
-    isSafeWallet: false,
-    seizeConnect: jest.fn(),
-  }),
+  useSeizeConnectContext: () => mockConnection,
 }));
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
@@ -182,8 +201,83 @@ function renderBuy() {
 }
 beforeEach(() => {
   jest.clearAllMocks();
+  mockAuth.connectedProfile = mockProfile;
+  mockAuth.isAuthenticated = true;
+  mockAuth.activeProfileProxy = null;
+  mockConnection.address = payer;
+  mockConnection.canSignActiveWallet = true;
   mockFetchOrders.mockResolvedValue({ orders: [order] });
   mockPrepare.mockResolvedValue(operation);
+});
+
+function setGuestSession() {
+  mockAuth.connectedProfile = null;
+  mockAuth.isAuthenticated = false;
+  mockConnection.address = undefined;
+  mockConnection.canSignActiveWallet = false;
+}
+
+it("shows an observed listing to a guest after loading without preparing or connecting", async () => {
+  let resolveOrders!: (value: { orders: ApiMarketTradeOrder[] }) => void;
+  mockFetchOrders.mockReturnValueOnce(
+    new Promise<{ orders: ApiMarketTradeOrder[] }>((resolve) => {
+      resolveOrders = resolve;
+    })
+  );
+  setGuestSession();
+  renderBuy();
+
+  expect(await screen.findByRole("status")).toHaveTextContent(
+    "Loading listings"
+  );
+  expect(await screen.findByRole("button", { name: "Buy" })).toBeDisabled();
+  await act(async () => {
+    resolveOrders({ orders: [order] });
+  });
+
+  const buy = await screen.findByRole("button", { name: "Buy 0.1 ETH" });
+  expect(buy).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Connect wallet" })).toBeEnabled();
+  fireEvent.submit(buy.closest("form")!);
+  expect(mockPrepare).not.toHaveBeenCalled();
+  expect(mockConfirm).not.toHaveBeenCalled();
+  expect(mockSeizeConnect).not.toHaveBeenCalled();
+});
+
+it("keeps a guest order error visible and offers refresh without preparing", async () => {
+  mockFetchOrders.mockRejectedValueOnce(new Error("orders unavailable"));
+  setGuestSession();
+  renderBuy();
+
+  await waitFor(() =>
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Orders could not be loaded"
+    )
+  );
+  expect(screen.getByRole("button", { name: "Refresh orders" })).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Buy" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Connect wallet" })).toBeEnabled();
+  expect(mockPrepare).not.toHaveBeenCalled();
+  expect(mockConfirm).not.toHaveBeenCalled();
+  expect(mockSeizeConnect).not.toHaveBeenCalled();
+});
+
+it("keeps a guest empty order state visible and offers refresh without preparing", async () => {
+  mockFetchOrders.mockResolvedValueOnce({ orders: [] });
+  setGuestSession();
+  renderBuy();
+
+  await waitFor(() =>
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "No executable orders were returned for this artwork."
+    )
+  );
+  expect(screen.getByRole("button", { name: "Refresh orders" })).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Buy" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Connect wallet" })).toBeEnabled();
+  expect(mockPrepare).not.toHaveBeenCalled();
+  expect(mockConfirm).not.toHaveBeenCalled();
+  expect(mockSeizeConnect).not.toHaveBeenCalled();
 });
 it("automatically selects the cheapest exact listing, refreshes it, validates, and waits for explicit wallet confirmation", async () => {
   mockFetchOrders.mockResolvedValue({

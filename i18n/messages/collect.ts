@@ -370,6 +370,7 @@ export const COLLECT_MESSAGES = {
     "Explore freely. Connect to see your collection and make a plan.",
   "collect.connect": "Connect wallet",
   "collect.loading": "Loading artwork",
+  "collect.buy.loadingListings": "Loading listings",
   "collect.retry": "Try again",
   "collect.empty.title": "No artwork matches yet",
   "collect.empty.description":

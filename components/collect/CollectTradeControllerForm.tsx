@@ -96,7 +96,7 @@ function getNoInlineOrderMessage({
   if (ordersFailed) return t(locale, "collect.error.orders");
   return t(
     locale,
-    ordersLoading ? "collect.loading" : "collect.trade.noOrders"
+    ordersLoading ? "collect.buy.loadingListings" : "collect.trade.noOrders"
   );
 }
 
@@ -153,7 +153,7 @@ function InlineTradeForm({
           ? collectBuyAmount(props.selectedOrder, props.draft.quantity)
           : null
       }
-      disabledReason={props.disabledReason ?? noInlineOrder}
+      disabledReason={noInlineOrder ?? props.disabledReason}
       loading={props.preparing}
       error={props.error}
       onChange={inlineDraftChange}

@@ -127,7 +127,10 @@ export default function CollectInlineBuyForm(props: Props) {
         </p>
       )}
       {props.disabledReason && (
-        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300">
+        <p
+          role="status"
+          className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300"
+        >
           {props.disabledReason}
         </p>
       )}
