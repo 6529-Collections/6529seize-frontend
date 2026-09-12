@@ -97,7 +97,7 @@ describe.each(TEMPLATES)(
         const html = files.get(path)!;
         expect(html).toBeDefined();
         const parsed = new DOMParser().parseFromString(html, "text/html");
-        expect(parsed.body.dataset.design).toBe(templateId);
+        expect(parsed.body.dataset["design"]).toBe(templateId);
         expect(parsed.head.querySelectorAll("style").length).toBeGreaterThan(0);
         expect(
           parsed.body.querySelector("style, script, iframe, form")

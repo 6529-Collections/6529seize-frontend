@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import CmsSiteRenderer from "@/components/profile-cms/CmsSiteRenderer";
 import { getApprovedGalleryEntries } from "@/components/profile-cms/approved-renderer/contract";
+import { blockSchema } from "@/lib/profile-cms/protocol/v1";
 import {
   CMS_STUDIO_DESIGNS,
   getCmsStudioPresentation,
@@ -87,16 +88,18 @@ it("searches across collections, combines filters, and changes the browsing view
 });
 
 it("preserves unannotated canonical artwork occurrences and their original order", () => {
-  const entries = getApprovedGalleryEntries({
-    id: "mixed-gallery",
-    block_type: "gallery",
-    asset_ids: ["a", "b", "a", "c", "a"],
-    items: [
-      { asset_id: "a", title: "First annotation" },
-      { asset_id: "a", title: "Second annotation" },
-      { asset_id: "c", title: "Third work" },
-    ],
-  });
+  const entries = getApprovedGalleryEntries(
+    blockSchema.parse({
+      id: "mixed-gallery",
+      block_type: "gallery",
+      asset_ids: ["a", "b", "a", "c", "a"],
+      items: [
+        { asset_id: "a", title: "First annotation" },
+        { asset_id: "a", title: "Second annotation" },
+        { asset_id: "c", title: "Third work" },
+      ],
+    })
+  );
   expect(entries).toEqual([
     { asset_id: "a", title: "First annotation" },
     { asset_id: "b" },
@@ -236,6 +239,7 @@ it("prefills an inquiry and preserves the visitor's typed message across preview
   const work = document.payload.pages.find((entry) =>
     entry.blocks.some(
       (block) =>
+        "subject" in block &&
         typeof block["subject"] === "string" &&
         block.block_type === "button_link"
     )
@@ -319,7 +323,9 @@ it("preserves the verified pixel artwork without interpolation through image opt
   const page = document.payload.pages.find(
     (candidate) =>
       candidate.id.startsWith("page-work-") &&
-      candidate.blocks.some((block) => block["asset_id"] === "blitmap-1")
+      candidate.blocks.some(
+        (block) => "asset_id" in block && block["asset_id"] === "blitmap-1"
+      )
   )!;
   const { container } = render(
     <CmsSiteRenderer cmsPackage={document} page={page} locale="en-US" />

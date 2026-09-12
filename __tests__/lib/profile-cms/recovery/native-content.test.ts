@@ -1,5 +1,6 @@
 import fixture from "@/ops/workstreams/profile-native-cms-roadmap/phase-1/fixtures/valid/minimal-profile-homepage.package.json";
 import {
+  blockSchema,
   cmsPackageSchema,
   validateCmsPackageV1,
   withComputedCmsHashes,
@@ -46,7 +47,7 @@ function nativeDocument(): CmsPackageV1 {
     page_id: detail.id,
     path: detail.path,
   });
-  home.blocks = [
+  home.blocks = blockSchema.array().parse([
     {
       id: "collection-grid",
       block_type: "gallery",
@@ -92,7 +93,7 @@ function nativeDocument(): CmsPackageV1 {
       label: "Canonical work link",
       href: "https://6529.io/punk6529/work",
     },
-  ];
+  ]);
   return withComputedCmsHashes(cmsPackage);
 }
 
@@ -325,7 +326,7 @@ it("preserves unknown item extensions and every unannotated canonical artwork", 
 it("validates a section target on its destination page and retains it in the archive", () => {
   const document = nativeDocument();
   const home = document.payload.pages[0]!;
-  home.blocks = [
+  home.blocks = blockSchema.array().parse([
     {
       id: "section-link",
       block_type: "button_link",
@@ -333,7 +334,7 @@ it("validates a section target on its destination page and retains it in the arc
       page_id: "page-work",
       block_id: "work-description",
     },
-  ];
+  ]);
   const valid = withComputedCmsHashes(document);
   expect(validateCmsPackageV1(valid, { enforceHashes: true }).valid).toBe(true);
   expect(
@@ -365,20 +366,24 @@ it("validates a section target on its destination page and retains it in the arc
 
 it("retains the artwork enquiry subject in an archival email fallback", () => {
   const document = nativeDocument();
-  document.payload.pages[1]!.blocks.push({
-    id: "inquiry-email",
-    block_type: "callout",
-    email: "loans@example.org",
-    subject: "General enquiry",
-    presentation: { variant: "contact" },
-  });
-  document.payload.pages[0]!.blocks.push({
-    id: "inquiry-link",
-    block_type: "button_link",
-    page_id: "page-work",
-    subject: "Work: Blue & Red\r\nBcc: nobody",
-    label: "Enquire",
-  });
+  document.payload.pages[1]!.blocks.push(
+    blockSchema.parse({
+      id: "inquiry-email",
+      block_type: "callout",
+      email: "loans@example.org",
+      subject: "General enquiry",
+      presentation: { variant: "contact" },
+    })
+  );
+  document.payload.pages[0]!.blocks.push(
+    blockSchema.parse({
+      id: "inquiry-link",
+      block_type: "button_link",
+      page_id: "page-work",
+      subject: "Work: Blue & Red\r\nBcc: nobody",
+      label: "Enquire",
+    })
+  );
   const html = renderRecoveredCmsSite(document).get(
     cmsRecoveryFilePath(document.site.base_path)
   )!;
