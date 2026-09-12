@@ -155,6 +155,9 @@ export default function CollectGoalsController({
     create.isError && submittedScope === scope
       ? t(locale, "collect.error.analysis")
       : undefined;
+  let definitionsStatus: "ready" | "error" | "loading" = "loading";
+  if (catalog) definitionsStatus = "ready";
+  else if (catalogFailed) definitionsStatus = "error";
   return (
     <div className="tw-space-y-4">
       <CollectGoalForm
@@ -162,9 +165,7 @@ export default function CollectGoalsController({
         budgetOptional
         {...(completion ? { completion } : {})}
         definitions={collectGoalOptions(catalog, draft, locale)}
-        definitionsStatus={
-          catalog ? "ready" : catalogFailed ? "error" : "loading"
-        }
+        definitionsStatus={definitionsStatus}
         onRetryDefinitions={onRetryCatalog}
         profile={
           profile?.id
