@@ -15,6 +15,7 @@ export interface OfferPlanAcquisitionProps {
   readonly strategySessionKey?: string | undefined;
   readonly blended?: boolean | undefined;
   readonly buyOptions?: readonly ApiCollectPlanLeg[] | undefined;
+  readonly buyObservedAt?: string | undefined;
   readonly buyLockedAssetKeys?: readonly string[] | undefined;
   readonly onReviewBuys?:
     | ((legs: readonly ApiCollectPlanLeg[]) => void)
@@ -34,6 +35,7 @@ export interface OfferPlanRow {
   readonly selected: boolean;
   readonly unitPriceEth: string;
   readonly expiryHours: string;
+  readonly expiryDateTime?: string;
   readonly pinned: boolean;
 }
 
@@ -42,6 +44,7 @@ export interface OfferPlanReview {
   readonly quantity: string;
   readonly unitPriceEth: string;
   readonly expiryHours: string;
+  readonly expiryDateTime?: string;
   readonly maximumOfferAmountWei?: string | undefined;
 }
 
@@ -56,10 +59,12 @@ export interface PendingOfferCommitment extends PublishedOfferCommitment {
 }
 
 export interface OfferPricingControls {
+  readonly blendTier?: "conservative" | "base" | "aggressive";
   readonly method: OfferPriceMethod;
   readonly percent: string;
   readonly budgetEth: string;
   readonly expiryHours: string;
+  readonly expiryDateTime?: string;
 }
 
 export interface OfferPlanAnalysisInput {

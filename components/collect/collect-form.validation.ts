@@ -4,6 +4,7 @@ import type {
   CollectTradeDraft,
 } from "./collect.types";
 import { isAddress, zeroAddress } from "viem";
+import { resolveCollectOrderExpiry } from "./collect-order-expiry";
 
 export function isPositiveEthAmount(value: string): boolean {
   const parts = value.split(".");
@@ -51,7 +52,7 @@ export function validateCollectTrade(
     return "price";
   if (
     (action === "list" || action === "offer") &&
-    !["24", "168", "720"].includes(draft.expiryHours)
+    resolveCollectOrderExpiry(draft) === null
   )
     return "expiry";
   if (
