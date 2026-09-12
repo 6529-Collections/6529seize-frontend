@@ -45,6 +45,7 @@ import {
 } from "@/lib/profile-cms/studio/demo-assets";
 import { CMS_STUDIO_MEME_WORKS } from "@/lib/profile-cms/studio/meme-assets";
 import { getCmsStudioMemeDisplayAsset } from "@/lib/profile-cms/studio/meme-display-assets";
+import CmsApprovedSiteRenderer from "./CmsApprovedSiteRenderer";
 
 export interface CmsStudioEditingContext {
   readonly selectedBlockId?: string | null | undefined;
@@ -90,6 +91,17 @@ export default function CmsStudioSiteRenderer({
   readonly presentation: CmsStudioPresentation;
   readonly editing?: CmsStudioEditingContext | undefined;
 }) {
+  if (presentation.studio_design) {
+    return (
+      <CmsApprovedSiteRenderer
+        cmsPackage={cmsPackage}
+        page={page}
+        locale={locale}
+        presentation={presentation}
+        editing={editing}
+      />
+    );
+  }
   const context: RendererContext = {
     ...createRendererContext(cmsPackage, locale, editing?.onNavigatePage),
     appearance: "studio",

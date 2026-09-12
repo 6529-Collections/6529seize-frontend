@@ -12,13 +12,32 @@ import type { CmsDocumentOperation } from "@/lib/profile-cms/studio/document";
 import {
   CMS_STUDIO_ROLES,
   CMS_STUDIO_SPANS,
+  CMS_APPROVED_VARIANTS,
   getCmsStudioBlockPresentation,
 } from "@/lib/profile-cms/studio/presentation";
 import { StudioButton, StudioField, StudioSelect } from "./StudioControls";
 import StudioForm, { type StudioFormState } from "./StudioForm";
+import StudioCollectionFields, {
+  editableEntries,
+} from "./StudioCollectionFields";
 
 const HEADING_LABEL = "profileCms.studio.heading";
 const TEXT_LABEL = "profileCms.studio.text";
+const MOCKUP_FIELDS: readonly {
+  key: string;
+  label: MessageKey;
+  multiline?: boolean;
+}[] = [
+  { key: "mockup_kicker", label: "profileCms.approved.mockupKicker" },
+  { key: "mockup_heading", label: "profileCms.approved.mockupHeading" },
+  { key: "mockup_period", label: "profileCms.approved.mockupPeriod" },
+  { key: "mockup_footer", label: "profileCms.approved.mockupFooter" },
+  {
+    key: "mockup_description",
+    label: "profileCms.approved.mockupDescription",
+    multiline: true,
+  },
+];
 export const STUDIO_BLOCK_LABELS = {
   heading: HEADING_LABEL,
   rich_text: TEXT_LABEL,
@@ -144,8 +163,24 @@ export default function StudioBlockInspector({
   readonly onOperation: (operation: CmsDocumentOperation) => boolean;
   readonly formState: StudioFormState;
 }) {
-  const fields = BLOCK_FIELDS[block.block_type] ?? [];
   const originalFields = block as CmsBlockV1 & Record<string, unknown>;
+  const hasMockup =
+    block.block_type === "callout" &&
+    ["planner", "catalogue"].includes(getString(block, "mockup_style") ?? "");
+  const fields = [
+    ...(BLOCK_FIELDS[block.block_type] ?? []).filter(
+      (field) => !hasMockup || field.key !== "content"
+    ),
+    ...(hasMockup ? MOCKUP_FIELDS : []),
+  ];
+  const [collectionChanges, setCollectionChanges] = useState<
+    Record<string, unknown>
+  >({});
+  const collectionFields = { ...originalFields, ...collectionChanges };
+  const changeCollection = (patch: Record<string, unknown>) => {
+    setCollectionChanges((current) => ({ ...current, ...patch }));
+    formState.onPendingChange(true);
+  };
   const [values, setValues] = useState<Record<string, string>>({});
   const [assetId, setAssetId] = useState(getString(block, "asset_id") ?? "");
   const [assetIdChanged, setAssetIdChanged] = useState(false);
@@ -166,6 +201,7 @@ export default function StudioBlockInspector({
   >({});
   const presentation = originalFields["presentation"];
   const presentationRecord = getEditablePresentation(presentation);
+  const [variant, setVariant] = useState<string | null>(null);
   const unsupportedLinkFields = ["page_id", "href", "url"].filter(
     (key) => !isOptionalString(originalFields[key])
   );
@@ -177,15 +213,42 @@ export default function StudioBlockInspector({
       ? ids.filter((id): id is string => typeof id === "string")
       : [];
   });
-  const media = ["image", "video", "audio"].includes(block.block_type);
+  const media =
+    ["image", "video", "audio"].includes(block.block_type) ||
+    (block.block_type === "callout" &&
+      typeof originalFields["asset_id"] === "string");
+  const mediaKind = block.block_type === "callout" ? "image" : block.block_type;
   const submit = () => {
-    const patch: Record<string, unknown> = { ...values };
+    const patch: Record<string, unknown> = { ...values, ...collectionChanges };
+    const previousRows = editableEntries(originalFields["rows"]);
+    const nextRows = editableEntries(collectionChanges["rows"]);
+    if (
+      previousRows &&
+      nextRows &&
+      values["content"] === undefined &&
+      typeof originalFields["content"] === "string" &&
+      originalFields["content"].trim() === rowsText(previousRows)
+    ) {
+      patch["content"] = rowsText(nextRows);
+    }
     if (Object.keys(designChanges).length > 0)
       patch["presentation"] = { ...presentationRecord, ...designChanges };
+    if (variant !== null)
+      patch["presentation"] = {
+        ...presentationRecord,
+        ...designChanges,
+        variant,
+      };
     const removeFields: string[] = [];
+    if (patch["page_id"] === "") {
+      delete patch["page_id"];
+      removeFields.push("page_id");
+    }
     if (assetIdChanged && assetId) patch["asset_id"] = assetId;
     if (galleryChanged) patch["asset_ids"] = galleryIds;
     if (linkChanged) {
+      if (destination !== getString(block, "page_id"))
+        removeFields.push("block_id");
       if (destination === "external") {
         patch["href"] = href;
         removeFields.push("page_id", "url");
@@ -249,6 +312,43 @@ export default function StudioBlockInspector({
           />
         );
       })}
+      {hasMockup ? (
+        <StudioSelect
+          label={t(locale, "profileCms.approved.mockupStyle")}
+          value={getString(collectionFields, "mockup_style") ?? "planner"}
+          options={[
+            {
+              value: "planner",
+              label: t(locale, "profileCms.approved.mockupPlanner"),
+            },
+            {
+              value: "catalogue",
+              label: t(locale, "profileCms.approved.mockupCatalogue"),
+            },
+          ]}
+          onChange={(value) => changeCollection({ mockup_style: value })}
+        />
+      ) : null}
+      {block.block_type === "callout" &&
+      ["rings", "ellipses"].includes(
+        getString(originalFields, "poster_style") ?? ""
+      ) ? (
+        <StudioSelect
+          label={t(locale, "profileCms.approved.posterStyle")}
+          value={getString(collectionFields, "poster_style") ?? "rings"}
+          options={[
+            {
+              value: "rings",
+              label: t(locale, "profileCms.approved.posterRings"),
+            },
+            {
+              value: "ellipses",
+              label: t(locale, "profileCms.approved.posterEllipses"),
+            },
+          ]}
+          onChange={(value) => changeCollection({ poster_style: value })}
+        />
+      ) : null}
       {media && isOptionalString(originalFields["asset_id"]) ? (
         <>
           <StudioSelect
@@ -259,9 +359,8 @@ export default function StudioBlockInspector({
               ...document.payload.assets
                 .filter(
                   (item) =>
-                    item.kind === block.block_type ||
-                    (block.block_type === "image" &&
-                      item.kind === "social_image")
+                    item.kind === mediaKind ||
+                    (mediaKind === "image" && item.kind === "social_image")
                 )
                 .map((item) => ({
                   value: item.id,
@@ -346,7 +445,8 @@ export default function StudioBlockInspector({
           ) : null}
         </>
       ) : null}
-      {block.block_type === "gallery" ? (
+      {block.block_type === "gallery" &&
+      !editableEntries(originalFields["items"]) ? (
         <BlockGalleryFields
           document={document}
           value={galleryValue}
@@ -358,6 +458,65 @@ export default function StudioBlockInspector({
           }}
         />
       ) : null}
+      {(["items", "rows"] as const).map((kind) => (
+        <StudioCollectionFields
+          key={kind}
+          document={document}
+          fields={collectionFields}
+          kind={kind}
+          locale={locale}
+          onChange={changeCollection}
+        />
+      ))}
+      {block.block_type === "callout" &&
+      typeof originalFields["email"] === "string" ? (
+        <>
+          <StudioField
+            label={t(locale, "profileCms.approved.contactRecipient")}
+            value={values["email"] ?? originalFields["email"]}
+            onChange={(email) =>
+              setValues((current) => ({ ...current, email }))
+            }
+          />
+          <StudioField
+            label={t(locale, "profileCms.approved.contactSubject")}
+            value={values["subject"] ?? getString(block, "subject") ?? ""}
+            onChange={(subject) =>
+              setValues((current) => ({ ...current, subject }))
+            }
+          />
+        </>
+      ) : null}
+      {block.block_type === "button_link" &&
+      typeof originalFields["subject"] === "string" ? (
+        <StudioField
+          label={t(locale, "profileCms.approved.contactSubject")}
+          value={values["subject"] ?? originalFields["subject"]}
+          onChange={(subject) =>
+            setValues((current) => ({ ...current, subject }))
+          }
+          maxLength={200}
+        />
+      ) : null}
+      {block.block_type === "image" &&
+      isOptionalString(originalFields["page_id"]) ? (
+        <StudioSelect
+          label={t(locale, "profileCms.studio.destination")}
+          value={
+            typeof collectionFields["page_id"] === "string"
+              ? collectionFields["page_id"]
+              : ""
+          }
+          options={[
+            { value: "", label: t(locale, "profileCms.approved.noLink") },
+            ...document.payload.pages.map((item) => ({
+              value: item.id,
+              label: item.metadata.title,
+            })),
+          ]}
+          onChange={(page_id) => changeCollection({ page_id })}
+        />
+      ) : null}
       <BlockPresentationFields
         block={block}
         changes={designChanges}
@@ -366,6 +525,20 @@ export default function StudioBlockInspector({
           setDesignChanges((current) => ({ ...current, ...change }))
         }
       />
+      {typeof presentationRecord?.["variant"] === "string" &&
+      CMS_APPROVED_VARIANTS.some(
+        (choice) => choice === presentationRecord["variant"]
+      ) ? (
+        <StudioSelect
+          label={t(locale, "profileCms.approved.sectionStyle")}
+          value={variant ?? presentationRecord["variant"]}
+          options={CMS_APPROVED_VARIANTS.map((value) => ({
+            value,
+            label: t(locale, `profileCms.approved.variant.${value}`),
+          }))}
+          onChange={setVariant}
+        />
+      ) : null}
       <StudioButton type="submit" primary>
         {t(locale, "profileCms.studio.apply")}
       </StudioButton>
@@ -504,6 +677,15 @@ function isEditableGallery(value: unknown): boolean {
     value === undefined ||
     (Array.isArray(value) && value.every((item) => typeof item === "string"))
   );
+}
+
+function rowsText(rows: readonly Record<string, unknown>[]): string {
+  return rows
+    .map(
+      (row) =>
+        `${getString(row, "label") ?? ""}: ${getString(row, "value") ?? ""}`
+    )
+    .join("\n");
 }
 
 function isOptionalString(value: unknown): value is string | undefined {

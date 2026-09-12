@@ -52,6 +52,7 @@ jest.mock("next/link", () => ({
 }));
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
@@ -201,16 +202,17 @@ it.each([false, undefined])(
 it("allows guests to choose a template and edit it with the real renderer", () => {
   owner(false);
   showBuilder();
-  fireEvent.click(screen.getByRole("button", { name: "Preview Signature" }));
+  fireEvent.click(screen.getByRole("button", { name: "Preview Personal" }));
   click("Use this template");
+  click("Pages");
   change("Page title", "My website");
   click("Apply");
-  click("Preview");
+  click("View site");
   expect(
-    screen.getByRole("heading", { name: "Hi, I'm Mira." })
+    screen.getByRole("heading", { name: "Mara Silva." })
   ).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
-  click("Edit");
+  click("Edit content");
   expect(currentPackage().payload.pages[0]!.metadata.title).toBe("My website");
 });
 it("blocks Save, outer tabs and preview without discarding pending page fields", () => {
@@ -220,7 +222,7 @@ it("blocks Save, outer tabs and preview without discarding pending page fields",
   change("Page title", "Pending title");
   expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
   click("Versions");
-  click("Preview");
+  click("View site");
   expect(screen.getByLabelText("Page title")).toHaveValue("Pending title");
   expect(screen.getByLabelText("Page title")).toHaveFocus();
   click("Save draft");

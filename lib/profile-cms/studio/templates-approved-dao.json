@@ -1,0 +1,3993 @@
+{
+  "pages": [
+    {
+      "slug": "home",
+      "title": "The image and its author",
+      "description": "Fourteen works from The Memes, brought together for our first public collection display.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "fund-v2-home-001",
+          "block_type": "rich_text",
+          "content": "Autumn programme · 3—31 October 2026",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "hero",
+            "group": "fund-v2-home-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-home-002",
+          "block_type": "heading",
+          "text": "The image and its author",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "hero",
+            "group": "fund-v2-home-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-home-003",
+          "block_type": "rich_text",
+          "content": "Fourteen works from The Memes, brought together for our first public collection display.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "fund-v2-home-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-home-004",
+          "block_type": "gallery",
+          "asset_ids": ["meme-375", "meme-103", "meme-47"],
+          "items": [
+            {
+              "asset_id": "meme-375",
+              "title": "The Tree of Knowledge of Good and Evil",
+              "subtitle": "ACK · No. 375",
+              "page_id": "page-work-375"
+            },
+            {
+              "asset_id": "meme-103",
+              "title": "Don't Trust, Check.",
+              "subtitle": "Jack Butcher · No. 103",
+              "page_id": "page-work-103"
+            },
+            {
+              "asset_id": "meme-47",
+              "title": "EXIT STRATEGY",
+              "subtitle": "XCOPY · Still preview · No. 047",
+              "page_id": "page-work-47"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        },
+        {
+          "id": "fund-v2-home-005",
+          "block_type": "rich_text",
+          "content": "From the collection",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-home-006",
+          "block_type": "heading",
+          "text": "Selected by Amina Chen",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-home-007",
+          "block_type": "rich_text",
+          "content": "14 works",
+          "presentation": {
+            "span": "half",
+            "role": "body",
+            "variant": "stats",
+            "group": "fund-v2-home-exhibition-stats"
+          }
+        },
+        {
+          "id": "fund-v2-home-008",
+          "block_type": "rich_text",
+          "content": "13 artists",
+          "presentation": {
+            "span": "half",
+            "role": "body",
+            "variant": "stats",
+            "group": "fund-v2-home-exhibition-stats"
+          }
+        },
+        {
+          "id": "fund-v2-home-009",
+          "block_type": "rich_text",
+          "content": "3 groupings",
+          "presentation": {
+            "span": "half",
+            "role": "body",
+            "variant": "stats",
+            "group": "fund-v2-home-exhibition-stats"
+          }
+        },
+        {
+          "id": "fund-v2-home-010",
+          "block_type": "rich_text",
+          "content": "Open access",
+          "presentation": {
+            "span": "half",
+            "role": "body",
+            "variant": "stats",
+            "group": "fund-v2-home-exhibition-stats"
+          }
+        },
+        {
+          "id": "fund-v2-home-011",
+          "block_type": "rich_text",
+          "content": "A collection about internet culture needs room for more than its most familiar symbols. This display puts shared characters and public statements alongside landscape, photography and works that complicate the idea of an individual author.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-home-012",
+          "block_type": "rich_text",
+          "content": "The accompanying notes explain why each work entered the collection. The three groupings offer different routes through it; the acquisition register records how those choices were made.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-home-013",
+          "block_type": "button_link",
+          "label": "Explore the exhibition",
+          "page_id": "page-exhibitions",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-home-014",
+          "block_type": "rich_text",
+          "content": "Registered 10 September 2026",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-home-015",
+          "block_type": "heading",
+          "text": "Recent accessions",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-home-016",
+          "block_type": "button_link",
+          "label": "View all seventeen works",
+          "page_id": "page-register",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-home-017",
+          "block_type": "gallery",
+          "asset_ids": ["meme-540", "meme-537", "meme-118", "meme-52"],
+          "items": [
+            {
+              "asset_id": "meme-540",
+              "title": "Tears of the Desert",
+              "subtitle": "Ebrahim_Elmi",
+              "page_id": "page-work-540"
+            },
+            {
+              "asset_id": "meme-537",
+              "title": "ＮＯ ＨＵＭＡＮ ＩＮＴＥＲＦＡＣＥ",
+              "subtitle": "MaNiC · Still preview",
+              "page_id": "page-work-537"
+            },
+            {
+              "asset_id": "meme-118",
+              "title": "The Socially Umpired Animals",
+              "subtitle": "Botto",
+              "page_id": "page-work-118"
+            },
+            {
+              "asset_id": "meme-52",
+              "title": "MEME FACTORY",
+              "subtitle": "Grant Riven Yun",
+              "page_id": "page-work-52"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        },
+        {
+          "id": "fund-v2-home-018",
+          "block_type": "rich_text",
+          "content": "Open collection session · 26 September",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "fund-v2-home-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-home-019",
+          "block_type": "heading",
+          "text": "Before the exhibition opens",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-home-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-home-020",
+          "block_type": "rich_text",
+          "content": "Join Amina and Luca at 17:00 UTC for a walkthrough of the selection and its display checklist. We will review the animated works in their original formats and discuss the proposed public-loan policy.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-home-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-home-021",
+          "block_type": "callout",
+          "title": "Session agenda and contact Hosted by Noor Patel · 60 minutes",
+          "content": "17:00 — Amina introduces the three groupings. 17:20 — Luca reviews media, credits and display requirements. 17:40 — Member questions and the lending proposal.\n\nRequest the session details at hello@example.org.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "fund-v2-home-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-home-022",
+          "block_type": "callout",
+          "title": "hello@example.org",
+          "email": "hello@example.org",
+          "content": "",
+          "subject": "Enquiry",
+          "form": false,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "fund-v2-home-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-home-023",
+          "block_type": "rich_text",
+          "content": "About Common Collection",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "fund-v2-home-group-3"
+          }
+        },
+        {
+          "id": "fund-v2-home-024",
+          "block_type": "heading",
+          "text": "A collection held in common",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-home-group-3"
+          }
+        },
+        {
+          "id": "fund-v2-home-025",
+          "block_type": "rich_text",
+          "content": "Four members contribute research, decide acquisitions and share responsibility for the archive. Our focus is internet identity, shared characters and the circulation of images. The collection is intended for study and public display.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-home-group-3"
+          }
+        },
+        {
+          "id": "fund-v2-home-026",
+          "block_type": "button_link",
+          "label": "Mandate and governance",
+          "page_id": "page-mandate",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-home-group-3"
+          }
+        }
+      ],
+      "navigationLabel": "Overview"
+    },
+    {
+      "slug": "register",
+      "title": "The collection",
+      "description": "Seventeen works across The Memes and Blitmap. Explore the programme, artists and accession records.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "fund-v2-register-001",
+          "block_type": "rich_text",
+          "content": "The collection / September 2026",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-register-002",
+          "block_type": "heading",
+          "text": "The collection",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-register-003",
+          "block_type": "rich_text",
+          "content": "Seventeen works across The Memes and Blitmap. Explore the programme, artists and accession records.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-register-004",
+          "block_type": "rich_text",
+          "content": "17 works · All works",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-register-005",
+          "block_type": "gallery",
+          "asset_ids": [
+            "meme-375",
+            "meme-540",
+            "meme-47",
+            "meme-52",
+            "meme-103",
+            "meme-118",
+            "meme-48",
+            "meme-9",
+            "meme-537",
+            "meme-5",
+            "meme-37",
+            "meme-59",
+            "meme-2",
+            "meme-8",
+            "blitmap-1",
+            "blitmap-4",
+            "blitmap-13"
+          ],
+          "items": [
+            {
+              "asset_id": "meme-375",
+              "title": "The Tree of Knowledge of Good and Evil",
+              "subtitle": "The Memes · #375 / CC.26.015",
+              "page_id": "page-work-375",
+              "category": "Constructed worlds"
+            },
+            {
+              "asset_id": "meme-540",
+              "title": "Tears of the Desert",
+              "subtitle": "The Memes · #540 / CC.26.017",
+              "page_id": "page-work-540",
+              "category": "Constructed worlds"
+            },
+            {
+              "asset_id": "meme-47",
+              "title": "EXIT STRATEGY",
+              "subtitle": "The Memes · #47 / CC.26.007",
+              "page_id": "page-work-47",
+              "category": "Collective characters"
+            },
+            {
+              "asset_id": "meme-52",
+              "title": "MEME FACTORY",
+              "subtitle": "The Memes · #52 / CC.26.013",
+              "page_id": "page-work-52",
+              "category": "Constructed worlds"
+            },
+            {
+              "asset_id": "meme-103",
+              "title": "Don't Trust, Check.",
+              "subtitle": "The Memes · #103 / CC.26.004",
+              "page_id": "page-work-103",
+              "category": "Public image"
+            },
+            {
+              "asset_id": "meme-118",
+              "title": "The Socially Umpired Animals",
+              "subtitle": "The Memes · #118 / CC.26.014",
+              "page_id": "page-work-118",
+              "category": "Constructed worlds"
+            },
+            {
+              "asset_id": "meme-48",
+              "title": "Freedom to Explore",
+              "subtitle": "The Memes · #48 / CC.26.012",
+              "page_id": "page-work-48",
+              "category": "Constructed worlds"
+            },
+            {
+              "asset_id": "meme-9",
+              "title": "The Institutions Are Coming",
+              "subtitle": "The Memes · #9 / CC.26.003",
+              "page_id": "page-work-9",
+              "category": "Public image"
+            },
+            {
+              "asset_id": "meme-537",
+              "title": "ＮＯ ＨＵＭＡＮ ＩＮＴＥＲＦＡＣＥ",
+              "subtitle": "The Memes · #537 / CC.26.016",
+              "page_id": "page-work-537",
+              "category": "Constructed worlds"
+            },
+            {
+              "asset_id": "meme-5",
+              "title": "rekt6529",
+              "subtitle": "The Memes · #5 / CC.26.005",
+              "page_id": "page-work-5",
+              "category": "Collective characters"
+            },
+            {
+              "asset_id": "meme-37",
+              "title": "Sgt. Pepe",
+              "subtitle": "The Memes · #37 / CC.26.006",
+              "page_id": "page-work-37",
+              "category": "Collective characters"
+            },
+            {
+              "asset_id": "meme-59",
+              "title": "Greedy Morning",
+              "subtitle": "The Memes · #59 / CC.26.008",
+              "page_id": "page-work-59",
+              "category": "Collective characters"
+            },
+            {
+              "asset_id": "meme-2",
+              "title": "SeizeJPGs",
+              "subtitle": "The Memes · #2 / CC.26.001",
+              "page_id": "page-work-2",
+              "category": "Public image"
+            },
+            {
+              "asset_id": "meme-8",
+              "title": "FirstGM",
+              "subtitle": "The Memes · #8 / CC.26.002",
+              "page_id": "page-work-8",
+              "category": "Public image"
+            },
+            {
+              "asset_id": "blitmap-1",
+              "title": "Rose",
+              "subtitle": "Blitmap · #1 / CC.26.009",
+              "page_id": "page-work-b1",
+              "category": "Blitmap"
+            },
+            {
+              "asset_id": "blitmap-4",
+              "title": "Psychic",
+              "subtitle": "Blitmap · #4 / CC.26.010",
+              "page_id": "page-work-b4",
+              "category": "Blitmap"
+            },
+            {
+              "asset_id": "blitmap-13",
+              "title": "Jupiter",
+              "subtitle": "Blitmap · #13 / CC.26.011",
+              "page_id": "page-work-b13",
+              "category": "Blitmap"
+            }
+          ],
+          "categories": [
+            "Constructed worlds",
+            "Collective characters",
+            "Public image",
+            "Blitmap"
+          ],
+          "searchable": true,
+          "display_modes": ["grid", "list"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery"
+          }
+        }
+      ],
+      "navigationLabel": "Collection"
+    },
+    {
+      "slug": "exhibitions",
+      "title": "The image and its author",
+      "description": "A public online display, with a collection session on 26 September and a complete work checklist.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "fund-v2-exhibitions-001",
+          "block_type": "rich_text",
+          "content": "Autumn programme · 3—31 October 2026",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "hero",
+            "group": "fund-v2-exhibitions-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-002",
+          "block_type": "heading",
+          "text": "The image and its author",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "hero",
+            "group": "fund-v2-exhibitions-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-003",
+          "block_type": "rich_text",
+          "content": "A public online display, with a collection session on 26 September and a complete work checklist.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "fund-v2-exhibitions-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-004",
+          "block_type": "gallery",
+          "asset_ids": ["meme-9", "meme-103"],
+          "items": [
+            {
+              "asset_id": "meme-9",
+              "title": "The Institutions Are Coming by 6529er",
+              "subtitle": "",
+              "page_id": "page-work-9"
+            },
+            {
+              "asset_id": "meme-103",
+              "title": "Don't Trust, Check. by Jack Butcher",
+              "subtitle": "",
+              "page_id": "page-work-103"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery",
+            "group": "fund-v2-exhibitions-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-005",
+          "block_type": "rich_text",
+          "content": "01 / Four works",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-006",
+          "block_type": "heading",
+          "text": "Public image",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-007",
+          "block_type": "rich_text",
+          "content": "A screenshot, an exhortation, a network and a joke about institutions. These works turn forms already circulating online into collection objects. FirstGM and Don't Trust, Check. make a useful pair: one preserves a particular statement, while the other asks how a statement earns our trust.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-008",
+          "block_type": "rich_text",
+          "content": "Selected by Amina Chen. The checklist keeps the original wording and source references with each work.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-009",
+          "block_type": "gallery",
+          "asset_ids": ["meme-37", "meme-59"],
+          "items": [
+            {
+              "asset_id": "meme-37",
+              "title": "Sgt. Pepe by Arsonic",
+              "subtitle": "",
+              "page_id": "page-work-37"
+            },
+            {
+              "asset_id": "meme-59",
+              "title": "Greedy Morning by Tyronejkd",
+              "subtitle": "",
+              "page_id": "page-work-59"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery",
+            "group": "fund-v2-exhibitions-group-3"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-010",
+          "block_type": "rich_text",
+          "content": "02 / Four works",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-3"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-011",
+          "block_type": "heading",
+          "text": "Collective characters",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-3"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-012",
+          "block_type": "rich_text",
+          "content": "Recognition travels faster than attribution. Pairing Arsonic and Tyronejkd gives us two distinct treatments of Pepe; OSF and XCOPY extend the selection beyond a single shared character. The grouping keeps those differences in view instead of treating meme art as one style.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-3"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-013",
+          "block_type": "rich_text",
+          "content": "Luca Bell's display checklist identifies the two animated originals in this group. The gallery uses still previews with links to their original media.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-3"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-014",
+          "block_type": "gallery",
+          "asset_ids": ["meme-118", "meme-540"],
+          "items": [
+            {
+              "asset_id": "meme-118",
+              "title": "The Socially Umpired Animals by Botto",
+              "subtitle": "",
+              "page_id": "page-work-118"
+            },
+            {
+              "asset_id": "meme-540",
+              "title": "Tears of the Desert by Ebrahim_Elmi",
+              "subtitle": "",
+              "page_id": "page-work-540"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery",
+            "group": "fund-v2-exhibitions-group-4"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-015",
+          "block_type": "rich_text",
+          "content": "03 / Six works",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-4"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-016",
+          "block_type": "heading",
+          "text": "Authorship & imagined worlds",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-4"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-017",
+          "block_type": "rich_text",
+          "content": "The September accessions broaden the collection beyond direct address. ACK, Cath Simard and Grant Riven Yun introduce different kinds of constructed space; Ebrahim_Elmi's portrait makes the human subject central. Botto and MaNiC provide a starting point for the session's discussion of authorship and machines.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-4"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-018",
+          "block_type": "rich_text",
+          "content": "The acquisition note records the group's reasoning without attributing unverified intentions to the artists. All six works entered under the same member decision.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-4"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-019",
+          "block_type": "rich_text",
+          "content": "Display checklist / Edition 1.0",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-5"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-020",
+          "block_type": "heading",
+          "text": "Credits, formats and access",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-5"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-021",
+          "block_type": "rich_text",
+          "content": "Fourteen credited works, including three animated originals. Each object page links to its 6529 source record; the collection register supplies the programme group and accession reference.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-5"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-022",
+          "block_type": "button_link",
+          "label": "Open the complete register ↗",
+          "page_id": "page-register",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-5"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-023",
+          "block_type": "rich_text",
+          "content": "Public programme",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-5"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-024",
+          "block_type": "heading",
+          "text": "26 September · 17:00 UTC",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-5"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-025",
+          "block_type": "rich_text",
+          "content": "Amina Chen introduces the selection; Luca Bell presents the display checklist. The session will review the lending-policy responses received by 18 September. Questions will be recorded with the October report.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-5"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-026",
+          "block_type": "callout",
+          "title": "Request session details ↗",
+          "email": "hello@example.org",
+          "content": "",
+          "subject": "Enquiry",
+          "form": false,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "fund-v2-exhibitions-group-5"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-027",
+          "block_type": "gallery",
+          "asset_ids": ["blitmap-1", "blitmap-4", "blitmap-13"],
+          "items": [
+            {
+              "asset_id": "blitmap-1",
+              "title": "Rose by dom, Blitmap number 1",
+              "subtitle": "",
+              "page_id": "page-work-b1"
+            },
+            {
+              "asset_id": "blitmap-4",
+              "title": "Psychic by Veenus, Blitmap number 4",
+              "subtitle": "",
+              "page_id": "page-work-b4"
+            },
+            {
+              "asset_id": "blitmap-13",
+              "title": "Jupiter by BigPapap, Blitmap number 13",
+              "subtitle": "",
+              "page_id": "page-work-b13"
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery",
+            "group": "fund-v2-exhibitions-group-6"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-028",
+          "block_type": "rich_text",
+          "content": "Also in the collection / Blitmap study",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-6"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-029",
+          "block_type": "heading",
+          "text": "Three original Blitmaps",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-6"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-030",
+          "block_type": "rich_text",
+          "content": "Rose, Psychic and Jupiter begin a separate study of Blitmap’s original compositions. Their compact pixel grids offer another route into the collection’s interest in shared visual culture, with individual authorship attached to each original.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-6"
+          }
+        },
+        {
+          "id": "fund-v2-exhibitions-031",
+          "block_type": "rich_text",
+          "content": "Selected by Luca Bell. The object records link directly to the collection contract and distinguish these originals from the project’s derived works.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "fund-v2-exhibitions-group-6"
+          }
+        }
+      ],
+      "navigationLabel": "Exhibitions"
+    },
+    {
+      "slug": "work-375",
+      "title": "The Tree of Knowledge of Good and Evil",
+      "description": "The September proposal sought a substantial work around which the autumn display could be organized. ACK’s contribution gives that selection a point of concentration beyond a familiar character or slogan. Its place in the collection is alongside the landscapes and constructed spaces of Cath Simard a",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-375-001",
+          "block_type": "image",
+          "asset_id": "meme-375",
+          "title": "The Tree of Knowledge of Good and Evil by ACK",
+          "caption": "PNG original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-375-002",
+          "block_type": "rich_text",
+          "content": "The Memes · No. 375",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-375-003",
+          "block_type": "heading",
+          "text": "The Tree of Knowledge of Good and Evil",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-375-004",
+          "block_type": "rich_text",
+          "content": "ACK",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-375-005",
+          "block_type": "rich_text",
+          "content": "The September proposal sought a substantial work around which the autumn display could be organized. ACK’s contribution gives that selection a point of concentration beyond a familiar character or slogan. Its place in the collection is alongside the landscapes and constructed spaces of Cath Simard and Grant Riven Yun; the exhibition leaves room to compare them without proposing a common artist intention.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-375-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-375-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-375-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.015\nRegistered: 10 September 2026\nEntry route: Secondary acquisition\nDecision: CIP–09\nProgramme: Authorship & imagined worlds\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.015"
+            },
+            {
+              "label": "Registered",
+              "value": "10 September 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Secondary acquisition"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–09"
+            },
+            {
+              "label": "Programme",
+              "value": "Authorship & imagined worlds"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-375-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-375-008",
+          "block_type": "button_link",
+          "label": "View source record ↗",
+          "href": "https://6529.io/the-memes/375",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-375-009",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "The Tree of Knowledge of Good and Evil"
+    },
+    {
+      "slug": "work-540",
+      "title": "Tears of the Desert",
+      "description": "We included this portrait because the proposed autumn selection was becoming too dependent on symbols and imagined environments. A human face changes that balance. The accession brings photography into the group and provides a useful comparison with Botto’s work, without treating the two images as e",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-540-001",
+          "block_type": "image",
+          "asset_id": "meme-540",
+          "title": "Tears of the Desert by Ebrahim_Elmi",
+          "caption": "JPEG original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-540-002",
+          "block_type": "rich_text",
+          "content": "The Memes · No. 540",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-540-003",
+          "block_type": "heading",
+          "text": "Tears of the Desert",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-540-004",
+          "block_type": "rich_text",
+          "content": "Ebrahim_Elmi",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-540-005",
+          "block_type": "rich_text",
+          "content": "We included this portrait because the proposed autumn selection was becoming too dependent on symbols and imagined environments. A human face changes that balance. The accession brings photography into the group and provides a useful comparison with Botto’s work, without treating the two images as evidence of the same method or subject.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-540-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-540-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-540-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.017\nRegistered: 10 September 2026\nEntry route: Secondary acquisition\nDecision: CIP–09\nProgramme: Authorship & imagined worlds\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.017"
+            },
+            {
+              "label": "Registered",
+              "value": "10 September 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Secondary acquisition"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–09"
+            },
+            {
+              "label": "Programme",
+              "value": "Authorship & imagined worlds"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-540-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-540-008",
+          "block_type": "button_link",
+          "label": "View source record ↗",
+          "href": "https://6529.io/the-memes/540",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-540-009",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Tears of the Desert"
+    },
+    {
+      "slug": "work-47",
+      "title": "EXIT STRATEGY",
+      "description": "The July acquisitions needed to extend beyond variations on Pepe. XCOPY’s contribution establishes a different visual vocabulary and an original that depends on animation. The display checklist therefore treats the still shown here as a reference image, with the source record retained for viewing th",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-47-001",
+          "block_type": "image",
+          "asset_id": "meme-47",
+          "title": "Still preview of EXIT STRATEGY by XCOPY",
+          "caption": "Still preview · Animated GIF original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-47-002",
+          "block_type": "rich_text",
+          "content": "The Memes · No. 47",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-47-003",
+          "block_type": "heading",
+          "text": "EXIT STRATEGY",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-47-004",
+          "block_type": "rich_text",
+          "content": "XCOPY",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-47-005",
+          "block_type": "rich_text",
+          "content": "The July acquisitions needed to extend beyond variations on Pepe. XCOPY’s contribution establishes a different visual vocabulary and an original that depends on animation. The display checklist therefore treats the still shown here as a reference image, with the source record retained for viewing the work in its original format.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-47-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-47-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-47-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.007\nRegistered: 24 July 2026\nEntry route: Secondary acquisition\nDecision: CIP–06\nProgramme: Collective characters\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.007"
+            },
+            {
+              "label": "Registered",
+              "value": "24 July 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Secondary acquisition"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–06"
+            },
+            {
+              "label": "Programme",
+              "value": "Collective characters"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-47-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-47-008",
+          "block_type": "button_link",
+          "label": "View original animation ↗",
+          "href": "https://arweave.net/B_j9Z1NTIt5QUGx_TTnAh0F93BMQ1FRAnDEg-TrehaE",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-47-009",
+          "block_type": "button_link",
+          "label": "View source record ↗",
+          "href": "https://6529.io/the-memes/47",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-47-010",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "EXIT STRATEGY"
+    },
+    {
+      "slug": "work-52",
+      "title": "MEME FACTORY",
+      "description": "This work was proposed as a connection between the collection’s public statements and its quieter constructed spaces. It sits in the September group, but the exhibition also places it in conversation with SeizeJPGs. That cross-reference matters more to our collecting rationale than a requirement tha",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-52-001",
+          "block_type": "image",
+          "asset_id": "meme-52",
+          "title": "MEME FACTORY by Grant Riven Yun",
+          "caption": "JPEG original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-52-002",
+          "block_type": "rich_text",
+          "content": "The Memes · No. 52",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-52-003",
+          "block_type": "heading",
+          "text": "MEME FACTORY",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-52-004",
+          "block_type": "rich_text",
+          "content": "Grant Riven Yun",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-52-005",
+          "block_type": "rich_text",
+          "content": "This work was proposed as a connection between the collection’s public statements and its quieter constructed spaces. It sits in the September group, but the exhibition also places it in conversation with SeizeJPGs. That cross-reference matters more to our collecting rationale than a requirement that every work illustrate one theme.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-52-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-52-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-52-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.013\nRegistered: 10 September 2026\nEntry route: Secondary acquisition\nDecision: CIP–09\nProgramme: Authorship & imagined worlds\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.013"
+            },
+            {
+              "label": "Registered",
+              "value": "10 September 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Secondary acquisition"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–09"
+            },
+            {
+              "label": "Programme",
+              "value": "Authorship & imagined worlds"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-52-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-52-008",
+          "block_type": "button_link",
+          "label": "View source record ↗",
+          "href": "https://6529.io/the-memes/52",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-52-009",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "MEME FACTORY"
+    },
+    {
+      "slug": "work-103",
+      "title": "Don't Trust, Check.",
+      "description": "Accepted with the first member contributions, this work gives the Public image group a reference for verification and authority. Its network of coloured nodes places the central statement among many connections. Paired with FirstGM, it supports our discussion of how a public claim is recorded and ch",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-103-001",
+          "block_type": "image",
+          "asset_id": "meme-103",
+          "title": "Don't Trust, Check. by Jack Butcher",
+          "caption": "PNG original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-103-002",
+          "block_type": "rich_text",
+          "content": "The Memes · No. 103",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-103-003",
+          "block_type": "heading",
+          "text": "Don't Trust, Check.",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-103-004",
+          "block_type": "rich_text",
+          "content": "Jack Butcher",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-103-005",
+          "block_type": "rich_text",
+          "content": "Accepted with the first member contributions, this work gives the Public image group a reference for verification and authority. Its network of coloured nodes places the central statement among many connections. Paired with FirstGM, it supports our discussion of how a public claim is recorded and checked.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-103-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-103-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-103-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.004\nRegistered: 19 June 2026\nEntry route: Member contribution\nDecision: CIP–04\nProgramme: Public image\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.004"
+            },
+            {
+              "label": "Registered",
+              "value": "19 June 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Member contribution"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–04"
+            },
+            {
+              "label": "Programme",
+              "value": "Public image"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-103-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-103-008",
+          "block_type": "button_link",
+          "label": "View source record ↗",
+          "href": "https://6529.io/the-memes/103",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-103-009",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Don't Trust, Check."
+    },
+    {
+      "slug": "work-118",
+      "title": "The Socially Umpired Animals",
+      "description": "Botto was included to prevent our discussion of authorship from stopping at the name in a credit line. The September session will consider this work alongside MaNiC’s contribution. The accession note records that curatorial comparison; it does not classify either image’s production method from its a",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-118-001",
+          "block_type": "image",
+          "asset_id": "meme-118",
+          "title": "The Socially Umpired Animals by Botto",
+          "caption": "JPEG original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-118-002",
+          "block_type": "rich_text",
+          "content": "The Memes · No. 118",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-118-003",
+          "block_type": "heading",
+          "text": "The Socially Umpired Animals",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-118-004",
+          "block_type": "rich_text",
+          "content": "Botto",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-118-005",
+          "block_type": "rich_text",
+          "content": "Botto was included to prevent our discussion of authorship from stopping at the name in a credit line. The September session will consider this work alongside MaNiC’s contribution. The accession note records that curatorial comparison; it does not classify either image’s production method from its appearance alone.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-118-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-118-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-118-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.014\nRegistered: 10 September 2026\nEntry route: Secondary acquisition\nDecision: CIP–09\nProgramme: Authorship & imagined worlds\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.014"
+            },
+            {
+              "label": "Registered",
+              "value": "10 September 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Secondary acquisition"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–09"
+            },
+            {
+              "label": "Programme",
+              "value": "Authorship & imagined worlds"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-118-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-118-008",
+          "block_type": "button_link",
+          "label": "View source record ↗",
+          "href": "https://6529.io/the-memes/118",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-118-009",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "The Socially Umpired Animals"
+    },
+    {
+      "slug": "work-48",
+      "title": "Freedom to Explore",
+      "description": "The acquisition proposal made a case for landscape within a collection initially concentrated on direct address. Cath Simard’s work allows that expansion while remaining part of The Memes. Our display preserves the complete composition and keeps the original record close to the image for anyone who ",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-48-001",
+          "block_type": "image",
+          "asset_id": "meme-48",
+          "title": "Freedom to Explore by Cath Simard",
+          "caption": "JPEG original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-48-002",
+          "block_type": "rich_text",
+          "content": "The Memes · No. 48",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-48-003",
+          "block_type": "heading",
+          "text": "Freedom to Explore",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-48-004",
+          "block_type": "rich_text",
+          "content": "Cath Simard",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-48-005",
+          "block_type": "rich_text",
+          "content": "The acquisition proposal made a case for landscape within a collection initially concentrated on direct address. Cath Simard’s work allows that expansion while remaining part of The Memes. Our display preserves the complete composition and keeps the original record close to the image for anyone who wants to examine it beyond the exhibition.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-48-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-48-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-48-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.012\nRegistered: 10 September 2026\nEntry route: Secondary acquisition\nDecision: CIP–09\nProgramme: Authorship & imagined worlds\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.012"
+            },
+            {
+              "label": "Registered",
+              "value": "10 September 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Secondary acquisition"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–09"
+            },
+            {
+              "label": "Programme",
+              "value": "Authorship & imagined worlds"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-48-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-48-008",
+          "block_type": "button_link",
+          "label": "View source record ↗",
+          "href": "https://6529.io/the-memes/48",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-48-009",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Freedom to Explore"
+    },
+    {
+      "slug": "work-9",
+      "title": "The Institutions Are Coming",
+      "description": "An institution collecting this image should be prepared to include the joke at its own expense. We accepted it with the founding contributions and placed it beside the collection’s more earnest public statements. It keeps the programme’s account of NFT culture from becoming exclusively celebratory o",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-9-001",
+          "block_type": "image",
+          "asset_id": "meme-9",
+          "title": "The Institutions Are Coming by 6529er",
+          "caption": "JPEG original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-9-002",
+          "block_type": "rich_text",
+          "content": "The Memes · No. 9",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-9-003",
+          "block_type": "heading",
+          "text": "The Institutions Are Coming",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-9-004",
+          "block_type": "rich_text",
+          "content": "6529er",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-9-005",
+          "block_type": "rich_text",
+          "content": "An institution collecting this image should be prepared to include the joke at its own expense. We accepted it with the founding contributions and placed it beside the collection’s more earnest public statements. It keeps the programme’s account of NFT culture from becoming exclusively celebratory or self-serious.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-9-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-9-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-9-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.003\nRegistered: 19 June 2026\nEntry route: Member contribution\nDecision: CIP–04\nProgramme: Public image\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.003"
+            },
+            {
+              "label": "Registered",
+              "value": "19 June 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Member contribution"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–04"
+            },
+            {
+              "label": "Programme",
+              "value": "Public image"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-9-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-9-008",
+          "block_type": "button_link",
+          "label": "View source record ↗",
+          "href": "https://6529.io/the-memes/9",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-9-009",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "The Institutions Are Coming"
+    },
+    {
+      "slug": "work-537",
+      "title": "ＮＯ ＨＵＭＡＮ ＩＮＴＥＲＦＡＣＥ",
+      "description": "The September proposal paired this work with Botto as an entry point into a discussion of machines and authorship. It also adds an animated original to a group otherwise presented through static images. The archive retains its full title and original-format reference; the still preview is not a subs",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-537-001",
+          "block_type": "image",
+          "asset_id": "meme-537",
+          "title": "Still preview of ＮＯ　ＨＵＭＡＮ　ＩＮＴＥＲＦＡＣＥ by MaNiC",
+          "caption": "Still preview · Animated GIF original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-537-002",
+          "block_type": "rich_text",
+          "content": "The Memes · No. 537",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-537-003",
+          "block_type": "heading",
+          "text": "ＮＯ ＨＵＭＡＮ ＩＮＴＥＲＦＡＣＥ",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-537-004",
+          "block_type": "rich_text",
+          "content": "MaNiC",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-537-005",
+          "block_type": "rich_text",
+          "content": "The September proposal paired this work with Botto as an entry point into a discussion of machines and authorship. It also adds an animated original to a group otherwise presented through static images. The archive retains its full title and original-format reference; the still preview is not a substitute for that record.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-537-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-537-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-537-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.016\nRegistered: 10 September 2026\nEntry route: Secondary acquisition\nDecision: CIP–09\nProgramme: Authorship & imagined worlds\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.016"
+            },
+            {
+              "label": "Registered",
+              "value": "10 September 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Secondary acquisition"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–09"
+            },
+            {
+              "label": "Programme",
+              "value": "Authorship & imagined worlds"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-537-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-537-008",
+          "block_type": "button_link",
+          "label": "View original animation ↗",
+          "href": "https://arweave.net/tqx3Gw4PZqYclMiyjtHydobRZi7IZYo989RQooU_6YA",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-537-009",
+          "block_type": "button_link",
+          "label": "View source record ↗",
+          "href": "https://6529.io/the-memes/537",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-537-010",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "ＮＯ ＨＵＭＡＮ ＩＮＴＥＲＦＡＣＥ"
+    },
+    {
+      "slug": "work-5",
+      "title": "rekt6529",
+      "description": "OSF’s work was selected with EXIT STRATEGY to broaden the character group beyond a single shared figure. Together they give the exhibition two distinct animated originals. Their accession and display records stay separate, including independent credits and source links, rather than reducing them to ",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-5-001",
+          "block_type": "image",
+          "asset_id": "meme-5",
+          "title": "Still preview of rekt6529 by OSF",
+          "caption": "Still preview · Animated GIF original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-5-002",
+          "block_type": "rich_text",
+          "content": "The Memes · No. 5",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-5-003",
+          "block_type": "heading",
+          "text": "rekt6529",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-5-004",
+          "block_type": "rich_text",
+          "content": "OSF",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-5-005",
+          "block_type": "rich_text",
+          "content": "OSF’s work was selected with EXIT STRATEGY to broaden the character group beyond a single shared figure. Together they give the exhibition two distinct animated originals. Their accession and display records stay separate, including independent credits and source links, rather than reducing them to a general category of animated meme art.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-5-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-5-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-5-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.005\nRegistered: 24 July 2026\nEntry route: Secondary acquisition\nDecision: CIP–06\nProgramme: Collective characters\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.005"
+            },
+            {
+              "label": "Registered",
+              "value": "24 July 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Secondary acquisition"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–06"
+            },
+            {
+              "label": "Programme",
+              "value": "Collective characters"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-5-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-5-008",
+          "block_type": "button_link",
+          "label": "View original animation ↗",
+          "href": "https://arweave.net/WjpA-XWxKYVg6OI2TcOXZJpPw5Oh3wg-XhRyv9ZV3_s",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-5-009",
+          "block_type": "button_link",
+          "label": "View source record ↗",
+          "href": "https://6529.io/the-memes/5",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-5-010",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "rekt6529"
+    },
+    {
+      "slug": "work-37",
+      "title": "Sgt. Pepe",
+      "description": "The committee chose a focused pair of Pepe works rather than an open-ended survey. Sgt. Pepe is shown with Greedy Morning so that a familiar subject does not obscure the difference between artists. This pair forms the centre of the July group, with OSF and XCOPY establishing its wider context.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-37-001",
+          "block_type": "image",
+          "asset_id": "meme-37",
+          "title": "Sgt. Pepe by Arsonic",
+          "caption": "JPEG original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-37-002",
+          "block_type": "rich_text",
+          "content": "The Memes · No. 37",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-37-003",
+          "block_type": "heading",
+          "text": "Sgt. Pepe",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-37-004",
+          "block_type": "rich_text",
+          "content": "Arsonic",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-37-005",
+          "block_type": "rich_text",
+          "content": "The committee chose a focused pair of Pepe works rather than an open-ended survey. Sgt. Pepe is shown with Greedy Morning so that a familiar subject does not obscure the difference between artists. This pair forms the centre of the July group, with OSF and XCOPY establishing its wider context.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-37-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-37-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-37-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.006\nRegistered: 24 July 2026\nEntry route: Secondary acquisition\nDecision: CIP–06\nProgramme: Collective characters\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.006"
+            },
+            {
+              "label": "Registered",
+              "value": "24 July 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Secondary acquisition"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–06"
+            },
+            {
+              "label": "Programme",
+              "value": "Collective characters"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-37-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-37-008",
+          "block_type": "button_link",
+          "label": "View source record ↗",
+          "href": "https://6529.io/the-memes/37",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-37-009",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Sgt. Pepe"
+    },
+    {
+      "slug": "work-59",
+      "title": "Greedy Morning",
+      "description": "Greedy Morning entered with Sgt. Pepe under one proposal. Keeping the pair together allows the public programme to discuss how a shared character supports distinct works, rather than treating recognition as the end of the encounter. Future additions to this group must make a comparably specific cont",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-59-001",
+          "block_type": "image",
+          "asset_id": "meme-59",
+          "title": "Greedy Morning by Tyronejkd",
+          "caption": "PNG original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-59-002",
+          "block_type": "rich_text",
+          "content": "The Memes · No. 59",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-59-003",
+          "block_type": "heading",
+          "text": "Greedy Morning",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-59-004",
+          "block_type": "rich_text",
+          "content": "Tyronejkd",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-59-005",
+          "block_type": "rich_text",
+          "content": "Greedy Morning entered with Sgt. Pepe under one proposal. Keeping the pair together allows the public programme to discuss how a shared character supports distinct works, rather than treating recognition as the end of the encounter. Future additions to this group must make a comparably specific contribution.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-59-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-59-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-59-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.008\nRegistered: 24 July 2026\nEntry route: Secondary acquisition\nDecision: CIP–06\nProgramme: Collective characters\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.008"
+            },
+            {
+              "label": "Registered",
+              "value": "24 July 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Secondary acquisition"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–06"
+            },
+            {
+              "label": "Programme",
+              "value": "Collective characters"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-59-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-59-008",
+          "block_type": "button_link",
+          "label": "View source record ↗",
+          "href": "https://6529.io/the-memes/59",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-59-009",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Greedy Morning"
+    },
+    {
+      "slug": "work-2",
+      "title": "SeizeJPGs",
+      "description": "This is the collection’s first accession reference and part of the founding member contribution. It establishes the direct public address against which later acquisitions can be read. The exhibition links it to MEME FACTORY while preserving its place in the earlier Public image group.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-2-001",
+          "block_type": "image",
+          "asset_id": "meme-2",
+          "title": "SeizeJPGs by 6529er",
+          "caption": "JPEG original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-2-002",
+          "block_type": "rich_text",
+          "content": "The Memes · No. 2",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-2-003",
+          "block_type": "heading",
+          "text": "SeizeJPGs",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-2-004",
+          "block_type": "rich_text",
+          "content": "6529er",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-2-005",
+          "block_type": "rich_text",
+          "content": "This is the collection’s first accession reference and part of the founding member contribution. It establishes the direct public address against which later acquisitions can be read. The exhibition links it to MEME FACTORY while preserving its place in the earlier Public image group.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-2-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-2-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-2-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.001\nRegistered: 19 June 2026\nEntry route: Member contribution\nDecision: CIP–04\nProgramme: Public image\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.001"
+            },
+            {
+              "label": "Registered",
+              "value": "19 June 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Member contribution"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–04"
+            },
+            {
+              "label": "Programme",
+              "value": "Public image"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-2-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-2-008",
+          "block_type": "button_link",
+          "label": "View source record ↗",
+          "href": "https://6529.io/the-memes/2",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-2-009",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "SeizeJPGs"
+    },
+    {
+      "slug": "work-8",
+      "title": "FirstGM",
+      "description": "We accepted FirstGM as a record of a particular online statement, not as a generic example of NFT imagery. Its screenshot format is central to its place in the collection. In the exhibition it is paired with Jack Butcher’s work to connect documentary evidence with the question of verification.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-8-001",
+          "block_type": "image",
+          "asset_id": "meme-8",
+          "title": "FirstGM by 6529",
+          "caption": "JPEG original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-8-002",
+          "block_type": "rich_text",
+          "content": "The Memes · No. 8",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-8-003",
+          "block_type": "heading",
+          "text": "FirstGM",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-8-004",
+          "block_type": "rich_text",
+          "content": "6529",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-8-005",
+          "block_type": "rich_text",
+          "content": "We accepted FirstGM as a record of a particular online statement, not as a generic example of NFT imagery. Its screenshot format is central to its place in the collection. In the exhibition it is paired with Jack Butcher’s work to connect documentary evidence with the question of verification.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-8-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-8-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-8-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.002\nRegistered: 19 June 2026\nEntry route: Member contribution\nDecision: CIP–04\nProgramme: Public image\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.002"
+            },
+            {
+              "label": "Registered",
+              "value": "19 June 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Member contribution"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–04"
+            },
+            {
+              "label": "Programme",
+              "value": "Public image"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-8-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-8-008",
+          "block_type": "button_link",
+          "label": "View source record ↗",
+          "href": "https://6529.io/the-memes/8",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-8-009",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "FirstGM"
+    },
+    {
+      "slug": "work-b1",
+      "title": "Rose",
+      "description": "Rose anchors the first Blitmap study alongside Psychic and Jupiter. The proposal deliberately selected three original compositions, with each artist credited separately. Their shared pixel grid allows a close comparison of form and colour without substituting project-level identity for the individua",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-b1-001",
+          "block_type": "image",
+          "asset_id": "blitmap-1",
+          "title": "Rose by dom",
+          "caption": "32 × 32 pixel composition · Onchain SVG original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-b1-002",
+          "block_type": "rich_text",
+          "content": "Blitmap · No. 1",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-b1-003",
+          "block_type": "heading",
+          "text": "Rose",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-b1-004",
+          "block_type": "rich_text",
+          "content": "dom",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-b1-005",
+          "block_type": "rich_text",
+          "content": "Rose anchors the first Blitmap study alongside Psychic and Jupiter. The proposal deliberately selected three original compositions, with each artist credited separately. Their shared pixel grid allows a close comparison of form and colour without substituting project-level identity for the individual work.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-b1-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-b1-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-b1-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.009\nRegistered: 14 August 2026\nEntry route: Secondary acquisition\nDecision: CIP–07\nProgramme: Blitmap study\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.009"
+            },
+            {
+              "label": "Registered",
+              "value": "14 August 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Secondary acquisition"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–07"
+            },
+            {
+              "label": "Programme",
+              "value": "Blitmap study"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-b1-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-b1-008",
+          "block_type": "button_link",
+          "label": "View contract record ↗",
+          "href": "https://etherscan.io/token/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63?a=1",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-b1-009",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Rose"
+    },
+    {
+      "slug": "work-b4",
+      "title": "Psychic",
+      "description": "Psychic was selected as the second work in the Blitmap study. Its inclusion gives the group a different palette and composition while keeping the same compact format. The record identifies the original token and its artist; it does not treat other works in the project as interchangeable editions.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-b4-001",
+          "block_type": "image",
+          "asset_id": "blitmap-4",
+          "title": "Psychic by Veenus",
+          "caption": "32 × 32 pixel composition · Onchain SVG original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-b4-002",
+          "block_type": "rich_text",
+          "content": "Blitmap · No. 4",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-b4-003",
+          "block_type": "heading",
+          "text": "Psychic",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-b4-004",
+          "block_type": "rich_text",
+          "content": "Veenus",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-b4-005",
+          "block_type": "rich_text",
+          "content": "Psychic was selected as the second work in the Blitmap study. Its inclusion gives the group a different palette and composition while keeping the same compact format. The record identifies the original token and its artist; it does not treat other works in the project as interchangeable editions.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-b4-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-b4-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-b4-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.010\nRegistered: 14 August 2026\nEntry route: Secondary acquisition\nDecision: CIP–07\nProgramme: Blitmap study\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.010"
+            },
+            {
+              "label": "Registered",
+              "value": "14 August 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Secondary acquisition"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–07"
+            },
+            {
+              "label": "Programme",
+              "value": "Blitmap study"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-b4-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-b4-008",
+          "block_type": "button_link",
+          "label": "View contract record ↗",
+          "href": "https://etherscan.io/token/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63?a=4",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-b4-009",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Psychic"
+    },
+    {
+      "slug": "work-b13",
+      "title": "Jupiter",
+      "description": "Jupiter completes the initial three-work Blitmap selection. The study remains small enough to examine each original individually before proposing an expansion. Its contract reference is published with the display image so that the project, token and attribution can be checked independently.",
+      "navigation": false,
+      "blocks": [
+        {
+          "id": "fund-v2-work-b13-001",
+          "block_type": "image",
+          "asset_id": "blitmap-13",
+          "title": "Jupiter by BigPapap",
+          "caption": "32 × 32 pixel composition · Onchain SVG original · CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-work-b13-002",
+          "block_type": "rich_text",
+          "content": "Blitmap · No. 13",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-b13-003",
+          "block_type": "heading",
+          "text": "Jupiter",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-b13-004",
+          "block_type": "rich_text",
+          "content": "BigPapap",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-b13-005",
+          "block_type": "rich_text",
+          "content": "Jupiter completes the initial three-work Blitmap selection. The study remains small enough to examine each original individually before proposing an expansion. Its contract reference is published with the display image so that the project, token and attribution can be checked independently.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-b13-006",
+          "block_type": "rich_text",
+          "content": "Illustrative accession record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-work-b13-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-b13-007",
+          "block_type": "callout",
+          "title": "",
+          "content": "Reference: CC.26.011\nRegistered: 14 August 2026\nEntry route: Secondary acquisition\nDecision: CIP–07\nProgramme: Blitmap study\nCustody: Collection Safe · two-signature policy",
+          "rows": [
+            {
+              "label": "Reference",
+              "value": "CC.26.011"
+            },
+            {
+              "label": "Registered",
+              "value": "14 August 2026"
+            },
+            {
+              "label": "Entry route",
+              "value": "Secondary acquisition"
+            },
+            {
+              "label": "Decision",
+              "value": "CIP–07"
+            },
+            {
+              "label": "Programme",
+              "value": "Blitmap study"
+            },
+            {
+              "label": "Custody",
+              "value": "Collection Safe · two-signature policy"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-work-b13-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-work-b13-008",
+          "block_type": "button_link",
+          "label": "View contract record ↗",
+          "href": "https://etherscan.io/token/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63?a=13",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-work-b13-009",
+          "block_type": "button_link",
+          "label": "Acquisition decision ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Jupiter"
+    },
+    {
+      "slug": "mandate",
+      "title": "Collecting mandate",
+      "description": "Collect digital art concerned with internet identity, shared visual culture and the ways images are made, owned and circulated.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "fund-v2-mandate-001",
+          "block_type": "rich_text",
+          "content": "The charter / Adopted 2 February 2026",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "hero",
+            "group": "fund-v2-mandate-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-mandate-002",
+          "block_type": "heading",
+          "text": "Collecting mandate",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "hero",
+            "group": "fund-v2-mandate-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-mandate-003",
+          "block_type": "rich_text",
+          "content": "Policy owner: Noor Patel Next review: December 2026",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "fund-v2-mandate-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-mandate-004",
+          "block_type": "rich_text",
+          "content": "Collect digital art concerned with internet identity, shared visual culture and the ways images are made, owned and circulated.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-mandate-005",
+          "block_type": "heading",
+          "text": "Scope and purpose",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-mandate-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-mandate-006",
+          "block_type": "rich_text",
+          "content": "The collection brings together individual practices and collaborative projects. The Memes and Blitmap are its first two areas of concentration. Acquisitions should deepen those areas or make a specific, documented connection to them.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-mandate-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-mandate-007",
+          "block_type": "rich_text",
+          "content": "Public display, research and preservation guide the programme. Member distributions and short-term trading are outside the mandate.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-mandate-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-mandate-008",
+          "block_type": "heading",
+          "text": "Acquisition requirements",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-mandate-group-3"
+          }
+        },
+        {
+          "id": "fund-v2-mandate-009",
+          "block_type": "rich_text",
+          "content": "A proposal identifies the exact work and edition, explains its place in the collection, and records attribution, provenance, rights and media dependencies. Terms and available funds are reviewed before a vote; approval does not authorize different works or changed terms.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-mandate-group-3"
+          }
+        },
+        {
+          "id": "fund-v2-mandate-010",
+          "block_type": "heading",
+          "text": "Member decisions",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-mandate-group-4"
+          }
+        },
+        {
+          "id": "fund-v2-mandate-011",
+          "block_type": "rich_text",
+          "content": "Proposals remain open for at least seven days. Three eligible members form a quorum; approval requires two-thirds of votes cast. A member with a financial or personal interest discloses it and abstains. Research and coordination roles do not carry additional votes.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-mandate-group-4"
+          }
+        },
+        {
+          "id": "fund-v2-mandate-012",
+          "block_type": "rich_text",
+          "content": "From proposal to accession",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-mandate-013",
+          "block_type": "callout",
+          "title": "",
+          "content": "Research: Research Publish the work, source references and collecting rationale.\nDiscussion: Discussion Resolve attribution, media and custody questions. Record amendments before the vote.\nDecision: Decision Record each member’s vote, conflicts and any conditions attached to approval.\nExecution: Execution Two designated signers confirm the approved terms. Jo reconciles the result against the accession register.",
+          "rows": [
+            {
+              "label": "Research",
+              "value": "Research Publish the work, source references and collecting rationale."
+            },
+            {
+              "label": "Discussion",
+              "value": "Discussion Resolve attribution, media and custody questions. Record amendments before the vote."
+            },
+            {
+              "label": "Decision",
+              "value": "Decision Record each member’s vote, conflicts and any conditions attached to approval."
+            },
+            {
+              "label": "Execution",
+              "value": "Execution Two designated signers confirm the approved terms. Jo reconciles the result against the accession register."
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body"
+          }
+        },
+        {
+          "id": "fund-v2-mandate-014",
+          "block_type": "callout",
+          "title": "Custody and continuity Two-signature approval · quarterly reconciliation",
+          "content": "The collection uses a dedicated Safe. Two designated signers authorize custody transactions; one member cannot move a work alone. Signer changes require a separate member resolution.\n\nJo maintains the custody register and prepares quarterly reconciliation. Luca retains original media, metadata and source references independently of the website. An NFT record, a media backup and permission to exhibit are documented separately.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note"
+          }
+        },
+        {
+          "id": "fund-v2-mandate-015",
+          "block_type": "callout",
+          "title": "Loans and public access CIP–10 · policy under discussion",
+          "content": "The proposed checklist records the host, dates, work, format, credit line and responsible contact. A media exhibition does not automatically require a token transfer. Each proposed loan receives its own approval.\n\nRead the lending proposal ↗",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note"
+          }
+        },
+        {
+          "id": "fund-v2-mandate-016",
+          "block_type": "button_link",
+          "label": "Read the lending proposal ↗",
+          "page_id": "page-records",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-example-disclosure",
+          "block_type": "rich_text",
+          "content": "Fictional collection: members, accessions and decisions are illustrative. Real CC0 artworks retain their titles and credits. No ownership or artist endorsement is claimed.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note"
+          }
+        }
+      ],
+      "navigationLabel": "Governance"
+    },
+    {
+      "slug": "people",
+      "title": "Members and responsibilities",
+      "description": "Each member holds one vote. Operational responsibilities remain subject to the charter and collective approval.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "fund-v2-people-001",
+          "block_type": "rich_text",
+          "content": "The members",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "hero",
+            "group": "fund-v2-people-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-people-002",
+          "block_type": "heading",
+          "text": "Members and responsibilities",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "hero",
+            "group": "fund-v2-people-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-people-003",
+          "block_type": "rich_text",
+          "content": "Each member holds one vote. Operational responsibilities remain subject to the charter and collective approval.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "fund-v2-people-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-people-004",
+          "block_type": "heading",
+          "text": "Amina Chen",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "people",
+            "group": "fund-v2-people-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-people-005",
+          "block_type": "rich_text",
+          "content": "Collection research",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "people",
+            "group": "fund-v2-people-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-people-006",
+          "block_type": "rich_text",
+          "content": "Amina leads collection research and edits selection rationales, with a particular interest in the relationship between digital editions and the visual conventions of print.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "people",
+            "group": "fund-v2-people-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-people-007",
+          "block_type": "rich_text",
+          "content": "Current work: October exhibition and accession reviews",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "people",
+            "group": "fund-v2-people-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-people-008",
+          "block_type": "heading",
+          "text": "Luca Bell",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "people",
+            "group": "fund-v2-people-group-3"
+          }
+        },
+        {
+          "id": "fund-v2-people-009",
+          "block_type": "rich_text",
+          "content": "Archive & rights",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "people",
+            "group": "fund-v2-people-group-3"
+          }
+        },
+        {
+          "id": "fund-v2-people-010",
+          "block_type": "rich_text",
+          "content": "Luca maintains media references, credit lines and rights documentation, with responsibility for the register’s completeness and long-term usability.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "people",
+            "group": "fund-v2-people-group-3"
+          }
+        },
+        {
+          "id": "fund-v2-people-011",
+          "block_type": "rich_text",
+          "content": "Current work: source records and the lending checklist",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "people",
+            "group": "fund-v2-people-group-3"
+          }
+        },
+        {
+          "id": "fund-v2-people-012",
+          "block_type": "heading",
+          "text": "Jo Morgan",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "people",
+            "group": "fund-v2-people-group-4"
+          }
+        },
+        {
+          "id": "fund-v2-people-013",
+          "block_type": "rich_text",
+          "content": "Treasury & custody",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "people",
+            "group": "fund-v2-people-group-4"
+          }
+        },
+        {
+          "id": "fund-v2-people-014",
+          "block_type": "rich_text",
+          "content": "Jo oversees transaction records, custody documentation and execution planning. She reviews proposed terms before member consideration and records how approved decisions are carried out.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "people",
+            "group": "fund-v2-people-group-4"
+          }
+        },
+        {
+          "id": "fund-v2-people-015",
+          "block_type": "rich_text",
+          "content": "Current work: September accession reconciliation",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "people",
+            "group": "fund-v2-people-group-4"
+          }
+        },
+        {
+          "id": "fund-v2-people-016",
+          "block_type": "heading",
+          "text": "Noor Patel",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "people",
+            "group": "fund-v2-people-group-5"
+          }
+        },
+        {
+          "id": "fund-v2-people-017",
+          "block_type": "rich_text",
+          "content": "Member coordination",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "people",
+            "group": "fund-v2-people-group-5"
+          }
+        },
+        {
+          "id": "fund-v2-people-018",
+          "block_type": "rich_text",
+          "content": "Noor administers proposals, agendas and voting records, and coordinates the public programme. She brings questions from open sessions to member discussion.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "people",
+            "group": "fund-v2-people-group-5"
+          }
+        },
+        {
+          "id": "fund-v2-people-019",
+          "block_type": "rich_text",
+          "content": "Current work: the 26 September session",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "people",
+            "group": "fund-v2-people-group-5"
+          }
+        },
+        {
+          "id": "fund-v2-people-020",
+          "block_type": "rich_text",
+          "content": "Research, loans and introductions",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-people-021",
+          "block_type": "heading",
+          "text": "Enquiries and proposals",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-people-022",
+          "block_type": "rich_text",
+          "content": "For research suggestions, questions about the register or proposals for public sessions. hello@example.org",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "fund-v2-people-023",
+          "block_type": "callout",
+          "title": "hello@example.org",
+          "email": "hello@example.org",
+          "content": "",
+          "subject": "Enquiry",
+          "form": false,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact"
+          }
+        }
+      ],
+      "navigationLabel": "People"
+    },
+    {
+      "slug": "records",
+      "title": "Decisions and reports",
+      "description": "The collection now comprises seventeen works across The Memes and Blitmap. The six additions approved under CIP–09 complete the selection for October’s display, extending it into landscape, portraiture and questions of authorship.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "fund-v2-records-001",
+          "block_type": "rich_text",
+          "content": "The public record",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "hero",
+            "group": "fund-v2-records-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-records-002",
+          "block_type": "heading",
+          "text": "Decisions and reports",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "hero",
+            "group": "fund-v2-records-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-records-003",
+          "block_type": "rich_text",
+          "content": "Maintained by Noor Patel Updated 12 September 2026",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "fund-v2-records-group-1"
+          }
+        },
+        {
+          "id": "fund-v2-records-004",
+          "block_type": "rich_text",
+          "content": "Collection report / 12 September 2026",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-records-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-records-005",
+          "block_type": "heading",
+          "text": "Six September accessions",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-records-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-records-006",
+          "block_type": "rich_text",
+          "content": "The collection now comprises seventeen works across The Memes and Blitmap. The six additions approved under CIP–09 complete the selection for October’s display, extending it into landscape, portraiture and questions of authorship.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-records-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-records-007",
+          "block_type": "rich_text",
+          "content": "Accession notes and source references are published. The October report will include the display checklist and questions raised at the open collection session.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-records-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-records-008",
+          "block_type": "rich_text",
+          "content": "Programme and archive",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "ledger",
+            "group": "fund-v2-records-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-records-009",
+          "block_type": "callout",
+          "title": "",
+          "content": "Amina: the fourteen-work exhibition selection is complete.\nLuca: original-format checks are due 22 September; three works require animation review.\nJo: September accession reconciliation is complete.\nNoor: session agenda published; lending comments remain open.",
+          "rows": [
+            {
+              "label": "",
+              "value": "Amina: the fourteen-work exhibition selection is complete."
+            },
+            {
+              "label": "",
+              "value": "Luca: original-format checks are due 22 September; three works require animation review."
+            },
+            {
+              "label": "",
+              "value": "Jo: September accession reconciliation is complete."
+            },
+            {
+              "label": "",
+              "value": "Noor: session agenda published; lending comments remain open."
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-records-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-records-010",
+          "block_type": "rich_text",
+          "content": "Next session: 26 September, 17:00 UTC. Exhibition opens: 3 October.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "ledger",
+            "group": "fund-v2-records-group-2"
+          }
+        },
+        {
+          "id": "fund-v2-records-011",
+          "block_type": "callout",
+          "title": "Discussion CIP–10 · 11 SEP 2026 A standard record for public loans",
+          "content": "Proposer: Luca Bell Comments close: 18 September Decision pending\n\nRecord the host, display period, work, media source, credit line and responsible contact for every public loan. Distinguish permission to display media from a transfer of the NFT. Animated works require a playback check before installation.\n\nMember comments close on 18 September. The 26 September session will consider the revised checklist; adoption and individual loan approvals remain separate decisions.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note"
+          }
+        },
+        {
+          "id": "fund-v2-records-012",
+          "block_type": "callout",
+          "title": "Registered CIP–09 · 9 SEP 2026 Six works for Authorship & imagined worlds",
+          "content": "Discussion: 2–9 September Proposer: Amina Chen 4 yes · 0 no Registered: 10 September\n\nApprove the proposed secondary acquisitions of works by ACK, Botto, Cath Simard, Ebrahim_Elmi, Grant Riven Yun and MaNiC. The group broadens the programme beyond shared characters and public statements, and completes the October exhibition selection.\n\nAmina, Luca, Jo and Noor voted yes. No conflicts were declared. Jo recorded completion against references CC.26.012–017; Luca’s original-format review remains a display requirement.\n\nView the six accessions ↗",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note"
+          }
+        },
+        {
+          "id": "fund-v2-records-013",
+          "block_type": "callout",
+          "title": "Registered CIP–07 · 7 AUG 2026 Establish a Blitmap study group",
+          "content": "Discussion: 31 July–7 August Proposer: Luca Bell 4 yes · 0 no Registered: 14 August\n\nApprove Rose by dom, Psychic by Veenus and Jupiter by BigPapap as the first Blitmap accessions. The three original compositions establish a focused comparison of form and palette, with the contract record retained alongside the display image.\n\nAmina, Luca, Jo and Noor voted yes. No conflicts were declared. References CC.26.009–011 were reconciled on 14 August. The Blitmap study is a separate programme from October’s fourteen-work Memes exhibition.\n\nView the Blitmap group ↗",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note"
+          }
+        },
+        {
+          "id": "fund-v2-records-014",
+          "block_type": "callout",
+          "title": "Registered CIP–06 · 17 JUL 2026 Collective characters: four acquisitions",
+          "content": "Discussion: 10–17 July Proposer: Amina Chen 4 yes · 0 no Registered: 24 July\n\nApprove rekt6529, Sgt. Pepe, EXIT STRATEGY and Greedy Morning. The selection pairs two treatments of Pepe with works by OSF and XCOPY, giving the programme a wider account of character and visual identity.\n\nAmina, Luca, Jo and Noor voted yes; no conflicts were declared. References CC.26.005–008 entered the register on 24 July. The animated originals of rekt6529 and EXIT STRATEGY are identified in the display checklist.\n\nView the four accessions ↗",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note"
+          }
+        },
+        {
+          "id": "fund-v2-records-015",
+          "block_type": "callout",
+          "title": "Registered CIP–04 · 12 JUN 2026 Accept the first four member contributions",
+          "content": "Discussion: 5–12 June Proposer: Noor Patel 3 yes · 0 no · 1 abstain Registered: 19 June\n\nAccept SeizeJPGs, FirstGM, The Institutions Are Coming and Don't Trust, Check. into the collection. Together they establish the Public image group: a record of how familiar online forms carry a statement, a joke or a demand.\n\nAmina, Luca and Noor voted yes. Jo disclosed her role as contributing member and abstained. References CC.26.001–004 were registered on 19 June; donor status confers no additional vote or right of withdrawal.\n\nView the four contributions ↗",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note"
+          }
+        },
+        {
+          "id": "fund-v2-records-016",
+          "block_type": "callout",
+          "title": "Adopted CIP–01 · 2 FEB 2026 Adopt the charter and decision rules",
+          "content": "Discussion: 26 January–2 February Proposer: Noor Patel 4 yes · 0 no\n\nAmina, Luca, Jo and Noor adopted the collecting mandate, discussion period, quorum, voting rules, conflict policy and two-signature custody approvals. The charter’s first scheduled review is December 2026.\n\nRead the charter ↗",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note"
+          }
+        },
+        {
+          "id": "fund-v2-records-017",
+          "block_type": "button_link",
+          "label": "Read the charter ↗",
+          "page_id": "page-mandate",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Records"
+    }
+  ],
+  "navigation": [
+    {
+      "label": "Overview",
+      "pageSlug": "home"
+    },
+    {
+      "label": "Collection",
+      "pageSlug": "register"
+    },
+    {
+      "label": "Exhibitions",
+      "pageSlug": "exhibitions"
+    },
+    {
+      "label": "Governance",
+      "pageSlug": "mandate"
+    },
+    {
+      "label": "People",
+      "pageSlug": "people"
+    },
+    {
+      "label": "Records",
+      "pageSlug": "records"
+    }
+  ]
+}

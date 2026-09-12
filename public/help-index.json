@@ -5571,7 +5571,7 @@
       ],
       "facts": [
         "Open /{user}/cms/builder directly to build or edit a profile-owned website. A profile with an available published website shows Website in its header; that link opens the published site.",
-        "The studio has 39 complete visual templates: 23 original compositions and 16 inspired by credited CC0 cards from The Memes. Templates and point-and-click editing work without an AI agent.",
+        "The studio offers six fully populated templates: Personal, Artist, Collector, Meme, Organization, and Fund / DAO. Templates and point-and-click editing work without an AI agent.",
         "Use Pages for page titles, addresses, menu labels, duplication, removal, and choosing the homepage. Use Content to edit sections and Design for site name, layout, palette, typography, spacing, and accent color.",
         "Preview all pages in Desktop and Phone views. Review and replace sample names, writing, artwork, claims, and links before confirming the sample-content review for publication.",
         "Saving, image upload, server validation, and publishing require the connected non-proxy owner profile. Publishing uploads content and asks the wallet to sign; saving alone does not publish.",
@@ -7832,22 +7832,31 @@
         "organization",
         "fund",
         "DAO",
-        "visual editor"
+        "visual editor",
+        "project mockup",
+        "book catalogue"
       ],
       "facts": [
-        "Browse 39 templates in People & ideas, Collections, Artists, Organizations, Funds & collecting groups, and The Memes. Open a full example, explore its pages, then choose Use this template.",
-        "Artist examples cover studios, portfolios, exhibitions, medium studies, process journals, editions, and retrospectives. Organization examples include professional practices, nonprofits, crypto protocols, NFT projects, funds, collecting DAOs, and institutional collections.",
+        "Browse six complete examples: Personal, Artist, Collector, Meme, Organization, and Fund / DAO. Open a full example, explore its pages and artwork, then choose Use this template.",
+        "Artist includes three bodies of work and nine individual works; Collector includes nineteen works, four curated sets and collecting notes; Fund / DAO includes seventeen works, exhibition notes, a mandate, members and decision records. The other examples provide personal projects and experience, a digital art club, and an artist-run organization's programme and visitor information.",
         "All templates use visually editable content. Click a section or select it in Content to edit supported text, images, captions, credits, links, widths, and treatments. Add, duplicate, remove, and reorder sections with the controls.",
-        "Pages supports adding and duplicating pages, page settings, choosing the home page, showing a page in the site menu, and changing menu order. A referenced page cannot be removed until its remaining links or homepage reference are changed.",
+        "Edit a gallery's works, titles, credits, categories and detail-page links in Content. Edit record rows in their section and full artwork descriptions in Pages. Archive sections can provide search, categories and grid or list views. Editing one artwork page preserves the other pages.",
+        "Personal includes project planner and book catalogue portfolio illustrations. Select their section in Content to edit the title, small label, mockup heading, date or period, description and footer note. Mockup style switches between Project planner and Book catalogue. Edit rows for tasks and statuses or books, authors and loan notes, then choose Apply changes.",
+        "Pages supports adding and duplicating pages, page settings, choosing the home page, showing a page in the site menu, and changing menu order. A page referenced by another link, gallery work, record or the homepage cannot be removed until those references are changed.",
         "Design restyles the current site. Start a new site replaces the draft with a new template after confirmation; save or download the current draft first. This is not automatic content-preserving template conversion.",
-        "The Memes examples preserve card titles, artist credits, and source links. Static previews avoid autoplaying animated originals. Template use does not claim token ownership, authorship, or artist endorsement."
+        "Examples include generated original artwork and credited CC0 works from The Memes and Blitmap. Animated originals use still previews with original-media links. Sample people, organizations, records and edition offers are fictional; replace their claims and contact details before publishing. Template use does not claim NFT ownership, authorship or artist endorsement."
       ],
       "canonical_path": "/{user}/cms/builder",
       "related_paths": ["/{user}"],
       "tags": ["profiles", "cms", "templates"],
       "source_refs": [
         "lib/profile-cms/studio/templates.ts",
+        "lib/profile-cms/studio/templates-approved.ts",
+        "lib/profile-cms/studio/approved-assets.ts",
         "components/profile-cms-builder/studio/StudioTemplateLibrary.tsx",
+        "components/profile-cms-builder/studio/StudioCollectionFields.tsx",
+        "components/profile-cms-builder/studio/StudioBlockInspector.tsx",
+        "components/profile-cms/approved-renderer/ProjectMockup.tsx",
         "components/profile-cms-builder/studio/StudioPageActions.tsx",
         "ops/docs/profiles/feature-profile-cms-builder.md"
       ]

@@ -19,6 +19,8 @@ import { ORGANIZATION_TEMPLATES } from "./templates-organizations";
 import { CMS_STUDIO_MEME_TEMPLATES } from "./templates-memes";
 import type { CmsStudioTemplate } from "./template-types";
 import { getCmsStudioTemplateNavigationLabel } from "./template-navigation";
+import { CMS_APPROVED_TEMPLATES } from "./templates-approved";
+import { CMS_APPROVED_ART_ASSETS } from "./approved-assets";
 
 export const CMS_STUDIO_CORE_TEMPLATES: readonly CmsStudioTemplate[] = [
   ...PERSONAL_TEMPLATES,
@@ -28,10 +30,13 @@ export const CMS_STUDIO_CORE_TEMPLATES: readonly CmsStudioTemplate[] = [
 
 export { CMS_STUDIO_MEME_TEMPLATES } from "./templates-memes";
 
-export const CMS_STUDIO_TEMPLATES: readonly CmsStudioTemplate[] = [
+const LEGACY_STUDIO_TEMPLATES: readonly CmsStudioTemplate[] = [
   ...CMS_STUDIO_CORE_TEMPLATES,
   ...CMS_STUDIO_MEME_TEMPLATES,
 ];
+
+export const CMS_STUDIO_TEMPLATES: readonly CmsStudioTemplate[] =
+  CMS_APPROVED_TEMPLATES;
 
 export const CMS_STUDIO_DEMO_ASSET_BINDINGS = [
   { id: "demo-quiet-signal", name: "Quiet Signal" },
@@ -41,7 +46,7 @@ export const CMS_STUDIO_DEMO_ASSET_BINDINGS = [
 
 /** Sample content stays explicitly identified until reviewed and replaced. */
 export const CMS_STUDIO_SAMPLE_CONTENT_NOTE =
-  "This package contains fictional demonstration writing. Images are original example artwork or individually credited CC0 works from The Memes. The profile handle identifies the draft destination, not the subject, creator, or NFT owner of the sample content. Review and replace sample claims before publishing.";
+  "This package contains fictional demonstration writing, including sample biographies, programmes, collection records and edition offers. Images are original generated example artwork or individually credited CC0 works from The Memes and Blitmap. The profile handle identifies the draft destination, not the subject, creator, or NFT owner of the sample content. Review and replace sample claims before publishing.";
 
 /** A full V1 document, with no projection into the legacy single-page editor. */
 export function instantiateCmsStudioTemplate(
@@ -52,7 +57,9 @@ export function instantiateCmsStudioTemplate(
   if (!/^[A-Za-z0-9][A-Za-z0-9_-]{1,63}$/.test(handle)) {
     throw new Error("Invalid CMS profile handle");
   }
-  const template = CMS_STUDIO_TEMPLATES.find((item) => item.id === templateId);
+  const template = [...CMS_STUDIO_TEMPLATES, ...LEGACY_STUDIO_TEMPLATES].find(
+    (item) => item.id === templateId
+  );
   if (!template) throw new Error("Unknown CMS studio template");
   const createdAt = now.toISOString();
   const base = buildCmsPackageCandidate(
@@ -110,13 +117,34 @@ export function instantiateCmsStudioTemplate(
       navigation: [
         {
           id: "nav-main",
-          items: pages.map((item, index) => ({
-            page_id: item.id,
-            label:
-              index === 0
-                ? "Home"
-                : (item.metadata.navigation_label ?? item.metadata.title),
-          })),
+          items: template.navigation
+            ? template.navigation.map((item) => {
+                const target = pages.find(
+                  (page) => page.id === `page-${item.pageSlug}`
+                );
+                if (!target)
+                  throw new Error("Missing CMS template navigation page");
+                if (item.blockId) {
+                  if (!target.blocks.some((block) => block.id === item.blockId))
+                    throw new Error("Missing CMS template navigation section");
+                  return {
+                    label: item.label,
+                    url: `${target.path}#${item.blockId}`,
+                  };
+                }
+                return { label: item.label, page_id: target.id };
+              })
+            : pages
+                .filter(
+                  (_, index) => template.pages[index]?.navigation !== false
+                )
+                .map((item, index) => ({
+                  page_id: item.id,
+                  label:
+                    index === 0
+                      ? "Home"
+                      : (item.metadata.navigation_label ?? item.metadata.title),
+                })),
         },
       ],
       source_packets: [sourcePacket],
@@ -157,10 +185,12 @@ function instantiatePages(
         description: item.description,
         locale: "en",
         canonical_url: `https://6529.io/${handle}/${item.slug}`,
-        navigation_label: getCmsStudioTemplateNavigationLabel(
-          template.id,
-          item.slug
-        ),
+        navigation_label:
+          item.navigationLabel ??
+          template.navigation?.find(
+            (entry) => entry.pageSlug === item.slug && !entry.blockId
+          )?.label ??
+          getCmsStudioTemplateNavigationLabel(template.id, item.slug),
         search: "include",
         robots: "index",
         last_updated: createdAt,
@@ -187,9 +217,11 @@ function referencedTemplateAssets(pages: readonly CmsPageV1[]): CmsAssetV1[] {
     }
   }
   return [...assetIds].map((id) => {
-    const asset = [...DEMO_ART_ASSETS, ...MEME_ART_ASSETS].find(
-      (item) => item.id === id
-    );
+    const asset = [
+      ...DEMO_ART_ASSETS,
+      ...MEME_ART_ASSETS,
+      ...CMS_APPROVED_ART_ASSETS,
+    ].find((item) => item.id === id);
     if (!asset) throw new Error("Missing CMS template artwork binding");
     return assetSchema.parse(asset);
   });

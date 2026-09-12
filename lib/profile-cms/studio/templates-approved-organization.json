@@ -1,0 +1,599 @@
+{
+  "pages": [
+    {
+      "slug": "home",
+      "title": "Assembly House",
+      "description": "We’re a small, artist-run space in south London. Come for an exhibition, learn to make a print, or join us around the long table. You don’t need to be a member.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "organization-v2-home-001",
+          "block_type": "heading",
+          "text": "Assembly House",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "hero",
+            "group": "organization-v2-home-group-1"
+          }
+        },
+        {
+          "id": "organization-v2-home-002",
+          "block_type": "heading",
+          "text": "Exhibitions, workshops, and a place to meet.",
+          "level": 2,
+          "presentation": {
+            "span": "half",
+            "role": "body",
+            "variant": "intro",
+            "group": "organization-v2-home-description"
+          }
+        },
+        {
+          "id": "organization-v2-home-003",
+          "block_type": "rich_text",
+          "content": "We’re a small, artist-run space in south London. Come for an exhibition, learn to make a print, or join us around the long table. You don’t need to be a member.",
+          "presentation": {
+            "span": "half",
+            "role": "body",
+            "variant": "intro",
+            "group": "organization-v2-home-description"
+          }
+        },
+        {
+          "id": "organization-v2-home-004",
+          "block_type": "heading",
+          "text": "Programme",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-2"
+          }
+        },
+        {
+          "id": "organization-v2-home-005",
+          "block_type": "rich_text",
+          "content": "September — October 2026",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-2"
+          }
+        },
+        {
+          "id": "organization-v2-home-006",
+          "block_type": "rich_text",
+          "content": "Sat / Sep 19",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-3"
+          }
+        },
+        {
+          "id": "organization-v2-home-007",
+          "block_type": "rich_text",
+          "content": "Workshop · 11:00–14:00",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-3"
+          }
+        },
+        {
+          "id": "organization-v2-home-008",
+          "block_type": "heading",
+          "text": "Your first two-colour print",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-3"
+          }
+        },
+        {
+          "id": "organization-v2-home-009",
+          "block_type": "rich_text",
+          "content": "Print a two-colour edition with paper stencils. Suitable for beginners; all materials provided.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-3"
+          }
+        },
+        {
+          "id": "organization-v2-home-010",
+          "block_type": "button_link",
+          "label": "Book a place",
+          "page_id": "page-home",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-3"
+          },
+          "block_id": "organization-v2-home-045"
+        },
+        {
+          "id": "organization-v2-home-011",
+          "block_type": "rich_text",
+          "content": "£18 · 12 places",
+          "presentation": {
+            "span": "full",
+            "role": "card",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-3"
+          }
+        },
+        {
+          "id": "organization-v2-home-012",
+          "block_type": "callout",
+          "title": "Workshop details",
+          "content": "Led by Jo Mercer. Bring an image or a few shapes you’d like to work with; we’ll supply paper, ink, and aprons. Ages 16+. The studio has step-free access.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "organization-v2-home-group-3"
+          }
+        },
+        {
+          "id": "organization-v2-home-013",
+          "block_type": "rich_text",
+          "content": "Sat / Sep 26",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-4"
+          }
+        },
+        {
+          "id": "organization-v2-home-014",
+          "block_type": "rich_text",
+          "content": "Open table · 12:00–16:00",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-4"
+          }
+        },
+        {
+          "id": "organization-v2-home-015",
+          "block_type": "heading",
+          "text": "Bring something you’re making",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-4"
+          }
+        },
+        {
+          "id": "organization-v2-home-016",
+          "block_type": "rich_text",
+          "content": "A shared afternoon for unfinished projects. Bring a sketchbook, a laptop, some stitching, or just yourself.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-4"
+          }
+        },
+        {
+          "id": "organization-v2-home-017",
+          "block_type": "button_link",
+          "label": "Just drop in",
+          "page_id": "page-home",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-4"
+          },
+          "block_id": "organization-v2-home-040"
+        },
+        {
+          "id": "organization-v2-home-018",
+          "block_type": "rich_text",
+          "content": "Free · Everyone welcome",
+          "presentation": {
+            "span": "full",
+            "role": "card",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-4"
+          }
+        },
+        {
+          "id": "organization-v2-home-019",
+          "block_type": "callout",
+          "title": "What to expect",
+          "content": "We’ll put the kettle on and clear the long table. Stay for half an hour or all afternoon. There’s no presentation, and you don’t have to show your work.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "organization-v2-home-group-4"
+          }
+        },
+        {
+          "id": "organization-v2-home-020",
+          "block_type": "rich_text",
+          "content": "Sat / Oct 03",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-5"
+          }
+        },
+        {
+          "id": "organization-v2-home-021",
+          "block_type": "rich_text",
+          "content": "Exhibition opening · 18:00–21:00",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-5"
+          }
+        },
+        {
+          "id": "organization-v2-home-022",
+          "block_type": "heading",
+          "text": "In the neighbourhood",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-5"
+          }
+        },
+        {
+          "id": "organization-v2-home-023",
+          "block_type": "rich_text",
+          "content": "Photographs, drawings, and recorded conversations from our summer walking group. On view through 24 October.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-5"
+          }
+        },
+        {
+          "id": "organization-v2-home-024",
+          "block_type": "button_link",
+          "label": "Plan your visit",
+          "page_id": "page-home",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-5"
+          },
+          "block_id": "organization-v2-home-040"
+        },
+        {
+          "id": "organization-v2-home-025",
+          "block_type": "rich_text",
+          "content": "Free entry",
+          "presentation": {
+            "span": "full",
+            "role": "card",
+            "variant": "schedule",
+            "group": "organization-v2-home-group-5"
+          }
+        },
+        {
+          "id": "organization-v2-home-026",
+          "block_type": "callout",
+          "title": "Exhibition details",
+          "content": "Open Thursday–Saturday, 12:00–18:00. Printed transcripts accompany all recordings. A large-print exhibition guide is available at the front desk.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "organization-v2-home-group-5"
+          }
+        },
+        {
+          "id": "organization-v2-home-027",
+          "block_type": "heading",
+          "text": "Our projects",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "organization-v2-home-group-6"
+          }
+        },
+        {
+          "id": "organization-v2-home-028",
+          "block_type": "rich_text",
+          "content": "Two projects in progress",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "organization-v2-home-group-6"
+          }
+        },
+        {
+          "id": "organization-v2-home-029",
+          "block_type": "callout",
+          "title": "Open table. 12—4.",
+          "content": "Assembly House / Saturdays Open table. 12—4.",
+          "rows": [],
+          "presentation": {
+            "span": "full",
+            "role": "card",
+            "variant": "poster",
+            "group": "organization-v2-home-group-7"
+          },
+          "poster_style": "rings"
+        },
+        {
+          "id": "organization-v2-home-030",
+          "block_type": "heading",
+          "text": "Saturday afternoons at the long table",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "organization-v2-home-group-7"
+          }
+        },
+        {
+          "id": "organization-v2-home-031",
+          "block_type": "rich_text",
+          "content": "Our monthly open table gives people space to work alongside one another. A second session for parents and children is planned for the autumn.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "organization-v2-home-group-7"
+          }
+        },
+        {
+          "id": "organization-v2-home-032",
+          "block_type": "callout",
+          "title": "How to get involved",
+          "content": "The next open table is on 26 September. Drop in without booking. To help host a future session, email hello@assemblyhouse.example.org with the month you’re available.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "organization-v2-home-group-7"
+          }
+        },
+        {
+          "id": "organization-v2-home-033",
+          "block_type": "callout",
+          "title": "Neighbourhood Editions",
+          "content": "A community print project Neighbourhood Editions First edition / Autumn 2026",
+          "rows": [],
+          "presentation": {
+            "span": "full",
+            "role": "card",
+            "variant": "poster",
+            "group": "organization-v2-home-group-8"
+          },
+          "poster_style": "ellipses"
+        },
+        {
+          "id": "organization-v2-home-034",
+          "block_type": "heading",
+          "text": "The first twenty copies",
+          "level": 3,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "organization-v2-home-group-8"
+          }
+        },
+        {
+          "id": "organization-v2-home-035",
+          "block_type": "rich_text",
+          "content": "Six neighbours are making a print portfolio of places they use every day. The first set goes on display in our front window in October.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "organization-v2-home-group-8"
+          }
+        },
+        {
+          "id": "organization-v2-home-036",
+          "block_type": "callout",
+          "title": "Inside the project",
+          "content": "Each participant is drawing one place: the launderette, a bus stop, the library, a café, a park bench, and the corner shop. We’ll print all six designs together over two weekends.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "organization-v2-home-group-8"
+          }
+        },
+        {
+          "id": "organization-v2-home-037",
+          "block_type": "rich_text",
+          "content": "People",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "intro",
+            "group": "organization-v2-home-group-10"
+          }
+        },
+        {
+          "id": "organization-v2-home-038",
+          "block_type": "heading",
+          "text": "The team",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "organization-v2-home-group-10"
+          }
+        },
+        {
+          "id": "organization-v2-home-039",
+          "block_type": "callout",
+          "title": "",
+          "content": "Ali Turner: Ali Turner Programme & partnerships\nJo Mercer: Jo Mercer Print studio & workshops\nNia Ellis: Nia Ellis Visitors & volunteers",
+          "rows": [
+            {
+              "label": "Ali Turner",
+              "value": "Ali Turner Programme & partnerships"
+            },
+            {
+              "label": "Jo Mercer",
+              "value": "Jo Mercer Print studio & workshops"
+            },
+            {
+              "label": "Nia Ellis",
+              "value": "Nia Ellis Visitors & volunteers"
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "list",
+            "group": "organization-v2-home-group-10"
+          }
+        },
+        {
+          "id": "organization-v2-home-040",
+          "block_type": "rich_text",
+          "content": "Find us",
+          "presentation": {
+            "span": "full",
+            "role": "kicker",
+            "variant": "contact",
+            "group": "organization-v2-home-group-11"
+          }
+        },
+        {
+          "id": "organization-v2-home-041",
+          "block_type": "heading",
+          "text": "Visit",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "organization-v2-home-group-11"
+          }
+        },
+        {
+          "id": "organization-v2-home-042",
+          "block_type": "rich_text",
+          "content": "Assembly House 14 Foundry Lane, London",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "organization-v2-home-group-11"
+          }
+        },
+        {
+          "id": "organization-v2-home-043",
+          "block_type": "rich_text",
+          "content": "Thursday–Saturday · 12:00–18:00 Free exhibition entry. Step-free entrance on Foundry Lane.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "organization-v2-home-group-11"
+          }
+        },
+        {
+          "id": "organization-v2-home-044",
+          "block_type": "callout",
+          "title": "Access information",
+          "content": "The gallery, studio, and accessible toilet are on the ground floor. Assistance dogs are welcome. Email before your visit if there’s anything we can arrange.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "organization-v2-home-group-11"
+          }
+        },
+        {
+          "id": "organization-v2-home-045",
+          "block_type": "rich_text",
+          "content": "Workshop bookings & questions hello@assemblyhouse.example.org ↗",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "organization-v2-home-group-11"
+          }
+        },
+        {
+          "id": "organization-v2-home-046",
+          "block_type": "callout",
+          "title": "hello@assemblyhouse.example.org ↗",
+          "email": "hello@assemblyhouse.example.org",
+          "content": "",
+          "subject": "Enquiry",
+          "form": false,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "organization-v2-home-group-11"
+          }
+        },
+        {
+          "id": "organization-v2-home-047",
+          "block_type": "rich_text",
+          "content": "Assembly House is a fictional organization. Programme and address are for demonstration.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        }
+      ],
+      "navigationLabel": "Assembly House"
+    }
+  ],
+  "navigation": [
+    {
+      "label": "What’s on",
+      "pageSlug": "home",
+      "blockId": "organization-v2-home-004"
+    },
+    {
+      "label": "Projects",
+      "pageSlug": "home",
+      "blockId": "organization-v2-home-027"
+    },
+    {
+      "label": "People",
+      "pageSlug": "home",
+      "blockId": "organization-v2-home-037"
+    },
+    {
+      "label": "Visit ↗",
+      "pageSlug": "home",
+      "blockId": "organization-v2-home-040"
+    }
+  ]
+}

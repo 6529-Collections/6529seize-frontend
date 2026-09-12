@@ -13,6 +13,8 @@ export interface CmsStudioTemplatePage {
   readonly title: string;
   readonly description: string;
   readonly blocks: CmsBlockV1[];
+  readonly navigation?: boolean;
+  readonly navigationLabel?: string;
 }
 
 export interface CmsStudioTemplate {
@@ -31,4 +33,9 @@ export interface CmsStudioTemplate {
     readonly url: string;
   };
   readonly pages: readonly CmsStudioTemplatePage[];
+  readonly navigation?: readonly {
+    readonly label: string;
+    readonly pageSlug: string;
+    readonly blockId?: string;
+  }[];
 }
