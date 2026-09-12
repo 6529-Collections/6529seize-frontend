@@ -32,7 +32,7 @@ export class ApiArtworkDocumentationAsset {
     'failure_code'?: string | null;
     'access_class'?: ApiArtworkDocumentationAssetAccessClassEnum;
     'has_preview'?: boolean;
-    'technical_metadata'?: ApiArtworkAssetTechnicalMetadata;
+    'technical_metadata'?: ApiArtworkAssetTechnicalMetadata | null;
     'has_validation_report'?: boolean;
     'has_media_preview'?: boolean;
 

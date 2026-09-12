@@ -233,6 +233,7 @@ paths:
           required: true
           schema:
             type: string
+            pattern: ^"draft-[1-9][0-9]*"$
       requestBody:
         required: true
         content:
@@ -332,6 +333,7 @@ paths:
           required: true
           schema:
             type: string
+            pattern: ^"draft-[1-9][0-9]*"$
       requestBody:
         required: true
         content:
@@ -18550,6 +18552,7 @@ components:
         - identifier
     ApiArtworkAssetTechnicalMetadata:
       type: object
+      nullable: true
       additionalProperties: false
       properties:
         version:
@@ -18702,7 +18705,6 @@ components:
           type: boolean
         technical_metadata:
           $ref: "#/components/schemas/ApiArtworkAssetTechnicalMetadata"
-          nullable: true
         has_validation_report:
           type: boolean
         has_media_preview:
