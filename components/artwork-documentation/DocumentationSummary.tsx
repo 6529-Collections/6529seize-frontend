@@ -13,12 +13,18 @@ import {
 } from "@/i18n/messages/artwork-documentation-fields";
 import { isRedacted } from "@/lib/artwork-documentation/answers";
 import {
-  MODULE_FIELDS,
-  fieldSection,
-  type ModuleId,
-  type DocumentationSection,
+  documentationFields,
+  documentationFieldSection,
+  isMuseumRecord,
+} from "@/lib/artwork-documentation/catalogue";
+import type {
+  ModuleId,
+  DocumentationSection,
 } from "@/lib/artwork-documentation/registry";
 import { useDocumentationMessages } from "./DocumentationControls";
+import DocumentationCatalogueValue, {
+  documentationVisibleLabels,
+} from "./DocumentationCatalogueValue";
 import DocumentationRecordValue, {
   documentationLanguageName,
 } from "./DocumentationRecordValue";
@@ -26,6 +32,7 @@ import DocumentationRecordValue, {
 export { default as DocumentationValueSummary } from "./DocumentationRecordValue";
 
 interface RecordContext {
+  readonly work_id?: string | undefined;
   readonly profile?: ApiArtworkDocumentationProfile | undefined;
   readonly assets?:
     | readonly { readonly id: string; readonly filename: string }[]
@@ -97,11 +104,12 @@ export function DocumentationRecordedAnswer({
   const { msg, locale } = useDocumentationMessages();
   if (isRedacted(answer))
     return <span className="tw-text-iron-400">{msg("redacted")}</span>;
-  const editor = MODULE_FIELDS[moduleId].find(
+  const editor = documentationFields(context.profile, moduleId).find(
     (item) => item.id === field
   )?.editor;
   const translateEnum =
     editor?.kind === "choice" ||
+    editor?.kind === "multi_choice" ||
     (editor?.kind === "list" && editor.item.kind === "choice");
   const provided =
     answer.status === ApiArtworkDocumentationAnswerStatusEnum.Provided;
@@ -115,16 +123,29 @@ export function DocumentationRecordedAnswer({
     readableValue = value.map((language: unknown) =>
       documentationLanguageName(language, locale)
     );
+  let content = (
+    <DocumentationRecordValue
+      translateEnum={provided && translateEnum}
+      value={readableValue}
+    />
+  );
+  if (provided && editor?.kind === "asset")
+    content = <RecordFiles value={value} assets={context.assets} />;
+  if (provided && editor && context.profile && isMuseumRecord(context.profile))
+    content = (
+      <DocumentationCatalogueValue
+        value={value}
+        editor={editor}
+        labels={documentationVisibleLabels(
+          context.modules,
+          context.assets,
+          context.work_id
+        )}
+      />
+    );
   return (
     <>
-      {provided && editor?.kind === "asset" ? (
-        <RecordFiles value={value} assets={context.assets} />
-      ) : (
-        <DocumentationRecordValue
-          translateEnum={provided && translateEnum}
-          value={readableValue}
-        />
-      )}
+      {content}
       {answer.explanation && (
         <p className="tw-mb-0 tw-mt-3 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-7 tw-text-iron-300">
           {answer.explanation}
@@ -187,12 +208,15 @@ function RecordSection({
   readonly section?: DocumentationSection | undefined;
 }) {
   const { msg } = useDocumentationMessages();
-  const order = MODULE_FIELDS[id].map((field) => field.id);
+  const fields = documentationFields(profile ?? context.profile, id);
+  const order = fields.map((field) => field.id);
   const entries = Object.entries(context.modules[id]?.answers ?? {})
     .filter(
       ([field]) =>
         !consumed.has(id + "." + field) &&
-        (!section || fieldSection(id, field) === section)
+        (!section ||
+          documentationFieldSection(profile ?? context.profile, id, field) ===
+            section)
     )
     .sort(([first], [second]) => {
       const a = order.indexOf(first);
@@ -211,7 +235,12 @@ function RecordSection({
           {entries
             .filter(([field]) => order.includes(field))
             .map(([field, answer]) => {
-              const narrative = narrativeFields.has(field);
+              const definition = fields.find((entry) => entry.id === field);
+              const narrative =
+                narrativeFields.has(field) ||
+                ["object", "list", "localized"].includes(
+                  definition?.editor.kind ?? ""
+                );
               const label =
                 (id === "interview"
                   ? (
@@ -219,7 +248,9 @@ function RecordSection({
                     )?.interview_instrument.prompts.find(
                       (prompt) => prompt.id === field
                     )?.text
-                  : undefined) ?? documentationFieldLabel(field);
+                  : undefined) ??
+                definition?.label ??
+                documentationFieldLabel(field);
               return (
                 <div
                   key={field}
@@ -322,7 +353,10 @@ export default function DocumentationSummary({
   }
   const hasAnswers = modules.some((id) =>
     Object.keys(context.modules[id]?.answers ?? {}).some(
-      (field) => !section || fieldSection(id, field) === section
+      (field) =>
+        !section ||
+        documentationFieldSection(profile ?? context.profile, id, field) ===
+          section
     )
   );
   return (

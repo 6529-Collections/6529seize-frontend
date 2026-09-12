@@ -153,6 +153,259 @@ paths:
                   $ref: "#/components/schemas/ApiAggregatedActivityMemes"
         "404":
           description: Memes Aggregated Activity for consolidation key not found
+  /artwork-documentation/contexts/{id}/museum-records:
+    get:
+      tags:
+        - ArtworkDocumentation
+      summary: Read attributed museum records
+      description: >-
+        Returns up to ten entries; pass next_cursor as before to read the next
+        page.
+      operationId: artworkDocumentationListMuseumRecords
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: artwork-documentation
+        handler:
+          import: "@/api/artwork-documentation/artwork-documentation-museum.handlers"
+          name: handleListMuseumRecords
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Authorized artwork record response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiArtworkMuseumRecords"
+        "401":
+          description: Authentication required
+        "403":
+          description: Operation unavailable for this role
+        "404":
+          description: Record unavailable
+        "409":
+          description: Record changed; reload before retry
+        "422":
+          description: Invalid record or evidence
+    post:
+      tags:
+        - ArtworkDocumentation
+      summary: Append an attributed museum record without changing artist confirmation
+      operationId: artworkDocumentationAppendMuseumRecord
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: artwork-documentation
+        handler:
+          import: "@/api/artwork-documentation/artwork-documentation-museum.handlers"
+          name: handleAppendMuseumRecord
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: If-Match
+          in: header
+          required: true
+          schema:
+            type: string
+            pattern: ^"draft-[1-9][0-9]*"$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiArtworkMuseumRecordInput"
+      responses:
+        "200":
+          description: Authorized artwork record response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiArtworkMuseumRecord"
+        "401":
+          description: Authentication required
+        "403":
+          description: Operation unavailable for this role
+        "404":
+          description: Record unavailable
+        "409":
+          description: Record changed; reload before retry
+        "422":
+          description: Invalid record or evidence
+        "428":
+          description: Idempotency key and draft version required
+  /artwork-documentation/contexts/{id}/dossier:
+    get:
+      tags:
+        - ArtworkDocumentation
+      summary: Inspect the portable artwork dossier and mapping report
+      operationId: artworkDocumentationGetArtworkDossier
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: artwork-documentation
+        handler:
+          import: "@/api/artwork-documentation/artwork-documentation-museum.handlers"
+          name: handleGetArtworkDossier
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Authorized artwork record response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiArtworkDossier"
+        "401":
+          description: Authentication required
+        "403":
+          description: Operation unavailable for this role
+        "404":
+          description: Record unavailable
+        "409":
+          description: Record changed; reload before retry
+        "413":
+          description: Dossier record, asset or byte limit exceeded (DOSSIER_RECORD_LIMIT)
+        "422":
+          description: Invalid record or evidence
+  /artwork-documentation/contexts/{id}/dossier/exports:
+    post:
+      tags:
+        - ArtworkDocumentation
+      summary: Prepare a portable dossier with verified original files
+      operationId: artworkDocumentationCreateArtworkDossierExport
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: artwork-documentation
+        handler:
+          import: "@/api/artwork-documentation/artwork-documentation-museum.handlers"
+          name: handleCreateArtworkDossierExport
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: If-Match
+          in: header
+          required: true
+          schema:
+            type: string
+            pattern: ^"draft-[1-9][0-9]*"$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiArtworkDossierExportRequest"
+      responses:
+        "200":
+          description: Authorized artwork record response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiArtworkDossierExport"
+        "401":
+          description: Authentication required
+        "403":
+          description: Operation unavailable for this role
+        "404":
+          description: Record unavailable
+        "409":
+          description: Record changed; reload before retry
+        "413":
+          description: Dossier record, asset or byte limit exceeded (DOSSIER_RECORD_LIMIT)
+        "422":
+          description: Invalid record or evidence
+        "428":
+          description: Idempotency key and draft version required
+  /artwork-documentation/contexts/{id}/dossier/exports/{exportId}:
+    get:
+      tags:
+        - ArtworkDocumentation
+      summary: Read export progress and obtain an authorized download
+      operationId: artworkDocumentationGetArtworkDossierExport
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: artwork-documentation
+        handler:
+          import: "@/api/artwork-documentation/artwork-documentation-museum.handlers"
+          name: handleGetArtworkDossierExport
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: exportId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Authorized artwork record response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiArtworkDossierExport"
+        "401":
+          description: Authentication required
+        "403":
+          description: Operation unavailable for this role
+        "404":
+          description: Record unavailable
+        "409":
+          description: Record changed; reload before retry
+        "422":
+          description: Invalid record or evidence
   /artwork-documentation/profiles:
     get:
       tags:
@@ -1835,6 +2088,9 @@ paths:
       tags:
         - ArtworkDocumentation
       summary: PreviewDocumentationUpgrade
+      description: >-
+        Read-only compatibility preview; no Idempotency-Key or If-Match is
+        required.
       operationId: artworkDocumentationPreviewDocumentationUpgrade
       security:
         - bearerAuth: []
@@ -1852,12 +2108,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: Idempotency-Key
-          in: header
-          required: true
-          schema:
-            type: string
-            format: uuid
       responses:
         "200":
           description: Authorized private response
@@ -1886,10 +2136,6 @@ paths:
             Private documentation domain error; stable code, safe message and
             request ID. Missing and unauthorized records are indistinguishable.
         "422":
-          description: >-
-            Private documentation domain error; stable code, safe message and
-            request ID. Missing and unauthorized records are indistinguishable.
-        "428":
           description: >-
             Private documentation domain error; stable code, safe message and
             request ID. Missing and unauthorized records are indistinguishable.
@@ -2803,6 +3049,48 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/ApiArtworkDocumentationCreateContext"
+  /artwork-documentation/contexts/{id}/artist-records/{revisionId}:
+    get:
+      tags:
+        - ArtworkDocumentation
+      summary: Read the artist identity revision for comparison
+      operationId: artworkDocumentationGetArtworkArtistRecord
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: artwork-documentation
+        handler:
+          import: "@/api/artwork-documentation/artwork-documentation-museum.handlers"
+          name: handleGetArtworkArtistRecord
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: revisionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Complete identity revision, visible only to its artist.
+          content:
+            application/json:
+              schema:
+                $ref: >-
+                  #/components/schemas/ApiArtworkDocumentationAvailableArtistRecord
+        "401":
+          description: Authentication required
+        "404":
+          description: >-
+            Missing records and authenticated readers other than the artist both
+            return 404.
   /auth/nonce:
     get:
       tags:
@@ -18227,6 +18515,157 @@ components:
           items:
             type: integer
             format: int64
+    ApiArtworkAssetC2paResult:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - not_validated
+            - no_manifest
+            - report_available
+            - failed
+            - unsupported
+        original_bytes_preserved:
+          type: boolean
+        validator:
+          type: string
+        validator_version:
+          type: string
+        media_sha256:
+          type: string
+        report_sha256:
+          type: string
+        report:
+          type: object
+          additionalProperties: true
+        trust:
+          type: string
+          enum:
+            - not_assessed
+        remote_fetch:
+          type: boolean
+        error_code:
+          type: string
+        settings_sha256:
+          type: string
+        report_size_bytes:
+          type: number
+        integrity:
+          type: string
+          enum:
+            - valid
+            - invalid
+            - not_determined
+      required:
+        - status
+        - original_bytes_preserved
+    ApiArtworkAssetFormatIdentification:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - unidentified
+            - signature_match
+        authority:
+          type: string
+          nullable: true
+        identifier:
+          type: string
+          nullable: true
+        source_commit:
+          type: string
+        source_sha256:
+          type: string
+        signature_id:
+          type: number
+        identification_scope:
+          type: string
+          enum:
+            - selected_pronom_signatures
+      required:
+        - status
+        - authority
+        - identifier
+    ApiArtworkAssetTechnicalMetadata:
+      type: object
+      nullable: true
+      additionalProperties: false
+      properties:
+        version:
+          type: integer
+        characterization:
+          type: string
+          enum:
+            - partial
+            - complete
+            - unsupported
+        method:
+          type: string
+        detected_format:
+          type: string
+        format_registry:
+          $ref: "#/components/schemas/ApiArtworkAssetFormatIdentification"
+        original_sha256:
+          type: string
+        measured_at:
+          type: string
+        properties:
+          type: object
+          additionalProperties:
+            oneOf:
+              - type: string
+                nullable: true
+              - type: number
+              - type: boolean
+        warnings:
+          type: array
+          items:
+            type: string
+        c2pa:
+          $ref: "#/components/schemas/ApiArtworkAssetC2paResult"
+        archive:
+          type: object
+          additionalProperties: false
+          properties:
+            entries:
+              type: number
+            expanded_bytes:
+              type: number
+            inventory:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  path:
+                    type: string
+                  size_bytes:
+                    type: number
+                  sha256:
+                    type: string
+                required:
+                  - path
+                  - size_bytes
+                  - sha256
+          required:
+            - entries
+            - expanded_bytes
+            - inventory
+      required:
+        - version
+        - characterization
+        - method
+        - detected_format
+        - format_registry
+        - original_sha256
+        - measured_at
+        - properties
+        - warnings
+        - c2pa
     ApiArtworkDocumentationAnswer:
       type: object
       properties:
@@ -18303,6 +18742,12 @@ components:
             - artwork
             - rights_evidence
         has_preview:
+          type: boolean
+        technical_metadata:
+          $ref: "#/components/schemas/ApiArtworkAssetTechnicalMetadata"
+        has_validation_report:
+          type: boolean
+        has_media_preview:
           type: boolean
       required:
         - id
@@ -18415,6 +18860,11 @@ components:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/ApiArtworkDocumentationAnswer"
+        deferred:
+          type: boolean
+          description: >-
+            When true, fetch this artist record by its revision ID before
+            presenting or applying it.
     ApiArtworkDocumentationCapabilities:
       type: object
       properties:
@@ -18535,6 +18985,8 @@ components:
         part_number:
           type: integer
           format: int64
+          minimum: 1
+          maximum: 512
         etag:
           type: string
         checksum_sha256:
@@ -18549,6 +19001,8 @@ components:
       properties:
         parts:
           type: array
+          minItems: 1
+          maxItems: 512
           items:
             $ref: "#/components/schemas/ApiArtworkDocumentationCompletePart"
       required:
@@ -18858,6 +19312,8 @@ components:
           enum:
             - original
             - preview
+            - media
+            - c2pa_report
       required:
         - variant
       additionalProperties: false
@@ -18886,6 +19342,28 @@ components:
       properties:
         id:
           type: string
+        label:
+          type: string
+        guidance:
+          type: string
+        chapter:
+          type: string
+        editor:
+          type: string
+          enum:
+            - text
+            - long_text
+            - structured
+            - choice
+            - media_profiles
+        media_profiles:
+          type: array
+          items:
+            type: string
+        required_for_media:
+          type: boolean
+        read_only:
+          type: boolean
         value_schema:
           $ref: "#/components/schemas/ApiArtworkDocumentationValueSchema"
         allowed_statuses:
@@ -18995,6 +19473,25 @@ components:
       required:
         - lifecycle
       additionalProperties: false
+    ApiArtworkDocumentationMediaProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+        required_fields:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - label
+        - description
+        - required_fields
+      additionalProperties: false
     ApiArtworkDocumentationModule:
       type: object
       properties:
@@ -19075,6 +19572,12 @@ components:
     ApiArtworkDocumentationProfile:
       type: object
       properties:
+        media_profiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiArtworkDocumentationMediaProfile"
+        program_rules:
+          $ref: "#/components/schemas/ApiArtworkDocumentationProgramRules"
         intake_mode:
           type: string
           enum:
@@ -19179,6 +19682,32 @@ components:
         - enabled
         - self_service_enabled
         - profiles
+      additionalProperties: false
+    ApiArtworkDocumentationProgramRules:
+      type: object
+      properties:
+        default_media_profiles:
+          type: array
+          items:
+            type: string
+        allowed_media_profiles:
+          type: array
+          items:
+            type: string
+        fixed_artwork_license:
+          type: object
+          properties:
+            uri:
+              type: string
+            label:
+              type: string
+          required:
+            - uri
+            - label
+          additionalProperties: false
+      required:
+        - default_media_profiles
+        - allowed_media_profiles
       additionalProperties: false
     ApiArtworkDocumentationPublicPreview:
       type: object
@@ -19553,6 +20082,8 @@ components:
         size_bytes:
           type: integer
           format: int64
+          minimum: 1
+          maximum: 8589934592
         declared_mime:
           type: string
         role:
@@ -19628,6 +20159,18 @@ components:
     ApiArtworkDocumentationUpgradePreview:
       type: object
       properties:
+        retained_fields:
+          type: array
+          items:
+            type: string
+        blocking_fields:
+          type: array
+          items:
+            type: string
+        notices:
+          type: array
+          items:
+            type: string
         current_profile:
           $ref: "#/components/schemas/ApiArtworkDocumentationProfile"
         proposed_profile:
@@ -19664,6 +20207,8 @@ components:
         part_number:
           type: integer
           format: int64
+          minimum: 1
+          maximum: 512
         checksum_sha256:
           type: string
       required:
@@ -19704,6 +20249,10 @@ components:
     ApiArtworkDocumentationValueSchema:
       type: object
       properties:
+        title:
+          type: string
+        uniqueItems:
+          type: boolean
         type:
           type: string
         enum:
@@ -19734,11 +20283,9 @@ components:
           type: integer
           format: int64
         minimum:
-          type: integer
-          format: int64
+          type: number
         maximum:
-          type: integer
-          format: int64
+          type: number
         format:
           type: string
         oneOf:
@@ -19762,6 +20309,357 @@ components:
         - id
         - contexts
       additionalProperties: false
+    ApiArtworkDossier:
+      type: object
+      additionalProperties: false
+      properties:
+        context_id:
+          type: string
+          format: uuid
+        draft_version:
+          type: integer
+        source_sha256:
+          type: string
+        confirmation:
+          type: string
+          enum:
+            - unconfirmed
+            - current
+            - newer_draft
+        files:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiArtworkDossierFile"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiArtworkDossierIssue"
+        can_export:
+          type: boolean
+        publication_state:
+          type: string
+          enum:
+            - database_draft
+      required:
+        - context_id
+        - draft_version
+        - source_sha256
+        - confirmation
+        - files
+        - issues
+        - can_export
+        - publication_state
+    ApiArtworkDossierExport:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        context_id:
+          type: string
+          format: uuid
+        source_sha256:
+          type: string
+        state:
+          type: string
+          enum:
+            - queued
+            - processing
+            - ready
+            - failed
+            - expired
+        created_at:
+          type: integer
+        expires_at:
+          type: integer
+          nullable: true
+        download_url:
+          type: string
+          nullable: true
+        sha256:
+          type: string
+          nullable: true
+        size_bytes:
+          type: integer
+          nullable: true
+        failure_code:
+          type: string
+          nullable: true
+      required:
+        - id
+        - context_id
+        - source_sha256
+        - state
+        - created_at
+        - expires_at
+        - download_url
+        - sha256
+        - size_bytes
+        - failure_code
+    ApiArtworkDossierExportRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        source_sha256:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+      required:
+        - source_sha256
+    ApiArtworkDossierFile:
+      type: object
+      additionalProperties: false
+      properties:
+        path:
+          type: string
+        media_type:
+          type: string
+        size_bytes:
+          type: integer
+        sha256:
+          type: string
+        asset_id:
+          type: string
+          format: uuid
+      required:
+        - path
+        - media_type
+        - size_bytes
+        - sha256
+    ApiArtworkDossierIssue:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+        path:
+          type: string
+        severity:
+          type: string
+          enum:
+            - error
+            - warning
+            - information
+        message:
+          type: string
+      required:
+        - code
+        - path
+        - severity
+        - message
+    ApiArtworkMuseumRecord:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        context_id:
+          type: string
+          format: uuid
+        actor_profile_id:
+          type: string
+        source_revision_id:
+          type: string
+          format: uuid
+          nullable: true
+        source_draft_version:
+          type: integer
+        created_at:
+          type: integer
+        sha256:
+          type: string
+        payload:
+          type: object
+          additionalProperties: false
+          properties:
+            kind:
+              type: string
+            title:
+              type: string
+              maxLength: 300
+            effective_date:
+              type: string
+            event_status:
+              type: string
+              enum:
+                - planned
+                - completed
+                - cancelled
+                - unknown
+            statement:
+              type: string
+              maxLength: 50000
+            subject_ids:
+              type: array
+              items:
+                type: string
+                format: uuid
+            evidence_asset_ids:
+              type: array
+              items:
+                type: string
+                format: uuid
+            details:
+              type: object
+              additionalProperties: true
+              description: >-
+                Strictly validated against the selected museum record definition
+                value_schema.
+            supersedes_id:
+              type: string
+              format: uuid
+            evidence:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  asset_id:
+                    type: string
+                    format: uuid
+                  sha256:
+                    type: string
+                  size_bytes:
+                    type: integer
+                required:
+                  - asset_id
+                  - sha256
+                  - size_bytes
+            stream_schema:
+              type: string
+            recording_basis:
+              type: string
+              enum:
+                - database_account_authentication
+          required:
+            - kind
+            - title
+            - event_status
+            - subject_ids
+            - evidence_asset_ids
+            - details
+            - evidence
+            - stream_schema
+            - recording_basis
+      required:
+        - id
+        - context_id
+        - actor_profile_id
+        - source_revision_id
+        - source_draft_version
+        - created_at
+        - sha256
+        - payload
+    ApiArtworkMuseumRecordDefinition:
+      type: object
+      additionalProperties: false
+      properties:
+        kind:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+        lane:
+          type: string
+          enum:
+            - curatorial
+            - technical
+            - rights
+        stream_schema:
+          type: string
+        value_schema:
+          $ref: "#/components/schemas/ApiArtworkDocumentationValueSchema"
+      required:
+        - kind
+        - label
+        - description
+        - lane
+        - stream_schema
+        - value_schema
+    ApiArtworkMuseumRecordInput:
+      type: object
+      additionalProperties: false
+      properties:
+        kind:
+          type: string
+        title:
+          type: string
+          maxLength: 300
+        effective_date:
+          type: string
+        event_status:
+          type: string
+          enum:
+            - planned
+            - completed
+            - cancelled
+            - unknown
+        statement:
+          type: string
+          maxLength: 50000
+        subject_ids:
+          type: array
+          maxItems: 100
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+        evidence_asset_ids:
+          type: array
+          maxItems: 100
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+        details:
+          type: object
+          additionalProperties: true
+          description: >-
+            Strictly validated against the selected museum record definition
+            value_schema.
+        supersedes_id:
+          type: string
+          format: uuid
+      required:
+        - kind
+        - title
+        - event_status
+        - subject_ids
+        - evidence_asset_ids
+        - details
+    ApiArtworkMuseumRecords:
+      type: object
+      additionalProperties: false
+      properties:
+        context_id:
+          type: string
+          format: uuid
+        draft_version:
+          type: integer
+        definitions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiArtworkMuseumRecordDefinition"
+        allowed_kinds:
+          type: array
+          items:
+            type: string
+        records:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiArtworkMuseumRecord"
+        next_cursor:
+          type: string
+          nullable: true
+      required:
+        - context_id
+        - draft_version
+        - definitions
+        - allowed_kinds
+        - records
+        - next_cursor
     ApiAttachment:
       type: object
       required:

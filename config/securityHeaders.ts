@@ -131,6 +131,9 @@ export function createSecurityHeaders(
   const mediaSrc = [
     "'self'",
     "blob:",
+    // Authorized passive artwork previews use the two private archive buckets.
+    "https://6529-artwork-documentation-987989283142-eu-west-1.s3.eu-west-1.amazonaws.com",
+    "https://6529-artwork-documentation-987989283142-us-east-1.s3.us-east-1.amazonaws.com",
     "https://*.cloudfront.net",
     "https://videos.files.wordpress.com",
     mediaResolverSource,
