@@ -5,9 +5,16 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
 import { commonApiFetch } from "@/services/api/common-api";
+import { revealMarketDepth } from "@/components/nft-market-depth/market-depth-disclosure";
+
+function renderOpenDepth(ui: ReactElement) {
+  const result = render(ui);
+  fireEvent.click(screen.getByRole("button", { name: "Listings & offers" }));
+  return result;
+}
 
 jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
   useNftPurchasingVisibility: () => ({ hideNftPurchasing: false }),
@@ -161,9 +168,60 @@ describe("MarketDepthPanel", () => {
     jest.useRealTimers();
   });
 
+  it("keeps the price summary visible and tables closed until requested, preserving expanded rows on collapse", async () => {
+    fetchMock.mockResolvedValue(depth());
+    render(<MarketDepthPanel contract="0x1" tokenId="7" />);
+    expect(await screen.findByText("Lowest listing · ETH")).toBeVisible();
+    const heading = screen.getByRole("button", { name: "Listings & offers" });
+    expect(heading).toHaveAttribute("aria-expanded", "false");
+    expect(
+      screen.queryByRole("button", { name: "Listings at 1.25 ETH" })
+    ).not.toBeInTheDocument();
+    fireEvent.click(heading);
+    const level = screen.getByRole("button", { name: "Listings at 1.25 ETH" });
+    fireEvent.click(level);
+    expect(level).toHaveAttribute("aria-expanded", "true");
+    fireEvent.click(heading);
+    expect(heading).toHaveFocus();
+    expect(level).not.toBeVisible();
+    fireEvent.click(heading);
+    expect(screen.getByRole("button", { name: "Listings at 1.25 ETH" })).toBe(
+      level
+    );
+    expect(level).toHaveAttribute("aria-expanded", "true");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("opens only the matching NFT and focuses its heading with reduced-motion-aware scrolling", async () => {
+    fetchMock.mockResolvedValue(depth());
+    const scroll = jest.fn();
+    const { rerender, unmount } = render(
+      <MarketDepthPanel contract="0xAbC" tokenId="7" />
+    );
+    const heading = screen.getByRole("button", { name: "Listings & offers" });
+    heading.scrollIntoView = scroll;
+    await screen.findByText("Lowest listing · ETH");
+    act(() => revealMarketDepth("0xabc", "8"));
+    expect(heading).toHaveAttribute("aria-expanded", "false");
+    act(() => revealMarketDepth("0xabc", "7"));
+    expect(heading).toHaveAttribute("aria-expanded", "true");
+    expect(heading).toHaveFocus();
+    expect(scroll).toHaveBeenCalledWith({
+      block: "start",
+      behavior: expect.stringMatching(/smooth|instant/),
+    });
+    rerender(<MarketDepthPanel contract="0xAbC" tokenId="8" />);
+    expect(heading).toHaveAttribute("aria-expanded", "false");
+    act(() => revealMarketDepth("0xabc", "7"));
+    expect(heading).toHaveAttribute("aria-expanded", "false");
+    unmount();
+    act(() => revealMarketDepth("0xabc", "8"));
+    expect(scroll).toHaveBeenCalledTimes(1);
+  });
+
   it("shows a safe error and does not refetch when only the locale changes", async () => {
     fetchMock.mockRejectedValue(new Error("private provider diagnostic"));
-    const { rerender } = render(
+    const { rerender } = renderOpenDepth(
       <MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />
     );
     expect(
@@ -179,7 +237,7 @@ describe("MarketDepthPanel", () => {
   it("keeps currencies separate and labels criteria applicability", async () => {
     fetchMock.mockResolvedValue(depth());
 
-    render(
+    renderOpenDepth(
       <MarketDepthPanel
         contract="0x0000000000000000000000000000000000000001"
         tokenId="7"
@@ -246,7 +304,9 @@ describe("MarketDepthPanel", () => {
       })
     );
 
-    render(<MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />);
+    renderOpenDepth(
+      <MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />
+    );
 
     expect(
       await screen.findByText("Updated 5 minutes ago")
@@ -269,7 +329,9 @@ describe("MarketDepthPanel", () => {
       jest.setSystemTime(new Date("2026-09-10T12:00:00.000Z"));
       fetchMock.mockResolvedValue(depth({ as_of: asOf }));
 
-      render(<MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />);
+      renderOpenDepth(
+        <MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />
+      );
 
       await screen.findByText("Lowest listing · ETH");
       expect(screen.queryByText(/Updated in /)).not.toBeInTheDocument();
@@ -301,7 +363,7 @@ describe("MarketDepthPanel", () => {
       })
     );
 
-    const { container } = render(
+    const { container } = renderOpenDepth(
       <MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />
     );
 
@@ -319,7 +381,7 @@ describe("MarketDepthPanel", () => {
   it("renders the optional action slot once between the summary and prices", async () => {
     fetchMock.mockResolvedValue(depth());
 
-    render(
+    renderOpenDepth(
       <MarketDepthPanel
         contract="0x0000000000000000000000000000000000000001"
         tokenId="7"
@@ -328,7 +390,7 @@ describe("MarketDepthPanel", () => {
     );
 
     const title = screen.getByRole("heading", {
-      name: "Listings and Offers",
+      name: "Listings & offers",
     });
     const action = screen.getByRole("button", { name: "Collect this card" });
     const firstPrice = await screen.findByText("Lowest listing · ETH");
@@ -365,7 +427,7 @@ describe("MarketDepthPanel", () => {
       })
     );
 
-    const { container } = render(
+    const { container } = renderOpenDepth(
       <MarketDepthPanel
         contract="0x1"
         tokenId="7"
@@ -401,7 +463,7 @@ describe("MarketDepthPanel", () => {
       .mockResolvedValueOnce(depth())
       .mockReturnValueOnce(pendingRefresh);
 
-    render(
+    renderOpenDepth(
       <MarketDepthPanel
         contract="0x1"
         tokenId="7"
@@ -440,7 +502,7 @@ describe("MarketDepthPanel", () => {
       .mockReturnValueOnce(pendingOldPage)
       .mockResolvedValueOnce(depth());
 
-    const { rerender } = render(
+    const { rerender } = renderOpenDepth(
       <MarketDepthPanel
         contract="0x1"
         tokenId="7"
@@ -528,7 +590,7 @@ describe("MarketDepthPanel", () => {
       .mockReturnValueOnce(pendingOldPage)
       .mockResolvedValueOnce(refreshed);
 
-    render(
+    renderOpenDepth(
       <MarketDepthPanel
         contract="0x1"
         tokenId="7"
@@ -567,7 +629,7 @@ describe("MarketDepthPanel", () => {
       .mockRejectedValueOnce(new Error("private provider diagnostic"))
       .mockResolvedValueOnce(depth());
 
-    render(
+    renderOpenDepth(
       <MarketDepthPanel
         contract="0x1"
         tokenId="7"
@@ -613,7 +675,7 @@ describe("MarketDepthPanel", () => {
       })
     );
 
-    const { rerender } = render(
+    const { rerender } = renderOpenDepth(
       <MarketDepthPanel
         contract="0x0000000000000000000000000000000000000001"
         tokenId="7"
@@ -683,7 +745,9 @@ describe("MarketDepthPanel", () => {
       .mockReturnValueOnce(pendingFirstNextPage)
       .mockReturnValueOnce(pendingSecondNextPage);
 
-    render(<MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />);
+    renderOpenDepth(
+      <MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />
+    );
 
     const priceButton = await screen.findByRole("button", {
       name: "Listings at 1.25 ETH",
@@ -753,7 +817,9 @@ describe("MarketDepthPanel", () => {
         })
       );
 
-    render(<MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />);
+    renderOpenDepth(
+      <MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />
+    );
     fireEvent.click(
       await screen.findByRole("button", { name: "Listings at 1.25 ETH" })
     );
@@ -793,7 +859,9 @@ describe("MarketDepthPanel", () => {
         Object.assign(new Error("private provider diagnostic"), { status: 400 })
       );
 
-    render(<MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />);
+    renderOpenDepth(
+      <MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />
+    );
     fireEvent.click(
       await screen.findByRole("button", { name: "Listings at 1.25 ETH" })
     );
@@ -834,7 +902,7 @@ describe("MarketDepthPanel", () => {
         })
       );
 
-    const { rerender } = render(
+    const { rerender } = renderOpenDepth(
       <MarketDepthPanel
         contract="0x0000000000000000000000000000000000000001"
         tokenId="7"

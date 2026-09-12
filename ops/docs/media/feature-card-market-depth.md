@@ -3,16 +3,30 @@
 Parent: [Media Index](README.md)
 
 The Memes, Meme Lab, Gradients and NextGen card pages show captured OpenSea
-quotes in a Listings and Offers section. Where a card has Additional details,
-that content appears as a compact disclosure above Listings and Offers and
-starts collapsed unless a link opens those details directly. Listings and
-Offers gives you a quick Lowest listing and Highest offer view, then lets you
+quotes in **Listings & offers**. The section starts collapsed, with the lowest
+ETH listing and highest WETH offer visible in its summary. **View listings & offers**
+beside the artwork's Collect action opens the section and moves focus to its
+heading. Expanding it lets you
 inspect the quoted levels and the orders behind those prices.
 
 On Memes, Meme Lab and Gradient cards, artwork details retain mint, edition,
 collector and TDH information where applicable. Listing and offer summaries appear
-in Listings and Offers, without a second set of prices or a market-cap estimate
+in Listings & offers, without a second set of prices or a market-cap estimate
 in the artwork details.
+
+**About this artwork** contains traits, metadata and original files where
+available. It starts collapsed on ordinary artwork URLs; existing artwork-focus
+links open it. You can expand or collapse it independently of the market section.
+Collapsing a section keeps its selection and active review state.
+
+On Memes cards, supply shows **Edition size**, **Ex. research** and
+**Ex. museum & research**, alongside **Holding wallets**. Excluded counts remove
+burned editions and the named reserve holdings; the combined count removes each
+reserve once. These counts do not describe editions listed for sale.
+**Supply details & rankings** explains the exclusions and ranks **Ex. research**
+and **Ex. museum & research**. Smaller supplies rank first; equal supplies share a
+rank and the next rank skips those ties. A card without a recorded ranking shows
+**Unranked**.
 
 ## Read listings and offers
 
@@ -64,7 +78,10 @@ fees, token permissions and gas before authorizing. Sale proceeds go to your
 signing wallet. Purchase delivery and gifting controls do not apply to accepting
 an offer.
 
-Collection and trait offers remain visible but cannot be accepted here yet.
+Collection-wide offers and verified trait offers can be accepted for the NFT
+on the current page. The site binds that exact NFT to the signed criteria;
+the displayed row alone is not proof of eligibility. If eligibility cannot be
+verified, the offer remains unavailable instead of selling another NFT.
 Meme Lab prices are informational. Supported order types, connected wallets and
 current market conditions determine which actions can complete. See
 [Collecting Tools](collecting.md) for wallet support and transaction recovery.

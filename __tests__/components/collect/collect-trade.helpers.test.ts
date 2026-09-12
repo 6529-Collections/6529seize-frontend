@@ -4,6 +4,7 @@ import {
 } from "@/components/collect/collect-trade.helpers";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
+import { formatCollectCustomExpiryInput } from "@/components/collect/collect-custom-expiry";
 import {
   MARKET_SEAPORT,
   MARKET_ZERO,
@@ -38,6 +39,57 @@ const connection = {
   hasExpected: true,
   cancelTarget: undefined,
 };
+
+it.each(["offer", "list"] as const)(
+  "preserves an exact custom %s expiry in Unix seconds",
+  (action) => {
+    const now = Date.UTC(2026, 8, 12, 12, 0);
+    const chosen = now + 86_400_000;
+    const clock = jest.spyOn(Date, "now").mockReturnValue(now);
+    try {
+      const options = {
+        profile,
+        wallet,
+        action,
+        assetKey: operation.asset_key,
+        selectedOrder: null,
+        cancelTarget: undefined,
+        draft: {
+          quantity: "1",
+          unitPriceEth: "0.1",
+          expiryHours: "custom",
+          expiryDateTime: formatCollectCustomExpiryInput(chosen),
+          recipient: wallet,
+        },
+      };
+      expect(buildMarketRequest(options).expires_at).toBe(chosen / 1000);
+      clock.mockReturnValue(now + 60_000);
+      expect(buildMarketRequest(options).expires_at).toBe(chosen / 1000);
+    } finally {
+      clock.mockRestore();
+    }
+  }
+);
+
+it("rejects an invalid absolute expiry before constructing a prepare request", () => {
+  expect(() =>
+    buildMarketRequest({
+      profile,
+      wallet,
+      action: "offer",
+      assetKey: operation.asset_key,
+      selectedOrder: null,
+      cancelTarget: undefined,
+      draft: {
+        quantity: "1",
+        unitPriceEth: "0.1",
+        expiryHours: "custom",
+        expiryDateTime: "not-a-date",
+        recipient: wallet,
+      },
+    })
+  ).toThrow("MARKET_ORDER_EXPIRY_INVALID");
+});
 it.each(["offer", "list"] as const)(
   "keeps a 30-day %s inside the API duration cap when the fresh block lags",
   (action) => {

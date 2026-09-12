@@ -3725,6 +3725,50 @@ paths:
           description: Profile not authorized
         "503":
           description: Official source unavailable or analysis work window exceeded
+  /collect/tdh-daily-plans:
+    post:
+      tags:
+        - Collect
+      summary: Find a best available portfolio for a daily TDH objective or ETH budget
+      description: >-
+        Read-only bounded search over captured native ETH listings. Daily base
+        TDH rates are integer hundredths (divide by 100); boosted daily TDH
+        rates are integer ten-thousandths (divide by 10000). These are nominal
+        daily rates, not a forecast of the change at the next UTC TDH snapshot.
+        Acquired editions are revalued as stock at acquisition time. Gas remains
+        unknown until fresh review, and this endpoint never prepares, signs or
+        submits an order. A third-party recipient does not add the acquisition's
+        personal TDH benefit to the requesting profile.
+      operationId: createCollectDailyTdhPlan
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: collect
+        handler:
+          import: "@/api/collect/collect-daily-tdh.handlers"
+          name: handleCreateCollectDailyTdhPlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCollectDailyTdhRequest"
+      responses:
+        "200":
+          description: Verified baseline and best evaluated portfolio
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCollectDailyTdhPlan"
+        "400":
+          description: Invalid mode, target, recipient, families or budget
+        "403":
+          description: Profile not authorized
+        "503":
+          description: Official source unavailable or analysis work window exceeded
   /collect/rules:
     post:
       tags:
@@ -5212,6 +5256,310 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionError"
+  /content-moderation/checks/access:
+    get:
+      tags:
+        - Content moderation
+      summary: getModerationAccess
+      operationId: getModerationAccess
+      security:
+        - bearerAuth: []
+      parameters: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleGetModerationAccess
+      responses:
+        "200":
+          description: Private developer response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationAccess"
+        "403":
+          description: Developer access required; proxies are not allowed
+        "409":
+          description: Reviewed revision changed or action key conflicts
+  /content-moderation/checks:
+    get:
+      tags:
+        - Content moderation
+      summary: getModerationChecks
+      operationId: getModerationChecks
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: subject_type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - REP_CATEGORY
+              - PROFILE_BIO
+              - GROUP_NAME
+              - DROP
+        - name: outcome
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ALLOW
+              - REJECT
+              - ERROR
+              - PENDING
+        - name: policy_family
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - PUBLIC_FIELDS
+              - WAVE_CONTENT
+        - name: trigger
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: review_status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - NEEDS_REVIEW
+              - REVIEWED
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: profile_id
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: subject_id
+          in: query
+          required: false
+          description: >-
+            Exact opaque subject ID from the check; REP categories use the check
+            ID, never category text.
+          schema:
+            type: string
+            maxLength: 200
+            pattern: ^[a-zA-Z0-9_:-]+$
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleGetModerationChecks
+      responses:
+        "200":
+          description: Private developer response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationCheckPage"
+        "403":
+          description: Developer access required; proxies are not allowed
+        "409":
+          description: Reviewed revision changed or action key conflicts
+  /content-moderation/checks/counts:
+    get:
+      tags:
+        - Content moderation
+      summary: getModerationCounts
+      operationId: getModerationCounts
+      security:
+        - bearerAuth: []
+      parameters: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleGetModerationCounts
+      responses:
+        "200":
+          description: Private developer response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationCounts"
+        "403":
+          description: Developer access required; proxies are not allowed
+        "409":
+          description: Reviewed revision changed or action key conflicts
+  /content-moderation/checks/{id}:
+    get:
+      tags:
+        - Content moderation
+      summary: getModerationCheck
+      operationId: getModerationCheck
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleGetModerationCheck
+      responses:
+        "200":
+          description: Private developer response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationCheckDetail"
+        "403":
+          description: Developer access required; proxies are not allowed
+        "409":
+          description: Reviewed revision changed or action key conflicts
+  /content-moderation/checks/{id}/actions:
+    post:
+      tags:
+        - Content moderation
+      summary: moderationCheckAction
+      operationId: moderationCheckAction
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleModerationCheckAction
+      responses:
+        "200":
+          description: Private developer response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationCheckDetail"
+        "403":
+          description: Developer access required; proxies are not allowed
+        "409":
+          description: Reviewed revision changed or action key conflicts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiModerationActionRequest"
+  /content-moderation/checks/report/{report_id}:
+    get:
+      tags:
+        - Content moderation
+      summary: getModerationReportCheck
+      operationId: getModerationReportCheck
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: report_id
+          in: path
+          required: true
+          schema:
+            type: string
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleGetModerationReportCheck
+      responses:
+        "200":
+          description: Private developer response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationCheckDetail"
+        "403":
+          description: Developer access required; proxies are not allowed
+        "409":
+          description: Reviewed revision changed or action key conflicts
+  /content-moderation/checks/profile/{profile_id}:
+    get:
+      tags:
+        - Content moderation
+      summary: getModerationProfileCheck
+      operationId: getModerationProfileCheck
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: profile_id
+          in: path
+          required: true
+          schema:
+            type: string
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleGetModerationProfileCheck
+      responses:
+        "200":
+          description: Private developer response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationCheckDetail"
+        "403":
+          description: Developer access required; proxies are not allowed
+        "409":
+          description: Reviewed revision changed or action key conflicts
   /content-moderation/blocked-profiles:
     get:
       tags:
@@ -5497,6 +5845,11 @@ paths:
         - ContentModeration
       summary: Apply an authorized moderation decision to a drop.
       operationId: decideModeratedDrop
+      deprecated: true
+      description: >-
+        This unversioned mutation is retired. Open the report through
+        /content-moderation/checks/report/{report_id}, inspect its current
+        revision, and use /content-moderation/checks/{id}/actions.
       security:
         - bearerAuth: []
       parameters:
@@ -5512,14 +5865,10 @@ paths:
             schema:
               $ref: "#/components/schemas/ApiContentModerationDropDecisionRequest"
       responses:
-        "200":
-          description: Current moderation state
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiContentModerationDropDecisionResponse"
         "403":
           description: Moderator access required
+        "409":
+          description: MODERATION_REVIEW_REQUIRED; use the versioned review actions.
   /content-moderation/profiles/{profile_id}/status:
     get:
       tags:
@@ -5553,6 +5902,11 @@ paths:
         - ContentModeration
       summary: Suspend or reinstate a profile as an authorized moderator.
       operationId: setModeratedProfileStatus
+      deprecated: true
+      description: >-
+        This unversioned mutation is retired. Open the profile through
+        /content-moderation/checks/profile/{profile_id}, inspect its current
+        revision, and use /content-moderation/checks/{id}/actions.
       security:
         - bearerAuth: []
       parameters:
@@ -5568,14 +5922,10 @@ paths:
             schema:
               $ref: "#/components/schemas/ApiContentModerationProfileStatusRequest"
       responses:
-        "200":
-          description: Current profile status
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiContentModerationProfileStatusResponse"
         "403":
           description: Moderator access required
+        "409":
+          description: MODERATION_REVIEW_REQUIRED; use the versioned review actions.
   /content-moderation/profiles/suspended:
     get:
       tags:
@@ -20534,6 +20884,243 @@ components:
               format: int64
             block_timestamp:
               type: string
+    ApiCollectDailyTdhPersonalEffects:
+      type: object
+      required:
+        - counts_toward_profile
+        - baseline_base_tdh_per_day_hundredths
+        - proposed_base_tdh_per_day_hundredths
+        - baseline_boost
+        - proposed_boost
+        - baseline_boosted_tdh_per_day_ten_thousandths
+        - proposed_boosted_tdh_per_day_ten_thousandths
+        - additional_boosted_tdh_per_day_ten_thousandths
+        - changed_boost_on_existing_tdh
+      properties:
+        counts_toward_profile:
+          type: boolean
+          description: False when the acquisition recipient is outside the profile.
+        baseline_base_tdh_per_day_hundredths:
+          type: string
+          pattern: ^(0|[1-9][0-9]*)$
+        proposed_base_tdh_per_day_hundredths:
+          type: string
+          pattern: ^(0|[1-9][0-9]*)$
+        baseline_boost:
+          type: number
+        proposed_boost:
+          type: number
+        baseline_boosted_tdh_per_day_ten_thousandths:
+          type: string
+          pattern: ^(0|[1-9][0-9]*)$
+          description: Integer ten-thousandths of boosted TDH per day; divide by 10000.
+        proposed_boosted_tdh_per_day_ten_thousandths:
+          type: string
+          pattern: ^(0|[1-9][0-9]*)$
+          description: Integer ten-thousandths of boosted TDH per day; divide by 10000.
+        additional_boosted_tdh_per_day_ten_thousandths:
+          type: string
+          pattern: ^(0|-?[1-9][0-9]*)$
+          description: >-
+            Signed integer change in ten-thousandths of boosted TDH per day;
+            divide by 10000.
+        changed_boost_on_existing_tdh:
+          type: number
+          description: >-
+            Change in the existing profile's boosted TDH stock attributable to
+            revaluing existing holdings after the acquisition. This is not daily
+            accrual.
+    ApiCollectDailyTdhPlan:
+      type: object
+      required:
+        - plan_id
+        - request
+        - status
+        - base_tdh_per_day_hundredths
+        - shortfall_base_tdh_per_day_hundredths
+        - purchase_cost_wei
+        - signed_fees_wei
+        - remaining_budget_wei
+        - gas_estimate_wei
+        - funding_estimate_wei
+        - items
+        - personal_effects
+        - catalog_version
+        - valid_until
+        - coverage
+        - search
+        - snapshot_block
+        - snapshot_timestamp
+        - acquisition_timestamp
+        - rules_version
+        - assumptions
+      properties:
+        plan_id:
+          type: string
+          description: >-
+            Content hash of this transient analysis, not a marketplace operation
+            id.
+        request:
+          $ref: "#/components/schemas/ApiCollectDailyTdhRequest"
+        status:
+          type: string
+          enum:
+            - NO_PURCHASE_NEEDED
+            - TARGET_MET_BEST_FOUND
+            - PARTIAL
+            - BUDGET_ALLOCATED_BEST_FOUND
+            - NO_LISTINGS
+        base_tdh_per_day_hundredths:
+          type: string
+          pattern: ^(0|[1-9][0-9]*)$
+          description: Integer hundredths of nominal base TDH per day; divide by 100.
+        shortfall_base_tdh_per_day_hundredths:
+          type: string
+          nullable: true
+          pattern: ^(0|[1-9][0-9]*)$
+          description: Null for ETH budget mode; otherwise target shortfall in hundredths.
+        purchase_cost_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: >-
+            Captured listing subtotal including signed fees; fresh review is
+            required.
+        signed_fees_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: Fee component already included in purchase_cost_wei.
+        remaining_budget_wei:
+          type: string
+          nullable: true
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: Remaining budget for ETH budget mode; null for base TDH target mode.
+        gas_estimate_wei:
+          type: string
+          nullable: true
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: Null until fresh order review; zero when no purchase is needed.
+        funding_estimate_wei:
+          type: string
+          nullable: true
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: Null while gas is unknown; zero when no purchase is needed.
+        items:
+          type: array
+          maxItems: 128
+          items:
+            $ref: "#/components/schemas/ApiCollectTdhTargetItem"
+        personal_effects:
+          $ref: "#/components/schemas/ApiCollectDailyTdhPersonalEffects"
+        catalog_version:
+          type: string
+        valid_until:
+          type: string
+          nullable: true
+          description: >-
+            Earliest selected listing expiry or captured index freshness
+            deadline. Review must refresh exact orders.
+        coverage:
+          $ref: "#/components/schemas/ApiCollectTdhTargetCoverage"
+        search:
+          $ref: "#/components/schemas/ApiCollectDailyTdhSearch"
+        snapshot_block:
+          type: integer
+          minimum: 0
+        snapshot_timestamp:
+          type: string
+          description: Timestamp of the official profile and collection snapshot inputs.
+        acquisition_timestamp:
+          type: string
+          description: >-
+            Modeled acquisition time used to revalue owned and purchased
+            editions as stock under the current rules.
+        rules_version:
+          type: string
+        assumptions:
+          type: array
+          items:
+            type: string
+    ApiCollectDailyTdhRequest:
+      type: object
+      additionalProperties: false
+      description: >-
+        BASE_TDH_TARGET requires only target_base_tdh_per_day_hundredths;
+        ETH_BUDGET requires only budget_wei. Supplying neither, both, or the
+        field belonging to the other mode is invalid.
+      required:
+        - profile_id
+        - recipient
+        - mode
+      properties:
+        profile_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        recipient:
+          type: string
+          pattern: ^0x(?!0{40}$)[0-9a-fA-F]{40}$
+          description: >-
+            Nonzero acquisition recipient. A recipient outside the requesting
+            profile does not contribute personal TDH benefit to that profile.
+        families:
+          type: array
+          minItems: 1
+          maxItems: 3
+          default:
+            - memes
+            - gradients
+            - pebbles
+          items:
+            $ref: "#/components/schemas/ApiCollectFamily"
+          description: Distinct families only. Defaults to all supported families.
+        mode:
+          type: string
+          enum:
+            - BASE_TDH_TARGET
+            - ETH_BUDGET
+        target_base_tdh_per_day_hundredths:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,15})$
+          description: >-
+            Required only for BASE_TDH_TARGET. Integer hundredths of nominal
+            base TDH per day (divide by 100), at most 9007199254740991.
+        budget_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: >-
+            Required only for ETH_BUDGET. Uint256 purchase subtotal ceiling
+            including signed fees and excluding unquoted gas.
+    ApiCollectDailyTdhSearch:
+      type: object
+      required:
+        - evaluated_portfolios
+        - candidate_count
+        - stop_reason
+        - optimality
+      properties:
+        evaluated_portfolios:
+          type: integer
+          minimum: 0
+        candidate_count:
+          type: integer
+          minimum: 0
+        stop_reason:
+          type: string
+          enum:
+            - COMPLETE
+            - TIME_LIMIT
+            - EVALUATION_LIMIT
+        optimality:
+          type: string
+          enum:
+            - BEST_FOUND
+          description: Best evaluated portfolio; not a globally optimal guarantee.
     ApiCollectedStats:
       type: object
       required:
@@ -28685,9 +29272,57 @@ components:
           type: integer
           format: int64
           description: Positive rank for TDH-recorded cards, or -1 when unranked.
+        research_holdings:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Holdings of the configured 6529 Research address
+            0xc2Ce4CCeF11A8171f443745cEa3BceEAadD750C7 only. Null before the
+            research-aware supply metrics have been computed.
+        research_holdings_rank:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Supply rank by research holdings, with shared values sharing a rank
+            and the next rank skipped (1, 1, 3). -1 is unranked; null means not
+            yet computed.
+        edition_size_ex_research:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Edition supply excluding burned tokens and holdings of the
+            configured 6529 Research address. Null before computation.
+        edition_size_ex_research_rank:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Lower-supply rank for edition_size_ex_research, with shared values
+            sharing a rank and the next rank skipped (1, 1, 3). -1 is unranked;
+            null means not yet computed.
+        edition_size_ex_museum_and_research:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Edition supply excluding burned tokens and the union of Museum and
+            configured 6529 Research holdings. A token held by both predicates
+            is excluded once. Null before computation.
+        edition_size_ex_museum_and_research_rank:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Lower-supply rank for edition_size_ex_museum_and_research, with
+            shared values sharing a rank and the next rank skipped (1, 1, 3). -1
+            is unranked; null means not yet computed.
         edition_size_cleaned:
           type: integer
           format: int64
+          description: Existing Museum-only cleaned edition supply.
         edition_size_cleaned_rank:
           type: integer
           format: int64
@@ -29107,6 +29742,357 @@ components:
       enum:
         - ACTIVE
         - SUSPENDED
+    ApiModerationAccess:
+      type: object
+      required:
+        - developer
+      properties:
+        developer:
+          type: boolean
+    ApiModerationAction:
+      type: string
+      enum:
+        - REEVALUATE
+        - ALLOW
+        - BLOCK
+        - REVOKE_OVERRIDE
+        - MARK_REVIEWED
+        - SUPPRESS
+        - RESTORE
+        - QUARANTINE
+        - REMOVE
+        - SUSPEND
+        - REINSTATE
+    ApiModerationActionRequest:
+      type: object
+      required:
+        - action
+        - reason
+        - expected_version
+        - idempotency_key
+      properties:
+        action:
+          $ref: "#/components/schemas/ApiModerationAction"
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        expected_version:
+          type: integer
+          format: int64
+          minimum: 1
+        idempotency_key:
+          type: string
+          format: uuid
+    ApiModerationAudit:
+      type: object
+      required:
+        - id
+        - created_at
+        - actor_profile_id
+        - action
+        - reason
+        - previous_state
+        - new_state
+        - metadata
+      properties:
+        id:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+        actor_profile_id:
+          type: string
+          nullable: true
+        action:
+          type: string
+        reason:
+          type: string
+          nullable: true
+        previous_state:
+          type: string
+          nullable: true
+        new_state:
+          type: string
+          nullable: true
+        metadata:
+          type: object
+          additionalProperties: true
+          nullable: true
+    ApiModerationCheck:
+      type: object
+      required:
+        - id
+        - subject_type
+        - subject_id
+        - author_profile_id
+        - actor_profile_id
+        - operation
+        - policy_family
+        - policy_version
+        - scope
+        - content_fingerprint
+        - outcome
+        - trigger
+        - review_status
+        - override
+        - permit_expires_at
+        - permit_consumed_at
+        - published_subject_id
+        - suppressed
+        - version
+        - created_at
+        - updated_at
+        - evidence_expires_at
+        - preview
+      properties:
+        id:
+          type: string
+        subject_type:
+          type: string
+          enum:
+            - REP_CATEGORY
+            - PROFILE_BIO
+            - GROUP_NAME
+            - DROP
+        subject_id:
+          type: string
+        author_profile_id:
+          type: string
+          nullable: true
+        actor_profile_id:
+          type: string
+          nullable: true
+        operation:
+          type: string
+        policy_family:
+          type: string
+          enum:
+            - PUBLIC_FIELDS
+            - WAVE_CONTENT
+        policy_version:
+          type: string
+        scope:
+          type: object
+          additionalProperties: true
+        content_fingerprint:
+          type: string
+        outcome:
+          type: string
+          enum:
+            - ALLOW
+            - REJECT
+            - ERROR
+            - PENDING
+        trigger:
+          type: string
+        review_status:
+          type: string
+          enum:
+            - NEEDS_REVIEW
+            - REVIEWED
+        override:
+          type: string
+          enum:
+            - ALLOW
+            - BLOCK
+            - null
+          nullable: true
+        permit_expires_at:
+          type: integer
+          format: int64
+          nullable: true
+        permit_consumed_at:
+          type: integer
+          format: int64
+          nullable: true
+        published_subject_id:
+          type: string
+          nullable: true
+        suppressed:
+          type: boolean
+        version:
+          type: integer
+          format: int64
+        created_at:
+          type: integer
+          format: int64
+        updated_at:
+          type: integer
+          format: int64
+        evidence_expires_at:
+          type: integer
+          format: int64
+          nullable: true
+        preview:
+          type: string
+          nullable: true
+    ApiModerationCheckDetail:
+      type: object
+      required:
+        - check
+        - evidence
+        - current_revision_matches
+        - evidence_expired
+        - evaluations
+        - audit
+        - allowed_actions
+        - action_effect
+        - current_state
+      properties:
+        check:
+          $ref: "#/components/schemas/ApiModerationCheck"
+        evidence:
+          type: object
+          additionalProperties: true
+          nullable: true
+        current_revision_matches:
+          type: boolean
+        evidence_expired:
+          type: boolean
+        evaluations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiModerationEvaluation"
+        audit:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiModerationAudit"
+        allowed_actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiModerationAction"
+        action_effect:
+          type: string
+          enum:
+            - GLOBAL_CATEGORY_RULE
+            - EXACT_RESUBMISSION_PERMIT
+            - PUBLISHED_DROP
+            - PUBLISHED_FIELD
+            - PROFILE_STATUS
+        current_state:
+          $ref: "#/components/schemas/ApiModerationCurrentState"
+    ApiModerationCheckPage:
+      type: object
+      required:
+        - items
+        - next_cursor
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiModerationCheck"
+        next_cursor:
+          type: string
+          nullable: true
+    ApiModerationCounts:
+      type: object
+      required:
+        - needs_review
+        - quarantined
+        - rejected_today
+        - evaluator_failures_today
+      properties:
+        needs_review:
+          type: integer
+          format: int64
+        quarantined:
+          type: integer
+          format: int64
+        rejected_today:
+          type: integer
+          format: int64
+        evaluator_failures_today:
+          type: integer
+          format: int64
+    ApiModerationCurrentState:
+      type: object
+      required:
+        - profile_status
+        - drop_status
+        - published
+        - suppressed
+        - revision
+      properties:
+        profile_status:
+          type: string
+          nullable: true
+          enum:
+            - ACTIVE
+            - SUSPENDED
+            - null
+        drop_status:
+          type: string
+          nullable: true
+          enum:
+            - VISIBLE
+            - AI_QUARANTINED
+            - MODERATOR_REMOVED
+            - null
+        published:
+          type: boolean
+        suppressed:
+          type: boolean
+        revision:
+          type: string
+          nullable: true
+    ApiModerationEvaluation:
+      type: object
+      required:
+        - id
+        - item_id
+        - retry_of
+        - trigger
+        - outcome
+        - provider
+        - model
+        - policy_version
+        - result
+        - cache_hit
+        - fallback
+        - started_at
+        - completed_at
+      properties:
+        id:
+          type: string
+        item_id:
+          type: string
+        retry_of:
+          type: string
+          nullable: true
+        trigger:
+          type: string
+        outcome:
+          type: string
+          enum:
+            - ALLOW
+            - REJECT
+            - ERROR
+            - PENDING
+        provider:
+          type: string
+          nullable: true
+        model:
+          type: string
+          nullable: true
+        policy_version:
+          type: string
+        result:
+          type: object
+          additionalProperties: true
+          nullable: true
+        cache_hit:
+          type: boolean
+        fallback:
+          type: string
+          nullable: true
+        started_at:
+          type: integer
+          format: int64
+        completed_at:
+          type: integer
+          format: int64
+          nullable: true
     ApiNft:
       type: object
       required:

@@ -12,8 +12,7 @@ import type {
 } from "./collect.types";
 import { formatDecimalString, formatNumber } from "@/i18n/format";
 import { collectPlanSelectionCost } from "./collect-plan-selection.helpers";
-import { marketAmount } from "./market.adapters";
-import { MARKET_ZERO } from "./market-validation";
+import { collectPlanAmount } from "./collect-plan-amounts";
 
 export function collectPlanForScenario(
   plan: ApiCollectPlan,
@@ -39,7 +38,8 @@ function scenarioView(
   return {
     id,
     label,
-    priceLabel: marketAmount(result.total_cost_wei, MARKET_ZERO),
+    priceLabel: collectPlanAmount(locale, result.total_cost_wei).compact,
+    priceExactLabel: collectPlanAmount(locale, result.total_cost_wei).exact,
     detail: t(locale, "collect.plan.scenario.detail", {
       count: formatNumber(locale, result.legs.length),
       remaining: formatNumber(locale, result.remaining_requirements.length),
@@ -93,9 +93,8 @@ export function collectCostPlanView(
         keys.has(leg.asset_key)
       );
       const priced = available.legs.filter((leg) => keys.has(leg.asset_key));
-      const cost = collectPlanSelectionCost(
-        purchased.length > 0 ? purchased : priced
-      );
+      const displayedLegs = purchased.length > 0 ? purchased : priced;
+      const cost = collectPlanSelectionCost(displayedLegs);
       let availabilityLabel = t(
         locale,
         ready ? "collect.plan.notPriced" : "collect.plan.checkingAvailability"
@@ -115,6 +114,9 @@ export function collectCostPlanView(
         scenario === "budget"
       )
         purchaseLabel = t(locale, "collect.plan.outsideBudget");
+      let availabilityRank: 0 | 1 | 2 = 2;
+      if (purchased.length > 0) availabilityRank = 0;
+      else if (priced.length > 0) availabilityRank = 1;
       return {
         ...requirement,
         status:
@@ -122,18 +124,35 @@ export function collectCostPlanView(
             ? "selected"
             : requirement.status,
         availabilityLabel,
+        availabilityRank,
+        artworkKeys:
+          keys.size === 1
+            ? [...keys]
+            : [...new Set(displayedLegs.map((leg) => leg.asset_key))],
         ...(cost !== null && (purchased.length > 0 || priced.length > 0)
-          ? { priceLabel: marketAmount(cost, MARKET_ZERO) }
+          ? {
+              priceLabel: collectPlanAmount(locale, cost).compact,
+              priceExactLabel: collectPlanAmount(locale, cost).exact,
+            }
           : {}),
         ...(purchaseLabel ? { purchaseLabel } : {}),
       };
     }),
-    totalLabel: marketAmount(plan.result.total_cost_wei, MARKET_ZERO),
+    totalLabel: collectPlanAmount(locale, plan.result.total_cost_wei).compact,
+    totalExactLabel: collectPlanAmount(locale, plan.result.total_cost_wei)
+      .exact,
     ...(purchaseTotal !== null
-      ? { purchaseTotalLabel: marketAmount(purchaseTotal, MARKET_ZERO) }
+      ? {
+          purchaseTotalLabel: collectPlanAmount(locale, purchaseTotal).compact,
+          purchaseTotalExactLabel: collectPlanAmount(locale, purchaseTotal)
+            .exact,
+        }
       : {}),
     ...(gas !== null
-      ? { gasReserveLabel: marketAmount(gas, MARKET_ZERO) }
+      ? {
+          gasReserveLabel: collectPlanAmount(locale, gas, 8).compact,
+          gasReserveExactLabel: collectPlanAmount(locale, gas, 8).exact,
+        }
       : {}),
     outcomeLabel: plan.analysis.counts_toward_profile
       ? t(locale, "collect.plan.outcome", {
@@ -151,7 +170,7 @@ export function collectCostPlanView(
             scenarioView(
               "budget",
               t(locale, "collect.plan.scenario.budget", {
-                budget: marketAmount(source.budget_wei, MARKET_ZERO),
+                budget: collectPlanAmount(locale, source.budget_wei).exact,
               }),
               source.result,
               locale

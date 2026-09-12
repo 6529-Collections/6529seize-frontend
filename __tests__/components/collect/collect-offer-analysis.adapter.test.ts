@@ -3,6 +3,7 @@ import {
   offerAnalysisView,
 } from "@/components/collect/collect-offer-analysis.adapter";
 import { initialOfferRows } from "@/components/collect/collect-offer-plan.helpers";
+import { formatCollectCustomExpiryInput } from "@/components/collect/collect-custom-expiry";
 import type { OfferPlanAnalysisInput } from "@/components/collect/collect-offer-plan.types";
 import { analyzeCollectOffers } from "@/components/collect/analyze-collect-offers";
 import { MARKET_WETH } from "@/components/collect/market-validation";
@@ -142,6 +143,48 @@ describe("offer analysis request", () => {
         NOW
       )
     ).toThrow();
+  });
+  it("keeps an explicit cap through the manual funding check used by blended proposals", () => {
+    const draft = input();
+    const capped = {
+      ...draft,
+      committedAmountWei: "100000000000000001",
+      controls: { ...draft.controls, budgetEth: "0.3" },
+    };
+    expect(buildOfferAnalysisRequest(capped, NOW).max_total_weth_wei).toBe(
+      "199999999999999999"
+    );
+    expect(() =>
+      buildOfferAnalysisRequest(
+        { ...capped, controls: { ...capped.controls, budgetEth: "invalid" } },
+        NOW
+      )
+    ).toThrow();
+    expect(() =>
+      buildOfferAnalysisRequest(
+        { ...capped, committedAmountWei: "300000000000000000" },
+        NOW
+      )
+    ).toThrow();
+  });
+  it("keeps the chosen custom expiry as an absolute timestamp during plan checks", () => {
+    const draft = input();
+    const expiry = NOW + 3600000;
+    const custom = {
+      ...draft,
+      controls: {
+        ...draft.controls,
+        expiryHours: "custom",
+        expiryDateTime: formatCollectCustomExpiryInput(expiry),
+      },
+    };
+    expect(buildOfferAnalysisRequest(custom, NOW).expires_at).toBe(
+      expiry / 1000
+    );
+    expect(buildOfferAnalysisRequest(custom, NOW + 60000).expires_at).toBe(
+      expiry / 1000
+    );
+    expect(() => buildOfferAnalysisRequest(custom, expiry - 60000)).toThrow();
   });
   it("rejects duplicate, excessive, malformed or unselected inputs", () => {
     const draft = input();
@@ -320,6 +363,17 @@ describe("offer analysis response binding", () => {
     expect(
       offerAnalysisView(result, request, NOW).prices[0]?.references[0]
     ).toMatchObject({ amountWei: "1", currency: "WETH" });
+    const reference = row.references[0]!;
+    const alterations = [
+      { quantity: "1", total_amount_wei: "1" },
+      { observed_at: NOW + 1 },
+      { expires_at: NOW + 59999 },
+      { observed_at: NOW - 3600000 },
+    ];
+    for (const alteration of alterations) {
+      row.references = [{ ...reference, ...alteration }];
+      expect(() => offerAnalysisView(result, request, NOW)).toThrow();
+    }
   });
   it("uses the shared authenticated API helper once, without any operation creation", async () => {
     jest.spyOn(Date, "now").mockReturnValue(NOW);
@@ -344,4 +398,19 @@ describe("offer analysis response binding", () => {
     );
     jest.restoreAllMocks();
   });
+});
+
+it("allows bounded server clock skew without extending the analysis deadline", () => {
+  const request = buildOfferAnalysisRequest(input(), NOW);
+  const result = response();
+  result.created_at = NOW + 15000;
+  result.valid_until = NOW + 60000;
+  expect(offerAnalysisView(result, request, NOW).validUntil).toBe(
+    new Date(result.valid_until).toISOString()
+  );
+  result.created_at = NOW + 15001;
+  expect(() => offerAnalysisView(result, request, NOW)).toThrow();
+  result.created_at = NOW - 1000;
+  result.valid_until = NOW;
+  expect(() => offerAnalysisView(result, request, NOW)).toThrow();
 });
