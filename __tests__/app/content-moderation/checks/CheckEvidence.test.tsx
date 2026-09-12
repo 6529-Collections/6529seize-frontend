@@ -3,6 +3,7 @@ import {
   checkAuditActionLabel,
   checkValueLabel,
   readCheckFilters,
+  safeCheckId,
 } from "@/app/content-moderation/checks/checks.helpers";
 import { render, screen } from "@testing-library/react";
 jest.mock("@/hooks/useBrowserLocale", () => ({
@@ -43,7 +44,7 @@ it("only accepts typed filters, exact IDs, and UTC date boundaries", () => {
       subject_type: "DROP",
       outcome: "REJECT",
       profile_id: "person-1",
-      subject_id: "private text here",
+      subject_id: "author:wave",
       trigger: "CONTENT_REPORTED",
       from: "2026-09-12",
       to: "2026-09-12",
@@ -54,8 +55,28 @@ it("only accepts typed filters, exact IDs, and UTC date boundaries", () => {
     subject_type: "DROP",
     outcome: "REJECT",
     profile_id: "person-1",
+    subject_id: "author:wave",
     trigger: "CONTENT_REPORTED",
     from: Date.UTC(2026, 8, 12),
     to: Date.UTC(2026, 8, 13) - 1,
   });
+});
+
+it("accepts opaque category and routine IDs while excluding raw content filters", () => {
+  const subjectId = "a".repeat(64);
+  expect(
+    readCheckFilters(new URLSearchParams({ subject_id: subjectId })).subject_id
+  ).toBe(subjectId);
+  expect(
+    readCheckFilters(
+      new URLSearchParams({ subject_id: "L'art de René (édition 2)!" })
+    ).subject_id
+  ).toBeUndefined();
+  expect(
+    readCheckFilters(new URLSearchParams({ subject_id: "x".repeat(201) }))
+      .subject_id
+  ).toBeUndefined();
+  const routineId = "routine:123e4567-e89b-12d3-a456-426614174000";
+  expect(safeCheckId(routineId)).toBe(routineId);
+  expect(safeCheckId("../other-path")).toBeNull();
 });

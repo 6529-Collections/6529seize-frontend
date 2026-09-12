@@ -68,8 +68,13 @@ export function checkValueLabel(
   return key ? t(locale, key) : value;
 }
 
-export function safeCheckId(value: string | null): string | null {
-  return value && /^[a-zA-Z0-9_-]{1,128}$/.test(value) ? value : null;
+export function safeCheckId(
+  value: string | null,
+  maxLength = 128
+): string | null {
+  return value && value.length <= maxLength && /^[a-zA-Z0-9_:-]+$/.test(value)
+    ? value
+    : null;
 }
 
 export function checkAuditActionLabel(
@@ -92,7 +97,10 @@ export function readCheckFilters(
       values[key] = value;
   }
   for (const key of ["profile_id", "subject_id"] as const) {
-    const value = safeCheckId(params.get(key));
+    const value = safeCheckId(
+      params.get(key),
+      key === "subject_id" ? 200 : 128
+    );
     if (value) values[key] = value;
   }
   for (const key of ["from", "to"] as const) {

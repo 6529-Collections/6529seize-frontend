@@ -5310,8 +5310,11 @@ paths:
         - name: subject_id
           in: query
           required: false
+          description: Exact opaque subject ID from the check; REP categories use the check ID, never category text.
           schema:
             type: string
+            maxLength: 200
+            pattern: '^[a-zA-Z0-9_:-]+$'
         - name: before
           in: query
           required: false

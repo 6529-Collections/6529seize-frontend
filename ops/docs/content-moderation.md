@@ -240,7 +240,9 @@ of filters; today uses UTC.
 **Checks** covers REP categories, About text, group names, and posts. Filter by
 content type, outcome, policy, trigger, review status, UTC date range, or an
 exact profile or subject ID. Filtered views and selected checks have direct
-links. **Public-facing text** is the stricter policy for REP, About, and group
+links. For REP categories, use the opaque **Subject ID** shown in the check's
+**Context** section; category text is never used as a URL filter.
+**Public-facing text** is the stricter policy for REP, About, and group
 names; **Wave safety** is the permissive policy for posts and reports.
 
 Select **Review check** to open saved evidence, scope and current state,

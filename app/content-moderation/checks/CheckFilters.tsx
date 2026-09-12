@@ -102,8 +102,8 @@ export default function CheckFilters({
               <input
                 name={name}
                 defaultValue={String(filters[name] ?? "")}
-                pattern="[a-zA-Z0-9_-]{1,128}"
-                maxLength={128}
+                pattern="[a-zA-Z0-9_:\-]+"
+                maxLength={name === "subject_id" ? 200 : 128}
                 autoComplete="off"
                 aria-describedby={`${id}-help`}
                 className={checkControlClass}
