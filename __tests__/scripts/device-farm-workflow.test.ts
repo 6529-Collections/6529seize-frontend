@@ -14,6 +14,7 @@ const gitBash = path.join(
 const bash =
   process.platform === "win32" && fs.existsSync(gitBash) ? gitBash : "bash";
 
+/** Runs the workflow's pack planner and captures its outputs and visible summary. */
 function plan(overrides: Record<string, string> = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "device-farm-plan-"));
   try {
@@ -45,6 +46,7 @@ function plan(overrides: Record<string, string> = {}) {
           .map((line) => line.split("="))
       ),
       log: result.stdout,
+      summary: fs.readFileSync(path.join(root, "summary"), "utf8"),
     };
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
@@ -57,16 +59,23 @@ describe("Device Farm cadence and pack selection", () => {
       { cron: "0 4 * * 0,2-6" },
       { cron: "0 4 * * 1" },
     ]);
-    expect(
-      plan({ EVENT_NAME: "schedule", SCHEDULE_CRON: "0 4 * * 0,2-6" }).output
-    ).toMatchObject({
+    const daily = plan({
+      EVENT_NAME: "schedule",
+      SCHEDULE_CRON: "0 4 * * 0,2-6",
+    });
+    expect(daily.output).toMatchObject({
       web: "true",
       native: "false",
       "target-url": "https://6529.io",
     });
-    expect(
-      plan({ EVENT_NAME: "schedule", SCHEDULE_CRON: "0 4 * * 1" }).output
-    ).toMatchObject({ web: "true", native: "true" });
+    expect(daily.summary).toContain(
+      "Requested packs: `web` (event: `schedule`, cron: `0 4 * * 0,2-6`)"
+    );
+    const weekly = plan({ EVENT_NAME: "schedule", SCHEDULE_CRON: "0 4 * * 1" });
+    expect(weekly.output).toMatchObject({ web: "true", native: "true" });
+    expect(weekly.summary).toContain(
+      "Requested packs: `all` (event: `schedule`, cron: `0 4 * * 1`)"
+    );
     expect(workflow.concurrency).toEqual({
       group: "device-farm-qa",
       "cancel-in-progress": false,
@@ -80,13 +89,15 @@ describe("Device Farm cadence and pack selection", () => {
   ])(
     "preserves manual %s selection and staging target",
     (packs, web, native) => {
-      expect(
-        plan({ PACKS_INPUT: packs, TARGET_INPUT: "staging" }).output
-      ).toEqual({
+      const manual = plan({ PACKS_INPUT: packs, TARGET_INPUT: "staging" });
+      expect(manual.output).toEqual({
         web,
         native,
         "target-url": "https://staging.6529.io",
       });
+      expect(manual.summary).toContain(
+        `Requested packs: \`${packs}\` (event: \`workflow_dispatch\`)`
+      );
     }
   );
 
