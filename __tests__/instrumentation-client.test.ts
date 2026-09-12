@@ -2871,12 +2871,36 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
-  it("drops the raw 3V injected sendMessage event with a Sentry helper frame", () => {
+  it("drops the raw 3V injected sendMessage event with a minified Sentry wrapper", () => {
     const beforeSend = loadBeforeSend();
 
     const result = beforeSend(noiseFilterFixtures.threeV);
 
     expect(result).toBeNull();
+  });
+
+  it("keeps a 3V-shaped event with changed wrapper coordinates", () => {
+    const beforeSend = loadBeforeSend();
+    const fixtureValue = noiseFilterFixtures.threeV.exception.values[0];
+    const event = {
+      ...noiseFilterFixtures.threeV,
+      exception: {
+        values: [
+          {
+            ...fixtureValue,
+            stacktrace: {
+              frames: fixtureValue.stacktrace.frames.map((frame, index) =>
+                index === 0 ? { ...frame, colno: 6174 } : frame
+              ),
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("drops the exact browser-extension wallet rejection bridge stack", () => {

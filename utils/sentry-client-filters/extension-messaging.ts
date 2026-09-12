@@ -24,6 +24,33 @@ import {
 
 const browserExtensionWalletRejectionMessage = "User rejected the request.";
 const browserExtensionWalletBridgePath = "app:///content-scripts/bridge.js";
+const browserExtensionSendMessageNextChunkPrefix =
+  "app:///_next/static/chunks/";
+const browserExtensionSendMessageInjectedPath =
+  "app:///injectedScript.bundle.js";
+// beforeSend receives Sentry's minified wrapper before server-side source maps
+// reveal helpers.ts. Keep each cohort-backed wrapper/injected tuple exact so
+// nearby application failures and future bundle drift fail open.
+const browserExtensionSendMessageRawFrameSignatures = [
+  {
+    wrapperFunction: "n",
+    wrapperLine: 3,
+    wrapperColumn: 4853,
+    injectedColumn: 84027,
+  },
+  {
+    wrapperFunction: "n",
+    wrapperLine: 7,
+    wrapperColumn: 4853,
+    injectedColumn: 84027,
+  },
+  {
+    wrapperFunction: "r",
+    wrapperLine: 7,
+    wrapperColumn: 6173,
+    injectedColumn: 84147,
+  },
+] as const;
 // Keep the complete pre-symbolication stack exact so extension bundle drift
 // fails open and nearby application failures remain visible.
 const browserExtensionWalletBridgeFrameSignatures = [
@@ -66,6 +93,56 @@ function hasOnlyInjectedSendMessageFrames(
       (frame) =>
         isExtensionMessagingFrame(frame) || isSentryBrowserHelperFrame(frame)
     )
+  );
+}
+
+function hasOnlyMatchingFramePaths(
+  frame: SentryStackFrame,
+  predicate: (path: string) => boolean
+): boolean {
+  const framePaths = getFramePaths(frame);
+  return framePaths.length > 0 && framePaths.every(predicate);
+}
+
+function hasExactBrowserExtensionSendMessageRawFrames(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  if (!Array.isArray(frames) || frames.length !== 2) {
+    return false;
+  }
+
+  const [wrapperFrame, injectedFrame] = frames;
+  if (!wrapperFrame || !injectedFrame) {
+    return false;
+  }
+
+  const hasExpectedWrapperPath = hasOnlyMatchingFramePaths(
+    wrapperFrame,
+    (path) =>
+      path.startsWith(browserExtensionSendMessageNextChunkPrefix) &&
+      path.endsWith(".js")
+  );
+  const hasExpectedInjectedPath = hasOnlyMatchingFramePaths(
+    injectedFrame,
+    (path) => path === browserExtensionSendMessageInjectedPath
+  );
+  if (
+    !hasExpectedWrapperPath ||
+    !hasExpectedInjectedPath ||
+    wrapperFrame.in_app !== true ||
+    injectedFrame.function !== "n" ||
+    injectedFrame.in_app !== true ||
+    injectedFrame.lineno !== 2
+  ) {
+    return false;
+  }
+
+  return browserExtensionSendMessageRawFrameSignatures.some(
+    (signature) =>
+      wrapperFrame.function === signature.wrapperFunction &&
+      wrapperFrame.lineno === signature.wrapperLine &&
+      wrapperFrame.colno === signature.wrapperColumn &&
+      injectedFrame.colno === signature.injectedColumn
   );
 }
 
@@ -177,7 +254,12 @@ export function shouldFilterBrowserExtensionSendMessageError(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
-  const value = event.exception?.values?.[0];
+  const values = event.exception?.values;
+  if (!Array.isArray(values) || values.length !== 1) {
+    return false;
+  }
+
+  const [value] = values;
   const normalizedMessage = normalizeErrorPrefix(value?.value ?? "");
   const isWebKitExtensionTabNotFoundError =
     normalizedMessage === webkitExtensionMessagingTabNotFoundMessage;
@@ -189,17 +271,29 @@ export function shouldFilterBrowserExtensionSendMessageError(
     return false;
   }
 
+  const frames = value.stacktrace?.frames;
+  const hasVerifiedRawFrames =
+    normalizedMessage === injectedScriptSendMessageError &&
+    hasExactBrowserExtensionSendMessageRawFrames(frames);
+  const ownershipValue = hasVerifiedRawFrames
+    ? {
+        ...value,
+        stacktrace: {
+          frames: frames?.slice(1),
+        },
+      }
+    : value;
   if (
     value.mechanism?.type !== browserUnhandledRejectionMechanism ||
     value.mechanism.handled !== false ||
-    hasAppOwnedSourceEvidence(event, value, hint)
+    hasAppOwnedSourceEvidence(event, ownershipValue, hint)
   ) {
     return false;
   }
 
   if (isWebKitExtensionTabNotFoundError) {
-    return event.exception?.values?.length === 1;
+    return true;
   }
 
-  return hasOnlyInjectedSendMessageFrames(value.stacktrace?.frames);
+  return hasVerifiedRawFrames || hasOnlyInjectedSendMessageFrames(frames);
 }
