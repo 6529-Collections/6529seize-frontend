@@ -13,6 +13,10 @@ const CONTRACTS = [
     inputs: [/^\.github\/workflows\/device-farm-qa\.yml$/u],
   },
   {
+    test: "__tests__/scripts/production-canary-workflow.test.ts",
+    inputs: [/^\.github\/workflows\/production-e2e\.yml$/u],
+  },
+  {
     test: "__tests__/contracts/hover-revealed-controls.test.ts",
     inputs: [/^(?:app|components)\/.*\.tsx$/u, /^tailwind\.config\./u],
   },
