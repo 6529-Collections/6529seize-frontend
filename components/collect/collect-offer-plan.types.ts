@@ -1,4 +1,5 @@
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
+import type { ApiCollectPlanLeg } from "@/generated/models/ApiCollectPlanLeg";
 
 /** Editable display state. Signing continues through the existing exact-NFT offer flow. */
 export type OfferPriceMethod =
@@ -7,6 +8,18 @@ export type OfferPriceMethod =
   | "improve_bid"
   | "discount_ask"
   | "goal";
+
+/** Presets affect editable proposals; purchase/offer commitments remain owned by the workspace. */
+export interface OfferPlanAcquisitionProps {
+  readonly initialMethod?: OfferPriceMethod | undefined;
+  readonly strategySessionKey?: string | undefined;
+  readonly blended?: boolean | undefined;
+  readonly buyOptions?: readonly ApiCollectPlanLeg[] | undefined;
+  readonly buyLockedAssetKeys?: readonly string[] | undefined;
+  readonly onReviewBuys?:
+    | ((legs: readonly ApiCollectPlanLeg[]) => void)
+    | undefined;
+}
 
 export interface CollectOfferSelection {
   readonly asset?: ApiCollectAsset | undefined;
