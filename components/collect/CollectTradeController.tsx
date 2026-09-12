@@ -28,6 +28,7 @@ import {
 } from "@/services/api/market-api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
+import type { ReactNode } from "react";
 
 import type {
   CollectTradeAction,
@@ -54,6 +55,7 @@ import {
 } from "./collect-controller-review";
 import { useCollectTradeOrders } from "./useCollectTradeOrders";
 import { collectProfileWallets } from "./collect-recipient.helpers";
+import { useFixedCollectOrder } from "./useFixedCollectOrder";
 import {
   collectBuyAmount,
   collectBuyListings,
@@ -103,6 +105,8 @@ interface CollectTradeControllerProps {
   readonly action: CollectTradeAction;
   readonly initialOperation?: ApiMarketOperation;
   readonly initialOrder?: ApiMarketTradeOrder;
+  readonly fixedOrder?: boolean;
+  readonly maximumOrderQuantity?: string;
   readonly initialQuantity?: string;
   readonly initialRecipient?: string;
   readonly initialUnitPriceEth?: string;
@@ -119,6 +123,7 @@ interface CollectTradeControllerProps {
     expected: ApiMarketPrepareRequest
   ) => void;
   readonly onMarketChange?: () => void;
+  readonly secondaryActions?: ReactNode;
   readonly presentation?: CollectTradePresentation;
   readonly layout?: "standard" | "inline-buy";
 }
@@ -127,12 +132,14 @@ export default function CollectTradeController(
   props: CollectTradeControllerProps
 ) {
   const { connectedProfile, activeProfileProxy, isAuthenticated } = useAuth();
-  const { address } = useSeizeConnectContext();
+  const { address, canSignActiveWallet, isSafeWallet } =
+    useSeizeConnectContext();
   // A different offer target, actor or allocation starts a fresh draft. Pending
   // work in the previous controller loses its intent guard when it unmounts.
   const key =
-    props.action === "offer"
+    props.action === "offer" || props.fixedOrder
       ? JSON.stringify([
+          props.action,
           props.asset?.asset_key,
           props.initialOperation?.id,
           connectedProfile?.id,
@@ -145,6 +152,16 @@ export default function CollectTradeController(
           props.initialExpiryHours,
           props.maximumOfferAmountWei,
           props.fixedOfferQuantity,
+          props.fixedOrder,
+          props.maximumOrderQuantity,
+          props.fixedOrder ? props.initialOrder : undefined,
+          props.fixedOrder
+            ? collectProfileWallets(connectedProfile)
+                .map((item) => item.wallet.toLowerCase())
+                .sort((left, right) => left.localeCompare(right))
+            : undefined,
+          props.fixedOrder ? canSignActiveWallet : undefined,
+          props.fixedOrder ? isSafeWallet : undefined,
         ])
       : undefined;
   return <CollectTradeControllerContent key={key} {...props} />;
@@ -155,6 +172,8 @@ function CollectTradeControllerContent({
   action,
   initialOperation,
   initialOrder,
+  fixedOrder = false,
+  maximumOrderQuantity,
   initialQuantity,
   initialRecipient,
   initialUnitPriceEth,
@@ -167,6 +186,7 @@ function CollectTradeControllerContent({
   onPublished,
   onCommitment,
   onMarketChange,
+  secondaryActions,
   presentation = "dialog",
   layout = "standard",
 }: CollectTradeControllerProps) {
@@ -220,6 +240,7 @@ function CollectTradeControllerContent({
     operation,
     layout,
     initialOrder,
+    fixedOrder,
     initialQuantity: initialQuantity ?? offerQuantity,
     initialRecipient,
     initialUnitPriceEth,
@@ -311,6 +332,20 @@ function CollectTradeControllerContent({
   const disabledReason = reasonKey
     ? t(locale, reasonKey)
     : collectOfferLimitReason(expected, offerMaximum, locale, offerQuantity);
+  const fixedIntent = useFixedCollectOrder({
+    fixed: fixedOrder,
+    action,
+    assetKey,
+    initialOrder,
+    draft,
+    profileId: connectedProfile?.id ?? undefined,
+    profileWallets: collectProfileWallets(connectedProfile).map(
+      (item) => item.wallet
+    ),
+    wallet: connection.address,
+    canSign: disabledReason === undefined,
+    maximumQuantity: maximumOrderQuantity,
+  });
   const prepare = async (value: CollectTradeDraft) => {
     if (
       preparing ||
@@ -324,7 +359,9 @@ function CollectTradeControllerContent({
     setError(undefined);
     try {
       let orderForRequest = selectedOrder;
-      if (inlineBuy && selectedOrder) {
+      if (fixedOrder) {
+        orderForRequest = await fixedIntent.refresh();
+      } else if (inlineBuy && selectedOrder) {
         const refreshed = await orders.refetch();
         if (refreshed.isError || !refreshed.data)
           throw new Error("ORDER_REFRESH_FAILED");
@@ -360,6 +397,7 @@ function CollectTradeControllerContent({
         cancelTarget,
       });
       offerIntent.guard(request);
+      fixedIntent.guard();
       // Retry a lost prepare response with the same key and exact request body.
       const old = pendingPrepare.current;
       const fingerprint = JSON.stringify({
@@ -385,6 +423,7 @@ function CollectTradeControllerContent({
       pendingPrepare.current = intent;
       const prepared = await prepareMarketOperation(intent.request, intent.key);
       offerIntent.guard(intent.request);
+      fixedIntent.guard();
       validateMarketOperation(prepared, intent.request);
       offerIntent.bind(prepared, intent.request);
       saveMarketIntent(connectedProfile.id, prepared.id, {
@@ -393,6 +432,15 @@ function CollectTradeControllerContent({
       setExpected(intent.request);
       receiveOperation(prepared);
     } catch (failure) {
+      try {
+        fixedIntent.guard();
+      } catch {
+        return;
+      }
+      if (fixedOrder) {
+        setError(t(locale, "collect.trade.exactOrderChanged"));
+        return;
+      }
       setError(
         failure instanceof Error &&
           [
@@ -421,6 +469,8 @@ function CollectTradeControllerContent({
       action={action}
       asset={asset}
       needsOrder={needsOrder}
+      fixedOrder={fixedOrder}
+      maximumOrderQuantity={maximumOrderQuantity}
       inlineBuy={inlineBuy}
       draft={draft}
       fixedOfferQuantity={offerQuantity}
@@ -435,6 +485,7 @@ function CollectTradeControllerContent({
       disabledReason={disabledReason}
       preparing={preparing}
       error={error}
+      secondaryActions={secondaryActions}
       onChange={setDraft}
       onQuantityEdited={() => setQuantityEdited(true)}
       onClearSelectedOrder={() => setSelectedOrder(null)}
@@ -503,7 +554,8 @@ function CollectTradeControllerContent({
               receiveOperation,
               () => setError(t(locale, "collect.error.prepare"))
             );
-          } else void orders.refetch();
+          } else if (!fixedOrder) void orders.refetch();
+          else setError(t(locale, "collect.trade.exactOrderChanged"));
         }}
         onConfirm={async (id, revision) => {
           if (
@@ -529,6 +581,12 @@ function CollectTradeControllerContent({
                   offerIntent.reserve
                 );
               else await execution.confirm(displayedOperation, expected, guard);
+            } else if (fixedOrder) {
+              await execution.confirm(
+                displayedOperation,
+                expected,
+                fixedIntent.guard
+              );
             } else await execution.confirm(displayedOperation, expected);
           }
         }}

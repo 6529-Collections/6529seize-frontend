@@ -13,7 +13,7 @@ import {
 } from "@testing-library/react";
 import type { CollectTradeAction } from "@/components/collect/collect.types";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 const mockFetchAssets = jest.fn();
 const mockControllerRender = jest.fn();
@@ -52,9 +52,7 @@ jest.mock("@/services/api/collect-api", () => ({
 jest.mock("@/components/collect/CollectOwnerAction", () => ({
   __esModule: true,
   default: ({ onList }: { onList: (trigger: HTMLButtonElement) => void }) => (
-    <button onClick={(event) => onList(event.currentTarget)}>
-      List for sale
-    </button>
+    <button onClick={(event) => onList(event.currentTarget)}>List</button>
   ),
 }));
 jest.mock("@/components/collect/CollectTradeController", () => ({
@@ -66,6 +64,7 @@ jest.mock("@/components/collect/CollectTradeController", () => ({
     onMarketChange,
     presentation,
     layout,
+    secondaryActions,
   }: {
     asset: ApiCollectAsset;
     action: CollectTradeAction;
@@ -73,6 +72,7 @@ jest.mock("@/components/collect/CollectTradeController", () => ({
     onMarketChange?: () => void;
     presentation?: string;
     layout?: string;
+    secondaryActions?: ReactNode;
   }) {
     const [reviewed, setReviewed] = useState(false);
     mockControllerRender();
@@ -85,6 +85,8 @@ jest.mock("@/components/collect/CollectTradeController", () => ({
         data-presentation={presentation}
         data-reviewed={reviewed}
       >
+        {layout === "inline-buy" && <button>Collect</button>}
+        {layout === "inline-buy" && secondaryActions}
         <button onClick={onClose}>Close trade</button>
         <button onClick={onMarketChange}>Market changed</button>
         <button onClick={() => setReviewed(true)}>Prepare review</button>
@@ -125,7 +127,7 @@ function renderActions(tokenId = "5", onMarketChange?: () => void) {
 }
 async function openOffer() {
   const user = userEvent.setup();
-  const trigger = screen.getByRole("button", {
+  const trigger = await screen.findByRole("button", {
     name: "Make an offer: Meme Five",
   });
   await user.click(trigger);
@@ -145,7 +147,7 @@ beforeEach(() => {
   ];
   mockFetchAssets.mockResolvedValue({ data: [asset] });
 });
-it("loads canonical inline Buy without a modal or initial Collect click", async () => {
+it("loads canonical inline Collect without a modal or initial Collect click", async () => {
   renderActions();
   const trade = await screen.findByTestId("inline-trade");
   expect(trade).toHaveAttribute("data-asset", asset.asset_key);
@@ -233,7 +235,7 @@ it("preserves iOS purchasing gate before any query or action", () => {
   expect(screen.queryByRole("button")).not.toBeInTheDocument();
   expect(mockFetchAssets).not.toHaveBeenCalled();
 });
-it("refreshes the enclosing market from inline Buy and owner listing", async () => {
+it("refreshes the enclosing market from inline Collect and owner listing", async () => {
   const changed = jest.fn();
   renderActions("5", changed);
   fireEvent.click(
@@ -241,7 +243,7 @@ it("refreshes the enclosing market from inline Buy and owner listing", async () 
       name: "Market changed",
     })
   );
-  const trigger = screen.getByRole("button", { name: "List for sale" });
+  const trigger = screen.getByRole("button", { name: "List" });
   fireEvent.click(trigger);
   const trade = await screen.findByTestId("trade");
   expect(trade).toHaveAttribute("data-action", "list");
@@ -274,6 +276,21 @@ it("selects exact token after a page of numeric-name search matches", async () =
   ]);
   expect(mockFetchAssets.mock.calls[1][0].signal).toBe(
     mockFetchAssets.mock.calls[0][0].signal
+  );
+});
+it("orders the native actions Collect, Make an offer, then List", async () => {
+  renderActions();
+  const trade = await screen.findByTestId("inline-trade");
+  const collect = within(trade).getByRole("button", { name: "Collect" });
+  const offer = screen.getByRole("button", {
+    name: "Make an offer: Meme Five",
+  });
+  const list = await screen.findByRole("button", { name: "List" });
+  expect(collect.compareDocumentPosition(offer)).toBe(
+    Node.DOCUMENT_POSITION_FOLLOWING
+  );
+  expect(offer.compareDocumentPosition(list)).toBe(
+    Node.DOCUMENT_POSITION_FOLLOWING
   );
 });
 it("stops a catalog repeatedly returning another token", async () => {

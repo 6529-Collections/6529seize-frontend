@@ -147,6 +147,7 @@ export default function MarketDepthPriceLevels({
                             error={error}
                             onRetry={onLoadOrders}
                             onRefresh={onRefresh}
+                            enableTradeActions
                           />
                         )}
                       </div>

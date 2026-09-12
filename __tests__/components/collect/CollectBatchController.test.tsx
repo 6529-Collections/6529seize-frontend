@@ -157,7 +157,7 @@ it("prepares once, focuses review without signing, and preserves the edited dest
   });
   await waitFor(() => expect(prepare).toBeEnabled());
   fireEvent.click(prepare);
-  const buy = await screen.findByRole("button", { name: /^Buy / });
+  const buy = await screen.findByRole("button", { name: /^Collect / });
   expect(mockPrepare).toHaveBeenCalledTimes(1);
   expect(mockConfirm).not.toHaveBeenCalled();
   expect(screen.getByRole("heading", { level: 2 })).toHaveFocus();
@@ -188,7 +188,7 @@ it.each([
     const first = mount();
     await screen.findByRole("heading", { level: 2 });
     expect(
-      screen.queryByRole("button", { name: /^Buy / })
+      screen.queryByRole("button", { name: /^Collect / })
     ).not.toBeInTheDocument();
     first.unmount();
     mount();
@@ -205,7 +205,7 @@ it("cannot open a new empty edit form for a recovered operation", async () => {
   expect(
     screen.queryByRole("button", { name: "Edit purchase" })
   ).not.toBeInTheDocument();
-  expect(screen.getByRole("button", { name: /^Buy / })).toBeDisabled();
+  expect(screen.getByRole("button", { name: /^Collect / })).toBeDisabled();
   expect(mockPrepare).not.toHaveBeenCalled();
 });
 it("preserves the native purchasing gate before preparation", async () => {
@@ -246,7 +246,7 @@ it.each(["profile", "paying wallet"])(
       finish(prior);
     });
     expect(
-      screen.queryByRole("button", { name: /^Buy / })
+      screen.queryByRole("button", { name: /^Collect / })
     ).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Check selected purchases" })

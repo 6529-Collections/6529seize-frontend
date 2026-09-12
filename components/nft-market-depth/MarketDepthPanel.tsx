@@ -25,6 +25,7 @@ import {
 } from "react";
 import { MarketDepthOtherOrders } from "./MarketDepthOrderDetails";
 import MarketDepthPriceLevels from "./MarketDepthPriceLevels";
+import { MarketDepthTradeProvider } from "./MarketDepthTradeActions";
 import {
   loadCompleteMarketDepth,
   MarketDepthSnapshotChangedError,
@@ -507,118 +508,125 @@ export default function MarketDepthPanel({
       )}
 
       {effectiveStatus === "ready" && data && (
-        <div className="tw-mt-8">
-          {data.status === ApiMarketDepthStatusEnum.Unavailable ? (
-            <>
-              <div className="tw-border-0 tw-border-y tw-border-solid tw-border-white/10 tw-py-5">
-                <p className="tw-m-0 tw-text-sm tw-text-iron-300">
-                  {t(resolvedLocale, "marketDepth.unavailable.title")}
-                </p>
-              </div>
-              <AboutPrices data={data} locale={resolvedLocale} />
-            </>
-          ) : (
-            <>
-              <dl className="tw-m-0 tw-grid tw-border-0 tw-border-y tw-border-solid tw-border-white/10 sm:tw-grid-cols-2 sm:tw-divide-x sm:tw-divide-y-0 sm:tw-divide-white/10">
-                <div className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-py-5 sm:tw-border-b-0 sm:tw-pr-8">
-                  <dt className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
-                    {t(resolvedLocale, "marketDepth.bestAsk")}
-                  </dt>
-                  <dd className="tw-m-0 tw-mt-2 tw-text-2xl tw-font-medium tw-tabular-nums tw-text-iron-100">
-                    <DecimalValue
-                      locale={resolvedLocale}
-                      value={ethBook?.best_ask}
-                    />
-                  </dd>
+        <MarketDepthTradeProvider
+          contract={contract}
+          tokenId={String(tokenId)}
+          locale={resolvedLocale}
+          onMarketChange={refresh}
+        >
+          <div className="tw-mt-8">
+            {data.status === ApiMarketDepthStatusEnum.Unavailable ? (
+              <>
+                <div className="tw-border-0 tw-border-y tw-border-solid tw-border-white/10 tw-py-5">
+                  <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+                    {t(resolvedLocale, "marketDepth.unavailable.title")}
+                  </p>
                 </div>
-                <div className="tw-py-5 sm:tw-pl-8">
-                  <dt className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
-                    {t(resolvedLocale, "marketDepth.bestBid")}
-                  </dt>
-                  <dd className="tw-m-0 tw-mt-2 tw-text-2xl tw-font-medium tw-tabular-nums tw-text-iron-100">
-                    <DecimalValue
-                      locale={resolvedLocale}
-                      value={wethBook?.best_bid}
-                    />
-                  </dd>
-                </div>
-              </dl>
+                <AboutPrices data={data} locale={resolvedLocale} />
+              </>
+            ) : (
+              <>
+                <dl className="tw-m-0 tw-grid tw-border-0 tw-border-y tw-border-solid tw-border-white/10 sm:tw-grid-cols-2 sm:tw-divide-x sm:tw-divide-y-0 sm:tw-divide-white/10">
+                  <div className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-py-5 sm:tw-border-b-0 sm:tw-pr-8">
+                    <dt className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+                      {t(resolvedLocale, "marketDepth.bestAsk")}
+                    </dt>
+                    <dd className="tw-m-0 tw-mt-2 tw-text-2xl tw-font-medium tw-tabular-nums tw-text-iron-100">
+                      <DecimalValue
+                        locale={resolvedLocale}
+                        value={ethBook?.best_ask}
+                      />
+                    </dd>
+                  </div>
+                  <div className="tw-py-5 sm:tw-pl-8">
+                    <dt className="tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
+                      {t(resolvedLocale, "marketDepth.bestBid")}
+                    </dt>
+                    <dd className="tw-m-0 tw-mt-2 tw-text-2xl tw-font-medium tw-tabular-nums tw-text-iron-100">
+                      <DecimalValue
+                        locale={resolvedLocale}
+                        value={wethBook?.best_bid}
+                      />
+                    </dd>
+                  </div>
+                </dl>
 
-              {!hasQuotedLevels && (
-                <p className="tw-mb-0 tw-mt-6 tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-pb-6 tw-text-sm tw-text-iron-400">
-                  {t(resolvedLocale, "marketDepth.empty")}
-                </p>
-              )}
+                {!hasQuotedLevels && (
+                  <p className="tw-mb-0 tw-mt-6 tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-pb-6 tw-text-sm tw-text-iron-400">
+                    {t(resolvedLocale, "marketDepth.empty")}
+                  </p>
+                )}
 
-              {nonEmptySides.length > 0 && (
-                <div className="tw-mt-10 tw-grid tw-grid-cols-[repeat(auto-fit,minmax(min(100%,20rem),1fr))] tw-gap-x-12 tw-gap-y-10">
-                  {nonEmptySides.map(({ book, side, levels }) => (
-                    <div
-                      key={`${book.currency.address}-${side}`}
-                      className="tw-min-w-0"
-                    >
-                      <div className="tw-mb-3 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-3 tw-gap-y-1">
-                        <h3 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-base tw-font-medium tw-text-iron-100">
-                          {t(
-                            resolvedLocale,
-                            side === "ask"
-                              ? "marketDepth.asks"
-                              : "marketDepth.bids"
-                          )}{" "}
-                          · {currencyName(resolvedLocale, book)}
-                        </h3>
-                        <span className="tw-text-xs tw-text-iron-500">
-                          {t(resolvedLocale, "marketDepth.sideCount.orders", {
-                            count: formatLocalizedInteger(
+                {nonEmptySides.length > 0 && (
+                  <div className="tw-mt-10 tw-grid tw-grid-cols-[repeat(auto-fit,minmax(min(100%,20rem),1fr))] tw-gap-x-12 tw-gap-y-10">
+                    {nonEmptySides.map(({ book, side, levels }) => (
+                      <div
+                        key={`${book.currency.address}-${side}`}
+                        className="tw-min-w-0"
+                      >
+                        <div className="tw-mb-3 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-3 tw-gap-y-1">
+                          <h3 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-base tw-font-medium tw-text-iron-100">
+                            {t(
                               resolvedLocale,
                               side === "ask"
-                                ? book.ask_order_count
-                                : book.bid_order_count
-                            ),
-                          })}
-                        </span>
-                        {!isCanonicalCurrency(book) && (
-                          <span
-                            title={book.currency.address}
-                            className="tw-w-full tw-break-all tw-text-xs tw-text-iron-500"
-                          >
-                            {book.currency.address}
+                                ? "marketDepth.asks"
+                                : "marketDepth.bids"
+                            )}{" "}
+                            · {currencyName(resolvedLocale, book)}
+                          </h3>
+                          <span className="tw-text-xs tw-text-iron-500">
+                            {t(resolvedLocale, "marketDepth.sideCount.orders", {
+                              count: formatLocalizedInteger(
+                                resolvedLocale,
+                                side === "ask"
+                                  ? book.ask_order_count
+                                  : book.bid_order_count
+                              ),
+                            })}
                           </span>
-                        )}
+                          {!isCanonicalCurrency(book) && (
+                            <span
+                              title={book.currency.address}
+                              className="tw-w-full tw-break-all tw-text-xs tw-text-iron-500"
+                            >
+                              {book.currency.address}
+                            </span>
+                          )}
+                        </div>
+                        <MarketDepthPriceLevels
+                          side={side}
+                          levels={levels}
+                          currency={book.currency}
+                          currencyLabel={currencyName(resolvedLocale, book)}
+                          orders={data.orders}
+                          isLoading={isLoadingMore || data.next !== null}
+                          error={currentLoadMoreError}
+                          onLoadOrders={loadOrders}
+                          onRefresh={refresh}
+                          locale={resolvedLocale}
+                        />
                       </div>
-                      <MarketDepthPriceLevels
-                        side={side}
-                        levels={levels}
-                        currency={book.currency}
-                        currencyLabel={currencyName(resolvedLocale, book)}
-                        orders={data.orders}
-                        isLoading={isLoadingMore || data.next !== null}
-                        error={currentLoadMoreError}
-                        onLoadOrders={loadOrders}
-                        onRefresh={refresh}
-                        locale={resolvedLocale}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
 
-              <p className="tw-mb-0 tw-mt-8 tw-max-w-3xl tw-text-xs tw-leading-5 tw-text-iron-500">
-                {t(resolvedLocale, "marketDepth.sourceCaveat")}
-              </p>
+                <p className="tw-mb-0 tw-mt-8 tw-max-w-3xl tw-text-xs tw-leading-5 tw-text-iron-500">
+                  {t(resolvedLocale, "marketDepth.sourceCaveat")}
+                </p>
 
-              <MarketDepthOtherOrders
-                data={data}
-                locale={resolvedLocale}
-                onRetry={loadOrders}
-                onRefresh={refresh}
-                isLoading={isLoadingMore || data.next !== null}
-                error={currentLoadMoreError}
-              />
-              <AboutPrices data={data} locale={resolvedLocale} />
-            </>
-          )}
-        </div>
+                <MarketDepthOtherOrders
+                  data={data}
+                  locale={resolvedLocale}
+                  onRetry={loadOrders}
+                  onRefresh={refresh}
+                  isLoading={isLoadingMore || data.next !== null}
+                  error={currentLoadMoreError}
+                />
+                <AboutPrices data={data} locale={resolvedLocale} />
+              </>
+            )}
+          </div>
+        </MarketDepthTradeProvider>
       )}
     </section>
   );

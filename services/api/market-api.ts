@@ -7,6 +7,7 @@ import type { ApiMarketSendAttemptRequest } from "@/generated/models/ApiMarketSe
 import type { ApiMarketSendAttemptRejection } from "@/generated/models/ApiMarketSendAttemptRejection";
 import type { ApiMarketListings } from "@/generated/models/ApiMarketListings";
 import type { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import { commonApiFetch, commonApiPost } from "./common-api";
 
 const operationPath = (id: string) =>
@@ -31,6 +32,24 @@ export const fetchMarketOrders = (
   commonApiFetch<ApiMarketOrders>({
     endpoint: "market/orders",
     params: { asset_key: assetKey, side },
+    signal,
+    cache: "no-store",
+    errorMode: "structured",
+  });
+export const fetchExactMarketOrder = (
+  orderHash: string,
+  protocolAddress: string,
+  assetKey: string,
+  side: "LISTING" | "OFFER",
+  signal?: AbortSignal
+) =>
+  commonApiFetch<ApiMarketTradeOrder>({
+    endpoint: `market/orders/${encodeURIComponent(orderHash)}`,
+    params: {
+      protocol_address: protocolAddress,
+      asset_key: assetKey,
+      side,
+    },
     signal,
     cache: "no-store",
     errorMode: "structured",

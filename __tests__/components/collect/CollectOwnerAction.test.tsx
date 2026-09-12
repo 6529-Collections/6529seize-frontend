@@ -77,7 +77,7 @@ it("shows listing for an NFT held by another confirmed profile wallet and requir
   const { rerender } = render(
     <CollectOwnerAction assetKey={asset} onList={onList} />
   );
-  fireEvent.click(screen.getByRole("button", { name: "List for sale" }));
+  fireEvent.click(screen.getByRole("button", { name: "List" }));
   expect(onList).not.toHaveBeenCalled();
   fireEvent.click(
     screen.getByRole("button", { name: new RegExp("custody.eth") })
@@ -85,7 +85,7 @@ it("shows listing for an NFT held by another confirmed profile wallet and requir
   expect(mockSwitch).toHaveBeenCalledWith(owner);
   mockAddress = owner;
   rerender(<CollectOwnerAction assetKey={asset} onList={onList} />);
-  const trigger = screen.getByRole("button", { name: "List for sale" });
+  const trigger = screen.getByRole("button", { name: "List" });
   fireEvent.click(trigger);
   expect(onList).toHaveBeenCalledWith(trigger);
 });
@@ -96,19 +96,19 @@ it("never treats stale other-profile or other-asset holdings as ownership", () =
     <CollectOwnerAction assetKey={asset} onList={onList} />
   );
   expect(
-    screen.queryByRole("button", { name: "List for sale" })
+    screen.queryByRole("button", { name: "List" })
   ).not.toBeInTheDocument();
   mockAnalysis!.account.profile_id = "profile";
   rerender(<CollectOwnerAction assetKey={`${asset}0`} onList={onList} />);
   expect(
-    screen.queryByRole("button", { name: "List for sale" })
+    screen.queryByRole("button", { name: "List" })
   ).not.toBeInTheDocument();
 });
-it("keeps List for sale discoverable for guests and opens the connection flow", () => {
+it("keeps List discoverable for guests and opens the connection flow", () => {
   mockProfile = null;
   const onList = jest.fn();
   render(<CollectOwnerAction assetKey={asset} onList={onList} />);
-  fireEvent.click(screen.getByRole("button", { name: "List for sale" }));
+  fireEvent.click(screen.getByRole("button", { name: "List" }));
   expect(mockConnect).toHaveBeenCalledTimes(1);
   expect(onList).not.toHaveBeenCalled();
 });
@@ -119,7 +119,7 @@ it("shows a disabled listing action while checking ownership", () => {
   mockIsFetching = true;
   const onList = jest.fn();
   render(<CollectOwnerAction assetKey={asset} onList={onList} />);
-  const button = screen.getByRole("button", { name: "List for sale" });
+  const button = screen.getByRole("button", { name: "List" });
   expect(button).toBeDisabled();
   expect(button).toHaveAccessibleDescription("Checking ownership…");
   expect(screen.getByRole("status")).toHaveTextContent("Checking ownership…");
@@ -138,7 +138,7 @@ it.each([true, false])(
     const { rerender } = render(
       <CollectOwnerAction assetKey={asset} onList={onList} />
     );
-    const list = screen.getByRole("button", { name: "List for sale" });
+    const list = screen.getByRole("button", { name: "List" });
     expect(list).toBeDisabled();
     expect(list).toHaveAccessibleDescription("Ownership could not be checked.");
     const status = screen.getByRole("status");
@@ -159,9 +159,7 @@ it.each([true, false])(
     expect(
       screen.getByRole("button", { name: "Retry ownership check" })
     ).toBeDisabled();
-    expect(
-      screen.getByRole("button", { name: "List for sale" })
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "List" })).toBeDisabled();
   }
 );
 
@@ -177,7 +175,7 @@ it("restores listing only after a successful ownership retry", () => {
   );
   mockIsError = false;
   rerender(<CollectOwnerAction assetKey={asset} onList={onList} />);
-  const list = screen.getByRole("button", { name: "List for sale" });
+  const list = screen.getByRole("button", { name: "List" });
   expect(list).toBeEnabled();
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
   fireEvent.click(list);
