@@ -53,16 +53,32 @@ The command writes `publication.json`, `content.json`, the reconstructed
 output directory with a static file server or open that file directly.
 
 Published website links can use readable page addresses such as `/handle/studio`.
-The signed package retains archive file paths; recovered navigation points to
-those local HTML files. The archive preserves content and navigation rather than
-requiring the interactive studio or its exact visual presentation.
+The signed package retains archive file paths; recovered navigation and readable
+page links point to local HTML files, including artwork detail pages. The archive
+does not require the interactive studio or its application bundle.
 
 Static recovery renders ordinary text/media, navigation, gallery works and 2D
-room placements. It does not execute author JavaScript or activate embedded HTML
-and 3D runtimes. More specialized blocks retain their structured source in an
-expandable panel. Referenced media still needs its original host or decentralized
-gateway unless separately mirrored; recovering page JSON does not archive every
-external asset.
+room placements. The six native studio designs also retain grouped sections,
+column widths, design-specific styling, artwork captions and credits, collection
+records, and links between all their pages and sections. Contact sections provide
+an email link; artwork enquiry links retain their subject when the destination
+has a contact email. Project mockups recover the current headings, notes, and task
+or book rows as readable records. This archival layout is not a pixel-for-pixel copy of the interactive site:
+search, gallery filters, view switches, and contact forms are not activated.
+
+New native gallery drafts require an `asset_ids` placement for each annotated
+`items` entry, including repeated occurrences of the same artwork. Recovery can
+display item-only gallery data defensively when both ID arrays are empty, using
+the same asset lookup and URI checks as ordinary artwork. That display fallback
+does not make an invalid package pass authoring or publication validation.
+Record rows replace an exact duplicate prose fallback; independent paragraphs
+remain alongside the record.
+
+Recovery does not execute author JavaScript or activate embedded HTML and 3D
+runtimes. More specialized blocks retain their structured source in an expandable
+panel. Referenced media still needs its original host or decentralized gateway
+unless separately mirrored; recovering page JSON does not archive every external
+asset.
 
 ## Contract wallets
 

@@ -45,6 +45,7 @@ import {
 } from "@/lib/profile-cms/studio/demo-assets";
 import { CMS_STUDIO_MEME_WORKS } from "@/lib/profile-cms/studio/meme-assets";
 import { getCmsStudioMemeDisplayAsset } from "@/lib/profile-cms/studio/meme-display-assets";
+import CmsApprovedSiteRenderer from "./CmsApprovedSiteRenderer";
 
 export interface CmsStudioEditingContext {
   readonly selectedBlockId?: string | null | undefined;
@@ -77,19 +78,29 @@ const DENSITY_CLASSES = {
 const LINK_CLASS =
   "tw-text-inherit tw-no-underline tw-transition-opacity hover:tw-text-inherit hover:tw-opacity-70 focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:!tw-outline-current";
 
-export default function CmsStudioSiteRenderer({
-  cmsPackage,
-  page,
-  locale,
-  presentation,
-  editing,
-}: {
+interface CmsStudioSiteRendererProps {
   readonly cmsPackage: CmsPackageV1;
   readonly page: CmsPageV1;
   readonly locale: SupportedLocale;
   readonly presentation: CmsStudioPresentation;
   readonly editing?: CmsStudioEditingContext | undefined;
-}) {
+}
+
+export default function CmsStudioSiteRenderer(
+  props: CmsStudioSiteRendererProps
+) {
+  if (props.presentation.studio_design)
+    return <CmsApprovedSiteRenderer {...props} />;
+  return <LegacyCmsStudioSiteRenderer {...props} />;
+}
+
+function LegacyCmsStudioSiteRenderer({
+  cmsPackage,
+  page,
+  locale,
+  presentation,
+  editing,
+}: CmsStudioSiteRendererProps) {
   const context: RendererContext = {
     ...createRendererContext(cmsPackage, locale, editing?.onNavigatePage),
     appearance: "studio",

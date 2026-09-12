@@ -173,7 +173,7 @@
         "The complete artist record is one reusable form for photography, digital art, video, audio, HTML, generative, interactive, spatial, text and installation. Select all media that apply; their questions combine without deleting earlier answers. Keys and Gates uses the same form with photography and fixed project CC0 artwork terms.",
         "The complete record chapters are The work, The artist’s account, Materials & versions, The conversation, Presentation & care, Credits & terms, and The complete record. Existing earlier forms retain their six chapters. Extend this artist record offers an explicit update preview. Owners of earlier project records can apply the reviewed update within the same project while fixed terms remain. Restricted legacy answers need a coordinator’s review and block conversion; confirmed versions are preserved.",
         "Long writing fields preserve complete documents and transcripts. Read this text opens a reading view, and Write returns to the field. Import text accepts UTF-8 text or Markdown for review, then Use this text replaces the field or Add after my writing appends it. Imported text is separate until chosen. HTML is shown as text. Over-limit writing is retained for correction before saving.",
-        "See an example for this answer opens a precise excerpt from AN ALTERATION where available. Other media-specific answers use clearly labeled invented examples about illustrative works. Read the complete example opens AN ALTERATION’s standalone illustrated record with the full supplied prose, print instructions and interview. It is illustrative, not a confirmed accession. Only supplied writing and preview image are included; named masters, source files and prints have not been received or verified. Its print-custody discrepancy remains explicit. Examples do not fill answers or confirm facts.",
+        "See an example for this answer opens a precise excerpt from AN ALTERATION where available. Other media-specific answers use clearly labeled invented examples about illustrative works. Read the complete example opens AN ALTERATION’s standalone illustrated record with the full supplied prose, print instructions and interview. It is an illustrative (fictional) record. Only supplied writing and preview image are included; named masters, source files and prints have not been received or verified. Its print-custody discrepancy remains explicit. Examples do not fill answers or confirm facts.",
         "Materials & versions distinguishes uploaded originals, described materials and physical objects. Batch file selection uploads in order using the selected role and pauses on a problem. Edit file details records source, terms and derivations. Current limits are 8 GiB per original, 128 GiB per record, 1,000 files and five simultaneous uploads, subject to the displayed policy and format rules.",
         "Open the player uses approved passive audio or video with native controls and no autoplay. Linked WebVTT captions load after an access check; Captions selects among supplied files and Read the transcript opens a linked readable conversation. Missing alternatives are explained; no captions or transcription are invented. Try again retries media or caption loading. Unsupported codecs can use the original download or a separate display derivative. HTML, SVG and code never execute in the record. File integrity shows measured properties, checksums and credential status without claiming custody, authorship or archival suitability. Embedded-manifest integrity does not establish signer trust or truth of claims.",
         "Catalogue & history stores separately attributed Museum entries with dates, status and evidence. Only staff with the relevant review lanes see entry writing controls. Save the Museum entry is deliberate and separate from artist autosave; its draft remains across chapter navigation. Museum additions do not rewrite confirmed artist text.",
@@ -5597,7 +5597,7 @@
       ],
       "facts": [
         "Open /{user}/cms/builder directly to build or edit a profile-owned website. A profile with an available published website shows Website in its header; that link opens the published site.",
-        "The studio has 39 complete visual templates: 23 original compositions and 16 inspired by credited CC0 cards from The Memes. Templates and point-and-click editing work without an AI agent.",
+        "The studio offers six fully populated templates: Personal, Artist, Collector, Meme, Organization, and Fund / DAO. Templates and point-and-click editing work without an AI agent.",
         "Use Pages for page titles, addresses, menu labels, duplication, removal, and choosing the homepage. Use Content to edit sections and Design for site name, layout, palette, typography, spacing, and accent color.",
         "Preview all pages in Desktop and Phone views. Review and replace sample names, writing, artwork, claims, and links before confirming the sample-content review for publication.",
         "Saving, image upload, server validation, and publishing require the connected non-proxy owner profile. Publishing uploads content and asks the wallet to sign; saving alone does not publish.",
@@ -7829,15 +7829,8 @@
         "Apply changes or Discard form changes before saving, publishing, switching panels, or Undo. Unapplied page, section, and design fields are not autosaved; browser recovery keeps the applied document. Finish or cancel an image upload before leaving its panel."
       ],
       "canonical_path": "/{user}/cms/builder",
-      "related_paths": [
-        "/{user}"
-      ],
-      "tags": [
-        "profiles",
-        "cms",
-        "sharing",
-        "search"
-      ],
+      "related_paths": ["/{user}"],
+      "tags": ["profiles", "cms", "sharing", "search"],
       "source_refs": [
         "components/profile-cms-builder/studio/StudioPageSettings.tsx",
         "components/profile-cms-builder/studio/StudioForm.tsx",
@@ -7868,22 +7861,31 @@
         "organization",
         "fund",
         "DAO",
-        "visual editor"
+        "visual editor",
+        "project mockup",
+        "book catalogue"
       ],
       "facts": [
-        "Browse 39 templates in People & ideas, Collections, Artists, Organizations, Funds & collecting groups, and The Memes. Open a full example, explore its pages, then choose Use this template.",
-        "Artist examples cover studios, portfolios, exhibitions, medium studies, process journals, editions, and retrospectives. Organization examples include professional practices, nonprofits, crypto protocols, NFT projects, funds, collecting DAOs, and institutional collections.",
+        "Browse six complete examples: Personal, Artist, Collector, Meme, Organization, and Fund / DAO. Open a full example, explore its pages and artwork, then choose Use this template.",
+        "Artist includes three bodies of work and nine individual works; Collector includes nineteen works, four curated sets and collecting notes; Fund / DAO includes seventeen works, exhibition notes, a mandate, members and decision records. The other examples provide personal projects and experience, a digital art club, and an artist-run organization's programme and visitor information.",
         "All templates use visually editable content. Click a section or select it in Content to edit supported text, images, captions, credits, links, widths, and treatments. Add, duplicate, remove, and reorder sections with the controls.",
-        "Pages supports adding and duplicating pages, page settings, choosing the home page, showing a page in the site menu, and changing menu order. A referenced page cannot be removed until its remaining links or homepage reference are changed.",
+        "Edit a gallery's works, titles, credits, categories and detail-page links in Content. Edit record rows in their section and full artwork descriptions in Pages. Archive sections can provide search, categories and grid or list views. Editing one artwork page preserves the other pages.",
+        "Personal includes project planner and book catalogue portfolio illustrations. Select their section in Content to edit the title, small label, mockup heading, date or period, description and footer note. Mockup style switches between Project planner and Book catalogue. Edit rows for tasks and statuses or books, authors and loan notes, then choose Apply changes.",
+        "Pages supports adding and duplicating pages, page settings, choosing the home page, showing a page in the site menu, and changing menu order. A page referenced by another link, gallery work, record or the homepage cannot be removed until those references are changed.",
         "Design restyles the current site. Start a new site replaces the draft with a new template after confirmation; save or download the current draft first. This is not automatic content-preserving template conversion.",
-        "The Memes examples preserve card titles, artist credits, and source links. Static previews avoid autoplaying animated originals. Template use does not claim token ownership, authorship, or artist endorsement."
+        "Examples include generated original artwork and credited CC0 works from The Memes and Blitmap. Animated originals use still previews with original-media links. Sample people, organizations, records and edition offers are fictional; replace their claims and contact details before publishing. Template use does not claim NFT ownership, authorship or artist endorsement."
       ],
       "canonical_path": "/{user}/cms/builder",
       "related_paths": ["/{user}"],
       "tags": ["profiles", "cms", "templates"],
       "source_refs": [
         "lib/profile-cms/studio/templates.ts",
+        "lib/profile-cms/studio/templates-approved.ts",
+        "lib/profile-cms/studio/approved-assets.ts",
         "components/profile-cms-builder/studio/StudioTemplateLibrary.tsx",
+        "components/profile-cms-builder/studio/StudioCollectionFields.tsx",
+        "components/profile-cms-builder/studio/StudioBlockInspector.tsx",
+        "components/profile-cms/approved-renderer/ProjectMockup.tsx",
         "components/profile-cms-builder/studio/StudioPageActions.tsx",
         "ops/docs/profiles/feature-profile-cms-builder.md"
       ]
@@ -7964,14 +7966,8 @@
         "Use your own agent subscription or API account. The local adapter makes no model calls or background retries. File exchange does not require a session token; connected access uses a separate temporary key. Keep keys out of prompts and website files. Neither workflow requires wallet private keys or recovery phrases."
       ],
       "canonical_path": "/{user}/cms/builder",
-      "related_paths": [
-        "/{user}"
-      ],
-      "tags": [
-        "profiles",
-        "cms",
-        "agents"
-      ],
+      "related_paths": ["/{user}"],
+      "tags": ["profiles", "cms", "agents"],
       "source_refs": [
         "components/profile-cms-builder/agent/ProfileCmsAgentWorkspace.tsx",
         "components/profile-cms-builder/agent/CmsAgentConnection.tsx",
@@ -8156,12 +8152,7 @@
         "/collect?intent=tdh&view=projection",
         "/collect/orders"
       ],
-      "tags": [
-        "collections",
-        "TDH",
-        "profiles",
-        "wallets"
-      ],
+      "tags": ["collections", "TDH", "profiles", "wallets"],
       "source_refs": [
         "ops/docs/media/collecting.md",
         "components/collect/CollectTdhDailyController.tsx",
