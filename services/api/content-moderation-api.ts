@@ -11,6 +11,7 @@ import type { ApiContentModerationReportResponse } from "@/generated/models/ApiC
 import type { ApiContentModerationReportWithdrawalResponse } from "@/generated/models/ApiContentModerationReportWithdrawalResponse";
 import type { ApiContentModerationUserReport } from "@/generated/models/ApiContentModerationUserReport";
 import type { ApiContentModeratorAccess } from "@/generated/models/ApiContentModeratorAccess";
+import type { ApiModerationAccess } from "@/generated/models/ApiModerationAccess";
 import {
   commonApiDelete,
   commonApiDeleteWithResponse,
@@ -72,19 +73,39 @@ export const withdrawDropReport = (
     errorMode: "structured",
   });
 
-export const fetchContentModeratorAccess =
-  (): Promise<ApiContentModeratorAccess> =>
-    commonApiFetch<ApiContentModeratorAccess>({
-      endpoint: "content-moderation/moderator-access",
-      errorMode: "structured",
-    });
+export const fetchContentModeratorAccess = async (
+  signal?: AbortSignal
+): Promise<ApiContentModeratorAccess> => {
+  const access = await commonApiFetch<ApiModerationAccess>({
+    endpoint: "content-moderation/checks/access",
+    ...(signal ? { signal } : {}),
+    cache: "no-store",
+    errorMode: "structured",
+  });
+  if (!access.developer)
+    return {
+      moderator: false,
+      has_open_reports: false,
+      open_report_count: 0,
+      resolved_report_count: 0,
+      suspended_profile_count: 0,
+    };
+  return commonApiFetch<ApiContentModeratorAccess>({
+    endpoint: "content-moderation/moderator-access",
+    ...(signal ? { signal } : {}),
+    cache: "no-store",
+    errorMode: "structured",
+  });
+};
 
 export const fetchContentModerationBlockActivity = ({
   limit = 50,
   before,
+  signal,
 }: {
   readonly limit?: number | undefined;
   readonly before?: string | undefined;
+  readonly signal?: AbortSignal;
 } = {}): Promise<ApiContentModerationBlockActivityItem[]> =>
   commonApiFetch<
     ApiContentModerationBlockActivityItem[],
@@ -96,6 +117,8 @@ export const fetchContentModerationBlockActivity = ({
       limit: String(limit),
       ...(before === undefined ? {} : { before }),
     },
+    signal,
+    cache: "no-store",
     errorMode: "structured",
   });
 
@@ -118,10 +141,12 @@ export const fetchMyContentModerationReports = ({
 export const fetchContentModerationQueue = ({
   limit = 50,
   before,
+  signal,
   view = "OPEN",
 }: {
   readonly limit?: number | undefined;
   readonly before?: string | undefined;
+  readonly signal?: AbortSignal;
   readonly view?: "OPEN" | "RESOLVED" | undefined;
 } = {}): Promise<ApiContentModerationQueueItem[]> =>
   commonApiFetch<ApiContentModerationQueueItem[], Record<string, string>>({
@@ -131,15 +156,19 @@ export const fetchContentModerationQueue = ({
       view,
       ...(before === undefined ? {} : { before: String(before) }),
     },
+    signal,
+    cache: "no-store",
     errorMode: "structured",
   });
 
 export const fetchSuspendedModerationProfiles = ({
   limit = 50,
   before,
+  signal,
 }: {
   readonly limit?: number | undefined;
   readonly before?: string | undefined;
+  readonly signal?: AbortSignal;
 } = {}): Promise<ApiContentModerationProfileListItem[]> =>
   commonApiFetch<ApiContentModerationProfileListItem[], Record<string, string>>(
     {
@@ -148,6 +177,8 @@ export const fetchSuspendedModerationProfiles = ({
         limit: String(limit),
         ...(before === undefined ? {} : { before: String(before) }),
       },
+      signal,
+      cache: "no-store",
       errorMode: "structured",
     }
   );

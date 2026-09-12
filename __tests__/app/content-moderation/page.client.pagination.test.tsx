@@ -24,7 +24,10 @@ import {
   waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { PathnameContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime";
+import {
+  PathnameContext,
+  SearchParamsContext,
+} from "next/dist/shared/lib/hooks-client-context.shared-runtime";
 import { useEffect, useState, type ReactNode } from "react";
 
 // Supply Next's pathname context and model its native-history integration.
@@ -52,9 +55,13 @@ function NavigationTestProvider({
     };
   }, []);
   return (
-    <PathnameContext.Provider value={pathname}>
-      {children}
-    </PathnameContext.Provider>
+    <SearchParamsContext.Provider
+      value={new URLSearchParams(globalThis.location.search)}
+    >
+      <PathnameContext.Provider value={pathname}>
+        {children}
+      </PathnameContext.Provider>
+    </SearchParamsContext.Provider>
   );
 }
 
@@ -117,6 +124,18 @@ jest.mock("@/services/api/content-moderation-api", () => ({
   setModeratedProfileStatus: jest.fn(),
 }));
 
+jest.mock("@/services/api/moderation-checks-api", () => ({
+  fetchModerationCounts: jest.fn(async () => ({
+    needs_review: 0,
+    quarantined: 0,
+    rejected_today: 0,
+    evaluator_failures_today: 0,
+  })),
+  fetchModerationChecks: jest.fn(async () => ({
+    items: [],
+    next_cursor: null,
+  })),
+}));
 jest.mock("next/image", () => ({
   __esModule: true,
   default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
@@ -175,6 +194,8 @@ const createBlockActivityItem = (
 describe("ContentModerationPageClient pagination", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFetchContentModerationQueue.mockReset();
+    mockFetchContentModerationBlockActivity.mockReset();
     globalThis.history.replaceState(null, "", "/content-moderation");
     jest.mocked(fetchSuspendedModerationProfiles).mockResolvedValue([]);
     mockFetchingProfile = false;
@@ -231,6 +252,8 @@ describe("ContentModerationPageClient pagination", () => {
         expect(screen.queryByRole("tabpanel")).not.toBeInTheDocument();
         expect(screen.queryByRole("link")).not.toBeInTheDocument();
         jest.clearAllMocks();
+        mockFetchContentModerationQueue.mockReset();
+        mockFetchContentModerationBlockActivity.mockReset();
         await act(async () => {
           mockBlockActivityIntersection?.(true);
           await client.invalidateQueries();
@@ -247,7 +270,7 @@ describe("ContentModerationPageClient pagination", () => {
     const client = new QueryClient();
     const feed = (enabled: boolean) => (
       <QueryClientProvider client={client}>
-        <BlockActivityFeed enabled={enabled} />
+        <BlockActivityFeed enabled={enabled} profileId="moderator-1" />
       </QueryClientProvider>
     );
     const { container, rerender } = render(feed(false));
@@ -268,7 +291,7 @@ describe("ContentModerationPageClient pagination", () => {
     const client = new QueryClient({
       defaultOptions: { queries: { staleTime: Infinity } },
     });
-    client.setQueryData(BLOCK_ACTIVITY_QUERY_KEY, {
+    client.setQueryData([...BLOCK_ACTIVITY_QUERY_KEY, "moderator-1"], {
       pages: [
         Array.from({ length: 50 }, (_, index) =>
           createBlockActivityItem(index)
@@ -278,7 +301,7 @@ describe("ContentModerationPageClient pagination", () => {
     });
     const feed = (enabled: boolean) => (
       <QueryClientProvider client={client}>
-        <BlockActivityFeed enabled={enabled} />
+        <BlockActivityFeed enabled={enabled} profileId="moderator-1" />
       </QueryClientProvider>
     );
     const { container, rerender } = render(feed(true));
@@ -462,7 +485,7 @@ describe("ContentModerationPageClient pagination", () => {
     await userEvent.keyboard("{ArrowLeft}");
     expect(screen.getByRole("tab", { name: "Block activity" })).toHaveFocus();
     expect(globalThis.location.pathname).toBe("/content-moderation");
-    await userEvent.keyboard("{Home}{ArrowRight}{Enter}");
+    await userEvent.keyboard("{Home}{ArrowRight}{ArrowRight}{Enter}");
     expect(globalThis.location.pathname).toBe(
       "/content-moderation/resolved-reports"
     );
@@ -646,6 +669,7 @@ describe("ContentModerationPageClient pagination", () => {
     );
     expect(mockFetchContentModerationQueue).toHaveBeenNthCalledWith(1, {
       limit: 50,
+      signal: expect.any(AbortSignal),
       view: "OPEN",
     });
 
@@ -655,6 +679,7 @@ describe("ContentModerationPageClient pagination", () => {
     expect(mockFetchContentModerationQueue).toHaveBeenNthCalledWith(2, {
       before: "cursor-50",
       limit: 50,
+      signal: expect.any(AbortSignal),
       view: "OPEN",
     });
     await waitFor(() =>
@@ -691,6 +716,7 @@ describe("ContentModerationPageClient pagination", () => {
     expect(await screen.findByText("content-2")).toBeInTheDocument();
     expect(mockFetchContentModerationQueue).toHaveBeenLastCalledWith({
       limit: 50,
+      signal: expect.any(AbortSignal),
       view: "RESOLVED",
     });
     expect(screen.getByText("Resolved: Resolved Allowed")).toBeInTheDocument();
@@ -744,6 +770,7 @@ describe("ContentModerationPageClient pagination", () => {
     );
     expect(mockFetchContentModerationBlockActivity).toHaveBeenNthCalledWith(1, {
       limit: 50,
+      signal: expect.any(AbortSignal),
     });
     expect(screen.getByRole("button", { name: "Load more" })).toBeVisible();
 
@@ -755,6 +782,7 @@ describe("ContentModerationPageClient pagination", () => {
     expect(mockFetchContentModerationBlockActivity).toHaveBeenNthCalledWith(2, {
       before: "block-cursor-50",
       limit: 50,
+      signal: expect.any(AbortSignal),
     });
 
     await userEvent.click(screen.getByRole("button", { name: "Load more" }));
@@ -765,6 +793,7 @@ describe("ContentModerationPageClient pagination", () => {
     expect(mockFetchContentModerationBlockActivity).toHaveBeenNthCalledWith(3, {
       before: "block-cursor-100",
       limit: 50,
+      signal: expect.any(AbortSignal),
     });
   });
 });

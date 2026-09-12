@@ -1,4 +1,6 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
+import { sha256 } from "js-sha256";
+import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
 import { useMutation } from "@tanstack/react-query";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
@@ -98,6 +100,10 @@ export const useGroupMutations = ({
   requestAuth,
   onGroupCreate,
 }: UseGroupMutationsArgs) => {
+  const pendingPublication = useRef<{
+    fingerprint: string;
+    group: ApiGroupFull;
+  } | null>(null);
   const createGroupMutation = useMutation({
     mutationFn: async ({
       payload,
@@ -235,12 +241,32 @@ export const useGroupMutations = ({
         };
       }
 
+      const oldVersionId = resolveOldVersionId({
+        previousGroup,
+        currentHandle,
+      });
+      const fingerprint = sha256(
+        JSON.stringify([
+          getWalletAddress()?.toLowerCase(),
+          getWalletRole(),
+          currentHandle?.toLowerCase(),
+          oldVersionId,
+          { ...payload, name: trimmedName },
+        ])
+      );
+      if (pendingPublication.current?.fingerprint !== fingerprint || !publish) {
+        pendingPublication.current = null;
+      }
       let created: ApiGroupFull;
       try {
-        created = await createGroupMutation.mutateAsync({
-          payload,
-          nameOverride: trimmedName,
-        });
+        created =
+          pendingPublication.current?.group ??
+          (await createGroupMutation.mutateAsync({
+            payload,
+            nameOverride: trimmedName,
+          }));
+        if (publish)
+          pendingPublication.current = { fingerprint, group: created };
       } catch (error) {
         return {
           ok: false,
@@ -257,11 +283,6 @@ export const useGroupMutations = ({
         };
       }
 
-      const oldVersionId = resolveOldVersionId({
-        previousGroup,
-        currentHandle,
-      });
-
       const visibilityResult = await updateVisibility({
         groupId: created.id,
         visible: true,
@@ -277,6 +298,7 @@ export const useGroupMutations = ({
         };
       }
 
+      pendingPublication.current = null;
       return {
         ok: true,
         group: visibilityResult.group ?? created,

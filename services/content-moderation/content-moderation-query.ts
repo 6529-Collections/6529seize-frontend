@@ -1,4 +1,4 @@
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import type { QueryClient } from "@tanstack/react-query";
 
@@ -40,7 +40,45 @@ const CONTENT_PRESENTATION_QUERY_ROOTS = [
   QueryKey.DM_DROPS_UNREAD,
   QueryKey.WAVES_OVERVIEW,
   QueryKey.WAVES_V2,
+  QueryKey.PROFILE_CIC_STATEMENTS,
+  QueryKey.PROFILE,
+  QueryKey.GROUP,
+  QueryKey.GROUPS,
 ] as const;
+
+export const MODERATION_CHECKS_QUERY_KEY = [
+  QueryKey.CONTENT_MODERATION_REPORTS,
+  "checks",
+] as const;
+
+export const isPrivateModerationQuery = (
+  queryKey: readonly unknown[]
+): boolean =>
+  queryKey[0] === QueryKey.CONTENT_MODERATION_REPORTS &&
+  [
+    "OPEN",
+    "RESOLVED",
+    "suspended-profiles",
+    "block-activity",
+    "checks",
+  ].includes(String(queryKey[1]));
+
+export const clearPrivateModerationQueries = (
+  queryClient: QueryClient,
+  keepProfileId?: string | null
+): void => {
+  // Removal cancels in-flight requests as well as forgetting their evidence.
+  queryClient.removeQueries({
+    predicate: (query) =>
+      isPrivateModerationQuery(query.queryKey) &&
+      (!keepProfileId || query.queryKey[2] !== keepProfileId),
+  });
+  const mutations = queryClient.getMutationCache();
+  for (const mutation of mutations.getAll()) {
+    if (isPrivateModerationQuery(mutation.options.mutationKey ?? []))
+      mutations.remove(mutation);
+  }
+};
 
 export const invalidateContentModerationPresentation = async (
   queryClient: QueryClient

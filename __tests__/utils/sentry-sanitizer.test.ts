@@ -765,3 +765,18 @@ describe("sentry-sanitizer", () => {
     );
   });
 });
+
+it("filters saved moderation evidence from telemetry context", () => {
+  const event = sanitizeSentryEvent({
+    extra: {
+      evidence: { text: "synthetic private material" },
+      content_snapshot: { parts: ["synthetic private material"] },
+      preview: "synthetic private material",
+      statement_value: "synthetic private material",
+      moderator_note: "synthetic private material",
+      error_code: "MODERATION_STORAGE_UNAVAILABLE",
+    },
+  });
+  expect(JSON.stringify(event)).not.toContain("synthetic private material");
+  expect(event.extra?.["error_code"]).toBe("MODERATION_STORAGE_UNAVAILABLE");
+});

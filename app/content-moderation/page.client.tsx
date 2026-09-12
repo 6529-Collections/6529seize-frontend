@@ -3,44 +3,30 @@
 import { useAuth } from "@/components/auth/Auth";
 import ContentModerationNoAccess from "@/components/content-moderation/ContentModerationNoAccess";
 import type { ApiContentModerationQueueItem } from "@/generated/models/ApiContentModerationQueueItem";
-import type { ApiContentModerationProfileStatusResponse } from "@/generated/models/ApiContentModerationProfileStatusResponse";
 import { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
-import { ApiContentModerationDropDecisionRequestDecisionEnum } from "@/generated/models/ApiContentModerationDropDecisionRequest";
-import { ApiModeratedProfileStatus } from "@/generated/models/ApiModeratedProfileStatus";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import {
-  CONTENT_MODERATOR_ACCESS_QUERY_KEY,
-  useContentModeratorAccess,
-} from "@/hooks/content-moderation/useContentModeratorAccess";
+import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import {
-  decideModeratedDrop,
   fetchContentModerationQueue,
   fetchSuspendedModerationProfiles,
-  setModeratedProfileStatus,
 } from "@/services/api/content-moderation-api";
-import { setGlobalDropModerationOverride } from "@/services/content-moderation/content-moderation-state";
 import {
   formatContentModerationEnum,
   getAiRecommendationText,
 } from "@/services/content-moderation/content-moderation-formatters";
 import {
-  invalidateContentModerationPresentation,
   MODERATION_QUEUE_QUERY_KEY,
-  PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY,
   SUSPENDED_MODERATION_PROFILES_QUERY_KEY,
 } from "@/services/content-moderation/content-moderation-query";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
+import { Suspense, useMemo } from "react";
+import ModerationChecks from "./checks/ModerationChecks";
+import ModerationCheckCounts from "./checks/ModerationCheckCounts";
 import {
   formatEvidence,
   formatTimestamp,
@@ -95,7 +81,7 @@ function getActiveDataState(
   suspendedState: ModerationDataState,
   enabled: boolean
 ): ModerationDataState {
-  if (!enabled || tab === "BLOCK_ACTIVITY") {
+  if (!enabled || tab === "BLOCK_ACTIVITY" || tab === "CHECKS") {
     return { isLoading: false, isError: false };
   }
   if (tab === "SUSPENDED") {
@@ -110,13 +96,6 @@ function ModerationQueueCard({
   readonly item: ApiContentModerationQueueItem;
 }) {
   const locale = useBrowserLocale();
-  const { setToast } = useAuth();
-  const queryClient = useQueryClient();
-  const [reason, setReason] = useState("");
-  const [selectedDecision, setSelectedDecision] =
-    useState<ApiContentModerationDropDecisionRequestDecisionEnum | null>(null);
-  const [pendingProfileStatus, setPendingProfileStatus] =
-    useState<ApiModeratedProfileStatus | null>(null);
   const content = getSnapshotContent(item.content_snapshot);
   const assets = getSnapshotAssets(item.content_snapshot);
   const parentSnapshot = getRecord(item.content_snapshot["parent_context"]);
@@ -129,75 +108,6 @@ function ModerationQueueCard({
   const reporterPfp = getSafeAssetUrl(item.reporter_pfp);
   const reporterLabel = item.reporter_handle ?? item.reporter_profile_id;
 
-  const decisionMutation = useMutation({
-    mutationFn: (
-      decision: ApiContentModerationDropDecisionRequestDecisionEnum
-    ) =>
-      decideModeratedDrop(item.drop_id, {
-        decision,
-        reason: reason.trim() || null,
-      }),
-    onSuccess: (response) => {
-      setGlobalDropModerationOverride(response.drop_id, response.status);
-      void queryClient.invalidateQueries({
-        queryKey: MODERATION_QUEUE_QUERY_KEY,
-      });
-      void queryClient.invalidateQueries({
-        queryKey: CONTENT_MODERATOR_ACCESS_QUERY_KEY,
-      });
-      void invalidateContentModerationPresentation(queryClient);
-      setToast({
-        message: t(locale, "contentModeration.moderator.decisionSuccess"),
-        type: "success",
-      });
-      setReason("");
-      setSelectedDecision(null);
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: t(locale, "contentModeration.moderator.decisionError"),
-        description: t(locale, "contentModeration.error.retry"),
-        details: getToastErrorDetails(error),
-      });
-    },
-  });
-
-  const profileMutation = useMutation({
-    mutationFn: (status: ApiModeratedProfileStatus) =>
-      setModeratedProfileStatus(item.author_profile_id, {
-        status,
-        reason: reason.trim() || null,
-      }),
-    onSuccess: (response) => {
-      queryClient.setQueryData<ApiContentModerationProfileStatusResponse>(
-        [...PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY, item.author_profile_id],
-        response
-      );
-      void queryClient.invalidateQueries({
-        queryKey: MODERATION_QUEUE_QUERY_KEY,
-      });
-      void queryClient.invalidateQueries({
-        queryKey: CONTENT_MODERATOR_ACCESS_QUERY_KEY,
-      });
-      void invalidateContentModerationPresentation(queryClient);
-      setToast({
-        message: t(locale, "contentModeration.moderator.profileSuccess"),
-        type: "success",
-      });
-      setPendingProfileStatus(null);
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: t(locale, "contentModeration.moderator.profileError"),
-        description: t(locale, "contentModeration.error.retry"),
-        details: getToastErrorDetails(error),
-      });
-    },
-  });
-
-  const isPending = decisionMutation.isPending || profileMutation.isPending;
   const isResolved = item.status !== ApiContentModerationReportStatus.Open;
 
   return (
@@ -390,150 +300,14 @@ function ModerationQueueCard({
             </p>
           )}
         </div>
-      ) : (
-        <section className="tw-mt-5" aria-labelledby={`${item.id}-decision`}>
-          <h3
-            id={`${item.id}-decision`}
-            className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50"
-          >
-            {t(locale, "contentModeration.moderator.chooseDecision")}
-          </h3>
-          <div className="tw-mt-3 tw-grid tw-gap-2 lg:tw-grid-cols-3">
-            {(
-              [
-                {
-                  value:
-                    ApiContentModerationDropDecisionRequestDecisionEnum.Allow,
-                  label: "contentModeration.moderator.allow",
-                  description: "contentModeration.moderator.allowDescription",
-                },
-                {
-                  value:
-                    ApiContentModerationDropDecisionRequestDecisionEnum.Quarantine,
-                  label: "contentModeration.moderator.quarantine",
-                  description:
-                    "contentModeration.moderator.quarantineDescription",
-                },
-                {
-                  value:
-                    ApiContentModerationDropDecisionRequestDecisionEnum.Remove,
-                  label: "contentModeration.moderator.remove",
-                  description: "contentModeration.moderator.removeDescription",
-                },
-              ] as const
-            ).map((choice) => (
-              <button
-                key={choice.value}
-                type="button"
-                aria-pressed={selectedDecision === choice.value}
-                disabled={isPending}
-                onClick={() => setSelectedDecision(choice.value)}
-                className={`tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-text-left tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-50 ${
-                  selectedDecision === choice.value
-                    ? "tw-border-primary-400 tw-bg-primary-500/10"
-                    : "tw-border-iron-800 tw-bg-iron-900/45 hover:tw-border-iron-600 hover:tw-bg-iron-900"
-                }`}
-              >
-                <span className="tw-block tw-text-sm tw-font-semibold tw-text-iron-50">
-                  {t(locale, choice.label)}
-                </span>
-                <span className="tw-mt-1 tw-block tw-text-sm tw-leading-5 tw-text-iron-300">
-                  {t(locale, choice.description)}
-                </span>
-              </button>
-            ))}
-          </div>
-          <label className="tw-mt-4 tw-block">
-            <span className="tw-text-sm tw-font-semibold tw-text-iron-200">
-              {t(locale, "contentModeration.moderator.reason")}
-            </span>
-            <textarea
-              value={reason}
-              onChange={(event) => setReason(event.target.value)}
-              rows={3}
-              maxLength={2000}
-              placeholder={t(
-                locale,
-                "contentModeration.moderator.reasonPlaceholder"
-              )}
-              className="tw-mt-2 tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-            />
-          </label>
-          <div className="tw-mt-4 tw-flex tw-justify-end">
-            <button
-              type="button"
-              disabled={isPending || selectedDecision === null}
-              onClick={() => {
-                if (selectedDecision !== null) {
-                  decisionMutation.mutate(selectedDecision);
-                }
-              }}
-              className="tw-cursor-pointer tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white hover:tw-bg-primary-400 disabled:tw-cursor-default disabled:tw-opacity-40"
-            >
-              {t(locale, "contentModeration.moderator.applyDecision")}
-            </button>
-          </div>
-        </section>
-      )}
-
-      <section className="tw-mt-5 tw-rounded-xl tw-bg-iron-900/35 tw-p-4">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-          <div>
-            <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
-              {t(locale, "contentModeration.moderator.authorStatus")}
-            </h3>
-            <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-300">
-              {formatContentModerationEnum(item.author_status)}
-            </p>
-          </div>
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() =>
-              setPendingProfileStatus(
-                item.author_status === ApiModeratedProfileStatus.Suspended
-                  ? ApiModeratedProfileStatus.Active
-                  : ApiModeratedProfileStatus.Suspended
-              )
-            }
-            className="tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-bg-iron-800 disabled:tw-cursor-default disabled:tw-opacity-50"
-          >
-            {t(
-              locale,
-              item.author_status === ApiModeratedProfileStatus.Suspended
-                ? "contentModeration.moderator.reinstate"
-                : "contentModeration.moderator.suspend"
-            )}
-          </button>
-        </div>
-        {pendingProfileStatus !== null && (
-          <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4">
-            <p className="tw-m-0 tw-flex-1 tw-text-sm tw-text-iron-200">
-              {t(
-                locale,
-                pendingProfileStatus === ApiModeratedProfileStatus.Suspended
-                  ? "contentModeration.moderator.confirmSuspend"
-                  : "contentModeration.moderator.confirmReinstate"
-              )}
-            </p>
-            <button
-              type="button"
-              className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-px-2 tw-py-1 tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-white"
-              onClick={() => setPendingProfileStatus(null)}
-            >
-              {t(locale, "contentModeration.report.cancel")}
-            </button>
-            <button
-              type="button"
-              disabled={profileMutation.isPending}
-              className="tw-cursor-pointer tw-rounded-lg tw-border-0 tw-bg-iron-100 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-black hover:tw-bg-white disabled:tw-cursor-default disabled:tw-opacity-50"
-              onClick={() => profileMutation.mutate(pendingProfileStatus)}
-            >
-              {t(locale, "contentModeration.moderator.confirm")}
-            </button>
-          </div>
-        )}
-      </section>
+      ) : null}
+      <Link
+        href={`/content-moderation/checks?report=${encodeURIComponent(item.id)}`}
+        prefetch={false}
+        className="tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      >
+        {t(locale, "checks.reportReview")}
+      </Link>
     </article>
   );
 }
@@ -552,9 +326,14 @@ export default function ContentModerationPageClient() {
   const reportsTabActive = isReportsTab(activeTab);
   const reportsView = activeTab === "RESOLVED" ? "RESOLVED" : "OPEN";
   const queueQuery = useInfiniteQuery({
-    queryKey: [...MODERATION_QUEUE_QUERY_KEY, reportsView],
-    queryFn: ({ pageParam }) =>
+    queryKey: [
+      ...MODERATION_QUEUE_QUERY_KEY,
+      reportsView,
+      connectedProfile?.id,
+    ],
+    queryFn: ({ pageParam, signal }) =>
       fetchContentModerationQueue({
+        signal,
         limit: MODERATION_QUEUE_PAGE_SIZE,
         view: reportsView,
         ...(pageParam === undefined ? {} : { before: pageParam }),
@@ -568,9 +347,13 @@ export default function ContentModerationPageClient() {
     retry: false,
   });
   const suspendedQuery = useInfiniteQuery({
-    queryKey: SUSPENDED_MODERATION_PROFILES_QUERY_KEY,
-    queryFn: ({ pageParam }) =>
+    queryKey: [
+      ...SUSPENDED_MODERATION_PROFILES_QUERY_KEY,
+      connectedProfile?.id,
+    ],
+    queryFn: ({ pageParam, signal }) =>
       fetchSuspendedModerationProfiles({
+        signal,
         limit: MODERATION_QUEUE_PAGE_SIZE,
         ...(pageParam === undefined ? {} : { before: pageParam }),
       }),
@@ -597,7 +380,10 @@ export default function ContentModerationPageClient() {
     moderatorContentReady
   );
   return (
-    <main className="tailwind-scope tw-min-h-dvh tw-w-full tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12 lg:tw-px-8">
+    <main
+      className="tailwind-scope sentry-block tw-min-h-dvh tw-w-full tw-min-w-0 tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12 lg:tw-px-8"
+      data-dd-privacy="hidden"
+    >
       <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
         {t(locale, "contentModeration.moderator.title")}
       </h1>
@@ -615,6 +401,12 @@ export default function ContentModerationPageClient() {
           <ContentModerationNoAccess locale={locale} />
         )}
       {moderatorContentReady && (
+        <ModerationCheckCounts
+          key={connectedProfile?.id}
+          profileId={connectedProfile!.id}
+        />
+      )}
+      {moderatorContentReady && (
         <ContentModerationTabs
           activeTab={activeTab}
           openCount={accessQuery.data?.open_report_count ?? 0}
@@ -631,6 +423,16 @@ export default function ContentModerationPageClient() {
         tabIndex={moderatorContentReady ? 0 : undefined}
         className="focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
       >
+        {moderatorContentReady && activeTab === "CHECKS" && (
+          <Suspense
+            fallback={<p role="status">{t(locale, "checks.loading")}</p>}
+          >
+            <ModerationChecks
+              key={connectedProfile?.id}
+              profileId={connectedProfile!.id}
+            />
+          </Suspense>
+        )}
         {moderatorContentReady && activeDataState.isLoading && (
           <output className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
             {t(locale, "contentModeration.moderator.loading")}
@@ -688,7 +490,11 @@ export default function ContentModerationPageClient() {
             </p>
           )}
         {moderatorContentReady && activeTab === "BLOCK_ACTIVITY" && (
-          <BlockActivityFeed enabled={moderatorContentReady} />
+          <BlockActivityFeed
+            key={connectedProfile?.id}
+            profileId={connectedProfile!.id}
+            enabled={moderatorContentReady}
+          />
         )}
         {moderatorContentReady &&
           activeTab === "SUSPENDED" &&

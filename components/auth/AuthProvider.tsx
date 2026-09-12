@@ -136,7 +136,6 @@ export default function Auth({
   });
   const connectedProfile =
     !isSigningOutAll && isConnectedProfileForAddress ? loadedProfile : null;
-  useContentModerationStateScope(connectedProfile?.id);
   const isConnectedProfileSettling = Boolean(
     !isSigningOutAll &&
     address &&
@@ -244,6 +243,7 @@ export default function Auth({
 
   const [activeProfileProxy, setActiveProfileProxy] =
     useState<ApiProfileProxy | null>(null);
+  useContentModerationStateScope(connectedProfile?.id, activeProfileProxy?.id);
   const authRole = (() => {
     try {
       const authJwt = getAuthJwt();

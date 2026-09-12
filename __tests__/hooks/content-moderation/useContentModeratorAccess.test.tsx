@@ -101,7 +101,7 @@ describe("useContentModeratorAccess identity privacy", () => {
       await act(async () => {
         await client.invalidateQueries();
       });
-      expect(fetchContentModeratorAccess).not.toHaveBeenCalled();
+      expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1);
 
       jest
         .mocked(fetchContentModeratorAccess)
@@ -111,7 +111,7 @@ describe("useContentModeratorAccess identity privacy", () => {
       rerender();
       expect(result.current.data).toBeUndefined();
       await waitFor(() => expect(result.current.data?.moderator).toBe(false));
-      expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1);
+      expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(2);
     }
   );
 
@@ -152,3 +152,61 @@ describe("useContentModeratorAccess identity privacy", () => {
     expect(client.isFetching()).toBe(0);
   });
 });
+
+it("clears the previous developer's filtered checks on a direct identity switch", async () => {
+  const client = new QueryClient();
+  mockProfileId = "moderator-1";
+  mockProxy = null;
+  jest.mocked(fetchContentModeratorAccess).mockResolvedValue(access);
+  const { result, rerender } = mountAccess(client);
+  await waitFor(() => expect(result.current.data?.moderator).toBe(true));
+  const key = [
+    ...MODERATION_QUEUE_QUERY_KEY,
+    "checks",
+    "moderator-1",
+    "list",
+    { outcome: "REJECT" },
+  ];
+  client.setQueryData(key, { evidence: "private" });
+  jest
+    .mocked(fetchContentModeratorAccess)
+    .mockReturnValue(new Promise(() => undefined));
+  mockProfileId = "moderator-2";
+  rerender();
+  expect(result.current.data).toBeUndefined();
+  expect(client.getQueryData(key)).toBeUndefined();
+  expect(client.getQueryData(accessKey)).toBeUndefined();
+});
+
+it.each(["denied", "failed"])(
+  "clears private data after an access refresh is %s",
+  async (mode) => {
+    const client = new QueryClient();
+    mockProfileId = "moderator-1";
+    mockProxy = null;
+    jest.mocked(fetchContentModeratorAccess).mockResolvedValue(access);
+    const { result } = mountAccess(client);
+    await waitFor(() => expect(result.current.data?.moderator).toBe(true));
+    const key = [
+      ...MODERATION_QUEUE_QUERY_KEY,
+      "checks",
+      "moderator-1",
+      "detail",
+      "one",
+    ];
+    client.setQueryData(key, { evidence: "private" });
+    if (mode === "denied")
+      jest
+        .mocked(fetchContentModeratorAccess)
+        .mockResolvedValue({ ...access, moderator: false });
+    else
+      jest
+        .mocked(fetchContentModeratorAccess)
+        .mockRejectedValue(new Error("offline"));
+    await act(async () => {
+      await client.invalidateQueries({ queryKey: accessKey });
+    });
+    await waitFor(() => expect(result.current.data?.moderator).not.toBe(true));
+    expect(client.getQueryData(key)).toBeUndefined();
+  }
+);
