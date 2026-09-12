@@ -15,7 +15,13 @@ import {
 } from "@/services/api/collect-api";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import type {
   CollectCatalogView,
   CollectCollection,
@@ -145,11 +151,23 @@ function CollectCatalogController({
   } | null>(null);
   const [offerWorkspaceActive, setOfferWorkspaceActive] = useState(false);
   const offerReturnFocus = useRef<HTMLElement | null>(null);
+  const selectionOfferFocus = useRef<"none" | "open" | "pending">("none");
+  const setSelectionOfferTrigger = useCallback(
+    (button: HTMLButtonElement | null) => {
+      if (button && selectionOfferFocus.current === "pending") {
+        selectionOfferFocus.current = "none";
+        button.focus({ preventScroll: true });
+      }
+    },
+    []
+  );
   const openOffers = (
     items: readonly CollectOfferSelection[],
-    hasAlternatives = false
+    hasAlternatives = false,
+    returnToSelection = false
   ) => {
     if (items.length === 0) return;
+    selectionOfferFocus.current = returnToSelection ? "open" : "none";
     offerReturnFocus.current =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
@@ -158,7 +176,13 @@ function CollectCatalogController({
     setOfferWorkspaceActive(true);
   };
   const closeOffers = () => {
+    const returningToSelection =
+      selectionOfferFocus.current === "open" && selection.length > 0;
+    selectionOfferFocus.current = returningToSelection ? "pending" : "none";
     setOfferWorkspaceActive(false);
+    // The selection portal remounts after leaving the workspace. Its callback
+    // ref restores focus on that commit, rather than focusing a detached button.
+    if (returningToSelection) return;
     requestAnimationFrame(() => {
       if (offerReturnFocus.current?.isConnected)
         offerReturnFocus.current.focus();
@@ -424,8 +448,13 @@ function CollectCatalogController({
               items={selection}
               onClear={() => setSelection([])}
               onReview={() => setBatch({ items: selection })}
+              planOffersRef={setSelectionOfferTrigger}
               onPlanOffers={() =>
-                openOffers(collectSelectedOfferSelection(selection))
+                openOffers(
+                  collectSelectedOfferSelection(selection),
+                  false,
+                  true
+                )
               }
             />
           ) : null
