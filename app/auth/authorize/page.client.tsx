@@ -36,10 +36,20 @@ export default function AuthAuthorizePageClient() {
   const [message, setMessage] = useState("");
   const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
   const [redirectUrl, setRedirectUrl] = useState("");
+  // Track which params the displayed appInfo was validated for,
+  // so stale fetch responses can't spoof a different app's consent.
+  const [validatedParams, setValidatedParams] = useState<{
+    app: string;
+    redirect_uri: string;
+  } | null>(null);
 
-  // Fetch app info on mount
+  // Fetch app info when appId or redirectUri changes.
+  // Reset state first so a stale response from a prior request
+  // can't update the consent view for a different app.
   useEffect(() => {
     if (!appId || !redirectUri) {
+      setAppInfo(null);
+      setValidatedParams(null);
       setStatus("error");
       setMessage(
         "Missing required parameters (app, redirect_uri). Please return to the community app and try again."
@@ -47,15 +57,28 @@ export default function AuthAuthorizePageClient() {
       return;
     }
 
+    // Reset for the new params before fetching
+    setAppInfo(null);
+    setValidatedParams(null);
+    setStatus("loading");
+
+    const currentApp = appId;
+    const currentRedirectUri = redirectUri;
+
+    let cancelled = false;
+
     async function fetchAppInfo() {
       try {
         const info = await commonApiFetch<AppInfo>({
           endpoint: "auth/authorize/app-info",
-          params: { app: appId!, redirect_uri: redirectUri! },
+          params: { app: currentApp, redirect_uri: currentRedirectUri },
         });
+        if (cancelled) return;
         setAppInfo(info);
+        setValidatedParams({ app: currentApp, redirect_uri: currentRedirectUri });
         setStatus("confirm");
       } catch (err) {
+        if (cancelled) return;
         setStatus("error");
         setMessage(
           err instanceof Error
@@ -66,6 +89,10 @@ export default function AuthAuthorizePageClient() {
     }
 
     fetchAppInfo();
+
+    return () => {
+      cancelled = true;
+    };
   }, [appId, redirectUri]);
 
   // If user is not logged in, show login prompt
@@ -85,6 +112,14 @@ export default function AuthAuthorizePageClient() {
 
   async function handleApprove() {
     if (!appId || !redirectUri) return;
+    // Only allow approval if appInfo was validated for the current params
+    if (
+      !validatedParams ||
+      validatedParams.app !== appId ||
+      validatedParams.redirect_uri !== redirectUri
+    ) {
+      return;
+    }
     setStatus("approving");
     try {
       const result = await commonApiPost<
