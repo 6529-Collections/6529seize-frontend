@@ -88,7 +88,7 @@ export function collectBatchReviewScope(options: {
     options.profile?.primary_wallet.toLowerCase(),
     collectProfileWallets(options.profile)
       .map((wallet) => wallet.wallet.toLowerCase())
-      .sort(),
+      .sort((left, right) => left.localeCompare(right)),
     options.payingWallet?.toLowerCase(),
     options.initialRecipient?.toLowerCase(),
     options.items.map((item) => [

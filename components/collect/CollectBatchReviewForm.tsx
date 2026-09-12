@@ -115,14 +115,9 @@ function BatchReviewDraft({
           onPrepare(draft);
       }}
     >
-      <div className="tw-space-y-1">
-        <h2 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-          {t(locale, "collect.batchReview.title")}
-        </h2>
-        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-          {t(locale, "collect.batchReview.description")}
-        </p>
-      </div>
+      <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+        {t(locale, "collect.batchReview.description")}
+      </p>
       <fieldset
         disabled={loading}
         className="tw-m-0 tw-min-w-0 tw-space-y-1 tw-border-0 tw-p-0"
