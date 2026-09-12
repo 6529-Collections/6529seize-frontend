@@ -8,6 +8,7 @@ import { ApiArtworkDocumentationContextLifecycleEnum } from "@/generated/models/
 import type { ApiArtworkDocumentationAssetLink } from "@/generated/models/ApiArtworkDocumentationAssetLink";
 import { ApiArtworkDocumentationAnswerIntendedVisibilityEnum } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import { ApiArtworkDocumentationAssetAccessClassEnum } from "@/generated/models/ApiArtworkDocumentationAsset";
+import { isPublicationOnly } from "./intake";
 
 const NO_MUTATIONS: ApiArtworkDocumentationCapabilities = {
   read_context: false,
@@ -160,7 +161,8 @@ export function canWriteDocumentationAssetRole(
     capabilities.edit_modules.includes(
       ApiArtworkDocumentationCapabilitiesEditModulesEnum.Files
     ) &&
-    (!["rights_instrument", "consent_instrument"].includes(role) ||
+    ((context.profile.version === 3 && isPublicationOnly(context.profile)) ||
+      !["rights_instrument", "consent_instrument"].includes(role) ||
       capabilities.read_rights_evidence)
   );
 }
@@ -173,7 +175,12 @@ export function canReferenceDocumentationAssetLink(
   if (!capabilities.read_context) return false;
   if (capabilities.confirm_as_artist) return true;
   if (
-    ["rights_instrument", "consent_instrument"].includes(link.role) ||
+    ((context.profile.version !== 3 ||
+      !isPublicationOnly(context.profile) ||
+      link.intended_visibility !== "public_record" ||
+      link.manifest.access_class !==
+        ApiArtworkDocumentationAssetAccessClassEnum.Artwork) &&
+      ["rights_instrument", "consent_instrument"].includes(link.role)) ||
     context.mutation_restricted_paths.includes(`asset-rights:${link.asset_id}`)
   )
     return capabilities.read_rights_evidence;
@@ -199,8 +206,14 @@ export function canEditDocumentationAsset(
     asset.access_class ===
       ApiArtworkDocumentationAssetAccessClassEnum.RightsEvidence ||
     paths.includes(`asset-rights:${assetId}`) ||
-    [asset, ...links].some((item) =>
-      ["rights_instrument", "consent_instrument"].includes(item.role)
+    [asset, ...links].some(
+      (item) =>
+        (context.profile.version !== 3 ||
+          !isPublicationOnly(context.profile) ||
+          item.intended_visibility !== "public_record" ||
+          asset.access_class !==
+            ApiArtworkDocumentationAssetAccessClassEnum.Artwork) &&
+        ["rights_instrument", "consent_instrument"].includes(item.role)
     );
   if (rightsEvidence) return capabilities.read_rights_evidence;
   return (

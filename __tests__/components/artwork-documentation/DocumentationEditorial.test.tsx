@@ -95,6 +95,85 @@ describe("editorial artwork documentation", () => {
     );
   });
 
+  it("names an empty nested list and retains its visible group label as entries are added and removed", async () => {
+    const user = userEvent.setup();
+    function TextWorkEditor() {
+      const [value, setValue] = useState<FieldValue>({ documents: [] });
+      return (
+        <>
+          <p id="text-work-help">Describe each version supplied with this work.</p>
+          <DocumentationValueEditor
+            id="text-work"
+            label="Text, poetry & publications"
+            describedBy="text-work-help"
+            hideLabel
+            editor={{
+              kind: "object",
+              required: ["documents"],
+              fields: {
+                documents: {
+                  kind: "list",
+                  label: "Documents and text versions",
+                  item: { kind: "text", label: "Document title" },
+                  max: 10,
+                },
+              },
+            }}
+            value={value}
+            onChange={setValue}
+          />
+        </>
+      );
+    }
+    render(<TextWorkEditor />);
+    const group = screen.getByRole("group", {
+      name: "Documents and text versions",
+    });
+    expect(group).toHaveAccessibleDescription(
+      "Describe each version supplied with this work."
+    );
+    expect(
+      within(group).getByText("Documents and text versions", {
+        selector: "legend",
+      })
+    ).not.toHaveClass("tw-sr-only");
+    expect(
+      screen.getByText("Text, poetry & publications", {
+        selector: "legend",
+      })
+    ).toHaveClass("tw-sr-only");
+    await user.click(within(group).getByRole("button", { name: "Add entry" }));
+    await user.type(
+      within(group).getByRole("textbox", { name: "Document title" }),
+      "Reading version"
+    );
+    expect(
+      within(group).getByRole("textbox", { name: "Document title" })
+    ).toHaveValue("Reading version");
+    await user.click(within(group).getByRole("button", { name: "Remove entry 1" }));
+    expect(within(group).queryByRole("textbox")).not.toBeInTheDocument();
+    expect(
+      within(group).getByText("Documents and text versions", { selector: "legend" })
+    ).not.toHaveClass("tw-sr-only");
+  });
+
+  it("keeps a top-level list group accessible without repeating its visible answer heading", () => {
+    render(
+      <DocumentationValueEditor
+        id="names"
+        label="Names"
+        editor={{ kind: "list", item: { kind: "text" }, max: 10 }}
+        value={[]}
+        onChange={jest.fn()}
+        hideLabel
+      />
+    );
+    expect(screen.getByRole("group", { name: "Names" })).toBeInTheDocument();
+    expect(screen.getByText("Names", { selector: "legend" })).toHaveClass(
+      "tw-sr-only"
+    );
+  });
+
   it("applies a typed language correction once and preserves sibling text and review metadata", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();

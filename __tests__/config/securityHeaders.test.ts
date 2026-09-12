@@ -118,6 +118,23 @@ describe("createSecurityHeaders CSP", () => {
     ).toEqual(["'none'"]);
   });
 
+  it("allows passive artwork previews only from the two archive buckets without broadening active content", () => {
+    const policy = getContentSecurityPolicy();
+    const mediaSrc = getDirectiveSources(policy, "media-src");
+    const archives = [
+      "https://6529-artwork-documentation-987989283142-eu-west-1.s3.eu-west-1.amazonaws.com",
+      "https://6529-artwork-documentation-987989283142-us-east-1.s3.us-east-1.amazonaws.com",
+    ];
+    expect(mediaSrc).toEqual(expect.arrayContaining(archives));
+    expect(mediaSrc).not.toContain("https:");
+    expect(mediaSrc).not.toContain("https://*.amazonaws.com");
+    expect(mediaSrc).not.toContain("https://*.s3.amazonaws.com");
+    for (const directive of ["script-src", "frame-src", "object-src"]) {
+      const sources = getDirectiveSources(policy, directive);
+      for (const origin of archives) expect(sources).not.toContain(origin);
+    }
+  });
+
   it("omits unsafe-eval unless explicitly enabled for local tooling", () => {
     expect(
       getDirectiveSources(getContentSecurityPolicy(), "script-src")

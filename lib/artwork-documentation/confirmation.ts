@@ -4,6 +4,13 @@ export function confirmationCopyMatches(
   profile: ApiArtworkDocumentationProfile
 ): boolean {
   if (
+    profile.confirmation_copy_version === "stream-museum-record-confirmation-v3"
+  )
+    return (
+      profile.confirmation_copy ===
+      ARTWORK_DOCUMENTATION_MESSAGES["artworkDocumentation.museum.confirmCopy"]
+    );
+  if (
     profile.confirmation_copy_version ===
     "artwork-documentation-confirmation-v2"
   )

@@ -69,6 +69,10 @@ export const ARTWORK_DOCUMENTATION_CHAPTER_MESSAGES = {
     "More about presentation & care ({count})",
   "artworkDocumentation.chapters.additional.review":
     "Additional details ({count})",
+  "artworkDocumentation.chapters.additional.materials":
+    "Additional material details ({count})",
+  "artworkDocumentation.chapters.additional.conversation":
+    "Other conversations and earlier answers ({count})",
   "artworkDocumentation.chapters.additionalHelp":
     "Add the details that help someone understand this particular work. You can leave these unanswered and return later.",
   "artworkDocumentation.chapters.answerAlternatives":

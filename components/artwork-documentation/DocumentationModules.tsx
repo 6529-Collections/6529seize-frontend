@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { formatNumber } from "@/i18n/format";
 import { ApiArtworkDocumentationAnswerStatusEnum } from "@/generated/models/ApiArtworkDocumentationAnswer";
@@ -19,9 +19,16 @@ import {
 } from "@/lib/artwork-documentation/answers";
 import type { PendingEdit } from "@/lib/artwork-documentation/draft-controller";
 import {
-  fieldSection,
+  documentationFields,
+  documentationFieldSection,
+  documentationMediaProfiles,
+  documentationReferences,
+  fieldAppliesToMedia,
+  isMuseumRecord,
+  selectedDocumentationMedia,
+} from "@/lib/artwork-documentation/catalogue";
+import {
   initialValue,
-  MODULE_FIELDS,
   MODULE_IDS,
   type DocumentationField,
   type DocumentationSection,
@@ -65,14 +72,23 @@ interface Props {
 
 export default function DocumentationModules(props: Props) {
   const { msg, locale } = useDocumentationMessages();
+  const references = useMemo(
+    () => documentationReferences(props.context, props.edits),
+    [props.context, props.edits]
+  );
   const required = requiredPaths(props.context, props.edits);
+  const media = selectedDocumentationMedia(props.context, props.edits);
+  for (const profile of documentationMediaProfiles(props.context.profile)) {
+    if (media.includes(profile.id))
+      profile.requiredFields.forEach((path) => required.add(path));
+  }
   // Keep optional answers in their current group while typing and autosaving.
   // A fresh chapter visit promotes previously recorded answers into the open view.
   const [initiallyAnswered] = useState(
     () =>
       new Set(
         MODULE_IDS.flatMap((moduleId) =>
-          MODULE_FIELDS[moduleId]
+          documentationFields(props.context.profile, moduleId)
             .filter(
               (field) =>
                 !!readAnswer(props.context, moduleId, field.id, props.edits) ||
@@ -87,34 +103,60 @@ export default function DocumentationModules(props: Props) {
       (module) => String(module.id) === moduleId
     );
     if (policy?.version !== 1) return [];
-    return MODULE_FIELDS[moduleId]
+    return documentationFields(props.context.profile, moduleId)
       .filter(
         (field) =>
           (props.inlineFields
             ? props.inlineFields.includes(`${moduleId}.${field.id}`)
-            : fieldSection(moduleId, field.id) === props.section) &&
+            : documentationFieldSection(
+                props.context.profile,
+                moduleId,
+                field.id
+              ) === props.section) &&
           !props.excludeFields?.includes(`${moduleId}.${field.id}`) &&
           policy.fields.some((entry) => entry.id === field.id) &&
-          visibleField(props.context, moduleId, field.id, props.edits)
+          visibleField(props.context, moduleId, field.id, props.edits) &&
+          ((!field.legacy && fieldAppliesToMedia(field, media)) ||
+            !!readAnswer(props.context, moduleId, field.id, props.edits) ||
+            isRedacted(props.context.modules[moduleId]?.answers[field.id]))
       )
       .map((field) => ({ moduleId, field }));
   });
   const isPrimary = ({ moduleId, field }: (typeof fields)[number]) =>
     !!props.inlineFields ||
     required.has(`${moduleId}.${field.id}`) ||
-    initiallyAnswered.has(`${moduleId}.${field.id}`);
+    initiallyAnswered.has(`${moduleId}.${field.id}`) ||
+    (isMuseumRecord(props.context.profile) &&
+      ["documents", "sessions", "described_materials"].includes(field.id));
   const renderField = ({ moduleId, field }: (typeof fields)[number]) => (
     <DocumentationAnswerField
       key={`${moduleId}.${field.id}`}
       {...props}
+      references={references}
       moduleId={moduleId}
       field={field}
       required={required.has(`${moduleId}.${field.id}`)}
     />
   );
-  const mainFields = fields.filter(({ moduleId }) => moduleId !== "interview");
+  const mainFields = fields.filter(
+    ({ moduleId }) =>
+      moduleId !== "interview" || isMuseumRecord(props.context.profile)
+  );
+  if (isMuseumRecord(props.context.profile) && props.section === "artwork") {
+    const openingFields = ["title", "title_language", "media_profiles"];
+    mainFields.sort((left, right) => {
+      const position = (fieldId: string) => {
+        const index = openingFields.indexOf(fieldId);
+        return index < 0 ? openingFields.length : index;
+      };
+      return position(left.field.id) - position(right.field.id);
+    });
+  }
   const optional = mainFields.filter((field) => !isPrimary(field));
-  const interview = fields.filter(({ moduleId }) => moduleId === "interview");
+  const interview = fields.filter(
+    ({ moduleId }) =>
+      moduleId === "interview" && !isMuseumRecord(props.context.profile)
+  );
   const interviewMode: unknown = readAnswer(
     props.context,
     "interview",
@@ -192,6 +234,7 @@ export default function DocumentationModules(props: Props) {
 
 function DocumentationAnswerField(
   props: Props & {
+    readonly references: ReturnType<typeof documentationReferences>;
     readonly moduleId: ModuleId;
     readonly field: DocumentationField;
     readonly required: boolean;
@@ -206,6 +249,7 @@ function DocumentationAnswerField(
   const redacted = isRedacted(context.modules[moduleId]?.answers[field.id]);
   const disabled =
     (props.readOnly ?? false) ||
+    field.readOnly === true ||
     !canEditDocumentationField(
       context,
       `${moduleId}.${field.id}`,
@@ -222,7 +266,9 @@ function DocumentationAnswerField(
       ? context.profile.interview_instrument.prompts.find(
           (prompt) => prompt.id === field.id
         )?.text
-      : undefined) ?? documentationFieldLabel(field.id);
+      : undefined) ??
+    field.label ??
+    documentationFieldLabel(field.id);
   const [replacementReason, setReplacementReason] = useState("");
   const pending = edits.find(
     (edit) => edit.moduleId === moduleId && edit.operation.field === field.id
@@ -303,7 +349,9 @@ function DocumentationAnswerField(
   const fullWidth =
     field.id === "title" ||
     (field.editor.kind === "text" && field.editor.multiline === true) ||
-    (["object", "list", "localized"].includes(field.editor.kind) &&
+    (["object", "list", "localized", "multi_choice"].includes(
+      field.editor.kind
+    ) &&
       field.id !== "declared_dimensions");
   const fieldClass = `tw-min-w-0 ${fullWidth ? "sm:tw-col-span-2" : ""}`;
   if (disabled)
@@ -344,12 +392,13 @@ function DocumentationAnswerField(
           </span>
         )}
       </div>
-      {field.help && (
+      {(field.guidance ?? field.help) && (
         <p
           id={helpId}
           className="tw-mb-4 tw-text-sm tw-leading-relaxed tw-text-iron-300"
         >
-          {msg(fieldHelpKey(field.help, publicationOnly))}
+          {field.guidance ??
+            (field.help && msg(fieldHelpKey(field.help, publicationOnly)))}
         </p>
       )}
       {redacted ? (
@@ -426,7 +475,9 @@ function DocumentationAnswerField(
               }
               disabled={disabled}
               assets={choices}
-              describedBy={field.help ? helpId : undefined}
+              examplePath={`${moduleId}.${field.id}`}
+              references={props.references}
+              describedBy={(field.guidance ?? field.help) ? helpId : undefined}
               onChange={(value) => update({ value })}
             />
           ) : (
