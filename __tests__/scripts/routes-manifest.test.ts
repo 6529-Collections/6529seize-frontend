@@ -116,6 +116,17 @@ describe("routes-manifest scan", () => {
     ]);
   });
 
+  it("rejects linked directories before a cycle can hide or repeat pages", () => {
+    const root = writeFixtureApp(["/one"]);
+    const app = path.join(root, "app");
+    fs.symlinkSync(
+      app,
+      path.join(app, "linked"),
+      process.platform === "win32" ? "junction" : "dir"
+    );
+    expect(() => scanAppRoutes(app)).toThrow("Unsupported symlink");
+  });
+
   it("rejects route-group collisions instead of overwriting a page", () => {
     const root = writeFixtureApp(["/(one)/same", "/(two)/same"]);
     expect(() => scanAppRoutes(path.join(root, "app"))).toThrow(
@@ -125,6 +136,18 @@ describe("routes-manifest scan", () => {
 });
 
 describe("routes-manifest validateEntry", () => {
+  it.each([
+    null,
+    [],
+    { prod: "No fixture." },
+    { staging: 1 },
+    { staging: " " },
+  ])("rejects malformed omission map %j", (fixtureOmissions) => {
+    expect(
+      validateEntry("/x/[id]", { classification: "fixture", fixtureOmissions })
+        .length
+    ).toBeGreaterThan(0);
+  });
   it.each([
     null,
     [],
@@ -214,6 +237,8 @@ describe("routes-manifest validateEntry", () => {
     "/x/%2e%2e",
     "/x/%5bid%5d",
     "/x/%5cother",
+    "/x/%2fother",
+    "/x/%00",
     "/other/1",
     "/x/1/extra",
     "/x/%zz",
@@ -326,21 +351,22 @@ describe("routes-manifest CLI ratchet", () => {
   });
 
   it("update preserves existing classifications", () => {
-    const root = writeFixtureApp(["/keep"]);
+    const root = writeFixtureApp(["/keep/[id]"]);
     runScript(root, ["--update"]);
     const manifest = readManifest(root);
-    manifest.routes["/keep"] = {
+    manifest.routes["/keep/[id]"] = {
       classification: "fixture",
-      fixture: { staging: "/keep/1" },
+      fixture: { staging: "/keep/1", production: "/keep/1" },
     };
     fs.writeFileSync(
       path.join(root, "tests", "routes.manifest.json"),
       `${JSON.stringify(manifest, null, 2)}\n`
     );
     runScript(root, ["--update"]);
-    expect(readManifest(root).routes["/keep"]?.fixture?.["staging"]).toBe(
+    expect(readManifest(root).routes["/keep/[id]"]?.fixture?.["staging"]).toBe(
       "/keep/1"
     );
+    expect(runScript(root, []).status).toBe(0);
   });
 
   it.each([
