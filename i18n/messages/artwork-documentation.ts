@@ -1,13 +1,13 @@
 import { ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES } from "./artwork-documentation-guidance";
-import { ARTWORK_DOCUMENTATION_EXAMPLE_MESSAGES } from "./artwork-documentation-examples";
 import { ARTWORK_DOCUMENTATION_EDITORIAL_MESSAGES } from "./artwork-documentation-editorial";
 import { ARTWORK_DOCUMENTATION_CHAPTER_MESSAGES } from "./artwork-documentation-chapters";
+import { ARTWORK_DOCUMENTATION_MUSEUM_MESSAGES } from "./artwork-documentation-museum";
 
 export const ARTWORK_DOCUMENTATION_MESSAGES = {
   ...ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES,
-  ...ARTWORK_DOCUMENTATION_EXAMPLE_MESSAGES,
   ...ARTWORK_DOCUMENTATION_EDITORIAL_MESSAGES,
   ...ARTWORK_DOCUMENTATION_CHAPTER_MESSAGES,
+  ...ARTWORK_DOCUMENTATION_MUSEUM_MESSAGES,
   "artworkDocumentation.interviewEvidenceHelp":
     "Before selecting a recording or transcript, add the interview date, at least one participant and permission for that material. Choose permission for a future public record only when the participants have agreed to that use; otherwise keep the material restricted for private review.",
   "artworkDocumentation.all": "All",
@@ -285,7 +285,7 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.approved": "Approved by the artist",
   "artworkDocumentation.primaryLanguage": "Primary language",
   "artworkDocumentation.captionHelp":
-    "Give a reader a way into the work. For Keys and Gates, aim for 75–150 words in your chosen language.",
+    "Give a reader a way into the work. Aim for 75–150 words in your chosen language.",
   "artworkDocumentation.captureHelp":
     "When was the photograph made? A year or approximate range is useful if you do not know the exact date.",
   "artworkDocumentation.locationHelp":

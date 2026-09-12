@@ -15,6 +15,9 @@ import { ApiArtworkDocumentationProfile } from '../models/ApiArtworkDocumentatio
 import { HttpFile } from '../http/http';
 
 export class ApiArtworkDocumentationUpgradePreview {
+    'retained_fields'?: Array<string>;
+    'blocking_fields'?: Array<string>;
+    'notices'?: Array<string>;
     'current_profile': ApiArtworkDocumentationProfile;
     'proposed_profile': ApiArtworkDocumentationProfile;
     'added_required_fields': Array<string>;
@@ -25,6 +28,24 @@ export class ApiArtworkDocumentationUpgradePreview {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "retained_fields",
+            "baseName": "retained_fields",
+            "type": "Array<string>",
+            "format": ""
+        },
+        {
+            "name": "blocking_fields",
+            "baseName": "blocking_fields",
+            "type": "Array<string>",
+            "format": ""
+        },
+        {
+            "name": "notices",
+            "baseName": "notices",
+            "type": "Array<string>",
+            "format": ""
+        },
         {
             "name": "current_profile",
             "baseName": "current_profile",

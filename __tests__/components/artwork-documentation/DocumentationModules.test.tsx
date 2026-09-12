@@ -5,12 +5,106 @@ import { documentationFixture } from "@/__tests__/fixtures/artwork-documentation
 import type { ApiArtworkDocumentationOperation } from "@/generated/models/ApiArtworkDocumentationOperation";
 import type { PendingEdit } from "@/lib/artwork-documentation/draft-controller";
 import { validDocumentationOperation } from "@/lib/artwork-documentation/validation";
+import museumProfile from "@/__tests__/fixtures/artwork-documentation-profile-v3.json";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
 
 describe("artwork documentation modules", () => {
+  it("names the nested video duration group while retaining the Type control's label", () => {
+    const context = documentationFixture();
+    context.profile = museumProfile as never;
+    context.modules["artwork"]!.answers["media_profiles"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: ["video"],
+    } as never;
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="story"
+        onChange={jest.fn()}
+      />
+    );
+    const duration = screen.getByRole("group", {
+      name: "Duration",
+      exact: true,
+    });
+    expect(
+      within(duration).getByRole("combobox", { name: "Type", exact: true })
+    ).toBeInTheDocument();
+    expect(duration.querySelector("legend")).not.toHaveClass("tw-sr-only");
+    const examples = within(duration).getAllByText(
+      "See an example for this answer",
+      { exact: true }
+    );
+    for (const example of examples)
+      expect(
+        duration.querySelector("legend")!.compareDocumentPosition(example) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+  });
+  it("guides a generic Stream caption without assigning a program to the work", () => {
+    const context = documentationFixture();
+    context.profile = museumProfile as never;
+    context.program_id = null;
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="story"
+        onChange={jest.fn()}
+      />
+    );
+    expect(
+      within(
+        screen.getByRole("region", { name: "Caption", exact: true })
+      ).getByText(
+        "Give a reader a way into the work. Aim for 75–150 words in your chosen language."
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/For Keys and Gates, aim/)).toBeNull();
+  });
+  it("lets artists choose the work's media before media-specific facts and preserves combined choices", () => {
+    const context = documentationFixture();
+    context.profile = museumProfile as never;
+    context.modules["artwork"]!.answers["media_profiles"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: ["photography"],
+    } as never;
+    context.modules["artwork"]!.answers["capture_date"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: { precision: "year", start: "2026", approximate: false },
+    } as never;
+    const onChange = jest.fn();
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="artwork"
+        onChange={onChange}
+      />
+    );
+    const media = screen.getByRole("region", { name: "The form of the work" });
+    const capture = screen.getByRole("region", { name: "Capture date" });
+    expect(
+      media.compareDocumentPosition(capture) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    fireEvent.click(
+      within(media).getByRole("checkbox", { name: /Audio, sound & music/ })
+    );
+    expect(onChange).toHaveBeenLastCalledWith(
+      "artwork",
+      expect.objectContaining({
+        field: "media_profiles",
+        answer: expect.objectContaining({ value: ["photography", "audio"] }),
+      })
+    );
+  });
   it("associates a nested Label with its input rather than the surrounding field heading", () => {
     const context = documentationFixture();
     const artwork = context.profile.modules.find(
