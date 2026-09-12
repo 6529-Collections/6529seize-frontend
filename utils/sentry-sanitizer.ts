@@ -698,7 +698,9 @@ function sanitizeSpanData(
         typeof value === "string" ? sanitizeUrlLikeString(value, kind) : value;
       continue;
     }
-    nextData[key] = sanitizeUnknown(value, 0, new WeakSet<object>());
+    nextData[key] = isSensitiveSentryField(key)
+      ? REDACTED
+      : sanitizeUnknown(value, 0, new WeakSet<object>());
   }
   return nextData;
 }

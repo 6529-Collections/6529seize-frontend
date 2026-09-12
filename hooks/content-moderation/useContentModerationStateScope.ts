@@ -16,13 +16,15 @@ export const CONTENT_MODERATOR_ACCESS_QUERY_KEY = [
 
 export const useContentModerationStateScope = (
   connectedProfileId: string | null | undefined,
-  proxyId?: string | null
+  proxyId?: string | null,
+  isDirectProfileSession = true
 ) => {
   const queryClient = useQueryClient();
   useEffect(() => {
     clearContentModerationState();
     clearSubmissionRequestKeys();
-    const keepProfileId = proxyId ? null : connectedProfileId;
+    const keepProfileId =
+      proxyId || !isDirectProfileSession ? null : connectedProfileId;
     clearPrivateModerationQueries(queryClient, keepProfileId);
     clearPersonalReportQueries(queryClient, keepProfileId);
     queryClient.removeQueries({
@@ -30,7 +32,7 @@ export const useContentModerationStateScope = (
       predicate: (query) =>
         !keepProfileId || query.queryKey[2] !== keepProfileId,
     });
-  }, [connectedProfileId, proxyId, queryClient]);
+  }, [connectedProfileId, proxyId, isDirectProfileSession, queryClient]);
 
   useEffect(
     () =>

@@ -327,6 +327,8 @@ request shows an error instead of incorrectly treating the user as
 unauthorized.
 Switching identity, entering proxy mode, signing out, or losing server access
 clears private review data. Private evidence is excluded from session replay.
+Private review data and personal Reports stay hidden until the current sign-in
+token identifies a direct profile session, including while proxy details load.
 
 ## Common scenarios
 

@@ -32,6 +32,7 @@ export const createMockAuthContext = (
     connectionStatus: "CONNECTED" as any,
     receivedProfileProxies: [],
     activeProfileProxy: null,
+    isDirectProfileSession: true,
     showWaves: false,
     requestAuth: jest.fn(async () => ({ success: false })),
     setToast: jest.fn(),

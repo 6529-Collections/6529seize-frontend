@@ -10,9 +10,13 @@ import { CONTENT_MODERATOR_ACCESS_QUERY_KEY } from "./useContentModerationStateS
 export { CONTENT_MODERATOR_ACCESS_QUERY_KEY } from "./useContentModerationStateScope";
 
 export const useContentModeratorAccess = () => {
-  const { connectedProfile, activeProfileProxy } = useAuth();
+  const { connectedProfile, activeProfileProxy, isDirectProfileSession } =
+    useAuth();
   const queryClient = useQueryClient();
-  const profileId = activeProfileProxy === null ? connectedProfile?.id : null;
+  const profileId =
+    isDirectProfileSession === true && activeProfileProxy === null
+      ? connectedProfile?.id
+      : null;
   const previousProfileId = useRef(profileId);
   const query = useQuery({
     queryKey: [...CONTENT_MODERATOR_ACCESS_QUERY_KEY, profileId ?? null],

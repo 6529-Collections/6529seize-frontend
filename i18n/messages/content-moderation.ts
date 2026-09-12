@@ -157,7 +157,7 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.blockActivity.blocked": "Blocked",
   "contentModeration.moderator.blockActivity.unblocked": "Unblocked",
   "contentModeration.moderator.noPower":
-    "WatchTower is available to developer profiles. Switch out of proxy mode to use your own access.",
+    "WatchTower requires developer access. Use a developer profile and switch out of proxy mode.",
   "contentModeration.moderator.redirecting": "Redirecting in {seconds}",
   "contentModeration.moderator.openReportsIndicator":
     "Open reports need review",

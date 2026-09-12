@@ -163,8 +163,12 @@ function ReportRow({
 
 export default function ReportsPreferencesSettings() {
   const locale = useBrowserLocale();
-  const { connectedProfile, activeProfileProxy } = useAuth();
-  const profileId = activeProfileProxy === null ? connectedProfile?.id : null;
+  const { connectedProfile, activeProfileProxy, isDirectProfileSession } =
+    useAuth();
+  const profileId =
+    isDirectProfileSession === true && activeProfileProxy === null
+      ? connectedProfile?.id
+      : null;
   const query = useInfiniteQuery({
     queryKey: [...MY_CONTENT_MODERATION_REPORTS_QUERY_KEY, profileId ?? null],
     queryFn: ({ pageParam, signal }) =>

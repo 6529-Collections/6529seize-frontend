@@ -5,6 +5,25 @@ import {
   sanitizeUrlString,
 } from "@/utils/sentry-sanitizer";
 
+it("redacts sensitive top-level span data as well as nested evidence", () => {
+  const span = sanitizeSentrySpan({
+    data: {
+      evidence: "private",
+      content_snapshot: "private",
+      preview: "private",
+      nested: { moderator_note: "private" },
+      safe: "visible",
+    },
+  });
+  expect(span.data).toEqual({
+    evidence: "[Filtered]",
+    content_snapshot: "[Filtered]",
+    preview: "[Filtered]",
+    nested: { moderator_note: "[Filtered]" },
+    safe: "visible",
+  });
+});
+
 const SYNTHETIC_WAVE_ID = `${"1".repeat(8)}-${"2".repeat(4)}-4${"3".repeat(3)}-8${"4".repeat(3)}-${"5".repeat(12)}`;
 const SYNTHETIC_DROP_ID = `${"6".repeat(8)}-${"7".repeat(4)}-4${"8".repeat(3)}-8${"9".repeat(3)}-${"a".repeat(12)}`;
 const SYNTHETIC_AUTHOR_ID = `${"a".repeat(8)}-${"b".repeat(4)}-4${"c".repeat(3)}-8${"d".repeat(3)}-${"e".repeat(12)}`;

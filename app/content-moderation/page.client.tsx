@@ -314,14 +314,21 @@ function ModerationQueueCard({
 
 export default function ContentModerationPageClient() {
   const locale = useBrowserLocale();
-  const { connectedProfile, activeProfileProxy, fetchingProfile } = useAuth();
+  const {
+    connectedProfile,
+    activeProfileProxy,
+    fetchingProfile,
+    isDirectProfileSession,
+  } = useAuth();
   const profileId = connectedProfile?.id;
   const pathname = usePathname();
   const activeTab =
     getModerationTab(normalizePathname(pathname).split("/")[2]) ?? "OPEN";
   const accessQuery = useContentModeratorAccess();
   const hasModeratorIdentity =
-    Boolean(connectedProfile?.id) && activeProfileProxy === null;
+    Boolean(connectedProfile?.id) &&
+    activeProfileProxy === null &&
+    isDirectProfileSession === true;
   const { canModerate, permissionsLoading, moderatorContentReady } =
     getModeratorPermissions(accessQuery, hasModeratorIdentity, fetchingProfile);
   const reportsTabActive = isReportsTab(activeTab);

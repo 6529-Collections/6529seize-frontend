@@ -24,6 +24,7 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
     connectedProfile: mockProfileId ? { id: mockProfileId } : null,
     activeProfileProxy: mockProxyId ? { id: mockProxyId } : null,
+    isDirectProfileSession: mockProxyId === null,
     requestAuth: jest.fn().mockResolvedValue({ success: true }),
     setToast: jest.fn(),
   }),

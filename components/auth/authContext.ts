@@ -10,6 +10,7 @@ export const AuthContext = createContext<AuthContextType>({
   fetchingProfile: false,
   receivedProfileProxies: [],
   activeProfileProxy: null,
+  isDirectProfileSession: false,
   connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
   showWaves: false,
   requestAuth: async () => ({ success: false }),

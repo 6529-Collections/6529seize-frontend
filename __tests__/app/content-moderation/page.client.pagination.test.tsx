@@ -80,6 +80,7 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
     connectedProfile: mockProfileId === null ? null : { id: mockProfileId },
     activeProfileProxy: mockActiveProfileProxy,
+    isDirectProfileSession: mockActiveProfileProxy === null,
     fetchingProfile: mockFetchingProfile,
     setToast: jest.fn(),
   }),

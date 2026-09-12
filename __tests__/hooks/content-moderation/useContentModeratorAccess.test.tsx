@@ -17,11 +17,13 @@ import type { ReactNode } from "react";
 
 let mockProfileId: string | null = "moderator-1";
 let mockProxy: { id: string } | null = null;
+let mockDirectSession = true;
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
     connectedProfile: mockProfileId === null ? null : { id: mockProfileId },
     activeProfileProxy: mockProxy,
+    isDirectProfileSession: mockDirectSession,
   }),
 }));
 
@@ -57,6 +59,7 @@ describe("useContentModeratorAccess identity privacy", () => {
     jest.clearAllMocks();
     mockProfileId = "moderator-1";
     mockProxy = null;
+    mockDirectSession = true;
     jest.mocked(fetchContentModeratorAccess).mockResolvedValue(access);
   });
 
@@ -151,6 +154,38 @@ describe("useContentModeratorAccess identity privacy", () => {
     }
     expect(client.isFetching()).toBe(0);
   });
+});
+
+it("ignores cached access and Checks on reload before the proxy session is resolved", () => {
+  mockProfileId = "moderator-1";
+  mockProxy = null;
+  mockDirectSession = false;
+  const client = new QueryClient();
+  client.setQueryData(accessKey, access);
+  const checkKey = [
+    ...MODERATION_QUEUE_QUERY_KEY,
+    "checks",
+    "moderator-1",
+    "detail",
+    "one",
+  ];
+  client.setQueryData(checkKey, { evidence: "private cached evidence" });
+  const observed: unknown[] = [];
+  renderHook(
+    () => {
+      const result = useContentModeratorAccess();
+      observed.push(result.data);
+      return result;
+    },
+    {
+      wrapper: ({ children }: { readonly children: ReactNode }) => (
+        <QueryClientProvider client={client}>{children}</QueryClientProvider>
+      ),
+    }
+  );
+  expect(observed.every((value) => value === undefined)).toBe(true);
+  expect(client.getQueryData(checkKey)).toBeUndefined();
+  mockDirectSession = true;
 });
 
 it("clears the previous developer's filtered checks on a direct identity switch", async () => {
