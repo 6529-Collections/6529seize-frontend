@@ -4,7 +4,7 @@
   padding: clamp(16px, 4.5%, 48px);
   overflow-wrap: anywhere;
   background: #183ddd;
-  color: #20272c;
+  color: #fff;
   font-family: "CMS Manrope", Arial, sans-serif;
   font-size: 12px;
   line-height: 1.5;
@@ -34,6 +34,7 @@
   border: 1px solid #d9dfeb;
   border-radius: 6px;
   background: #fff;
+  color: #20272c;
   box-shadow: 0 14px 30px #081d6b45;
 }
 
@@ -203,6 +204,7 @@
 
 .mat[data-cms-project-mockup="catalogue"] {
   background: #ed927c;
+  color: #3c352b;
 }
 
 .catalogue {
@@ -300,7 +302,7 @@
 }
 
 .books li:nth-child(3n) .bookCover {
-  background: #777aa2;
+  background: #6b6e96;
   color: #fff8e8;
 }
 

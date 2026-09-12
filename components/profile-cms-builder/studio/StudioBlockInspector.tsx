@@ -23,6 +23,7 @@ import StudioCollectionFields, {
 
 const HEADING_LABEL = "profileCms.studio.heading";
 const TEXT_LABEL = "profileCms.studio.text";
+const APPROVED_VARIANT_VALUES: readonly string[] = CMS_APPROVED_VARIANTS;
 const MOCKUP_FIELDS: readonly {
   key: string;
   label: MessageKey;
@@ -219,18 +220,7 @@ export default function StudioBlockInspector({
       typeof originalFields["asset_id"] === "string");
   const mediaKind = block.block_type === "callout" ? "image" : block.block_type;
   const submit = () => {
-    const patch: Record<string, unknown> = { ...values, ...collectionChanges };
-    const previousRows = editableEntries(originalFields["rows"]);
-    const nextRows = editableEntries(collectionChanges["rows"]);
-    if (
-      previousRows &&
-      nextRows &&
-      values["content"] === undefined &&
-      typeof originalFields["content"] === "string" &&
-      originalFields["content"].trim() === rowsText(previousRows)
-    ) {
-      patch["content"] = rowsText(nextRows);
-    }
+    const patch = collectionPatch(originalFields, values, collectionChanges);
     if (Object.keys(designChanges).length > 0)
       patch["presentation"] = { ...presentationRecord, ...designChanges };
     if (variant !== null)
@@ -526,9 +516,7 @@ export default function StudioBlockInspector({
         }
       />
       {typeof presentationRecord?.["variant"] === "string" &&
-      CMS_APPROVED_VARIANTS.some(
-        (choice) => choice === presentationRecord["variant"]
-      ) ? (
+      APPROVED_VARIANT_VALUES.includes(presentationRecord["variant"]) ? (
         <StudioSelect
           label={t(locale, "profileCms.approved.sectionStyle")}
           value={variant ?? presentationRecord["variant"]}
@@ -677,6 +665,26 @@ function isEditableGallery(value: unknown): boolean {
     value === undefined ||
     (Array.isArray(value) && value.every((item) => typeof item === "string"))
   );
+}
+
+function collectionPatch(
+  original: Record<string, unknown>,
+  values: Record<string, string>,
+  changes: Record<string, unknown>
+): Record<string, unknown> {
+  const patch: Record<string, unknown> = { ...values, ...changes };
+  const previousRows = editableEntries(original["rows"]);
+  const nextRows = editableEntries(changes["rows"]);
+  if (
+    previousRows &&
+    nextRows &&
+    values["content"] === undefined &&
+    typeof original["content"] === "string" &&
+    original["content"].trim() === rowsText(previousRows)
+  ) {
+    patch["content"] = rowsText(nextRows);
+  }
+  return patch;
 }
 
 function rowsText(rows: readonly Record<string, unknown>[]): string {

@@ -29,6 +29,7 @@ import {
 } from "./approved-renderer/contract";
 import { ApprovedLink } from "./approved-renderer/links";
 import { ApprovedSessionProvider } from "./approved-renderer/session";
+import { useBlockEditing } from "./approved-renderer/useBlockEditing";
 import styles from "./approved-renderer/approved.module.css";
 
 export default function CmsApprovedSiteRenderer({
@@ -62,9 +63,11 @@ export default function CmsApprovedSiteRenderer({
     handle: cmsPackage.profile.handle,
   });
   const sessionScope = `${cmsPackage.profile.handle.toLowerCase()}:${cmsPackage.package_id}`;
+  const rootRef = useBlockEditing(!!editing?.onSelectBlock, sessionScope);
   return (
     <ApprovedSessionProvider key={sessionScope} scope={sessionScope}>
       <div
+        ref={rootRef}
         className={`tailwind-scope ${styles["root"] ?? ""}`}
         data-cms-approved-design={presentation.studio_design}
         data-palette={presentation.studio_palette}
@@ -390,25 +393,11 @@ function EditableBlock({
       data-role={presentation.role}
       data-variant={variant}
       data-selected={editing?.selectedBlockId === block.id}
-      onClick={
-        editing?.onSelectBlock
-          ? (event) => {
-              const target = event.target;
-              if (
-                target instanceof Element &&
-                target.closest(
-                  "a,button,input,textarea,select,label,summary,[role=button]"
-                )
-              )
-                return;
-              editing.onSelectBlock?.(block.id);
-            }
-          : undefined
-      }
     >
       {editing?.onSelectBlock ? (
         <button
           type="button"
+          data-cms-edit-block
           className={styles["editBlock"]}
           onClick={() => editing.onSelectBlock?.(block.id)}
           aria-pressed={editing.selectedBlockId === block.id}

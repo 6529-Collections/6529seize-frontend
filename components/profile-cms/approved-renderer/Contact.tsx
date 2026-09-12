@@ -141,13 +141,13 @@ function ContactForm({
             {t(context.locale, "profileCms.approved.prepareEmail")}
           </button>
           {prepared ? (
-            <div className={styles["formWide"]} role="status">
-              <p>{t(context.locale, "profileCms.approved.emailReady")}</p>
+            <output className={styles["formWide"]}>
+              <span>{t(context.locale, "profileCms.approved.emailReady")}</span>
               <a href={href} className={styles["textLink"]}>
                 {t(context.locale, "profileCms.approved.openEmail")}{" "}
                 <span aria-hidden="true">↗</span>
               </a>
-            </div>
+            </output>
           ) : null}
         </form>
       ) : null}

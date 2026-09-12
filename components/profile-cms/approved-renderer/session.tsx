@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 export interface ApprovedContactDraft {
   readonly name?: string;
@@ -46,24 +53,21 @@ export function ApprovedSessionProvider({
   const [drafts, setDrafts] = useState<Record<string, ApprovedContactDraft>>(
     () => rememberedDrafts(scope)
   );
-  return (
-    <SessionContext
-      value={{
-        subject,
-        setSubject,
-        drafts,
-        updateDraft: (id, patch) => {
-          const next = { ...drafts, [id]: { ...drafts[id], ...patch } };
-          const keys = Object.keys(next);
-          if (keys.length > DRAFT_CACHE_LIMIT && keys[0]) delete next[keys[0]];
-          remember(scope, next);
-          setDrafts(next);
-        },
-      }}
-    >
-      {children}
-    </SessionContext>
+  const updateDraft = useCallback(
+    (id: string, patch: ApprovedContactDraft) => {
+      const next = { ...drafts, [id]: { ...drafts[id], ...patch } };
+      const keys = Object.keys(next);
+      if (keys.length > DRAFT_CACHE_LIMIT && keys[0]) delete next[keys[0]];
+      remember(scope, next);
+      setDrafts(next);
+    },
+    [drafts, scope]
   );
+  const value = useMemo(
+    () => ({ subject, setSubject, drafts, updateDraft }),
+    [subject, drafts, updateDraft]
+  );
+  return <SessionContext value={value}>{children}</SessionContext>;
 }
 
 export function useApprovedSession() {

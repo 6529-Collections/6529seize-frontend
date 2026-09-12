@@ -84,9 +84,8 @@ export default function ApprovedGallery({
       {filterable || searchable || modes.includes("list") ? (
         <div className={styles["galleryTools"]}>
           {filterable ? (
-            <div
+            <fieldset
               className={styles["filters"]}
-              role="group"
               aria-label={title ?? t(context.locale, "profileCms.approved.all")}
             >
               <button
@@ -113,7 +112,7 @@ export default function ApprovedGallery({
                   </span>
                 </button>
               ))}
-            </div>
+            </fieldset>
           ) : null}
           <div className={styles["searchRow"]}>
             {searchable ? (
@@ -127,7 +126,7 @@ export default function ApprovedGallery({
                 />
               </label>
             ) : null}
-            <p className={styles["resultCount"]} role="status">
+            <output className={styles["resultCount"]}>
               {t(
                 context.locale,
                 visible.length === 1
@@ -137,11 +136,10 @@ export default function ApprovedGallery({
                   count: formatNumber(context.locale, visible.length),
                 }
               )}
-            </p>
+            </output>
             {modes.includes("list") ? (
-              <div
+              <fieldset
                 className={styles["viewModes"]}
-                role="group"
                 aria-label={t(context.locale, "profileCms.studio.preview")}
               >
                 {(["grid", "list"] as const).map((value) => (
@@ -154,7 +152,7 @@ export default function ApprovedGallery({
                     {t(context.locale, `profileCms.approved.${value}`)}
                   </button>
                 ))}
-              </div>
+              </fieldset>
             ) : null}
           </div>
         </div>

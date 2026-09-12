@@ -724,6 +724,14 @@
   gap: 0 22px;
   border-bottom: 1px solid var(--approved-line);
 }
+.filters,
+.viewModes {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border-inline: 0;
+  border-top: 0;
+}
 .filters button,
 .viewModes button {
   min-height: 47px;
@@ -779,6 +787,7 @@
   white-space: nowrap;
 }
 .viewModes {
+  border-bottom: 0;
   display: flex;
   gap: 18px;
 }
@@ -927,6 +936,10 @@
 .formWide {
   grid-column: 1/-1;
 }
+.contactForm output > span {
+  display: block;
+  font-size: 11px;
+}
 .contactForm p {
   margin: 0;
   font-size: 11px;
@@ -1043,13 +1056,11 @@
   align-items: stretch;
 }
 .root[data-cms-approved-design="personal-v2"] .splitHero > div:first-child {
+  --approved-focus: var(--approved-accent-ink);
   background: var(--approved-accent);
   color: var(--approved-accent-ink);
   padding: 34px 30px;
   align-content: center;
-}
-.root[data-cms-approved-design="personal-v2"] .splitHero > div:first-child {
-  --approved-focus: var(--approved-accent-ink);
 }
 .root[data-cms-approved-design="personal-v2"] .splitHero > div:last-child {
   padding: 27px 27px 27px 0;
@@ -1340,13 +1351,11 @@
   --approved-panel: #e4e9dc;
 }
 .root[data-cms-approved-design="fund-v2"] .siteHeader {
+  --approved-focus: #f2f3eb;
   max-width: none;
   background: #193e2c;
   color: #f2f3eb;
   padding-inline: max(34px, calc((100% - 1236px) / 2));
-}
-.root[data-cms-approved-design="fund-v2"] .siteHeader {
-  --approved-focus: #f2f3eb;
 }
 .root[data-cms-approved-design="fund-v2"] .topline {
   border-color: #61816b;

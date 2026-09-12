@@ -78,30 +78,29 @@ const DENSITY_CLASSES = {
 const LINK_CLASS =
   "tw-text-inherit tw-no-underline tw-transition-opacity hover:tw-text-inherit hover:tw-opacity-70 focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:!tw-outline-current";
 
-export default function CmsStudioSiteRenderer({
-  cmsPackage,
-  page,
-  locale,
-  presentation,
-  editing,
-}: {
+interface CmsStudioSiteRendererProps {
   readonly cmsPackage: CmsPackageV1;
   readonly page: CmsPageV1;
   readonly locale: SupportedLocale;
   readonly presentation: CmsStudioPresentation;
   readonly editing?: CmsStudioEditingContext | undefined;
-}) {
-  if (presentation.studio_design) {
-    return (
-      <CmsApprovedSiteRenderer
-        cmsPackage={cmsPackage}
-        page={page}
-        locale={locale}
-        presentation={presentation}
-        editing={editing}
-      />
-    );
-  }
+}
+
+export default function CmsStudioSiteRenderer(
+  props: CmsStudioSiteRendererProps
+) {
+  if (props.presentation.studio_design)
+    return <CmsApprovedSiteRenderer {...props} />;
+  return <LegacyCmsStudioSiteRenderer {...props} />;
+}
+
+function LegacyCmsStudioSiteRenderer({
+  cmsPackage,
+  page,
+  locale,
+  presentation,
+  editing,
+}: CmsStudioSiteRendererProps) {
   const context: RendererContext = {
     ...createRendererContext(cmsPackage, locale, editing?.onNavigatePage),
     appearance: "studio",

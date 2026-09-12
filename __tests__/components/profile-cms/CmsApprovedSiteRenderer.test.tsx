@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import CmsSiteRenderer from "@/components/profile-cms/CmsSiteRenderer";
 import { getApprovedGalleryEntries } from "@/components/profile-cms/approved-renderer/contract";
@@ -127,6 +128,106 @@ it("selects copy while keeping artwork links navigable in the editor", () => {
     .find((link) => link.getAttribute("href")?.endsWith("/work-48"))!;
   fireEvent.click(feature);
   expect(navigate).toHaveBeenCalledWith("page-work-48");
+  expect(select).not.toHaveBeenCalled();
+});
+
+it("uses native Edit buttons for keyboard activation and cleans up pointer editing", async () => {
+  const user = userEvent.setup();
+  const document = fixture();
+  const page = document.payload.pages[0]!;
+  const select = jest.fn();
+  const navigate = jest.fn();
+  const { rerender } = render(
+    <CmsSiteRenderer
+      cmsPackage={document}
+      page={page}
+      locale="en-US"
+      editing={{ onSelectBlock: select, onNavigatePage: navigate }}
+    />
+  );
+  const hero = page.blocks.find((block) => block.block_type === "heading")!;
+  const heading = screen.getByRole("heading", { level: 1 });
+  const section = heading.closest("section")!;
+  const edit = within(section).getByRole("button", { name: "Edit section" });
+  edit.focus();
+  await user.keyboard("{Enter}");
+  expect(select).toHaveBeenCalledTimes(1);
+  expect(select).toHaveBeenLastCalledWith(hero.id);
+  await user.keyboard(" ");
+  expect(select).toHaveBeenCalledTimes(2);
+  expect(section).not.toHaveAttribute("role");
+  expect(section).not.toHaveAttribute("tabindex");
+
+  select.mockClear();
+  rerender(
+    <CmsSiteRenderer cmsPackage={document} page={page} locale="en-US" />
+  );
+  await user.click(screen.getByRole("heading", { level: 1 }));
+  expect(select).not.toHaveBeenCalled();
+});
+
+it("keeps delegated editing scoped to the current site after a template replacement", () => {
+  const first = fixture("collector-v2");
+  const next = fixture("artist-v2");
+  const select = jest.fn();
+  const editing = { onSelectBlock: select, onNavigatePage: jest.fn() };
+  const { rerender } = render(
+    <CmsSiteRenderer
+      cmsPackage={first}
+      page={first.payload.pages[0]!}
+      locale="en-US"
+      editing={editing}
+    />
+  );
+  rerender(
+    <CmsSiteRenderer
+      cmsPackage={next}
+      page={next.payload.pages[0]!}
+      locale="en-US"
+      editing={editing}
+    />
+  );
+  fireEvent.click(screen.getByRole("heading", { level: 1 }));
+  expect(select).toHaveBeenCalledTimes(1);
+  expect(select).toHaveBeenCalledWith(
+    next.payload.pages[0]!.blocks.find(
+      (block) => block.block_type === "heading"
+    )!.id
+  );
+});
+
+it("leaves nested disclosures and form controls independent of block selection", async () => {
+  const user = userEvent.setup();
+  const organization = fixture("organization-v2");
+  const select = jest.fn();
+  const editing = { onSelectBlock: select, onNavigatePage: jest.fn() };
+  const { rerender } = render(
+    <CmsSiteRenderer
+      cmsPackage={organization}
+      page={organization.payload.pages[0]!}
+      locale="en-US"
+      editing={editing}
+    />
+  );
+  const summary = screen.getByText("Workshop details", { selector: "summary" });
+  await user.click(summary);
+  expect(summary.closest("details")).toHaveAttribute("open");
+  expect(select).not.toHaveBeenCalled();
+  const artist = fixture("artist-v2");
+  const contact = artist.payload.pages.find(
+    (page) => page.id === "page-contact"
+  )!;
+  rerender(
+    <CmsSiteRenderer
+      cmsPackage={artist}
+      page={contact}
+      locale="en-US"
+      editing={editing}
+    />
+  );
+  await user.click(screen.getByLabelText("Your name"));
+  await user.keyboard("A visitor");
+  expect(screen.getByLabelText("Your name")).toHaveValue("A visitor");
   expect(select).not.toHaveBeenCalled();
 });
 
