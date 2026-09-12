@@ -244,22 +244,6 @@ function MemeLabLiveDetails({
             unit="ETH"
           />
           <MemeLabMetadataLink url={nft.uri} />
-          <MemeLabMarketMetric
-            label="Floor Price"
-            value={nft.floor_price}
-            unit="ETH"
-          />
-          <MemeLabMarketMetric
-            label="Market Cap"
-            value={nft.market_cap}
-            decimals={100}
-            unit="ETH"
-          />
-          <MemeLabMarketMetric
-            label="Highest Offer"
-            value={nft.highest_offer}
-            unit="ETH"
-          />
           {showMarketplaceLinks && (
             <div className="tw-flex tw-min-w-[8.5rem] tw-items-end">
               <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />

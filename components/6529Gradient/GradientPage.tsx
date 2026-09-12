@@ -312,25 +312,9 @@ function GradientDetailsPanel({
       <section className="tw-pt-6 md:tw-pt-8">
         <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-8 md:tw-grid-cols-3 md:tw-gap-x-10">
           <GradientMarketMetric
-            label="Floor Price"
-            value={nft.floor_price}
-            unit="ETH"
-          />
-          <GradientMarketMetric
-            label="Market Cap"
-            value={nft.market_cap}
-            decimals={100}
-            unit="ETH"
-          />
-          <GradientMarketMetric
             label="TDH Rate"
             value={nft.hodl_rate}
             decimals={100}
-          />
-          <GradientMarketMetric
-            label="Highest Offer"
-            value={nft.highest_offer}
-            unit="ETH"
           />
           {showMarketplaceLinks && <GradientMarketplaceLinks nft={nft} />}
         </div>
