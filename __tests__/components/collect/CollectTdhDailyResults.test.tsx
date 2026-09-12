@@ -7,7 +7,7 @@ it("represents an unsupported line amount as unavailable, never as free", () => 
   plan.items[0]!.quantity = "0";
   render(<CollectTdhDailyResults plan={plan} onReview={jest.fn()} />);
   const row = screen
-    .getByRole("link", { name: "Target artwork", exact: true })
+    .getByRole("link", { name: "Target artwork" })
     .closest("li")!;
   expect(within(row).getByText("—")).toBeVisible();
   expect(within(row).queryByText("0 ETH")).not.toBeInTheDocument();
