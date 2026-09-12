@@ -26,11 +26,16 @@ import type {
   OfferPricingControls,
   PublishedOfferCommitment,
   PendingOfferCommitment,
+  OfferPlanAcquisitionProps,
 } from "./collect-offer-plan.types";
+import { offerBuyOptions } from "./collect-offer-blend.helpers";
+import { collectPlanSelectionCost } from "./collect-plan-selection.helpers";
+import { MARKET_BATCH_LIMITS } from "./market-batch-validation";
 import OfferPlanItem from "./OfferPlanItem";
+import OfferPlanBuySummary from "./OfferPlanBuySummary";
 import OfferPlanPricing, { OFFER_INPUT_CLASS } from "./OfferPlanPricing";
 
-interface OfferPlanPanelProps {
+interface OfferPlanPanelProps extends OfferPlanAcquisitionProps {
   readonly items: readonly CollectOfferSelection[];
   readonly profile: ApiIdentity | null;
   readonly payingWallet?: string | undefined;
@@ -55,7 +60,10 @@ const TEXT_BUTTON =
 export default function OfferPlanPanel(props: OfferPlanPanelProps) {
   return (
     <OfferPlanContents
-      key={offerPlanScope(props.items, props.profile, props.payingWallet)}
+      key={JSON.stringify([
+        offerPlanScope(props.items, props.profile, props.payingWallet),
+        props.strategySessionKey ?? "",
+      ])}
       {...props}
     />
   );
@@ -72,12 +80,18 @@ function OfferPlanContents({
   onReviewPending,
   analyze,
   onReviewOffer,
+  initialMethod = "manual",
+  blended = false,
+  buyOptions = [],
+  buyLockedAssetKeys = [],
+  onReviewBuys,
 }: OfferPlanPanelProps) {
   const locale = useBrowserLocale();
   const id = useId();
   const [rows, setRows] = useState(() => initialOfferRows(items));
+  const [buyKeys, setBuyKeys] = useState<readonly string[]>([]);
   const [controls, setControls] = useState<OfferPricingControls>({
-    method: "manual",
+    method: initialMethod,
     percent: "5",
     budgetEth: "",
     expiryHours: "168",
@@ -104,6 +118,8 @@ function OfferPlanContents({
     keys: [...publishedAssetKeys].sort((a, b) => a.localeCompare(b)),
     offers: publishedOffers,
     pending: pendingOffers,
+    buys: buyKeys,
+    buyLocks: buyLockedAssetKeys,
   });
   const analysis =
     analysisResult?.scope === publishedScope ? analysisResult.view : null;
@@ -117,9 +133,25 @@ function OfferPlanContents({
     generation.current++;
   }, [publishedScope]);
 
-  const totals = offerPlanTotals(rows, publishedAssetKeys);
+  const excludedOfferKeys = [
+    ...publishedAssetKeys,
+    ...buyKeys,
+    ...buyLockedAssetKeys,
+  ];
+  const availableBuys = offerBuyOptions(rows, blended ? buyOptions : []);
+  const selectedBuyLegs = rows
+    .filter(
+      (row) =>
+        row.selected &&
+        buyKeys.includes(row.assetKey) &&
+        !publishedAssetKeys.includes(row.assetKey) &&
+        !buyLockedAssetKeys.includes(row.assetKey)
+    )
+    .flatMap((row) => availableBuys.get(row.assetKey)?.legs ?? []);
+  const buyCostWei = collectPlanSelectionCost(selectedBuyLegs);
+  const totals = offerPlanTotals(rows, excludedOfferKeys);
   const selected = rows.filter(
-    (row) => row.selected && !publishedAssetKeys.includes(row.assetKey)
+    (row) => row.selected && !excludedOfferKeys.includes(row.assetKey)
   );
   const budget =
     controls.method === "goal" ? offerUnitWei(controls.budgetEth) : null;
@@ -168,9 +200,38 @@ function OfferPlanContents({
     setAnalysis(null);
   };
   const changeRow = (next: OfferPlanRow) => {
+    if (
+      publishedAssetKeys.includes(next.assetKey) ||
+      buyLockedAssetKeys.includes(next.assetKey)
+    )
+      return;
     changed();
     setRows((current) =>
       current.map((row) => (row.assetKey === next.assetKey ? next : row))
+    );
+  };
+  const changeRoute = (assetKey: string, buying: boolean) => {
+    if (
+      busy ||
+      publishedAssetKeys.includes(assetKey) ||
+      buyLockedAssetKeys.includes(assetKey) ||
+      (buying && !availableBuys.has(assetKey))
+    )
+      return;
+    changed();
+    setBuyKeys((current) =>
+      buying
+        ? [...new Set([...current, assetKey])]
+        : current.filter((key) => key !== assetKey)
+    );
+    setRows((current) =>
+      current.map((row) =>
+        row.pinned ||
+        publishedAssetKeys.includes(row.assetKey) ||
+        buyLockedAssetKeys.includes(row.assetKey)
+          ? row
+          : { ...row, unitPriceEth: "" }
+      )
     );
   };
   const changeControls = (next: OfferPricingControls) => {
@@ -226,7 +287,7 @@ function OfferPlanContents({
       setRows((current) => {
         const next = new Map(
           applyOfferPrices(
-            current.filter((row) => !publishedAssetKeys.includes(row.assetKey)),
+            current.filter((row) => !excludedOfferKeys.includes(row.assetKey)),
             result.prices,
             controls.method
           ).map((row) => [row.assetKey, row])
@@ -264,10 +325,16 @@ function OfferPlanContents({
           id={`${id}-title`}
           className="tw-m-0 tw-text-lg tw-font-medium tw-text-iron-100"
         >
-          {t(locale, "collect.offerPlan.title")}
+          {t(
+            locale,
+            blended ? "collect.blend.title" : "collect.offerPlan.title"
+          )}
         </h2>
         <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-relaxed tw-text-iron-400">
-          {t(locale, "collect.offerPlan.intro")}
+          {t(
+            locale,
+            blended ? "collect.blend.intro" : "collect.offerPlan.intro"
+          )}
         </p>
       </div>
       <form
@@ -297,7 +364,7 @@ function OfferPlanContents({
         </p>
       )}
       <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-3">
-        <label className="tw-min-w-0 tw-flex-1 tw-space-y-1 tw-text-xs tw-text-iron-300">
+        <label className="tw-min-w-0 tw-basis-full tw-space-y-1 tw-text-xs tw-text-iron-300 sm:tw-flex-1">
           <span>{t(locale, "collect.offerPlan.findNFT")}</span>
           <input
             type="search"
@@ -317,7 +384,8 @@ function OfferPlanContents({
             changed();
             setRows((current) =>
               current.map((row) =>
-                publishedAssetKeys.includes(row.assetKey)
+                publishedAssetKeys.includes(row.assetKey) ||
+                buyLockedAssetKeys.includes(row.assetKey)
                   ? row
                   : { ...row, selected: true }
               )
@@ -334,7 +402,8 @@ function OfferPlanContents({
             changed();
             setRows((current) =>
               current.map((row) =>
-                publishedAssetKeys.includes(row.assetKey)
+                publishedAssetKeys.includes(row.assetKey) ||
+                buyLockedAssetKeys.includes(row.assetKey)
                   ? row
                   : { ...row, selected: false }
               )
@@ -346,18 +415,38 @@ function OfferPlanContents({
       </div>
       <p className="tw-m-0 tw-text-xs tw-text-iron-400">
         {t(locale, "collect.offerPlan.selectionCount", {
-          selected: formatInteger(locale, selected.length),
+          selected: formatInteger(
+            locale,
+            rows.filter(
+              (row) =>
+                row.selected &&
+                !publishedAssetKeys.includes(row.assetKey) &&
+                !buyLockedAssetKeys.includes(row.assetKey)
+            ).length
+          ),
           total: formatInteger(locale, rows.length),
         })}
       </p>
       <ol
         className="tw-m-0 tw-list-none tw-p-0"
-        aria-label={t(locale, "collect.offerPlan.nfts")}
+        aria-label={t(
+          locale,
+          blended ? "collect.blend.nfts" : "collect.offerPlan.nfts"
+        )}
       >
         {visible.map((row) => (
           <OfferPlanItem
             key={row.assetKey}
             row={row}
+            blended={blended}
+            buying={
+              buyKeys.includes(row.assetKey) ||
+              buyLockedAssetKeys.includes(row.assetKey)
+            }
+            buyAvailable={availableBuys.has(row.assetKey)}
+            buyCostWei={availableBuys.get(row.assetKey)?.costWei}
+            buyReserved={buyLockedAssetKeys.includes(row.assetKey)}
+            onRouteChange={(buying) => changeRoute(row.assetKey, buying)}
             price={prices.get(row.assetKey)}
             busy={busy}
             published={
@@ -384,7 +473,7 @@ function OfferPlanContents({
                 !row.asset ||
                 !row.selected ||
                 offerRowIssue(row) !== null ||
-                publishedAssetKeys.includes(row.assetKey)
+                excludedOfferKeys.includes(row.assetKey)
               )
                 return;
               onReviewOffer({
@@ -443,6 +532,25 @@ function OfferPlanContents({
         aria-live="polite"
         aria-atomic="true"
       >
+        {blended && (
+          <OfferPlanBuySummary
+            costWei={buyCostWei}
+            listings={selectedBuyLegs.length}
+            disabled={busy || Boolean(reason) || !onReviewBuys}
+            onReview={() => {
+              if (
+                busy ||
+                reason ||
+                !onReviewBuys ||
+                selectedBuyLegs.length === 0 ||
+                selectedBuyLegs.length > MARKET_BATCH_LIMITS.orders ||
+                buyCostWei === null
+              )
+                return;
+              onReviewBuys(selectedBuyLegs);
+            }}
+          />
+        )}
         <div className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-2">
           <span className="tw-text-sm tw-text-iron-300">
             {t(locale, "collect.offerPlan.proposed", {

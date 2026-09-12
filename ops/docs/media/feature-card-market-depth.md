@@ -34,8 +34,12 @@ levels.
 
 ## Collect a listing or accept an offer
 
-On Memes, Gradients and Pebbles cards, expand a listing price and choose
-**Collect** beside an individual order. The site checks that exact listing and
+On Memes, Gradients and Pebbles cards, **Collect** appears beside each supported
+listing price and **Sell** beside offer prices. A level with one loaded order
+acts on that exact order directly. When several orders share a price, the action
+opens the orders so you can choose one; it does not silently pick a seller or
+offer. The price disclosure remains available for inspecting details.
+The site checks that exact listing and
 adds it to your selection. Set **Quantity** for supported editions, or choose
 **Remove** to take it out. Some listings must be collected as a complete lot.
 
@@ -51,7 +55,7 @@ same copies, so they cannot both be added to this card's selection. A unique NFT
 can be selected only once. The site does not replace an unavailable order with a
 different listing or silently remove it from your review.
 
-For an eligible offer on this specific card, choose **Accept offer**. Connect the
+For an eligible offer on this specific card, choose **Sell**. Connect the
 wallet that holds the NFT; holdings in other consolidated wallets cannot be used
 by that signer. Supported edition offers allow a quantity within that wallet's
 holdings and the offer's remaining amount. Review the WETH you will receive after

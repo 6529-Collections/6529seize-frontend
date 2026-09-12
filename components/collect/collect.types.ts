@@ -53,7 +53,18 @@ export interface CollectRequirementView {
   readonly detail: string;
   readonly status: "owned" | "selected" | "missing" | "unavailable";
   readonly media?: ReactNode;
+  readonly availabilityLabel?: string;
+  readonly priceLabel?: string;
+  readonly purchaseLabel?: string;
 }
+
+export type CollectPlanScenario = "available" | "budget";
+export type CollectAcquisitionStrategy =
+  | "buy"
+  | "match_bid"
+  | "improve_bid"
+  | "discount_ask"
+  | "blended";
 
 export interface CollectPlanView {
   readonly id: string;
@@ -67,6 +78,16 @@ export interface CollectPlanView {
   readonly blockers: readonly string[];
   readonly assumptions: readonly string[];
   readonly reviewDisabledReason?: string | undefined;
+  readonly purchaseTotalLabel?: string;
+  readonly gasReserveLabel?: string;
+  readonly outcomeLabel?: string;
+  readonly scenarios?: readonly {
+    id: CollectPlanScenario;
+    label: string;
+    priceLabel: string;
+    detail: string;
+  }[];
+  readonly scenario?: CollectPlanScenario;
 }
 
 export interface CollectGoalOption {

@@ -229,6 +229,54 @@ it("keeps UNKNOWN publication reserved and does not release it merely on modal c
   expect(panel().pendingOffers).toHaveLength(1);
   expect(panel().publishedOffers).toEqual([]);
 });
+it("preserves commitments across strategy entries and forwards exact purchase routing boundaries", () => {
+  const { props, rerender } = mount();
+  openReview();
+  reserve(operation({ state: ApiMarketOperationStateEnum.Unknown }));
+  fireEvent.click(screen.getByRole("button", { name: "Close offer" }));
+  const buyOptions = [
+    {
+      candidate_id: "listing",
+      order_id: `0x${"2".repeat(64)}`,
+      asset_key: offerAsset(2).asset_key,
+      quantity: "1",
+      unit_price_wei: "100000000000000000",
+    },
+  ];
+  const onReviewBuys = jest.fn();
+  const buyLockedAssetKeys = [offerAsset(2).asset_key];
+  rerender(
+    <CollectOfferWorkspace
+      {...props}
+      initialMethod="goal"
+      strategySessionKey="blend"
+      blended
+      buyOptions={buyOptions}
+      buyLockedAssetKeys={buyLockedAssetKeys}
+      onReviewBuys={onReviewBuys}
+    />
+  );
+  expect(panel().pendingOffers).toHaveLength(1);
+  expect(panel()).toMatchObject({
+    initialMethod: "goal",
+    strategySessionKey: "blend",
+    blended: true,
+    buyLockedAssetKeys,
+  });
+  expect(panel().buyOptions).toBe(buyOptions);
+  act(() => panel().onReviewBuys?.(buyOptions));
+  expect(onReviewBuys).toHaveBeenCalledWith(buyOptions);
+  rerender(
+    <CollectOfferWorkspace
+      {...props}
+      initialMethod="match_bid"
+      strategySessionKey="weth"
+      buyLockedAssetKeys={buyLockedAssetKeys}
+    />
+  );
+  expect(panel().pendingOffers).toHaveLength(1);
+  expect(panel().buyLockedAssetKeys).toBe(buyLockedAssetKeys);
+});
 it.each([
   { asset_key: offerAsset(2).asset_key },
   { quantity: "1" },

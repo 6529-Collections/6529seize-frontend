@@ -6,6 +6,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
 import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
 import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
+import type { ApiCollectPlanLeg } from "@/generated/models/ApiCollectPlanLeg";
 import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -18,6 +19,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
@@ -27,14 +29,23 @@ import type {
   CollectCollection,
   CollectGoalDraft,
   CollectIntent,
+  CollectPlanScenario,
+  CollectAcquisitionStrategy,
   CollectTradeAction,
 } from "./collect.types";
 import { collectCatalogArtwork } from "./collect-catalog.adapters";
-import { collectCostPlanView } from "./collect-plan.adapters";
+import {
+  collectCostPlanView,
+  collectPlanForScenario,
+} from "./collect-plan.adapters";
 import { collectCatalogEntryId, useCollectCatalog } from "./useCollectCatalog";
 import CollectGoalsController from "./CollectGoalsController";
 import CollectTdhWorkspace from "./CollectTdhWorkspace";
 import CollectPlanBasket from "./CollectPlanBasket";
+import {
+  collectPlanReviewFingerprint,
+  collectPlanReviewLegs,
+} from "./collect-plan-review.helpers";
 import CollectPageView, { COLLECT_INTENTS } from "./CollectPageView";
 import CollectTradeController from "./CollectTradeController";
 import { collectProfileWallets } from "./collect-recipient.helpers";
@@ -52,7 +63,11 @@ import {
 } from "./collect-buy.helpers";
 import type { CollectArtworkSelection } from "./CollectArtworkCard";
 import CollectOfferWorkspace from "./CollectOfferWorkspace";
-import type { CollectOfferSelection } from "./collect-offer-plan.types";
+import CollectStrategyPicker from "./CollectStrategyPicker";
+import type {
+  CollectOfferSelection,
+  OfferPriceMethod,
+} from "./collect-offer-plan.types";
 import {
   collectMissingOfferSelection,
   collectSelectedOfferSelection,
@@ -137,18 +152,57 @@ function CollectCatalogController({
     revision: number;
     plan: ApiCollectPlan;
   } | null>(null);
-  const costPlan =
+  const sourceCostPlan =
     storedCostPlan?.revision === goalState.revision
       ? storedCostPlan.plan
       : null;
+  const [scenarioState, setScenarioState] = useState<{
+    planId: string;
+    scenario: CollectPlanScenario;
+  } | null>(null);
+  const planScenario =
+    scenarioState?.planId === sourceCostPlan?.id
+      ? (scenarioState?.scenario ?? "budget")
+      : "budget";
+  const costPlan = sourceCostPlan
+    ? collectPlanForScenario(sourceCostPlan, planScenario)
+    : null;
+  const planFingerprint = costPlan
+    ? collectPlanReviewFingerprint(costPlan)
+    : null;
+  const currentPlanFingerprint = useRef(planFingerprint);
+  useLayoutEffect(() => {
+    currentPlanFingerprint.current = planFingerprint;
+  }, [planFingerprint]);
   const setCostPlan = (plan: ApiCollectPlan | null) =>
     setStoredCostPlan(plan ? { revision: goalState.revision, plan } : null);
   const [basketOpen, setBasketOpen] = useState(false);
+  const [blendedPurchase, setBlendedPurchase] = useState<{
+    fingerprint: string;
+    plan: ApiCollectPlan;
+    legs: readonly ApiCollectPlanLeg[];
+  } | null>(null);
+  const currentBlendedPurchase = useRef(blendedPurchase);
+  useLayoutEffect(() => {
+    currentBlendedPurchase.current = blendedPurchase;
+  }, [blendedPurchase]);
+  const [blendedBuyLocks, setBlendedBuyLocks] = useState<readonly string[]>([]);
+  const [blendedPurchaseOpen, setBlendedPurchaseOpen] = useState(false);
+  const focusResumePurchase = useCallback(
+    (button: HTMLButtonElement | null) => {
+      button?.focus({ preventScroll: true });
+    },
+    []
+  );
   const [selection, setSelection] = useState<CollectSelectedListing[]>([]);
   const [offerWorkspace, setOfferWorkspace] = useState<{
     items: readonly CollectOfferSelection[];
     hasAlternatives: boolean;
+    strategy?: CollectAcquisitionStrategy | undefined;
+    planFingerprint?: string | null;
+    sessionKey: string;
   } | null>(null);
+  const strategySession = useRef(0);
   const [offerWorkspaceActive, setOfferWorkspaceActive] = useState(false);
   const offerReturnFocus = useRef<HTMLElement | null>(null);
   const selectionOfferFocus = useRef<"none" | "open" | "pending">("none");
@@ -164,7 +218,8 @@ function CollectCatalogController({
   const openOffers = (
     items: readonly CollectOfferSelection[],
     hasAlternatives = false,
-    returnToSelection = false
+    returnToSelection = false,
+    strategy?: CollectAcquisitionStrategy
   ) => {
     if (items.length === 0) return;
     selectionOfferFocus.current = returnToSelection ? "open" : "none";
@@ -172,7 +227,14 @@ function CollectCatalogController({
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
-    setOfferWorkspace({ items, hasAlternatives });
+    strategySession.current += 1;
+    setOfferWorkspace({
+      items,
+      hasAlternatives,
+      strategy,
+      planFingerprint: strategy ? planFingerprint : null,
+      sessionKey: String(strategySession.current),
+    });
     setOfferWorkspaceActive(true);
   };
   const closeOffers = () => {
@@ -286,12 +348,13 @@ function CollectCatalogController({
     };
   };
   const plan =
-    costPlan && profile
+    sourceCostPlan && profile
       ? collectCostPlanView(
-          costPlan,
+          sourceCostPlan,
           profile,
           t(locale, `collect.intent.${intent}`),
-          locale
+          locale,
+          planScenario
         )
       : null;
   let catalogView: CollectCatalogView;
@@ -416,6 +479,34 @@ function CollectCatalogController({
         costPlan.result.legs
       )
     : null;
+  const chooseStrategy = (strategy: CollectAcquisitionStrategy) => {
+    if (strategy === "buy") {
+      closeOffers();
+      return;
+    }
+    if (missingOffers)
+      openOffers(
+        missingOffers.items,
+        missingOffers.hasAlternatives,
+        false,
+        strategy
+      );
+  };
+  const workspacePlanMatches = Boolean(
+    planFingerprint && offerWorkspace?.planFingerprint === planFingerprint
+  );
+  const resumablePurchase = blendedPurchase !== null;
+  const releasePurchase = () => {
+    if (currentBlendedPurchase.current !== blendedPurchase) return;
+    currentBlendedPurchase.current = null;
+    setBlendedPurchaseOpen(false);
+    setBlendedPurchase(null);
+    setBlendedBuyLocks([]);
+  };
+  let initialOfferMethod: OfferPriceMethod = "manual";
+  const strategy = offerWorkspace?.strategy;
+  if (strategy === "blended") initialOfferMethod = "goal";
+  else if (strategy && strategy !== "buy") initialOfferMethod = strategy;
   return (
     <>
       <CollectPageView
@@ -423,18 +514,101 @@ function CollectCatalogController({
         collection={collection}
         intent={intent}
         profile={profile}
-        plan={plan}
+        plan={
+          plan && blendedPurchase
+            ? {
+                ...plan,
+                reviewDisabledReason: t(locale, "collect.blend.finishReview"),
+              }
+            : plan
+        }
         goalContent={goalContent}
         workspaceActive={offerWorkspaceActive}
         showCollections={!tdhProjection}
+        recoveryContent={
+          blendedPurchase &&
+          !blendedPurchaseOpen && (
+            <div className="tw-mb-5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-border-y tw-border-solid tw-border-white/10 tw-py-3">
+              <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+                {t(
+                  locale,
+                  blendedPurchase.fingerprint === planFingerprint
+                    ? "collect.blend.retainedPurchase"
+                    : "collect.blend.previousPurchase"
+                )}
+              </p>
+              <button
+                ref={focusResumePurchase}
+                type="button"
+                onClick={() => setBlendedPurchaseOpen(true)}
+                className="tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-text-iron-100 hover:tw-bg-iron-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              >
+                {t(
+                  locale,
+                  blendedPurchase.fingerprint === planFingerprint
+                    ? "collect.blend.resumePurchase"
+                    : "collect.blend.resumePriorPurchase"
+                )}
+              </button>
+            </div>
+          )
+        }
         workspaceContent={
           offerWorkspace && (
-            <CollectOfferWorkspace
-              items={offerWorkspace.items}
-              hasAlternatives={offerWorkspace.hasAlternatives}
-              active={offerWorkspaceActive}
-              onBack={closeOffers}
-            />
+            <>
+              {offerWorkspace.strategy && (
+                <CollectStrategyPicker
+                  value={offerWorkspace.strategy}
+                  locale={locale}
+                  onChange={chooseStrategy}
+                />
+              )}
+              <CollectOfferWorkspace
+                items={offerWorkspace.items}
+                hasAlternatives={offerWorkspace.hasAlternatives}
+                active={offerWorkspaceActive}
+                onBack={closeOffers}
+                initialMethod={initialOfferMethod}
+                strategySessionKey={offerWorkspace.sessionKey}
+                blended={offerWorkspace.strategy === "blended"}
+                buyOptions={
+                  workspacePlanMatches ? (costPlan?.result.legs ?? []) : []
+                }
+                buyLockedAssetKeys={blendedBuyLocks}
+                onReviewBuys={
+                  resumablePurchase
+                    ? undefined
+                    : (legs) => {
+                        if (
+                          costPlan &&
+                          workspacePlanMatches &&
+                          currentPlanFingerprint.current === planFingerprint &&
+                          currentBlendedPurchase.current === null
+                        ) {
+                          const reviewedLegs = collectPlanReviewLegs(
+                            costPlan,
+                            legs
+                          );
+                          if (reviewedLegs.length === 0) return;
+                          setBlendedBuyLocks((keys) => [
+                            ...new Set([
+                              ...keys,
+                              ...reviewedLegs.map((leg) => leg.asset_key),
+                            ]),
+                          ]);
+                          const purchase = {
+                            fingerprint: collectPlanReviewFingerprint(costPlan),
+                            plan: costPlan,
+                            legs: reviewedLegs,
+                          };
+                          currentBlendedPurchase.current = purchase;
+                          setBlendedPurchase(purchase);
+                          setBlendedPurchaseOpen(true);
+                        }
+                      }
+                }
+              />
+            </>
           )
         }
         showListings={
@@ -478,9 +652,22 @@ function CollectCatalogController({
             });
         }}
         onReviewPlan={(id, revision) => {
-          if (costPlan?.id === id && costPlan.revision === revision)
+          if (
+            currentBlendedPurchase.current === null &&
+            costPlan?.id === id &&
+            costPlan.revision === revision
+          )
             setBasketOpen(true);
         }}
+        onPlanScenarioChange={(scenario) => {
+          if (sourceCostPlan) {
+            setScenarioState({ planId: sourceCostPlan.id, scenario });
+            setBasketOpen(false);
+          }
+        }}
+        onPlanStrategyChange={
+          (missingOffers?.items.length ?? 0) > 0 ? chooseStrategy : undefined
+        }
         onPlanOffers={
           missingOffers !== null && missingOffers.items.length > 0
             ? () =>
@@ -493,6 +680,20 @@ function CollectCatalogController({
           plan={costPlan}
           onClose={() => setBasketOpen(false)}
           onSettled={() => setCostPlan(null)}
+        />
+      )}
+      {blendedPurchase && (
+        <CollectPlanBasket
+          plan={blendedPurchase.plan}
+          reviewLegs={blendedPurchase.legs}
+          open={blendedPurchaseOpen}
+          onClose={() => setBlendedPurchaseOpen(false)}
+          onDiscard={releasePurchase}
+          onSettled={() => {
+            if (currentBlendedPurchase.current !== blendedPurchase) return;
+            releasePurchase();
+            setCostPlan(null);
+          }}
         />
       )}
       {trade && (

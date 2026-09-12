@@ -69,13 +69,26 @@ card page.
    Leave the budget cap blank to estimate the full goal. An entered cap includes
    estimated gas. This is an analysis constraint; collecting still requires a fresh
    price review and wallet approval.
-   Review missing requirements, checked artworks, unavailable items and the
-   proposed purchases. A partial plan leaves its unfilled requirements visible.
-4. Select some or all proposed purchases. **Review purchase** brings them into
+   Results appear below the controls. Missing requirements come first, with
+   the quantity priced for your goal, the proposed purchase quantity and its
+   price. **Already in your profile** expands the holdings that already meet
+   the goal. The results show the purchase cost, gas reserve and projected
+   profile completion before any purchase.
+   With a budget cap, compare **Within your budget** and **Available for your
+   goal**, calculated from the same listings. The budget option is selected
+   initially. Choosing the available option explicitly removes that analysis
+   cap for the review; its larger estimate is shown before continuing. Neither
+   option guarantees complete market coverage. A partial plan leaves unfilled
+   requirements visible; a missing price is never treated as zero cost.
+4. Choose a strategy directly in the results: **Buy now**, **At WETH offer**,
+   **WETH + %**, **Ask − %**, or **Blended**. The offer choices open the
+   corresponding calculation controls; enter the percentage or budget and
+   calculate before reviewing individual NFT prices.
+   With **Buy now**, select some or all proposed purchases. This brings them into
    one review with quantities, delivery addresses and an estimated total.
    **Review live total** checks every selected order and shows the exact price,
    fees and gas reserve before wallet approval. To propose your own prices,
-   choose **Make offers for missing NFTs** and review each NFT's offer separately.
+   choose **Make offers** and review each NFT's offer separately.
 5. Approve the required token permission if needed, then review and authorize
    the purchase transaction or fixed-price order signature in your wallet.
 6. Follow the result in Orders. A sent transaction, a mined transaction and a
@@ -157,7 +170,7 @@ and approval amounts before continuing with remaining offers.
 ### Plan offers for selected NFTs
 
 Select NFTs in Lowest listings or TDH, then choose **Plan offers**. A completion
-plan also offers **Make offers for missing NFTs**, including required NFTs that
+plan also offers **Make offers**, including required NFTs that
 have no supported listing. When several artworks could satisfy a trait, the
 offer plan uses the chosen artworks rather than making offers on every
 alternative.
@@ -200,6 +213,29 @@ that offer. Closing its review does not free its amount for another offer.
 After a reload, enter a fresh budget and check funding again; the backend's
 potential offer exposure still applies. Changing the profile or paying wallet
 starts a separate workspace.
+
+### Combine purchases and offers
+
+Choose **Blended** in the completion results to decide how to acquire each NFT.
+Rows start as offers using Conservative allocation. Switch an NFT to **Buy now**
+when the plan has exact, priced listings for its entire requested quantity.
+Partial listing coverage remains an offer choice; the page does not silently
+reduce the number of copies you requested.
+
+The purchase summary shows ETH separately from the WETH offer budget. Calculate
+offer prices for the offer rows, and review the purchase rows together. These
+are separate transactions and signatures; there is no combined budget guarantee
+or all-or-revert guarantee across purchases and offers.
+
+An NFT with a pending or published offer cannot also be routed into purchases in
+this workspace. Opening purchase review reserves those NFTs from further offers
+while that review is retained, including after closing it. That label does not
+mean a purchase has been sent or confirmed. Use **Resume purchase review** to
+return to the same selection. If you change the goal, scenario or destination,
+**Resume prior plan review** explicitly returns to the original NFTs and address.
+A new plan cannot replace that unfinished review. Before live transaction review
+begins, **Discard purchase draft** releases its reservations. Confirmed settlement
+also releases them; closing alone does not.
 
 ### Compare TDH
 
@@ -295,6 +331,11 @@ not open later when loading finishes.
 
 If an order changes, refresh its available terms and review again. The site
 does not substitute a different NFT into an exact-item purchase.
+
+Preparation errors distinguish an unreachable service, expired authentication,
+changed profile or delivery wallets, unsupported terms and invalid trade details.
+Follow the displayed recovery step; retrying preparation does not sign or send
+a transaction. A failed offer preparation does not require choosing a listing.
 
 If publication is uncertain, the order may still be usable. Keep its potential
 exposure until confirmed cancellation, expiry or fill. If broadcast is uncertain,

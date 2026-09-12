@@ -2,6 +2,7 @@ import {
   MarketDepthOrderAction,
   MarketDepthTradeProvider,
 } from "@/components/nft-market-depth/MarketDepthTradeActions";
+import MarketDepthPriceLevels from "@/components/nft-market-depth/MarketDepthPriceLevels";
 import {
   MARKET_SEAPORT,
   MARKET_WETH,
@@ -26,7 +27,9 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
 const mockFetchAssets = jest.fn();
@@ -35,6 +38,7 @@ const mockFetchOwnership = jest.fn();
 const mockBatch = jest.fn();
 const mockTrade = jest.fn();
 const mockSeizeConnect = jest.fn();
+let mockHideNftPurchasing = false;
 let mockAuth = {
   connectedProfile: {
     id: "profile-1",
@@ -55,6 +59,11 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 jest.mock("@/components/common/NftPurchasingGate", () => ({
   __esModule: true,
   default: ({ children }: { children: ReactNode }) => children,
+}));
+jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
+  useNftPurchasingVisibility: () => ({
+    hideNftPurchasing: mockHideNftPurchasing,
+  }),
 }));
 jest.mock("@/services/api/collect-api", () => ({
   fetchCollectAssets: (...args: unknown[]) => mockFetchAssets(...args),
@@ -178,6 +187,44 @@ function renderAction(order: ApiMarketOrder) {
   );
 }
 
+function renderLevel(
+  orders: readonly ApiMarketOrder[],
+  expectedCount = orders.length,
+  isLoading = false
+) {
+  const reference = orders[0] ?? depthOrder();
+  const onLoadOrders = jest.fn();
+  const view = render(
+    <MarketDepthTradeProvider
+      contract={MEMES_CONTRACT}
+      tokenId="8"
+      locale="en-US"
+      onMarketChange={jest.fn()}
+    >
+      <MarketDepthPriceLevels
+        side={reference.side === ApiMarketOrderSideEnum.Ask ? "ask" : "bid"}
+        levels={[
+          {
+            unit_price: reference.unit_price!,
+            quantity: "3",
+            cumulative_quantity: "3",
+            order_count: expectedCount,
+          },
+        ]}
+        currency={reference.currency}
+        currencyLabel={reference.currency.symbol}
+        locale="en-US"
+        orders={orders}
+        isLoading={isLoading}
+        error={null}
+        onLoadOrders={onLoadOrders}
+        onRefresh={jest.fn()}
+      />
+    </MarketDepthTradeProvider>
+  );
+  return { ...view, onLoadOrders };
+}
+
 function offerRow(orderHash: string, orderKey: string): ApiMarketOrder {
   return depthOrder({
     order_id: orderHash,
@@ -240,6 +287,7 @@ function ownedAsset() {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockHideNftPurchasing = false;
   mockAuth = {
     connectedProfile: {
       id: "profile-1",
@@ -257,6 +305,120 @@ beforeEach(() => {
 });
 
 describe("MarketDepthTradeActions", () => {
+  it("collects a single order from its collapsed price row with keyboard access", async () => {
+    const user = userEvent.setup();
+    const { onLoadOrders } = renderLevel([depthOrder()]);
+    const disclosure = screen.getByRole("button", { name: /^Listings at / });
+    const collect = screen.getByRole("button", { name: "Collect" });
+    expect(disclosure).toHaveAttribute("aria-expanded", "false");
+    await user.tab();
+    expect(disclosure).toHaveFocus();
+    await user.tab();
+    expect(collect).toHaveFocus();
+    await user.keyboard("{Enter}");
+    await screen.findByRole("textbox", { name: "Quantity" });
+    expect(disclosure).toHaveAttribute("aria-expanded", "false");
+    expect(onLoadOrders).not.toHaveBeenCalled();
+    expect(mockFetchExactOrder).toHaveBeenCalledTimes(1);
+    expect(mockFetchExactOrder).toHaveBeenCalledWith(
+      HASH,
+      MARKET_SEAPORT,
+      ASSET_KEY,
+      ApiMarketTradeOrderSideEnum.Listing,
+      expect.any(AbortSignal)
+    );
+    expect(mockBatch).not.toHaveBeenCalled();
+  });
+
+  it("opens the existing fixed-order sale review directly from Sell", async () => {
+    ownedAsset();
+    mockFetchExactOrder.mockResolvedValue(
+      executableOrder({
+        side: ApiMarketTradeOrderSideEnum.Offer,
+        currency: MARKET_WETH,
+      })
+    );
+    const { onLoadOrders } = renderLevel([offerRow(HASH, "offer")]);
+    fireEvent.click(screen.getByRole("button", { name: "Sell" }));
+    await screen.findByTestId("offer-review");
+    expect(screen.getByRole("button", { name: /^Offers at / })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+    expect(onLoadOrders).not.toHaveBeenCalled();
+    expect(mockTrade.mock.calls.at(-1)?.[0]).toMatchObject({
+      action: "accept",
+      fixedOrder: true,
+      initialOrder: { identity: { order_hash: HASH } },
+    });
+  });
+
+  it("lets the collector choose an exact order at a shared price without choosing one implicitly", async () => {
+    const second = depthOrder({ order_key: "second", order_id: SECOND_HASH });
+    mockFetchExactOrder.mockResolvedValue(
+      executableOrder({
+        identity: { protocol_address: MARKET_SEAPORT, order_hash: SECOND_HASH },
+      })
+    );
+    renderLevel([depthOrder(), second]);
+    fireEvent.click(screen.getByRole("button", { name: "Collect" }));
+    expect(mockFetchExactOrder).not.toHaveBeenCalled();
+    const choices = screen.getByRole("list", { name: "Orders at this price" });
+    const actions = within(choices).getAllByRole("button", { name: "Collect" });
+    expect(actions).toHaveLength(2);
+    fireEvent.click(actions[1]!);
+    await screen.findByRole("textbox", { name: "Quantity" });
+    expect(mockFetchExactOrder).toHaveBeenCalledTimes(1);
+    expect(mockFetchExactOrder).toHaveBeenCalledWith(
+      SECOND_HASH,
+      MARKET_SEAPORT,
+      ASSET_KEY,
+      ApiMarketTradeOrderSideEnum.Listing,
+      expect.any(AbortSignal)
+    );
+  });
+
+  it("keeps a missing-order action as a disclosure until the exact order is known", () => {
+    const { onLoadOrders } = renderLevel([], 1, true);
+    fireEvent.click(screen.getByRole("button", { name: "Collect" }));
+    expect(onLoadOrders).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("Loading order details…")).toBeInTheDocument();
+    expect(mockFetchExactOrder).not.toHaveBeenCalled();
+  });
+
+  it("omits the action column and trading controls when purchasing is restricted", () => {
+    mockHideNftPurchasing = true;
+    renderLevel([depthOrder()]);
+    expect(screen.queryByRole("columnheader", { name: "Action" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Collect" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /^Listings at / }));
+    expect(screen.getByText("Order information")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Collect" })).toBeNull();
+    expect(mockFetchExactOrder).not.toHaveBeenCalled();
+  });
+
+  it("does not treat a mismatched advertised single-order count as an exact order", () => {
+    renderLevel(
+      [
+        depthOrder(),
+        depthOrder({ order_key: "second", order_id: SECOND_HASH }),
+      ],
+      1
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Collect" }));
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Order details have changed"
+    );
+    expect(mockFetchExactOrder).not.toHaveBeenCalled();
+  });
+
+  it("keeps a single row action unique when its order information is expanded", () => {
+    renderLevel([depthOrder()]);
+    fireEvent.click(screen.getByRole("button", { name: /^Listings at / }));
+    expect(screen.getAllByRole("button", { name: "Collect" })).toHaveLength(1);
+    expect(screen.getByText("Order information")).toBeInTheDocument();
+  });
+
   it("rebinds an exact listing, accepts a valid quantity, and checks it again before one batch review", async () => {
     renderAction(depthOrder());
     fireEvent.click(screen.getByRole("button", { name: "Collect" }));

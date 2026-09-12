@@ -14,16 +14,20 @@ import {
   type ApiMarketTradeOrder,
 } from "@/generated/models/ApiMarketTradeOrder";
 import { fetchCollectAssets } from "@/services/api/collect-api";
-import { fetchMarketOrders } from "@/services/api/market-api";
+import {
+  fetchExactMarketOrder,
+  fetchMarketOrders,
+} from "@/services/api/market-api";
 
 jest.mock("@/services/api/collect-api", () => ({
   fetchCollectAssets: jest.fn(),
 }));
 jest.mock("@/services/api/market-api", () => ({
+  fetchExactMarketOrder: jest.fn(),
   fetchMarketOrders: jest.fn(),
 }));
 const assets = jest.mocked(fetchCollectAssets),
-  orders = jest.mocked(fetchMarketOrders);
+  orders = jest.mocked(fetchExactMarketOrder);
 const contract = "0x33fd426905f149f8376e227d0c9d3340aad17af1";
 function fixture(token = "1") {
   const asset: ApiCollectAsset = {
@@ -77,25 +81,48 @@ function mockFixture(f = fixture()) {
     next: false,
     catalog_version: "catalog",
   });
-  orders.mockResolvedValue({
-    orders: [f.order],
-    source: "OpenSea",
-    observed_at: 1,
-    complete: false,
-  });
+  orders.mockResolvedValue(f.order);
   return f;
 }
 beforeEach(() => jest.resetAllMocks());
 
 it("preserves selected order identity and exact quantity with whole-lot price basis", async () => {
   const f = mockFixture();
-  const result = await resolveCollectPlanSelection(
-    [f.leg],
-    [],
-    new AbortController().signal
-  );
+  const signal = new AbortController().signal;
+  const result = await resolveCollectPlanSelection([f.leg], [], signal);
   expect(result).toEqual([{ asset: f.asset, order: f.order, quantity: "2" }]);
+  expect(orders).toHaveBeenCalledWith(
+    f.leg.order_id,
+    MARKET_SEAPORT,
+    f.leg.asset_key,
+    "LISTING",
+    signal
+  );
   expect(collectPlanSelectionCost([f.leg])).toBe("200");
+});
+it("resolves a valid selected order outside the limited discovery results", async () => {
+  const f = mockFixture();
+  jest.mocked(fetchMarketOrders).mockResolvedValue({
+    orders: [fixture("9").order],
+    source: "OpenSea",
+    observed_at: 1,
+    complete: false,
+  });
+  await expect(
+    resolveCollectPlanSelection([f.leg], [], new AbortController().signal)
+  ).resolves.toEqual([{ asset: f.asset, order: f.order, quantity: "2" }]);
+  expect(fetchMarketOrders).not.toHaveBeenCalled();
+});
+it("does not fall back to another listing when exact order resolution fails", async () => {
+  const f = mockFixture();
+  const unavailable = Object.assign(new Error("ORDER_MISMATCH"), {
+    status: 409,
+  });
+  orders.mockRejectedValue(unavailable);
+  await expect(
+    resolveCollectPlanSelection([f.leg], [], new AbortController().signal)
+  ).rejects.toBe(unavailable);
+  expect(fetchMarketOrders).not.toHaveBeenCalled();
 });
 it("searches subsequent catalog pages for the canonical exact asset", async () => {
   const f = mockFixture();
@@ -223,17 +250,12 @@ it("bounds active fetching to four and preserves selected leg ordering", async (
       catalog_version: "catalog",
     };
   });
-  orders.mockImplementation(async (key) => {
+  orders.mockImplementation(async (_hash, _protocol, key) => {
     active++;
     peak = Math.max(peak, active);
     await Promise.resolve();
     active--;
-    return {
-      orders: [fixture(key.split(":")[2]!).order],
-      source: "OpenSea",
-      observed_at: 1,
-      complete: false,
-    };
+    return fixture(key.split(":")[2]!).order;
   });
   const legs = Array.from(
     { length: 128 },
@@ -267,4 +289,20 @@ it("stops after cancellation and passes the signal to each request", async () =>
     resolveCollectPlanSelection([f.leg], [], controller.signal)
   ).rejects.toThrow();
   expect(orders).not.toHaveBeenCalled();
+});
+it("rejects a late exact order after cancellation and keeps the same request signal", async () => {
+  const f = mockFixture();
+  const controller = new AbortController();
+  orders.mockImplementation(
+    async (_hash, _protocol, _assetKey, _side, signal) => {
+      expect(signal).toBe(controller.signal);
+      controller.abort();
+      return f.order;
+    }
+  );
+  await expect(
+    resolveCollectPlanSelection([f.leg], [], controller.signal)
+  ).rejects.toThrow();
+  expect(orders).toHaveBeenCalledTimes(1);
+  expect(fetchMarketOrders).not.toHaveBeenCalled();
 });
