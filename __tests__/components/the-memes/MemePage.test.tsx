@@ -84,8 +84,9 @@ jest.mock("@/components/the-memes/MemePageArtViewer", () => ({
 }));
 
 jest.mock("@/components/the-memes/MemePageArt", () => ({
-  MemePageArt: ({ show }: any) =>
-    show ? <div data-testid="art">Art</div> : null,
+  MemePageArt: ({ locale }: { readonly locale: string }) => (
+    <div data-testid="art-details" data-locale={locale} />
+  ),
 }));
 
 jest.mock("@/components/the-memes/MemePageReferences", () => ({
@@ -353,6 +354,7 @@ describe("MemePage tab navigation", () => {
   });
 
   it.each([
+    ["Details", MEME_FOCUS.THE_ART, "art-details"],
     ["Collectors", MEME_FOCUS.COLLECTORS, "collectors-sub"],
     ["History", MEME_FOCUS.ACTIVITY, "activity"],
     ["References", MEME_FOCUS.REFERENCES, "references-sub"],
@@ -380,6 +382,21 @@ describe("MemePage tab navigation", () => {
       });
     }
   );
+
+  it("opens legacy artwork links directly in Details with locale preserved", async () => {
+    currentFocus = MEME_FOCUS.THE_ART;
+    currentLocale = "de-DE";
+    renderPage();
+    expect(await screen.findByTestId("art-details")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
+    expect(screen.getByRole("button", { name: "Details" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+    expect(screen.queryByTestId("live-sub")).not.toBeInTheDocument();
+  });
 
   it("selects the Timeline history subtab", async () => {
     const page = renderPage();
