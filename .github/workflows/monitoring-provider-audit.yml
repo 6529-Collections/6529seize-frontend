@@ -1,0 +1,84 @@
+name: Audit monitoring provider access
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: monitoring-provider-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read Sentry monitoring capabilities
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { appendFileSync } from 'node:fs';
+
+          const token = process.env.SENTRY_AUTH_TOKEN;
+          if (!token) {
+            console.error('Sentry monitoring audit: no configured token.');
+            process.exit(1);
+          }
+          async function read(path) {
+            try {
+              const response = await fetch(`https://sentry.io/api/0/${path}`, {
+                headers: { Authorization: `Bearer ${token}` },
+                redirect: 'error',
+                signal: AbortSignal.timeout(15000),
+              });
+              if (!response.ok) {
+                await response.body?.cancel();
+                return { status: response.status };
+              }
+              return { status: response.status, data: await response.json() };
+            } catch {
+              // Never emit request URLs, headers, vendor bodies or exceptions.
+              return { status: 'unavailable' };
+            }
+          }
+          const [identity, project, projects, uptime, crons, rules] = await Promise.all([
+            read(''),
+            read('projects/seize-ff/6529-frontend/'),
+            read('organizations/seize-ff/projects/'),
+            read('organizations/seize-ff/uptime/'),
+            read('organizations/seize-ff/monitors/'),
+            read('projects/seize-ff/6529-frontend/rules/'),
+          ]);
+          const scopes = Array.isArray(identity.data?.auth?.scopes)
+            ? identity.data.auth.scopes.filter(value => typeof value === 'string' && /^[a-z]+:[a-z]+$/.test(value))
+            : [];
+          const permitted = new Set(scopes);
+          const safeProjects = Array.isArray(projects.data)
+            ? projects.data.filter(value => typeof value.id === 'string' && /^\d+$/.test(value.id)
+              && typeof value.slug === 'string' && /^[a-z0-9-]+$/.test(value.slug))
+              .map(value => ({ id: value.id, slug: value.slug }))
+            : [];
+          const summary = {
+            authenticationStatus: identity.status,
+            scopes,
+            projectStatus: project.status,
+            projectsStatus: projects.status,
+            projects: safeProjects,
+            mayConfigureAlerts: ['alerts:write', 'project:admin', 'project:write'].some(value => permitted.has(value)),
+            uptimeStatus: uptime.status,
+            uptimeMonitorsOnFirstPage: Array.isArray(uptime.data) ? uptime.data.length : null,
+            cronStatus: crons.status,
+            cronMonitorsOnFirstPage: Array.isArray(crons.data) ? crons.data.length : null,
+            rulesStatus: rules.status,
+            projectRulesOnFirstPage: Array.isArray(rules.data) ? rules.data.length : null,
+          };
+          const output = JSON.stringify(summary, null, 2);
+          console.log(output);
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Sentry monitoring access\n\nRead-only audit; no provider settings changed.\n\n\`\`\`json\n${output}\n\`\`\`\n`);
+          if (identity.status !== 200) process.exitCode = 1;
+          NODE
