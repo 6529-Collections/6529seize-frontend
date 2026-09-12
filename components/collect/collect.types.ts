@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { CollectPurchaseAmounts } from "./collect-review-amounts";
 
 /** Display models only. API adapters must use the generated marketplace contract. */
 export type CollectCollection = "all" | "memes" | "gradients" | "pebbles";
@@ -132,12 +133,35 @@ export interface CollectReviewFact {
   readonly value: string;
 }
 
+export interface CollectPurchaseReviewView {
+  readonly amounts: CollectPurchaseAmounts;
+  readonly currency: "ETH" | "WETH";
+  readonly artworkLabel: string;
+  readonly quantity: string;
+  readonly payerAddress: string;
+  readonly payerName?: string | undefined;
+  readonly recipientAddress: string;
+  readonly recipientName?: string | undefined;
+  readonly recipientInProfile: boolean;
+  readonly netWei: string;
+  readonly fees: readonly {
+    readonly amountWei: string;
+    readonly recipient: string;
+  }[];
+  readonly approvalFeeCaps: readonly {
+    readonly label: string;
+    readonly amountWei: string | null;
+  }[];
+  readonly contractFacts: readonly CollectReviewFact[];
+}
+
 export interface CollectTradeReview {
   readonly id: string;
   readonly revision: string;
   readonly action: CollectTradeAction;
   readonly title: string;
   readonly media?: ReactNode;
+  readonly purchase?: CollectPurchaseReviewView | undefined;
   readonly facts: readonly CollectReviewFact[];
   readonly technicalFacts: readonly CollectReviewFact[];
   readonly totalLabel: string;

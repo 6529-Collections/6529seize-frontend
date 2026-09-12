@@ -21,6 +21,10 @@ import {
   parseAbi,
   type Hex,
 } from "viem";
+import {
+  isFreshMarketReviewExpiry,
+  isValidMarketReviewExpiry,
+} from "./market-review-expiry";
 
 // Independent browser allowlist. Never obtain signing contracts or EIP-712 types from a response.
 export const MARKET_SEAPORT = "0x0000000000000068f116a894984e2db1123eb395";
@@ -151,10 +155,17 @@ function validateMarketIntent(
       operation.quantity === expected.quantity &&
       same(operation.currency, expected.currency)
   );
-  assert(
-    Number.isSafeInteger(operation.expires_at) &&
-      (!requireFreshReview || operation.expires_at > now)
-  );
+  if (requireFreshReview) {
+    if (!isFreshMarketReviewExpiry(operation.expires_at, now)) {
+      throw new Error("MARKET_REVIEW_REFRESH_REQUIRED");
+    }
+  } else {
+    // Recovery/publication can retain the server's invalidated-review sentinel.
+    assert(
+      operation.expires_at === 0 ||
+        isValidMarketReviewExpiry(operation.expires_at)
+    );
+  }
   assert(uint(operation.total_wei) === uint(expected.amount_wei));
   const [chain, contract, tokenId] = expected.asset_key.split(":");
   assert(
@@ -381,6 +392,23 @@ export function validateMarketOperation(
 ): void {
   validateMarketOperationBindings(operation, expected, now, {
     requireFreshReview: true,
+    requireActiveOrder: true,
+  });
+}
+
+/** Bind a previous purchase/cancellation review before mandatory fresh continuation. */
+export function validateMarketOperationForRefresh(
+  operation: ApiMarketOperation,
+  expected: ApiMarketPrepareRequest,
+  now = Date.now()
+): void {
+  assert(
+    expected.kind === ApiMarketKind.Buy ||
+      expected.kind === ApiMarketKind.Accept ||
+      expected.kind === ApiMarketKind.Cancel
+  );
+  validateMarketOperationBindings(operation, expected, now, {
+    requireFreshReview: false,
     requireActiveOrder: true,
   });
 }

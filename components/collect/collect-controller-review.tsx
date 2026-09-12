@@ -1,4 +1,5 @@
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
 import {
@@ -10,9 +11,9 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { CollectTradeReview } from "./collect.types";
 import CollectAssetMedia from "./CollectAssetMedia";
-import { marketAmount, marketOperationReview } from "./market.adapters";
+import { marketOperationReview } from "./market.adapters";
 import { readMarketIntent } from "./market-operation-storage";
-import { MARKET_ZERO } from "./market-validation";
+import { collectPurchaseReview } from "./collect-purchase-review";
 
 export function collectOfferLimitReason(
   expected: ApiMarketPrepareRequest | null,
@@ -35,8 +36,8 @@ interface CollectControllerReviewOptions {
   readonly locale: SupportedLocale;
   readonly disabledReason: string | undefined;
   readonly profileId: string | undefined;
+  readonly profile?: ApiIdentity | null;
   readonly asset: ApiCollectAsset | undefined;
-  readonly inlineBuy: boolean;
 }
 
 function recoveredTransactionFacts(
@@ -58,10 +59,10 @@ export function collectControllerReview({
   locale,
   disabledReason,
   profileId,
+  profile,
   asset,
-  inlineBuy,
 }: CollectControllerReviewOptions): CollectTradeReview | null {
-  const review = operation
+  const review: CollectTradeReview | null = operation
     ? {
         ...marketOperationReview(operation, locale, disabledReason, profileId),
         ...(asset
@@ -74,40 +75,21 @@ export function collectControllerReview({
           : {}),
       }
     : null;
-  if (review)
-    review.technicalFacts = [
+  if (review && operation) {
+    const technicalFacts = [
       ...review.technicalFacts,
       ...recoveredTransactionFacts(operation, locale),
     ];
-  if (review && operation && inlineBuy) {
-    review.technicalFacts = [...review.facts, ...review.technicalFacts];
-    const fees = operation.fees.reduce(
-      (total, fee) => total + BigInt(fee.amount_wei),
-      0n
-    );
-    const gas = operation.transaction?.gas_reserve_wei;
-    review.facts = [
-      {
-        label: t(locale, "collect.trade.quantity"),
-        value: operation.quantity,
-      },
-      {
-        label: t(locale, "collect.trade.destination"),
-        value: operation.nft_recipient ?? operation.recipient,
-      },
-      {
-        label: t(locale, "collect.buy.includedFees"),
-        value: marketAmount(fees.toString(), operation.currency),
-      },
-      ...(gas
-        ? [
-            {
-              label: t(locale, "collect.trade.gasCap"),
-              value: marketAmount(gas, MARKET_ZERO),
-            },
-          ]
-        : []),
-    ];
+    return {
+      ...review,
+      technicalFacts,
+      purchase: collectPurchaseReview(
+        operation,
+        locale,
+        profile ?? null,
+        technicalFacts
+      ),
+    };
   }
   return review;
 }

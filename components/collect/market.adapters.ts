@@ -15,6 +15,7 @@ import {
   MARKET_CONDUIT,
   MARKET_ZERO_HASH,
 } from "./market-validation";
+import { isValidMarketReviewExpiry } from "./market-review-expiry";
 
 export function marketAmount(amount: string, currency: string): string {
   return `${formatEther(BigInt(amount))} ${currency.toLowerCase() === MARKET_ZERO ? "ETH" : "WETH"}`;
@@ -192,7 +193,9 @@ export function marketOperationReview(
         ? [t(locale, "collect.trade.approval")]
         : []),
     ],
-    expiresAt: operation.expires_at,
+    expiresAt: isValidMarketReviewExpiry(operation.expires_at)
+      ? operation.expires_at
+      : null,
     disabledReason,
   };
 }
