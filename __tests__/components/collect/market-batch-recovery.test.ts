@@ -13,10 +13,11 @@ import {
 } from "@/components/collect/market-batch-storage";
 import { createMarketSendAttempt } from "@/components/collect/market-send-attempt";
 import {
-  ApiMarketSendAttemptPurposeEnum,
-  ApiMarketSendAttemptStatusEnum as Status,
-} from "@/generated/models/ApiMarketSendAttempt";
+  ApiMarketBatchSendAttemptPurposeEnum,
+  ApiMarketBatchSendAttemptStatusEnum as Status,
+} from "@/generated/models/ApiMarketBatchSendAttempt";
 import { batchFixture } from "./market-batch.fixture";
+import { ApiMarketBatchOperationStateEnum } from "@/generated/models/ApiMarketBatchOperation";
 const mockLock = jest.fn();
 jest.mock("@/components/collect/market-operation-lock", () => ({
   withMarketOperationLock: (...args: unknown[]) => mockLock(...args),
@@ -43,7 +44,7 @@ function setup() {
   const attempt = createMarketSendAttempt(f.operation.transaction!, 12, "1");
   f.operation.send_attempt = {
     attempt_id: attempt.id,
-    purpose: ApiMarketSendAttemptPurposeEnum.Transaction,
+    purpose: ApiMarketBatchSendAttemptPurposeEnum.Transaction,
     status: Status.Active,
     transaction_digest: attempt.digest,
     snapshot_block: 12,
@@ -73,6 +74,18 @@ it("clears a proven never-requested journal only under the operation lock", asyn
   expect(
     readMarketBatch("profile", f.operation.id)?.sendAttempt
   ).toBeUndefined();
+});
+it("retires a terminal verified journal instead of accumulating completed purchases in the active selection index", async () => {
+  const f = setup();
+  f.operation.state = ApiMarketBatchOperationStateEnum.Confirmed;
+  f.operation.send_attempt!.status = Status.Resolved;
+  await fetchRecoverableMarketBatch(f.operation.id, "profile");
+  expect(readMarketBatch("profile", f.operation.id)).toBeNull();
+  expect(
+    localStorage.getItem(`6529-market-batch:profile:${f.operation.id}`)
+  ).toBeNull();
+  expect(reject).not.toHaveBeenCalled();
+  expect(submit).not.toHaveBeenCalled();
 });
 it("rechecks durable wallet intent after the lock is acquired", async () => {
   const f = setup();

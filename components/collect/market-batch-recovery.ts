@@ -6,6 +6,7 @@ import type { ApiMarketBatchOperation } from "@/generated/models/ApiMarketBatchO
 import {
   readMarketBatch,
   readPersistedMarketBatch,
+  retireMarketBatch,
 } from "./market-batch-storage";
 import {
   batchSendAttempt,
@@ -30,6 +31,13 @@ export async function fetchRecoverableMarketBatch(
   if (operation.profile_id !== profile)
     throw new Error("MARKET_PROFILE_CHANGED");
   clearResolvedBatchSend(operation);
+  if (
+    !batchNeedsPolling(operation) &&
+    ["CONFIRMED", "FAILED", "EXPIRED"].includes(operation.state)
+  ) {
+    retireMarketBatch(profile, id);
+    return operation;
+  }
   const saved = readMarketBatch(profile, id),
     attempt = batchSendAttempt(operation);
   const persisted = readPersistedMarketBatch(profile, id)?.sendAttempt;

@@ -2,13 +2,12 @@
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { STATS_QUERY_KEY } from "@/components/user/collected/stats/constants";
-import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 
 /** A receipt can arrive from polling or recovery, not only from the wallet request. */
 export function useMarketSettlement(
-  operation: ApiMarketOperation | null,
+  operation: { readonly id: string; readonly state: string } | null,
   onSettled?: () => void,
   onMarketChange?: () => void
 ) {

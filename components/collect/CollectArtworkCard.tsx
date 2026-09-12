@@ -5,16 +5,27 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { CollectArtworkView, CollectTradeAction } from "./collect.types";
 import CollectTradeActions from "./CollectTradeActions";
+import { CheckIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { useId } from "react";
+
+export interface CollectArtworkSelection {
+  readonly selected: boolean;
+  readonly disabledReason?: string | undefined;
+  readonly onToggle: () => void;
+}
 
 export default function CollectArtworkCard({
   artwork,
   locale,
   onTrade,
+  selection,
 }: {
   readonly artwork: CollectArtworkView;
   readonly locale: SupportedLocale;
   readonly onTrade: (artworkId: string, action: CollectTradeAction) => void;
+  readonly selection?: CollectArtworkSelection | undefined;
 }) {
+  const selectionReasonId = useId();
   return (
     <article className="tw-flex tw-min-w-0 tw-flex-col">
       <Link
@@ -46,24 +57,63 @@ export default function CollectArtworkCard({
           </p>
         )}
         {artwork.priceLabel && (
-          <div>
-            <p className="tw-m-0 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-100">
-              {artwork.priceLabel}
-            </p>
-            {artwork.priceDescription && (
-              <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-400">
-                {artwork.priceDescription}
+          <div className="tw-flex tw-items-start tw-justify-between tw-gap-2">
+            <div>
+              <p className="tw-m-0 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-100">
+                {artwork.priceLabel}
               </p>
+              {artwork.priceDescription && (
+                <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-400">
+                  {artwork.priceDescription}
+                </p>
+              )}
+              {artwork.sourceLabel && (
+                <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-400">
+                  {artwork.sourceLabel}
+                </p>
+              )}
+            </div>
+            {selection && (
+              <button
+                type="button"
+                aria-pressed={selection.selected}
+                aria-label={t(
+                  locale,
+                  selection.selected
+                    ? "collect.selection.removeArtwork"
+                    : "collect.selection.addArtwork",
+                  { title: artwork.title }
+                )}
+                disabled={
+                  Boolean(selection.disabledReason) && !selection.selected
+                }
+                aria-describedby={
+                  selection.disabledReason ? selectionReasonId : undefined
+                }
+                title={selection.disabledReason}
+                onClick={selection.onToggle}
+                className="tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-transparent tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/40 desktop-hover:hover:tw-text-white"
+              >
+                {selection.selected ? (
+                  <CheckIcon aria-hidden="true" className="tw-size-4" />
+                ) : (
+                  <PlusIcon aria-hidden="true" className="tw-size-4" />
+                )}
+              </button>
             )}
-            {artwork.sourceLabel && (
-              <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-400">
-                {artwork.sourceLabel}
-              </p>
+            {selection?.disabledReason && (
+              <span id={selectionReasonId} className="tw-sr-only">
+                {selection.disabledReason}
+              </span>
             )}
           </div>
         )}
         <CollectTradeActions
-          actions={artwork.actions}
+          actions={
+            selection
+              ? artwork.actions.filter(({ action }) => action !== "buy")
+              : artwork.actions
+          }
           title={artwork.title}
           locale={locale}
           onTrade={(action) => onTrade(artwork.id, action)}

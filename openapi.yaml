@@ -8510,7 +8510,9 @@ paths:
           in: query
           description: >-
             Opt in to multi-artwork operations. Omitted/false preserves legacy
-            single-artwork history.
+            single-artwork history. Batch history omits execution payloads and
+            reviewed seller components; fetch the operation by ID before review
+            or recovery. Follow next when a page is limited by response size.
           schema:
             type: boolean
             default: false
@@ -23648,9 +23650,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiWaveParticipationRequirement"
         required_metadata:
-          description: |
-            The metadata that must be provided by the participant. 
-            Empty array if nothing is required.
+          description: "The metadata that must be provided by the participant. \nEmpty array if nothing is required.\n"
           type: array
           items:
             $ref: "#/components/schemas/ApiWaveRequiredMetadata"
@@ -26439,6 +26439,98 @@ components:
         - start_time
         - end_time
         - salt
+    ApiMarketBatchTransaction:
+      type: object
+      additionalProperties: false
+      properties:
+        chain_id:
+          type: integer
+          format: int64
+        to:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        value:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        data:
+          type: string
+          pattern: ^0x[0-9a-fA-F]*$
+          maxLength: 2097154
+        purpose:
+          type: string
+          enum:
+            - APPROVE_NFT
+            - APPROVE_CURRENCY
+            - FULFILL
+            - CANCEL
+        approval_scope:
+          type: string
+          enum:
+            - TOKEN
+            - COLLECTION
+            - CURRENCY_AMOUNT
+        gas_limit:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        max_fee_per_gas:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        gas_reserve_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        sender:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+      required:
+        - chain_id
+        - sender
+        - to
+        - value
+        - data
+        - purpose
+    ApiMarketBatchSendAttempt:
+      type: object
+      additionalProperties: false
+      properties:
+        attempt_id:
+          type: string
+          format: uuid
+        purpose:
+          type: string
+          enum:
+            - APPROVAL
+            - TRANSACTION
+        transaction_digest:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        snapshot_block:
+          type: integer
+          format: int64
+          minimum: 0
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - REJECTED
+            - RESOLVED
+        transaction:
+          $ref: "#/components/schemas/ApiMarketBatchTransaction"
+        transaction_hash:
+          type: string
+          nullable: true
+          pattern: ^0x[0-9a-fA-F]{64}$
+      required:
+        - attempt_id
+        - purpose
+        - transaction_digest
+        - snapshot_block
+        - status
+        - transaction
+        - transaction_hash
     ApiMarketBatchOperation:
       type: object
       additionalProperties: false
@@ -26477,7 +26569,7 @@ components:
           pattern: ^(0|[1-9][0-9]{0,77})$
           maxLength: 78
         transaction:
-          $ref: "#/components/schemas/ApiMarketTransaction"
+          $ref: "#/components/schemas/ApiMarketBatchTransaction"
         transaction_hash:
           type: string
           pattern: ^0x[0-9a-fA-F]{64}$
@@ -26499,7 +26591,7 @@ components:
           type: string
           pattern: ^0x[0-9a-fA-F]{64}$
         send_attempt:
-          $ref: "#/components/schemas/ApiMarketSendAttempt"
+          $ref: "#/components/schemas/ApiMarketBatchSendAttempt"
         potential_liability_wei:
           type: string
           pattern: ^(0|[1-9][0-9]{0,77})$

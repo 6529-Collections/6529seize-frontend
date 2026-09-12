@@ -10,8 +10,8 @@ import {
   beginMarketBatchAttempt,
   rejectMarketBatchAttempt,
 } from "@/services/api/market-batch-api";
-import { ApiMarketSendAttemptStatusEnum as Status } from "@/generated/models/ApiMarketSendAttempt";
-import { ApiMarketSendAttemptPurposeEnum } from "@/generated/models/ApiMarketSendAttempt";
+import { ApiMarketBatchSendAttemptStatusEnum as Status } from "@/generated/models/ApiMarketBatchSendAttempt";
+import { ApiMarketBatchSendAttemptPurposeEnum } from "@/generated/models/ApiMarketBatchSendAttempt";
 import { batchFixture, PAYER, NOW } from "./market-batch.fixture";
 import type { ApiMarketBatchOperation } from "@/generated/models/ApiMarketBatchOperation";
 import type { Hex } from "viem";
@@ -39,7 +39,7 @@ function setup() {
       ...f.operation,
       send_attempt: {
         attempt_id: body.attempt_id,
-        purpose: ApiMarketSendAttemptPurposeEnum.Transaction,
+        purpose: ApiMarketBatchSendAttemptPurposeEnum.Transaction,
         status: Status.Active,
         transaction_digest: body.transaction_digest,
         snapshot_block: f.operation.block_number!,
@@ -53,7 +53,7 @@ function setup() {
     ...latest,
     send_attempt: {
       attempt_id: body.attempt_id,
-      purpose: ApiMarketSendAttemptPurposeEnum.Transaction,
+      purpose: ApiMarketBatchSendAttemptPurposeEnum.Transaction,
       status: Status.Rejected,
       transaction_digest: "0".repeat(64),
       snapshot_block: 12,

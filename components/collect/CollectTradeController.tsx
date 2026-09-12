@@ -45,6 +45,8 @@ import { readMarketIntent, saveMarketIntent } from "./market-operation-storage";
 import { CollectOrderBook } from "./CollectOrderPicker";
 import CollectTradeForm from "./CollectTradeForm";
 import CollectInlineBuyForm from "./CollectInlineBuyForm";
+import CollectBatchController from "./CollectBatchController";
+import type { CollectSelectedListing } from "./collect-selection.helpers";
 import CollectTradeSheet, {
   type CollectTradePresentation,
 } from "./CollectTradeSheet";
@@ -176,6 +178,10 @@ export default function CollectTradeController({
   );
   const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [splitPurchase, setSplitPurchase] = useState<{
+    item: CollectSelectedListing;
+    recipient: string;
+  } | null>(null);
   const pendingPrepare = useRef<{
     request: ApiMarketPrepareRequest;
     key: string;
@@ -472,6 +478,22 @@ export default function CollectTradeController({
           onPrepare={(value) => {
             void prepare(value);
           }}
+          onSplitDelivery={
+            asset?.family.toString() === "memes" &&
+            selectedOrder &&
+            collectBuyAmount(selectedOrder, draft.quantity) !== null &&
+            BigInt(draft.quantity) > 1n
+              ? () =>
+                  setSplitPurchase({
+                    item: {
+                      asset,
+                      order: selectedOrder,
+                      quantity: draft.quantity,
+                    },
+                    recipient: draft.recipient,
+                  })
+              : undefined
+          }
           orderOptions={
             buyOrders.length > 1 ? (
               <details>
@@ -541,52 +563,63 @@ export default function CollectTradeController({
     </>
   );
   return (
-    <CollectTradeSheet
-      open
-      presentation={presentation}
-      compact={inlineBuy}
-      review={review}
-      title={asset?.name}
-      stage={stage}
-      form={form}
-      recoveryAction={
-        <>
-          {displayedOperation &&
-            marketOperationHasUnresolvedSend(displayedOperation) && (
-              <CollectTransactionRecovery
-                key={displayedOperation.id}
-                disabled={!isAuthenticated || Boolean(activeProfileProxy)}
-                onRecover={(hash) =>
-                  execution.recoverTransaction(displayedOperation, hash)
-                }
-              />
-            )}
-          <TradeRecoveryAction
-            reviewed={review !== null}
-            reason={reasonKey}
-            onConnect={connection.seizeConnect}
-          />
-        </>
-      }
-      message={execution.message ?? (displayedOperation ? error : undefined)}
-      onClose={onClose}
-      onRefresh={() => {
-        if (displayedOperation) {
-          void continueMarketOperation(displayedOperation.id).then(
-            receiveOperation,
-            () => setError(t(locale, "collect.error.prepare"))
-          );
-        } else void orders.refetch();
-      }}
-      onConfirm={async (id, revision) => {
-        if (
-          displayedOperation &&
-          expected &&
-          displayedOperation.id === id &&
-          displayedOperation.revision === revision
-        )
-          await execution.confirm(displayedOperation, expected);
-      }}
-    />
+    <>
+      <CollectTradeSheet
+        open
+        presentation={presentation}
+        compact={inlineBuy}
+        review={review}
+        title={asset?.name}
+        stage={stage}
+        form={form}
+        recoveryAction={
+          <>
+            {displayedOperation &&
+              marketOperationHasUnresolvedSend(displayedOperation) && (
+                <CollectTransactionRecovery
+                  key={displayedOperation.id}
+                  disabled={!isAuthenticated || Boolean(activeProfileProxy)}
+                  onRecover={(hash) =>
+                    execution.recoverTransaction(displayedOperation, hash)
+                  }
+                />
+              )}
+            <TradeRecoveryAction
+              reviewed={review !== null}
+              reason={reasonKey}
+              onConnect={connection.seizeConnect}
+            />
+          </>
+        }
+        message={execution.message ?? (displayedOperation ? error : undefined)}
+        onClose={onClose}
+        onRefresh={() => {
+          if (displayedOperation) {
+            void continueMarketOperation(displayedOperation.id).then(
+              receiveOperation,
+              () => setError(t(locale, "collect.error.prepare"))
+            );
+          } else void orders.refetch();
+        }}
+        onConfirm={async (id, revision) => {
+          if (
+            displayedOperation &&
+            expected &&
+            displayedOperation.id === id &&
+            displayedOperation.revision === revision
+          )
+            await execution.confirm(displayedOperation, expected);
+        }}
+      />
+      {splitPurchase && (
+        <CollectBatchController
+          items={[splitPurchase.item]}
+          initialRecipient={splitPurchase.recipient}
+          onClose={() => setSplitPurchase(null)}
+          {...(onMarketChange ? { onMarketChange } : {})}
+          {...(onSettled ? { onSettled } : {})}
+        />
+      )}
+    </>
   );
 }

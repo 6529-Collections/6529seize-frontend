@@ -14,6 +14,38 @@ export interface SavedMarketBatch {
 const key = (profile: string, id: string) =>
   `6529-market-batch:${profile}:${id}`;
 const memory = new Map<string, SavedMarketBatch>();
+/** Call only after authoritative recovery proves a terminal state without an active send. */
+export function retireMarketBatch(profile: string, id: string) {
+  memory.delete(key(profile, id));
+  try {
+    localStorage.removeItem(key(profile, id));
+  } catch {
+    // A leftover journal will be rechecked against the server, never treated as permission to send.
+  }
+}
+/** Enumerate only this profile's public journals, including other tabs and reloads. */
+export function listSavedMarketBatches(
+  profile: string
+): Array<{ id: string; saved: SavedMarketBatch }> {
+  const prefix = `6529-market-batch:${profile}:`;
+  const keys = new Set(
+    [...memory.keys()].filter((item) => item.startsWith(prefix))
+  );
+  try {
+    for (let index = 0; index < localStorage.length; index++) {
+      const item = localStorage.key(index);
+      if (item?.startsWith(prefix)) keys.add(item);
+    }
+  } catch {
+    throw new Error("MARKET_RECOVERY_STORAGE_UNAVAILABLE");
+  }
+  return [...keys].map((item) => {
+    const id = item.slice(prefix.length);
+    const saved = readMarketBatch(profile, id);
+    if (!saved) throw new Error("MARKET_RECOVERY_STORAGE_UNAVAILABLE");
+    return { id, saved };
+  });
+}
 /** Public selected intent and send markers only; never save signed orders or calldata. */
 export function saveMarketBatch(
   profile: string,

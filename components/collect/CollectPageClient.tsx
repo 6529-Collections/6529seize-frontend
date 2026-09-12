@@ -32,13 +32,25 @@ import CollectPlanBasket from "./CollectPlanBasket";
 import CollectPageView, { COLLECT_INTENTS } from "./CollectPageView";
 import CollectTradeController from "./CollectTradeController";
 import { collectProfileWallets } from "./collect-recipient.helpers";
+import CollectSelectionBar from "./CollectSelectionBar";
+import CollectBatchController from "./CollectBatchController";
+import {
+  collectSelectionItem,
+  toggleCollectSelection,
+  type CollectSelectedListing,
+} from "./collect-selection.helpers";
+import {
+  collectListingKey,
+  collectOrderPurchaseQuantity,
+} from "./collect-buy.helpers";
+import type { CollectArtworkSelection } from "./CollectArtworkCard";
 
 export default function CollectPageClient() {
   const searchParams = useSearchParams();
   const { connectedProfile } = useAuth();
   const membership = collectProfileWallets(connectedProfile)
     .map((wallet) => wallet.wallet.toLowerCase())
-    .sort()
+    .sort((left, right) => left.localeCompare(right))
     .join(":");
   return (
     <CollectCatalogController
@@ -110,6 +122,11 @@ function CollectCatalogController({
   const setCostPlan = (plan: ApiCollectPlan | null) =>
     setStoredCostPlan(plan ? { revision: goalState.revision, plan } : null);
   const [basketOpen, setBasketOpen] = useState(false);
+  const [selection, setSelection] = useState<CollectSelectedListing[]>([]);
+  const [batch, setBatch] = useState<{
+    items: readonly CollectSelectedListing[];
+    recipient?: string;
+  } | null>(null);
   const [trade, setTrade] = useState<{
     asset: ApiCollectAsset;
     action: CollectTradeAction;
@@ -142,6 +159,52 @@ function CollectCatalogController({
     enabled: intent === "lowest",
   });
   const discovery = useCollectCatalog(collection, intent);
+  const selectionFor = (id: string): CollectArtworkSelection | undefined => {
+    const entry = discovery.entries.find(
+      (item) => collectCatalogEntryId(item) === id
+    );
+    if (!entry?.order) return undefined;
+    const order = entry.order,
+      key = collectListingKey(order);
+    const selected = selection.some(
+      (item) => collectListingKey(item.order) === key
+    );
+    const duplicate721 =
+      entry.asset.family !== ApiCollectFamily.Memes &&
+      selection.some((item) => item.asset.asset_key === entry.asset.asset_key);
+    let disabledReason: string | undefined;
+    if (!selected) {
+      if (duplicate721)
+        disabledReason = t(locale, "collect.selection.alreadySelected");
+      else if (selection.length >= 128)
+        disabledReason = t(locale, "collect.selection.limit", { count: 128 });
+      else if (collectOrderPurchaseQuantity(order) === null)
+        disabledReason = t(locale, "collect.trade.unavailable");
+    }
+    return {
+      selected,
+      disabledReason,
+      onToggle: () => {
+        if (selected) {
+          setSelection((items) =>
+            items.filter((item) => collectListingKey(item.order) !== key)
+          );
+          return;
+        }
+        if (disabledReason) return;
+        const candidate = collectSelectionItem({
+          asset: entry.asset,
+          order,
+          profileWallets: collectProfileWallets(connectedProfile).map(
+            (wallet) => wallet.wallet
+          ),
+          nowSeconds: Math.floor(Date.now() / 1000),
+        });
+        if (candidate)
+          setSelection((items) => toggleCollectSelection(items, candidate));
+      },
+    };
+  };
   const plan =
     costPlan && profile
       ? collectCostPlanView(
@@ -267,6 +330,16 @@ function CollectCatalogController({
         profile={profile}
         plan={plan}
         goalContent={goalContent}
+        selectionFor={selectionFor}
+        selectionSummary={
+          selection.length > 0 ? (
+            <CollectSelectionBar
+              items={selection}
+              onClear={() => setSelection([])}
+              onReview={() => setBatch({ items: selection })}
+            />
+          ) : null
+        }
         onCollectionChange={changeCollection}
         onIntentChange={changeIntent}
         onConnect={connect}
@@ -294,10 +367,7 @@ function CollectCatalogController({
         <CollectPlanBasket
           plan={costPlan}
           onClose={() => setBasketOpen(false)}
-          onPurchase={(asset, order, quantity, recipient) => {
-            setBasketOpen(false);
-            setTrade({ asset, order, quantity, recipient, action: "buy" });
-          }}
+          onSettled={() => setCostPlan(null)}
         />
       )}
       {trade && (
@@ -310,6 +380,27 @@ function CollectCatalogController({
           {...(trade.recipient ? { initialRecipient: trade.recipient } : {})}
           onClose={() => setTrade(null)}
           onSettled={() => setCostPlan(null)}
+        />
+      )}
+      {batch && (
+        <CollectBatchController
+          items={batch.items}
+          {...(batch.recipient ? { initialRecipient: batch.recipient } : {})}
+          onClose={() => setBatch(null)}
+          onSettled={(completed) => {
+            setSelection((items) =>
+              items.filter(
+                (item) =>
+                  !completed.items.some(
+                    (purchased) =>
+                      purchased.asset_key === item.asset.asset_key &&
+                      purchased.order.order_hash.toLowerCase() ===
+                        item.order.identity.order_hash.toLowerCase()
+                  )
+              )
+            );
+            setCostPlan(null);
+          }}
         />
       )}
     </>

@@ -83,6 +83,10 @@ jest.mock("@/components/collect/CollectTradeController", () => ({
   __esModule: true,
   default: () => null,
 }));
+jest.mock("@/components/collect/CollectBatchController", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -196,7 +200,7 @@ it.each([
       pebbles: "Pebbles",
     };
     fireEvent.click(
-      screen.getByRole("option", { name: labels[after] ?? after, exact: true })
+      screen.getByRole("option", { name: labels[after] ?? after })
     );
     expect(mockReplace).toHaveBeenCalledWith(
       `/collect?collection=${after}&intent=${nextIntent}`,

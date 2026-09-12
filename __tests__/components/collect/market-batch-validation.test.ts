@@ -97,8 +97,14 @@ it.each(["quantity", "amount_wei", "asset_key"] as const)(
 );
 it("rejects approvals, gas under-reservation, extra calldata and foreign chains", () => {
   for (const mutate of [
-    (f: ReturnType<typeof batchFixture>) =>
-      f.operation.approval_transactions.push(f.operation.transaction!),
+    (f: ReturnType<typeof batchFixture>) => {
+      const { approval_scope: _batchScope, ...transaction } =
+        f.operation.transaction!;
+      f.operation.approval_transactions.push({
+        ...transaction,
+        purpose: ApiMarketTransactionPurposeEnum.ApproveCurrency,
+      });
+    },
     (f: ReturnType<typeof batchFixture>) => {
       f.operation.transaction!.gas_reserve_wei = "1";
     },
@@ -151,3 +157,4 @@ it("binds review comparison to per-NFT destination, price and gas while allowing
   f.operation.items[0]!.allocations[0]!.recipient = PAYER;
   expect(marketBatchReviewTerms(f.operation)).not.toBe(before);
 });
+import { ApiMarketTransactionPurposeEnum } from "@/generated/models/ApiMarketTransaction";

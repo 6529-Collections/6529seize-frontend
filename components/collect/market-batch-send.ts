@@ -1,6 +1,6 @@
 import type { ApiMarketBatchOperation } from "@/generated/models/ApiMarketBatchOperation";
 import type { ApiMarketBatchPrepareRequest } from "@/generated/models/ApiMarketBatchPrepareRequest";
-import { ApiMarketSendAttemptStatusEnum as Status } from "@/generated/models/ApiMarketSendAttempt";
+import { ApiMarketBatchSendAttemptStatusEnum as Status } from "@/generated/models/ApiMarketBatchSendAttempt";
 import { ApiMarketSendAttemptRequestPurposeEnum } from "@/generated/models/ApiMarketSendAttemptRequest";
 import { ApiMarketSendAttemptRejectionReasonEnum } from "@/generated/models/ApiMarketSendAttemptRejection";
 import {

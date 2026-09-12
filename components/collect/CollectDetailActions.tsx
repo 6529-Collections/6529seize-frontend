@@ -227,7 +227,7 @@ function ProfileDetailActions(props: CollectDetailActionsProps) {
   const { connectedProfile } = useAuth();
   const membership = collectProfileWallets(connectedProfile)
     .map((wallet) => wallet.wallet.toLowerCase())
-    .sort()
+    .sort((left, right) => left.localeCompare(right))
     .join(":");
   return (
     <DetailActions

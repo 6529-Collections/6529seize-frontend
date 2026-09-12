@@ -7,7 +7,9 @@ import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import Link from "next/link";
 import { useId, useState, type ReactNode } from "react";
-import CollectArtworkCard from "./CollectArtworkCard";
+import CollectArtworkCard, {
+  type CollectArtworkSelection,
+} from "./CollectArtworkCard";
 import CollectGoalNavigation from "./CollectGoalNavigation";
 import CollectPlanPanel from "./CollectPlanPanel";
 import type {
@@ -40,6 +42,10 @@ interface CollectPageViewProps {
   readonly profile: CollectProfileView | null;
   readonly plan: CollectPlanView | null;
   readonly goalContent?: ReactNode;
+  readonly selectionFor?:
+    | ((id: string) => CollectArtworkSelection | undefined)
+    | undefined;
+  readonly selectionSummary?: ReactNode;
   readonly onCollectionChange: (collection: CollectCollection) => void;
   readonly onIntentChange: (intent: CollectIntent) => void;
   readonly onConnect: () => void;
@@ -55,9 +61,10 @@ function Listings({
   onRetry,
   onLoadMore,
   onTrade,
+  selectionFor,
 }: Pick<
   CollectPageViewProps,
-  "catalog" | "onRetry" | "onLoadMore" | "onTrade"
+  "catalog" | "onRetry" | "onLoadMore" | "onTrade" | "selectionFor"
 > & { readonly locale: SupportedLocale }) {
   if (catalog.status === "loading") {
     return (
@@ -110,6 +117,7 @@ function Listings({
             artwork={artwork}
             locale={locale}
             onTrade={onTrade}
+            selection={selectionFor?.(artwork.id)}
           />
         ))}
       </div>
@@ -248,6 +256,7 @@ export default function CollectPageView(props: CollectPageViewProps) {
                 onRetry={props.onRetry}
                 onLoadMore={props.onLoadMore}
                 onTrade={props.onTrade}
+                selectionFor={props.selectionFor}
               />
             </section>
           )}
@@ -262,7 +271,8 @@ export default function CollectPageView(props: CollectPageViewProps) {
           </aside>
         )}
       </div>
-      {props.plan && (
+      {props.selectionSummary}
+      {props.plan && !props.selectionSummary && (
         <>
           <div className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-40 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/95 tw-px-4 tw-pb-[calc(env(safe-area-inset-bottom)+0.75rem)] tw-pt-3 xl:tw-hidden">
             <div className="tw-mx-auto tw-flex tw-max-w-3xl tw-items-center tw-justify-between tw-gap-4">

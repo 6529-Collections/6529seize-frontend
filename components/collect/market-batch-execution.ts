@@ -25,6 +25,10 @@ import {
 import { readMarketBatch, saveMarketBatch } from "./market-batch-storage";
 import { verifyRecoveredMarketTransaction } from "./market-send-recovery";
 import { withMarketOperationLock } from "./market-operation-lock";
+import {
+  findResumableMarketBatch,
+  marketBatchProfileLock,
+} from "./market-batch-resume";
 
 interface Execution {
   readonly client: PublicClient;
@@ -155,60 +159,80 @@ async function send(options: Execution) {
 export async function confirmMarketBatch(
   options: Execution
 ): Promise<"UPDATED_REVIEW" | "COMPLETE"> {
-  return withMarketOperationLock(options.operation.id, async () => {
-    const { operation, expected, assertConnection, onOperation, client } =
-      options;
-    assertConnection();
-    const capability = await fetchMarketBatchCapabilities();
-    if (
-      capability.available !== true ||
-      capability.execution_policy !== "ALL_OR_REVERT" ||
-      capability.currency.toString() !== expected.currency.toString() ||
-      capability.requires_complete_simulation !== true
-    )
-      throw new Error("MARKET_ACTION_DISABLED");
-    let current = await fetchMarketBatch(operation.id);
-    assertIdentity(current, operation);
-    clearResolvedBatchSend(current);
-    const prior = readMarketBatch(expected.profile_id, current.id);
-    if (prior?.transactionHash) {
-      await recoverMarketBatch({
-        client,
-        operation: current,
-        hash: prior.transactionHash,
-        assertConnection,
-        onOperation,
-      });
-      return "COMPLETE";
-    }
-    if (batchSendAttempt(current)) throw new Error("MARKET_BROADCAST_UNKNOWN");
-    if (current.revision !== operation.revision) {
-      onOperation(current);
-      return "UPDATED_REVIEW";
-    }
-    if (current.state !== "REVIEW") {
-      onOperation(current);
-      return "COMPLETE";
-    }
-    validateMarketBatchOperation(current, expected, options.profileWallets);
-    const refreshed = await continueMarketBatch(current.id);
-    assertIdentity(refreshed, operation);
-    validateMarketBatchOperation(refreshed, expected, options.profileWallets);
-    if (batchSendAttempt(refreshed))
-      throw new Error("MARKET_BROADCAST_UNKNOWN");
-    assertConnection();
-    if (marketBatchReviewTerms(refreshed) !== marketBatchReviewTerms(current)) {
-      onOperation(refreshed);
-      return "UPDATED_REVIEW";
-    }
-    current = refreshed;
-    onOperation(current);
-    if (current.state !== "REVIEW") return "COMPLETE";
-    if (
-      !saveMarketBatch(expected.profile_id, current.id, { request: expected })
-    )
-      throw new Error("MARKET_RECOVERY_STORAGE_UNAVAILABLE");
-    await send({ ...options, operation: current });
-    return "COMPLETE";
-  });
+  return withMarketOperationLock(
+    marketBatchProfileLock(options.expected.profile_id),
+    () =>
+      withMarketOperationLock(options.operation.id, async () => {
+        const { operation, expected, assertConnection, onOperation, client } =
+          options;
+        assertConnection();
+        if (
+          await findResumableMarketBatch(expected.profile_id, expected.items, {
+            excludeId: operation.id,
+            includeReview: false,
+          })
+        )
+          throw new Error("MARKET_BROADCAST_UNKNOWN");
+        const capability = await fetchMarketBatchCapabilities();
+        if (
+          capability.available !== true ||
+          capability.execution_policy !== "ALL_OR_REVERT" ||
+          capability.currency.toString() !== expected.currency.toString() ||
+          capability.requires_complete_simulation !== true
+        )
+          throw new Error("MARKET_ACTION_DISABLED");
+        let current = await fetchMarketBatch(operation.id);
+        assertIdentity(current, operation);
+        clearResolvedBatchSend(current);
+        const prior = readMarketBatch(expected.profile_id, current.id);
+        if (prior?.transactionHash) {
+          await recoverMarketBatch({
+            client,
+            operation: current,
+            hash: prior.transactionHash,
+            assertConnection,
+            onOperation,
+          });
+          return "COMPLETE";
+        }
+        if (batchSendAttempt(current))
+          throw new Error("MARKET_BROADCAST_UNKNOWN");
+        if (current.revision !== operation.revision) {
+          onOperation(current);
+          return "UPDATED_REVIEW";
+        }
+        if (current.state !== "REVIEW") {
+          onOperation(current);
+          return "COMPLETE";
+        }
+        validateMarketBatchOperation(current, expected, options.profileWallets);
+        const refreshed = await continueMarketBatch(current.id);
+        assertIdentity(refreshed, operation);
+        validateMarketBatchOperation(
+          refreshed,
+          expected,
+          options.profileWallets
+        );
+        if (batchSendAttempt(refreshed))
+          throw new Error("MARKET_BROADCAST_UNKNOWN");
+        assertConnection();
+        if (
+          marketBatchReviewTerms(refreshed) !== marketBatchReviewTerms(current)
+        ) {
+          onOperation(refreshed);
+          return "UPDATED_REVIEW";
+        }
+        current = refreshed;
+        onOperation(current);
+        if (current.state !== "REVIEW") return "COMPLETE";
+        if (
+          !saveMarketBatch(expected.profile_id, current.id, {
+            request: expected,
+          })
+        )
+          throw new Error("MARKET_RECOVERY_STORAGE_UNAVAILABLE");
+        await send({ ...options, operation: current });
+        return "COMPLETE";
+      })
+  );
 }

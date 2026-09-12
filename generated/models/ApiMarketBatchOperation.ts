@@ -13,8 +13,9 @@
 
 import { ApiMarketBatchItem } from '../models/ApiMarketBatchItem';
 import { ApiMarketBatchMirrorTerms } from '../models/ApiMarketBatchMirrorTerms';
+import { ApiMarketBatchSendAttempt } from '../models/ApiMarketBatchSendAttempt';
 import { ApiMarketBatchSettlement } from '../models/ApiMarketBatchSettlement';
-import { ApiMarketSendAttempt } from '../models/ApiMarketSendAttempt';
+import { ApiMarketBatchTransaction } from '../models/ApiMarketBatchTransaction';
 import { ApiMarketTransaction } from '../models/ApiMarketTransaction';
 import { HttpFile } from '../http/http';
 
@@ -26,7 +27,7 @@ export class ApiMarketBatchOperation {
     'wallet': string;
     'currency': string;
     'total_wei': string;
-    'transaction'?: ApiMarketTransaction;
+    'transaction'?: ApiMarketBatchTransaction;
     'transaction_hash'?: string;
     /**
     * Review refresh deadline as Unix milliseconds; not an onchain cancellation or expiry.
@@ -36,7 +37,7 @@ export class ApiMarketBatchOperation {
     'error_code'?: string;
     'block_number'?: number;
     'block_hash'?: string;
-    'send_attempt'?: ApiMarketSendAttempt;
+    'send_attempt'?: ApiMarketBatchSendAttempt;
     'potential_liability_wei': string;
     'kind': ApiMarketBatchOperationKindEnum;
     'execution_policy': ApiMarketBatchOperationExecutionPolicyEnum;
@@ -96,7 +97,7 @@ export class ApiMarketBatchOperation {
         {
             "name": "transaction",
             "baseName": "transaction",
-            "type": "ApiMarketTransaction",
+            "type": "ApiMarketBatchTransaction",
             "format": ""
         },
         {
@@ -138,7 +139,7 @@ export class ApiMarketBatchOperation {
         {
             "name": "send_attempt",
             "baseName": "send_attempt",
-            "type": "ApiMarketSendAttempt",
+            "type": "ApiMarketBatchSendAttempt",
             "format": ""
         },
         {

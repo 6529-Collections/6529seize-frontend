@@ -17,7 +17,7 @@ export function marketConnectionReason(options: {
   readonly canSign: boolean;
   readonly address: string | undefined;
   readonly profile: ApiIdentity | null;
-  readonly operation: ApiMarketOperation | null;
+  readonly operation: Pick<ApiMarketOperation, "wallet" | "profile_id"> | null;
   readonly hasExpected: boolean;
   readonly cancelTarget: ApiMarketOperation | undefined;
 }) {
