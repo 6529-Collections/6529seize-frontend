@@ -77,12 +77,28 @@ it("ignores another profile, resolved transactions, and unrelated seller orders"
   fetch.mockClear();
   const other = value.request.items.map((item) => ({
     ...item,
+    asset_key: `${item.asset_key}9`,
     order: { ...item.order, order_hash: `0x${"e".repeat(64)}` },
   }));
   expect(
     await findResumableMarketBatch(value.request.profile_id, other)
   ).toBeNull();
   expect(fetch).not.toHaveBeenCalled();
+});
+it("resumes an unresolved NFT purchase even when a replacement listing has a different seller hash", async () => {
+  const value = saved();
+  const replacement = value.request.items.map((item) => ({
+    ...item,
+    order: { ...item.order, order_hash: `0x${"e".repeat(64)}` },
+  }));
+  expect(
+    (await findResumableMarketBatch(value.request.profile_id, replacement))
+      ?.operation.id
+  ).toBe(value.operation.id);
+  value.operation.state = ApiMarketBatchOperationStateEnum.Review;
+  expect(
+    await findResumableMarketBatch(value.request.profile_id, replacement)
+  ).toBeNull();
 });
 it("fails closed on a mismatched recovery identity", async () => {
   const value = saved();

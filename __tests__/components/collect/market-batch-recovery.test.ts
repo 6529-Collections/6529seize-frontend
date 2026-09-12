@@ -87,6 +87,34 @@ it("retires a terminal verified journal instead of accumulating completed purcha
   expect(reject).not.toHaveBeenCalled();
   expect(submit).not.toHaveBeenCalled();
 });
+it.each(["id", "wallet"] as const)(
+  "preserves the pending journal when a terminal response has the wrong %s",
+  async (field) => {
+    const f = setup();
+    const before = localStorage.getItem(
+      `6529-market-batch:profile:${f.operation.id}`
+    );
+    fetch.mockResolvedValue({
+      ...f.operation,
+      state: ApiMarketBatchOperationStateEnum.Confirmed,
+      [field]:
+        field === "id"
+          ? "another-operation"
+          : "0x9999999999999999999999999999999999999999",
+    });
+    await expect(
+      fetchRecoverableMarketBatch(f.operation.id, "profile")
+    ).rejects.toThrow("MARKET_REVIEW_MISMATCH");
+    expect(readMarketBatch("profile", f.operation.id)?.sendAttempt?.id).toBe(
+      f.attempt.id
+    );
+    expect(
+      localStorage.getItem(`6529-market-batch:profile:${f.operation.id}`)
+    ).toBe(before);
+    expect(reject).not.toHaveBeenCalled();
+    expect(submit).not.toHaveBeenCalled();
+  }
+);
 it("rechecks durable wallet intent after the lock is acquired", async () => {
   const f = setup();
   mockLock.mockImplementation(
