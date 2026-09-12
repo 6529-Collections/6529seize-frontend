@@ -26,6 +26,7 @@ interface CollectTradeSheetProps {
   readonly onRefresh: () => void;
   readonly onConfirm: (reviewId: string, revision: string) => Promise<void>;
   readonly presentation?: CollectTradePresentation;
+  readonly compact?: boolean;
 }
 
 export function CollectTradeDialog({
@@ -132,26 +133,40 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
   };
 
   const content = (
-    <div className="tw-space-y-5 tw-px-4 tw-text-iron-100 md:tw-px-6">
+    <div
+      className={
+        props.compact
+          ? "tw-w-full tw-space-y-3 tw-text-iron-100"
+          : "tw-space-y-5 tw-px-4 tw-text-iron-100 md:tw-px-6"
+      }
+    >
       {review ? (
         <>
-          <div className="tw-flex tw-items-center tw-gap-4">
-            {review.media !== undefined && review.media !== null && (
-              <div className="tw-relative tw-flex tw-size-20 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 [&_img]:tw-max-h-full [&_img]:tw-object-contain">
-                {review.media}
+          {!props.compact && (
+            <div className="tw-flex tw-items-center tw-gap-4">
+              {review.media !== undefined && review.media !== null && (
+                <div className="tw-relative tw-flex tw-size-20 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 [&_img]:tw-max-h-full [&_img]:tw-object-contain">
+                  {review.media}
+                </div>
+              )}
+              <div className="tw-min-w-0">
+                <p className="tw-mb-1 tw-mt-0 tw-text-xs tw-font-semibold tw-text-primary-300">
+                  {t(locale, `collect.action.${review.action}`)}
+                </p>
+                <h2 className="tw-m-0 tw-break-words tw-text-lg tw-font-semibold tw-leading-6">
+                  {review.title}
+                </h2>
               </div>
-            )}
-            <div className="tw-min-w-0">
-              <p className="tw-mb-1 tw-mt-0 tw-text-xs tw-font-semibold tw-text-primary-300">
-                {t(locale, `collect.action.${review.action}`)}
-              </p>
-              <h2 className="tw-m-0 tw-break-words tw-text-lg tw-font-semibold tw-leading-6">
-                {review.title}
-              </h2>
             </div>
-          </div>
+          )}
           <Facts facts={review.facts} />
-          <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4">
+          <div
+            className={
+              props.compact
+                ? "tw-space-y-1"
+                : "tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4"
+            }
+          >
             <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
               {review.totalDescription}
             </p>
@@ -255,11 +270,30 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
                 void confirm();
               }}
             >
-              {t(locale, "collect.trade.continue")}
+              {props.compact && review.action === "buy"
+                ? t(locale, "collect.buy.atPrice", { price: review.totalLabel })
+                : t(locale, "collect.trade.continue")}
             </Button>
           )}
         </div>
       )}
+      {props.compact &&
+        review &&
+        (props.stage === "review" || props.stage === "confirmed") && (
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={confirming}
+            onClick={props.onClose}
+          >
+            {t(
+              locale,
+              props.stage === "confirmed"
+                ? "collect.buy.doneDelivery"
+                : "collect.buy.editPurchase"
+            )}
+          </Button>
+        )}
       {props.recoveryAction}
     </div>
   );

@@ -16,9 +16,11 @@ import { t } from "@/i18n/messages";
 export function MemeLabOverview({
   nft,
   defaultAdditionalDetailsOpen,
+  locale,
 }: {
   readonly nft: LabNFT | undefined;
   readonly defaultAdditionalDetailsOpen: boolean;
+  readonly locale: SupportedLocale;
 }) {
   if (!nft) {
     return null;
@@ -27,6 +29,7 @@ export function MemeLabOverview({
     <MemeLabOverviewDetails
       nft={nft}
       defaultAdditionalDetailsOpen={defaultAdditionalDetailsOpen}
+      locale={locale}
     />
   );
 }

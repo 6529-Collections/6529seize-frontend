@@ -1,5 +1,5 @@
-import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.en-US.json";
 import artworkShareMessages from "@/i18n/messages/artworkShare.en-US.json";
+import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.en-US.json";
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.en-US.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.en-US.json";
 import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.en-US.json";
@@ -48,6 +48,7 @@ import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
 import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
+import { COLLECT_TDH_TARGET_MESSAGES } from "@/i18n/messages/collect-tdh-target";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -2780,6 +2781,7 @@ const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 export const EN_US_MESSAGES = {
   ...artworkShareMessages,
   ...COLLECT_MESSAGES,
+  ...COLLECT_TDH_TARGET_MESSAGES,
   ...profileCmsAgentMessages,
   "nftActivity.loading": "Loading NFT activity…",
   "nftActivity.error": "Could not load NFT activity.",

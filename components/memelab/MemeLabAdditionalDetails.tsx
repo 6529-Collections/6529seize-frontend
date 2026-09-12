@@ -17,14 +17,15 @@ import {
   getImageDimensionsFromMetadata,
   getImageFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   ChartBarIcon,
   ChevronDownIcon,
-  InformationCircleIcon,
   LinkIcon,
   SwatchIcon,
 } from "@heroicons/react/24/outline";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useId, useState } from "react";
 
 type MemeLabMediaMetadata = Parameters<typeof getImageFileTypeFromMetadata>[0];
 type MemeLabMetadataLinks = {
@@ -169,50 +170,45 @@ function getMemeLabDetailRows(nft: LabNFT) {
 function MemeLabAdditionalDetailsAccordion({
   defaultOpen,
   children,
+  locale,
 }: {
   readonly defaultOpen: boolean;
   readonly children: ReactNode;
+  readonly locale: SupportedLocale;
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const panelId = useId();
 
   return (
-    <section className="tw-mt-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800">
+    <section className="tw-mt-4 tw-border-0 tw-border-y tw-border-solid tw-border-white/10">
       <button
         type="button"
         aria-expanded={isOpen}
+        aria-controls={panelId}
         onClick={() => setIsOpen((current) => !current)}
-        className="tw-group tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-bg-transparent tw-px-0 tw-py-4 tw-text-left tw-text-iron-100 tw-transition-colors tw-duration-300 tw-ease-out hover:tw-text-white"
+        className="tw-group tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-bg-transparent tw-px-0 tw-py-2.5 tw-text-left tw-text-iron-300 tw-transition-colors tw-duration-150 tw-ease-out hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none"
       >
-        <span className="tw-flex tw-items-center tw-gap-3">
-          <span
-            className={`tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-p-1.5 tw-transition-colors tw-duration-300 tw-ease-out ${
-              isOpen
-                ? "tw-bg-primary-500 tw-text-iron-100"
-                : "tw-bg-iron-900 tw-text-iron-500 group-hover:tw-text-iron-100"
-            }`}
-          >
-            <InformationCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-          </span>
-          <span className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-200 sm:tw-text-lg">
-            Additional details
-          </span>
+        <span className="tw-text-sm tw-font-medium tw-text-iron-300 group-hover:tw-text-white sm:tw-text-base">
+          {t(locale, "memeLab.detail.additionalDetails")}
         </span>
         <ChevronDownIcon
-          className={`tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-500 tw-transition tw-duration-200 group-hover:tw-text-iron-100 ${
+          aria-hidden="true"
+          className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 tw-ease-out group-hover:tw-text-white motion-reduce:tw-transition-none ${
             isOpen ? "tw-rotate-180 tw-text-iron-100" : ""
           }`}
         />
       </button>
       <div
-        className={`tw-grid tw-transition-[grid-template-rows,opacity] tw-duration-300 tw-ease-out ${
+        id={panelId}
+        aria-hidden={!isOpen}
+        inert={!isOpen}
+        className={`tw-grid tw-transition-[grid-template-rows,opacity] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none ${
           isOpen
             ? "tw-grid-rows-[1fr] tw-opacity-100"
             : "tw-grid-rows-[0fr] tw-opacity-0"
         }`}
       >
         <div
-          aria-hidden={!isOpen}
-          inert={!isOpen}
           tabIndex={isOpen ? undefined : -1}
           className={isOpen ? "tw-overflow-visible" : "tw-overflow-hidden"}
         >
@@ -283,9 +279,11 @@ function MemeLabAdditionalDetailsContent({ nft }: { readonly nft: LabNFT }) {
 export function MemeLabOverviewDetails({
   nft,
   defaultAdditionalDetailsOpen,
+  locale,
 }: {
   readonly nft: LabNFT;
   readonly defaultAdditionalDetailsOpen: boolean;
+  readonly locale: SupportedLocale;
 }) {
   return (
     <>
@@ -293,6 +291,7 @@ export function MemeLabOverviewDetails({
       <MemeLabAdditionalDetailsAccordion
         key={defaultAdditionalDetailsOpen ? "details-open" : "details-closed"}
         defaultOpen={defaultAdditionalDetailsOpen}
+        locale={locale}
       >
         <MemeLabAdditionalDetailsContent nft={nft} />
       </MemeLabAdditionalDetailsAccordion>

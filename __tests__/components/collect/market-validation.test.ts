@@ -18,7 +18,9 @@ import {
   MARKET_ZERO_HASH,
   MARKET_WETH,
   marketTypedData,
+  validateCommittedMarketOffer,
   validateMarketOperation,
+  validatePublishedMarketOffer,
   validateMarketTransaction,
 } from "@/components/collect/market-validation";
 import { encodeFunctionData, hashStruct, hashTypedData, parseAbi } from "viem";
@@ -157,6 +159,40 @@ function buyFixture() {
   return { request, operation, transaction };
 }
 
+function offerFixture() {
+  const { request, operation } = fixture();
+  request.kind = ApiMarketKind.Offer;
+  request.currency = MARKET_WETH;
+  operation.kind = ApiMarketKind.Offer;
+  operation.currency = MARKET_WETH;
+  operation.state = ApiMarketOperationStateEnum.Live;
+  operation.potential_liability_wei = "1000";
+  const nft = operation.order!.components.offer[0]!;
+  operation.order!.components.offer = [
+    {
+      item_type: 1,
+      token: MARKET_WETH,
+      identifier_or_criteria: "0",
+      start_amount: "1000",
+      end_amount: "1000",
+    },
+  ];
+  operation.order!.components.consideration = [
+    { ...nft, recipient: MAKER },
+    {
+      item_type: 1,
+      token: MARKET_WETH,
+      identifier_or_criteria: "0",
+      start_amount: "50",
+      end_amount: "50",
+      recipient: FEE,
+    },
+  ];
+  reseal(operation);
+  operation.order_hash = operation.order!.order_hash;
+  return { request, operation };
+}
+
 describe("independent marketplace review validation", () => {
   it("accepts an exact allowlisted listing", () => {
     const f = fixture();
@@ -219,6 +255,270 @@ describe("independent marketplace review validation", () => {
     const f = fixture();
     expect(() =>
       validateMarketOperation(f.operation, f.request, f.operation.expires_at)
+    ).toThrow();
+  });
+
+  it("keeps the fresh review deadline for signature validation", () => {
+    const f = offerFixture();
+    expect(() =>
+      validateMarketOperation(f.operation, f.request, f.operation.expires_at)
+    ).toThrow();
+  });
+
+  it("accepts an exact awaiting-signature offer commitment", () => {
+    const f = offerFixture();
+    f.operation.state = ApiMarketOperationStateEnum.AwaitingSignature;
+    expect(() =>
+      validateCommittedMarketOffer(f.operation, f.request, NOW)
+    ).not.toThrow();
+  });
+
+  it("rejects a stale or expired pre-submit offer commitment", () => {
+    const stale = offerFixture();
+    stale.operation.state = ApiMarketOperationStateEnum.AwaitingSignature;
+    stale.operation.expires_at = NOW;
+    expect(() =>
+      validateCommittedMarketOffer(stale.operation, stale.request, NOW)
+    ).toThrow();
+
+    const expired = offerFixture();
+    expired.operation.state = ApiMarketOperationStateEnum.AwaitingSignature;
+    expect(() =>
+      validateCommittedMarketOffer(
+        expired.operation,
+        expired.request,
+        Number(expired.operation.order!.components.end_time) * 1000
+      )
+    ).toThrow();
+  });
+
+  it.each([
+    ApiMarketOperationStateEnum.Publishing,
+    ApiMarketOperationStateEnum.Unknown,
+  ])("reserves an expired unresolved %s offer", (state) => {
+    const f = offerFixture();
+    f.operation.state = state;
+    f.operation.expires_at = NOW - 1;
+    expect(() =>
+      validateCommittedMarketOffer(
+        f.operation,
+        f.request,
+        Number(f.operation.order!.components.end_time) * 1000
+      )
+    ).not.toThrow();
+  });
+
+  it.each([
+    ApiMarketOperationStateEnum.Review,
+    ApiMarketOperationStateEnum.Approval,
+    ApiMarketOperationStateEnum.Failed,
+    ApiMarketOperationStateEnum.Expired,
+    ApiMarketOperationStateEnum.Cancelled,
+  ])("rejects the non-commitment %s state", (state) => {
+    const f = offerFixture();
+    f.operation.state = state;
+    expect(() =>
+      validateCommittedMarketOffer(f.operation, f.request, NOW)
+    ).toThrow();
+  });
+
+  it("retains full financial, actor, NFT and row-hash bindings", () => {
+    const mutations: Array<(fixture: ReturnType<typeof offerFixture>) => void> =
+      [
+        (f) => {
+          f.operation.total_wei = "999";
+        },
+        (f) => {
+          f.operation.wallet = "0x2222222222222222222222222222222222222222";
+        },
+        (f) => {
+          f.operation.order!.components.consideration[0]!.identifier_or_criteria =
+            "2";
+          reseal(f.operation);
+          f.operation.order_hash = f.operation.order!.order_hash;
+        },
+        (f) => {
+          f.operation.order_hash = MARKET_ZERO_HASH;
+        },
+      ];
+    for (const mutate of mutations) {
+      const f = offerFixture();
+      f.operation.state = ApiMarketOperationStateEnum.Publishing;
+      mutate(f);
+      expect(() =>
+        validateCommittedMarketOffer(f.operation, f.request, NOW)
+      ).toThrow();
+    }
+  });
+
+  it("dispatches live and confirmed offers through publication proof", () => {
+    const live = offerFixture();
+    expect(() =>
+      validateCommittedMarketOffer(live.operation, live.request, NOW)
+    ).not.toThrow();
+
+    const confirmed = offerFixture();
+    confirmed.operation.state = ApiMarketOperationStateEnum.Confirmed;
+    expect(() =>
+      validateCommittedMarketOffer(confirmed.operation, confirmed.request, NOW)
+    ).toThrow();
+    confirmed.operation.potential_liability_wei = "0";
+    confirmed.operation.settlement = {
+      filled_quantity: confirmed.request.quantity,
+      remaining_quantity: "0",
+      safe_block_number: 22_000_000,
+    };
+    expect(() =>
+      validateCommittedMarketOffer(confirmed.operation, confirmed.request, NOW)
+    ).not.toThrow();
+  });
+
+  it("accepts a live published offer after its review deadline", () => {
+    const f = offerFixture();
+    f.operation.expires_at = NOW - 1;
+    expect(() =>
+      validatePublishedMarketOffer(f.operation, f.request, NOW)
+    ).not.toThrow();
+  });
+
+  it("rejects a live publication after the signed order expires", () => {
+    const f = offerFixture();
+    f.operation.expires_at = NOW - 1;
+    expect(() =>
+      validatePublishedMarketOffer(
+        f.operation,
+        f.request,
+        Number(f.operation.order!.components.end_time) * 1000
+      )
+    ).toThrow();
+  });
+
+  it("accepts an expired, fully settled confirmed offer", () => {
+    const f = offerFixture();
+    f.operation.state = ApiMarketOperationStateEnum.Confirmed;
+    f.operation.expires_at = NOW - 1;
+    f.operation.potential_liability_wei = "0";
+    f.operation.settlement = {
+      filled_quantity: f.request.quantity,
+      remaining_quantity: "0",
+      safe_block_number: 22_000_000,
+    };
+    expect(() =>
+      validatePublishedMarketOffer(
+        f.operation,
+        f.request,
+        Number(f.operation.order!.components.end_time) * 1000
+      )
+    ).not.toThrow();
+  });
+
+  it("rejects a confirmed offer whose signed order has not started", () => {
+    const f = offerFixture();
+    f.operation.state = ApiMarketOperationStateEnum.Confirmed;
+    f.operation.potential_liability_wei = "0";
+    f.operation.settlement = {
+      filled_quantity: f.request.quantity,
+      remaining_quantity: "0",
+      safe_block_number: 22_000_000,
+    };
+    expect(() =>
+      validatePublishedMarketOffer(
+        f.operation,
+        f.request,
+        Number(f.operation.order!.components.start_time) * 1000 - 1
+      )
+    ).toThrow();
+  });
+
+  it.each([
+    [
+      "wrong row hash",
+      (f: ReturnType<typeof offerFixture>): void => {
+        f.operation.order_hash = MARKET_ZERO_HASH;
+      },
+    ],
+    [
+      "partial fill",
+      (f: ReturnType<typeof offerFixture>): void => {
+        f.operation.settlement!.filled_quantity = "0";
+      },
+    ],
+    [
+      "remaining fill",
+      (f: ReturnType<typeof offerFixture>): void => {
+        f.operation.settlement!.remaining_quantity = "1";
+      },
+    ],
+    [
+      "missing safe block",
+      (f: ReturnType<typeof offerFixture>): void => {
+        delete f.operation.settlement!.safe_block_number;
+      },
+    ],
+    [
+      "remaining liability",
+      (f: ReturnType<typeof offerFixture>): void => {
+        f.operation.potential_liability_wei = "1";
+      },
+    ],
+  ] as const)("rejects a confirmed offer with %s", (_name, mutate) => {
+    const f = offerFixture();
+    f.operation.state = ApiMarketOperationStateEnum.Confirmed;
+    f.operation.potential_liability_wei = "0";
+    f.operation.settlement = {
+      filled_quantity: f.request.quantity,
+      remaining_quantity: "0",
+      safe_block_number: 22_000_000,
+    };
+    mutate(f);
+    expect(() =>
+      validatePublishedMarketOffer(f.operation, f.request, NOW)
+    ).toThrow();
+  });
+
+  it.each([
+    ApiMarketOperationStateEnum.AwaitingSignature,
+    ApiMarketOperationStateEnum.Unknown,
+  ])("rejects a non-published %s offer", (state) => {
+    const f = offerFixture();
+    f.operation.state = state;
+    expect(() =>
+      validatePublishedMarketOffer(f.operation, f.request, NOW)
+    ).toThrow();
+  });
+
+  it("rejects a non-offer publication", () => {
+    const f = fixture();
+    f.operation.state = ApiMarketOperationStateEnum.Live;
+    f.operation.order_hash = f.operation.order!.order_hash;
+    expect(() =>
+      validatePublishedMarketOffer(f.operation, f.request, NOW)
+    ).toThrow();
+  });
+
+  it("retains financial and canonical bindings for a published offer", () => {
+    const changedTotal = offerFixture();
+    changedTotal.operation.total_wei = "1001";
+    expect(() =>
+      validatePublishedMarketOffer(
+        changedTotal.operation,
+        changedTotal.request,
+        NOW
+      )
+    ).toThrow();
+
+    const changedToken = offerFixture();
+    changedToken.operation.order!.components.consideration[0]!.identifier_or_criteria =
+      "2";
+    reseal(changedToken.operation);
+    changedToken.operation.order_hash =
+      changedToken.operation.order!.order_hash;
+    expect(() =>
+      validatePublishedMarketOffer(
+        changedToken.operation,
+        changedToken.request,
+        NOW
+      )
     ).toThrow();
   });
   it("rejects altered signed expiry", () => {

@@ -2,7 +2,14 @@ import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import MemeLabPageComponent from "@/components/memelab/MemeLabPage";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, render, screen, within, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  within,
+  waitFor,
+} from "@testing-library/react";
 import React from "react";
 import { createConfig, http, WagmiProvider } from "wagmi";
 import { mainnet } from "wagmi/chains";
@@ -618,6 +625,7 @@ describe("MemeLabPageComponent", () => {
       expect(
         screen.getByRole("region", { name: "Meme Lab activity" })
       ).toBeInTheDocument();
+      expect(screen.getAllByTestId("market-depth")).toHaveLength(1);
     });
   });
 
@@ -632,11 +640,26 @@ describe("MemeLabPageComponent", () => {
     );
     const { rerender } = render(page());
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: "Additional details" })
-      ).toHaveAttribute("aria-expanded", "false");
+    const detailsButton = await screen.findByRole("button", {
+      name: "Additional details",
     });
+    expect(detailsButton).toHaveAttribute("aria-expanded", "false");
+    const detailsPanelId = detailsButton.getAttribute("aria-controls") ?? "";
+    expect(detailsPanelId).toBeTruthy();
+    expect(document.getElementById(detailsPanelId)).toHaveAttribute(
+      "aria-hidden",
+      "true"
+    );
+    expect(
+      detailsButton.compareDocumentPosition(screen.getByTestId("market-depth"))
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    fireEvent.click(detailsButton);
+    expect(detailsButton).toHaveAttribute("aria-expanded", "true");
+    expect(document.getElementById(detailsPanelId)).toHaveAttribute(
+      "aria-hidden",
+      "false"
+    );
+    fireEvent.click(detailsButton);
 
     mockSearchParamsWithFocus(MEME_FOCUS.THE_ART);
 

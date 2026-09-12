@@ -16,10 +16,12 @@ export default function CollectPlanPanel({
   plan,
   locale,
   onReview,
+  onPlanOffers,
 }: {
   readonly plan: CollectPlanView;
   readonly locale: SupportedLocale;
   readonly onReview: (planId: string, revision: string) => void;
+  readonly onPlanOffers?: (() => void) | undefined;
 }) {
   const disabled =
     Boolean(plan.reviewDisabledReason) ||
@@ -120,6 +122,11 @@ export default function CollectPlanPanel({
           <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
             {plan.reviewDisabledReason}
           </p>
+        )}
+        {onPlanOffers && (
+          <Button variant="secondary" fullWidth onClick={onPlanOffers}>
+            {t(locale, "collect.offerWorkspace.planMissing")}
+          </Button>
         )}
       </div>
     </section>

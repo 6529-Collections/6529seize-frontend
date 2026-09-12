@@ -2,12 +2,17 @@
 
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import { useId, useState } from "react";
 import { validateCollectGoal } from "./collect-form.validation";
+import CollectGoalDefinitionPicker from "./CollectGoalDefinitionPicker";
+import CollectCompletionControls, {
+  type CollectCompletionSelection,
+} from "./CollectCompletionControls";
 import type {
   CollectGoalDraft,
   CollectGoalOption,
+  CollectIntent,
   CollectProfileView,
 } from "./collect.types";
 
@@ -24,6 +29,8 @@ interface CollectGoalFormProps {
   readonly onSubmit: (draft: CollectGoalDraft) => void;
   readonly onConnect: () => void;
   readonly showBudget?: boolean;
+  readonly budgetOptional?: boolean;
+  readonly completion?: CollectCompletionSelection;
 }
 
 export default function CollectGoalForm(props: CollectGoalFormProps) {
@@ -32,8 +39,32 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
   const [invalidField, setInvalidField] =
     useState<ReturnType<typeof validateCollectGoal>>(null);
   const { draft } = props;
+  const title = t(
+    locale,
+    draft.intent === "tdh"
+      ? "collect.tdh.projectionTitle"
+      : `collect.intent.${draft.intent}`
+  );
   const showQuantity = ["season", "full_set", "artist"].includes(draft.intent);
   const needsDefinition = draft.intent !== "tdh";
+  const showDefinition =
+    needsDefinition && !(props.completion && draft.intent === "full_set");
+  const definitionLabels: Partial<Record<CollectIntent, MessageKey>> = {
+    season: "collect.goal.season",
+    artist: "collect.goal.artist",
+    pebbles_set: "collect.goal.set",
+  };
+  const definitionPlaceholders: Partial<Record<CollectIntent, MessageKey>> = {
+    season: "collect.goal.selectSeason",
+    artist: "collect.goal.selectArtist",
+    pebbles_set: "collect.goal.selectSet",
+  };
+  let gridClass = "sm:tw-grid-cols-2 lg:tw-grid-cols-3";
+  if (showQuantity) {
+    gridClass = showDefinition
+      ? "tw-grid-cols-[7rem_minmax(0,1fr)] lg:tw-grid-cols-[minmax(0,1fr)_7rem_minmax(0,1fr)]"
+      : "tw-grid-cols-[7rem_minmax(0,1fr)] sm:tw-grid-cols-[7rem_minmax(0,20rem)]";
+  }
   const errors = {
     definition: "collect.goal.requiredDefinition",
     quantity: "collect.goal.invalidCount",
@@ -48,44 +79,64 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
   };
   return (
     <form
+      aria-label={title}
       onSubmit={(event) => {
         event.preventDefault();
-        const invalid = validateCollectGoal(draft, props.showBudget !== false);
+        const invalid = validateCollectGoal(
+          draft,
+          props.showBudget !== false && !props.budgetOptional
+        );
         setInvalidField(invalid);
         if (!invalid && props.profile && !props.loading) props.onSubmit(draft);
       }}
       className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/40 tw-p-4 sm:tw-p-5"
     >
-      <h2 className="tw-mb-4 tw-mt-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-        {t(locale, `collect.intent.${draft.intent}`)}
-      </h2>
-      <div className="tw-grid tw-gap-4 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
-        {needsDefinition && (
-          <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
-            <span>{t(locale, "collect.goal.definition")}</span>
-            <select
+      {props.completion ? (
+        <CollectCompletionControls
+          {...props.completion}
+          intent={draft.intent}
+          locale={locale}
+          disabled={props.loading}
+        />
+      ) : (
+        <h2 className="tw-mb-4 tw-mt-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+          {title}
+        </h2>
+      )}
+      <div className={`tw-grid tw-items-end tw-gap-4 ${gridClass}`}>
+        {showDefinition && (
+          <div
+            className={
+              showQuantity
+                ? "tw-col-span-2 tw-min-w-0 lg:tw-col-span-1"
+                : "tw-min-w-0"
+            }
+          >
+            <CollectGoalDefinitionPicker
+              key={draft.intent}
+              label={t(
+                locale,
+                definitionLabels[draft.intent] ?? "collect.goal.definition"
+              )}
+              placeholder={t(
+                locale,
+                definitionPlaceholders[draft.intent] ??
+                  "collect.goal.selectDefinition"
+              )}
+              locale={locale}
               value={draft.definitionId}
-              disabled={props.loading || props.definitions.length === 0}
-              onChange={(event) => change({ definitionId: event.target.value })}
-              aria-invalid={invalidField === "definition"}
-              aria-describedby={
-                invalidField === "definition" ? `${id}-error` : undefined
-              }
-              className={COLLECT_INPUT_CLASS}
-            >
-              <option value="">
-                {t(locale, "collect.goal.selectDefinition")}
-              </option>
-              {props.definitions.map((definition) => (
-                <option key={definition.id} value={definition.id}>
-                  {definition.label}
-                </option>
-              ))}
-            </select>
-          </label>
+              definitions={props.definitions}
+              disabled={props.loading}
+              invalid={invalidField === "definition"}
+              {...(invalidField === "definition"
+                ? { errorId: `${id}-error` }
+                : {})}
+              onChange={(definitionId) => change({ definitionId })}
+            />
+          </div>
         )}
         {showQuantity && (
-          <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
+          <label className="tw-max-w-28 tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
             <span>{t(locale, "collect.goal.targetCount")}</span>
             <input
               disabled={props.loading}
@@ -104,7 +155,14 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
         )}
         {props.showBudget !== false && (
           <label className="tw-space-y-2 tw-text-xs tw-font-semibold tw-text-iron-300">
-            <span>{t(locale, "collect.goal.budget")}</span>
+            <span>
+              {t(
+                locale,
+                props.budgetOptional
+                  ? "collect.goal.optionalBudget"
+                  : "collect.goal.budget"
+              )}
+            </span>
             <input
               disabled={props.loading}
               inputMode="decimal"
@@ -143,7 +201,12 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
           id={`${id}-budget-hint`}
           className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-400"
         >
-          {t(locale, "collect.goal.budgetHint")}
+          {t(
+            locale,
+            props.budgetOptional
+              ? "collect.goal.optionalBudgetHint"
+              : "collect.goal.budgetHint"
+          )}
         </p>
       )}
       {draft.intent === "artist" && (
@@ -185,13 +248,15 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
         </p>
       )}
       <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-        <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-          {props.profile
-            ? t(locale, "collect.profileScope", {
-                profile: props.profile.displayName,
-              })
-            : t(locale, "collect.goal.connect")}
-        </p>
+        {(!props.profile || !props.completion) && (
+          <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+            {props.profile
+              ? t(locale, "collect.profileScope", {
+                  profile: props.profile.displayName,
+                })
+              : t(locale, "collect.goal.connect")}
+          </p>
+        )}
         {props.profile ? (
           <Button
             type="submit"

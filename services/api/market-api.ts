@@ -1,4 +1,3 @@
-import type { ApiMarketMyOperations } from "@/generated/models/ApiMarketMyOperations";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import type { ApiMarketOrders } from "@/generated/models/ApiMarketOrders";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
@@ -49,17 +48,6 @@ export const prepareMarketOperation = (
 export const fetchMarketOperation = (id: string, signal?: AbortSignal) =>
   commonApiFetch<ApiMarketOperation>({
     endpoint: operationPath(id),
-    signal,
-    cache: "no-store",
-    errorMode: "structured",
-  });
-export const fetchMyMarketOperations = (
-  signal?: AbortSignal,
-  cursor?: string | null
-) =>
-  commonApiFetch<ApiMarketMyOperations>({
-    endpoint: "market/me/operations",
-    params: { limit: "24", ...(cursor ? { cursor } : {}) },
     signal,
     cache: "no-store",
     errorMode: "structured",
