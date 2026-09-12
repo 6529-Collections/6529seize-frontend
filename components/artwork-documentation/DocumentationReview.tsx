@@ -17,6 +17,7 @@ import type {
 } from "@/lib/artwork-documentation/draft-controller";
 import { documentationDraftRecord } from "@/lib/artwork-documentation/record";
 import { confirmationCopyMatches } from "@/lib/artwork-documentation/confirmation";
+import type { DocumentationSection } from "@/lib/artwork-documentation/registry";
 import { documentationQueryKey } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
 import {
   confirmDocumentation,
@@ -45,11 +46,13 @@ export default function DocumentationReview({
   controller,
   saveState,
   edits = EMPTY_EDITS,
+  onNavigateSection,
 }: {
   readonly context: ApiArtworkDocumentationContext;
   readonly controller: DocumentationDraftController;
   readonly saveState: SaveState;
   readonly edits?: readonly PendingEdit[];
+  readonly onNavigateSection: (section: DocumentationSection) => void;
 }) {
   const { msg, locale } = useDocumentationMessages();
   const draftRecord = documentationDraftRecord(context, edits);
@@ -91,9 +94,13 @@ export default function DocumentationReview({
   const missing = Object.values(context.modules).flatMap(
     (module) => module.completeness.missing
   );
+  const needsInterviewPermission = context.issues.some(
+    (issue) => issue.code === "INTERVIEW_PUBLICATION_PERMISSION_REQUIRED"
+  );
   const canConfirm =
     mutationCapabilities(context).confirm_as_artist &&
     !missing.length &&
+    !needsInterviewPermission &&
     saveState === "clean" &&
     context.lifecycle === ApiArtworkDocumentationContextLifecycleEnum.Active &&
     confirmationCopyMatches(context.profile);
@@ -170,6 +177,27 @@ export default function DocumentationReview({
               <DocumentationNotice>
                 {msg("confirmed")} · {msg("reviewPending")}
               </DocumentationNotice>
+            )}
+            {needsInterviewPermission && (
+              <div className="tw-max-w-prose tw-space-y-3">
+                <p className="tw-text-sm tw-leading-7 tw-text-iron-300">
+                  {msg("museum.interviewPermissionRequired")}
+                </p>
+                <div className="tw-flex tw-flex-wrap tw-gap-3">
+                  <DocumentationButton
+                    secondary
+                    onClick={() => onNavigateSection("conversation")}
+                  >
+                    {msg("museum.chapter.conversation")}
+                  </DocumentationButton>
+                  <DocumentationButton
+                    secondary
+                    onClick={() => onNavigateSection("rights")}
+                  >
+                    {msg("museum.chapter.rights")}
+                  </DocumentationButton>
+                </div>
+              </div>
             )}
             {missing.length > 0 && (
               <div>

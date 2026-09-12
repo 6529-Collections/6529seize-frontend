@@ -14,6 +14,9 @@ import { fetchDropsV2ByIds } from "@/services/api/wave-drops-v2-api";
 import { documentationQueryKey } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
 import { useDocumentationActor } from "./DocumentationAuthGate";
 import { useDocumentationMessages } from "./DocumentationControls";
+import DocumentationMediaPlayer, {
+  canPlayDocumentationAsset,
+} from "./DocumentationMediaPlayer";
 
 interface Props {
   readonly context: ApiArtworkDocumentationContext;
@@ -92,6 +95,7 @@ export function ArtworkImage({
 
 function CanonicalPreview({
   context,
+  publication,
   assetId,
   compact = false,
   title,
@@ -109,12 +113,29 @@ function CanonicalPreview({
     ),
     queryFn: ({ signal }) =>
       downloadDocumentationAsset(context.id, assetId, "preview", signal),
-    enabled: asset?.state === "ready",
+    enabled:
+      asset?.state === "ready" &&
+      asset.has_preview !== false &&
+      !canPlayDocumentationAsset(asset),
     retry: false,
     gcTime: 0,
     staleTime: 0,
     meta: { persist: false },
   });
+  if (asset && canPlayDocumentationAsset(asset))
+    return (
+      <figure className="tw-m-0 tw-min-w-0">
+        <DocumentationMediaPlayer
+          key={asset.id}
+          context={context}
+          asset={asset}
+          publication={publication}
+        />
+        <figcaption className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+          {title} · {msg("editorial.finalArtwork")}
+        </figcaption>
+      </figure>
+    );
   return (
     <figure className="tw-m-0 tw-min-w-0">
       <div className="tw-flex tw-min-h-32 tw-items-center tw-justify-center tw-bg-iron-950 tw-p-5 sm:tw-p-8">
@@ -241,6 +262,7 @@ export default function DocumentationArtworkPreview({
     return (
       <CanonicalPreview
         context={context}
+        publication={publication}
         assetId={assetId}
         title={title}
         compact={compact}

@@ -1,122 +1,61 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import DocumentationWorkedExample from "@/components/artwork-documentation/DocumentationWorkedExample";
 import DocumentationModules from "@/components/artwork-documentation/DocumentationModules";
-import DocumentationNarrativeStarter from "@/components/artwork-documentation/DocumentationNarrativeStarter";
+import { DocumentationExampleExcerpt } from "@/components/artwork-documentation/DocumentationFieldExample";
 import { documentationFixture } from "@/__tests__/fixtures/artwork-documentation";
 import {
-  MODULE_FIELDS,
-  MODULE_IDS,
-  SECTIONS,
+  AN_ALTERATION_EXAMPLE_PATH,
+  anAlterationExcerpt,
+} from "@/lib/artwork-documentation/an-alteration";
+import {
+  parseSection,
+  type DocumentationSection,
 } from "@/lib/artwork-documentation/registry";
-import { documentationExampleFields } from "@/lib/artwork-documentation/examples";
-import { ARTWORK_DOCUMENTATION_EXAMPLE_MESSAGES } from "@/i18n/messages/artwork-documentation-examples";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
 
-function completeProfile() {
-  const context = documentationFixture();
-  context.profile.interview_instrument = {
-    id: "artwork-documentation-artist-interview-v1",
-    version: 1,
-    language: "en",
-    prompts: [{ id: "q5", text: "What does a gate mean in this image?" }],
-  };
-  context.profile.modules = context.profile.modules.map((module) => ({
-    ...module,
-    fields: MODULE_FIELDS[module.id].map((field) => ({
-      ...context.profile.modules[1]!.fields[0]!,
-      id: field.id,
-    })),
-  }));
-  return context;
-}
-
-describe("worked artwork documentation examples", () => {
-  it("covers all eight modules and every publication field, with a separate review example", () => {
-    const context = completeProfile();
-    const excluded = new Set([
-      "identity.private_contact",
-      "files.source_availability",
-      "rights.people_depicted",
-      "rights.consent_status",
-      "rights.consent_asset_ids",
-      "rights.identifiability_note",
-      "rights.sensitive_context_note",
-    ]);
-    const fields = SECTIONS.flatMap((section) =>
-      documentationExampleFields(context.profile, section)
+describe("precise guidance from the supplied artist record", () => {
+  it("keeps an untrusted chapter value out of markup and the sample destination", () => {
+    const hostile = '\"><img src=x onerror=alert(1)>';
+    expect(parseSection(hostile)).toBe("artwork");
+    const { container } = render(
+      <DocumentationWorkedExample
+        context={documentationFixture()}
+        edits={[]}
+        section={hostile as DocumentationSection}
+      />
     );
-    expect(new Set(fields.map((entry) => entry.moduleId))).toEqual(
-      new Set(MODULE_IDS)
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "id",
+      `documentation-sample-${hostile}`
     );
-    expect(
-      fields.map(({ moduleId, field }) => `${moduleId}.${field.id}`).sort()
-    ).toEqual(
-      MODULE_IDS.flatMap((moduleId) =>
-        MODULE_FIELDS[moduleId].map((field) => `${moduleId}.${field.id}`)
-      )
-        .filter((path) => !excluded.has(path))
-        .sort()
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      AN_ALTERATION_EXAMPLE_PATH
     );
-    expect(
-      ARTWORK_DOCUMENTATION_EXAMPLE_MESSAGES[
-        "artworkDocumentation.examples.review"
-      ]
-    ).toContain("before finalizing");
+    expect(container.querySelector("img,script,iframe")).toBeNull();
   });
 
-  it("keeps an empty section's fictional example closed until deliberately opened without adding answers", async () => {
+  it("opens the complete illustrated sample separately and never puts the whole record in a form disclosure", () => {
     const context = documentationFixture();
-    context.modules["artwork"]!.answers = {};
-    const before = JSON.stringify(context);
-    render(
+    const original = JSON.stringify(context);
+    const { container } = render(
       <DocumentationWorkedExample
         context={context}
         edits={[]}
         section="artwork"
       />
     );
-    const summary = screen
-      .getByText("Read an example record")
-      .closest("summary")!;
-    expect(summary.closest("details")).not.toHaveAttribute("open");
-    fireEvent.click(summary);
-    await waitFor(() =>
-      expect(summary.closest("details")).toHaveAttribute("open")
-    );
-    expect(screen.getByText("The Space Between")).toBeInTheDocument();
-    expect(JSON.stringify(context)).toBe(before);
-  });
-
-  it("keeps the example discoverable after a section has an answer, and filters unsupported fields", () => {
-    render(
-      <DocumentationWorkedExample
-        context={documentationFixture()}
-        edits={[]}
-        section="artwork"
-      />
-    );
     expect(
-      screen.getByText("Read an example record").closest("details")
-    ).not.toHaveAttribute("open");
-    expect(
-      screen.queryByText("12 May 2025; exact day.")
-    ).not.toBeInTheDocument();
+      screen.getByRole("link", { name: "Read the complete example" })
+    ).toHaveAttribute("href", AN_ALTERATION_EXAMPLE_PATH);
+    expect(screen.getByRole("link")).toHaveAttribute("target", "_blank");
+    expect(container.querySelector("details")).toBeNull();
+    expect(JSON.stringify(context)).toBe(original);
   });
-
-  it("does not attach known interview answers to an unknown pinned instrument", () => {
-    const context = completeProfile();
-    context.profile.interview_instrument.id = "another-instrument";
-    expect(
-      documentationExampleFields(context.profile, "preservation").some(
-        ({ field }) => field.id === "q5"
-      )
-    ).toBe(false);
-  });
-
-  it("does not offer a factual title or location template for insertion", () => {
+  it("shows the relevant original excerpt without inserting fictional facts", () => {
     const onChange = jest.fn();
     render(
       <DocumentationModules
@@ -126,152 +65,37 @@ describe("worked artwork documentation examples", () => {
         onChange={onChange}
       />
     );
-    expect(
-      screen.queryByRole("button", { name: "Adapt this writing structure" })
-    ).not.toBeInTheDocument();
+    const details = screen
+      .getAllByText("See an example for this answer")[0]!
+      .closest("details")!;
+    expect(details).not.toHaveAttribute("open");
+    fireEvent.click(details.querySelector("summary")!);
+    const expected = anAlterationExcerpt("artwork", "title");
+    expect(expected).toBeTruthy();
+    expect(details.querySelector("blockquote")).not.toBeNull();
+    expect(details.querySelector("blockquote")?.textContent).toBe(expected);
+    expect(details.querySelector("button")).toBeNull();
     expect(onChange).not.toHaveBeenCalled();
   });
-
-  it("keeps writing structures unsaved until the artist replaces prompts and explicitly applies a schema-valid answer", () => {
-    const onApply = jest.fn();
-    render(
-      <DocumentationNarrativeStarter
-        id="caption"
-        label="Caption"
-        structure="I made [[your own account]]."
-        editor={{ kind: "localized", max: 3000 }}
-        disabled={false}
-        hasAnswer={false}
-        validate={() => true}
-        onApply={onApply}
+  it("distinguishes a specialist example from AN ALTERATION and leaves unrelated questions alone", () => {
+    const { container, rerender } = render(
+      <DocumentationExampleExcerpt moduleId="process" fieldId="video" />
+    );
+    fireEvent.click(screen.getByText("See an example for this answer"));
+    expect(screen.getByText(/Illustrative example:/)).toHaveTextContent(
+      /invented details/
+    );
+    expect(
+      container.querySelector("blockquote")?.textContent?.length
+    ).toBeGreaterThan(30);
+    expect(screen.queryByText(/From AN ALTERATION/)).toBeNull();
+    expect(container.querySelector("a,button")).toBeNull();
+    rerender(
+      <DocumentationExampleExcerpt
+        moduleId="interview"
+        fieldId="unknown_custom_question"
       />
     );
-    fireEvent.click(
-      screen.getByRole("button", { name: "Adapt this writing structure" })
-    );
-    expect(onApply).not.toHaveBeenCalled();
-    expect(
-      screen.getByRole("textbox", { name: "Your answer for Caption" })
-    ).toHaveFocus();
-    expect(
-      screen.getByRole("button", { name: "Use my answer" })
-    ).toBeDisabled();
-    fireEvent.change(
-      screen.getByRole("textbox", { name: "Your answer for Caption" }),
-      { target: { value: "I photographed the trees after the rain." } }
-    );
-    expect(
-      screen.getByRole("button", { name: "Use my answer" })
-    ).toBeDisabled();
-    fireEvent.change(
-      screen.getByLabelText("Language of your answer (for example, en or es)"),
-      { target: { value: "en" } }
-    );
-    expect(onApply).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Use my answer" }));
-    expect(onApply).toHaveBeenCalledWith({
-      primary_language: "en",
-      versions: [
-        {
-          language: "en",
-          text: "I photographed the trees after the rain.",
-          authorship: "original",
-          approved_by_artist: false,
-        },
-      ],
-    });
-  });
-
-  it("does not overwrite an answer that arrives while the artist writes a starter", () => {
-    const props = {
-      id: "description",
-      label: "Description",
-      structure: "[[My account]]",
-      editor: { kind: "text" as const, multiline: true },
-      disabled: false,
-      hasAnswer: false,
-      validate: () => true,
-      onApply: jest.fn(),
-    };
-    const { rerender } = render(<DocumentationNarrativeStarter {...props} />);
-    fireEvent.click(
-      screen.getByRole("button", { name: "Adapt this writing structure" })
-    );
-    fireEvent.change(screen.getByRole("textbox"), {
-      target: { value: "My own work." },
-    });
-    rerender(<DocumentationNarrativeStarter {...props} hasAnswer />);
-    expect(screen.getByDisplayValue("My own work.")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Use my answer" })
-    ).toBeDisabled();
-    expect(props.onApply).not.toHaveBeenCalled();
-  });
-
-  it.each([
-    "I made [[a renamed prompt]].",
-    "I made [[an unfinished prompt.",
-    "I made an unfinished prompt]].",
-  ])("keeps a remaining reserved prompt unsaved: %s", (text) => {
-    const onApply = jest.fn();
-    render(
-      <DocumentationNarrativeStarter
-        id="description"
-        label="Description"
-        structure="I made [[my account]]."
-        editor={{ kind: "text", multiline: true }}
-        disabled={false}
-        hasAnswer={false}
-        validate={() => true}
-        onApply={onApply}
-      />
-    );
-    fireEvent.click(
-      screen.getByRole("button", { name: "Adapt this writing structure" })
-    );
-    fireEvent.change(screen.getByRole("textbox"), {
-      target: { value: text },
-    });
-    const apply = screen.getByRole("button", { name: "Use my answer" });
-    expect(apply).toBeDisabled();
-    fireEvent.click(apply);
-    expect(onApply).not.toHaveBeenCalled();
-    fireEvent.change(screen.getByRole("textbox"), {
-      target: { value: "I refer to the catalogue [1] in my account." },
-    });
-    expect(apply).toBeEnabled();
-    fireEvent.click(apply);
-    expect(onApply).toHaveBeenCalledWith(
-      "I refer to the catalogue [1] in my account."
-    );
-  });
-
-  it("leaves rejected or discarded working text out of the form", () => {
-    const onApply = jest.fn();
-    render(
-      <DocumentationNarrativeStarter
-        id="description"
-        label="Description"
-        structure="[[My account]]"
-        editor={{ kind: "text", multiline: true }}
-        disabled={false}
-        hasAnswer={false}
-        validate={() => false}
-        onApply={onApply}
-      />
-    );
-    fireEvent.click(
-      screen.getByRole("button", { name: "Adapt this writing structure" })
-    );
-    fireEvent.change(screen.getByRole("textbox"), {
-      target: { value: "Too long for this schema." },
-    });
-    expect(
-      screen.getByRole("button", { name: "Use my answer" })
-    ).toBeDisabled();
-    fireEvent.click(
-      screen.getByRole("button", { name: "Discard this working text" })
-    );
-    expect(onApply).not.toHaveBeenCalled();
+    expect(container).toBeEmptyDOMElement();
   });
 });
