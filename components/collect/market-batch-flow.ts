@@ -29,7 +29,7 @@ interface Inventory {
   remaining: bigint;
 }
 function ensure(value: unknown): asserts value {
-  if (!value) throw new Error("MARKET_REVIEW_MISMATCH");
+  if (!Boolean(value)) throw new Error("MARKET_REVIEW_MISMATCH");
 }
 function inventory(orders: readonly Order[], side: "offer" | "consideration") {
   const result = new Map<string, Inventory>();

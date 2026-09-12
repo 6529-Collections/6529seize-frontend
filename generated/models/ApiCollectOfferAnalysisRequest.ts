@@ -15,6 +15,9 @@ import { ApiCollectOfferAnalysisAsset } from '../models/ApiCollectOfferAnalysisA
 import { ApiCollectOfferAnalysisMethod } from '../models/ApiCollectOfferAnalysisMethod';
 import { HttpFile } from '../http/http';
 
+/**
+* Offers currently require recipient to equal the paying wallet. An external-recipient acknowledgment does not enable unsupported offer gifting.
+*/
 export class ApiCollectOfferAnalysisRequest {
     'profile_id': string;
     'wallet': string;

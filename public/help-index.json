@@ -7974,18 +7974,18 @@
         "Browse artworks on /the-memes, /6529-gradient and /nextgen/collection/pebbles. Complete my set on The Memes carries the selected season, or its full set when no season is selected; the Gradients link opens its full set and the Pebbles link opens its trait-set planner. The View collection link returns from Collecting tools to the selected collection page; on narrow screens it appears as an accessible arrow.",
         "Supported artwork cards place a priced Buy action near the artwork summary, before the longer description and Listings and Offers. The lowest supported listing is selected automatically; Other listings exposes alternatives. Deliver to shows the recipient, and Change opens the mint-style destination picker. Buy checks the selected order again before showing exact terms for wallet approval. A changed order requires another review.",
         "Make an offer is visible beside buying. List for sale appears when a confirmed wallet in the profile holds the NFT; connect that holding wallet to list it. While ownership is loading it stays visible but unavailable; a failed check offers Try again. The more-actions menu contains Review offers. Offer and listing dialogs show loading or retry states; Close or Escape returns to the opener. Closing during loading cancels that attempt and does not open a delayed review.",
-        "Lowest listings shows each NFT once at its lowest supported purchase price, including the quantity of an indivisible lot. Open the artwork image or title for its native card page, or use the plus control to add it to your purchase selection. A checkmark removes it again. The selection stays available across Lowest listings and TDH, and Review purchase lets you select all or some items. An empty result does not prove that no orders exist elsewhere. Try again retries a failed listing request.",
+        "Lowest listings shows each NFT once at its lowest supported purchase price, including the quantity of an indivisible lot. Open the artwork image or title for its native card page, or use the plus control to add it to your selection. A checkmark removes it again. The selection stays available across Lowest listings and TDH. Review purchase lets you select all or some items; Plan offers opens individual NFT prices instead. An empty result does not prove that no orders exist elsewhere. Try again retries a failed listing request.",
         "All set collecting uses the profile across its confirmed consolidated wallets. Copies per NFT is the total you want to hold of each required NFT, including copies already in your profile. Wallets identify custody, funding, signing or receipt; selecting a custody wallet does not redefine the primary collecting scope.",
         "Purchase recipients follow minting and show the profile's confirmed wallets automatically. Choose one, or use Send to a fren to search a profile or ENS name, or enter another wallet. Review the full resolved address; the paying wallet is separate from the recipient. A multiple-item review starts with one delivery address and allows a different address per NFT or an edition quantity split across addresses. Allocations must equal the purchased quantity. Delivery occurs in the purchase transaction without onward transfers. A gift outside the profile does not advance that profile’s projected completion or TDH.",
         "Pebbles is the current NextGen project. Palette, Size, Traced and Ultimate goals extend its existing Trait Sets. Ultimate can satisfy multiple trait requirements with one token.",
-        "Completion plans show missing requirements and incomplete coverage. Budget cap is optional: leave it blank to estimate the full goal, or enter a cap including estimated gas. This cap constrains the analysis and does not authorize spending. The initial scan checks one best exact OpenSea listing per artwork; it does not exhaust market depth. Select some or all proposed purchases for a shared review. These controls do not create collection-wide or trait-group offers.",
+        "Completion plans show missing requirements and incomplete coverage. Budget cap is optional: leave it blank to estimate the full goal, or enter a cap including estimated gas. This cap constrains the analysis and does not authorize spending. The initial scan checks one best exact OpenSea listing per artwork; it does not exhaust market depth. Select some or all proposed purchases for a shared review, or choose Make offers for missing NFTs to price individual offers, including required NFTs without supported listings. These are exact-NFT offers, not collection-wide or trait-group orders.",
         "Review live total checks every selected exact ETH listing before a multiple-item purchase. Supported selections use one Ethereum transaction: all selected purchases and recipient deliveries succeed together or all revert, although a revert can cost gas. The site does not silently substitute listings, drop items or split the selection into several transactions. Review the exact total, fees and gas reserve; changed or expired terms require another review. Orders confirms the purchase only after verifying all selected deliveries.",
         "Supported execution uses Ethereum mainnet, exact NFTs, explicit quantities and ETH or WETH. Fixed-price offers use WETH and receive NFTs in the signing wallet. Profile consolidation and social proxy access do not grant trading authority over another wallet.",
         "Review the total price, fees, seller net where applicable, recipient and token approval scope. New listings include configured creator support; standard offers include required provider fees; purchases and accepted offers preserve their signed fees. The 6529 platform fee is zero.",
         "Orders at /collect/orders tracks operation recovery. Potential offer exposure begins when signable terms are revealed, even if no signature or publication is confirmed. A quote freshness timer does not expire a signed order.",
         "If a wallet may have submitted a transaction but its hash was not returned, the review shows Checking the outcome and blocks another send for that operation across browsers. Copy the hash from wallet activity into Transaction hash from your wallet and select Check this transaction. The site verifies the exact transaction; this does not send a replacement. Approvals and recovery without local browser data use the same flow.",
         "If publication or broadcast is uncertain, retain the order or transaction hash and reconcile it instead of sending a duplicate purchase. Cancellation can lose a race to a fill and is effective only after chain verification. Revoking an approval or pausing new trading does not permanently cancel signed orders.",
-        "TDH opens Memes listings immediately, ranked by base TDH per full held day per ETH, without requiring a profile, budget or time horizon. A direct link can keep another collection. Each NFT appears at its best supported indexed ETH ask including signed fees; gas is checked at purchase. The displayed rate excludes seller TDH and profile or set multipliers. How TDH value works explains snapshot coverage. Project profile TDH opens the separate budget and time-horizon comparison using an official profile snapshot and changes to bonuses on existing holdings. Back to TDH listings returns to browsing.",
+        "TDH opens Memes listings immediately, ranked by base TDH per full held day per ETH, without requiring a profile, budget or time horizon. A direct link can keep another collection. Each NFT appears at its best supported indexed ETH ask including signed fees; gas is checked at purchase. The displayed rate excludes seller TDH and profile or set multipliers. How TDH value works explains snapshot coverage. Reach target TDH opens a separate profile projection: enter a future TDH target and timeframe to find a purchase plan and estimated budget. Back to TDH listings returns to browsing.",
         "A Safe can receive a gift purchase. Execution from smart contract wallets and inside the native app is unavailable until those paths are supported. Programmatic preparation still requires owner review and wallet authorization; the backend does not hold user signing keys.",
         "Saved rules freeze exact targets, funding wallet, recipient, unit and total review limits, gas reserve, expiry and action count. They prepare one ETH purchase at a time for wallet approval. Pause and expiry retain unresolved operations, and confirmed acquisitions count permanently even if the NFT is later sold or transferred. Rules do not grant unattended wallet execution authority."
       ],
@@ -8008,7 +8008,106 @@
         "components/collect/CollectDetailActions.tsx",
         "components/collect/CollectTradeSheet.tsx",
         "components/collect/useCollectCatalog.ts",
-        "components/collect/useMarketExecution.ts"
+        "components/collect/useMarketExecution.ts",
+        "components/collect/CollectOfferWorkspace.tsx",
+        "components/collect/CollectTdhWorkspace.tsx"
+      ]
+    },
+    {
+      "id": "collect.offer-planning",
+      "kind": "workflow",
+      "title": "Plan individual NFT offers from a selection",
+      "aliases": [
+        "plan offers",
+        "group offers",
+        "make offers for missing NFTs",
+        "manual price for each NFT",
+        "match best WETH offer",
+        "offer above a bid",
+        "offer below an ask",
+        "allocate an offer budget"
+      ],
+      "keywords": [
+        "Collect",
+        "offers",
+        "WETH",
+        "bids",
+        "asks",
+        "price",
+        "quantity",
+        "budget",
+        "pending",
+        "expiry"
+      ],
+      "facts": [
+        "Select NFTs from Lowest listings or TDH, then choose Plan offers. A completion plan has Make offers for missing NFTs, including required NFTs without supported listings. For a trait requirement with several alternatives, the offer plan uses the chosen artworks rather than offering on every alternative. Search the plan and select all or only the NFTs you want.",
+        "Enter each price is the default. Set WETH per NFT for every artwork, its quantity and a default expiry of 1, 7 or 30 days. Open Details & expiry to change one NFT's expiry. An edition offer's unit price is multiplied by its copies. A budget constrains allocation; it does not replace per-NFT prices. A manual edit stays pinned when recalculating until Use calculated price releases it.",
+        "Price method also offers Match observed WETH offer, Above observed WETH offer by an entered percentage, and Below observed ask by an entered percentage. These are one-time calculations using applicable observed exact-NFT orders; they do not follow later bids automatically. Native ETH asks are compared with WETH at 1:1 before wrapping costs.",
+        "Conservative allocation proposes opening prices within an Offer budget (WETH), using available reference evidence and preserving manual prices. It can leave WETH unused. Missing or stale references need a manual price or another calculation. Observed prices do not confirm maker funding, seller acceptance, fill probability or a globally optimal allocation.",
+        "Check amounts and WETH checks manual prices; Calculate prices checks other methods. WETH funding belongs to the paying wallet, not a pooled profile balance. Potential offer exposure is included in the funding check. Analysis does not publish orders or request a wallet signature.",
+        "Review offer opens one NFT's exact quantity, price, fees and expiry for wallet authorization. Quantity is fixed during review; return to the offer plan to change copies. Each NFT offer is signed separately and may fill independently; a group of offers has no all-or-revert guarantee. Offers receive NFTs in the signing wallet. The allocation's remaining cap does not permit a reviewed row to spend another NFT's allocation.",
+        "Awaiting offer status remains committed, and Check offer status reopens that same offer. Pending and published amounts remain counted against the allocation budget across selection changes and Back to collecting in the same workspace. Closing a review does not release its amount. After reload, enter a fresh budget and check funding again; authoritative potential exposure still applies. Changing profile or paying wallet starts a separate workspace.",
+        "A signed offer may fill while you are away. Uncertain publication keeps potential exposure until reconciliation. Cancellation can race a fill; only verified cancellation, expiry or fill resolves the applicable liability. Clearing the UI or revoking an approval does not permanently cancel a signed offer. Orders at /collect/orders provides recovery."
+      ],
+      "canonical_path": "/collect",
+      "link_label": "Open collecting tools",
+      "related_paths": ["/collect/orders"],
+      "tags": ["collections", "marketplace", "offers", "wallets"],
+      "source_refs": [
+        "ops/docs/media/collecting.md",
+        "components/collect/CollectOfferWorkspace.tsx",
+        "components/collect/OfferPlanPanel.tsx",
+        "components/collect/collect-offer-selection.helpers.ts",
+        "components/collect/analyze-collect-offers.ts",
+        "components/collect/collect-offer-analysis.adapter.ts",
+        "components/collect/CollectTradeController.tsx"
+      ]
+    },
+    {
+      "id": "collect.tdh-target",
+      "kind": "workflow",
+      "title": "Reach a profile TDH target within a timeframe",
+      "aliases": [
+        "reach target TDH",
+        "how much TDH can I get",
+        "budget to reach TDH",
+        "TDH in 30 days",
+        "future TDH target",
+        "additional TDH",
+        "TDH purchase plan"
+      ],
+      "keywords": [
+        "Collect",
+        "TDH",
+        "target",
+        "timeframe",
+        "baseline",
+        "projection",
+        "budget",
+        "profile",
+        "recipient",
+        "offers"
+      ],
+      "facts": [
+        "In Collecting tools, choose TDH then Reach target TDH. Enter Target TDH and a timeframe of 1, 30, 90 or 365 days, then choose The Memes, Gradients or Pebbles. Defaults are Total TDH at the end, 30 days and The Memes. Back to TDH listings returns to the immediate base TDH/day per ETH listing comparison, which needs no profile, budget or timeframe.",
+        "The target projection uses the profile's holdings across confirmed consolidated wallets and a verified official snapshot, including changes to bonuses on existing holdings. Deliver to must be a wallet in that profile; a gift outside it adds no profile TDH. Purchase funding and delivery wallets can differ.",
+        "Advanced options includes Additional TDH above my baseline, measured above the no-purchase baseline at the same future date. Maximum purchase budget (ETH) is optional: leave it blank to estimate the purchase budget for the target. An entered limit includes signed listing fees and excludes gas, which is quoted at purchase review. Analysis is not spending authorization.",
+        "Results show baseline, proposed TDH and target on the stated UTC date. No purchases needed means the baseline already meets the target. Otherwise Best purchase plan found or Closest purchase plan found shows exact NFTs, quantities, estimated subtotal and any remaining TDH gap. The bounded search does not prove a global minimum cost or that an unmet target is impossible. Projection assumptions and coverage describes the indexed asks and snapshot used.",
+        "Review purchase brings the proposed exact acquisitions into the shared purchase review. Current prices, availability, gas and funding are checked before wallet approval. Changing NFTs, quantities or delivery wallet requires a new projection before relying on its TDH result. Changing target, timeframe, profile or confirmed wallet membership invalidates the old result.",
+        "Plan offers for these artworks opens per-NFT offer prices only when the projected destination matches the paying wallet, because offers deliver to the signer. If another profile wallet was selected, choose the paying wallet and run the projection again first. Offers add TDH only when they fill; later fills leave less holding time. The purchase projection does not predict whether or when offers fill."
+      ],
+      "canonical_path": "/collect?intent=tdh&view=projection",
+      "link_label": "Reach target TDH",
+      "related_paths": ["/collect", "/collect/orders"],
+      "tags": ["collections", "TDH", "profiles", "wallets"],
+      "source_refs": [
+        "ops/docs/media/collecting.md",
+        "components/collect/CollectTdhWorkspace.tsx",
+        "components/collect/CollectTdhTargetController.tsx",
+        "components/collect/CollectTdhTargetForm.tsx",
+        "components/collect/CollectTdhTargetDelivery.tsx",
+        "components/collect/CollectTdhTargetResults.tsx",
+        "components/collect/collect-tdh-target.helpers.ts"
       ]
     }
   ]

@@ -53,6 +53,7 @@ export default function CollectGoalNavigation({
 
   return (
     <div
+      data-collect-navigation
       role="group"
       aria-label={t(locale, "collect.navigation.label")}
       className="tw-mb-5 tw-grid tw-grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)_auto] tw-gap-1 sm:tw-flex sm:tw-flex-wrap sm:tw-gap-2"

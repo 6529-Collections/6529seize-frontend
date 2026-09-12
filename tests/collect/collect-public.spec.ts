@@ -231,7 +231,7 @@ test("listing selection carries across browsing and opens one wallet-gated purch
   await page.keyboard.press("Enter");
   await expect(page.getByRole("dialog")).toHaveCount(0);
   const selection = page.getByRole("region", {
-    name: "Purchase selection",
+    name: "Selected NFTs",
     exact: true,
   });
   await expect(
@@ -332,6 +332,64 @@ test("listing selection carries across browsing and opens one wallet-gated purch
   await expect(review).toBeFocused();
   await selection.getByRole("button", { name: "Clear", exact: true }).click();
   await expect(selection).toHaveCount(0);
+  expect(mutations).toEqual([]);
+});
+
+test("group offer prices remain per NFT and survive a return to browsing", async ({
+  page,
+}, info) => {
+  const mutations = await mockCatalog(page);
+  await page.goto("/collect?collection=memes&intent=lowest", {
+    waitUntil: "domcontentloaded",
+  });
+  for (const id of [1, 2]) {
+    await page
+      .getByRole("button", {
+        name: `Add Catalog artwork ${id} to selection`,
+        exact: true,
+      })
+      .click();
+  }
+  const open = page.getByRole("button", { name: "Plan offers", exact: true });
+  await open.click();
+  await expect(
+    page.getByRole("heading", { name: "Plan offers", exact: true })
+  ).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  const first = page.getByRole("textbox", {
+    name: "WETH price per NFT for Catalog artwork 1",
+    exact: true,
+  });
+  const second = page.getByRole("textbox", {
+    name: "WETH price per NFT for Catalog artwork 2",
+    exact: true,
+  });
+  await first.fill("0.005");
+  await second.fill("0.012");
+  await expect(
+    page.getByRole("textbox", { name: "Offer budget (WETH)", exact: true })
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", {
+      name: "Review offer for Catalog artwork 1",
+      exact: true,
+    })
+  ).toBeDisabled();
+  await noHorizontalOverflow(page);
+  await page.screenshot({
+    path: info.outputPath("collect-group-offers.png"),
+    fullPage: true,
+  });
+  await page
+    .getByRole("button", { name: "Back to collecting", exact: true })
+    .click();
+  await expect(open).toBeFocused();
+  await expect(
+    page.getByRole("heading", { name: "Plan offers", exact: true })
+  ).toBeHidden();
+  await open.click();
+  await expect(first).toHaveValue("0.005");
+  await expect(second).toHaveValue("0.012");
   expect(mutations).toEqual([]);
 });
 
@@ -437,10 +495,10 @@ test("TDH opens Memes listings immediately and keeps projection as a separate ke
     "Catalog artwork 2"
   );
   await expect(
-    page.getByLabel("Projection horizon", { exact: true })
+    page.getByRole("combobox", { name: "Timeframe", exact: true })
   ).toHaveCount(0);
   const projection = page.getByRole("button", {
-    name: "Project profile TDH",
+    name: "Reach target TDH",
     exact: true,
   });
   await projection.focus();
@@ -450,6 +508,17 @@ test("TDH opens Memes listings immediately and keeps projection as a separate ke
     exact: true,
   });
   await expect(back).toBeFocused();
+  await expect(
+    page.getByRole("form", { name: "Reach target TDH", exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("combobox", { name: "Timeframe", exact: true })
+  ).toHaveValue("30");
+  await expect(page.getByLabel("Target TDH", { exact: true })).toHaveValue("");
+  await page.screenshot({
+    path: info.outputPath("collect-tdh-target.png"),
+    fullPage: true,
+  });
   await expect(
     page.getByRole("region", { name: "Lowest cost TDH", exact: true })
   ).toHaveCount(0);

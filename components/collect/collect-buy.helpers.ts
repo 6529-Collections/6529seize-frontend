@@ -18,14 +18,15 @@ function unsignedAmount(value: unknown): bigint | null {
 type PurchaseMetadata = Partial<
   Record<"purchase_quantity" | "quantity_step" | "available_quantity", unknown>
 >;
+function purchaseMetadata(value: unknown, fallback: string): unknown {
+  if (value === undefined) return fallback;
+  return value;
+}
 export function collectOrderPurchaseQuantity(
   order: ApiMarketTradeOrder
 ): string | null {
   const metadata: ApiMarketTradeOrder & PurchaseMetadata = order;
-  const quantity =
-    metadata.purchase_quantity === undefined
-      ? order.quantity
-      : metadata.purchase_quantity;
+  const quantity = purchaseMetadata(metadata.purchase_quantity, order.quantity);
   return typeof quantity === "string" &&
     collectBuyAmount(order, quantity) !== null
     ? quantity
@@ -36,9 +37,7 @@ export function collectOrderAvailableQuantity(
 ): string | null {
   const metadata: ApiMarketTradeOrder & PurchaseMetadata = order;
   const value = unsignedAmount(
-    metadata.available_quantity === undefined
-      ? order.quantity
-      : metadata.available_quantity
+    purchaseMetadata(metadata.available_quantity, order.quantity)
   );
   return value !== null && value > 0n ? value.toString() : null;
 }
@@ -47,9 +46,7 @@ export function collectOrderQuantityStep(
 ): string | null {
   const metadata: ApiMarketTradeOrder & PurchaseMetadata = order;
   const value = unsignedAmount(
-    metadata.quantity_step === undefined
-      ? order.quantity
-      : metadata.quantity_step
+    purchaseMetadata(metadata.quantity_step, order.quantity)
   );
   return value !== null && value > 0n ? value.toString() : null;
 }

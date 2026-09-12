@@ -111,7 +111,7 @@ jest.mock("@/components/collect/CollectGoalsController", () => ({
   __esModule: true,
   default: () => null,
 }));
-jest.mock("@/components/collect/CollectTdhController", () => ({
+jest.mock("@/components/collect/CollectTdhTargetController", () => ({
   __esModule: true,
   default: () => null,
 }));

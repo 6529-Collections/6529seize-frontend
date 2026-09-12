@@ -9,8 +9,6 @@ import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
 import type { ApiCollectPlanRequest } from "@/generated/models/ApiCollectPlanRequest";
 import type { ApiCollectTdhRequest } from "@/generated/models/ApiCollectTdhRequest";
 import type { ApiCollectTdhProjection } from "@/generated/models/ApiCollectTdhProjection";
-import type { ApiCollectTdhRankingRequest } from "@/generated/models/ApiCollectTdhRankingRequest";
-import type { ApiCollectTdhRanking } from "@/generated/models/ApiCollectTdhRanking";
 import type { ApiCollectTdhListings } from "@/generated/models/ApiCollectTdhListings";
 import { commonApiFetch, commonApiPost } from "./common-api";
 
@@ -84,12 +82,6 @@ export const advanceCollectPlan = (id: string, signal?: AbortSignal) =>
     endpoint: `collect/plans/${encodeURIComponent(id)}/advance`,
     body: {},
     signal,
-    errorMode: "structured",
-  });
-export const compareCollectTdh = (body: ApiCollectTdhRankingRequest) =>
-  commonApiPost<ApiCollectTdhRankingRequest, ApiCollectTdhRanking>({
-    endpoint: "collect/tdh-ranking",
-    body,
     errorMode: "structured",
   });
 export const projectCollectTdh = (body: ApiCollectTdhRequest) =>

@@ -4,7 +4,10 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
-import type { ApiMarketBatchOperation } from "@/generated/models/ApiMarketBatchOperation";
+import {
+  ApiMarketBatchOperationStateEnum,
+  type ApiMarketBatchOperation,
+} from "@/generated/models/ApiMarketBatchOperation";
 import type { ApiMarketBatchPrepareRequest } from "@/generated/models/ApiMarketBatchPrepareRequest";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -107,6 +110,7 @@ function ScopedBatchController({
   const [now, setNow] = useState(() => Date.now());
   const mounted = useRef(false),
     pending = useRef(false);
+  const scopeIsActive = () => mounted.current;
   const formContainer = useRef<HTMLDivElement>(null);
   const priorPrepare = useRef<{
     request: ApiMarketBatchPrepareRequest;
@@ -151,12 +155,13 @@ function ScopedBatchController({
     retry: false,
   });
   const activeOperation = operation ?? resume.data?.operation ?? null;
+  const activeOperationId = activeOperation?.id;
   const expected = preparedRequest ?? resume.data?.request ?? null;
   useEffect(() => {
-    if (!activeOperation) return;
+    if (!activeOperationId) return;
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
-  }, [activeOperation?.id]);
+  }, [activeOperationId]);
   const polling = useQuery({
     queryKey: [
       QueryKey.MARKET_OPERATION,
@@ -215,7 +220,9 @@ function ScopedBatchController({
     address: connection.address,
     profile: auth.connectedProfile,
     operation: displayed,
-    hasExpected: expected !== null || displayed?.state !== "REVIEW",
+    hasExpected:
+      expected !== null ||
+      displayed?.state !== ApiMarketBatchOperationStateEnum.Review,
     cancelTarget: undefined,
   });
   const checkingResume =
@@ -223,13 +230,12 @@ function ScopedBatchController({
     operation === null &&
     items.length > 0 &&
     resume.isFetching;
-  const disabledReason = reason
-    ? t(locale, reason)
-    : resume.isError
-      ? t(locale, "collect.trade.checkFailed")
-      : checkingResume
-        ? t(locale, "collect.trade.stage.reconciling")
-        : undefined;
+  let disabledReason: string | undefined;
+  if (reason) disabledReason = t(locale, reason);
+  else if (resume.isError)
+    disabledReason = t(locale, "collect.trade.checkFailed");
+  else if (checkingResume)
+    disabledReason = t(locale, "collect.trade.stage.reconciling");
   const prepare = async (draft: CollectBatchDraft) => {
     if (
       pending.current ||
@@ -255,7 +261,7 @@ function ScopedBatchController({
             request.items,
             { includeReview: false }
           );
-          if (!mounted.current) return;
+          if (!scopeIsActive()) return;
           if (unresolved) {
             setExpected(unresolved.request);
             receive(unresolved.operation);
@@ -279,7 +285,7 @@ function ScopedBatchController({
           );
           if (!saveMarketBatch(request.profile_id, result.id, { request }))
             throw new Error("MARKET_RECOVERY_STORAGE_UNAVAILABLE");
-          if (!mounted.current) return;
+          if (!scopeIsActive()) return;
           setExpected(request);
           receive(result);
           priorPrepare.current = null;
@@ -323,7 +329,15 @@ function ScopedBatchController({
   const unresolved = displayed
     ? batchSendAttempt(displayed) !== undefined
     : false;
-  const expired = displayed?.state === "REVIEW" && displayed.expires_at <= now;
+  const expired =
+    displayed?.state === ApiMarketBatchOperationStateEnum.Review &&
+    displayed.expires_at <= now;
+  let operationDisabledReason: string | undefined;
+  if (unresolved)
+    operationDisabledReason = t(locale, "collect.trade.broadcastUnknown");
+  else if (expired)
+    operationDisabledReason = t(locale, "collect.trade.expired");
+  const reviewDisabledReason = disabledReason ?? operationDisabledReason;
   const content = (
     <div className="tw-space-y-5 tw-p-5 sm:tw-p-6">
       {(reason === "collect.trade.connectSigner" ||
@@ -369,21 +383,17 @@ function ScopedBatchController({
           operation={displayed}
           items={items}
           busy={preparing || execution.busy}
-          disabledReason={
-            disabledReason ??
-            (unresolved
-              ? t(locale, "collect.trade.broadcastUnknown")
-              : expired
-                ? t(locale, "collect.trade.expired")
-                : undefined)
-          }
+          disabledReason={reviewDisabledReason}
           message={error ?? execution.message}
           onConfirm={async () => {
             if (expected && !disabledReason && !unresolved && !expired)
               await execution.confirm(displayed, expected);
           }}
           onEdit={() => {
-            if (!unresolved && displayed.state === "REVIEW") {
+            if (
+              !unresolved &&
+              displayed.state === ApiMarketBatchOperationStateEnum.Review
+            ) {
               setOperation(null);
               setEditedOperationId(displayed.id);
               setExpected(null);
@@ -398,17 +408,20 @@ function ScopedBatchController({
           onClose={onClose}
         />
       )}
-      {displayed && expired && displayed.state === "REVIEW" && !unresolved && (
-        <Button
-          variant="secondary"
-          disabled={preparing || execution.busy || !expected}
-          onClick={() => {
-            void refresh();
-          }}
-        >
-          {t(locale, "collect.retry")}
-        </Button>
-      )}
+      {displayed &&
+        expired &&
+        displayed.state === ApiMarketBatchOperationStateEnum.Review &&
+        !unresolved && (
+          <Button
+            variant="secondary"
+            disabled={preparing || execution.busy || !expected}
+            onClick={() => {
+              void refresh();
+            }}
+          >
+            {t(locale, "collect.retry")}
+          </Button>
+        )}
       {displayed && unresolved && (
         <CollectTransactionRecovery
           disabled={execution.busy}

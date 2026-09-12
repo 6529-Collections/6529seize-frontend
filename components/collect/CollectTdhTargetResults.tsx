@@ -30,11 +30,12 @@ export default function CollectTdhTargetResults({
     plan.status === ApiCollectTdhTargetPlanStatusEnum.NoPurchaseNeeded;
   const met =
     plan.status === ApiCollectTdhTargetPlanStatusEnum.TargetMetBestFound;
-  const title = noPurchase
-    ? "collect.tdhTarget.noPurchase"
-    : met
-      ? "collect.tdhTarget.bestFound"
-      : "collect.tdhTarget.partial";
+  let title:
+    | "collect.tdhTarget.noPurchase"
+    | "collect.tdhTarget.bestFound"
+    | "collect.tdhTarget.partial" = "collect.tdhTarget.partial";
+  if (noPurchase) title = "collect.tdhTarget.noPurchase";
+  else if (met) title = "collect.tdhTarget.bestFound";
   const eth = (value: string) =>
     `${formatDecimalString(locale, formatEther(BigInt(value)))} ETH`;
   const summary = [

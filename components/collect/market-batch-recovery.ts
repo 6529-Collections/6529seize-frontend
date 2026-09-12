@@ -21,13 +21,11 @@ export function batchNeedsPolling(operation: ApiMarketBatchOperation): boolean {
     ["PREPARING", "SUBMITTED", "MINED", "UNKNOWN"].includes(operation.state)
   );
 }
-/** Reconcile journals; this path never requests a wallet or resends a transaction. */
-export async function fetchRecoverableMarketBatch(
+function validateRecoveryIdentity(
+  operation: ApiMarketBatchOperation,
   id: string,
-  profile: string,
-  signal?: AbortSignal
+  profile: string
 ) {
-  const operation = await fetchMarketBatch(id, signal);
   if (operation.profile_id !== profile)
     throw new Error("MARKET_PROFILE_CHANGED");
   const original = readMarketBatch(profile, id);
@@ -37,6 +35,15 @@ export async function fetchRecoverableMarketBatch(
       operation.wallet.toLowerCase() !== original.request.wallet.toLowerCase())
   )
     throw new Error("MARKET_REVIEW_MISMATCH");
+}
+/** Reconcile journals; this path never requests a wallet or resends a transaction. */
+export async function fetchRecoverableMarketBatch(
+  id: string,
+  profile: string,
+  signal?: AbortSignal
+) {
+  const operation = await fetchMarketBatch(id, signal);
+  validateRecoveryIdentity(operation, id, profile);
   clearResolvedBatchSend(operation);
   if (
     !batchNeedsPolling(operation) &&

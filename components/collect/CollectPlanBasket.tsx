@@ -10,7 +10,7 @@ import { formatDecimalString, formatNumber } from "@/i18n/format";
 import { isAddress, zeroAddress } from "viem";
 import { projectCollectTdh } from "@/services/api/collect-api";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import CollectAssetReference from "./CollectAssetReference";
 import CollectBatchController from "./CollectBatchController";
 import type { CollectSelectedListing } from "./collect-selection.helpers";
@@ -49,11 +49,11 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
   );
   const [review, setReview] = useState<Review>({ status: "idle" });
   const pending = useRef<AbortController | null>(null);
-  const reviewFocus = useRef<HTMLDivElement>(null);
+  const focusReview = useCallback(
+    (node: HTMLDivElement | null) => node?.focus(),
+    []
+  );
   useEffect(() => () => pending.current?.abort(), []);
-  useEffect(() => {
-    if (review.status === "ready") reviewFocus.current?.focus();
-  }, [review.status]);
   const recipient = plan.result.recipient;
   const validRecipient = Boolean(
     recipient && isAddress(recipient) && recipient.toLowerCase() !== zeroAddress
@@ -62,6 +62,12 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
     selected.has(leg.candidate_id)
   );
   const total = collectPlanSelectionCost(chosen);
+  const priceLabel =
+    total === null
+      ? t(locale, "collect.plan.priceUnavailable")
+      : t(locale, "collect.plan.selectionEstimate", {
+          price: marketAmount(total, MARKET_ZERO),
+        });
   const all = chosen.length === plan.result.legs.length && chosen.length > 0;
   const overLimit = chosen.length > MARKET_BATCH_LIMITS.orders;
   const loading = review.status === "loading";
@@ -74,6 +80,8 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
   const scenarioMatchesSelection =
     JSON.stringify(scenario.variables?.acquisitions) ===
     JSON.stringify(acquisitions);
+  const recipientProps = recipient ? { initialRecipient: recipient } : {};
+  const settledProps = onSettled ? { onSettled } : {};
   const close = () => {
     pending.current?.abort();
     onClose();
@@ -123,7 +131,7 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
     >
       {review.status === "ready" ? (
         <div
-          ref={reviewFocus}
+          ref={focusReview}
           tabIndex={-1}
           role="region"
           aria-label={t(locale, "collect.plan.basket")}
@@ -131,10 +139,10 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
         >
           <CollectBatchController
             items={review.items}
-            {...(recipient ? { initialRecipient: recipient } : {})}
+            {...recipientProps}
             presentation="contents"
             onClose={close}
-            {...(onSettled ? { onSettled } : {})}
+            {...settledProps}
           />
         </div>
       ) : (
@@ -150,11 +158,7 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
               {t(locale, "collect.plan.batchDescription")}
             </p>
             <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-200">
-              {total === null
-                ? t(locale, "collect.plan.priceUnavailable")
-                : t(locale, "collect.plan.selectionEstimate", {
-                    price: marketAmount(total, MARKET_ZERO),
-                  })}
+              {priceLabel}
             </p>
           </div>
           <dl className="tw-m-0 tw-text-sm">
@@ -200,6 +204,10 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
           <ul className="tw-m-0 tw-list-none tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-p-0">
             {plan.result.legs.map((leg, index) => {
               const cost = collectPlanLegCost(leg);
+              const costLabel =
+                cost === null
+                  ? t(locale, "collect.plan.priceUnavailable")
+                  : marketAmount(cost, MARKET_ZERO);
               return (
                 <li
                   key={leg.candidate_id}
@@ -227,9 +235,7 @@ function PlanBasket({ plan, onClose, onSettled }: Props) {
                       />
                     </label>
                     <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-                      {cost === null
-                        ? t(locale, "collect.plan.priceUnavailable")
-                        : marketAmount(cost, MARKET_ZERO)}
+                      {costLabel}
                     </p>
                   </div>
                 </li>

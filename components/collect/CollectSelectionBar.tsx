@@ -14,10 +14,12 @@ export default function CollectSelectionBar({
   items,
   onReview,
   onClear,
+  onPlanOffers,
 }: {
   readonly items: readonly CollectSelectedListing[];
   readonly onReview: () => void;
   readonly onClear: () => void;
+  readonly onPlanOffers?: (() => void) | undefined;
 }) {
   const locale = useBrowserLocale();
   if (items.length === 0) return null;
@@ -43,6 +45,11 @@ export default function CollectSelectionBar({
         <Button variant="secondary" size="sm" onClick={onClear}>
           {t(locale, "collect.selection.clear")}
         </Button>
+        {onPlanOffers && (
+          <Button variant="secondary" size="sm" onClick={onPlanOffers}>
+            {t(locale, "collect.offerWorkspace.plan")}
+          </Button>
+        )}
         <Button
           variant="action"
           size="sm"

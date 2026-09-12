@@ -43,6 +43,9 @@ interface CollectPageViewProps {
   readonly profile: CollectProfileView | null;
   readonly plan: CollectPlanView | null;
   readonly goalContent?: ReactNode;
+  readonly workspaceContent?: ReactNode;
+  readonly workspaceActive?: boolean;
+  readonly showCollections?: boolean;
   readonly showListings?: boolean;
   readonly selectionFor?:
     | ((id: string) => CollectArtworkSelection | undefined)
@@ -55,6 +58,7 @@ interface CollectPageViewProps {
   readonly onLoadMore: () => void;
   readonly onTrade: (artworkId: string, action: CollectTradeAction) => void;
   readonly onReviewPlan: (planId: string, revision: string) => void;
+  readonly onPlanOffers?: (() => void) | undefined;
 }
 
 function Listings({
@@ -144,6 +148,12 @@ export default function CollectPageView(props: CollectPageViewProps) {
   const showListings =
     props.showListings ?? (props.intent === "lowest" || props.intent === "tdh");
   const [planOpen, setPlanOpen] = useState(false);
+  const planOffers = props.onPlanOffers
+    ? () => {
+        setPlanOpen(false);
+        props.onPlanOffers?.();
+      }
+    : undefined;
   let contentClass = showListings ? "tw-max-w-[1080px]" : "tw-max-w-3xl";
   if (props.plan)
     contentClass =
@@ -194,100 +204,109 @@ export default function CollectPageView(props: CollectPageViewProps) {
         locale={locale}
         onIntentChange={props.onIntentChange}
       />
-      {(props.intent === "lowest" || props.intent === "tdh") && (
-        <div
-          role="group"
-          aria-label={t(locale, "collect.collections")}
-          className="tw-mb-6 tw-flex tw-flex-wrap tw-gap-2"
-        >
-          {COLLECTIONS.map(({ id }) => (
-            <Button
-              key={id}
-              variant={props.collection === id ? "primary" : "tertiary"}
-              size="sm"
-              aria-pressed={props.collection === id}
-              onClick={() => props.onCollectionChange(id)}
-              className="tw-min-h-11"
-            >
-              {t(locale, `collect.collection.${id}`)}
-            </Button>
-          ))}
-        </div>
-      )}
-      <div className={contentClass}>
-        <div className="tw-min-w-0">
-          {props.goalContent !== undefined && props.goalContent !== null && (
-            <div className="tw-mb-6">{props.goalContent}</div>
-          )}
-          {showListings && (
-            <section
-              aria-label={t(
-                locale,
-                props.intent === "tdh"
-                  ? "collect.intent.tdh"
-                  : "collect.navigation.lowest"
-              )}
-            >
-              <Listings
-                catalog={props.catalog}
+      {!props.workspaceActive &&
+        props.showCollections !== false &&
+        (props.intent === "lowest" || props.intent === "tdh") && (
+          <div
+            role="group"
+            aria-label={t(locale, "collect.collections")}
+            className="tw-mb-6 tw-flex tw-flex-wrap tw-gap-2"
+          >
+            {COLLECTIONS.map(({ id }) => (
+              <Button
+                key={id}
+                variant={props.collection === id ? "primary" : "tertiary"}
+                size="sm"
+                aria-pressed={props.collection === id}
+                onClick={() => props.onCollectionChange(id)}
+                className="tw-min-h-11"
+              >
+                {t(locale, `collect.collection.${id}`)}
+              </Button>
+            ))}
+          </div>
+        )}
+      <div hidden={!props.workspaceActive} className="tw-max-w-4xl">
+        {props.workspaceContent}
+      </div>
+      <div hidden={props.workspaceActive}>
+        <div className={contentClass}>
+          <div className="tw-min-w-0">
+            {props.goalContent !== undefined && props.goalContent !== null && (
+              <div className="tw-mb-6">{props.goalContent}</div>
+            )}
+            {showListings && (
+              <section
+                aria-label={t(
+                  locale,
+                  props.intent === "tdh"
+                    ? "collect.intent.tdh"
+                    : "collect.navigation.lowest"
+                )}
+              >
+                <Listings
+                  catalog={props.catalog}
+                  locale={locale}
+                  onRetry={props.onRetry}
+                  onLoadMore={props.onLoadMore}
+                  onTrade={props.onTrade}
+                  selectionFor={props.selectionFor}
+                />
+              </section>
+            )}
+          </div>
+          {props.plan && (
+            <aside className="tw-sticky tw-top-5 tw-hidden xl:tw-block">
+              <CollectPlanPanel
+                plan={props.plan}
                 locale={locale}
-                onRetry={props.onRetry}
-                onLoadMore={props.onLoadMore}
-                onTrade={props.onTrade}
-                selectionFor={props.selectionFor}
+                onReview={props.onReviewPlan}
+                onPlanOffers={planOffers}
               />
-            </section>
+            </aside>
           )}
         </div>
-        {props.plan && (
-          <aside className="tw-sticky tw-top-5 tw-hidden xl:tw-block">
-            <CollectPlanPanel
-              plan={props.plan}
-              locale={locale}
-              onReview={props.onReviewPlan}
-            />
-          </aside>
+        {props.selectionSummary}
+        {props.plan && !Boolean(props.selectionSummary) && (
+          <>
+            <div className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-40 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/95 tw-px-4 tw-pb-[calc(env(safe-area-inset-bottom)+0.75rem)] tw-pt-3 xl:tw-hidden">
+              <div className="tw-mx-auto tw-flex tw-max-w-3xl tw-items-center tw-justify-between tw-gap-4">
+                <div className="tw-min-w-0">
+                  <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+                    {props.plan.coverageLabel}
+                  </p>
+                  <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-semibold tw-tabular-nums">
+                    {props.plan.totalLabel ??
+                      t(locale, "collect.plan.priceUnavailable")}
+                  </p>
+                </div>
+                <Button
+                  variant="action"
+                  size="lg"
+                  onClick={() => setPlanOpen(true)}
+                >
+                  {t(locale, "collect.plan.open")}
+                </Button>
+              </div>
+            </div>
+            <MobileWrapperDialog
+              title={t(locale, "collect.plan.title")}
+              isOpen={planOpen}
+              onClose={() => setPlanOpen(false)}
+              tabletModal
+              hideOnDesktopHover={false}
+              enableDragToClose={false}
+            >
+              <CollectPlanPanel
+                plan={props.plan}
+                locale={locale}
+                onReview={props.onReviewPlan}
+                onPlanOffers={planOffers}
+              />
+            </MobileWrapperDialog>
+          </>
         )}
       </div>
-      {props.selectionSummary}
-      {props.plan && !props.selectionSummary && (
-        <>
-          <div className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-40 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/95 tw-px-4 tw-pb-[calc(env(safe-area-inset-bottom)+0.75rem)] tw-pt-3 xl:tw-hidden">
-            <div className="tw-mx-auto tw-flex tw-max-w-3xl tw-items-center tw-justify-between tw-gap-4">
-              <div className="tw-min-w-0">
-                <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-                  {props.plan.coverageLabel}
-                </p>
-                <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-semibold tw-tabular-nums">
-                  {props.plan.totalLabel ??
-                    t(locale, "collect.plan.priceUnavailable")}
-                </p>
-              </div>
-              <Button
-                variant="action"
-                size="lg"
-                onClick={() => setPlanOpen(true)}
-              >
-                {t(locale, "collect.plan.open")}
-              </Button>
-            </div>
-          </div>
-          <MobileWrapperDialog
-            title={t(locale, "collect.plan.title")}
-            isOpen={planOpen}
-            onClose={() => setPlanOpen(false)}
-            tabletModal
-            hideOnDesktopHover={false}
-            enableDragToClose={false}
-          >
-            <CollectPlanPanel
-              plan={props.plan}
-              locale={locale}
-              onReview={props.onReviewPlan}
-            />
-          </MobileWrapperDialog>
-        </>
-      )}
     </div>
   );
 }

@@ -52,7 +52,7 @@ export function collectTdhTargetRequest(
   const target = parseCollectTdhTarget(draft.targetTdh);
   const budget = parseCollectTdhTargetBudget(draft.budgetEth);
   const horizon = Object.values(ApiCollectTdhTargetRequestHorizonDaysEnum).find(
-    (value) => typeof value === "number" && value === draft.horizonDays
+    (value) => typeof value === "number" && Number(value) === draft.horizonDays
   );
   const mode = Object.values(ApiCollectTdhTargetRequestTargetModeEnum).find(
     (value) =>
@@ -66,7 +66,7 @@ export function collectTdhTargetRequest(
     target === null ||
     budget === null ||
     typeof horizon !== "number" ||
-    !mode ||
+    mode === undefined ||
     !isCollectProfileWallet(profile, recipient)
   )
     return reject();
@@ -104,7 +104,7 @@ function validateRequest(
     profile.id !== expected.profile_id ||
     projection.account.profile_id !== profile.id ||
     sorted(projection.account.wallets) !== sorted(wallets) ||
-    projection.horizon_days !== expected.horizon_days ||
+    projection.horizon_days !== expected.horizon_days.valueOf() ||
     !isCollectProfileWallet(profile, expected.recipient)
   )
     return reject();
@@ -137,8 +137,7 @@ function validateItem(
 ) {
   const identity = collectAssetIdentity(item.asset.asset_key);
   if (
-    !identity ||
-    identity.family !== item.asset.family ||
+    identity?.family !== item.asset.family ||
     identity.tokenId !== item.asset.token_id ||
     item.asset.chain_id !== 1 ||
     item.asset.asset_key !==

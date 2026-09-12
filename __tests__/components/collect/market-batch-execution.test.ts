@@ -120,6 +120,56 @@ it("refreshes and simulates the complete exact transaction before one journaled 
   expect(send).toHaveBeenCalledTimes(1);
   expect(submit).toHaveBeenCalledTimes(1);
 });
+it.each(["execution_policy", "currency"] as const)(
+  "rejects array-valued capability %s before preparing a wallet request",
+  async (field) => {
+    const f = setup();
+    capability.mockResolvedValue(
+      Object.assign({}, enabledCapability, {
+        [field]: [enabledCapability[field]],
+      })
+    );
+    await expect(confirmMarketBatch(f.options)).rejects.toThrow(
+      "MARKET_ACTION_DISABLED"
+    );
+    expect(refresh).not.toHaveBeenCalled();
+    expect(f.client.call).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+    expect(f.wallet.sendTransaction).not.toHaveBeenCalled();
+    expect(submit).not.toHaveBeenCalled();
+  }
+);
+it.each(["kind", "execution_policy", "purpose"] as const)(
+  "rejects array-valued operation %s before the send journal or wallet",
+  async (field) => {
+    const f = setup();
+    if (field === "purpose")
+      Object.assign(f.operation.transaction!, { purpose: ["FULFILL"] });
+    else Object.assign(f.operation, { [field]: [f.operation[field]] });
+    await expect(confirmMarketBatch(f.options)).rejects.toThrow(
+      "MARKET_REVIEW_MISMATCH"
+    );
+    expect(refresh).not.toHaveBeenCalled();
+    expect(f.client.call).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+    expect(f.wallet.sendTransaction).not.toHaveBeenCalled();
+    expect(submit).not.toHaveBeenCalled();
+  }
+);
+it.each(["current", "refreshed"] as const)(
+  "does not send when the %s operation state is an array instead of REVIEW",
+  async (phase) => {
+    const f = setup();
+    const malformed = Object.assign({}, f.operation, { state: ["REVIEW"] });
+    if (phase === "current") fetch.mockResolvedValue(malformed);
+    else refresh.mockResolvedValue(malformed);
+    await expect(confirmMarketBatch(f.options)).resolves.toBe("COMPLETE");
+    expect(f.client.call).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
+    expect(f.wallet.sendTransaction).not.toHaveBeenCalled();
+    expect(submit).not.toHaveBeenCalled();
+  }
+);
 it("never sends a second operation while an overlapping seller order has an unresolved purchase", async () => {
   const f = setup();
   jest.mocked(findResumableMarketBatch).mockResolvedValue({

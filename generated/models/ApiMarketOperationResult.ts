@@ -27,8 +27,15 @@ export type ApiMarketOperationResult = ApiMarketBatchOperation | ApiMarketOperat
 * @export
 */
 export class ApiMarketOperationResultClass {
-    static readonly discriminator: string | undefined = undefined;
+    static readonly discriminator: string | undefined = "kind";
 
-    static readonly mapping: {[index: string]: string} | undefined = undefined;
+    static readonly mapping: {[index: string]: string} | undefined = {
+        "ACCEPT": "ApiMarketOperation",
+        "BUY": "ApiMarketOperation",
+        "BUY_BATCH": "ApiMarketBatchOperation",
+        "CANCEL": "ApiMarketOperation",
+        "LIST": "ApiMarketOperation",
+        "OFFER": "ApiMarketOperation",
+    };
 }
 

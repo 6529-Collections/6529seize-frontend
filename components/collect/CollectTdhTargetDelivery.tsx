@@ -47,12 +47,9 @@ export default function CollectTdhTargetDelivery({
   const own = identity.wallets.find(
     (wallet) => wallet.wallet.toLowerCase() === value.toLowerCase()
   );
-  const display =
-    own?.display && !isAddress(own.display)
-      ? own.display
-      : address
-        ? `${address.slice(0, 6)}…${address.slice(-4)}`
-        : t(locale, "collect.buy.chooseDelivery");
+  let display = t(locale, "collect.buy.chooseDelivery");
+  if (own?.display && !isAddress(own.display)) display = own.display;
+  else if (address) display = `${address.slice(0, 6)}…${address.slice(-4)}`;
   return (
     <div className="tw-max-w-xl tw-space-y-2">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-iron-400">
@@ -69,7 +66,7 @@ export default function CollectTdhTargetDelivery({
           type="button"
           aria-expanded={open}
           aria-controls={`${id}-wallets`}
-          onClick={() => setOpen((value) => !value)}
+          onClick={() => setOpen((wasOpen) => !wasOpen)}
           className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-xs tw-text-iron-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
         >
           {t(locale, "collect.buy.changeDelivery")}
@@ -92,7 +89,8 @@ export default function CollectTdhTargetDelivery({
               if (
                 wallet &&
                 identity.wallets.some(
-                  (own) => own.wallet.toLowerCase() === wallet.toLowerCase()
+                  (member) =>
+                    member.wallet.toLowerCase() === wallet.toLowerCase()
                 )
               ) {
                 onChange(getAddress(wallet));

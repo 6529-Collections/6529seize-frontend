@@ -4,6 +4,7 @@ import {
   fetchRecoverableMarketBatch,
 } from "./market-batch-recovery";
 import { listSavedMarketBatches } from "./market-batch-storage";
+import { marketBatchLiteral } from "./market-batch-validation";
 
 type SelectedOrder = Pick<
   ApiMarketBatchPrepareRequest["items"][number],
@@ -54,7 +55,7 @@ export async function findResumableMarketBatch(
     } else if (
       options.includeReview !== false &&
       saved.request.items.some((item) => selected.has(orderKey(item))) &&
-      operation.state === "REVIEW" &&
+      marketBatchLiteral(operation.state, "REVIEW") &&
       operation.expires_at > Date.now() &&
       (!review ||
         operation.updated_at > review.operation.updated_at ||

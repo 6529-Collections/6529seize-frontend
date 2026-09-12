@@ -16,7 +16,15 @@ export function parseCollectTdhTargetBudget(
 ): string | undefined | null {
   const trimmed = value.trim();
   if (trimmed === "") return undefined;
-  if (trimmed.length > 100 || !/^(0|[1-9]\d*)(?:\.\d{1,18})?$/.test(trimmed))
+  if (trimmed.length > 100) return null;
+  const parts = trimmed.split(".");
+  const [whole, fraction] = parts;
+  if (
+    parts.length > 2 ||
+    whole === undefined ||
+    !/^(0|[1-9]\d{0,99})$/.test(whole) ||
+    (fraction !== undefined && !/^\d{1,18}$/.test(fraction))
+  )
     return null;
   const amount = parseEther(trimmed);
   return amount < 2n ** 256n ? amount.toString() : null;

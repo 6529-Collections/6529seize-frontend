@@ -149,6 +149,16 @@ it("does not resume an expired no-send review", async () => {
     )
   ).toBeNull();
 });
+it("does not coerce a malformed array state into an actionable review", async () => {
+  const value = saved(ApiMarketBatchOperationStateEnum.Review);
+  Object.assign(value.operation, { state: ["REVIEW"] });
+  expect(
+    await findResumableMarketBatch(
+      value.request.profile_id,
+      value.request.items
+    )
+  ).toBeNull();
+});
 it("does not let a long completed purchase history block the current selection", async () => {
   const value = saved(ApiMarketBatchOperationStateEnum.Review);
   for (let index = 0; index < 129; index++)

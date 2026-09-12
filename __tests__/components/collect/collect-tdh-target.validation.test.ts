@@ -24,9 +24,15 @@ it("treats a blank budget as unbounded and preserves exact wei precision", () =>
 });
 it.each([
   "-1",
+  "+1",
+  ".1",
+  "1.",
+  "1..1",
   "1e3",
   "0.0000000000000000001",
   "01",
+  "01.1",
+  "1".repeat(101),
   "999999999999999999999999999999999999999999999999999999999999999999999999999999",
 ])("rejects invalid or overflowing budget %s", (value) =>
   expect(parseCollectTdhTargetBudget(value)).toBeNull()

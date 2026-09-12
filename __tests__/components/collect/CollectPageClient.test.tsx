@@ -71,7 +71,7 @@ jest.mock("@/components/collect/CollectGoalsController", () => ({
     </div>
   ),
 }));
-jest.mock("@/components/collect/CollectTdhController", () => ({
+jest.mock("@/components/collect/CollectTdhTargetController", () => ({
   __esModule: true,
   default: () => <div data-testid="profile-tdh-projection" />,
 }));
@@ -322,7 +322,7 @@ it("preserves explicit TDH collection links and subsequent user selections", () 
 it("keeps time-based profile projection separate from the immediate TDH listings", () => {
   mockSearchParams = new URLSearchParams("intent=tdh&collection=memes");
   const { rerender } = render(<CollectPageClient />);
-  fireEvent.click(screen.getByRole("button", { name: "Project profile TDH" }));
+  fireEvent.click(screen.getByRole("button", { name: "Reach target TDH" }));
   expect(mockReplace).toHaveBeenLastCalledWith(
     "/collect?intent=tdh&collection=memes&view=projection",
     { scroll: false }

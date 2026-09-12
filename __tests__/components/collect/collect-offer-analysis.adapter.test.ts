@@ -88,7 +88,7 @@ describe("offer analysis request", () => {
     expect(request).toMatchObject({
       recipient: OFFER_PAYER,
       acknowledge_external_recipient: false,
-      expires_at: NOW / 1000 + 168 * 3600,
+      expires_at: NOW / 1000 + 168 * 3600 - 120,
       method: { kind: "manual" },
     });
     expect(request.max_total_weth_wei).toBeUndefined();

@@ -12,6 +12,32 @@ function validate(f: ReturnType<typeof batchFixture>) {
 it("accepts exact mixed ERC721 and partial ERC1155 allocations in one native transaction", () =>
   expect(() => validate(batchFixture())).not.toThrow());
 it.each([
+  ["request kind", (f) => Object.assign(f.request, { kind: ["BUY_BATCH"] })],
+  [
+    "request execution policy",
+    (f) => Object.assign(f.request, { execution_policy: ["ALL_OR_REVERT"] }),
+  ],
+  [
+    "operation kind",
+    (f) => Object.assign(f.operation, { kind: ["BUY_BATCH"] }),
+  ],
+  [
+    "operation execution policy",
+    (f) => Object.assign(f.operation, { execution_policy: ["ALL_OR_REVERT"] }),
+  ],
+  [
+    "transaction purpose",
+    (f) => Object.assign(f.operation.transaction!, { purpose: ["FULFILL"] }),
+  ],
+] satisfies Array<[string, (f: ReturnType<typeof batchFixture>) => void]>)(
+  "rejects array-valued %s instead of coercing malformed JSON",
+  (_name, mutate) => {
+    const f = batchFixture();
+    mutate(f);
+    expect(() => validate(f)).toThrow("MARKET_REVIEW_MISMATCH");
+  }
+);
+it.each([
   [
     "omitted seller",
     (f) => {

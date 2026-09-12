@@ -15,7 +15,7 @@ import {
 } from "@/services/api/collect-api";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type {
   CollectCatalogView,
   CollectCollection,
@@ -45,6 +45,12 @@ import {
   collectOrderPurchaseQuantity,
 } from "./collect-buy.helpers";
 import type { CollectArtworkSelection } from "./CollectArtworkCard";
+import CollectOfferWorkspace from "./CollectOfferWorkspace";
+import type { CollectOfferSelection } from "./collect-offer-plan.types";
+import {
+  collectMissingOfferSelection,
+  collectSelectedOfferSelection,
+} from "./collect-offer-selection.helpers";
 
 export default function CollectPageClient() {
   const searchParams = useSearchParams();
@@ -133,6 +139,37 @@ function CollectCatalogController({
     setStoredCostPlan(plan ? { revision: goalState.revision, plan } : null);
   const [basketOpen, setBasketOpen] = useState(false);
   const [selection, setSelection] = useState<CollectSelectedListing[]>([]);
+  const [offerWorkspace, setOfferWorkspace] = useState<{
+    items: readonly CollectOfferSelection[];
+    hasAlternatives: boolean;
+  } | null>(null);
+  const [offerWorkspaceActive, setOfferWorkspaceActive] = useState(false);
+  const offerReturnFocus = useRef<HTMLElement | null>(null);
+  const openOffers = (
+    items: readonly CollectOfferSelection[],
+    hasAlternatives = false
+  ) => {
+    if (items.length === 0) return;
+    offerReturnFocus.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    setOfferWorkspace({ items, hasAlternatives });
+    setOfferWorkspaceActive(true);
+  };
+  const closeOffers = () => {
+    setOfferWorkspaceActive(false);
+    requestAnimationFrame(() => {
+      if (offerReturnFocus.current?.isConnected)
+        offerReturnFocus.current.focus();
+      else
+        document
+          .querySelector<HTMLButtonElement>(
+            '[data-collect-navigation] button[aria-pressed="true"]'
+          )
+          ?.focus({ preventScroll: true });
+    });
+  };
   const [batch, setBatch] = useState<{
     items: readonly CollectSelectedListing[];
     recipient?: string;
@@ -145,7 +182,7 @@ function CollectCatalogController({
     recipient?: string;
   } | null>(null);
   const { connectedProfile, requestAuth } = useAuth();
-  const { seizeConnect } = useSeizeConnectContext();
+  const { seizeConnect, address: payingWallet } = useSeizeConnectContext();
   const profile = connectedProfile?.id
     ? {
         id: connectedProfile.id,
@@ -250,6 +287,7 @@ function CollectCatalogController({
       ),
     };
   const updateQuery = (patch: Readonly<Record<string, string>>) => {
+    setOfferWorkspaceActive(false);
     const next = new URLSearchParams(queryString);
     for (const [key, value] of Object.entries(patch)) {
       if (value) next.set(key, value);
@@ -330,22 +368,26 @@ function CollectCatalogController({
   else if (intent === "tdh")
     goalContent = (
       <CollectTdhWorkspace
-        collection={collection}
         profile={connectedProfile}
+        payingWallet={payingWallet}
         snapshot={discovery.tdhSnapshot}
         projection={tdhProjection}
         onToggleProjection={() =>
           updateQuery({ view: tdhProjection ? "" : "projection" })
         }
         onConnect={connect}
+        onReviewPurchase={(items, recipient) => setBatch({ items, recipient })}
+        onPlanOffers={(targetPlan) =>
+          openOffers(collectSelectedOfferSelection(targetPlan.items))
+        }
       />
     );
-  else if (intent === "lowest")
-    goalContent = (
-      <p className="tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(locale, "collect.lowest.scope")}
-      </p>
-    );
+  const missingOffers = costPlan
+    ? collectMissingOfferSelection(
+        costPlan.analysis.requirements,
+        costPlan.result.legs
+      )
+    : null;
   return (
     <>
       <CollectPageView
@@ -355,6 +397,18 @@ function CollectCatalogController({
         profile={profile}
         plan={plan}
         goalContent={goalContent}
+        workspaceActive={offerWorkspaceActive}
+        showCollections={!tdhProjection}
+        workspaceContent={
+          offerWorkspace && (
+            <CollectOfferWorkspace
+              items={offerWorkspace.items}
+              hasAlternatives={offerWorkspace.hasAlternatives}
+              active={offerWorkspaceActive}
+              onBack={closeOffers}
+            />
+          )
+        }
         showListings={
           intent === "lowest" || (intent === "tdh" && !tdhProjection)
         }
@@ -365,6 +419,9 @@ function CollectCatalogController({
               items={selection}
               onClear={() => setSelection([])}
               onReview={() => setBatch({ items: selection })}
+              onPlanOffers={() =>
+                openOffers(collectSelectedOfferSelection(selection))
+              }
             />
           ) : null
         }
@@ -390,6 +447,12 @@ function CollectCatalogController({
           if (costPlan?.id === id && costPlan.revision === revision)
             setBasketOpen(true);
         }}
+        onPlanOffers={
+          missingOffers !== null && missingOffers.items.length > 0
+            ? () =>
+                openOffers(missingOffers.items, missingOffers.hasAlternatives)
+            : undefined
+        }
       />
       {basketOpen && costPlan && (
         <CollectPlanBasket

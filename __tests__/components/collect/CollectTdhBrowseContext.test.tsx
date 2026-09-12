@@ -45,7 +45,7 @@ it("opens the separate profile projection only on an explicit action", () => {
     />
   );
   expect(onOpenProjection).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole("button", { name: "Project profile TDH" }));
+  fireEvent.click(screen.getByRole("button", { name: "Reach target TDH" }));
   expect(onOpenProjection).toHaveBeenCalledTimes(1);
 });
 

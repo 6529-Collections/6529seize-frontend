@@ -199,7 +199,7 @@ function BatchReviewDraft({
           );
         })}
       </ul>
-      {(issueText || error) && (
+      {(issueText ?? error) && (
         <p
           id={`${id}-error`}
           role="alert"

@@ -2,8 +2,8 @@
 
 ## Overview
 
-Collecting tools help you complete profile sets, compare observed listings and
-explore TDH. Browse individual artworks on The Memes, 6529 Gradient and NextGen
+Collecting tools help you complete profile sets, buy selected NFTs, plan offers
+and explore TDH. Browse individual artworks on The Memes, 6529 Gradient and NextGen
 Pebbles collection pages, and review trades on the artwork's own page.
 Collecting belongs to your profile: holdings across its confirmed consolidated
 wallets count together.
@@ -64,7 +64,8 @@ card page.
 4. Select some or all proposed purchases. **Review purchase** brings them into
    one review with quantities, delivery addresses and an estimated total.
    **Review live total** checks every selected order and shows the exact price,
-   fees and gas reserve before wallet approval.
+   fees and gas reserve before wallet approval. To propose your own prices,
+   choose **Make offers for missing NFTs** and review each NFT's offer separately.
 5. Approve the required token permission if needed, then review and authorize
    the purchase transaction or fixed-price order signature in your wallet.
 6. Follow the result in Orders. A sent transaction, a mined transaction and a
@@ -88,10 +89,10 @@ supported purchase price. An indivisible lot says how many copies its price
 includes. Open an artwork for its card page, or select its **+** to add it to
 your purchase selection. The control becomes a checkmark; select it again to
 remove that NFT. The selection stays available while switching between Lowest
-listings and TDH. **Review purchase** lets you buy some or all selected items.
-No listing
-results does not mean that no orders exist elsewhere. If the listing source
-cannot be loaded, use **Try again** or return to the collection page.
+listings and TDH. **Review purchase** lets you buy some or all selected items;
+**Plan offers** opens a price plan for those NFTs.
+No listing results does not mean that no orders exist elsewhere. If the listing
+source cannot be loaded, use **Try again** or return to the collection page.
 
 ### Buy for another wallet
 
@@ -142,6 +143,53 @@ wallet activity can still change the available balance. Offers are not escrow.
 Filling one offer can consume WETH allowance needed by another; review balances
 and approval amounts before continuing with remaining offers.
 
+### Plan offers for selected NFTs
+
+Select NFTs in Lowest listings or TDH, then choose **Plan offers**. A completion
+plan also offers **Make offers for missing NFTs**, including required NFTs that
+have no supported listing. When several artworks could satisfy a trait, the
+offer plan uses the chosen artworks rather than making offers on every
+alternative.
+
+**Enter each price** is the default. Set **WETH per NFT** for each artwork,
+its quantity and a default expiry of 1, 7 or 30 days. Open **Details & expiry**
+to change an individual NFT's expiry. For editions, the unit price is
+multiplied by the number of copies. A budget constrains an allocation; it does
+not replace the individual NFT prices. Search the plan and select all or only
+the NFTs you want to offer on.
+
+Other **Price method** choices calculate proposed prices once:
+
+- **Match observed WETH offer** uses an applicable observed offer for that NFT.
+- **Above observed WETH offer** adds your chosen percentage to that reference.
+- **Below observed ask** subtracts your chosen percentage from the ask reference.
+  Native ETH asks are compared with WETH at 1:1 before wrapping costs.
+- **Conservative allocation** uses an **Offer budget (WETH)** and available
+  reference evidence to propose opening prices. It can leave part of the budget
+  unused; it does not predict acceptance or guarantee the best allocation.
+
+An edited price is kept when recalculating. **Use calculated price** releases
+that manual choice. Missing or stale references need a manual price or another
+calculation; the site does not invent a price. Observed orders are references,
+not confirmation that their makers are funded or that a seller will accept.
+
+Choose **Check amounts and WETH** for manual prices, or **Calculate prices** for
+the other methods. Funding belongs to the paying wallet; WETH in other profile
+wallets is not pooled. The check accounts for that wallet's potential offer
+exposure. **Review offer** opens one NFT's exact quantity, price, fees and expiry
+for wallet authorization. Quantity is fixed during this review; return to the
+offer plan to change the number of copies. Each offer is signed separately and can fill
+independently. Calculating prices does not publish offers, open the wallet or
+automatically follow future bids.
+
+Pending and published offers remain counted against the allocation budget while
+you move back to collecting or change the selected NFTs in the same workspace.
+**Awaiting offer status** is still a commitment; **Check offer status** reopens
+that offer. Closing its review does not free its amount for another offer.
+After a reload, enter a fresh budget and check funding again; the backend's
+potential offer exposure still applies. Changing the profile or paying wallet
+starts a separate workspace.
+
 ### Compare TDH
 
 Choose **TDH** to see listings immediately, starting with The Memes. You do not
@@ -159,12 +207,44 @@ Open **How TDH value works** for the source snapshot and coverage. Indexed price
 can change, and a bounded comparison identifies when more indexed asks were
 outside its coverage. The site checks a fresh executable quote before purchase.
 
-The separate time-based profile comparison uses a verified official TDH snapshot
-and includes bonus changes on existing holdings. Gifts outside the profile add
-no TDH to that profile. Its future projection and estimated gas reserve serve a
-different purpose from the base-rate listing grid. Open **Project profile TDH**
-to choose a budget and time horizon; **Back to TDH listings** returns to browsing.
-A direct link with a collection selected keeps that collection.
+### Reach target TDH
+
+From **TDH**, choose **Reach target TDH**. Enter the TDH you want to hold and a
+timeframe of 1, 30, 90 or 365 days, then choose The Memes, Gradients or Pebbles.
+The default is a total future TDH target, 30 days and The Memes.
+**Back to TDH listings** returns to the immediate price comparison.
+
+The projection uses your profile's confirmed consolidated holdings and a verified
+official snapshot, including changes to bonuses on existing holdings.
+**Deliver to** must be one of your profile's wallets: a gift outside the profile
+adds no TDH to it. The paying wallet and delivery wallet can differ for a purchase.
+
+Advanced options include **Additional TDH above my baseline**, measured above
+the projected no-purchase baseline on the same future date.
+**Maximum purchase budget (ETH)** is optional. Leave it blank to estimate the
+purchase budget for the target. An entered limit includes signed listing fees
+but excludes gas, which is quoted at purchase review. It does not authorize
+spending.
+
+Results compare the no-purchase baseline, proposed TDH and target on the shown
+UTC date. **No purchases needed** means the baseline already meets the target.
+Otherwise, the result shows the best purchase plan found, its exact NFTs and
+quantities, and the estimated purchase subtotal. A closest plan keeps the
+remaining TDH gap visible. This is a bounded search of indexed asks, not proof
+of the global minimum cost or that an unmet target is impossible. Open the
+assumptions for coverage and the snapshot used.
+
+**Review purchase** opens those exact acquisitions in the shared purchase review.
+Live prices, availability, gas and funding are checked there. Changing the NFTs,
+quantities or delivery wallet requires a new projection before relying on its
+TDH result. Changing the target, timeframe or profile also clears the old result.
+
+**Plan offers for these artworks** opens individual offer prices for the proposed
+NFTs. It requires the projected destination to be the paying wallet, because
+offers deliver to their signer. If another profile wallet was selected, choose
+the paying wallet and run the projection again first. Offers add TDH only after
+they fill; a later fill leaves less holding time. The purchase projection does
+not forecast when, or whether, those offers will fill.
 
 ### Save a rule for reviewed purchases
 
@@ -244,7 +324,9 @@ requires the owner to review and authorize each purchase or order. Signed limit
 orders can be filled by others until effective cancellation or expiry.
 Multiple-order purchases require supported exact ETH listings and a successful
 simulation of the whole selection. These controls do not create collection-wide
-or trait-group offers.
+or trait-group offers. A plan of individual offers has separate signatures and
+fills; it does not have the all-or-revert guarantee of a supported purchase
+selection.
 
 ## Related Pages
 

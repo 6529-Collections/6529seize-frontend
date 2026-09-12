@@ -41,6 +41,7 @@ export default function OfferPlanPricing({
 }) {
   const locale = useBrowserLocale();
   const id = useId();
+  const pricingLabel = t(locale, "collect.offerPlan.pricing");
   const percentage =
     value.method === "improve_bid" || value.method === "discount_ask";
   return (
@@ -48,9 +49,7 @@ export default function OfferPlanPricing({
       disabled={disabled}
       className="tw-m-0 tw-min-w-0 tw-space-y-3 tw-border-0 tw-p-0"
     >
-      <legend className="tw-sr-only">
-        {t(locale, "collect.offerPlan.pricing")}
-      </legend>
+      <legend className="tw-sr-only">{pricingLabel}</legend>
       <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
         <Field className="tw-min-w-0 tw-space-y-2">
           <Listbox
@@ -64,11 +63,11 @@ export default function OfferPlanPricing({
               htmlFor={`${id}-method`}
               className="tw-block tw-text-xs tw-text-iron-300"
             >
-              {t(locale, "collect.offerPlan.pricing")}
+              {pricingLabel}
             </label>
             <ListboxButton
               id={`${id}-method`}
-              aria-label={t(locale, "collect.offerPlan.pricing")}
+              aria-label={pricingLabel}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   event.preventDefault();
@@ -86,7 +85,7 @@ export default function OfferPlanPricing({
               />
             </ListboxButton>
             <ListboxOptions
-              aria-label={t(locale, "collect.offerPlan.pricing")}
+              aria-label={pricingLabel}
               anchor="bottom start"
               className="tailwind-scope tw-z-50 tw-w-[var(--button-width)] tw-overflow-auto tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/10 [--anchor-gap:0.5rem] focus:tw-outline-none"
             >

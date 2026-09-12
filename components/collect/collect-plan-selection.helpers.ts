@@ -69,12 +69,11 @@ async function findPlanAsset(
         throw new Error("UNSUPPORTED_ASSET");
       return asset;
     }
-    let progressed = false;
+    const previousSize = seen.size;
     for (const item of response.data) {
-      if (!seen.has(item.asset_key)) progressed = true;
       seen.add(item.asset_key);
     }
-    if (!response.next || !progressed) break;
+    if (!response.next || previousSize === seen.size) break;
   }
   throw new Error("ASSET_SEARCH_INCOMPLETE");
 }

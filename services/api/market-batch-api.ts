@@ -6,15 +6,17 @@ import type { ApiMarketSendAttemptRejection } from "@/generated/models/ApiMarket
 import type { ApiMarketSubmission } from "@/generated/models/ApiMarketSubmission";
 import type { ApiMarketMyOperations } from "@/generated/models/ApiMarketMyOperations";
 import { commonApiFetch, commonApiPost } from "./common-api";
+import { marketBatchLiteral } from "@/components/collect/market-batch-validation";
 
 const path = (id: string) => `market/operations/${encodeURIComponent(id)}`;
 function batch(operation: ApiMarketBatchOperation): ApiMarketBatchOperation {
-  if (operation.kind !== "BUY_BATCH") throw new Error("MARKET_REVIEW_MISMATCH");
+  if (!marketBatchLiteral(operation.kind, "BUY_BATCH"))
+    throw new Error("MARKET_REVIEW_MISMATCH");
   return operation;
 }
-async function post<T>(endpoint: string, body: T, idempotencyKey?: string) {
+async function post(endpoint: string, body: unknown, idempotencyKey?: string) {
   return batch(
-    await commonApiPost<T, ApiMarketBatchOperation>({
+    await commonApiPost<unknown, ApiMarketBatchOperation>({
       endpoint,
       body,
       ...(idempotencyKey

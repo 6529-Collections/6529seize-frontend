@@ -21,8 +21,7 @@ export function buildCollectBatchRequest(
   const items = draft.items.map((item) => {
     const identity = collectAssetIdentity(item.asset.asset_key);
     if (
-      !identity ||
-      identity.family !== item.asset.family ||
+      identity?.family !== item.asset.family ||
       item.asset.chain_id !== 1 ||
       item.asset.asset_key !==
         `1:${item.asset.contract.toLowerCase()}:${item.asset.token_id}` ||

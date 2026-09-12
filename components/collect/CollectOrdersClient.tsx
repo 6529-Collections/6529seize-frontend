@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiMarketOperationResult } from "@/generated/models/ApiMarketOperationResult";
+import { ApiMarketBatchOperationKindEnum } from "@/generated/models/ApiMarketBatchOperation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { fetchMarketHistoryWithBatches } from "@/services/api/market-batch-api";
@@ -53,14 +54,17 @@ function ProfileOrders() {
     operations.data?.pages.flatMap((page) => page.operations) ?? [];
   const select = (id: string, cancel: boolean) => {
     const operation = ownOperations.find((item) => item.id === id);
-    if (operation && !(cancel && operation.kind === "BUY_BATCH"))
+    if (
+      operation &&
+      !(cancel && operation.kind === ApiMarketBatchOperationKindEnum.BuyBatch)
+    )
       setSelected({ operation, cancel });
   };
   return (
     <>
       <CollectOrdersView
         orders={ownOperations.map((operation) =>
-          operation.kind === "BUY_BATCH"
+          operation.kind === ApiMarketBatchOperationKindEnum.BuyBatch
             ? marketBatchOperationView(operation, locale)
             : marketOperationView(operation, locale)
         )}
@@ -84,7 +88,8 @@ function ProfileOrders() {
       <CollectRulesPanel
         onOperation={(operation) => setSelected({ operation, cancel: false })}
       />
-      {selected?.operation.kind === "BUY_BATCH" && (
+      {selected?.operation.kind ===
+        ApiMarketBatchOperationKindEnum.BuyBatch && (
         <CollectBatchController
           key={selected.operation.id}
           items={[]}
@@ -92,20 +97,22 @@ function ProfileOrders() {
           onClose={() => setSelected(null)}
         />
       )}
-      {selected && selected.operation.kind !== "BUY_BATCH" && (
-        <CollectTradeController
-          key={`${selected.operation.id}:${selected.cancel}`}
-          action={
-            selected.cancel
-              ? "cancel"
-              : (selected.operation.kind.toLowerCase() as CollectTradeAction)
-          }
-          {...(selected.cancel
-            ? { cancelTarget: selected.operation }
-            : { initialOperation: selected.operation })}
-          onClose={() => setSelected(null)}
-        />
-      )}
+      {selected &&
+        selected.operation.kind !==
+          ApiMarketBatchOperationKindEnum.BuyBatch && (
+          <CollectTradeController
+            key={`${selected.operation.id}:${selected.cancel}`}
+            action={
+              selected.cancel
+                ? "cancel"
+                : (selected.operation.kind.toLowerCase() as CollectTradeAction)
+            }
+            {...(selected.cancel
+              ? { cancelTarget: selected.operation }
+              : { initialOperation: selected.operation })}
+            onClose={() => setSelected(null)}
+          />
+        )}
     </>
   );
 }

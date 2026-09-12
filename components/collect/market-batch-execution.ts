@@ -16,6 +16,7 @@ import { mainnet } from "viem/chains";
 import {
   validateMarketBatchOperation,
   marketBatchReviewTerms,
+  marketBatchLiteral,
 } from "./market-batch-validation";
 import {
   batchSendAttempt,
@@ -176,8 +177,8 @@ export async function confirmMarketBatch(
         const capability = await fetchMarketBatchCapabilities();
         if (
           capability.available !== true ||
-          capability.execution_policy !== "ALL_OR_REVERT" ||
-          capability.currency.toString() !== expected.currency.toString() ||
+          !marketBatchLiteral(capability.execution_policy, "ALL_OR_REVERT") ||
+          !marketBatchLiteral(capability.currency, expected.currency) ||
           capability.requires_complete_simulation !== true
         )
           throw new Error("MARKET_ACTION_DISABLED");
@@ -201,7 +202,7 @@ export async function confirmMarketBatch(
           onOperation(current);
           return "UPDATED_REVIEW";
         }
-        if (current.state !== "REVIEW") {
+        if (!marketBatchLiteral(current.state, "REVIEW")) {
           onOperation(current);
           return "COMPLETE";
         }
@@ -224,7 +225,7 @@ export async function confirmMarketBatch(
         }
         current = refreshed;
         onOperation(current);
-        if (current.state !== "REVIEW") return "COMPLETE";
+        if (!marketBatchLiteral(current.state, "REVIEW")) return "COMPLETE";
         if (
           !saveMarketBatch(expected.profile_id, current.id, {
             request: expected,

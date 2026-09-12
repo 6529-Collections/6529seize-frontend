@@ -45,7 +45,11 @@ export const MARKET_BATCH_ABI = parseAbi([
 ]);
 
 function assertBatch(value: unknown): asserts value {
-  if (!value) throw new Error("MARKET_REVIEW_MISMATCH");
+  if (!Boolean(value)) throw new Error("MARKET_REVIEW_MISMATCH");
+}
+/** Generated enum types cannot validate JSON. Compare runtime values without coercion. */
+export function marketBatchLiteral(value: unknown, expected: string): boolean {
+  return value === expected;
 }
 function batchUint(value: unknown): bigint {
   assertBatch(
@@ -86,7 +90,8 @@ export function validateMarketBatchRequest(
   profileWallets: readonly string[]
 ): void {
   assertBatch(
-    request.kind === "BUY_BATCH" && request.execution_policy === "ALL_OR_REVERT"
+    marketBatchLiteral(request.kind, "BUY_BATCH") &&
+      marketBatchLiteral(request.execution_policy, "ALL_OR_REVERT")
   );
   assertBatch(
     typeof request.profile_id === "string" && request.profile_id.length > 0
@@ -207,8 +212,7 @@ function validateItem(
   const nft = asset(expected.asset_key),
     offered = c.offer[0];
   assertBatch(
-    offered &&
-      offered.itemType === nft.type &&
+    offered?.itemType === nft.type &&
       batchSame(offered.token, nft.contract) &&
       offered.identifierOrCriteria === nft.identifier
   );
@@ -242,7 +246,7 @@ function validateItem(
     scale(sellerPayment.startAmount) === batchUint(actual.net_wei) &&
       total === batchUint(expected.amount_wei)
   );
-  assertBatch(actual.fees && actual.fees.length === c.consideration.length - 1);
+  assertBatch(actual.fees?.length === c.consideration.length - 1);
   c.consideration.slice(1).forEach((payment, index) => {
     const fee = actual.fees?.[index];
     assertBatch(
@@ -267,8 +271,9 @@ function zoneAuthorization(order: Advanced, wallet: string, end: bigint) {
   const byte = (index: number) =>
     Number.parseInt(hex.slice(index * 2, index * 2 + 2), 16);
   const context = byte(93);
-  const length =
-    context === 0 || context === 1 ? 126 : context === 7 ? 166 : 146;
+  let length = 146;
+  if (context === 0 || context === 1) length = 126;
+  else if (context === 7) length = 166;
   assertBatch(
     byte(0) === 0 &&
       [0, 1, 7, 8, 9].includes(context) &&
@@ -293,9 +298,8 @@ export function validateMarketBatchOperation(
 ): void {
   validateMarketBatchRequest(expected, profileWallets);
   assertBatch(
-    operation.kind.toString() === expected.kind.toString() &&
-      operation.execution_policy.toString() ===
-        expected.execution_policy.toString()
+    marketBatchLiteral(operation.kind, expected.kind) &&
+      marketBatchLiteral(operation.execution_policy, expected.execution_policy)
   );
   assertBatch(
     operation.profile_id === expected.profile_id &&
@@ -321,7 +325,10 @@ export function validateMarketBatchOperation(
   const terms = operation.mirror_terms,
     tx = operation.transaction;
   assertBatch(
-    terms && tx && tx.purpose === "FULFILL" && tx.approval_scope === undefined
+    terms &&
+      marketBatchLiteral(tx?.purpose, "FULFILL") &&
+      tx !== undefined &&
+      tx.approval_scope === undefined
   );
   const start = batchUint(terms.start_time),
     end = batchUint(terms.end_time),
@@ -392,10 +399,19 @@ export function validateMarketBatchOperation(
     assertBatch(advanced.signature !== "0x");
     zoneAuthorization(advanced, expected.wallet, end);
   });
-  const mirror = orders[checked.length];
+  validateMirror(orders[checked.length], expected, start, end, salt);
+  validateBatchFlow(orders, fulfillments, expected);
+}
+
+function validateMirror(
+  mirror: Advanced | undefined,
+  expected: ApiMarketBatchPrepareRequest,
+  start: bigint,
+  end: bigint,
+  salt: bigint
+) {
   assertBatch(
-    mirror &&
-      mirror.signature === "0x" &&
+    mirror?.signature === "0x" &&
       mirror.extraData === "0x" &&
       mirror.numerator === 1n &&
       mirror.denominator === 1n
@@ -419,8 +435,7 @@ export function validateMarketBatchOperation(
   );
   const payment = m.offer[0];
   assertBatch(
-    payment &&
-      payment.itemType === 0 &&
+    payment?.itemType === 0 &&
       batchSame(payment.token, MARKET_ZERO) &&
       payment.identifierOrCriteria === 0n
   );
@@ -438,8 +453,7 @@ export function validateMarketBatchOperation(
   m.consideration.forEach((received, index) => {
     const allocation = allocations[index];
     assertBatch(
-      allocation &&
-        received.itemType === allocation.type &&
+      received.itemType === allocation?.type &&
         batchSame(received.token, allocation.contract) &&
         received.identifierOrCriteria === allocation.identifier
     );
@@ -449,7 +463,6 @@ export function validateMarketBatchOperation(
         received.endAmount === received.startAmount
     );
   });
-  validateBatchFlow(orders, fulfillments, expected);
 }
 
 /** Authorization bytes may refresh; every price, recipient, order and gas cap must be reviewed again if changed. */

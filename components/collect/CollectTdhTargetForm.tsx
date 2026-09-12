@@ -100,9 +100,9 @@ export default function CollectTdhTargetForm({
             value={draft.family}
             onChange={(event) => {
               const family = Object.values(ApiCollectFamily).find(
-                (value) => value === event.target.value
+                (value) => value.toString() === event.target.value
               );
-              if (family) change({ family });
+              if (family !== undefined) change({ family });
             }}
             className={COLLECT_INPUT_CLASS}
           >

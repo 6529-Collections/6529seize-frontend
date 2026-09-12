@@ -27,8 +27,15 @@ export type ApiMarketOperationPrepareRequest = ApiMarketBatchPrepareRequest | Ap
 * @export
 */
 export class ApiMarketOperationPrepareRequestClass {
-    static readonly discriminator: string | undefined = undefined;
+    static readonly discriminator: string | undefined = "kind";
 
-    static readonly mapping: {[index: string]: string} | undefined = undefined;
+    static readonly mapping: {[index: string]: string} | undefined = {
+        "ACCEPT": "ApiMarketPrepareRequest",
+        "BUY": "ApiMarketPrepareRequest",
+        "BUY_BATCH": "ApiMarketBatchPrepareRequest",
+        "CANCEL": "ApiMarketPrepareRequest",
+        "LIST": "ApiMarketPrepareRequest",
+        "OFFER": "ApiMarketPrepareRequest",
+    };
 }
 

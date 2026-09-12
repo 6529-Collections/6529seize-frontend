@@ -20,6 +20,7 @@ import type {
   OfferPriceMethod,
 } from "./collect-offer-plan.types";
 import { MARKET_WETH, MARKET_ZERO } from "./market-validation";
+import { collectOrderExpiry } from "./collect-order-expiry";
 
 const UINT_MAX = 2n ** 256n - 1n;
 const METHODS: Record<OfferPriceMethod, ApiCollectOfferAnalysisMethodKindEnum> =
@@ -101,8 +102,7 @@ export function buildOfferAnalysisRequest(
     wallet: input.wallet,
     recipient: input.wallet,
     acknowledge_external_recipient: false,
-    expires_at:
-      Math.floor(now / 1000) + Number(input.controls.expiryHours) * 3600,
+    expires_at: collectOrderExpiry(input.controls.expiryHours, now),
     assets,
     method: { kind, ...(points === null ? {} : { basis_points: points }) },
     ...(budget === null

@@ -17,6 +17,7 @@ import { readMarketBatch, saveMarketBatch } from "./market-batch-storage";
 import {
   validateMarketBatchOperation,
   marketBatchReviewTerms,
+  marketBatchLiteral,
 } from "./market-batch-validation";
 
 export function batchSendAttempt(
@@ -28,7 +29,7 @@ export function batchSendAttempt(
   )?.sendAttempt;
   const server = operation.send_attempt;
   if (server?.status === Status.Active) {
-    if (server.purpose !== "TRANSACTION")
+    if (!marketBatchLiteral(server.purpose, "TRANSACTION"))
       throw new Error("MARKET_REVIEW_MISMATCH");
     return {
       id: server.attempt_id,
@@ -142,7 +143,7 @@ export async function sendReviewedMarketBatch(options: {
       armed.id !== operation.id ||
       server?.status !== Status.Active ||
       server.attempt_id !== attempt.id ||
-      server.purpose !== "TRANSACTION" ||
+      !marketBatchLiteral(server.purpose, "TRANSACTION") ||
       server.transaction_digest !== attempt.digest ||
       server.snapshot_block !== attempt.snapshotBlock ||
       createMarketSendAttempt(server.transaction, server.snapshot_block)

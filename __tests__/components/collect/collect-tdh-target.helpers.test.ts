@@ -107,6 +107,12 @@ const changedPlans: [string, (plan: ApiCollectTdhTargetPlan) => void][] = [
     },
   ],
   [
+    "string projection horizon",
+    (plan) => {
+      Object.assign(plan.projection, { horizon_days: "30" });
+    },
+  ],
+  [
     "gift recipient",
     (plan) => {
       plan.items[0]!.recipient = TARGET_FREN;
