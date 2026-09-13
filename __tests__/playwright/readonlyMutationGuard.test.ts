@@ -1,6 +1,9 @@
+import type { BrowserContext, Route } from "@playwright/test";
+
 import {
   decideReadonlyRequest,
   inferPlaywrightEnvironment,
+  installReadonlyMutationGuard,
   sanitizeReadonlyRequestUrl,
   shouldUseReadonlyGuard,
 } from "../../tests/support/readonlyMutationGuard";
@@ -437,6 +440,125 @@ describe("Playwright read-only mutation guard", () => {
         reason: "ignored-external-sdk-endpoint",
       });
     }
+  });
+
+  it.each([
+    "https://o123.ingest.sentry.io/api/456/envelope/",
+    "https://o123.ingest.us.sentry.io/api/456/envelope/?sentry_key=test",
+    "https://o123.ingest.de.sentry.io/api/456/envelope/",
+    "https://o123.ingest.us.sentry.io:443/api/456/envelope/",
+  ])("aborts a recognized Sentry envelope POST: %s", (url) => {
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://6529.io",
+        method: "POST",
+        readonly: true,
+        url,
+      })
+    ).toEqual({
+      action: "abort",
+      reason: "ignored-external-sdk-endpoint",
+    });
+  });
+
+  it.each([
+    "http://o123.ingest.us.sentry.io/api/456/envelope/",
+    "https://o123.ingest.us.sentry.io:8443/api/456/envelope/",
+    "https://user@o123.ingest.us.sentry.io/api/456/envelope/",
+    "https://:password@o123.ingest.us.sentry.io/api/456/envelope/",
+    "https://o123.ingest.us.sentry.io.example.com/api/456/envelope/",
+    "https://extra.o123.ingest.us.sentry.io/api/456/envelope/",
+    "https://o123.ingest.eu.sentry.io/api/456/envelope/",
+    "https://org.ingest.us.sentry.io/api/456/envelope/",
+    "https://ingest.sentry.io/api/456/envelope/",
+    "https://o123.ingest.sentry.io/api/456/store/",
+    "https://o123.ingest.us.sentry.io/api/456/envelope",
+    "https://o123.ingest.us.sentry.io/api/456/envelope/extra",
+    "https://o123.ingest.us.sentry.io/api/project/envelope/",
+    "https://o123.ingest.us.sentry.io/api/456/envelope-mutation/",
+    "https://o123.ingest.us.sentry.io/api/0/projects/",
+  ])("records Sentry endpoint near-matches as blocked mutations: %s", (url) => {
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://6529.io",
+        method: "POST",
+        readonly: true,
+        url,
+      })
+    ).toEqual({ action: "block", reason: "non-allowlisted-mutation" });
+  });
+
+  it.each(["PUT", "PATCH", "DELETE"])(
+    "does not suppress %s requests to the Sentry envelope endpoint",
+    (method) => {
+      expect(
+        decideReadonlyRequest({
+          baseURL: "https://6529.io",
+          method,
+          readonly: true,
+          url: "https://o123.ingest.us.sentry.io/api/456/envelope/",
+        })
+      ).toEqual({ action: "block", reason: "non-allowlisted-mutation" });
+    }
+  );
+
+  it("keeps registered mutations ahead of Sentry telemetry suppression", () => {
+    expect(
+      decideReadonlyRequest({
+        baseURL: "https://o123.ingest.us.sentry.io",
+        method: "POST",
+        readonly: true,
+        url: "https://o123.ingest.us.sentry.io/api/456/envelope/",
+      })
+    ).toMatchObject({
+      action: "block",
+      reason: "registered-mutation-endpoint",
+      ruleId: "first-party-api-mutations",
+    });
+  });
+
+  it("drops Sentry telemetry without hiding or sending business mutations", async () => {
+    const routeHandler = jest.fn();
+    const context = { route: routeHandler } as unknown as BrowserContext;
+    const guard = await installReadonlyMutationGuard(
+      context,
+      "https://6529.io"
+    );
+    const handleRoute = routeHandler.mock.calls[0][1] as (
+      route: Route
+    ) => Promise<void>;
+    const abort = jest.fn().mockResolvedValue(undefined);
+    const continueRequest = jest.fn().mockResolvedValue(undefined);
+    const makeRoute = (url: string) =>
+      ({
+        request: () => ({
+          method: () => "POST",
+          postData: () => null,
+          url: () => url,
+        }),
+        abort,
+        continue: continueRequest,
+      }) as unknown as Route;
+
+    await handleRoute(
+      makeRoute("https://o123.ingest.us.sentry.io/api/456/envelope/")
+    );
+    expect(abort).toHaveBeenCalledWith("blockedbyclient");
+    expect(guard.blockedRequests).toEqual([]);
+    expect(() => guard.assertNoBlockedRequests()).not.toThrow();
+
+    await handleRoute(makeRoute("https://api.6529.io/drops"));
+    expect(guard.blockedRequests).toEqual([
+      expect.objectContaining({
+        method: "POST",
+        url: "https://api.6529.io/drops",
+      }),
+    ]);
+    expect(() => guard.assertNoBlockedRequests()).toThrow(
+      "Read-only Playwright run blocked 1 mutation request(s)"
+    );
+    expect(abort).toHaveBeenCalledTimes(2);
+    expect(continueRequest).not.toHaveBeenCalled();
   });
 
   it("aborts exact Google CSP script-inclusion reports", () => {
