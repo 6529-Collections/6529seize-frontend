@@ -252,7 +252,7 @@ it("shows an observed listing to a guest after loading without preparing or conn
   expect(mockSeizeConnect).not.toHaveBeenCalled();
 });
 
-it("keeps a guest order error visible and offers refresh without preparing", async () => {
+it("keeps a guest order error visible and offers retry without preparing", async () => {
   mockFetchOrders.mockRejectedValueOnce(new Error("orders unavailable"));
   setGuestSession();
   renderBuy();
@@ -262,7 +262,7 @@ it("keeps a guest order error visible and offers refresh without preparing", asy
       "Orders could not be loaded"
     )
   );
-  expect(screen.getByRole("button", { name: "Refresh orders" })).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Try again" })).toBeEnabled();
   expect(screen.getByRole("button", { name: "Collect" })).toBeDisabled();
   expect(screen.getByRole("button", { name: "Connect wallet" })).toBeEnabled();
   expect(mockPrepare).not.toHaveBeenCalled();
@@ -270,7 +270,7 @@ it("keeps a guest order error visible and offers refresh without preparing", asy
   expect(mockSeizeConnect).not.toHaveBeenCalled();
 });
 
-it("keeps a guest empty order state visible and offers refresh without preparing", async () => {
+it("keeps a guest empty market visible without a routine refresh action", async () => {
   mockFetchOrders.mockResolvedValueOnce({ orders: [] });
   setGuestSession();
   renderBuy();
@@ -280,12 +280,118 @@ it("keeps a guest empty order state visible and offers refresh without preparing
       "No NFTs are currently available to collect."
     )
   );
-  expect(screen.getByRole("button", { name: "Refresh orders" })).toBeEnabled();
+  expect(
+    screen.queryByRole("button", { name: /refresh|try again/i })
+  ).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Collect" })).toBeDisabled();
   expect(screen.getByRole("button", { name: "Connect wallet" })).toBeEnabled();
   expect(mockPrepare).not.toHaveBeenCalled();
   expect(mockConfirm).not.toHaveBeenCalled();
   expect(mockSeizeConnect).not.toHaveBeenCalled();
+});
+
+it("quietly discovers a new listing from an empty market without preparing", async () => {
+  jest.useFakeTimers();
+  try {
+    mockFetchOrders.mockResolvedValueOnce({ orders: [] });
+    setGuestSession();
+    renderBuy();
+    await screen.findByText("No NFTs are currently available to collect.");
+    await act(async () => jest.advanceTimersByTimeAsync(60_000));
+    expect(
+      await screen.findByRole("button", { name: "Collect 0.1 ETH" })
+    ).toBeDisabled();
+    expect(mockFetchOrders).toHaveBeenCalledTimes(2);
+    expect(mockPrepare).not.toHaveBeenCalled();
+    expect(mockConfirm).not.toHaveBeenCalled();
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+it("recovers an edited two-copy choice after its listing disappears, preserving quantity and recipient", async () => {
+  jest.useFakeTimers();
+  try {
+    const editions = {
+      ...order,
+      available_quantity: "3",
+      purchase_quantity: "1",
+      quantity_step: "1",
+    };
+    mockFetchOrders
+      .mockResolvedValueOnce({ orders: [editions] })
+      .mockResolvedValueOnce({ orders: [] })
+      .mockResolvedValue({ orders: [editions] });
+    renderBuy();
+    await screen.findByRole("button", { name: "Collect 0.1 ETH" });
+    fireEvent.change(screen.getByRole("textbox", { name: "Quantity" }), {
+      target: { value: "2" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Collect 0.2 ETH" }));
+    await screen.findByText("No NFTs are currently available to collect.");
+    expect(mockPrepare).not.toHaveBeenCalled();
+    await act(async () => jest.advanceTimersByTimeAsync(60_000));
+    const collect = await screen.findByRole("button", {
+      name: "Collect 0.2 ETH",
+    });
+    expect(screen.getByRole("textbox", { name: "Quantity" })).toHaveValue("2");
+    fireEvent.click(collect);
+    await waitFor(() => expect(mockPrepare).toHaveBeenCalledTimes(1));
+    expect(mockPrepare.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        quantity: "2",
+        recipient: payer,
+        amount_wei: "200000000000000000",
+        order: order.identity,
+      })
+    );
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+it("does not replace the exact price while preparation is pending, even when an older background read resolves", async () => {
+  jest.useFakeTimers();
+  try {
+    let finishBrowsing!: (value: { orders: ApiMarketTradeOrder[] }) => void;
+    mockFetchOrders
+      .mockResolvedValueOnce({ orders: [order] })
+      .mockReturnValueOnce(
+        new Promise((resolve) => {
+          finishBrowsing = resolve;
+        })
+      )
+      .mockResolvedValue({ orders: [order] });
+    mockPrepare.mockReturnValue(new Promise(() => undefined));
+    renderBuy();
+    const collect = await screen.findByRole("button", {
+      name: "Collect 0.1 ETH",
+    });
+    await waitFor(() => expect(collect).toBeEnabled());
+    await act(async () => jest.advanceTimersByTimeAsync(60_000));
+    expect(mockFetchOrders).toHaveBeenCalledTimes(2);
+    fireEvent.click(collect);
+    await waitFor(() => expect(mockPrepare).toHaveBeenCalledTimes(1));
+    await act(async () => {
+      finishBrowsing({
+        orders: [{ ...order, total_wei: "900000000000000000" }],
+      });
+    });
+    expect(
+      screen.queryByRole("button", { name: "Collect 0.9 ETH" })
+    ).not.toBeInTheDocument();
+    await act(async () => jest.advanceTimersByTimeAsync(120_000));
+    expect(mockFetchOrders).toHaveBeenCalledTimes(3);
+    expect(mockPrepare.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        order: order.identity,
+        amount_wei: order.total_wei,
+        recipient: payer,
+      })
+    );
+  } finally {
+    jest.useRealTimers();
+  }
 });
 it("automatically selects the cheapest exact listing, refreshes it, validates, and waits for explicit wallet confirmation", async () => {
   mockFetchOrders.mockResolvedValue({

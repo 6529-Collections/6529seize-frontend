@@ -44,6 +44,12 @@ the Collect area shows whether listings are loading, could not be loaded, or con
 no supported orders. **Connect wallet** remains available; connecting is required
 before reviewing a purchase.
 
+Listing availability updates quietly while the artwork page is visible and idle.
+The site preserves an active purchase choice or review instead of replacing it
+with a background update. A failed request offers **Try again**; an empty result
+does not require a routine Refresh action. Collect still checks the exact order
+before opening a review.
+
 **Make an offer** is visible beside Collect. **List** appears when a
 confirmed wallet in the profile holds the NFT. Connect that holding wallet to
 list it; profile consolidation does not grant another wallet permission to sign.
