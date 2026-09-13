@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -21,13 +21,23 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
   onContinue,
 }) => {
   const locale = useBrowserLocale();
+  const reviewNoticeRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (reviewRequired) {
+      reviewNoticeRef.current?.focus();
+    }
+  }, [reviewRequired]);
+
   return (
     <div className="tw-relative tw-flex tw-h-full tw-flex-col">
       <div className="tw-flex-1 tw-overflow-y-auto tw-overflow-x-hidden tw-px-4 tw-pb-6 tw-pt-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 md:tw-px-8">
         <div className="tw-mx-auto tw-max-w-5xl">
           {reviewRequired && (
             <p
+              ref={reviewNoticeRef}
               role="status"
+              tabIndex={-1}
               className="tw-mb-0 tw-mt-6 tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-100 tw-ring-1 tw-ring-iron-700"
             >
               {t(locale, "memes.submission.agreement.changed")}

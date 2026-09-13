@@ -23,6 +23,32 @@ jest.mock(
 const wave: Wave = { participation: { terms: "terms" } } as any;
 
 describe("AgreementStep", () => {
+  it("focuses renewed review once and preserves keyboard focus on rerender and acceptance", () => {
+    const props = {
+      wave: wave as React.ComponentProps<typeof AgreementStep>["wave"],
+      agreements: false,
+      reviewRequired: true,
+      setAgreements: jest.fn(),
+      onContinue: jest.fn(),
+    };
+    const { rerender } = render(<AgreementStep {...props} />);
+    expect(screen.getByRole("status")).toHaveFocus();
+
+    const agreementToggle = screen.getByRole("button", {
+      name: "Check terms agreement",
+    });
+    agreementToggle.focus();
+    rerender(<AgreementStep {...props} />);
+    expect(agreementToggle).toHaveFocus();
+
+    rerender(<AgreementStep {...props} agreements reviewRequired={false} />);
+    expect(agreementToggle).toHaveFocus();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+    rerender(<AgreementStep {...props} />);
+    expect(screen.getByRole("status")).toHaveFocus();
+  });
+
   it("explains that changed terms need review and the draft is retained", () => {
     render(
       <AgreementStep
