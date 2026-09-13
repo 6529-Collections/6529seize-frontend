@@ -779,7 +779,6 @@ export default function Auth({
       {children}
       <AppToastContainer />
       <AuthSignModal
-        address={address}
         enableWalletAuthentication={enableWalletAuthentication}
         isConnectionShareUpgradePrompt={isConnectionShareUpgradePrompt}
         isDisconnectedWebSessionUpgradePrompt={

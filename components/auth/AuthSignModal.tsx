@@ -7,10 +7,11 @@ import { createPortal } from "react-dom";
 import Button from "@/components/utils/button/Button";
 import { t } from "@/i18n/messages";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { WalletIcon } from "@heroicons/react/24/outline";
+import { WalletIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import DotLoader from "../dotLoader/DotLoader";
 import { formatSessionUpgradeTimeLeft } from "./authSessionUpgrade";
 import styles from "./Auth.module.css";
+import { useSeizeConnectContext } from "./SeizeConnectContext";
 
 function closeDialog(dialog: HTMLDialogElement) {
   if (typeof dialog.close === "function" && dialog.open) {
@@ -22,7 +23,6 @@ function closeDialog(dialog: HTMLDialogElement) {
 }
 
 export function AuthSignModal({
-  address,
   enableWalletAuthentication,
   isConnectionShareUpgradePrompt,
   isDisconnectedWebSessionUpgradePrompt,
@@ -37,7 +37,6 @@ export function AuthSignModal({
   sessionUpgradeTimeLeftMs,
   shouldShowSignModal,
 }: {
-  readonly address?: string | undefined;
   readonly enableWalletAuthentication: boolean;
   readonly isConnectionShareUpgradePrompt: boolean;
   readonly isDisconnectedWebSessionUpgradePrompt: boolean;
@@ -55,9 +54,10 @@ export function AuthSignModal({
   readonly shouldShowSignModal: boolean;
 }) {
   const locale = useBrowserLocale();
+  const { address } = useSeizeConnectContext();
   const sessionUpgradeTimeLeftText = useMemo(
-    () => formatSessionUpgradeTimeLeft(sessionUpgradeTimeLeftMs),
-    [sessionUpgradeTimeLeftMs]
+    () => formatSessionUpgradeTimeLeft(sessionUpgradeTimeLeftMs, locale),
+    [sessionUpgradeTimeLeftMs, locale]
   );
   const signModalTitleId = useId();
   const signModalDescriptionId = useId();
@@ -191,7 +191,7 @@ export function AuthSignModal({
           className={
             isSessionUpgradePrompt
               ? styles["signModalHeader"]
-              : "tw-px-5 tw-pb-0 tw-pt-6"
+              : "tw-flex tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-pb-0 tw-pt-5"
           }
         >
           <h2
@@ -204,6 +204,17 @@ export function AuthSignModal({
           >
             {signModalTitle}
           </h2>
+          {!isSessionUpgradePrompt && !isSignRequestInProgress && (
+            <Button
+              variant="secondary"
+              size="lg"
+              className="tw-size-11 tw-min-w-11 tw-p-0"
+              aria-label={t(locale, "auth.signModal.cancelSignIn")}
+              onClick={onCancelSignRequest}
+            >
+              <XMarkIcon className="tw-size-5" aria-hidden="true" />
+            </Button>
+          )}
         </div>
         <div
           className={

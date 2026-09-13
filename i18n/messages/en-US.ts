@@ -2966,6 +2966,7 @@ export const EN_US_MESSAGES = {
   "waves.signIn.newHere":
     "New here? Sign a message with your wallet to get started.",
   "auth.signModal.authenticationRequest": "Sign in to 6529",
+  "auth.signModal.cancelSignIn": "Cancel sign-in",
   "auth.signModal.walletAddress": "Wallet address",
   "auth.signModal.noTransaction": "No transaction or gas fees.",
   "auth.signModal.connectionShareLead":

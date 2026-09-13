@@ -26,6 +26,11 @@ backend-owned frontend product records. The source lives at
 `ops/help/help-index.json`, the sync step writes `public/help-index.json`, and
 the backend consumes the deployed `/help-index.json` with a short cache.
 
+The wallet connection and Wave composer records explain **Sign in to 6529 to
+post**, the wallet chooser, and the **Sign message** step. The sign-in explanation
+confirms address ownership, with no transaction or gas fees. Profile setup and
+Wave permissions still determine participation after authentication.
+
 The Stream review record includes its four current entry guides and the
 **All topics** navigation. Its collector and code-review guide links refer to
 current pages; those guides are not invented as historical snapshot routes.
