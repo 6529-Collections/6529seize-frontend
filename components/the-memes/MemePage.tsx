@@ -44,8 +44,7 @@ import { MemePageArtViewer } from "./MemePageArtViewer";
 import { MemePageTabButton } from "./MemePageTabButton";
 import NftArtworkShareButton from "@/components/artwork-share/NftArtworkShareButton";
 import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";
-import MemePageArtistWorks from "./MemePageArtistWorks";
-import MemePageReferencesSection from "./MemePageReferencesSection";
+import MemePageRelatedWorks from "./MemePageRelatedWorks";
 import {
   MemePageNavigationSkeleton,
   MemePageSkeleton,
@@ -590,21 +589,13 @@ export default function MemePage({
             marketRefreshVersion={marketRefreshVersion}
           />
           {activeTab === MEME_FOCUS.LIVE && nft && (
-            <>
-              <MemePageArtistWorks key={nft.id} nft={nft} locale={locale} />
-              <MemePageReferencesSection
-                nft={nft}
-                locale={locale}
-                open={focusParam === MEME_FOCUS.REFERENCES}
-                onToggle={() =>
-                  replaceRouteFocus(
-                    focusParam === MEME_FOCUS.REFERENCES
-                      ? MEME_FOCUS.LIVE
-                      : MEME_FOCUS.REFERENCES
-                  )
-                }
-              />
-            </>
+            <MemePageRelatedWorks
+              key={nft.id}
+              nft={nft}
+              locale={locale}
+              focus={focusParam}
+              onFocusChange={replaceRouteFocus}
+            />
           )}
           {activeTab === MEME_FOCUS.LIVE && nft && nftMeta && (
             <MemePageArt show nft={nft} nftMeta={nftMeta} locale={locale} />
