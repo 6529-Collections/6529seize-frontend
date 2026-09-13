@@ -72,7 +72,7 @@ export default function CollectArtworkCard({
         )}
         {artwork.priceLabel && (
           <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-2">
-            <div className="tw-min-w-0 tw-max-w-full tw-flex-1 [overflow-wrap:anywhere]">
+            <div className="tw-min-w-0 tw-max-w-full [overflow-wrap:anywhere] max-[360px]:tw-w-full">
               {artwork.priceExactLabel &&
               artwork.priceExactLabel !== artwork.priceLabel ? (
                 <details className="tw-group/price">
