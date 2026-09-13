@@ -127,11 +127,15 @@ beforeEach(() => {
 });
 
 describe("NotificationsContext", () => {
-  it("provides context functions", () => {
+  it("provides context functions", async () => {
     const { result } = renderHook(() => useNotificationsContext(), { wrapper });
     expect(typeof result.current.reconcileProfileDeliveredNotifications).toBe(
       "function"
     );
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    await waitFor(() => {
+      expect(PushNotifications.register).toHaveBeenCalled();
+    });
   });
 
   it("throws when used outside provider", () => {
