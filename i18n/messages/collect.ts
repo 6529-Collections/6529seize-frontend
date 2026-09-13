@@ -754,6 +754,9 @@ export const COLLECT_MESSAGES = {
   "collect.recipient.applying": "Updating delivery…",
   "collect.recipient.cancel": "Cancel",
   "collect.recipient.updateFailed": "Delivery could not be updated. Try again.",
+  "collect.recipient.profileLevel": "Profile level {level}",
+  "collect.recipient.profileTdh": "Profile TDH: {tdh}",
+  "collect.recipient.walletTdh": "Wallet TDH: {tdh}",
   "collect.recipient.inProfile":
     "Delivery to this profile. Your payer can be a different wallet.",
   "collect.recipient.external":

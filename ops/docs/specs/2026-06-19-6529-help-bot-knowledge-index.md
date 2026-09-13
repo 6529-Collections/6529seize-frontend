@@ -47,9 +47,14 @@ The Collect navigation label opens the set planner. Individual purchase facts
 describe separate Pay with and Deliver to rows, expandable full wallet addresses,
 and editing delivery from the expanded Deliver to row on single-artwork purchases.
 Send to me offers confirmed profile wallets; Send to a fren supports a profile,
-ENS name or wallet address. Use this address applies the selected destination to
-a fresh review, Cancel retains the current one, and an external address requires
-confirmation. Delivery editing is unavailable during a wallet transaction or
+ENS name or wallet address. The chooser shows available profile picture, name,
+profile level and profile TDH, plus each wallet's TDH when known. Level describes
+the profile, not an individual wallet. These cues do not replace checking the
+full resolved destination address. Use this address applies the selected
+destination to a fresh review, Cancel retains the current one, and an external
+address requires confirmation. Continue in wallet stays disabled until the edit
+is applied or cancelled; confirmation is unavailable while the new review prepares.
+Delivery editing is unavailable during a wallet transaction or
 outcome recovery. Purchase facts also describe included order fees, network fee
 caps and conditional maximum totals. Price breakdown, nested Exact amounts and
 Contract details preserve precise amounts,

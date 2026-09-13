@@ -5,7 +5,7 @@ import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import CollectPurchaseSummary from "./CollectPurchaseSummary";
 import CollectOrderSummary from "./CollectOrderSummary";
 import CollectReviewRecipient from "./CollectReviewRecipient";
@@ -91,9 +91,6 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
   const [confirming, setConfirming] = useState(false);
   const [localError, setLocalError] = useState(false);
   const inFlight = useRef(false);
-  const [editingRecipientFor, setEditingRecipientFor] = useState<string | null>(
-    null
-  );
   const editingRecipient = useRef<string | null>(null);
   const recipientHost = useRef<HTMLDivElement>(null);
   const { review } = props;
@@ -102,12 +99,22 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
     props.recipientEditor?.profile?.id,
     props.recipientEditor?.payingWallet.toLowerCase(),
   ]);
+  const [recipientEditing, setRecipientEditing] = useState({
+    scope: recipientScope,
+    open: false,
+  });
+  if (recipientEditing.scope !== recipientScope) {
+    setRecipientEditing({ scope: recipientScope, open: false });
+  }
+  useLayoutEffect(() => {
+    editingRecipient.current = null;
+  }, [recipientScope]);
   const canConfirm =
     review !== null &&
     props.stage === "review" &&
     !review.disabledReason &&
     !confirming &&
-    editingRecipientFor !== recipientScope;
+    !(recipientEditing.scope === recipientScope && recipientEditing.open);
   const confirm = async () => {
     if (
       !canConfirm ||
@@ -235,7 +242,7 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
                   }
                   onEditingChange={(open) => {
                     editingRecipient.current = open ? recipientScope : null;
-                    setEditingRecipientFor(open ? recipientScope : null);
+                    setRecipientEditing({ scope: recipientScope, open });
                   }}
                   onApply={async (address, acknowledgeExternal) => {
                     if (inFlight.current || !props.recipientEditor)

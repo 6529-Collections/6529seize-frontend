@@ -464,12 +464,12 @@ function CollectTradeControllerContent({
     wallet: connection.address,
     enabled: action === "buy" && stage === "review" && !disabledReason,
     onUpdated: (next, request) => {
-      setDraft({
-        ...draft,
+      setDraft((current) => ({
+        ...current,
         quantity: request.quantity,
         recipient: request.recipient,
         acknowledgeExternalRecipient: request.acknowledge_external_recipient,
-      });
+      }));
       setQuantityEdited(true);
       setExpected(request);
       receiveOperation(next);
@@ -565,7 +565,11 @@ function CollectTradeControllerContent({
               marketOperationHasUnresolvedSend(displayedOperation) && (
                 <CollectTransactionRecovery
                   key={displayedOperation.id}
-                  disabled={!isAuthenticated || Boolean(activeProfileProxy)}
+                  disabled={
+                    !isAuthenticated ||
+                    Boolean(activeProfileProxy) ||
+                    recipientUpdate.pending
+                  }
                   onRecover={(hash) =>
                     execution.recoverTransaction(displayedOperation, hash)
                   }

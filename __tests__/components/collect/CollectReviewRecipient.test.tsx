@@ -179,10 +179,8 @@ it("uses the mint search to select a fren's exact wallet without preparing or pu
   );
   await waitFor(() =>
     expect(
-      screen.getByRole("textbox", {
-        name: "Or enter a wallet address directly",
-      })
-    ).toHaveValue(getAddress(fren))
+      screen.getByText(getAddress(fren), { selector: "code" })
+    ).toBeVisible()
   );
   expect(
     screen.getByText(getAddress(fren), { selector: "code" })

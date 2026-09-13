@@ -1,14 +1,16 @@
 "use client";
 
 import RecipientSelector from "@/components/common/RecipientSelector";
+import TransferModalPfp from "@/components/nft-transfer/TransferModalPfp";
 import Button from "@/components/utils/button/Button";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { CheckIcon } from "@heroicons/react/24/outline";
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { getAddress, isAddress } from "viem";
 import { COLLECT_INPUT_CLASS } from "./CollectGoalForm";
 import {
@@ -33,6 +35,49 @@ function asRecipientProfile(profile: ApiIdentity): CommunityMemberMinimal {
   };
 }
 
+function RecipientProfileContext({
+  profile,
+}: {
+  readonly profile: CommunityMemberMinimal;
+}) {
+  const locale = useBrowserLocale();
+  const hasLevel = Number.isInteger(profile.level) && profile.level >= 0;
+  const hasTdh = Number.isFinite(profile.tdh) && profile.tdh >= 0;
+  const name = [profile.handle, profile.display].find((value) => value?.trim());
+  return (
+    <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
+      {hasLevel && (
+        <div aria-hidden="true" className="tw-shrink-0">
+          <TransferModalPfp src={profile.pfp} alt="" level={profile.level} />
+        </div>
+      )}
+      <div className="tw-min-w-0 tw-flex-1">
+        {name && (
+          <bdi className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100 [overflow-wrap:anywhere]">
+            {name}
+          </bdi>
+        )}
+        <div className="tw-flex tw-flex-wrap tw-gap-x-3 tw-text-xs tw-tabular-nums tw-leading-5 tw-text-iron-400">
+          {hasLevel && (
+            <span>
+              {t(locale, "collect.recipient.profileLevel", {
+                level: formatInteger(locale, profile.level),
+              })}
+            </span>
+          )}
+          {hasTdh && (
+            <span>
+              {t(locale, "collect.recipient.profileTdh", {
+                tdh: formatInteger(locale, profile.tdh),
+              })}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CollectRecipientPicker({
   profile,
   payingWallet,
@@ -51,9 +96,11 @@ export default function CollectRecipientPicker({
   readonly compact?: boolean;
 }) {
   const locale = useBrowserLocale();
+  const walletContextPrefix = useId();
   const [otherProfile, setOtherProfile] =
     useState<CommunityMemberMinimal | null>(null);
   const [searchRevision, setSearchRevision] = useState(0);
+  const [focusSearch, setFocusSearch] = useState(false);
   const [chosenMode, setChosenMode] = useState<"profile" | "other" | null>(
     null
   );
@@ -79,6 +126,7 @@ export default function CollectRecipientPicker({
   const changeMode = (nextMode: "profile" | "other") => {
     if (nextMode === mode) return;
     setChosenMode(nextMode);
+    setFocusSearch(false);
     setOtherProfile(null);
     onChange(
       nextMode === "profile"
@@ -126,11 +174,30 @@ export default function CollectRecipientPicker({
           aria-describedby={invalid ? errorId : undefined}
           className="tw-pb-1 tw-pt-2"
         >
+          {compact && (
+            <div className="tw-mb-3 tw-px-2">
+              <RecipientProfileContext profile={ownProfile} />
+            </div>
+          )}
           {compact && ownIdentity.wallets.length > 0 && (
             <div className="tw-space-y-1">
               {ownIdentity.wallets.map((wallet) => {
                 const selected = areEqualAddresses(wallet.wallet, value);
-                const display = wallet.display.trim();
+                const display =
+                  typeof wallet.display === "string"
+                    ? wallet.display.trim()
+                    : "";
+                const walletTdh = profile?.wallets?.find((entry) =>
+                  areEqualAddresses(entry.wallet, wallet.wallet)
+                )?.tdh;
+                const walletContext =
+                  typeof walletTdh === "number" &&
+                  Number.isFinite(walletTdh) &&
+                  walletTdh >= 0
+                    ? t(locale, "collect.recipient.walletTdh", {
+                        tdh: formatInteger(locale, walletTdh),
+                      })
+                    : undefined;
                 return (
                   <button
                     key={wallet.wallet}
@@ -138,6 +205,11 @@ export default function CollectRecipientPicker({
                     aria-pressed={selected}
                     aria-label={
                       display ? `${display} ${wallet.wallet}` : wallet.wallet
+                    }
+                    aria-describedby={
+                      walletContext
+                        ? `${walletContextPrefix}-${wallet.wallet}`
+                        : undefined
                     }
                     onClick={() => onChange(wallet.wallet)}
                     className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-left aria-pressed:tw-bg-white/[0.04] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/[0.04]"
@@ -155,6 +227,14 @@ export default function CollectRecipientPicker({
                       >
                         {`${wallet.wallet.slice(0, 6)}…${wallet.wallet.slice(-4)}`}
                       </code>
+                      {walletContext && (
+                        <span
+                          id={`${walletContextPrefix}-${wallet.wallet}`}
+                          className="tw-block tw-text-xs tw-tabular-nums tw-leading-5 tw-text-iron-400"
+                        >
+                          {walletContext}
+                        </span>
+                      )}
                     </span>
                     {selected && (
                       <CheckIcon
@@ -199,13 +279,14 @@ export default function CollectRecipientPicker({
         >
           {compact && otherProfile && (
             <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
-              <bdi className="tw-min-w-0 tw-flex-1 tw-text-sm tw-font-normal tw-text-iron-200">
-                {otherProfile.handle ?? otherProfile.display}
-              </bdi>
+              <div className="tw-min-w-0 tw-flex-1">
+                <RecipientProfileContext profile={otherProfile} />
+              </div>
               <button
                 type="button"
                 onClick={() => {
                   setOtherProfile(null);
+                  setFocusSearch(true);
                   setSearchRevision((revision) => revision + 1);
                   onChange("");
                 }}
@@ -218,7 +299,7 @@ export default function CollectRecipientPicker({
           <RecipientSelector
             key={searchRevision}
             open
-            autoFocusSearch={false}
+            autoFocusSearch={compact && focusSearch}
             selectedProfile={otherProfile}
             selectedWallet={value || null}
             onProfileSelect={(selected) => {
@@ -229,27 +310,33 @@ export default function CollectRecipientPicker({
               onChange(wallet && isAddress(wallet) ? getAddress(wallet) : "")
             }
             label={t(locale, "collect.recipient.search")}
+            showLabel={!compact || !otherProfile}
+            // A new lookup clears the old destination before its results arrive.
             {...(compact ? { onSearchChange: () => onChange("") } : {})}
             showSelectedProfileCard={!compact}
+            showWalletTdh={compact}
             locale={locale}
           />
-          <label className="tw-block tw-space-y-2 tw-text-xs tw-text-iron-300">
-            <span>{t(locale, "collect.recipient.direct")}</span>
-            <input
-              autoComplete="off"
-              spellCheck={false}
-              maxLength={42}
-              value={value}
-              onChange={(event) => {
-                setOtherProfile(null);
-                setSearchRevision((revision) => revision + 1);
-                onChange(event.target.value);
-              }}
-              aria-invalid={invalid}
-              aria-describedby={invalid ? errorId : undefined}
-              className={`${COLLECT_INPUT_CLASS} tw-font-mono tw-text-xs`}
-            />
-          </label>
+          {(!compact || !otherProfile) && (
+            <label className="tw-block tw-space-y-2 tw-text-xs tw-text-iron-300">
+              <span>{t(locale, "collect.recipient.direct")}</span>
+              <input
+                autoComplete="off"
+                spellCheck={false}
+                maxLength={42}
+                value={value}
+                onChange={(event) => {
+                  setOtherProfile(null);
+                  setFocusSearch(false);
+                  setSearchRevision((revision) => revision + 1);
+                  onChange(event.target.value);
+                }}
+                aria-invalid={invalid}
+                aria-describedby={invalid ? errorId : undefined}
+                className={`${COLLECT_INPUT_CLASS} tw-font-mono tw-text-xs`}
+              />
+            </label>
+          )}
         </div>
       )}
       {!compact && isAddress(value) && (

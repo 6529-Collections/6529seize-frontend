@@ -120,9 +120,16 @@ confirmed wallets. **Send to a fren** lets you search a profile or ENS name, or
 enter a wallet address. Choose the receiving wallet and check its full resolved
 address. Confirm an address outside your profile before applying it.
 
+The chooser shows the selected profile's picture, name, level and profile TDH
+where available. Level belongs to the profile. Individual wallet rows also show
+**Wallet TDH** when that wallet's value is known. These details help identify the
+profile; use the full resolved address to confirm the destination.
+
 **Use this address** applies the destination and prepares a fresh purchase review;
 it does not sign or send a transaction. Review the updated address and terms
 before choosing **Continue in wallet**. **Cancel** keeps the current destination.
+**Continue in wallet** stays disabled until you apply or cancel the destination
+edit; applying keeps confirmation unavailable while the new review prepares.
 Delivery changes are unavailable while a wallet transaction or outcome recovery
 is in progress.
 

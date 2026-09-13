@@ -124,13 +124,29 @@ it("blocks Continue while editing and restores the original review when cancelle
   ).toBeDisabled();
   fireEvent.click(screen.getByRole("button", { name: "Continue in wallet" }));
   expect(onConfirm).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole("button", { name: "Cancel", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
   expect(
     screen.getByRole("button", { name: "Continue in wallet" })
   ).toBeEnabled();
   expect(onApply).not.toHaveBeenCalled();
   fireEvent.click(screen.getByText("Deliver to"));
   expect(screen.getByRole("combobox")).toHaveValue(PAYER);
+});
+
+it("does not retain an abandoned edit after switching away and back to a review", () => {
+  const view = render(sheet());
+  fireEvent.click(screen.getByText("Deliver to"));
+  expect(
+    screen.getByRole("button", { name: "Continue in wallet" })
+  ).toBeDisabled();
+
+  view.rerender(sheet({ current: { ...review, id: "another-purchase" } }));
+  view.rerender(sheet());
+
+  expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Continue in wallet" })
+  ).toBeEnabled();
 });
 
 it("waits for the recipient review update, then confirms only the new review", async () => {
