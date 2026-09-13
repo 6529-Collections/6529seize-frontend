@@ -3,6 +3,7 @@
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
+import Button from "@/components/utils/button/Button";
 import { collectOrderPurchaseQuantity } from "@/components/collect/collect-buy.helpers";
 import type { CollectSelectedListing } from "@/components/collect/collect-selection.helpers";
 import { collectProfileWallets } from "@/components/collect/collect-recipient.helpers";
@@ -43,7 +44,6 @@ import {
 } from "./market-depth-trade.helpers";
 
 import {
-  ACTION_CLASS,
   TradeContext,
   rowMatches,
   type RowState,
@@ -577,10 +577,13 @@ function SupportedMarketDepthTradeProvider({
       <NftPurchasingGate>
         {selected.length > 0 && (
           <div className="tw-mt-5 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-4">
-            <button
+            <Button
               type="button"
-              className={`${ACTION_CLASS} tw-w-full sm:tw-w-auto`}
-              disabled={!selectionValid || reviewState.busy}
+              variant="action"
+              size="lg"
+              className="tw-font-inherit tw-w-full !tw-whitespace-normal sm:tw-w-auto"
+              disabled={!selectionValid}
+              loading={reviewState.busy}
               onClick={(event) => {
                 reviewOpener.current = event.currentTarget;
                 reviewSelection();
@@ -589,7 +592,7 @@ function SupportedMarketDepthTradeProvider({
               {t(locale, "marketDepth.trade.review", {
                 count: formatNumber(locale, selected.length),
               })}
-            </button>
+            </Button>
             {reviewState.message && (
               <p
                 role={reviewState.error ? "alert" : "status"}
@@ -607,6 +610,22 @@ function SupportedMarketDepthTradeProvider({
                 .map((item) => item.order.identity.order_hash.toLowerCase())
                 .join(":")}
               items={reviewItems}
+              onItemsChange={(remaining) => {
+                const reviewedOrders = new Set(
+                  reviewItems.map((item) => item.order)
+                );
+                const retainedOrders = new Set(
+                  remaining.map((item) => item.order)
+                );
+                // Keep the active quote and its key stable; update only the browsing selection.
+                setSelected(
+                  selectedRef.current.filter(
+                    (item) =>
+                      !reviewedOrders.has(item.order) ||
+                      retainedOrders.has(item.order)
+                  )
+                );
+              }}
               onClose={() => {
                 setReviewItems(null);
                 restoreFocus(reviewOpener.current);

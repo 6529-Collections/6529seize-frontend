@@ -4,7 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
-import { COLLECT_PLANNER_FAMILIES, isCollectEdition } from "./collect-families";
+import { isCollectEdition } from "./collect-families";
 import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
 import type { ApiCollectPlanLeg } from "@/generated/models/ApiCollectPlanLeg";
 import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
@@ -46,7 +46,11 @@ import {
   collectPlanReviewFingerprint,
   collectPlanReviewLegs,
 } from "./collect-plan-review.helpers";
-import CollectPageView, { COLLECT_INTENTS } from "./CollectPageView";
+import {
+  collectLocation,
+  collectIntentForCollection,
+} from "./collect-navigation";
+import CollectPageView from "./CollectPageView";
 import CollectTradeController from "./CollectTradeController";
 import { collectProfileWallets } from "./collect-recipient.helpers";
 import { collectLowestArtworkEntries } from "./collect-catalog.helpers";
@@ -105,19 +109,13 @@ function CollectCatalogController({
   }, []);
   const router = useRouter();
   const params = new URLSearchParams(queryString);
-  const collection: CollectCollection =
-    COLLECT_PLANNER_FAMILIES.find(
-      (item) => item.toString() === params.get("collection")
-    ) ?? "memes";
-  const intent: CollectIntent =
-    COLLECT_INTENTS.find((item) => item === params.get("intent")) ?? "full_set";
+  const location = collectLocation(queryString);
+  const { collection, intent, definitionId } = location;
   const tdhProjection = intent === "tdh" && params.get("view") === "projection";
-  const explicitDefinition = params.get("definition");
-  let fullSetDefinition = collection === "gradients" ? "gradients" : "memes";
-  if (explicitDefinition === "memes" || explicitDefinition === "gradients")
-    fullSetDefinition = explicitDefinition;
-  const definitionId =
-    intent === "full_set" ? fullSetDefinition : (explicitDefinition ?? "");
+  useEffect(() => {
+    if (location.query !== queryString)
+      router.replace(`/collect?${location.query}`, { scroll: false });
+  }, [location.query, queryString, router]);
   const routeGoal = JSON.stringify([intent, collection, definitionId]);
   const [goalState, setGoalState] = useState<{
     routeGoal: string;
@@ -139,7 +137,12 @@ function CollectCatalogController({
     setGoalState({
       routeGoal,
       revision: goalState.revision + 1,
-      draft: { ...goalState.draft, intent, definitionId },
+      draft: {
+        ...goalState.draft,
+        intent,
+        definitionId,
+        targetCount: collection === "memes" ? goalState.draft.targetCount : "1",
+      },
     });
   }
   const goalDraft = goalState.draft;
@@ -389,57 +392,25 @@ function CollectCatalogController({
     }
     router.replace(`/collect?${next.toString()}`, { scroll: false });
   };
-  let completionCollection: CollectCollection =
-    fullSetDefinition === "gradients" ? "gradients" : "memes";
-  if (intent === "pebbles_set") completionCollection = "pebbles";
-  else if (intent === "season" || intent === "artist")
-    completionCollection = "memes";
   const changeCollection = (value: CollectCollection) => {
-    const patch: Record<string, string> = {
+    if (value === collection) return;
+    updateQuery({
       collection: value,
+      intent: collectIntentForCollection(intent, value),
+      definition: "",
       token: "",
       q: "",
-    };
-    if (["season", "full_set", "artist", "pebbles_set"].includes(intent)) {
-      if (value === completionCollection) return;
-      patch["definition"] = "";
-      if (value === "pebbles") patch["intent"] = "pebbles_set";
-      else if (value === "gradients" || intent === "pebbles_set")
-        patch["intent"] = "full_set";
-    }
-    updateQuery(patch);
+    });
   };
   const changeIntent = (value: CollectIntent) => {
-    const patch: Record<string, string> = {
-      intent: value,
+    updateQuery({
+      collection,
+      intent: collectIntentForCollection(value, collection),
       definition: "",
       view: "",
-    };
-    if (
-      ["season", "full_set", "artist", "pebbles_set", "tdh"].includes(value)
-    ) {
-      patch["token"] = "";
-      patch["q"] = "";
-    }
-    switch (value) {
-      case "season":
-      case "artist":
-      case "tdh":
-        patch["collection"] = "memes";
-        break;
-      case "full_set":
-        patch["collection"] =
-          completionCollection === "gradients" ? "gradients" : "memes";
-        break;
-      case "pebbles_set":
-        patch["collection"] = "pebbles";
-        break;
-      case "lowest":
-      case "explore":
-      case "specific":
-        break;
-    }
-    updateQuery(patch);
+      token: "",
+      q: "",
+    });
   };
   let goalContent: ReactNode;
   if (["season", "full_set", "artist", "pebbles_set"].includes(intent))
@@ -454,8 +425,7 @@ function CollectCatalogController({
         }}
         profile={connectedProfile}
         completion={{
-          collection: completionCollection,
-          onCollectionChange: changeCollection,
+          collection,
           onIntentChange: changeIntent,
         }}
         onChange={setGoalDraft}
@@ -554,7 +524,6 @@ function CollectCatalogController({
         }
         goalContent={goalContent}
         workspaceActive={offerWorkspaceActive}
-        showCollections={!tdhProjection}
         recoveryContent={
           blendedPurchase &&
           !blendedPurchaseOpen && (
@@ -746,6 +715,15 @@ function CollectCatalogController({
       {batch && (
         <CollectBatchController
           items={batch.items}
+          onItemsChange={(remaining) =>
+            setSelection((current) =>
+              current.filter(
+                (item) =>
+                  !batch.items.some((original) => original === item) ||
+                  remaining.some((retained) => retained === item)
+              )
+            )
+          }
           {...(batch.recipient ? { initialRecipient: batch.recipient } : {})}
           onClose={() => setBatch(null)}
           onSettled={(completed) => {

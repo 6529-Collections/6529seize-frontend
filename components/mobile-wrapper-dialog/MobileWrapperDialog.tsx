@@ -63,7 +63,7 @@ type MobileWrapperDialogProps = {
 };
 
 /** Retained children do not trigger Headless UI's unmount focus restoration. */
-function useRetainedDialogFocus(
+export function useRetainedDialogFocus(
   enabled: boolean,
   open: boolean,
   dialog: RefObject<HTMLDivElement | null>

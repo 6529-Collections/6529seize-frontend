@@ -14,6 +14,13 @@ import {
 } from "@testing-library/react";
 import { ApiMarketBatchOperationStateEnum } from "@/generated/models/ApiMarketBatchOperation";
 import { batchFixture, NOW, PAYER } from "./market-batch.fixture";
+import { createMarketSendAttempt } from "@/components/collect/market-send-attempt";
+import {
+  ApiMarketBatchSendAttemptPurposeEnum,
+  ApiMarketBatchSendAttemptStatusEnum,
+} from "@/generated/models/ApiMarketBatchSendAttempt";
+
+import * as recipientHooks from "@/components/collect/useCollectBatchRecipientUpdate";
 
 let mockFixture = batchFixture();
 let mockNative = false;
@@ -50,8 +57,9 @@ jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: () => ({ isCapacitor: mockNative }),
 }));
-jest.mock("@/components/collect/CollectTradeSheet", () => ({
-  CollectTradeDialog: ({ children }: { children: ReactNode }) => (
+jest.mock("@/components/collect/CollectCheckoutScreen", () => ({
+  __esModule: true,
+  default: ({ children }: { children: ReactNode }) => (
     <div role="dialog">{children}</div>
   ),
 }));
@@ -83,6 +91,7 @@ jest.mock("@/components/collect/useMarketSettlement", () => ({
 }));
 jest.mock("@/components/collect/useMarketBatchExecution", () => ({
   useMarketBatchExecution: () => ({
+    ready: true,
     busy: false,
     confirm: mockConfirm,
     clearMessage: jest.fn(),
@@ -122,7 +131,37 @@ beforeEach(() => {
   mockPrepare.mockResolvedValue(mockFixture.operation);
 });
 afterEach(() => jest.restoreAllMocks());
-function mount(initialOperation = false) {
+
+it.each([true, false])(
+  "only requests a manual hash when the active batch lacks one (known=%s)",
+  async (known) => {
+    const transaction = mockFixture.operation.transaction!;
+    const attempt = createMarketSendAttempt(
+      transaction,
+      mockFixture.operation.block_number,
+      mockFixture.operation.revision
+    );
+    mockFixture.operation.state = ApiMarketBatchOperationStateEnum.Unknown;
+    mockFixture.operation.send_attempt = {
+      attempt_id: attempt.id,
+      purpose: ApiMarketBatchSendAttemptPurposeEnum.Transaction,
+      transaction_digest: attempt.digest,
+      snapshot_block: attempt.snapshotBlock,
+      transaction,
+      status: ApiMarketBatchSendAttemptStatusEnum.Active,
+      transaction_hash: known ? `0x${"a".repeat(64)}` : null,
+    };
+    mount(true);
+    const input = screen.queryByRole("textbox", {
+      name: "Transaction hash from your wallet",
+    });
+    if (known) expect(input).not.toBeInTheDocument();
+    else expect(input).toBeInTheDocument();
+    expect(mockConfirm).not.toHaveBeenCalled();
+  }
+);
+
+function mount(initialOperation = false, onEmpty = jest.fn()) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
   });
@@ -140,6 +179,7 @@ function mount(initialOperation = false) {
       <CollectBatchController
         items={items}
         onClose={jest.fn()}
+        onEmpty={onEmpty}
         {...(initialOperation
           ? { initialOperation: mockFixture.operation }
           : {})}
@@ -170,7 +210,7 @@ it("explains a failed connection and retries the exact batch without signing", a
   expect(mockConfirm).not.toHaveBeenCalled();
 });
 
-it("prepares once, focuses review without signing, and preserves the edited destination when returning to the draft", async () => {
+it("prepares once and supports direct review editing without restarting the purchase", async () => {
   mount();
   const draft = screen.getByLabelText("Delivery draft");
   fireEvent.change(draft, { target: { value: "selected fren" } });
@@ -192,10 +232,15 @@ it("prepares once, focuses review without signing, and preserves the edited dest
     mockFixture.request,
     expect.any(Function)
   );
-  fireEvent.click(screen.getByRole("button", { name: "Edit purchase" }));
-  await waitFor(() =>
-    expect(screen.getByLabelText("Delivery draft")).toBeVisible()
-  );
+  expect(
+    screen.queryByRole("button", { name: "Edit purchase" })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getAllByRole("button", {
+      name: "Remove Selected artwork from this purchase",
+    })
+  ).toHaveLength(2);
+  expect(screen.getByRole("button", { name: /Change all to/ })).toBeEnabled();
   expect(screen.getByLabelText("Delivery draft")).toBe(draft);
   expect(draft).toHaveValue("selected fren");
 });
@@ -329,3 +374,49 @@ it.each(["profile", "paying wallet"])(
     expect(mockConfirm).not.toHaveBeenCalled();
   }
 );
+
+it("does not reopen a retained review after the guarded final-item removal callback", async () => {
+  jest
+    .spyOn(recipientHooks, "useCollectBatchRecipientUpdate")
+    .mockImplementation((options) => ({
+      canEdit: true,
+      pending: false,
+      assertIdle: jest.fn(),
+      update: jest.fn(),
+      updateAll: jest.fn(),
+      remove: async () => {
+        options.onEmpty?.();
+        return true;
+      },
+    }));
+  const onEmpty = jest.fn();
+  localStorage.setItem(
+    `6529-market-batch:${mockFixture.request.profile_id}:${mockFixture.operation.id}`,
+    JSON.stringify({ request: mockFixture.request })
+  );
+  const view = mount(true, onEmpty);
+  await waitFor(() =>
+    expect(
+      screen.getAllByRole("button", {
+        name: "Remove Selected artwork from this purchase",
+      })[0]
+    ).toBeEnabled()
+  );
+  fireEvent.click(
+    screen.getAllByRole("button", {
+      name: "Remove Selected artwork from this purchase",
+    })[0]!
+  );
+  await waitFor(() => expect(onEmpty).toHaveBeenCalledTimes(1));
+  view.rerenderScope();
+  expect(
+    screen.queryByRole("button", { name: "Continue in wallet" })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", {
+      name: "Remove Selected artwork from this purchase",
+    })
+  ).not.toBeInTheDocument();
+  expect(mockConfirm).not.toHaveBeenCalled();
+  expect(mockPrepare).not.toHaveBeenCalled();
+});

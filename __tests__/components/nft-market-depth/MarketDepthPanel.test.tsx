@@ -424,8 +424,8 @@ describe("MarketDepthPanel", () => {
     }
   );
 
-  it("shows five price levels initially and reveals the complete list", async () => {
-    const levels = Array.from({ length: 7 }, (_, index) => ({
+  it("shows ten price levels initially and reveals the complete list", async () => {
+    const levels = Array.from({ length: 12 }, (_, index) => ({
       unit_price: `${index + 1}.123`,
       quantity: "1",
       cumulative_quantity: String(index + 1),
@@ -449,14 +449,14 @@ describe("MarketDepthPanel", () => {
     );
 
     await screen.findByText("Listings · ETH");
-    expect(container.querySelector('[title="5.123"]')).toBeInTheDocument();
-    expect(container.querySelector('[title="6.123"]')).not.toBeInTheDocument();
+    expect(container.querySelector('[title="10.123"]')).toBeInTheDocument();
+    expect(container.querySelector('[title="11.123"]')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Show all levels" }));
-    expect(container.querySelector('[title="7.123"]')).toBeInTheDocument();
+    expect(container.querySelector('[title="12.123"]')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Show fewer levels" }));
-    expect(container.querySelector('[title="6.123"]')).not.toBeInTheDocument();
+    expect(container.querySelector('[title="11.123"]')).not.toBeInTheDocument();
   });
 
   it("keeps opened paginated order details complete across automatic update intervals", async () => {

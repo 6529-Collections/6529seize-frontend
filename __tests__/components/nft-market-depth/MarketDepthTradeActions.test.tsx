@@ -10,6 +10,7 @@ import {
   MARKET_ZERO,
 } from "@/components/collect/market-validation";
 import { MEMES_CONTRACT } from "@/constants/constants";
+import type CollectBatchController from "@/components/collect/CollectBatchController";
 import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
 import {
@@ -31,7 +32,7 @@ import {
   within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState, type ReactNode } from "react";
+import { useState, type ComponentProps, type ReactNode } from "react";
 
 const mockFetchAssets = jest.fn();
 const mockFetchExactOrder = jest.fn();
@@ -76,7 +77,7 @@ jest.mock("@/services/api/market-api", () => ({
 }));
 jest.mock("@/components/collect/CollectBatchController", () => ({
   __esModule: true,
-  default: (props: { onClose: () => void }) => {
+  default: (props: ComponentProps<typeof CollectBatchController>) => {
     mockBatch(props);
     return (
       <div data-testid="batch-review">
@@ -418,6 +419,7 @@ describe("MarketDepthTradeActions", () => {
 
   it("collects a single order from its collapsed price row with keyboard access", async () => {
     const user = userEvent.setup();
+    const resolve = deferExactOrders();
     const { onLoadOrders } = renderLevel([depthOrder()]);
     const disclosure = screen.getByRole("button", { name: /^Listings at / });
     const collect = screen.getByRole("button", { name: "Collect" });
@@ -428,6 +430,11 @@ describe("MarketDepthTradeActions", () => {
     await user.tab();
     expect(collect).toHaveFocus();
     await user.keyboard("{Enter}");
+    expect(collect).toHaveAttribute("aria-busy", "true");
+    expect(collect).toBeDisabled();
+    expect(collect).toHaveAccessibleName("Collect");
+    await waitFor(() => expect(mockFetchExactOrder).toHaveBeenCalledTimes(1));
+    await act(async () => resolve(HASH, executableOrder()));
     await screen.findByRole("textbox", { name: "Quantity" });
     expect(screen.getByRole("button", { name: "Remove" })).toHaveAttribute(
       "aria-pressed",
@@ -678,6 +685,102 @@ describe("MarketDepthTradeActions", () => {
     });
   });
 
+  it("updates the depth selection after quoted removal without remounting the active review and reopens only retained orders", async () => {
+    const secondMaker = "0x4444444444444444444444444444444444444444";
+    mockFetchExactOrder.mockImplementation((hash: string) =>
+      Promise.resolve(
+        hash === SECOND_HASH
+          ? executableOrder({
+              identity: {
+                protocol_address: MARKET_SEAPORT,
+                order_hash: SECOND_HASH,
+              },
+              maker: secondMaker,
+            })
+          : executableOrder()
+      )
+    );
+    renderOfferRows([
+      depthOrder(),
+      depthOrder({
+        order_key: "depth-2",
+        order_id: SECOND_HASH,
+        maker: secondMaker,
+        liquidity_group: "second-maker-asset-eth",
+      }),
+    ]);
+    fireEvent.click(screen.getAllByRole("button", { name: "Collect" })[0]!);
+    await screen.findByRole("button", { name: "Review selected listings (1)" });
+    fireEvent.click(screen.getByRole("button", { name: "Collect" }));
+    await screen.findByRole("button", { name: "Review selected listings (2)" });
+    fireEvent.change(screen.getAllByRole("textbox", { name: "Quantity" })[1]!, {
+      target: { value: "2" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Review selected listings (2)" })
+    );
+    const review = await screen.findByTestId("batch-review");
+    const originalProps = mockBatch.mock.calls.at(-1)![0] as ComponentProps<
+      typeof CollectBatchController
+    >;
+    const retained = originalProps.items[1]!;
+    expect(retained.order.identity.order_hash).toBe(SECOND_HASH);
+    expect(retained.quantity).toBe("2");
+    expect(mockFetchExactOrder).toHaveBeenCalledTimes(4);
+
+    act(() => originalProps.onItemsChange?.([retained]));
+
+    expect(
+      screen.getByRole("button", { name: "Review selected listings (1)" })
+    ).toBeVisible();
+    expect(screen.getByRole("button", { name: "Collect" })).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
+    expect(screen.getByRole("button", { name: "Remove" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    expect(screen.getByRole("textbox", { name: "Quantity" })).toHaveValue("2");
+    expect(screen.getByTestId("batch-review")).toBe(review);
+    expect(
+      (
+        mockBatch.mock.calls.at(-1)![0] as ComponentProps<
+          typeof CollectBatchController
+        >
+      ).items
+    ).toBe(originalProps.items);
+    expect(mockFetchExactOrder).toHaveBeenCalledTimes(4);
+
+    fireEvent.click(screen.getByRole("button", { name: "Close batch review" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Review selected listings (1)" })
+    );
+    await screen.findByTestId("batch-review");
+    const reopened = mockBatch.mock.calls.at(-1)![0] as ComponentProps<
+      typeof CollectBatchController
+    >;
+    expect(reopened.items).toEqual([retained]);
+    expect(mockFetchExactOrder).toHaveBeenCalledTimes(5);
+    expect(mockFetchExactOrder).toHaveBeenLastCalledWith(
+      SECOND_HASH,
+      MARKET_SEAPORT,
+      ASSET_KEY,
+      ApiMarketTradeOrderSideEnum.Listing,
+      expect.any(AbortSignal)
+    );
+
+    act(() => {
+      reopened.onItemsChange?.([]);
+      reopened.onClose();
+    });
+    expect(screen.queryByTestId("batch-review")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Review selected listings/ })
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Collect" })).toHaveLength(2);
+  });
+
   it("associates an invalid quantity message until the value is corrected", async () => {
     renderAction(depthOrder());
     fireEvent.click(screen.getByRole("button", { name: "Collect" }));
@@ -755,56 +858,65 @@ describe("MarketDepthTradeActions", () => {
     expect(mockTrade).not.toHaveBeenCalled();
   });
 
-  it.each([false, true])("requires signer ownership and binds the page NFT when accepting a WETH offer (collection-wide: %s)", async (collectionWide) => {
-    const offer = executableOrder({
-      side: ApiMarketTradeOrderSideEnum.Offer,
-      currency: MARKET_WETH,
-      quantity: "10",
-      available_quantity: "4",
-      purchase_quantity: "1",
-      total_wei: "1000",
-      net_wei: "900",
-      fees: [
-        {
-          recipient: "0x2222222222222222222222222222222222222222",
-          amount_wei: "100",
-        },
-      ],
-    });
-    mockFetchExactOrder.mockResolvedValue(offer);
-    mockFetchOwnership.mockResolvedValue({
-      account: { profile_id: "profile-1" },
-      requirements: [
-        {
-          holdings: [
-            {
-              asset_key: ASSET_KEY,
-              wallet: mockConnection.address,
-              quantity: "2",
-            },
-          ],
-        },
-      ],
-    });
-    renderAction(
-      depthOrder({
-        side: ApiMarketOrderSideEnum.Bid,
-        currency: { address: MARKET_WETH, symbol: "WETH", decimals: 18 },
-        ...(collectionWide ? { scope: ApiMarketOrderScopeEnum.Collection, applicability: ApiMarketOrderApplicabilityEnum.Collection, token_id: null } : {}),
-      })
-    );
-    fireEvent.click(screen.getByRole("button", { name: "Accept offer" }));
-    await screen.findByTestId("offer-review");
+  it.each([false, true])(
+    "requires signer ownership and binds the page NFT when accepting a WETH offer (collection-wide: %s)",
+    async (collectionWide) => {
+      const offer = executableOrder({
+        side: ApiMarketTradeOrderSideEnum.Offer,
+        currency: MARKET_WETH,
+        quantity: "10",
+        available_quantity: "4",
+        purchase_quantity: "1",
+        total_wei: "1000",
+        net_wei: "900",
+        fees: [
+          {
+            recipient: "0x2222222222222222222222222222222222222222",
+            amount_wei: "100",
+          },
+        ],
+      });
+      mockFetchExactOrder.mockResolvedValue(offer);
+      mockFetchOwnership.mockResolvedValue({
+        account: { profile_id: "profile-1" },
+        requirements: [
+          {
+            holdings: [
+              {
+                asset_key: ASSET_KEY,
+                wallet: mockConnection.address,
+                quantity: "2",
+              },
+            ],
+          },
+        ],
+      });
+      renderAction(
+        depthOrder({
+          side: ApiMarketOrderSideEnum.Bid,
+          currency: { address: MARKET_WETH, symbol: "WETH", decimals: 18 },
+          ...(collectionWide
+            ? {
+                scope: ApiMarketOrderScopeEnum.Collection,
+                applicability: ApiMarketOrderApplicabilityEnum.Collection,
+                token_id: null,
+              }
+            : {}),
+        })
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Accept offer" }));
+      await screen.findByTestId("offer-review");
 
-    expect(mockTrade.mock.calls.at(-1)?.[0]).toMatchObject({
-      action: "accept",
-      asset,
-      initialOrder: offer,
-      initialQuantity: "1",
-      maximumOrderQuantity: "2",
-      fixedOrder: true,
-    });
-  });
+      expect(mockTrade.mock.calls.at(-1)?.[0]).toMatchObject({
+        action: "accept",
+        asset,
+        initialOrder: offer,
+        initialQuantity: "1",
+        maximumOrderQuantity: "2",
+        fixedOrder: true,
+      });
+    }
+  );
 
   it("keeps the later offer review when an older exact lookup resolves last", async () => {
     const first = offerRow(HASH, "depth-first");

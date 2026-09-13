@@ -7,12 +7,14 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDecimalString } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { useId } from "react";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { CollectReviewMoney } from "./CollectReviewPrimitives";
+import { compactCollectReviewAmount } from "./collect-review-presentation";
 import CollectAssetMedia from "./CollectAssetMedia";
 import CollectBatchDestination from "./CollectBatchDestination";
 import {
   collectAllocationIssue,
   collectAllocationQuantity,
-  collectBatchEthAmount,
 } from "./collect-batch-review.helpers";
 import type { CollectBatchAllocation } from "./collect-batch.types";
 import { collectBuyAmount } from "./collect-buy.helpers";
@@ -46,6 +48,8 @@ export default function CollectBatchReviewItem({
   const locale = useBrowserLocale();
   const id = useId();
   const amount = collectBuyAmount(item.order, item.quantity);
+  const compactAmount =
+    amount === null ? null : compactCollectReviewAmount(locale, amount);
   const copies = collectAllocationQuantity(item.quantity);
   const canSplit =
     isCollectEdition(item.asset.family) && copies !== null && copies > 1n;
@@ -60,6 +64,34 @@ export default function CollectBatchReviewItem({
         position === index ? value : allocation
       )
     );
+  let price = (
+    <p className="tw-m-0 tw-text-sm tw-text-iron-200">
+      {t(locale, "collect.buy.listingChanged")}
+    </p>
+  );
+  if (amount !== null) {
+    price = compactAmount?.approximate ? (
+      <details className="tw-group/amount tw-min-w-0 tw-text-sm tw-text-iron-200">
+        <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-gap-1 tw-rounded-md focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+          <CollectReviewMoney wei={amount} currency="ETH" compact />
+          <ChevronDownIcon
+            aria-hidden="true"
+            className="tw-size-3 tw-shrink-0 tw-text-iron-400 group-open/amount:tw-rotate-180"
+          />
+        </summary>
+        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400 [overflow-wrap:anywhere]">
+          <span className="tw-block">
+            {t(locale, "collect.review.exactAmounts")}
+          </span>
+          <CollectReviewMoney wei={amount} currency="ETH" />
+        </p>
+      </details>
+    ) : (
+      <p className="tw-m-0 tw-text-sm tw-text-iron-200 [overflow-wrap:anywhere]">
+        <CollectReviewMoney wei={amount} currency="ETH" compact />
+      </p>
+    );
+  }
   return (
     <li className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-4">
       <div className="tw-flex tw-items-start tw-gap-3">
@@ -91,11 +123,7 @@ export default function CollectBatchReviewItem({
               quantity: formatDecimalString(locale, item.quantity),
             })}
           </p>
-          <p className="tw-m-0 tw-break-words tw-text-sm tw-tabular-nums tw-text-iron-200">
-            {amount === null
-              ? t(locale, "collect.buy.listingChanged")
-              : collectBatchEthAmount(locale, amount)}
-          </p>
+          {price}
         </div>
       </div>
       {selected && (

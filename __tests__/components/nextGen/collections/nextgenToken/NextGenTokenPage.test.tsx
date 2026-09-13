@@ -131,7 +131,7 @@ jest.mock(
 jest.mock(
   "@/components/nextGen/collections/collectionParts/NextGenCollection",
   () => ({
-    printViewButton: (cur: any, v: any, setView: any) => (
+    printViewButton: (_cur: any, v: any, setView: any) => (
       <button onClick={() => setView(v)} data-testid={`view-button-${v}`}>
         {v}
       </button>
@@ -184,7 +184,7 @@ describe("NextGenTokenPage", () => {
   });
 
   describe("rendering", () => {
-    it("places one Pebbles action before artwork and refreshes market data", () => {
+    it("places one Pebbles action after artwork and before the market tabs", () => {
       renderComponent();
       const collecting = screen.getByRole("button", {
         name: "Collect artwork",
@@ -197,7 +197,10 @@ describe("NextGenTokenPage", () => {
       ).toHaveLength(1);
       expect(
         collecting.compareDocumentPosition(screen.getByTestId("art"))
-      ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      ).toBe(Node.DOCUMENT_POSITION_PRECEDING);
+      expect(collecting.compareDocumentPosition(marketDepth)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
       expect(marketDepth).toHaveAttribute("data-refresh-key", "0");
       fireEvent.click(collecting);
       expect(marketDepth).toHaveAttribute("data-refresh-key", "1");

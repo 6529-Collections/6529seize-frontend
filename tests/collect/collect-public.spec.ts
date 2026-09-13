@@ -65,6 +65,23 @@ const listings = assets.slice(0, 2).map((asset, index) => ({
   },
 }));
 
+function listingsFor(family: string | null) {
+  if (family !== "gradients" && family !== "pebbles") return listings;
+  const contract =
+    family === "gradients"
+      ? "0x0c58ef43ff3032005e472cb5709f8908acb00205"
+      : "0x45882f9bc325e14fbb298a1df930c43a874b83ae";
+  return listings.map((item, index) => {
+    const token_id = String(family === "pebbles" ? 10000000001 + index : index);
+    const asset_key = `1:${contract}:${token_id}`;
+    return {
+      ...item,
+      asset: { ...item.asset, family, contract, token_id, asset_key },
+      order: { ...item.order, asset_key },
+    };
+  });
+}
+
 async function mockCatalog(page: Page, state = { fail: false }) {
   const mutations: string[] = [];
   await page.route("**/*", async (route) => {
@@ -153,7 +170,7 @@ async function mockCatalog(page: Page, state = { fail: false }) {
       }
       await route.fulfill({
         json: {
-          entries: listings,
+          entries: listingsFor(url.searchParams.get("family")),
           next: null,
           checked_at: new Date().toISOString(),
           complete: true,
@@ -164,7 +181,7 @@ async function mockCatalog(page: Page, state = { fail: false }) {
     if (url.pathname === "/api/collect/tdh-listings") {
       await route.fulfill({
         json: {
-          family: "memes",
+          family: url.searchParams.get("family") ?? "memes",
           snapshot_id: "tdh-fixture",
           catalog_version: catalog.version,
           status: "FRESH",
@@ -172,15 +189,16 @@ async function mockCatalog(page: Page, state = { fail: false }) {
           evaluated_ask_count: 2,
           observed_at: new Date().toISOString(),
           next: null,
-          entries: [...listings].reverse().map((item) => ({
-            ...item,
-            available_quantity: "1",
-            purchase_quantity: "1",
-            purchase_cost_wei: item.order.total_wei,
-            rate_hundredths: item.asset.token_id === "2" ? "400" : "100",
-            base_tdh_per_day_hundredths:
-              item.asset.token_id === "2" ? "400" : "100",
-          })),
+          entries: [...listingsFor(url.searchParams.get("family"))]
+            .reverse()
+            .map((item, index) => ({
+              ...item,
+              available_quantity: "1",
+              purchase_quantity: "1",
+              purchase_cost_wei: item.order.total_wei,
+              rate_hundredths: index === 0 ? "400" : "100",
+              base_tdh_per_day_hundredths: index === 0 ? "400" : "100",
+            })),
         },
       });
       return;
@@ -320,6 +338,29 @@ test("listing selection carries across browsing and opens one wallet-gated purch
   const dialog = page.getByRole("dialog");
   await expect(dialog).toHaveCount(1);
   await expect(dialog).toHaveAttribute("aria-modal", "true");
+  const checkoutSurface = dialog.locator(":scope > div").first();
+  const checkoutBounds = await checkoutSurface.evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    const style = getComputedStyle(node);
+    return {
+      x: rect.x,
+      y: rect.y,
+      width: rect.width,
+      height: rect.height,
+      position: style.position,
+      transform: style.transform,
+      className: node.className,
+    };
+  });
+  await info.attach("checkout-bounds", {
+    body: JSON.stringify(checkoutBounds),
+    contentType: "application/json",
+  });
+  expect(checkoutBounds.position).toBe("fixed");
+  expect(checkoutBounds.x).toBe(0);
+  expect(checkoutBounds.y).toBe(0);
+  expect(checkoutBounds.width).toBe(page.viewportSize()!.width);
+  expect(checkoutBounds.height).toBe(page.viewportSize()!.height);
   await expect(
     dialog.getByRole("button", { name: "Connect wallet", exact: true })
   ).toBeVisible();
@@ -365,7 +406,7 @@ test("listing selection carries across browsing and opens one wallet-gated purch
   await noHorizontalOverflow(page);
   await page.screenshot({
     path: info.outputPath("collect-selection-review.png"),
-    fullPage: true,
+    fullPage: false,
   });
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
@@ -508,6 +549,79 @@ test("set planning is the default and navigation opens observed listings", async
   expect(mutations).toEqual([]);
 });
 
+test("one collection selector stays available across set, listings and future TDH", async ({
+  page,
+}, info) => {
+  const mutations = await mockCatalog(page);
+  await page.goto("/collect?collection=gradients&intent=full_set", {
+    waitUntil: "domcontentloaded",
+  });
+  const collection = page.getByRole("button", { name: /^Collection\b/ });
+  await expect(collection).toContainText("Gradients");
+  await expect(
+    page.getByRole("textbox", { name: "Copies per NFT", exact: true })
+  ).toHaveCount(0);
+  await collection.focus();
+  await collection.press("Enter");
+  const options = page.getByRole("option");
+  await expect(options).toHaveText([
+    "The Memes",
+    "Gradients",
+    "Pebbles · NextGen",
+  ]);
+  await page
+    .getByRole("option", { name: "Pebbles · NextGen", exact: true })
+    .click();
+  await expect(collection).toBeFocused();
+  await expect(page).toHaveURL(/collection=pebbles/);
+  await expect(
+    page.getByRole("form", { name: "Complete a Pebbles set", exact: true })
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Lowest listings", exact: true })
+    .click();
+  await expect(collection).toContainText("Pebbles · NextGen");
+  await page.getByRole("button", { name: "TDH", exact: true }).click();
+  await expect(collection).toContainText("Pebbles · NextGen");
+  await page
+    .getByRole("button", { name: "Reach target TDH", exact: true })
+    .click();
+  await expect(collection).toContainText("Pebbles · NextGen");
+  await expect(
+    page.getByRole("form", { name: "Reach target TDH", exact: true })
+  ).toBeVisible();
+  await expect(page).toHaveURL(/collection=pebbles/);
+  await collection.click();
+  await page.getByRole("option", { name: "Gradients", exact: true }).click();
+  await expect(page).toHaveURL(/collection=gradients/);
+  await expect(page).toHaveURL(/view=projection/);
+  await expect(
+    page.getByRole("form", { name: "Reach target TDH", exact: true })
+  ).toBeVisible();
+  const viewport = page.viewportSize()!;
+  for (const width of viewport.width < 640 ? [320, 390] : [1440]) {
+    await page.setViewportSize({ ...viewport, width });
+    await noHorizontalOverflow(page);
+    await page.screenshot({
+      path: info.outputPath(`collect-collection-target-${width}.png`),
+      fullPage: true,
+    });
+  }
+  await page
+    .getByRole("button", { name: "Complete a set", exact: true })
+    .click();
+  await expect(collection).toContainText("Gradients");
+  await expect(
+    page.getByRole("textbox", { name: "Copies per NFT", exact: true })
+  ).toHaveCount(0);
+  await collection.click();
+  await page.getByRole("option", { name: "The Memes", exact: true }).click();
+  await expect(
+    page.getByRole("textbox", { name: "Copies per NFT", exact: true })
+  ).toBeVisible();
+  expect(mutations).toEqual([]);
+});
+
 test("listing errors remain distinct from empty results and support retry", async ({
   page,
 }, info) => {
@@ -534,7 +648,7 @@ test("listing errors remain distinct from empty results and support retry", asyn
   expect(mutations).toEqual([]);
 });
 
-test("TDH opens Memes listings immediately and keeps projection as a separate keyboard-accessible view", async ({
+test("TDH preserves the selected collection and keeps projection as a separate keyboard-accessible view", async ({
   page,
 }, info) => {
   const mutations = await mockCatalog(page);
@@ -545,9 +659,9 @@ test("TDH opens Memes listings immediately and keeps projection as a separate ke
   await tab.focus();
   await tab.press("Enter");
   await expect(tab).toBeFocused();
-  await expect(
-    page.getByRole("button", { name: "The Memes", exact: true })
-  ).toHaveAttribute("aria-pressed", "true");
+  const collection = page.getByRole("button", { name: /^Collection\b/ });
+  await expect(collection).toContainText("Pebbles · NextGen");
+  await expect(page).toHaveURL(/collection=pebbles/);
   await expect(
     page.getByRole("region", { name: "Lowest cost TDH", exact: true })
   ).toBeVisible();
@@ -571,6 +685,8 @@ test("TDH opens Memes listings immediately and keeps projection as a separate ke
   await expect(
     page.getByRole("form", { name: "Reach target TDH", exact: true })
   ).toBeVisible();
+  await expect(collection).toContainText("Pebbles · NextGen");
+  await expect(page).toHaveURL(/collection=pebbles/);
   await expect(
     page.getByRole("combobox", { name: "Timeframe", exact: true })
   ).toHaveValue("30");

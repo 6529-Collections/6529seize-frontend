@@ -10,6 +10,7 @@ interface SavedMarketBatch {
   readonly request: ApiMarketBatchPrepareRequest;
   readonly transactionHash?: Hex;
   readonly sendAttempt?: MarketSendAttempt;
+  readonly discardedReview?: true;
 }
 const key = (profile: string, id: string) =>
   `6529-market-batch:${profile}:${id}`;
@@ -52,9 +53,16 @@ export function saveMarketBatch(
   id: string,
   value: SavedMarketBatch
 ): boolean {
-  memory.set(key(profile, id), value);
+  const discardedReview =
+    value.discardedReview ??
+    memory.get(key(profile, id))?.discardedReview ??
+    readPersistedMarketBatch(profile, id)?.discardedReview;
+  const saved = discardedReview
+    ? { ...value, discardedReview: true as const }
+    : value;
+  memory.set(key(profile, id), saved);
   try {
-    const serialized = JSON.stringify(value);
+    const serialized = JSON.stringify(saved);
     localStorage.setItem(key(profile, id), serialized);
     return localStorage.getItem(key(profile, id)) === serialized;
   } catch {
@@ -121,5 +129,9 @@ function isSaved(value: unknown, profile: string): value is SavedMarketBatch {
       value.sendAttempt.purpose !== "TRANSACTION")
   )
     return false;
-  return true;
+  return !(
+    "discardedReview" in value &&
+    value.discardedReview !== undefined &&
+    value.discardedReview !== true
+  );
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import type { CollectCollection } from "./collect.types";
+import { COLLECT_PLANNER_FAMILIES } from "./collect-families";
 import { ApiCollectPlanningFamily } from "@/generated/models/ApiCollectPlanningFamily";
 import type { ApiCollectTdhTargetPlan } from "@/generated/models/ApiCollectTdhTargetPlan";
 import type { ApiCollectTdhTargetRequest } from "@/generated/models/ApiCollectTdhTargetRequest";
@@ -29,6 +31,7 @@ import type {
 import { validateCollectTdhTargetDraft } from "./collect-tdh-target.validation";
 
 interface Props {
+  readonly collection?: CollectCollection;
   readonly profile: ApiIdentity | null;
   readonly payingWallet?: string | undefined;
   readonly onConnect: () => void;
@@ -47,13 +50,14 @@ export default function CollectTdhTargetController(props: Props) {
     .join(":");
   return (
     <TargetController
-      key={`${props.profile?.id ?? "guest"}:${membership}:${props.payingWallet?.toLowerCase() ?? ""}`}
+      key={`${props.profile?.id ?? "guest"}:${membership}:${props.payingWallet?.toLowerCase() ?? ""}:${props.collection ?? "memes"}`}
       {...props}
     />
   );
 }
 
 function TargetController({
+  collection = "memes",
   profile,
   payingWallet,
   onConnect,
@@ -64,7 +68,10 @@ function TargetController({
   const [draft, setDraft] = useState<CollectTdhTargetDraft>({
     targetTdh: "",
     horizonDays: 30,
-    family: ApiCollectPlanningFamily.Memes,
+    family:
+      COLLECT_PLANNER_FAMILIES.find(
+        (family) => family.toString() === collection
+      ) ?? ApiCollectPlanningFamily.Memes,
     mode: "total",
     budgetEth: "",
   });
@@ -157,7 +164,7 @@ function TargetController({
     }
   };
   return (
-    <div className="tw-space-y-8">
+    <div className="tw-space-y-5">
       <CollectTdhTargetForm
         draft={draft}
         loading={loading}

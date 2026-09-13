@@ -385,3 +385,69 @@ it("does not split single copies, prepare while loading, or bypass a disabled tr
   fireEvent.submit(screen.getByRole("form", { name: "Review purchase" }));
   expect(p.onPrepare).not.toHaveBeenCalled();
 });
+
+it("shortens draft prices with exact disclosures without changing amounts, quantities or destinations", () => {
+  const firstSource = item(1, "3");
+  const first = {
+    ...firstSource,
+    order: {
+      ...firstSource.order,
+      total_wei: "24217345000000000",
+      net_wei: "24217345000000000",
+    },
+  };
+  const secondSource = item(2);
+  const second = {
+    ...secondSource,
+    order: {
+      ...secondSource.order,
+      total_wei: "10000000000000000",
+      net_wei: "10000000000000000",
+    },
+  };
+  const p = { ...props(), items: [first, second] };
+  render(<CollectBatchReviewForm {...p} />);
+  const row = screen
+    .getByRole("checkbox", { name: "Select Artwork 1" })
+    .closest("li")!;
+  expect(within(row).getByText("0.02422", { exact: true })).toBeVisible();
+  const exactItem = within(row).getByText("0.024217345", { exact: true });
+  expect(exactItem).not.toBeVisible();
+  fireEvent.click(row.querySelector("summary")!);
+  expect(exactItem).toBeVisible();
+  const estimated = screen.getByText("Estimated total ≈ 0.03422 ETH", {
+    exact: true,
+  });
+  const exactTotal = screen.getByText("0.034217345 ETH", { exact: true });
+  expect(exactTotal).not.toBeVisible();
+  fireEvent.click(estimated);
+  expect(exactTotal).toBeVisible();
+  fireEvent.click(review());
+  const selected = p.onPrepare.mock.calls[0]![0].items;
+  expect(selected[0]!.order).toBe(first.order);
+  expect(selected[0]!.quantity).toBe("3");
+  expect(selected[0]!.allocations).toEqual([
+    { recipient: payer, quantity: "3", acknowledgeExternalRecipient: false },
+  ]);
+  expect(selected[1]!.order).toBe(second.order);
+});
+
+it("keeps a one-wei draft visible and exact instead of displaying zero", () => {
+  const source = item(1);
+  const first = {
+    ...source,
+    order: { ...source.order, total_wei: "1", net_wei: "1" },
+  };
+  const p = { ...props(), items: [first] };
+  render(<CollectBatchReviewForm {...p} />);
+  expect(
+    screen.getByText("Estimated total 0.000000000000000001 ETH", {
+      exact: true,
+    })
+  ).toBeVisible();
+  expect(
+    artwork(1).getByText("0.000000000000000001", { exact: true })
+  ).toBeVisible();
+  fireEvent.click(review());
+  expect(p.onPrepare.mock.calls[0]![0].items[0]!.order.total_wei).toBe("1");
+});

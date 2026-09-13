@@ -1,7 +1,16 @@
-import { findResumableMarketBatch } from "@/components/collect/market-batch-resume";
+import {
+  discardUnsignedMarketBatchReview,
+  findResumableMarketBatch,
+} from "@/components/collect/market-batch-resume";
 import { fetchRecoverableMarketBatch } from "@/components/collect/market-batch-recovery";
 import { ApiMarketBatchOperationStateEnum } from "@/generated/models/ApiMarketBatchOperation";
 import { batchFixture } from "./market-batch.fixture";
+import {
+  readMarketBatch,
+  readPersistedMarketBatch,
+  retireMarketBatch,
+  saveMarketBatch,
+} from "@/components/collect/market-batch-storage";
 
 jest.mock("@/components/collect/market-batch-recovery", () => ({
   ...jest.requireActual("@/components/collect/market-batch-recovery"),
@@ -184,3 +193,121 @@ it("does not let a long completed purchase history block the current selection",
     )?.operation.id
   ).toBe(value.operation.id);
 });
+
+function discardedFixture() {
+  const value = batchFixture();
+  value.operation.id = "discarded-review";
+  saveMarketBatch(value.request.profile_id, value.operation.id, {
+    request: value.request,
+  });
+  fetch.mockResolvedValue(value.operation);
+  return value;
+}
+afterEach(() => retireMarketBatch("profile", "discarded-review"));
+
+it("excludes discarded unsigned reviews even when an original selected order overlaps after reload", async () => {
+  const value = discardedFixture();
+  discardUnsignedMarketBatchReview(value.operation, value.request);
+  expect(
+    readPersistedMarketBatch(value.request.profile_id, value.operation.id)
+  ).toMatchObject({ request: value.request, discardedReview: true });
+  expect(
+    await findResumableMarketBatch(
+      value.request.profile_id,
+      value.request.items.slice(1)
+    )
+  ).toBeNull();
+  expect(fetch).toHaveBeenCalledWith(
+    value.operation.id,
+    value.request.profile_id,
+    undefined
+  );
+});
+it.each([
+  ApiMarketBatchOperationStateEnum.Unknown,
+  ApiMarketBatchOperationStateEnum.Submitted,
+])(
+  "still recovers a discarded choice if the server later reports %s",
+  async (state) => {
+    const value = discardedFixture();
+    discardUnsignedMarketBatchReview(value.operation, value.request);
+    value.operation.state = state;
+    expect(
+      (
+        await findResumableMarketBatch(
+          value.request.profile_id,
+          value.request.items
+        )
+      )?.operation.id
+    ).toBe(value.operation.id);
+  }
+);
+it.each(["state", "server hash", "saved hash", "saved attempt"])(
+  "refuses to discard a review with a %s recovery obligation",
+  (reason) => {
+    const value = discardedFixture();
+    const hash = `0x${"a".repeat(64)}` as const;
+    if (reason === "state")
+      value.operation.state = ApiMarketBatchOperationStateEnum.Unknown;
+    if (reason === "server hash") value.operation.transaction_hash = hash;
+    if (reason === "saved hash")
+      saveMarketBatch(value.request.profile_id, value.operation.id, {
+        request: value.request,
+        transactionHash: hash,
+      });
+    if (reason === "saved attempt")
+      saveMarketBatch(value.request.profile_id, value.operation.id, {
+        request: value.request,
+        sendAttempt: {
+          id: "attempt",
+          purpose: "TRANSACTION",
+          digest: "a".repeat(64),
+          snapshotBlock: 100,
+          expectedRevision: "revision",
+          walletRequested: true,
+        },
+      });
+    expect(() =>
+      discardUnsignedMarketBatchReview(value.operation, value.request)
+    ).toThrow("MARKET_BROADCAST_UNKNOWN");
+    expect(
+      readMarketBatch(value.request.profile_id, value.operation.id)
+        ?.discardedReview
+    ).toBeUndefined();
+  }
+);
+it("does not clear a discard marker when a later journal update keeps recovery information", () => {
+  const value = discardedFixture();
+  discardUnsignedMarketBatchReview(value.operation, value.request);
+  const hash = `0x${"a".repeat(64)}` as const;
+  saveMarketBatch(value.request.profile_id, value.operation.id, {
+    request: value.request,
+    transactionHash: hash,
+  });
+  expect(
+    readMarketBatch(value.request.profile_id, value.operation.id)
+  ).toMatchObject({ discardedReview: true, transactionHash: hash });
+});
+
+it.each(["server", "journal"])(
+  "does not hide a known %s transaction hash behind a discard marker while acknowledgement is pending",
+  async (source) => {
+    const value = discardedFixture();
+    discardUnsignedMarketBatchReview(value.operation, value.request);
+    const hash = `0x${"a".repeat(64)}` as const;
+    if (source === "server") value.operation.transaction_hash = hash;
+    else
+      saveMarketBatch(value.request.profile_id, value.operation.id, {
+        request: value.request,
+        transactionHash: hash,
+      });
+    expect(
+      (
+        await findResumableMarketBatch(
+          value.request.profile_id,
+          value.request.items
+        )
+      )?.operation.id
+    ).toBe(value.operation.id);
+  }
+);
