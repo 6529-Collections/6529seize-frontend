@@ -4,7 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
-import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import { COLLECT_PLANNER_FAMILIES, isCollectEdition } from "./collect-families";
 import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
 import type { ApiCollectPlanLeg } from "@/generated/models/ApiCollectPlanLeg";
 import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
@@ -106,7 +106,7 @@ function CollectCatalogController({
   const router = useRouter();
   const params = new URLSearchParams(queryString);
   const collection: CollectCollection =
-    Object.values(ApiCollectFamily).find(
+    COLLECT_PLANNER_FAMILIES.find(
       (item) => item.toString() === params.get("collection")
     ) ?? "memes";
   const intent: CollectIntent =
@@ -314,7 +314,7 @@ function CollectCatalogController({
       (item) => collectListingKey(item.order) === key
     );
     const duplicate721 =
-      entry.asset.family !== ApiCollectFamily.Memes &&
+      !isCollectEdition(entry.asset.family) &&
       selection.some((item) => item.asset.asset_key === entry.asset.asset_key);
     let disabledReason: string | undefined;
     if (!selected) {

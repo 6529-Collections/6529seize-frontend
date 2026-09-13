@@ -4,6 +4,7 @@ import {
   validateCollectTdhTargetPlan,
 } from "@/components/collect/collect-tdh-target.helpers";
 import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import { ApiCollectPlanningFamily } from "@/generated/models/ApiCollectPlanningFamily";
 import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { ApiCollectTdhTargetRequestTargetModeEnum } from "@/generated/models/ApiCollectTdhTargetRequest";
 import {
@@ -23,7 +24,7 @@ it("builds total-target Memes request with an optional exact purchase budget", (
   const draft = {
     targetTdh: "00150",
     horizonDays: 30 as const,
-    family: ApiCollectFamily.Memes,
+    family: ApiCollectPlanningFamily.Memes,
     mode: "total" as const,
     budgetEth: "",
   };
@@ -49,6 +50,25 @@ it("keeps exact selected orders, quantity and included fees without adding fees 
   expect(collectTdhTargetSelection(plan, targetProfile, TARGET_NOW)).toEqual([
     { asset: plan.items[0]!.asset, order: plan.items[0]!.order, quantity: "2" },
   ]);
+});
+it("rejects marketplace-only families instead of expanding TDH support", () => {
+  const request = targetRequest();
+  Object.assign(request, { families: ["memelab"] });
+  const plan = targetPlan(request);
+  expect(() =>
+    validateCollectTdhTargetPlan(plan, request, targetProfile)
+  ).toThrow();
+  const draft = {
+    targetTdh: "150",
+    horizonDays: 30 as const,
+    family: ApiCollectPlanningFamily.Memes,
+    mode: "total" as const,
+    budgetEth: "",
+  };
+  Object.assign(draft, { family: "memelab" });
+  expect(() =>
+    collectTdhTargetRequest(draft, targetProfile, TARGET_PRIMARY)
+  ).toThrow();
 });
 it("compares additional target to future baseline and supports no purchase needed", () => {
   const plan = targetPlan({
@@ -210,7 +230,7 @@ it("rejects two purchase orders for the same ERC721 even when prices and project
   first.asset.contract = GRADIENT_CONTRACT;
   first.asset.asset_key = `1:${GRADIENT_CONTRACT.toLowerCase()}:1`;
   first.order.asset_key = first.asset.asset_key;
-  plan.request.families = [ApiCollectFamily.Gradients];
+  plan.request.families = [ApiCollectPlanningFamily.Gradients];
   plan.projection.recipient_allocations[0]!.asset_key = first.asset.asset_key;
   plan.items.push({
     ...first,

@@ -31,10 +31,17 @@ export const NOW = 1_800_000_000_000;
 const GRADIENT = "0x0c58ef43ff3032005e472cb5709f8908acb00205";
 const MEMES = "0x33fd426905f149f8376e227d0c9d3340aad17af1";
 
-export function batchFixture() {
+export function batchFixture(editionContract = MEMES) {
   const components: ApiMarketComponents[] = [
     { token: GRADIENT, id: "0", quantity: "1", type: 2, net: "90", fee: "10" },
-    { token: MEMES, id: "73", quantity: "3", type: 3, net: "54", fee: "6" },
+    {
+      token: editionContract,
+      id: "73",
+      quantity: "3",
+      type: 3,
+      net: "54",
+      fee: "6",
+    },
   ].map((item, index) => ({
     offerer: MAKER,
     zone: MARKET_ZERO,
@@ -96,7 +103,7 @@ export function batchFixture() {
       ApiMarketBatchPrepareRequestExecutionPolicyEnum.AllOrRevert,
     amount_wei: "140",
     items: reviewed.map((order, index) => ({
-      asset_key: `1:${index === 0 ? GRADIENT : MEMES}:${index === 0 ? "0" : "73"}`,
+      asset_key: `1:${index === 0 ? GRADIENT : editionContract}:${index === 0 ? "0" : "73"}`,
       order: { protocol_address: MARKET_SEAPORT, order_hash: order.order_hash },
       quantity: index === 0 ? "1" : "2",
       amount_wei: index === 0 ? "100" : "40",
@@ -184,7 +191,7 @@ export function batchFixture() {
       consideration: request.items.flatMap((item, index) =>
         item.allocations.map((allocation) => ({
           itemType: index === 0 ? 2 : 3,
-          token: index === 0 ? GRADIENT : MEMES,
+          token: index === 0 ? GRADIENT : (editionContract as `0x${string}`),
           identifierOrCriteria: index === 0 ? 0n : 73n,
           startAmount: BigInt(allocation.quantity),
           endAmount: BigInt(allocation.quantity),

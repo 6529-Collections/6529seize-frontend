@@ -1,11 +1,11 @@
-import type { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import type { ApiCollectPlanningFamily } from "@/generated/models/ApiCollectPlanningFamily";
 
 export const TDH_TARGET_HORIZONS = [1, 30, 90, 365] as const;
 export type TdhTargetHorizon = (typeof TDH_TARGET_HORIZONS)[number];
 export interface CollectTdhTargetDraft {
   readonly targetTdh: string;
   readonly horizonDays: TdhTargetHorizon;
-  readonly family: ApiCollectFamily;
+  readonly family: ApiCollectPlanningFamily;
   readonly mode: "total" | "additional";
   readonly budgetEth: string;
 }

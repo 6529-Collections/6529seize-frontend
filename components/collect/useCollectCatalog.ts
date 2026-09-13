@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import { ApiCollectPlanningFamily } from "@/generated/models/ApiCollectPlanningFamily";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
 import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import type { ApiMarketListings } from "@/generated/models/ApiMarketListings";
@@ -11,6 +11,7 @@ import { fetchMarketListings } from "@/services/api/market-api";
 import { fetchCollectTdhListings } from "@/services/api/collect-api";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import type { CollectCollection, CollectIntent } from "./collect.types";
+import { COLLECT_PLANNER_FAMILIES } from "./collect-families";
 
 export interface CollectCatalogEntry {
   readonly asset: ApiCollectAsset;
@@ -26,7 +27,7 @@ export function useCollectCatalog(
 ) {
   const listingMode = intent === "lowest" || intent === "tdh";
   const queryClient = useQueryClient();
-  const family = Object.values(ApiCollectFamily).find(
+  const family = COLLECT_PLANNER_FAMILIES.find(
     (value) => value.toString() === collection
   );
   const enabled = listingMode && family !== undefined;
@@ -44,12 +45,12 @@ export function useCollectCatalog(
     }): Promise<ApiMarketListings | ApiCollectTdhListings> =>
       intent === "tdh"
         ? fetchCollectTdhListings(
-            family ?? ApiCollectFamily.Memes,
+            family ?? ApiCollectPlanningFamily.Memes,
             pageParam,
             signal
           )
         : fetchMarketListings(
-            family ?? ApiCollectFamily.Memes,
+            family ?? ApiCollectPlanningFamily.Memes,
             pageParam,
             signal
           ),

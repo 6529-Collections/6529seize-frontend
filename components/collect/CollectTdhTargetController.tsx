@@ -1,6 +1,6 @@
 "use client";
 
-import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import { ApiCollectPlanningFamily } from "@/generated/models/ApiCollectPlanningFamily";
 import type { ApiCollectTdhTargetPlan } from "@/generated/models/ApiCollectTdhTargetPlan";
 import type { ApiCollectTdhTargetRequest } from "@/generated/models/ApiCollectTdhTargetRequest";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -64,7 +64,7 @@ function TargetController({
   const [draft, setDraft] = useState<CollectTdhTargetDraft>({
     targetTdh: "",
     horizonDays: 30,
-    family: ApiCollectFamily.Memes,
+    family: ApiCollectPlanningFamily.Memes,
     mode: "total",
     budgetEth: "",
   });

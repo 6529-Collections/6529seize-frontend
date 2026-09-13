@@ -30,6 +30,7 @@ export const MARKET_BATCH_LIMITS = {
 const ZONE = "0x000056f7000000ece9003ca63978907a00ffd100";
 const NFT_TYPES: Readonly<Record<string, number>> = {
   "0x33fd426905f149f8376e227d0c9d3340aad17af1": 3,
+  "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb": 3,
   "0x0c58ef43ff3032005e472cb5709f8908acb00205": 2,
   "0x45882f9bc325e14fbb298a1df930c43a874b83ae": 2,
 };

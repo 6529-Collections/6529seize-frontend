@@ -15,7 +15,7 @@ import type { ReactNode } from "react";
 import { collectAssetIdentity } from "./collect.adapters";
 import type {
   CollectActionView,
-  CollectCollection,
+  CollectTradeCollection,
   CollectTradeAction,
 } from "./collect.types";
 import CollectTradeActions from "./CollectTradeActions";
@@ -25,6 +25,7 @@ import CollectOwnerAction from "./CollectOwnerAction";
 import { collectProfileWallets } from "./collect-recipient.helpers";
 import {
   MEMES_CONTRACT,
+  MEMELAB_CONTRACT,
   GRADIENT_CONTRACT,
   NEXTGEN_CONTRACT,
 } from "@/constants/constants";
@@ -38,7 +39,7 @@ const ACTION_CLASS =
   "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-text-sm tw-font-medium tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-white";
 
 interface CollectDetailActionsProps {
-  readonly collection: Exclude<CollectCollection, "all">;
+  readonly collection: CollectTradeCollection;
   readonly tokenId: string;
   readonly title: string;
   readonly locale: SupportedLocale;
@@ -71,16 +72,17 @@ function PendingTrade({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-function collectFamily(collection: Exclude<CollectCollection, "all">) {
+function collectFamily(collection: CollectTradeCollection) {
   return {
     memes: ApiCollectFamily.Memes,
+    memelab: ApiCollectFamily.Memelab,
     gradients: ApiCollectFamily.Gradients,
     pebbles: ApiCollectFamily.Pebbles,
   }[collection];
 }
 
 function useCollectDetailAsset(
-  collection: Exclude<CollectCollection, "all">,
+  collection: CollectTradeCollection,
   tokenId: string
 ) {
   const family = collectFamily(collection);
@@ -189,6 +191,7 @@ function DetailActions(props: CollectDetailActionsProps) {
         revealMarketDepth(
           {
             memes: MEMES_CONTRACT,
+            memelab: MEMELAB_CONTRACT,
             gradients: GRADIENT_CONTRACT,
             pebbles: NEXTGEN_CONTRACT,
           }[props.collection],

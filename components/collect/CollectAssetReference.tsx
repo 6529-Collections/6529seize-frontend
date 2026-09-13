@@ -3,6 +3,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { collectAssetIdentity } from "./collect.adapters";
 import { getCollectHref } from "./CollectEntryLink";
+import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
 
 export default function CollectAssetReference({
   assetKey,
@@ -15,11 +16,15 @@ export default function CollectAssetReference({
   if (!identity) return <span>{t(locale, "collect.trade.asset")}</span>;
   return (
     <Link
-      href={getCollectHref({
-        collection: identity.family,
-        intent: "specific",
-        tokenId: identity.tokenId,
-      })}
+      href={
+        identity.family === ApiCollectFamily.Memelab
+          ? `/meme-lab/${encodeURIComponent(identity.tokenId)}`
+          : getCollectHref({
+              collection: identity.family,
+              intent: "specific",
+              tokenId: identity.tokenId,
+            })
+      }
       className="tw-text-iron-100 tw-underline tw-decoration-iron-600 tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
     >
       {t(locale, `collect.collection.${identity.family}`)} #{identity.tokenId}

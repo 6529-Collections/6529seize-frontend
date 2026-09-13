@@ -1,4 +1,5 @@
 import CollectReviewContract from "@/components/collect/CollectReviewContract";
+import { MEMELAB_CONTRACT } from "@/constants/constants";
 import type { CollectContractRole } from "@/components/collect/collect-contract-identity";
 import {
   act,
@@ -39,6 +40,7 @@ function clipboard(writeText: (text: string) => Promise<void>) {
 
 it.each<[string, CollectContractRole, string, string]>([
   [MEMES, "nft", "The Memes", "NFT contract"],
+  [MEMELAB_CONTRACT, "nft", "Meme Lab", "NFT contract"],
   [GRADIENT, "nft", "6529 Gradient", "NFT contract"],
   [
     "0x45882f9bc325e14fbb298a1df930c43a874b83ae",

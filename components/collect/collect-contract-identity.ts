@@ -5,6 +5,7 @@ export type CollectContractRole = "nft" | "exchange" | "fee" | "approval";
 export interface CollectContractIdentity {
   readonly name:
     | "The Memes"
+    | "Meme Lab"
     | "6529 Gradient"
     | "NextGen"
     | "Seaport 1.6"
@@ -17,6 +18,11 @@ export interface CollectContractIdentity {
 
 // Display identities only. This registry grants no transaction authority.
 const MAINNET_IDENTITIES = [
+  {
+    address: "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb",
+    role: "nft",
+    name: "Meme Lab",
+  },
   {
     address: "0x33fd426905f149f8376e227d0c9d3340aad17af1",
     role: "nft",

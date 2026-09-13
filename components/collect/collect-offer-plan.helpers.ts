@@ -1,5 +1,5 @@
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import { isCollectEdition } from "./collect-families";
 import { formatEther, parseEther } from "viem";
 import { isPositiveEthAmount } from "./collect-form.validation";
 import {
@@ -55,7 +55,7 @@ export function offerQuantity(row: CollectOfferSelection): bigint | null {
   )
     return null;
   const quantity = BigInt(row.quantity);
-  const maximum = identity.family === ApiCollectFamily.Memes ? 100n : 1n;
+  const maximum = isCollectEdition(identity.family) ? 100n : 1n;
   return quantity <= maximum ? quantity : null;
 }
 

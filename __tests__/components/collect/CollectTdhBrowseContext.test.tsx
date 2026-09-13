@@ -1,5 +1,5 @@
 import CollectTdhBrowseContext from "@/components/collect/CollectTdhBrowseContext";
-import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import { ApiCollectPlanningFamily } from "@/generated/models/ApiCollectPlanningFamily";
 import {
   ApiCollectTdhListingsStatusEnum,
   type ApiCollectTdhListings,
@@ -8,7 +8,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 
 const snapshot: ApiCollectTdhListings = {
   entries: [],
-  family: ApiCollectFamily.Memes,
+  family: ApiCollectPlanningFamily.Memes,
   next: null,
   snapshot_id: "snapshot",
   catalog_version: "catalog",

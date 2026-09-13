@@ -1,5 +1,5 @@
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
-import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import { isCollectEdition } from "./collect-families";
 import type { ApiCollectPlanLeg } from "@/generated/models/ApiCollectPlanLeg";
 import { fetchCollectAssets } from "@/services/api/collect-api";
 import { fetchExactMarketOrder } from "@/services/api/market-api";
@@ -84,7 +84,7 @@ async function resolveLeg(
   signal: AbortSignal
 ): Promise<CollectSelectedListing> {
   const asset = await findPlanAsset(leg.asset_key, signal);
-  if (asset.family !== ApiCollectFamily.Memes && leg.quantity !== "1")
+  if (!isCollectEdition(asset.family) && leg.quantity !== "1")
     throw new Error("ORDER_GONE");
   signal.throwIfAborted();
   const order = await fetchExactMarketOrder(
