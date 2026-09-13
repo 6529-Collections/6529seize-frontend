@@ -109,7 +109,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
         navigation={
           <nav
             aria-label={`${props.token.name} sections`}
-            className="tw-mb-6 tw-mt-6 tw-overflow-x-auto tw-border-0 tw-border-b tw-border-solid tw-border-white/15"
+            className="tw-no-scrollbar tw-mb-6 tw-mt-6 tw-overflow-x-auto tw-overflow-y-hidden tw-border-0 tw-border-b tw-border-solid tw-border-white/15"
           >
             <div className="-tw-mb-px tw-inline-flex tw-min-w-max tw-gap-6 sm:tw-gap-8">
               {printViewButton(
