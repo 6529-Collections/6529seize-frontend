@@ -303,6 +303,7 @@ export default function CollectRecipientPicker({
             selectedProfile={otherProfile}
             selectedWallet={value || null}
             onProfileSelect={(selected) => {
+              setChosenMode("other");
               setOtherProfile(selected);
               onChange("");
             }}
@@ -312,7 +313,14 @@ export default function CollectRecipientPicker({
             label={t(locale, "collect.recipient.search")}
             showLabel={!compact || !otherProfile}
             // A new lookup clears the old destination before its results arrive.
-            {...(compact ? { onSearchChange: () => onChange("") } : {})}
+            {...(compact
+              ? {
+                  onSearchChange: () => {
+                    setChosenMode("other");
+                    onChange("");
+                  },
+                }
+              : {})}
             showSelectedProfileCard={!compact}
             showWalletTdh={compact}
             locale={locale}
@@ -326,6 +334,7 @@ export default function CollectRecipientPicker({
                 maxLength={42}
                 value={value}
                 onChange={(event) => {
+                  setChosenMode("other");
                   setOtherProfile(null);
                   setFocusSearch(false);
                   setSearchRevision((revision) => revision + 1);

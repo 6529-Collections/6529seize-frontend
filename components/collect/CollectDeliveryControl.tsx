@@ -69,6 +69,7 @@ export default function CollectDeliveryControl({
           className="tw-m-0 tw-min-w-0 tw-space-y-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-p-4"
         >
           <CollectRecipientPicker
+            compact
             profile={profile}
             {...(payingWallet ? { payingWallet } : {})}
             value={value}

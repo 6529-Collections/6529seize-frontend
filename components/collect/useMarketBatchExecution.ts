@@ -70,11 +70,13 @@ export function useMarketBatchExecution(
   };
   const confirm = (
     operation: ApiMarketBatchOperation,
-    expected: ApiMarketBatchPrepareRequest
+    expected: ApiMarketBatchPrepareRequest,
+    guard?: () => void
   ) =>
     run(async () => {
       if (!wallet || !client) throw new Error("MARKET_CONNECTION_CHANGED");
       const assertConnection = () => {
+        guard?.();
         assertActor(operation);
         const current = live.current;
         if (
@@ -125,5 +127,11 @@ export function useMarketBatchExecution(
         })
       );
     });
-  return { confirm, recoverTransaction, busy, message };
+  return {
+    confirm,
+    recoverTransaction,
+    busy,
+    message,
+    clearMessage: () => setMessage(undefined),
+  };
 }

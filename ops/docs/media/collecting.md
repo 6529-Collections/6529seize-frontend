@@ -106,7 +106,7 @@ card page.
 
 ## Common Scenarios
 
-### Review an individual purchase
+### Review a purchase
 
 The purchase summary shows the artwork and quantity, with separate **Pay with**
 and **Deliver to** rows even when both use the same wallet. A confirmed profile
@@ -114,8 +114,9 @@ wallet name or an abbreviated address identifies each wallet. Click or tap its
 row to reveal the full checksummed address and copy control. Check the destination
 address before continuing, especially for a wallet outside your profile.
 
-On a Memes, Gradient or NextGen artwork purchase, expanding **Deliver to** also
-lets you choose a different destination. **Send to me** shows your profile's
+Every supported purchase review lets you expand a delivery row to choose a
+different destination. This includes individual artworks, selected listings,
+purchases from Collect and saved purchase reviews reopened from Orders. **Send to me** shows your profile's
 confirmed wallets. **Send to a fren** lets you search a profile or ENS name, or
 enter a wallet address. Choose the receiving wallet and check its full resolved
 address. Confirm an address outside your profile before applying it.
@@ -131,7 +132,12 @@ before choosing **Continue in wallet**. **Cancel** keeps the current destination
 **Continue in wallet** stays disabled until you apply or cancel the destination
 edit; applying keeps confirmation unavailable while the new review prepares.
 Delivery changes are unavailable while a wallet transaction or outcome recovery
-is in progress.
+is in progress. For purchases with several NFTs or split deliveries, each
+delivery row changes only those copies. Other NFTs and destinations are retained.
+Choosing another existing destination for the same NFT combines its copies.
+The review explains that copies sent outside your profile do not count toward
+its collecting goals or TDH. After a confirmed purchase, calculate a new TDH
+projection using the updated holdings.
 
 **Purchase price** includes the signed order fees. **Network fee cap** covers
 the quoted purchase transaction and any required approvals. For an ETH purchase

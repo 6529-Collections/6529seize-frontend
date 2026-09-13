@@ -85,6 +85,7 @@ jest.mock("@/components/collect/useMarketBatchExecution", () => ({
   useMarketBatchExecution: () => ({
     busy: false,
     confirm: mockConfirm,
+    clearMessage: jest.fn(),
     recoverTransaction: jest.fn(),
   }),
 }));
@@ -188,7 +189,8 @@ it("prepares once, focuses review without signing, and preserves the edited dest
   fireEvent.click(buy);
   expect(mockConfirm).toHaveBeenCalledWith(
     mockFixture.operation,
-    mockFixture.request
+    mockFixture.request,
+    expect.any(Function)
   );
   fireEvent.click(screen.getByRole("button", { name: "Edit purchase" }));
   await waitFor(() =>
@@ -206,20 +208,24 @@ it.each([0, NOW - 1])(
       JSON.stringify({ request: mockFixture.request })
     );
     mount(true);
-    const proceed = screen.getByRole("button", {
-      name: "Continue in wallet",
-    });
-    await waitFor(() => expect(proceed).toBeEnabled());
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", {
+          name: "Continue in wallet",
+        })
+      ).toBeEnabled()
+    );
     expect(mockConfirm).not.toHaveBeenCalled();
     expect(
       screen.queryByRole("button", { name: /refresh|retry/i })
     ).not.toBeInTheDocument();
     expect(screen.queryByText(/expired/i)).not.toBeInTheDocument();
-    fireEvent.click(proceed);
+    fireEvent.click(screen.getByRole("button", { name: "Continue in wallet" }));
     expect(mockConfirm).toHaveBeenCalledTimes(1);
     expect(mockConfirm).toHaveBeenCalledWith(
       mockFixture.operation,
-      mockFixture.request
+      mockFixture.request,
+      expect.any(Function)
     );
   }
 );

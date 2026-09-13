@@ -14,6 +14,7 @@ import { isCollectProfileWallet } from "./collect-recipient.helpers";
 
 interface CollectReviewRecipientProps {
   readonly address: string;
+  readonly label?: string;
   readonly name?: string | undefined;
   readonly profile: ApiIdentity | null;
   readonly payingWallet: string;
@@ -78,6 +79,7 @@ function SelectedRecipientAddress({
 
 export default function CollectReviewRecipient({
   address,
+  label,
   name,
   profile,
   payingWallet,
@@ -87,6 +89,7 @@ export default function CollectReviewRecipient({
   onApply,
 }: CollectReviewRecipientProps) {
   const locale = useBrowserLocale();
+  const deliveryLabel = label ?? t(locale, "collect.review.deliverTo");
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
   const mounted = useRef(true);
@@ -156,7 +159,7 @@ export default function CollectReviewRecipient({
       <CollectReviewWallet
         address={address}
         name={name}
-        label={t(locale, "collect.review.deliverTo")}
+        label={deliveryLabel}
         detail={
           recipientInProfile
             ? undefined
@@ -190,7 +193,7 @@ export default function CollectReviewRecipient({
           id={`${id}-label`}
           className="tw-shrink-0 tw-text-[13px] tw-text-iron-400"
         >
-          {t(locale, "collect.review.deliverTo")}
+          {deliveryLabel}
         </span>
         <bdi className="tw-min-w-0 tw-flex-1 tw-text-right tw-text-sm tw-font-normal tw-text-iron-100 [overflow-wrap:anywhere]">
           {showName

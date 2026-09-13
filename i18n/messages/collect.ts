@@ -678,6 +678,8 @@ export const COLLECT_MESSAGES = {
     "After this purchase: {owned} of {total} requirements complete",
   "collect.plan.giftOutcome":
     "Delivery outside this profile does not complete its collecting goal.",
+  "collect.review.giftOutcome":
+    "Copies delivered outside this profile do not count toward its collecting goals or TDH.",
   "collect.plan.costBreakdown": "NFTs {purchases} · gas reserve {gas}",
   "collect.plan.missingNfts": "Still to collect ({count})",
   "collect.plan.ownedNfts": "Already in your profile ({count})",
