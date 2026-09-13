@@ -245,3 +245,32 @@ it.each(["denied", "failed"])(
     expect(client.getQueryData(key)).toBeUndefined();
   }
 );
+
+it("keeps a failed initial check identifiable during a manual retry until the server responds", async () => {
+  const client = new QueryClient();
+  jest
+    .mocked(fetchContentModeratorAccess)
+    .mockRejectedValue(new Error("offline"));
+  const { result } = mountAccess(client);
+  await waitFor(() => expect(result.current.isError).toBe(true));
+  expect(result.current.isFetched).toBe(true);
+  expect(result.current.data).toBeUndefined();
+
+  let finishRetry: ((value: ApiContentModeratorAccess) => void) | undefined;
+  jest.mocked(fetchContentModeratorAccess).mockReturnValue(
+    new Promise((resolve) => {
+      finishRetry = resolve;
+    })
+  );
+  act(() => {
+    void result.current.refetch();
+  });
+  await waitFor(() => expect(result.current.isFetching).toBe(true));
+  expect(result.current.isFetched).toBe(true);
+  expect(result.current.isSuccess).toBe(false);
+  expect(result.current.data).toBeUndefined();
+
+  await act(async () => finishRetry?.(access));
+  await waitFor(() => expect(result.current.isSuccess).toBe(true));
+  expect(result.current.data?.moderator).toBe(true);
+});
