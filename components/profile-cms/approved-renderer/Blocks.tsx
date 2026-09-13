@@ -93,7 +93,11 @@ export function ApprovedBlock({
     case "html_embed":
     case "object_viewer":
     case "room_viewer":
-      return <CmsBlock block={block} context={context} />;
+      return (
+        <div className={styles["fallback"]} data-cms-approved-fallback>
+          <CmsBlock block={block} context={context} />
+        </div>
+      );
   }
 }
 

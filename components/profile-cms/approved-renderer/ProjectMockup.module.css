@@ -3,8 +3,8 @@
   min-width: 0;
   padding: clamp(16px, 4.5%, 48px);
   overflow-wrap: anywhere;
-  background: #183ddd;
-  color: #fff;
+  background: var(--cms-colorway-mockup-mat, #183ddd);
+  color: var(--cms-colorway-mockup-mat-ink, #fff);
   font-family: "CMS Manrope", Arial, sans-serif;
   font-size: 12px;
   line-height: 1.5;
@@ -31,11 +31,11 @@
 .planner {
   min-width: 0;
   overflow: hidden;
-  border: 1px solid #d9dfeb;
+  border: 1px solid var(--cms-colorway-mockup-window-border, #d9dfeb);
   border-radius: 6px;
-  background: #fff;
-  color: #20272c;
-  box-shadow: 0 14px 30px #081d6b45;
+  background: var(--cms-colorway-mockup-window, #fff);
+  color: var(--cms-colorway-mockup-window-ink, #20272c);
+  box-shadow: 0 14px 30px var(--cms-colorway-mockup-shadow, #081d6b45);
 }
 
 .appBar {
@@ -44,12 +44,12 @@
   justify-content: space-between;
   gap: 16px;
   padding: 15px 18px;
-  border-bottom: 1px solid #e3e6eb;
+  border-bottom: 1px solid var(--cms-colorway-mockup-line, #e3e6eb);
 }
 
 .appBar > p {
   max-width: 48%;
-  color: #59606a;
+  color: var(--cms-colorway-mockup-muted, #59606a);
   font-size: 11px;
   text-align: right;
 }
@@ -58,7 +58,7 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #20272c;
+  color: var(--cms-colorway-mockup-window-ink, #20272c);
   font-family: inherit;
   font-size: 15px;
   font-weight: 700;
@@ -72,8 +72,8 @@
   width: 22px;
   height: 22px;
   border-radius: 5px;
-  background: #183ddd;
-  color: #fff;
+  background: var(--cms-colorway-mockup-mat, #183ddd);
+  color: var(--cms-colorway-mockup-mat-ink, #fff);
   font-size: 19px;
 }
 
@@ -85,9 +85,9 @@
 
 .rail {
   padding: 18px 12px;
-  border-right: 1px solid #e3e6eb;
-  background: #f6f7fa;
-  color: #565f6b;
+  border-right: 1px solid var(--cms-colorway-mockup-line, #e3e6eb);
+  background: var(--cms-colorway-mockup-rail, #f6f7fa);
+  color: var(--cms-colorway-mockup-rail-ink, #565f6b);
   font-size: 11px;
 }
 
@@ -95,8 +95,8 @@
   margin: 0 -4px 28px;
   padding: 7px 8px;
   border-radius: 4px;
-  background: #e7edff;
-  color: #24409c;
+  background: var(--cms-colorway-mockup-active, #e7edff);
+  color: var(--cms-colorway-mockup-active-ink, #24409c);
   font-weight: 600;
 }
 
@@ -118,15 +118,15 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #6e82ce;
+  background: var(--cms-colorway-mockup-dot-one, #6e82ce);
 }
 
 .railProjects p:nth-child(3n + 2) .projectDot {
-  background: #d08747;
+  background: var(--cms-colorway-mockup-dot-two, #d08747);
 }
 
 .railProjects p:nth-child(3n) .projectDot {
-  background: #428272;
+  background: var(--cms-colorway-mockup-dot-three, #428272);
 }
 
 .taskPanel {
@@ -142,7 +142,7 @@
 }
 
 .mat .taskHeading h3 {
-  color: #20272c;
+  color: var(--cms-colorway-mockup-window-ink, #20272c);
   font-family: inherit;
   font-size: 24px;
   font-weight: 650;
@@ -150,14 +150,14 @@
 }
 
 .taskHeading p {
-  color: #59606a;
+  color: var(--cms-colorway-mockup-muted, #59606a);
   font-size: 11px;
   text-align: right;
 }
 
 .taskPanel .taskDescription {
   margin: 19px 0 9px;
-  color: #626b76;
+  color: var(--cms-colorway-mockup-subtle, #626b76);
   font-size: 11px;
 }
 
@@ -173,7 +173,7 @@
   gap: 9px;
   min-height: 49px;
   padding: 13px 0;
-  border-top: 1px solid #e7eaf0;
+  border-top: 1px solid var(--cms-colorway-mockup-row-line, #e7eaf0);
 }
 
 .taskLabel {
@@ -184,34 +184,34 @@
   max-width: 115px;
   padding: 3px 7px;
   border-radius: 4px;
-  background: #e6eee9;
-  color: #28533c;
+  background: var(--cms-colorway-mockup-status, #e6eee9);
+  color: var(--cms-colorway-mockup-status-ink, #28533c);
   font-size: 11px;
 }
 
 .tasks li:nth-child(3n) .status {
-  background: #fff0d6;
-  color: #785413;
+  background: var(--cms-colorway-mockup-status-alt, #fff0d6);
+  color: var(--cms-colorway-mockup-status-alt-ink, #785413);
 }
 
 .taskFooter {
   margin-top: 19px;
   padding-top: 12px;
-  border-top: 1px solid #e7eaf0;
-  color: #626b76;
+  border-top: 1px solid var(--cms-colorway-mockup-row-line, #e7eaf0);
+  color: var(--cms-colorway-mockup-subtle, #626b76);
   font-size: 11px;
 }
 
 .mat[data-cms-project-mockup="catalogue"] {
-  background: #ed927c;
-  color: #3c352b;
+  background: var(--cms-colorway-catalogue-mat, #ed927c);
+  color: var(--cms-colorway-catalogue-mat-ink, #3c352b);
 }
 
 .catalogue {
   padding: 22px 26px 20px;
-  background: #fffaf0;
-  color: #3c352b;
-  box-shadow: 7px 9px 0 #a550422b;
+  background: var(--cms-colorway-catalogue-paper, #fffaf0);
+  color: var(--cms-colorway-catalogue-ink, #3c352b);
+  box-shadow: 7px 9px 0 var(--cms-colorway-catalogue-shadow, #a550422b);
 }
 
 .catalogueBar {
@@ -219,8 +219,8 @@
   justify-content: space-between;
   gap: 18px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #ded6c8;
-  color: #69594a;
+  border-bottom: 1px solid var(--cms-colorway-catalogue-line, #ded6c8);
+  color: var(--cms-colorway-catalogue-muted, #69594a);
   font-size: 11px;
   letter-spacing: 0.025em;
 }
@@ -234,7 +234,7 @@
 }
 
 .mat .catalogueIntro h2 {
-  color: #382f23;
+  color: var(--cms-colorway-catalogue-heading, #382f23);
   font-family: Georgia, serif;
   font-size: clamp(27px, 5.5cqi, 39px);
   font-weight: 400;
@@ -243,7 +243,7 @@
 }
 
 .mat .catalogueIntro h3 {
-  color: #382f23;
+  color: var(--cms-colorway-catalogue-heading, #382f23);
   margin-top: 8px;
   font-family: inherit;
   font-size: 14px;
@@ -253,7 +253,7 @@
 .catalogueIntro p {
   max-width: 42ch;
   margin-top: 11px;
-  color: #706456;
+  color: var(--cms-colorway-catalogue-description, #706456);
   font-size: 11px;
 }
 
@@ -275,10 +275,10 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 18px 13px 14px;
-  border-left: 5px solid #00000018;
-  background: #e3a454;
-  color: #49331c;
-  box-shadow: 3px 4px 0 #47382017;
+  border-left: 5px solid var(--cms-colorway-book-spine, #00000018);
+  background: var(--cms-colorway-book-one, #e3a454);
+  color: var(--cms-colorway-book-one-ink, #49331c);
+  box-shadow: 3px 4px 0 var(--cms-colorway-book-shadow, #47382017);
 }
 
 .mat .bookCover h3 {
@@ -297,18 +297,18 @@
 }
 
 .books li:nth-child(3n + 2) .bookCover {
-  background: #284a3d;
-  color: #fff4d8;
+  background: var(--cms-colorway-book-two, #284a3d);
+  color: var(--cms-colorway-book-two-ink, #fff4d8);
 }
 
 .books li:nth-child(3n) .bookCover {
-  background: #6b6e96;
-  color: #fff8e8;
+  background: var(--cms-colorway-book-three, #6b6e96);
+  color: var(--cms-colorway-book-three-ink, #fff8e8);
 }
 
 .books .bookNote {
   margin-top: 10px;
-  color: #685b4d;
+  color: var(--cms-colorway-catalogue-note, #685b4d);
   font-size: 11px;
   white-space: pre-line;
 }
@@ -316,8 +316,8 @@
 .catalogueFooter {
   margin-top: 22px;
   padding-top: 12px;
-  border-top: 1px solid #ded6c8;
-  color: #685b4d;
+  border-top: 1px solid var(--cms-colorway-catalogue-line, #ded6c8);
+  color: var(--cms-colorway-catalogue-note, #685b4d);
   font-size: 11px;
 }
 
