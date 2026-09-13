@@ -88,7 +88,7 @@ export const MARKET_DEPTH_MESSAGES = namespaceMessages("marketDepth", [
   ["orders.retryDetails", "Retry details"],
   [
     "orders.changed",
-    "Order details have changed. Refresh prices to see the latest update.",
+    "Order details have changed. Try again to see the latest orders.",
   ],
   ["orders.listLabel", "Orders at this price"],
   ["orders.otherListLabel", "Orders requiring verification"],
@@ -176,13 +176,13 @@ export const MARKET_DEPTH_MESSAGES = namespaceMessages("marketDepth", [
   ["trade.loading", "Loading trade review…"],
   [
     "trade.changed",
-    "This order is no longer available as shown. Refresh prices and try again.",
+    "This order is no longer available as shown. Choose another order, or try this one again.",
   ],
   ["trade.review", "Review selected listings ({count})"],
   ["trade.checkingSelection", "Checking selected listings…"],
   [
     "trade.selectionChanged",
-    "One or more selected listings changed. Refresh prices and select them again.",
+    "These listings could not be confirmed. Try reviewing again, or remove them and choose other listings.",
   ],
   [
     "trade.criteriaUnavailable",

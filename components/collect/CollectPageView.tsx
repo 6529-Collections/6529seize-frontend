@@ -85,7 +85,7 @@ function Listings({
       <div
         role="status"
         aria-label={t(locale, "collect.loading")}
-        className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 sm:tw-gap-4"
+        className="tw-grid tw-grid-cols-2 tw-gap-3 max-[360px]:tw-grid-cols-1 sm:tw-grid-cols-3 sm:tw-gap-4"
       >
         {Array.from({ length: 6 }, (_, index) => (
           <div
@@ -124,7 +124,7 @@ function Listings({
   }
   return (
     <>
-      <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 sm:tw-gap-4">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-3 max-[360px]:tw-grid-cols-1 sm:tw-grid-cols-3 sm:tw-gap-4">
         {catalog.items.map((artwork) => (
           <CollectArtworkCard
             key={artwork.id}

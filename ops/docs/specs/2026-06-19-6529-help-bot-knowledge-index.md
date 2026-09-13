@@ -42,12 +42,20 @@ card's **Details** tab for the original Arweave artwork and metadata.
 The collecting record describes results below the goal controls, priced
 quantities, costs and explicit budget-versus-available scenarios. **Collect now**
 opens purchase selection and **Make offers** opens per-NFT offer pricing.
+Listing-card facts distinguish compact ETH prices from expandable Exact amounts;
+shortened prices do not change listing terms or purchase quantities.
 The card records preserve `focus=the-art` deep links to the Memes and Meme Lab
 **Overview**, where artwork details follow the description. The **Listings & offers**
 tab opens the market directly without another accordion. Primary and History tab changes keep the tab row visible and
 show the selected section from its top while deferred content loads.
 The Listings and Offers record distinguishes direct **Collect** and **Sell**
 actions for one order from the explicit choice among multiple orders at a price.
+Market browsing facts describe quiet periodic updates while visible and idle,
+paused for expanded order details, a chosen listing or open review as applicable.
+Healthy and empty states have no routine Refresh action; retrieval failures retain
+Try again or Retry details, as shown.
+Captured quotes are not guaranteed executable orders, and browsing updates do
+not replace the exact checks at preparation and Continue in wallet.
 The Collect navigation label opens the set planner. Individual purchase facts
 describe separate Pay with and Deliver to rows, expandable full wallet addresses,
 and editing delivery from expanded delivery rows on every supported purchase,
