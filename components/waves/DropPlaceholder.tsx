@@ -1,3 +1,5 @@
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import Button from "@/components/utils/button/Button";
 import {
   ChatRestriction,
   SubmissionRestriction,
@@ -28,6 +30,34 @@ interface DropPlaceholderProps {
   readonly chatRestriction?: ChatRestriction | undefined;
   readonly submissionRestriction?: SubmissionRestriction | undefined;
   readonly profileSetupHref?: string | undefined;
+}
+
+function WaveSignInPrompt() {
+  const locale = useBrowserLocale();
+  const { seizeConnect, seizeConnectOpen } = useSeizeConnectContext();
+
+  return (
+    <div className="tw-rounded-xl tw-border tw-border-iron-800/50 tw-bg-iron-900/50 tw-px-4 tw-py-4 tw-backdrop-blur tw-@container">
+      <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-text-center @lg:tw-flex-row @lg:tw-gap-5 @lg:tw-text-left">
+        <Button
+          variant="action"
+          size="lg"
+          onClick={seizeConnect}
+          disabled={seizeConnectOpen}
+          aria-busy={seizeConnectOpen}
+          className="tw-max-w-full tw-whitespace-normal"
+        >
+          {t(locale, "waves.signIn.post")}
+        </Button>
+        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+          {t(locale, "waves.signIn.newHere")}
+          <span className="tw-block">
+            {t(locale, "auth.signModal.noTransaction")}
+          </span>
+        </p>
+      </div>
+    </div>
+  );
 }
 
 function getProfileSetupMessage(
@@ -148,6 +178,18 @@ export default function DropPlaceholder({
     );
   }
 
+  const needsSignIn =
+    (type === "chat" && chatRestriction === ChatRestriction.NOT_LOGGED_IN) ||
+    (type === "submission" &&
+      submissionRestriction === SubmissionRestriction.NOT_LOGGED_IN) ||
+    (type === "both" &&
+      chatRestriction === ChatRestriction.NOT_LOGGED_IN &&
+      submissionRestriction === SubmissionRestriction.NOT_LOGGED_IN);
+
+  if (needsSignIn) {
+    return <WaveSignInPrompt />;
+  }
+
   const getMessage = () => {
     if (type === "suspended") {
       return (
@@ -172,13 +214,6 @@ export default function DropPlaceholder({
     }
 
     if (type === "both") {
-      if (
-        chatRestriction === ChatRestriction.NOT_LOGGED_IN &&
-        submissionRestriction === SubmissionRestriction.NOT_LOGGED_IN
-      ) {
-        return "Connect your wallet to participate in this wave";
-      }
-
       if (
         chatRestriction === ChatRestriction.NEEDS_PROFILE &&
         submissionRestriction === SubmissionRestriction.NEEDS_PROFILE
