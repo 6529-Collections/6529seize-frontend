@@ -201,6 +201,23 @@
   for the selected upcoming card.
 - Fallback panel does not expose full `/meme-calendar` controls: no timezone toggle, no `Next Mint` jump button, no `Meme #` input, and no upcoming-mints table.
 
+## Artist Gallery Translation Follow-up
+
+- Route/components: `/the-memes/{id}`, `MemePageArtistWorks`, and
+  `MemePageReferencesSection`.
+- Untranslated surface: `theMemes.detail.artistWorks.*` and
+  `theMemes.detail.references.sectionTitle`, including loading, error, retry,
+  disclosure, and artwork-preview messages.
+- Current fallback: `en-GB`, `fr-FR`, `es-ES`, and `de-DE` use `en-US` source
+  copy for these keys. Card links retain the selected locale and counts use
+  locale-aware formatting.
+- User impact: these labels remain in English when another supported locale is
+  selected; browsing and keyboard controls remain available.
+- Follow-up owner: frontend localization maintainers.
+- Remediation: add reviewed entries to the four locale dictionaries, then check
+  visible and accessible names, long-label wrapping, and expansion controls in
+  each locale.
+
 ## Related Pages
 
 - [Media Memes Index](README.md)

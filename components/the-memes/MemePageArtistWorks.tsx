@@ -85,7 +85,8 @@ function ProfileArtistWorks({
         retry={() => {
           if (identity.isError) {
             void identity.refetch();
-          } else {
+          }
+          if (cards.isError) {
             void cards.refetch();
           }
         }}

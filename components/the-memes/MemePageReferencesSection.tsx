@@ -23,10 +23,12 @@ export default function MemePageReferencesSection({
   onToggle: () => void;
 }>) {
   const panelId = useId();
+  const buttonId = useId();
   return (
     <section className="tw-mt-8 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800">
       <h2 className="tw-m-0">
         <button
+          id={buttonId}
           type="button"
           onClick={onToggle}
           aria-expanded={open}
@@ -40,9 +42,9 @@ export default function MemePageReferencesSection({
           />
         </button>
       </h2>
-      <div id={panelId} hidden={!open}>
+      <section id={panelId} aria-labelledby={buttonId} hidden={!open}>
         {open && <MemePageReferencesSubMenu show nft={nft} locale={locale} />}
-      </div>
+      </section>
     </section>
   );
 }

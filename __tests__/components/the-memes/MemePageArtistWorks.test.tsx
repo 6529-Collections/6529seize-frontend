@@ -3,6 +3,7 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import type { ApiArtistNameItem } from "@/generated/models/ApiArtistNameItem";
 import type { SupportedLocale } from "@/i18n/locales";
 import { commonApiFetch } from "@/services/api/common-api";
+import { getIdentityQueryKey } from "@/services/api/identity-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   fireEvent,
@@ -30,7 +31,12 @@ function mockCatalogue(artists = catalogue) {
     if (endpoint === "memes/artists_names") {
       return artists;
     }
-    const ids = (params?.["id"] ?? "").split(",").map(Number);
+    const idParam =
+      params && typeof params === "object" && "id" in params
+        ? params["id"]
+        : "";
+    const ids =
+      typeof idParam === "string" ? idParam.split(",").map(Number) : [];
     return {
       data: ids
         .toSorted((a, b) => a - b)
@@ -49,11 +55,11 @@ function mockCatalogue(artists = catalogue) {
 
 function renderGallery(
   locale: SupportedLocale = "en-US",
-  artistHandles: string | null = ""
-) {
-  const client = new QueryClient({
+  artistHandles: string | null = "",
+  client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
-  });
+  })
+) {
   return render(
     <QueryClientProvider client={client}>
       <MemePageArtistWorks
@@ -106,6 +112,7 @@ it("uses the catalogue when the API has a null artist profile handle", async () 
     await screen.findByRole("link", { name: /Artwork 6/ })
   ).toBeInTheDocument();
 });
+
 it("expands the complete deduplicated gallery and can restore the preview", async () => {
   renderGallery();
   const gallery = await screen.findByRole("region", {
@@ -166,6 +173,49 @@ it("combines profile history with mapped Main Stage winners, even when the artis
   expect(fetchMock).not.toHaveBeenCalledWith(
     expect.objectContaining({ endpoint: "memes/artists_names" })
   );
+});
+
+it("retries both failed profile and winner requests with one action", async () => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  const profile = {
+    handle: "arsonic",
+    artist_of_prevote_cards: [2],
+    winner_main_stage_drop_ids: ["winner-1"],
+  };
+  client.setQueryData(getIdentityQueryKey("arsonic"), profile);
+  const fallback = fetchMock.getMockImplementation()!;
+  let recovered = false;
+  fetchMock.mockImplementation(async (options) => {
+    if (options.endpoint === "identities/arsonic") {
+      if (!recovered) throw new Error("Identity unavailable");
+      return profile;
+    }
+    if (options.endpoint === "v2/drops") {
+      if (!recovered) throw new Error("Winner unavailable");
+      return { data: [] };
+    }
+    return fallback(options);
+  });
+  renderGallery("en-US", "arsonic", client);
+  await waitFor(() =>
+    expect(
+      client
+        .getQueryCache()
+        .getAll()
+        .filter((query) => query.state.status === "error")
+    ).toHaveLength(2)
+  );
+
+  recovered = true;
+  await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+  expect(
+    await screen.findByRole("link", { name: /Artwork 2/ })
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Try again" })
+  ).not.toBeInTheDocument();
 });
 
 it.each<SupportedLocale>(["en-US", "en-GB", "fr-FR", "es-ES", "de-DE"])(

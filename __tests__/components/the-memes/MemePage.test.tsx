@@ -446,6 +446,11 @@ describe("MemePage tab navigation", () => {
       "page"
     );
     expect(references).toHaveAttribute("aria-expanded", "true");
+    const panel = screen.getByRole("region", {
+      name: "References: Meme Lab & ReMemes",
+    });
+    expect(references).toHaveAttribute("aria-controls", panel.id);
+    expect(panel).toContainElement(screen.getByTestId("references-sub"));
 
     await userEvent.click(references);
     page.rerenderPage();
