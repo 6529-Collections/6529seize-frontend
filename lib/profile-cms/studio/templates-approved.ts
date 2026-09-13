@@ -57,6 +57,7 @@ function approved(
     presentation: {
       studio_revision: 1,
       studio_design: id,
+      studio_colorway: "original",
       studio_layout: layout,
       studio_palette: palette,
       studio_type: type,

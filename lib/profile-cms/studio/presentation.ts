@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { CmsBlockV1, CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
+import { CMS_STUDIO_COLORWAYS, type CmsColorwayId } from "./palettes";
 
 export const CMS_STUDIO_LAYOUTS = [
   "signature",
@@ -58,6 +59,7 @@ export const cmsStudioThemeTokenPatchSchema = z
     studio_type: z.enum(CMS_STUDIO_TYPES).optional(),
     studio_density: z.enum(CMS_STUDIO_DENSITIES).optional(),
     studio_design: z.enum(CMS_STUDIO_DESIGNS).optional(),
+    studio_colorway: z.enum(CMS_STUDIO_COLORWAYS).optional(),
   })
   .strict();
 
@@ -68,6 +70,7 @@ export interface CmsStudioPresentation {
   readonly studio_type: (typeof CMS_STUDIO_TYPES)[number];
   readonly studio_density: (typeof CMS_STUDIO_DENSITIES)[number];
   readonly studio_design?: CmsStudioDesign;
+  readonly studio_colorway?: CmsColorwayId;
 }
 
 export const DEFAULT_CMS_STUDIO_PRESENTATION: CmsStudioPresentation = {
@@ -86,6 +89,9 @@ export function getCmsStudioPresentation(
   if (tokens?.["studio_revision"] !== 1) return null;
   const design = CMS_STUDIO_DESIGNS.find(
     (value) => value === tokens["studio_design"]
+  );
+  const colorway = CMS_STUDIO_COLORWAYS.find(
+    (value) => value === tokens["studio_colorway"]
   );
   return {
     studio_revision: 1,
@@ -106,6 +112,7 @@ export function getCmsStudioPresentation(
       "balanced"
     ),
     ...(design ? { studio_design: design } : {}),
+    ...(colorway ? { studio_colorway: colorway } : {}),
   };
 }
 

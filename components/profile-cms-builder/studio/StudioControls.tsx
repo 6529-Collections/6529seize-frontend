@@ -1,7 +1,7 @@
 import { useId, type ChangeEvent, type ReactNode } from "react";
 
 export const STUDIO_CONTROL_CLASS =
-  "tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500/40";
+  "tw-w-full tw-min-h-11 tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 focus:tw-border-primary-300 focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300";
 
 export function StudioButton({
   children,
@@ -21,8 +21,8 @@ export function StudioButton({
   readonly label?: string | undefined;
 }) {
   const color = primary
-    ? "tw-border-primary-600 tw-bg-primary-600 tw-text-white hover:tw-bg-primary-700"
-    : "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-100 hover:tw-bg-iron-800";
+    ? "tw-border-primary-300 tw-bg-[#263F9F] tw-text-white hover:tw-bg-[#1F3484]"
+    : "tw-border-iron-500 tw-bg-iron-900 tw-text-iron-100 hover:tw-bg-iron-800";
   return (
     <button
       type={type}
@@ -30,7 +30,7 @@ export function StudioButton({
       disabled={disabled}
       aria-label={label}
       aria-pressed={active}
-      className={`tw-inline-flex tw-min-h-10 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 ${color} ${active ? "tw-ring-1 tw-ring-primary-400" : ""}`}
+      className={`tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 ${color} ${active ? "tw-ring-1 tw-ring-primary-400" : ""}`}
     >
       {children}
     </button>
@@ -83,7 +83,7 @@ export function StudioField({
       {help ? (
         <p
           id={`${id}-help`}
-          className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
+          className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300"
         >
           {help}
         </p>
