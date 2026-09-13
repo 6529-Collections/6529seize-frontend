@@ -45,7 +45,7 @@ push to open the matching app route.
   - Retry delay uses `Retry-After` headers or retry-hint text when available;
     otherwise delay uses bounded exponential backoff with jitter.
   - Duplicate registration callbacks with the same
-    (`device_id`, token, profile) fingerprint are skipped when already
+    (`device_id`, token, profile, login session) fingerprint are skipped when already
     completed in-session or already handled by an in-flight attempt.
 - Settings modal:
   - On open, settings load for this device ID.
@@ -81,17 +81,61 @@ push to open the matching app route.
     feed without sending the higher-interruption mobile push.
   - Tapping a coverage push opens the matching profile's Subscriptions tab
     after the normal connected-profile resolution.
-- iOS delivered-notification cleanup:
-  - Tapped pushes are removed from iOS delivered notifications after successful
-    registration.
-  - Delivered notifications are also cleared during notifications read flows
-    (feed read actions, grouped reaction read actions, wave read actions).
-  - When notification unread count reaches zero in nav state, delivered
-    notifications are cleared.
+- Delivered-notification cleanup on iOS and Android:
+  - Reading notifications for one connected profile preserves another profile's
+    delivered notifications, including when both profiles follow the same wave.
+  - After feed, grouped, or wave reads, the app removes matching delivered entries
+    only when their individual server records confirm they are read. New unread
+    entries stay in the tray. Wave cleanup waits for the read request to succeed.
+  - Navigation unread refreshes and returning to the active app can reconcile
+    delivered entries for the active profile. Switching profiles cannot redirect
+    an older cleanup operation to the new profile.
+  - Missing or failed unread/read-state requests never mean zero. Entries with
+    missing profile metadata, unknown older Android tags, or unavailable records
+    are preserved; users can dismiss them manually.
+- Badges:
+  - iOS badge updates are asynchronous and server-driven across all profiles
+    registered to the device. UserA=1 and UserB=1 changes from 2 to 1 after
+    UserA reads, then to 0 after the final read. Single-profile 1 to 0 works too.
+    The count respects push preferences and visibility filters, so it can differ
+    from the unfiltered in-app feed total.
+  - Reading from the website or desktop can update the phone's iOS badge when
+    the correction push is delivered and badge permission is enabled.
+  - Tray cleanup does not calculate or overwrite the iOS badge. Delivery delays,
+    offline devices, or failed refreshes can leave the badge temporarily stale.
+  - Android dots/counts depend on the launcher and remaining notifications;
+    there is no guaranteed numeric unread badge.
+
+### Signing out on a phone
+
+- Signing out UserA removes UserA's push registration and identifiable delivered
+  entries on this phone. UserB and other phones stay connected. If another wallet
+  on this phone still connects the same profile, that profile keeps its push registration.
+- `Sign out all` requests removal of every profile's push registration for this
+  installation, including profiles missing from the phone's saved account list,
+  and clears its delivered notifications. It does not sign out other devices.
+- iOS receives an asynchronous badge correction for the profiles still registered
+  to this phone, including zero after the last profile leaves. Android keeps the
+  remaining profiles' tray entries; launcher dot/count behavior varies.
+- Offline logout stores cleanup securely before removing local credentials. The
+  app retries on activation or reconnect and before registering a fresh login.
+  Until the server accepts cleanup, pushes can still arrive. Keep the app available
+  to reconnect; deleting app data can discard pending cleanup.
 
 ## Failure and Recovery
 
 - If push permission is not granted, registration is skipped.
+- If logout cannot save cleanup securely, local account credentials are retained
+  so the action can be retried. A pending network cleanup has no separate status UI.
+- Older installations with conflicting saved push tokens cannot prove ownership
+  of every registration automatically. Cleanup stays pending; support must verify
+  the installation and reconcile those registrations. A device ID alone is not
+  enough to authorize deleting other profiles.
+- Signing out before the phone first registers for push requires a valid saved
+  native session. If that proof is missing or expires before the phone reconnects,
+  cleanup stays pending and support must verify ownership before recovery.
+- An unreadable installation credential or a changed device ID stops push
+  registration rather than replacing the credential and losing pending cleanup.
 - If secure-storage read fails with a known recoverable pattern (missing key or
   known decrypt/keystore errors), setup regenerates `device_id` and continues.
 - If secure-storage read/write fails with an unrecoverable error, that setup
@@ -117,7 +161,9 @@ push to open the matching app route.
 ## Limitations / Notes
 
 - Native-app behavior only; browser runtime does not run push registration.
-- Delivered-tray cleanup logic is iOS-specific.
+- Background cross-device reads update iOS badges; selective tray cleanup runs
+  when the app executes reconciliation for that profile. This does not promise
+  immediate background tray synchronization on either platform.
 - Device push tap redirects currently support `profile` and `waves` payload
   types.
 - Push receive/tap issues do not surface a global blocking banner.

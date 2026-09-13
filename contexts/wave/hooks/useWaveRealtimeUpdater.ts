@@ -153,7 +153,6 @@ const useActiveWaveReadMarker = ({
 }: Pick<UseWaveRealtimeUpdaterProps, "removeWaveDeliveredNotifications"> & {
   readonly activeWaveIdRef: RefObject<string | null>;
 }): ((waveId: string, readThroughSerialNo?: number) => void) => {
-  const pendingDeliveredNotificationsRef = useRef<Promise<void> | null>(null);
   const pendingReadNotificationsRef = useRef<Promise<void> | null>(null);
 
   const markWaveNotificationsRead = useMarkWaveNotificationsRead();
@@ -181,15 +180,20 @@ const useActiveWaveReadMarker = ({
   const markNotificationsRead = useCallback(
     async (waveId: string, readThroughSerialNo?: number) => {
       try {
-        await markWaveNotificationsRead(waveId, {
+        const result = await markWaveNotificationsRead(waveId, {
           shouldSend: () => canSendReadForWave(waveId),
           readThroughSerialNo,
         });
+        if (result === "sent") await removeDeliveredNotifications(waveId);
       } catch (error) {
         reportBackgroundTaskError("Failed to mark wave as read:", error);
       }
     },
-    [markWaveNotificationsRead, canSendReadForWave]
+    [
+      markWaveNotificationsRead,
+      canSendReadForWave,
+      removeDeliveredNotifications,
+    ]
   );
 
   return useCallback(
@@ -201,14 +205,12 @@ const useActiveWaveReadMarker = ({
         return;
       }
 
-      pendingDeliveredNotificationsRef.current =
-        removeDeliveredNotifications(waveId);
       pendingReadNotificationsRef.current = markNotificationsRead(
         waveId,
         readThroughSerialNo
       );
     },
-    [activeWaveIdRef, removeDeliveredNotifications, markNotificationsRead]
+    [activeWaveIdRef, markNotificationsRead]
   );
 };
 

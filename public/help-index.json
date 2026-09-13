@@ -1517,6 +1517,7 @@
         "Scan Connection QR accepts only canonical 6529 connection-share links; the separate app-sidebar scanner remains general-purpose.",
         "On desktop web, the collapsed sidebar account avatar highlights on hover but opens its account dropdown only when activated; the dropdown stays aligned with the sidebar on centered wide-screen layouts.",
         "Sign out all clears every connected profile in one visible transition without switching through the remaining profiles.",
+        "On the native app, logout removes that profile from push delivery on this phone; Sign out all removes every profile registration for this installation, including stale profiles missing locally. Other devices stay connected. Offline cleanup retries when the app reconnects, so pushes can continue until the server accepts it.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
         "If Post cannot finish its session check, the draft stays in the composer. Wait for loading to finish, check the connection, complete sign-in if prompted, then retry Post. A stalled session check expires so a later attempt can check again; it does not automatically post the draft.",
         "If Post asks you to reconnect or reactions show Please reconnect your wallet, the saved profile can still be visible even though its session cannot renew. Reconnect that profile from the wallet account controls, then retry the action. Save your draft before logging out or reloading; failed authentication keeps it in the composer, and reactions are not automatically retried after sign-in.",
@@ -5132,6 +5133,8 @@
       ],
       "facts": [
         "Mobile push notifications are documented under the Notifications area.",
+        "Mobile tray cleanup preserves other connected profiles and removes only matching notifications confirmed read; uncertain or failed refreshes preserve entries.",
+        "The iOS badge is updated asynchronously from unread notifications across device-registered profiles, including reads from desktop or web. Android dots and counts depend on the launcher.",
         "Push notification behavior depends on mobile app support and notification permissions.",
         "Push settings include toggles for Identity - REP, Identity - NIC, New Follows, Mentions, Drops - Quoted, Drops - Replied, Drops - Voted, Drops - Reacted, Drops - Boosted, Wave Invites, and Subscription Coverage.",
         "Running-low and action-required subscription coverage can send mobile push; the earlier plan-a-top-up alert remains in the in-app feed without a push.",
