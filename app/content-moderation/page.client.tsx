@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import ContentModerationAccessError from "@/components/content-moderation/ContentModerationAccessError";
 import ContentModerationNoAccess from "@/components/content-moderation/ContentModerationNoAccess";
 import type { ApiContentModerationQueueItem } from "@/generated/models/ApiContentModerationQueueItem";
 import { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
@@ -64,9 +65,10 @@ function getModeratorPermissions(
   hasModeratorIdentity: boolean,
   fetchingProfile: boolean
 ) {
-  const canModerate = access.data?.moderator === true;
+  const canModerate = access.isSuccess && access.data?.moderator === true;
   const permissionsLoading =
-    fetchingProfile || (hasModeratorIdentity && access.isLoading);
+    fetchingProfile ||
+    (hasModeratorIdentity && access.isLoading && !access.isFetched);
   return {
     canModerate,
     permissionsLoading,
@@ -408,6 +410,16 @@ export default function ContentModerationPageClient() {
         (!hasModeratorIdentity || (accessQuery.isSuccess && !canModerate)) && (
           <ContentModerationNoAccess locale={locale} />
         )}
+      {!permissionsLoading &&
+        hasModeratorIdentity &&
+        (accessQuery.isError ||
+          (accessQuery.isFetched && !accessQuery.isSuccess)) && (
+          <ContentModerationAccessError
+            locale={locale}
+            retrying={accessQuery.isFetching}
+            onRetryAction={() => void accessQuery.refetch()}
+          />
+        )}
       {moderatorContentReady && profileId && (
         <ModerationCheckCounts key={profileId} profileId={profileId} />
       )}
@@ -444,12 +456,11 @@ export default function ContentModerationPageClient() {
             {t(locale, "contentModeration.moderator.loading")}
           </output>
         )}
-        {hasModeratorIdentity &&
-          (accessQuery.isError || activeDataState.isError) && (
-            <p role="alert" className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-red">
-              {t(locale, "contentModeration.moderator.loadError")}
-            </p>
-          )}
+        {moderatorContentReady && activeDataState.isError && (
+          <p role="alert" className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-red">
+            {t(locale, "contentModeration.moderator.loadError")}
+          </p>
+        )}
         {moderatorContentReady &&
           reportsTabActive &&
           queueItems.length === 0 &&

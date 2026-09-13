@@ -3,7 +3,7 @@
 ## Overview
 
 Content moderation gives users private control over what they see, provides a
-clear way to flag posts, and gives authorized developers a queue for
+clear way to flag posts, and gives authorized moderators a queue for
 serious reports. It also applies a narrow safety check before new or edited
 Wave posts are accepted.
 
@@ -21,7 +21,7 @@ being objectionable.
   adjacent **Reports** tab to track reports and their public outcomes. The
   older `/content-preferences` and `?tab=content` routes remain compatible and
   resolve to the blocked-profile view.
-- Authorized developer profiles can open **WatchTower** at `/content-moderation` from
+- Authorized **6529 Dev Team** group members can open **WatchTower** at `/content-moderation` from
   the desktop, mobile-browser, and mobile-app side navigation. It is not shown
   in the profile menu. The page heading is **WatchTower - Content Moderation**.
 
@@ -217,7 +217,7 @@ A high-confidence urgent report assessment may temporarily quarantine a post.
 Other assessments remain in the occasional moderator queue without changing
 the post's global visibility.
 
-Developer profiles can review open reports in **WatchTower** at
+Members of the **6529 Dev Team** group can review open reports in **WatchTower** at
 `/content-moderation`, which defaults to **Open reports**. All tabs share the
 site's bordered page frame and consistent content padding:
 
@@ -299,7 +299,7 @@ review the applicable effect, select a decision, enter a reason, and confirm:
 Author suspension is a separate, confirmation-backed action. **Suspend Profile**
 prevents future creates and edits without changing existing posts. Suspended
 profiles can be found in the central Suspended profiles view and opened in
-Checks for review and reinstatement without first locating a report. Developers
+Checks for review and reinstatement without first locating a report. Moderators
 also see **Suspend Profile** or **Reinstate Profile** in another profile's action
 menu; these open the same review page. That global moderation
 action remains independent of the moderator's personal Blocked state.
@@ -318,15 +318,19 @@ post**. Moderators inspect the preserved report snapshot in WatchTower rather
 than through the ordinary Wave post. Authors do not see the reporter, report
 reason, or pending report details.
 
-The WatchTower link is shown only to profiles whose server-provided access
-state grants developer access. Proxy sessions cannot use WatchTower. A red indicator appears while the queue contains open reports;
+The WatchTower link is shown only when the server confirms that the signed-in
+profile belongs to the **6529 Dev Team** group. Sign in with a wallet linked to
+that profile and use a direct profile session; proxy sessions cannot use
+WatchTower. A red indicator appears while the queue contains open reports;
 the client refreshes this lightweight state periodically while active, without
 a WebSocket. The backend checks every moderator request; hiding the link is not
 the authorization boundary. A user who opens `/content-moderation` without
-access, including through a direct tab link, sees the no-access countdown and
-is redirected home. A failed access
-request shows an error instead of incorrectly treating the user as
-unauthorized.
+access, including through a direct tab link, sees the group and sign-in
+requirements. The page stays open so the user can switch profiles, leave proxy
+mode, or choose **Go home**. If the permission check fails, **Couldn't check your
+WatchTower access. Try again.** appears with **Retry permission check**. Private
+review data stays hidden during the failure and retry until the server confirms
+access. A failed check does not mean that the profile lacks membership.
 Switching identity, entering proxy mode, signing out, or losing server access
 clears private review data. Private evidence is excluded from session replay.
 Private review data and personal Reports stay hidden until the current sign-in
@@ -390,13 +394,14 @@ mistake.
   Open reports can be withdrawn; the full moderation record remains available
   only in WatchTower.
 
-## Checks localization follow-up
+## Moderation localization follow-up
 
-The developer-only `/content-moderation/checks` surface currently uses the `en-US`
-source for its `checks.*` copy in `en-GB`, `fr-FR`, `es-ES` and `de-DE`. Dates and
-numbers still follow the selected locale. Frontend maintainers own the follow-up:
-translate this namespace and verify expanded labels on mobile before declaring
-those locale dictionaries complete. Provider, model, policy-version and unknown
+The private `/content-moderation/checks` surface and WatchTower access and
+recovery messages currently use the `en-US` source in `en-GB`, `fr-FR`, `es-ES`
+and `de-DE`. Dates and numbers still follow the selected locale. Frontend
+maintainers own the follow-up: translate these messages and verify expanded
+labels on mobile before declaring those locale dictionaries complete. Provider,
+model, policy-version and unknown
 future audit identifiers remain exact server values for diagnosis; known review
 actions and operations have translated message keys.
 
