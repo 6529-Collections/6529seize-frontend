@@ -15,6 +15,7 @@ import {
 } from "@/lib/profile-cms/studio/presentation";
 import { StudioButton, StudioField, StudioSelect } from "./StudioControls";
 import StudioForm, { type StudioFormState } from "./StudioForm";
+import StudioPalettePicker from "./StudioPalettePicker";
 
 const DESIGN_LABELS: Record<string, MessageKey> = {
   signature: "profileCms.studio.signature",
@@ -49,12 +50,6 @@ export default function StudioDesignPanel({
   readonly onApply: (operation: CmsDocumentOperation) => boolean;
   readonly formState: StudioFormState;
 }) {
-  const [title, setTitle] = useState(document.site.title);
-  const [description, setDescription] = useState(
-    document.site.description ?? ""
-  );
-  const [accent, setAccent] = useState(document.site.theme.accent);
-  const [invalid, setInvalid] = useState(false);
   const design =
     getCmsStudioPresentation(document) ?? DEFAULT_CMS_STUDIO_PRESENTATION;
   const choose = (patch: Partial<CmsStudioPresentation>) =>
@@ -69,52 +64,33 @@ export default function StudioDesignPanel({
     }));
   return (
     <div className="tw-space-y-6">
-      <StudioForm
+      {design.studio_design ? (
+        <StudioPalettePicker
+          design={design.studio_design}
+          selected={design.studio_colorway}
+          locale={locale}
+          pending={formState.pending}
+          onChoose={(palette) => {
+            onOperation({
+              type: "update_site",
+              patch: {
+                theme: {
+                  accent: palette.accent,
+                  tokens: { ...design, studio_colorway: palette.id },
+                },
+              },
+            });
+          }}
+        />
+      ) : null}
+      <StudioDesignFields
+        key={document.integrity.package_hash}
+        document={document}
         locale={locale}
-        state={formState}
-        onSubmit={() => {
-          if (!title.trim() || !/^#[0-9a-f]{6}$/i.test(accent)) {
-            setInvalid(true);
-            return false;
-          }
-          const applied = onApply({
-            type: "update_site",
-            patch: { title: title.trim(), description, theme: { accent } },
-          });
-          if (applied) setInvalid(false);
-          return applied;
-        }}
-      >
-        <StudioField
-          label={t(locale, "profileCms.studio.siteTitle")}
-          value={title}
-          onChange={setTitle}
-          maxLength={160}
-          invalid={invalid && !title.trim()}
-        />
-        <StudioField
-          label={t(locale, "profileCms.studio.accent")}
-          value={accent}
-          onChange={setAccent}
-          maxLength={7}
-          invalid={invalid && !/^#[0-9a-f]{6}$/i.test(accent)}
-        />
-        {invalid && (
-          <p role="alert" className="tw-text-red-300 tw-text-sm">
-            {t(locale, "profileCms.studio.invalidDesign")}
-          </p>
-        )}
-        <StudioField
-          label={t(locale, "profileCms.studio.siteDescription")}
-          value={description}
-          onChange={setDescription}
-          multiline
-          maxLength={300}
-        />
-        <StudioButton type="submit">
-          {t(locale, "profileCms.studio.apply")}
-        </StudioButton>
-      </StudioForm>
+        onApply={onApply}
+        formState={formState}
+        native={Boolean(design.studio_design)}
+      />
       <StudioSelect
         label={t(locale, "profileCms.studio.layout")}
         value={design.studio_layout}
@@ -124,15 +100,17 @@ export default function StudioDesignPanel({
           if (layout) choose({ studio_layout: layout });
         }}
       />
-      <StudioSelect
-        label={t(locale, "profileCms.studio.palette")}
-        value={design.studio_palette}
-        options={options(CMS_STUDIO_PALETTES)}
-        onChange={(value) => {
-          const palette = CMS_STUDIO_PALETTES.find((item) => item === value);
-          if (palette) choose({ studio_palette: palette });
-        }}
-      />
+      {!design.studio_design ? (
+        <StudioSelect
+          label={t(locale, "profileCms.studio.palette")}
+          value={design.studio_palette}
+          options={options(CMS_STUDIO_PALETTES)}
+          onChange={(value) => {
+            const palette = CMS_STUDIO_PALETTES.find((item) => item === value);
+            if (palette) choose({ studio_palette: palette });
+          }}
+        />
+      ) : null}
       <StudioSelect
         label={t(locale, "profileCms.studio.typography")}
         value={design.studio_type}
@@ -152,5 +130,75 @@ export default function StudioDesignPanel({
         }}
       />
     </div>
+  );
+}
+
+function StudioDesignFields({
+  document,
+  locale,
+  onApply,
+  formState,
+  native,
+}: {
+  readonly document: CmsPackageV1;
+  readonly locale: SupportedLocale;
+  readonly onApply: (operation: CmsDocumentOperation) => boolean;
+  readonly formState: StudioFormState;
+  readonly native: boolean;
+}) {
+  const [title, setTitle] = useState(document.site.title);
+  const [description, setDescription] = useState(
+    document.site.description ?? ""
+  );
+  const [accent, setAccent] = useState(document.site.theme.accent);
+  const [invalid, setInvalid] = useState(false);
+  return (
+    <StudioForm
+      locale={locale}
+      state={formState}
+      onSubmit={() => {
+        if (!title.trim() || !/^#[0-9a-f]{6}$/i.test(accent)) {
+          setInvalid(true);
+          return false;
+        }
+        const applied = onApply({
+          type: "update_site",
+          patch: { title: title.trim(), description, theme: { accent } },
+        });
+        if (applied) setInvalid(false);
+        return applied;
+      }}
+    >
+      <StudioField
+        label={t(locale, "profileCms.studio.siteTitle")}
+        value={title}
+        onChange={setTitle}
+        maxLength={160}
+        invalid={invalid && !title.trim()}
+      />
+      <StudioField
+        label={t(locale, "profileCms.studio.accent")}
+        help={native ? t(locale, "profileCms.palette.accentHelp") : undefined}
+        value={accent}
+        onChange={setAccent}
+        maxLength={7}
+        invalid={invalid && !/^#[0-9a-f]{6}$/i.test(accent)}
+      />
+      {invalid && (
+        <p role="alert" className="tw-text-red-300 tw-text-sm">
+          {t(locale, "profileCms.studio.invalidDesign")}
+        </p>
+      )}
+      <StudioField
+        label={t(locale, "profileCms.studio.siteDescription")}
+        value={description}
+        onChange={setDescription}
+        multiline
+        maxLength={300}
+      />
+      <StudioButton type="submit">
+        {t(locale, "profileCms.studio.apply")}
+      </StudioButton>
+    </StudioForm>
   );
 }
