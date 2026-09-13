@@ -57,6 +57,7 @@ import {
 import { useCollectTradeOrders } from "./useCollectTradeOrders";
 import { collectProfileWallets } from "./collect-recipient.helpers";
 import { useFixedCollectOrder } from "./useFixedCollectOrder";
+import { useCollectRecipientUpdate } from "./useCollectRecipientUpdate";
 import {
   collectBuyAmount,
   collectBuyListings,
@@ -456,6 +457,27 @@ function CollectTradeControllerContent({
     asset,
   });
   const stage = reviewStage(displayedOperation, execution.stage, preparing);
+  const recipientUpdate = useCollectRecipientUpdate({
+    operation: displayedOperation,
+    expected,
+    profile: connectedProfile,
+    wallet: connection.address,
+    enabled: action === "buy" && stage === "review" && !disabledReason,
+    onUpdated: (next, request) => {
+      setDraft((current) => ({
+        ...current,
+        quantity: request.quantity,
+        recipient: request.recipient,
+        acknowledgeExternalRecipient: request.acknowledge_external_recipient,
+      }));
+      setQuantityEdited(true);
+      setExpected(request);
+      receiveOperation(next);
+      setError(undefined);
+      execution.clearMessage();
+    },
+    onError: (failure) => setError(marketPreparationError(failure, locale)),
+  });
   const form = (
     <CollectTradeControllerForm
       locale={locale}
@@ -518,7 +540,24 @@ function CollectTradeControllerContent({
         compact={inlineBuy}
         review={review}
         title={asset?.name}
-        stage={stage}
+        stage={recipientUpdate.pending ? "preparing" : stage}
+        recipientEditor={
+          action === "buy" && review?.purchase && expected
+            ? {
+                profile:
+                  connectedProfile?.id === displayedOperation?.profile_id
+                    ? connectedProfile
+                    : null,
+                payingWallet: review.purchase.payerAddress,
+                disabled: !recipientUpdate.canEdit,
+                onApply: async (recipient, acknowledgeExternal) => {
+                  setError(undefined);
+                  execution.clearMessage();
+                  return recipientUpdate.update(recipient, acknowledgeExternal);
+                },
+              }
+            : undefined
+        }
         form={form}
         recoveryAction={
           <>
@@ -526,7 +565,11 @@ function CollectTradeControllerContent({
               marketOperationHasUnresolvedSend(displayedOperation) && (
                 <CollectTransactionRecovery
                   key={displayedOperation.id}
-                  disabled={!isAuthenticated || Boolean(activeProfileProxy)}
+                  disabled={
+                    !isAuthenticated ||
+                    Boolean(activeProfileProxy) ||
+                    recipientUpdate.pending
+                  }
                   onRecover={(hash) =>
                     execution.recoverTransaction(displayedOperation, hash)
                   }
@@ -579,6 +622,11 @@ function CollectTradeControllerContent({
                   offerIntent.reserve
                 );
               else await execution.confirm(displayedOperation, expected, guard);
+            } else if (action === "buy") {
+              await execution.confirm(displayedOperation, expected, () => {
+                recipientUpdate.assertIdle();
+                if (fixedOrder) fixedIntent.guard();
+              });
             } else if (fixedOrder) {
               await execution.confirm(
                 displayedOperation,
