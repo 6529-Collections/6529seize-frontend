@@ -287,6 +287,7 @@
         "Connect Wallet replaces Submit Artwork when the active profile has no signing connection. Connecting never starts artwork submission automatically; review the profile and click Submit Artwork separately.",
         "Connecting B's wallet while A remains the active authenticated profile leaves A in the strip with an amber dot. Explicitly switching the active profile updates the strip and checks that profile's eligibility before allowing submission.",
         "The primary action stays disabled during upload, signing, and processing, with phase-specific progress text.",
+        "If the destination wave or submission terms change while drafting, the form returns to Agreement and requires review and agreement again. Artwork and additional information stay in the draft; only the exact accepted wave and terms can be submitted.",
         "The Memes Main Stage requests an EIP-712 typed-data signature with the action Submit a Meme Card to The Memes. Review the Artwork title, Destination wave and Agreement to The Memes submission terms before signing. The Notice confirms this submission signature does not mint an NFT, approve token spending or transfer wallet assets, and signing requires no gas fee.",
         "ExpiresAt is the deadline for using the signature to submit: five minutes after the signing request is created. Expiry does not expire a completed submission or the agreement to the terms. If authorization expires before submission completes, retry from the draft and review a new signature request.",
         "Verification groups the signing wallet, wave and site identifiers, timestamps and hashes binding the submission and terms. Wallets control their own layout, field expansion and signature classification.",
@@ -298,6 +299,7 @@
       "source_refs": [
         "ops/docs/waves/memes/feature-memes-preview-and-submit-states.md",
         "components/waves/memes/submission/ui/SubmissionIdentityPanel.tsx",
+        "components/waves/memes/submission/hooks/useArtworkSubmissionForm.ts",
         "services/wallet-signatures/memes-submission-signature.ts",
         "hooks/drops/useDropSignature.ts"
       ]

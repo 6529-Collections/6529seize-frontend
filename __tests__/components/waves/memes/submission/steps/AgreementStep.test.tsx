@@ -23,6 +23,26 @@ jest.mock(
 const wave: Wave = { participation: { terms: "terms" } } as any;
 
 describe("AgreementStep", () => {
+  it("explains that changed terms need review and the draft is retained", () => {
+    render(
+      <AgreementStep
+        wave={wave as React.ComponentProps<typeof AgreementStep>["wave"]}
+        agreements={false}
+        reviewRequired
+        setAgreements={jest.fn()}
+        onContinue={jest.fn()}
+      />
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "The submission destination or terms changed. Review and agree again to continue. Your artwork draft has been kept."
+    );
+    expect(screen.getByTestId("agreement")).toHaveTextContent("terms");
+    expect(screen.getByTestId("primary")).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Check terms agreement" })
+    ).toHaveAttribute("aria-pressed", "false");
+  });
+
   it("toggles agreement and calls continue", async () => {
     const setAgreements = jest.fn();
     const onContinue = jest.fn();
@@ -54,6 +74,9 @@ describe("AgreementStep", () => {
       />
     );
     const btn = screen.getByTestId("primary");
+    expect(
+      screen.getByRole("button", { name: "Uncheck terms agreement" })
+    ).toHaveAttribute("aria-pressed", "true");
     expect(btn).not.toBeDisabled();
     expect(btn).toHaveAttribute("data-size", "default");
     await user.click(btn);

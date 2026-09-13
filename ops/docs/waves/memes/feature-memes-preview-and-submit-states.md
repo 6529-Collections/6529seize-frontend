@@ -136,6 +136,9 @@ these can differ between wallets.
   submitting.
 - If upload, auth, signing, or API submission fails, the modal keeps current
   draft state and supports retry from the current screen.
+- If the destination wave or submission terms change while drafting, the form
+  returns to `Agreement` and asks you to review and agree again. Your artwork
+  and additional information stay in the draft.
 - Canceling the signature in your wallet stops the submission and shows
   `Signature request was canceled in your wallet.` The draft stays available
   while the submission modal remains open. Closing the modal discards it.
