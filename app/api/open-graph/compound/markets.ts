@@ -9,7 +9,7 @@ import {
 } from "viem";
 
 import { cTokenAbi, cometAbi, comptrollerAbi, priceOracleAbi } from "./abis";
-import { publicClient } from "./client";
+import { getPublicClient } from "./client";
 import {
   compoundRegistry,
   type CompoundV2MarketConfig,
@@ -234,7 +234,7 @@ async function fetchV3AssetPrice(
   priceFeed: Address
 ): Promise<string | undefined> {
   try {
-    const price = await publicClient.readContract({
+    const price = await getPublicClient().readContract({
       address: comet,
       abi: cometAbi,
       functionName: "getPrice",
@@ -254,7 +254,7 @@ async function fetchV3Collateral(
   comet: Address
 ): Promise<V3CollateralInfo> {
   try {
-    const [symbolResult, decimalsResult] = await publicClient.multicall({
+    const [symbolResult, decimalsResult] = await getPublicClient().multicall({
       allowFailure: false,
       contracts: [
         { address: info.asset, abi: erc20Abi, functionName: "symbol" },
@@ -283,7 +283,7 @@ async function fetchV3Collaterals(
     return [];
   }
 
-  const collateralResults = await publicClient.multicall({
+  const collateralResults = await getPublicClient().multicall({
     allowFailure: false,
     contracts: Array.from(
       { length: numAssets },
@@ -313,7 +313,7 @@ async function fetchV3BasePrice(
   }
 
   try {
-    const basePrice = await publicClient.readContract({
+    const basePrice = await getPublicClient().readContract({
       address: comet,
       abi: cometAbi,
       functionName: "getPrice",
@@ -329,7 +329,7 @@ export async function fetchV2MarketState(
   market: CompoundV2MarketConfig
 ): Promise<V2MarketState> {
   const cToken = market.address as Address;
-  const marketResults = await publicClient.multicall({
+  const marketResults = await getPublicClient().multicall({
     allowFailure: false,
     contracts: [
       { address: cToken, abi: cTokenAbi, functionName: "decimals" },
@@ -358,7 +358,7 @@ export async function fetchV2MarketState(
   const supplyRatePerBlock = marketResults[7];
   const borrowRatePerBlock = marketResults[8];
 
-  const [_, collateralFactorMantissa] = await publicClient.readContract({
+  const [_, collateralFactorMantissa] = await getPublicClient().readContract({
     address: compoundRegistry.comptroller as Address,
     abi: comptrollerAbi,
     functionName: "markets",
@@ -367,13 +367,13 @@ export async function fetchV2MarketState(
 
   let underlyingPrice: bigint | null = null;
   try {
-    const oracleAddress = await publicClient.readContract({
+    const oracleAddress = await getPublicClient().readContract({
       address: compoundRegistry.comptroller as Address,
       abi: comptrollerAbi,
       functionName: "oracle",
     });
     if (oracleAddress && oracleAddress !== zeroAddress) {
-      underlyingPrice = await publicClient.readContract({
+      underlyingPrice = await getPublicClient().readContract({
         address: oracleAddress,
         abi: priceOracleAbi,
         functionName: "getUnderlyingPrice",
@@ -451,7 +451,7 @@ export async function fetchV3MarketState(
   market: CompoundV3MarketConfig
 ): Promise<V3MarketState> {
   const comet = market.address as Address;
-  const marketCoreResults = await publicClient.multicall({
+  const marketCoreResults = await getPublicClient().multicall({
     allowFailure: false,
     contracts: [
       { address: comet, abi: cometAbi, functionName: "decimals" },
@@ -470,7 +470,7 @@ export async function fetchV3MarketState(
 
   const utilizationValue = utilizationRaw ?? BIGINT_ZERO;
 
-  const [supplyRate, borrowRate] = await publicClient.multicall({
+  const [supplyRate, borrowRate] = await getPublicClient().multicall({
     allowFailure: false,
     contracts: [
       {

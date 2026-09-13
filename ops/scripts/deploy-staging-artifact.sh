@@ -4,7 +4,7 @@ set -euo pipefail
 
 for name in ARTIFACT_URL EXPECTED_DIGEST EXPECTED_SHA \
   PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64 REPO_DIR RUN_AS \
-  SSR_CLIENT_ID_B64 SSR_CLIENT_SECRET_B64; do
+  SSR_CLIENT_ID_B64 SSR_CLIENT_SECRET_B64 ETHEREUM_RPC_URL_B64 ALCHEMY_API_KEY_B64; do
   if [[ -z "${!name:-}" ]]; then
     echo "Required deployment value $name is missing." >&2
     exit 1
@@ -36,7 +36,7 @@ id "$RUN_AS" >/dev/null 2>&1 || {
   exit 1
 }
 
-for command in base64 curl flock grep jq sha256sum sudo unzip; do
+for command in base64 curl flock grep jq node sha256sum sudo unzip; do
   command -v "$command" >/dev/null 2>&1 || {
     echo "Required staging command '$command' is unavailable." >&2
     exit 1
@@ -49,10 +49,21 @@ sudo -H -u "$RUN_AS" pm2 --version >/dev/null 2>&1 || {
 
 ssr_client_id="$(printf '%s' "$SSR_CLIENT_ID_B64" | base64 -d)"
 ssr_client_secret="$(printf '%s' "$SSR_CLIENT_SECRET_B64" | base64 -d)"
+alchemy_api_key="$(printf '%s' "$ALCHEMY_API_KEY_B64" | base64 -d)"
+[[ -n "$alchemy_api_key" ]] || {
+  echo "Decoded staging Alchemy API key must be non-empty." >&2
+  exit 1
+}
+ethereum_rpc_url="$(printf '%s' "$ETHEREUM_RPC_URL_B64" | base64 -d)"
 [[ -n "$ssr_client_id" && -n "$ssr_client_secret" ]] || {
   echo "Decoded staging SSR credentials must be non-empty." >&2
   exit 1
 }
+if ! printf '%s' "$ethereum_rpc_url" | \
+  node "$REPO_DIR/ops/scripts/validate-ethereum-rpc-url.cjs"; then
+  echo "Decoded staging Ethereum RPC URL is invalid." >&2
+  exit 1
+fi
 
 release_root="$REPO_DIR/.deploy"
 if [[ -L "$release_root" ]]; then
@@ -275,7 +286,8 @@ retain_destinations_file=false
 runtime_secrets_tmp=""
 cleanup() {
   unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64 \
-    ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64
+    ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64 \
+    ethereum_rpc_url ETHEREUM_RPC_URL_B64 alchemy_api_key ALCHEMY_API_KEY_B64
   rm -f "$artifact_tmp"
   if [[ -n "$staging_app" && -d "$staging_app" ]]; then
     rm -rf -- "$staging_app"
@@ -330,13 +342,16 @@ runtime_secrets_tmp="$(mktemp "$release_root/runtime-secrets.XXXXXX.json")"
 jq -n \
   --arg ssr_client_id "$ssr_client_id" \
   --arg ssr_client_secret "$ssr_client_secret" \
-  '{SSR_CLIENT_ID:$ssr_client_id,SSR_CLIENT_SECRET:$ssr_client_secret}' \
+  --arg ethereum_rpc_url "$ethereum_rpc_url" \
+  --arg alchemy_api_key "$alchemy_api_key" \
+  '{SSR_CLIENT_ID:$ssr_client_id,SSR_CLIENT_SECRET:$ssr_client_secret,ETHEREUM_RPC_URL:$ethereum_rpc_url,ALCHEMY_API_KEY:$alchemy_api_key}' \
   > "$runtime_secrets_tmp"
 chown "$RUN_AS:$RUN_AS" "$runtime_secrets_tmp"
 chmod 600 "$runtime_secrets_tmp"
 mv -f "$runtime_secrets_tmp" "$runtime_secrets_file"
 runtime_secrets_tmp=""
-unset ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64
+unset ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64 \
+  ethereum_rpc_url ETHEREUM_RPC_URL_B64 alchemy_api_key ALCHEMY_API_KEY_B64
 
 ln -sfn "$release_app" "$current_link"
 cat > "$release_root/ecosystem.config.cjs" <<'PM2_CONFIG'
@@ -384,6 +399,8 @@ module.exports = {
       NODE_ENV: 'production',
       ['SSR_CLIENT_ID']: requireRuntimeEnv('SSR_CLIENT_ID'),
       ['SSR_CLIENT_SECRET']: requireRuntimeEnv('SSR_CLIENT_SECRET'),
+      ['ETHEREUM_RPC_URL']: requireRuntimeEnv('ETHEREUM_RPC_URL'),
+      ['ALCHEMY_API_KEY']: requireRuntimeEnv('ALCHEMY_API_KEY'),
       ...(publicReviewDiscussionDestinations
         ? {
             PUBLIC_REVIEW_DISCUSSION_DESTINATIONS:

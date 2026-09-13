@@ -605,6 +605,7 @@ export const createEslintConfig = ({
         "config/assets.ts",
         "config/deploymentEnv.ts",
         "config/env.ts",
+        "config/ethereumRpcEnv.ts",
         "config/museumPublicationEnv.server.ts",
         "config/nextConfig.ts",
         "config/publicReviewDestinationEnv.server.ts",
