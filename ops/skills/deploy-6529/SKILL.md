@@ -66,25 +66,30 @@ Inspect `permissions.admin` and `permissions.maintain` separately from the
 effective review/status requirements. A classic branch-protection 404 does not
 mean no rules apply: rulesets can protect that branch. Read every applicable
 ruleset's details, including inherited organization rules, conditions,
-`bypass_actors`, and `bypass_mode`. Set `release_ruleset_id` and
-`release_org` from the returned rule's ID and source, then use the matching
-source endpoint:
+`bypass_actors`, and `bypass_mode`. Read `ruleset_id`, `ruleset_source_type` and
+`ruleset_source` from the effective rules. Set `release_ruleset_id` to that ID;
+for a repository source, `release_org` is its owner before the slash, and for
+an organization source it is the organization slug. Run only the matching
+source command below:
 
 ```bash
-gh api "repos/$release_repo/rulesets/$release_ruleset_id"
-gh api "orgs/$release_org/rulesets/$release_ruleset_id"
+gh api "repos/$release_repo/rulesets/$release_ruleset_id" # Repository source
+gh api "orgs/$release_org/rulesets/$release_ruleset_id" # Organization source
 ```
 
 Use the team ID in the actual required-reviewer or bypass rule; do not substitute
 a similarly named team or a team from the other repository. Set
-`release_team_id` to that ID, resolve its slug, then set `release_team_slug`
-to the returned slug and check the authenticated actor's membership:
+`release_team_id` to that ID, then resolve its slug and check the authenticated
+actor's membership only if resolution succeeds and returns a nonempty slug:
 
 ```bash
-gh api "orgs/$release_org/teams" --paginate \
-  --jq ".[] | select(.id == $release_team_id) | {id,slug,name}"
-gh api "orgs/$release_org/teams/$release_team_slug/memberships/$release_actor" \
-  --jq '{state,role}'
+if release_team_slug="$(gh api "orgs/$release_org/teams" --paginate \
+  --jq ".[] | select(.id == $release_team_id) | .slug")" && [ -n "$release_team_slug" ]; then
+  gh api "orgs/$release_org/teams/$release_team_slug/memberships/$release_actor" \
+    --jq '{state,role}'
+else
+  printf '%s\n' 'Team membership is unknown; check the team ID and visibility.'
+fi
 ```
 
 - Require a successful membership response with `state: active` before claiming
@@ -98,7 +103,8 @@ gh api "orgs/$release_org/teams/$release_team_slug/memberships/$release_actor" \
   requested PR number and read its author, head, reviews, and merge state with
   `gh pr view "$release_pr" -R "$release_repo" --json author,headRefOid,reviews,reviewDecision,mergeStateStatus`.
   An author cannot approve their own PR; last-push and team-review requirements
-  may also leave review unmet for an authenticated maintainer.
+  may also leave review unmet for an authenticated maintainer. A transient
+  `mergeStateStatus: UNKNOWN` is not a denial; re-query after GitHub computes it.
 - Honor explicit owner/admin bypass authorization already given for the current
   release scope when the authenticated actor is eligible under the effective
   rules. Do not ask for it again merely because ordinary PR approval is unmet.
