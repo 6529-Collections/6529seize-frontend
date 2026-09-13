@@ -60,7 +60,7 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.entry.assignedEmpty":
     "No artwork records are assigned to this profile yet. If you have been invited, check that you are signed in with the invited profile or contact the project team.",
   "artworkDocumentation.entry.sourceMore":
-    "This submission may already have a record on a later page. Use Load more below to find it before starting a new record.",
+    "This submission may already have a record on a later page. Use Load more below to find it.",
   "artworkDocumentation.entry.sourceRecord":
     "This submission already has a documentation record. Open it to continue where you left off.",
   "artworkDocumentation.entry.listUnavailable":
