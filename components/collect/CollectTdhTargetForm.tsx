@@ -1,7 +1,6 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
-import { COLLECT_PLANNER_FAMILIES } from "./collect-families";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useId, type ReactNode } from "react";
@@ -44,18 +43,18 @@ export default function CollectTdhTargetForm({
         event.preventDefault();
         if (!loading && connected) onSubmit();
       }}
-      className="tw-max-w-3xl tw-space-y-5"
+      className="tw-max-w-2xl tw-space-y-4"
     >
       <div className="tw-max-w-2xl">
-        <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100">
+        <h2 className="tw-m-0 tw-text-base tw-font-medium tw-tracking-tight tw-text-iron-100">
           {t(locale, "collect.tdhTarget.title")}
         </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-400">
           {t(locale, "collect.tdhTarget.description")}
         </p>
       </div>
-      <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-4">
-        <label className="tw-block tw-w-40 tw-space-y-2 tw-text-xs tw-text-iron-300">
+      <div className="tw-grid tw-grid-cols-2 tw-items-end tw-gap-3 sm:tw-max-w-sm">
+        <label className="tw-block tw-min-w-0 tw-space-y-2 tw-text-xs tw-text-iron-300">
           <span>{t(locale, "collect.tdhTarget.target")}</span>
           <input
             id={`${id}-target`}
@@ -69,7 +68,7 @@ export default function CollectTdhTargetForm({
             className={`${COLLECT_INPUT_CLASS} tw-tabular-nums`}
           />
         </label>
-        <label className="tw-block tw-w-32 tw-space-y-2 tw-text-xs tw-text-iron-300">
+        <label className="tw-block tw-min-w-0 tw-space-y-2 tw-text-xs tw-text-iron-300">
           <span>{t(locale, "collect.tdhTarget.timeframe")}</span>
           <select
             value={draft.horizonDays}
@@ -90,25 +89,6 @@ export default function CollectTdhTargetForm({
                     : "collect.goal.horizonDays",
                   { days }
                 )}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="tw-block tw-w-40 tw-space-y-2 tw-text-xs tw-text-iron-300">
-          <span>{t(locale, "collect.tdhTarget.collection")}</span>
-          <select
-            value={draft.family}
-            onChange={(event) => {
-              const family = COLLECT_PLANNER_FAMILIES.find(
-                (value) => value.toString() === event.target.value
-              );
-              if (family !== undefined) change({ family });
-            }}
-            className={COLLECT_INPUT_CLASS}
-          >
-            {COLLECT_PLANNER_FAMILIES.map((family) => (
-              <option key={family} value={family}>
-                {t(locale, `collect.collection.${family}`)}
               </option>
             ))}
           </select>
@@ -178,11 +158,11 @@ export default function CollectTdhTargetForm({
         </p>
       )}
       {connected ? (
-        <Button variant="primary" type="submit" loading={loading}>
+        <Button variant="action" size="lg" type="submit" loading={loading}>
           {t(locale, "collect.tdhTarget.find")}
         </Button>
       ) : (
-        <Button variant="primary" onClick={onConnect}>
+        <Button variant="secondary" size="lg" onClick={onConnect}>
           {t(locale, "collect.connect")}
         </Button>
       )}

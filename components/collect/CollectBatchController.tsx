@@ -21,10 +21,9 @@ import { useEffect, useRef, useState } from "react";
 import CollectBatchReviewForm from "./CollectBatchReviewForm";
 import CollectBatchQuoteReview from "./CollectBatchQuoteReview";
 import CollectTransactionRecovery from "./CollectTransactionRecovery";
-import {
-  CollectTradeDialog,
-  type CollectTradePresentation,
-} from "./CollectTradeSheet";
+import type { CollectTradePresentation } from "./CollectTradeSheet";
+import CollectCheckoutScreen from "./CollectCheckoutScreen";
+import CollectPlanMetadataProvider from "./CollectPlanMetadataProvider";
 import { buildCollectBatchRequest } from "./collect-batch-request";
 import type { CollectBatchDraft } from "./collect-batch.types";
 import type { CollectSelectedListing } from "./collect-selection.helpers";
@@ -36,7 +35,11 @@ import {
 } from "./market-batch-recovery";
 import { batchSendAttempt } from "./market-batch-send";
 import { readMarketBatch, saveMarketBatch } from "./market-batch-storage";
-import { validateMarketBatchOperation } from "./market-batch-validation";
+import { knownMarketTransactionHash } from "./market-known-transaction";
+import {
+  validateMarketBatchOperation,
+  validateMarketBatchOperationForRefresh,
+} from "./market-batch-validation";
 import { useMarketBatchExecution } from "./useMarketBatchExecution";
 import { useCollectBatchRecipientUpdate } from "./useCollectBatchRecipientUpdate";
 import { useMarketSettlement } from "./useMarketSettlement";
@@ -52,9 +55,12 @@ interface Props {
   readonly initialRecipient?: string;
   readonly initialOperation?: ApiMarketBatchOperation;
   readonly onClose: () => void;
+  readonly onEmpty?: () => void;
   readonly onSettled?: (operation: ApiMarketBatchOperation) => void;
   readonly onMarketChange?: () => void;
   readonly presentation?: CollectTradePresentation;
+  readonly onItemsChange?: (items: readonly CollectSelectedListing[]) => void;
+  readonly open?: boolean;
 }
 
 export default function CollectBatchController(props: Props) {
@@ -88,9 +94,12 @@ function ScopedBatchController({
   initialRecipient,
   initialOperation,
   onClose,
+  onEmpty,
   onSettled,
   onMarketChange,
   presentation = "dialog",
+  onItemsChange,
+  open = true,
 }: Props) {
   const locale = useBrowserLocale(),
     auth = useAuth(),
@@ -98,6 +107,23 @@ function ScopedBatchController({
   const { isCapacitor } = useCapacitor(),
     client = useQueryClient();
   const [operation, setOperation] = useState(initialOperation ?? null);
+  const [discarded, setDiscarded] = useState(false);
+  const [availableItems, setAvailableItems] = useState(items);
+  const keepRequestedItems = (request: ApiMarketBatchPrepareRequest) => {
+    const remaining = availableItems.filter((selection) =>
+      request.items.some(
+        (item) =>
+          item.asset_key === selection.asset.asset_key &&
+          item.order.order_hash.toLowerCase() ===
+            selection.order.identity.order_hash.toLowerCase() &&
+          item.order.protocol_address.toLowerCase() ===
+            selection.order.identity.protocol_address.toLowerCase()
+      )
+    );
+    setAvailableItems(remaining);
+    onItemsChange?.(remaining);
+  };
+  const adoptedResume = useRef(false);
   const [preparedRequest, setExpected] =
     useState<ApiMarketBatchPrepareRequest | null>(() =>
       initialOperation
@@ -144,12 +170,61 @@ function ScopedBatchController({
       JSON.stringify(resumeItems),
       editedOperationId,
     ],
-    queryFn: ({ signal }) =>
-      findResumableMarketBatch(auth.connectedProfile!.id!, resumeItems, {
-        signal,
-        ...(editedOperationId ? { excludeId: editedOperationId } : {}),
-      }),
+    queryFn: async ({ signal }) => {
+      const resumed = await findResumableMarketBatch(
+        auth.connectedProfile!.id!,
+        resumeItems,
+        {
+          signal,
+          ...(editedOperationId ? { excludeId: editedOperationId } : {}),
+        }
+      );
+      if (
+        signal.aborted ||
+        !scopeIsActive() ||
+        adoptedResume.current ||
+        pending.current ||
+        discarded ||
+        initialOperation ||
+        operation !== null ||
+        !resumed ||
+        !auth.isAuthenticated ||
+        auth.activeProfileProxy ||
+        auth.connectedProfile?.id !== resumed.request.profile_id ||
+        connection.address?.toLowerCase() !==
+          resumed.request.wallet.toLowerCase()
+      )
+        return resumed;
+      const recovered = resumed.operation;
+      if (
+        recovered.state !== ApiMarketBatchOperationStateEnum.Review ||
+        batchNeedsPolling(recovered) ||
+        knownMarketTransactionHash(
+          recovered,
+          batchSendAttempt(recovered),
+          readMarketBatch(recovered.profile_id, recovered.id)
+        )
+      )
+        return resumed;
+      try {
+        validateMarketBatchOperationForRefresh(
+          recovered,
+          resumed.request,
+          collectProfileWallets(auth.connectedProfile).map(
+            (item) => item.wallet
+          )
+        );
+      } catch {
+        // Invalid or unresolved recovery must not change the browsing selection.
+        return resumed;
+      }
+      adoptedResume.current = true;
+      // Adopt the authoritative read once without remounting the quote or replacing item references.
+      keepRequestedItems(resumed.request);
+      return resumed;
+    },
     enabled:
+      !discarded &&
       !initialOperation &&
       operation === null &&
       items.length > 0 &&
@@ -158,8 +233,12 @@ function ScopedBatchController({
       Boolean(auth.connectedProfile?.id),
     retry: false,
   });
-  const activeOperation = operation ?? resume.data?.operation ?? null;
-  const expected = preparedRequest ?? resume.data?.request ?? null;
+  const activeOperation = discarded
+    ? null
+    : (operation ?? resume.data?.operation ?? null);
+  const expected = discarded
+    ? null
+    : (preparedRequest ?? resume.data?.request ?? null);
   const polling = useQuery({
     queryKey: [
       QueryKey.MARKET_OPERATION,
@@ -184,9 +263,10 @@ function ScopedBatchController({
       return value && batchNeedsPolling(value) ? 5000 : false;
     },
   });
-  const displayed = polling.data ?? activeOperation;
+  const displayed = discarded ? null : (polling.data ?? activeOperation);
   const receive = (value: ApiMarketBatchOperation) => {
     if (!mounted.current) return;
+    adoptedResume.current = true;
     const queryKey = [
       QueryKey.MARKET_OPERATION,
       "BUY_BATCH",
@@ -285,6 +365,7 @@ function ScopedBatchController({
             throw new Error("MARKET_RECOVERY_STORAGE_UNAVAILABLE");
           if (!scopeIsActive()) return;
           setExpected(request);
+          keepRequestedItems(request);
           receive(result);
           priorPrepare.current = null;
         }
@@ -299,8 +380,22 @@ function ScopedBatchController({
   const unresolved = displayed
     ? batchSendAttempt(displayed) !== undefined
     : false;
+  const knownHash =
+    displayed &&
+    knownMarketTransactionHash(
+      displayed,
+      batchSendAttempt(displayed),
+      readMarketBatch(displayed.profile_id, displayed.id)
+    );
+  const recoveryNeeded =
+    unresolved && !execution.busy && !execution.stage && !knownHash;
+  let unresolvedReason: Parameters<typeof t>[1] =
+    "collect.trade.broadcastUnknown";
+  if (execution.stage)
+    unresolvedReason = `collect.trade.stage.${execution.stage}`;
+  if (knownHash) unresolvedReason = "collect.trade.submissionPending";
   const operationDisabledReason = unresolved
-    ? t(locale, "collect.trade.broadcastUnknown")
+    ? t(locale, unresolvedReason)
     : undefined;
   const reviewDisabledReason = disabledReason ?? operationDisabledReason;
   const recipientUpdate = useCollectBatchRecipientUpdate({
@@ -311,12 +406,25 @@ function ScopedBatchController({
     enabled: !reviewDisabledReason && !preparing && !execution.busy,
     onUpdated: (value, request) => {
       setExpected(request);
+      keepRequestedItems(request);
       setError(undefined);
       execution.clearMessage();
       recipientEditing.current = null;
       receive(value);
     },
     onError: (failure) => setError(marketPreparationError(failure, locale)),
+    onEmpty: () => {
+      adoptedResume.current = true;
+      setDiscarded(true);
+      setOperation(null);
+      setExpected(null);
+      setAvailableItems([]);
+      priorPrepare.current = null;
+      recipientEditing.current = null;
+      onItemsChange?.([]);
+      onEmpty?.();
+      onClose();
+    },
   });
   const walletNames =
     displayed?.profile_id === auth.connectedProfile?.id
@@ -327,7 +435,7 @@ function ScopedBatchController({
         )
       : undefined;
   const content = (
-    <div className="tw-space-y-5 tw-p-5 sm:tw-p-6">
+    <div className="tw-space-y-5">
       {(reason === "collect.trade.connectSigner" ||
         reason === "collect.trade.reconnect") && (
         <Button variant="secondary" onClick={() => connection.seizeConnect()}>
@@ -337,7 +445,7 @@ function ScopedBatchController({
       {!initialOperation && (
         <div ref={formContainer} hidden={displayed !== null}>
           <CollectBatchReviewForm
-            items={items}
+            items={availableItems}
             profile={auth.connectedProfile}
             {...(connection.address
               ? { payingWallet: connection.address }
@@ -366,71 +474,91 @@ function ScopedBatchController({
         </Button>
       )}
       {displayed && (
-        <CollectBatchQuoteReview
-          canEdit={!initialOperation}
-          operation={displayed}
-          items={items}
-          profile={
-            displayed.profile_id === auth.connectedProfile?.id
-              ? auth.connectedProfile
-              : null
-          }
-          busy={preparing || execution.busy || recipientUpdate.pending}
-          disabledReason={reviewDisabledReason}
-          message={error ?? execution.message}
-          walletNames={walletNames}
-          {...(recipientUpdate.canEdit || recipientUpdate.pending
-            ? { onRecipientChange: recipientUpdate.update }
-            : {})}
-          onRecipientEditingChange={(open) => {
-            recipientEditing.current = { operationId: displayed.id, open };
-          }}
-          onConfirm={async () => {
-            if (
-              expected &&
-              !disabledReason &&
-              !unresolved &&
-              !recipientUpdate.pending &&
-              !(
-                recipientEditing.current?.operationId === displayed.id &&
-                recipientEditing.current.open
-              )
-            )
-              await execution.confirm(displayed, expected, () => {
-                recipientUpdate.assertIdle();
-                if (
+        <CollectPlanMetadataProvider
+          assetKeys={displayed.items.map((item) => item.asset_key)}
+          knownAssets={items.map((item) => item.asset)}
+          catalog={undefined}
+        >
+          <CollectBatchQuoteReview
+            canEdit={!initialOperation}
+            operation={displayed}
+            items={items}
+            profile={
+              displayed.profile_id === auth.connectedProfile?.id
+                ? auth.connectedProfile
+                : null
+            }
+            busy={preparing || execution.busy || recipientUpdate.pending}
+            disabledReason={
+              reviewDisabledReason ??
+              (!execution.ready && execution.readinessReason
+                ? t(locale, execution.readinessReason)
+                : undefined)
+            }
+            stage={execution.stage}
+            message={error ?? execution.message}
+            walletNames={walletNames}
+            {...(recipientUpdate.canEdit || recipientUpdate.pending
+              ? {
+                  onRecipientChange: recipientUpdate.update,
+                  onAllRecipientsChange: recipientUpdate.updateAll,
+                  onRemove: recipientUpdate.remove,
+                }
+              : {})}
+            onRecipientEditingChange={(editing) => {
+              recipientEditing.current = {
+                operationId: displayed.id,
+                open: editing,
+              };
+            }}
+            onConfirm={async () => {
+              if (
+                expected &&
+                !disabledReason &&
+                execution.ready &&
+                !unresolved &&
+                !recipientUpdate.pending &&
+                !(
                   recipientEditing.current?.operationId === displayed.id &&
                   recipientEditing.current.open
                 )
-                  throw new Error("MARKET_REVIEW_MISMATCH");
-              });
-          }}
-          onEdit={() => {
-            if (
-              !unresolved &&
-              !recipientUpdate.pending &&
-              !execution.busy &&
-              !(
-                recipientEditing.current?.operationId === displayed.id &&
-                recipientEditing.current.open
-              ) &&
-              displayed.state === ApiMarketBatchOperationStateEnum.Review
-            ) {
-              setOperation(null);
-              setEditedOperationId(displayed.id);
-              setExpected(null);
-              setError(undefined);
-              queueMicrotask(() =>
-                formContainer.current
-                  ?.querySelector<HTMLElement>("input, button")
-                  ?.focus()
-              );
-            }
-          }}
-          onClose={onClose}
-        />
+              )
+                await execution.confirm(displayed, expected, () => {
+                  recipientUpdate.assertIdle();
+                  if (
+                    recipientEditing.current?.operationId === displayed.id &&
+                    recipientEditing.current.open
+                  )
+                    throw new Error("MARKET_REVIEW_MISMATCH");
+                });
+            }}
+            onEdit={() => {
+              if (
+                !unresolved &&
+                !recipientUpdate.pending &&
+                !execution.busy &&
+                !(
+                  recipientEditing.current?.operationId === displayed.id &&
+                  recipientEditing.current.open
+                ) &&
+                displayed.state === ApiMarketBatchOperationStateEnum.Review
+              ) {
+                setOperation(null);
+                setEditedOperationId(displayed.id);
+                setExpected(null);
+                setError(undefined);
+                queueMicrotask(() =>
+                  formContainer.current
+                    ?.querySelector<HTMLElement>("input, button")
+                    ?.focus()
+                );
+              }
+            }}
+            onClose={onClose}
+          />
+        </CollectPlanMetadataProvider>
       )}
-      {displayed && unresolved && (
+      {displayed && recoveryNeeded && (
         <CollectTransactionRecovery
           disabled={execution.busy || recipientUpdate.pending}
           onRecover={(hash) => execution.recoverTransaction(displayed, hash)}
@@ -441,12 +569,12 @@ function ScopedBatchController({
   return presentation === "contents" ? (
     content
   ) : (
-    <CollectTradeDialog
-      open
-      title={t(locale, "collect.selection.review")}
+    <CollectCheckoutScreen
+      open={open}
+      busy={preparing || execution.busy || recipientUpdate.pending}
       onClose={onClose}
     >
       {content}
-    </CollectTradeDialog>
+    </CollectCheckoutScreen>
   );
 }

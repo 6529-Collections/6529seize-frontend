@@ -17,7 +17,10 @@ import {
 import { withMarketOperationLock } from "./market-operation-lock";
 import { useCollectRecipientScope } from "./useCollectRecipientScope";
 import { readMarketBatch, saveMarketBatch } from "./market-batch-storage";
-import { marketBatchProfileLock } from "./market-batch-resume";
+import {
+  discardUnsignedMarketBatchReview,
+  marketBatchProfileLock,
+} from "./market-batch-resume";
 import { batchSendAttempt } from "./market-batch-send";
 import { batchNeedsPolling } from "./market-batch-recovery";
 import {
@@ -38,6 +41,7 @@ interface BatchRecipientUpdateOptions {
     request: ApiMarketBatchPrepareRequest
   ) => void;
   readonly onError: (failure: unknown) => void;
+  readonly onEmpty?: () => void;
 }
 
 function hasPendingPurchase(operation: ApiMarketBatchOperation) {
@@ -181,11 +185,10 @@ export function useCollectBatchRecipientUpdate(
     options.operation !== null &&
     !hasPendingPurchase(options.operation);
 
-  const update = async (
-    itemIndex: number,
-    allocationIndex: number,
-    recipient: string,
-    acknowledgeExternal: boolean
+  const revise = async (
+    transform: (
+      request: ApiMarketBatchPrepareRequest
+    ) => ApiMarketBatchPrepareRequest | null
   ): Promise<boolean> => {
     if (pendingAttempt.current) return false;
     const attempt = {};
@@ -195,16 +198,11 @@ export function useCollectBatchRecipientUpdate(
       assertUpdate();
       const { operation, expected, profile } = options;
       if (!operation || !expected) throw new Error("MARKET_REVIEW_MISMATCH");
-      const request = recipientRequest(expected, profile, {
-        itemIndex,
-        allocationIndex,
-        recipient,
-        acknowledgeExternal,
-      });
+      const request = transform(expected);
       const wallets = collectProfileWallets(profile).map(
         (value) => value.wallet
       );
-      validateMarketBatchRequest(request, wallets);
+      if (request) validateMarketBatchRequest(request, wallets);
       return await withMarketOperationLock(
         marketBatchProfileLock(expected.profile_id),
         () =>
@@ -215,6 +213,13 @@ export function useCollectBatchRecipientUpdate(
             assertUpdate();
             assertSameOperation(current, operation);
             assertStoredReview(current, expected, wallets);
+            if (request === null) {
+              if (!live.current?.options.onEmpty)
+                throw new Error("MARKET_REVIEW_MISMATCH");
+              discardUnsignedMarketBatchReview(current, expected);
+              live.current.options.onEmpty();
+              return true;
+            }
             if (JSON.stringify(request) === JSON.stringify(expected))
               return true;
             const fingerprint = JSON.stringify({
@@ -254,6 +259,7 @@ export function useCollectBatchRecipientUpdate(
               assertUpdate();
               assertStoredReview(latest, expected, wallets);
               persistBatchReview(prepared, preparation.request, wallets);
+              discardUnsignedMarketBatchReview(latest, expected);
               live.current?.options.onUpdated(prepared, preparation.request);
               retry.current = null;
               return Promise.resolve(true);
@@ -271,5 +277,55 @@ export function useCollectBatchRecipientUpdate(
       }
     }
   };
-  return { update, pending, canEdit, assertIdle };
+  const update = (
+    itemIndex: number,
+    allocationIndex: number,
+    recipient: string,
+    acknowledgeExternal: boolean
+  ) =>
+    revise((expected) =>
+      recipientRequest(expected, options.profile, {
+        itemIndex,
+        allocationIndex,
+        recipient,
+        acknowledgeExternal,
+      })
+    );
+  const remove = (itemIndex: number) =>
+    revise((expected) => {
+      if (!Number.isInteger(itemIndex) || !expected.items[itemIndex])
+        throw new Error("MARKET_REVIEW_MISMATCH");
+      const items = expected.items.filter((_, index) => index !== itemIndex);
+      return items.length === 0
+        ? null
+        : {
+            ...expected,
+            items,
+            amount_wei: items
+              .reduce((total, item) => total + BigInt(item.amount_wei), 0n)
+              .toString(),
+          };
+    });
+  const updateAll = (recipient: string, acknowledgeExternal: boolean) =>
+    revise((expected) => {
+      if (!isAddress(recipient) || getAddress(recipient) === zeroAddress)
+        throw new Error("MARKET_REVIEW_MISMATCH");
+      const external = !isCollectProfileWallet(options.profile, recipient);
+      if (external && !acknowledgeExternal)
+        throw new Error("RECIPIENT_NOT_ACKNOWLEDGED");
+      return {
+        ...expected,
+        items: expected.items.map((item) => ({
+          ...item,
+          allocations: [
+            {
+              recipient: getAddress(recipient),
+              quantity: item.quantity,
+              acknowledge_external_recipient: external && acknowledgeExternal,
+            },
+          ],
+        })),
+      };
+    });
+  return { update, updateAll, remove, pending, canEdit, assertIdle };
 }

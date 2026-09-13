@@ -6,10 +6,19 @@ import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import {
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import CollectArtworkCard, {
   type CollectArtworkSelection,
 } from "./CollectArtworkCard";
+import CollectCollectionSelector from "./CollectCollectionSelector";
+import styles from "./marketplace-font.module.css";
+import { formatNumber } from "@/i18n/format";
 import CollectGoalNavigation from "./CollectGoalNavigation";
 import CollectPlanPanel from "./CollectPlanPanel";
 import type {
@@ -28,14 +37,6 @@ const COLLECTIONS = [
   { id: "gradients", href: "/6529-gradient" },
   { id: "pebbles", href: "/nextgen/collection/pebbles" },
 ] as const;
-export const COLLECT_INTENTS: readonly CollectIntent[] = [
-  "lowest",
-  "season",
-  "full_set",
-  "artist",
-  "pebbles_set",
-  "tdh",
-];
 
 interface CollectPageViewProps {
   readonly catalog: CollectCatalogView;
@@ -47,7 +48,6 @@ interface CollectPageViewProps {
   readonly recoveryContent?: ReactNode;
   readonly workspaceContent?: ReactNode;
   readonly workspaceActive?: boolean;
-  readonly showCollections?: boolean;
   readonly showListings?: boolean;
   readonly selectionFor?:
     | ((id: string) => CollectArtworkSelection | undefined)
@@ -124,6 +124,11 @@ function Listings({
   }
   return (
     <>
+      <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-tabular-nums tw-text-iron-400">
+        {t(locale, "collect.listings.shown", {
+          count: formatNumber(locale, catalog.items.length),
+        })}
+      </p>
       <div className="tw-grid tw-grid-cols-2 tw-gap-3 max-[360px]:tw-grid-cols-1 sm:tw-grid-cols-3 sm:tw-gap-4">
         {catalog.items.map((artwork) => (
           <CollectArtworkCard
@@ -152,16 +157,30 @@ function Listings({
 
 export default function CollectPageView(props: CollectPageViewProps) {
   const locale = useBrowserLocale();
+  const setupId = useId();
+  const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
+  const setup = useRef<HTMLDivElement>(null);
+  const editSetup = useRef<HTMLButtonElement>(null);
+  const collapsiblePlan =
+    props.plan && !props.plan.reviewDisabledReason ? props.plan.id : null;
+  const setupOpen =
+    collapsiblePlan === null || expandedPlan === collapsiblePlan;
+  useLayoutEffect(() => {
+    if (!setupOpen && setup.current?.contains(document.activeElement))
+      editSetup.current?.focus({ preventScroll: true });
+  }, [setupOpen]);
   const collectionLink = COLLECTIONS.find(({ id }) => id === props.collection);
   const showListings =
     props.showListings ?? (props.intent === "lowest" || props.intent === "tdh");
   const contentClass =
     showListings || props.plan ? "tw-max-w-[1080px]" : "tw-max-w-3xl";
   return (
-    <div className="tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-pb-28 tw-pt-6 tw-text-iron-100 md:tw-px-6 lg:tw-px-8">
-      <header className="tw-mb-7 tw-space-y-3">
+    <div
+      className={`${styles["surface"] ?? ""} tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-pb-28 tw-pt-5 tw-text-iron-100 md:tw-px-6 lg:tw-px-8`}
+    >
+      <header className="tw-mb-5 tw-space-y-2">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-2">
-          <h1 className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-3xl tw-font-semibold tw-tracking-tight">
+          <h1 className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-2xl tw-font-medium tw-tracking-tight">
             {t(locale, "collect.title")}
           </h1>
           {collectionLink && (
@@ -198,34 +217,19 @@ export default function CollectPageView(props: CollectPageViewProps) {
         )}
       </header>
       {props.recoveryContent}
+      <div className="tw-mb-4">
+        <CollectCollectionSelector
+          collection={props.collection}
+          locale={locale}
+          onCollectionChange={props.onCollectionChange}
+        />
+      </div>
       <CollectGoalNavigation
         intent={props.intent}
         collection={props.collection}
         locale={locale}
         onIntentChange={props.onIntentChange}
       />
-      {!props.workspaceActive &&
-        props.showCollections !== false &&
-        (props.intent === "lowest" || props.intent === "tdh") && (
-          <div
-            role="group"
-            aria-label={t(locale, "collect.collections")}
-            className="tw-mb-6 tw-flex tw-flex-wrap tw-gap-2"
-          >
-            {COLLECTIONS.map(({ id }) => (
-              <Button
-                key={id}
-                variant={props.collection === id ? "primary" : "tertiary"}
-                size="sm"
-                aria-pressed={props.collection === id}
-                onClick={() => props.onCollectionChange(id)}
-                className="tw-min-h-11"
-              >
-                {t(locale, `collect.collection.${id}`)}
-              </Button>
-            ))}
-          </div>
-        )}
       <div hidden={!props.workspaceActive} className="tw-max-w-4xl">
         {props.workspaceContent}
       </div>
@@ -233,7 +237,31 @@ export default function CollectPageView(props: CollectPageViewProps) {
         <div className={contentClass}>
           <div className="tw-min-w-0">
             {props.goalContent !== undefined && props.goalContent !== null && (
-              <div className="tw-mb-6">{props.goalContent}</div>
+              <div className="tw-mb-5">
+                {collapsiblePlan !== null && (
+                  <Button
+                    ref={editSetup}
+                    variant="secondary"
+                    size="sm"
+                    className="tw-mb-3 tw-min-h-11"
+                    aria-expanded={setupOpen}
+                    aria-controls={setupId}
+                    onClick={() =>
+                      setExpandedPlan(setupOpen ? null : collapsiblePlan)
+                    }
+                  >
+                    {t(
+                      locale,
+                      setupOpen
+                        ? "collect.goal.hideSetup"
+                        : "collect.goal.editSetup"
+                    )}
+                  </Button>
+                )}
+                <div ref={setup} id={setupId} hidden={!setupOpen}>
+                  {props.goalContent}
+                </div>
+              </div>
             )}
             {showListings && (
               <section

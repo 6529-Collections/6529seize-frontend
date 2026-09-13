@@ -40,6 +40,8 @@ import type {
 import { marketOperationStage } from "./market.adapters";
 import { validateMarketOperation } from "./market-validation";
 import { readMarketIntent, saveMarketIntent } from "./market-operation-storage";
+import { knownMarketTransactionHash } from "./market-known-transaction";
+import { marketOperationSendAttempt } from "./market-send-recovery";
 import CollectTradeControllerForm from "./CollectTradeControllerForm";
 import CollectBatchController from "./CollectBatchController";
 import type { CollectSelectedListing } from "./collect-selection.helpers";
@@ -454,7 +456,11 @@ function CollectTradeControllerContent({
   const review = collectControllerReview({
     operation: displayedOperation,
     locale,
-    disabledReason,
+    disabledReason:
+      disabledReason ??
+      (!execution.ready && execution.readinessReason
+        ? t(locale, execution.readinessReason)
+        : undefined),
     profileId: connectedProfile?.id ?? undefined,
     profile: connectedProfile ?? null,
     asset,
@@ -497,6 +503,7 @@ function CollectTradeControllerContent({
       orders={orders.data?.orders ?? []}
       buyOrders={buyOrders}
       ordersLoading={orders.isPending}
+      ordersUpdatedAt={orders.dataUpdatedAt}
       ordersFailed={orders.isError}
       makerLabel={connection.address ?? "—"}
       recipientProfile={connectedProfile}
@@ -542,7 +549,7 @@ function CollectTradeControllerContent({
   return (
     <>
       <CollectTradeSheet
-        open
+        open={!splitPurchase}
         presentation={presentation}
         compact={inlineBuy}
         review={review}
@@ -569,6 +576,16 @@ function CollectTradeControllerContent({
         recoveryAction={
           <>
             {displayedOperation &&
+              !execution.busy &&
+              !execution.stage &&
+              !knownMarketTransactionHash(
+                displayedOperation,
+                marketOperationSendAttempt(displayedOperation),
+                readMarketIntent(
+                  displayedOperation.profile_id,
+                  displayedOperation.id
+                )
+              ) &&
               marketOperationHasUnresolvedSend(displayedOperation) && (
                 <CollectTransactionRecovery
                   key={displayedOperation.id}
@@ -608,6 +625,7 @@ function CollectTradeControllerContent({
         onConfirm={async (id, revision) => {
           if (
             displayedOperation &&
+            execution.ready &&
             expected &&
             displayedOperation.id === id &&
             displayedOperation.revision === revision

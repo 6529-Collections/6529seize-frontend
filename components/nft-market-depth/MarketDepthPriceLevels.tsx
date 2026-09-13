@@ -16,7 +16,7 @@ import {
   useMarketDepthTradeActionsAvailable,
 } from "./MarketDepthOrderAction";
 
-const MAX_LEVELS = 5;
+const MAX_LEVELS = 10;
 
 export default function MarketDepthPriceLevels({
   side,

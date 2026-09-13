@@ -40,14 +40,20 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
   const id = useId();
   const [invalidField, setInvalidField] =
     useState<ReturnType<typeof validateCollectGoal>>(null);
-  const { draft } = props;
+  const uniqueGoal =
+    props.completion?.collection === "gradients" ||
+    props.completion?.collection === "pebbles" ||
+    (props.draft.intent === "full_set" &&
+      props.draft.definitionId === "gradients");
+  const draft = uniqueGoal ? { ...props.draft, targetCount: "1" } : props.draft;
   const title = t(
     locale,
     draft.intent === "tdh"
       ? "collect.tdh.projectionTitle"
       : `collect.intent.${draft.intent}`
   );
-  const showQuantity = ["season", "full_set", "artist"].includes(draft.intent);
+  const showQuantity =
+    !uniqueGoal && ["season", "full_set", "artist"].includes(draft.intent);
   const needsDefinition = draft.intent !== "tdh";
   const definitionsStatus = props.definitionsStatus ?? "ready";
   const definitionsUnavailable =
@@ -96,7 +102,7 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
         setInvalidField(invalid);
         if (!invalid && props.profile && !props.loading) props.onSubmit(draft);
       }}
-      className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/40 tw-p-4 sm:tw-p-5"
+      className="tw-space-y-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-p-4 sm:tw-p-5"
     >
       {props.completion ? (
         <CollectCompletionControls

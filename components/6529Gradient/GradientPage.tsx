@@ -533,7 +533,7 @@ export default function GradientPageComponent({
   return (
     <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
       <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
-        <header className="tw-pb-8">
+        <header className="tw-pb-4">
           <div className="tw-flex tw-flex-col tw-gap-4">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
               <ProfileCollectedReturnLink
@@ -590,15 +590,6 @@ export default function GradientPageComponent({
         </header>
         {nft ? (
           <>
-            <div className="tw-mb-4">
-              <CollectDetailActions
-                collection="gradients"
-                tokenId={String(nft.id)}
-                title={nft.name}
-                locale={locale}
-                onMarketChange={refreshMarket}
-              />
-            </div>
             <div className="tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-x-10 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] xl:tw-gap-x-16">
               <div className="tw-relative lg:tw-flex lg:tw-flex-col lg:tw-self-stretch">
                 <div className="tw-relative tw-flex tw-min-w-0 tw-items-center tw-pb-5 tw-pt-2 lg:tw-flex-1">
@@ -616,6 +607,13 @@ export default function GradientPageComponent({
                     }
                   />
                 </div>
+                <CollectDetailActions
+                  collection="gradients"
+                  tokenId={String(nft.id)}
+                  title={nft.name}
+                  locale={locale}
+                  onMarketChange={refreshMarket}
+                />
                 {isConnectedAddressOwner && (
                   <GradientTransferWidget nft={nft} />
                 )}

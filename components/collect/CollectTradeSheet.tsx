@@ -61,6 +61,7 @@ export function CollectTradeDialog({
       enableDragToClose={false}
       maxWidthClass="md:tw-max-w-xl"
       focusTitleOnOpen
+      showScrollbar
     >
       <div className={styles["surface"]}>{children}</div>
     </MobileWrapperDialog>
