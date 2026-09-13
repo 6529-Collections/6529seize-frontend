@@ -1,0 +1,136 @@
+{
+  "wave": {
+    "id": "5a8a8d52-1935-4d07-89db-fce66dd50e12",
+    "name": "The Memes Main Stage"
+  },
+  "terms": "The Memes submission terms.\nI own the submitted artwork.",
+  "drop": {
+    "wave_id": "5a8a8d52-1935-4d07-89db-fce66dd50e12",
+    "drop_type": "PARTICIPATORY",
+    "title": "A Meme for Tomorrow",
+    "parts": [
+      {
+        "content": "An artwork about an open future.",
+        "media": [
+          {
+            "url": "https://example.com/artwork.png",
+            "mime_type": "image/png"
+          }
+        ]
+      }
+    ],
+    "referenced_nfts": [],
+    "mentioned_users": [],
+    "metadata": [],
+    "signature": null,
+    "signer_address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+  },
+  "typedData": {
+    "domain": {
+      "name": "The Memes",
+      "version": "1",
+      "chainId": 1
+    },
+    "types": {
+      "EIP712Domain": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "version",
+          "type": "string"
+        },
+        {
+          "name": "chainId",
+          "type": "uint256"
+        }
+      ],
+      "MemeCardSubmission": [
+        {
+          "name": "Action",
+          "type": "string"
+        },
+        {
+          "name": "Artwork",
+          "type": "string"
+        },
+        {
+          "name": "Destination",
+          "type": "string"
+        },
+        {
+          "name": "Agreement",
+          "type": "string"
+        },
+        {
+          "name": "Notice",
+          "type": "string"
+        },
+        {
+          "name": "ExpiresAt",
+          "type": "string"
+        },
+        {
+          "name": "Verification",
+          "type": "SubmissionVerification"
+        }
+      ],
+      "SubmissionVerification": [
+        {
+          "name": "Wallet",
+          "type": "address"
+        },
+        {
+          "name": "WaveId",
+          "type": "string"
+        },
+        {
+          "name": "Audience",
+          "type": "string"
+        },
+        {
+          "name": "Origin",
+          "type": "string"
+        },
+        {
+          "name": "IssuedAt",
+          "type": "string"
+        },
+        {
+          "name": "Nonce",
+          "type": "string"
+        },
+        {
+          "name": "PayloadHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "TermsHash",
+          "type": "bytes32"
+        }
+      ]
+    },
+    "primaryType": "MemeCardSubmission",
+    "message": {
+      "Action": "Submit a Meme Card to The Memes",
+      "Artwork": "A Meme for Tomorrow",
+      "Destination": "The Memes Main Stage",
+      "Agreement": "I agree to The Memes submission terms I reviewed.",
+      "Notice": "Submission only. No mint, token approval or asset transfer. No gas fee.",
+      "ExpiresAt": "2026-09-13T12:05:00.000Z",
+      "Verification": {
+        "Wallet": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "WaveId": "5a8a8d52-1935-4d07-89db-fce66dd50e12",
+        "Audience": "api.6529.io",
+        "Origin": "https://6529.io",
+        "IssuedAt": "2026-09-13T12:00:00.000Z",
+        "Nonce": "24d3ca71-71e8-4b98-b417-1bbb282a8b41",
+        "PayloadHash": "0xbab9b3c0753d62c48b6d0dc49b4148bcc5506bf6a8bbe9feee384872cdb8a945",
+        "TermsHash": "0x4aaf082b4e56de454d08a73343c68ee8c7ba82f38bfe103ea7a2cb160364cde7"
+      }
+    }
+  },
+  "typedDataHash": "0x5e5e6eb648fb5508cc830cdeaa3f7ad120c96b2b4bcc20bdd800dc17c87f1f84",
+  "signature": "0xac3e2a139079e9b6326d0f18df668aa699fe6e3278ad0dd90b8e43ae4b1d6ee35cac1a4352a3c2e61e3f31e088be8eeaec71a9ca25ddef472c9c65ce7517e3641c"
+}
