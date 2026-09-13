@@ -144,12 +144,9 @@ export function ArtworkDocumentationRecordView({
   const museum = isMuseumRecord(context.profile);
   const draftRecord = documentationDraftRecord(context, draft.edits);
   const canWrite = canWriteDocumentation(mutationCapabilities(context));
-  const listPath = context.program_id
-    ? `/artwork-documentation/programs/${encodeURIComponent(context.program_id)}`
-    : "/artwork-documentation";
-  const viewOnlyBackLabel = context.program_id ? "backToResults" : "backToList";
-  const backLabel =
-    context.program_id || !canWrite ? viewOnlyBackLabel : "back";
+  // Access to this record does not imply access to its program-wide review queue.
+  const listPath = "/artwork-documentation";
+  const backLabel = "back";
   const [section, setSection] = useState(
     sections.includes(initialSection) ? initialSection : "artwork"
   );

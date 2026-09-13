@@ -1,5 +1,7 @@
 "use client";
 
+import { documentationCreationErrorMessage } from "@/lib/artwork-documentation/entry";
+
 import { mutationCapabilities } from "@/lib/artwork-documentation/capabilities";
 
 import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
@@ -34,32 +36,39 @@ export default function DocumentationNewContext({
   const access = useArtworkDocumentationAccess();
   const profiles = access.profiles.filter(
     (profile) =>
-      profile.profile_id !== context.profile.profile_id ||
-      profile.program_id !== context.program_id
+      access.selfServiceEnabled &&
+      !profile.program_id &&
+      (profile.profile_id !== context.profile.profile_id ||
+        profile.program_id !== context.program_id)
   );
   const [profileId, setProfileId] = useState("");
   const [checked, setChecked] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const key = useRef(crypto.randomUUID());
   const profile =
     profiles.find((item) => documentationProfileKey(item) === profileId) ??
     profiles[0];
-  if (!mutationCapabilities(context).confirm_as_artist || !profiles.length)
+  if (
+    !access.enabled ||
+    !mutationCapabilities(context).confirm_as_artist ||
+    !profiles.length
+  )
     return null;
   const create = async () => {
-    if (!profile || !(await controller.flush())) return;
+    if (!profile || busy) return;
     setBusy(true);
-    setError(false);
+    setError(null);
     try {
+      if (!(await controller.flush())) return;
       const created = await createAdditionalDocumentationContext(
         context.work_id,
         profile,
         key.current
       );
       router.push(documentationWorkspacePath(created.work_id, created.id));
-    } catch {
-      setError(true);
+    } catch (failure) {
+      setError(documentationCreationErrorMessage(failure));
     } finally {
       setBusy(false);
     }
@@ -76,14 +85,16 @@ export default function DocumentationNewContext({
             : "newContextHelp"
         )}
       </p>
-      {error && <DocumentationNotice error>{msg("error")}</DocumentationNotice>}
+      {error && <DocumentationNotice error>{msg(error)}</DocumentationNotice>}
       <label className="tw-block tw-text-sm tw-text-iron-300">
         {msg("profile")}
         <select
           className={`${inputClass} tw-my-3`}
+          disabled={busy}
           value={profile ? documentationProfileKey(profile) : ""}
           onChange={(event) => {
             setProfileId(event.target.value);
+            setError(null);
             key.current = crypto.randomUUID();
             setChecked(false);
           }}
