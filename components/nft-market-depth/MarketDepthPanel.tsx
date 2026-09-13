@@ -495,7 +495,7 @@ export default function MarketDepthPanel({
           '[data-market-depth-order-details="true"], details[open]'
         ) &&
         !loadMoreAbortControllerRef.current;
-      if (!canPublish() || browsingRequest.current) return;
+      if (!canPublish() || browsingRequest.current?.aborted === false) return;
       browsingRequest.current = signal;
       try {
         const next = await loadDepth(undefined, signal);

@@ -121,3 +121,33 @@ it("retains the last book on background failure and retries without replacing it
   expect(screen.getByTestId("mounted-trade-provider")).toBe(provider);
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });
+
+it("replaces an expired background request and rejects its late book without releasing the newer request", async () => {
+  let finishOld!: (value: ApiMarketDepth) => void;
+  let finishNew!: (value: ApiMarketDepth) => void;
+  fetchMock
+    .mockResolvedValueOnce(book())
+    .mockReturnValueOnce(
+      new Promise<ApiMarketDepth>((resolve) => {
+        finishOld = resolve;
+      })
+    )
+    .mockReturnValueOnce(
+      new Promise<ApiMarketDepth>((resolve) => {
+        finishNew = resolve;
+      })
+    );
+  render(<MarketDepthPanel contract="0x1" tokenId="7" embedded />);
+  await screen.findByText("Original observed book");
+  const provider = screen.getByTestId("mounted-trade-provider");
+  await act(async () => jest.advanceTimersByTimeAsync(60_000));
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  await act(async () => jest.advanceTimersByTimeAsync(60_000));
+  expect(fetchMock).toHaveBeenCalledTimes(3);
+  await act(async () => finishOld(book("Obsolete timed-out book")));
+  expect(screen.queryByText("Obsolete timed-out book")).not.toBeInTheDocument();
+  expect(screen.getByText("Original observed book")).toBeInTheDocument();
+  await act(async () => finishNew(book("Recovered current book")));
+  expect(screen.getByText("Recovered current book")).toBeInTheDocument();
+  expect(screen.getByTestId("mounted-trade-provider")).toBe(provider);
+});

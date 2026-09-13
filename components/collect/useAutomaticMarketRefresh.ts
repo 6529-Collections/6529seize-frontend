@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef } from "react";
+import { createFetchDeadline } from "@/lib/fetch/fetchDeadline";
 
 const BROWSING_INTERVAL_MS = 60_000;
+const BROWSING_TIMEOUT_MS = 30_000;
 
 /** Browsing reads never grant execution authority or replace an active intent. */
 export function useAutomaticMarketRefresh(
@@ -25,9 +27,16 @@ export function useAutomaticMarketRefresh(
       lastAttempt = Date.now();
       const controller = new AbortController();
       pending.current = controller;
-      void refresh(controller.signal)
+      const deadline = createFetchDeadline(
+        controller.signal,
+        BROWSING_TIMEOUT_MS,
+        () => new Error("Market browsing update timed out")
+      );
+      void deadline
+        .run(() => refresh(deadline.signal))
         .catch(() => undefined)
         .finally(() => {
+          deadline.dispose();
           if (pending.current === controller) pending.current = null;
         });
     };
