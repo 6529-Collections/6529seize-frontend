@@ -606,6 +606,7 @@ export const COLLECT_MESSAGES = {
   "collect.collections": "Collections",
   "collect.collection.all": "All collections",
   "collect.collection.memes": "The Memes",
+  "collect.collection.memelab": "Meme Lab",
   "collect.collection.gradients": "Gradients",
   "collect.collection.pebbles": "Pebbles",
   "collect.intent.explore": "Explore the art",

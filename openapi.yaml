@@ -3860,7 +3860,7 @@ paths:
           in: query
           required: true
           schema:
-            $ref: "#/components/schemas/ApiCollectFamily"
+            $ref: "#/components/schemas/ApiCollectPlanningFamily"
         - name: cursor
           in: query
           schema:
@@ -3911,7 +3911,7 @@ paths:
         - name: family
           in: query
           schema:
-            $ref: "#/components/schemas/ApiCollectFamily"
+            $ref: "#/components/schemas/ApiCollectPlanningFamily"
         - name: cursor
           in: query
           schema:
@@ -21974,7 +21974,7 @@ components:
             - gradients
             - pebbles
           items:
-            $ref: "#/components/schemas/ApiCollectFamily"
+            $ref: "#/components/schemas/ApiCollectPlanningFamily"
           description: Distinct families only. Defaults to all supported families.
         mode:
           type: string
@@ -22090,10 +22090,14 @@ components:
             type: string
     ApiCollectFamily:
       type: string
+      description: >-
+        Meme Lab is supported for explicit artwork lookup and card trading; it
+        is not part of collection goals or TDH planning.
       enum:
         - memes
         - gradients
         - pebbles
+        - memelab
     ApiCollectHolding:
       type: object
       additionalProperties: false
@@ -22564,6 +22568,12 @@ components:
         - order_id
         - asset_key
         - quantity
+    ApiCollectPlanningFamily:
+      type: string
+      enum:
+        - memes
+        - gradients
+        - pebbles
     ApiCollectPlanOptions:
       type: object
       additionalProperties: false
@@ -22642,7 +22652,7 @@ components:
         asset_key:
           type: string
         family:
-          $ref: "#/components/schemas/ApiCollectFamily"
+          $ref: "#/components/schemas/ApiCollectPlanningFamily"
         balance:
           type: number
         raw_days_held:
@@ -23110,7 +23120,7 @@ components:
           items:
             $ref: "#/components/schemas/ApiCollectTdhListing"
         family:
-          $ref: "#/components/schemas/ApiCollectFamily"
+          $ref: "#/components/schemas/ApiCollectPlanningFamily"
         next:
           type: string
           nullable: true
@@ -23335,7 +23345,7 @@ components:
         profile_id:
           type: string
         family:
-          $ref: "#/components/schemas/ApiCollectFamily"
+          $ref: "#/components/schemas/ApiCollectPlanningFamily"
         plan_id:
           type: string
           format: uuid
@@ -23566,7 +23576,7 @@ components:
           minItems: 1
           maxItems: 3
           items:
-            $ref: "#/components/schemas/ApiCollectFamily"
+            $ref: "#/components/schemas/ApiCollectPlanningFamily"
           description: Distinct families only. Defaults to all supported families.
         budget_wei:
           type: string

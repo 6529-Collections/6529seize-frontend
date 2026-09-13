@@ -55,6 +55,7 @@ export function MemeLabStaticHeader({
   locale,
   hasOwnershipContext,
   nftBalance,
+  onMarketChange,
 }: {
   readonly nft: LabNFT;
   readonly nftMeta: LabExtendedData;
@@ -62,12 +63,14 @@ export function MemeLabStaticHeader({
   readonly locale: SupportedLocale;
   readonly hasOwnershipContext: boolean;
   readonly nftBalance: number;
+  readonly onMarketChange?: (() => void) | undefined;
 }) {
   return (
     <MemeLabStaticCardHeader
       nft={nft}
       nftMeta={nftMeta}
       showMarketplaceLinks={showMarketplaceLinks}
+      onMarketChange={onMarketChange}
       locale={locale}
       artworkFooter={
         hasOwnershipContext ? (

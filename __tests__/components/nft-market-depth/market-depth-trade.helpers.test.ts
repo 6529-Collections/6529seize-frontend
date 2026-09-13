@@ -12,6 +12,8 @@ import {
   type ApiMarketTradeOrder,
 } from "@/generated/models/ApiMarketTradeOrder";
 import {
+  marketDepthCollectFamily,
+  marketDepthListingQuantityIsValid,
   marketDepthListingSelection,
   marketDepthOfferIsExecutable,
   marketDepthSelectionConflict,
@@ -23,6 +25,7 @@ import {
   MARKET_WETH,
   MARKET_ZERO,
 } from "@/components/collect/market-validation";
+import { MEMELAB_CONTRACT, GRADIENT_CONTRACT } from "@/constants/constants";
 
 const HASH = `0x${"a".repeat(64)}`;
 const ASSET_KEY = "1:0x33fd426905f149f8376e227d0c9d3340aad17af1:8";
@@ -98,6 +101,47 @@ function depthOrder(overrides: Partial<ApiMarketOrder> = {}): ApiMarketOrder {
 }
 
 describe("market depth executable-order bridge", () => {
+  it("resolves Meme Lab and keeps unknown contracts outside trading", () => {
+    expect(marketDepthCollectFamily(MEMELAB_CONTRACT.toUpperCase())).toBe(
+      ApiCollectFamily.Memelab
+    );
+    expect(marketDepthCollectFamily(MAKER)).toBeNull();
+  });
+  it("preserves multiple Meme Lab copies while single-token collections stay quantity one", () => {
+    const lab = {
+      ...asset,
+      contract: MEMELAB_CONTRACT.toLowerCase(),
+      family: ApiCollectFamily.Memelab,
+      asset_key: `1:${MEMELAB_CONTRACT.toLowerCase()}:8`,
+      tdh_eligible: false,
+    };
+    const order = tradeOrder({ asset_key: lab.asset_key });
+    expect(marketDepthListingQuantityIsValid(lab, order, "2")).toBe(true);
+    expect(marketDepthListingQuantityIsValid(lab, order, "3")).toBe(false);
+    expect(
+      marketDepthListingSelection({
+        asset: lab,
+        depthOrder: depthOrder(),
+        order,
+        quantity: "2",
+        profileWallets: [],
+        nowSeconds: 150,
+      })
+    ).toMatchObject({ asset: lab, quantity: "2" });
+    const gradient = {
+      ...asset,
+      contract: GRADIENT_CONTRACT.toLowerCase(),
+      family: ApiCollectFamily.Gradients,
+      asset_key: `1:${GRADIENT_CONTRACT.toLowerCase()}:8`,
+    };
+    expect(
+      marketDepthListingQuantityIsValid(
+        gradient,
+        tradeOrder({ asset_key: gradient.asset_key }),
+        "2"
+      )
+    ).toBe(false);
+  });
   it("requires one exact immutable identity and rejects side, currency, and expiry drift", () => {
     expect(
       matchFreshMarketDepthOrder({

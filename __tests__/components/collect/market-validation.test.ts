@@ -1,4 +1,5 @@
 import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
+import { MEMELAB_CONTRACT } from "@/constants/constants";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import { ApiMarketOperationStateEnum } from "@/generated/models/ApiMarketOperation";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
@@ -52,14 +53,14 @@ function reseal(operation: ApiMarketOperation) {
   });
   order.digest = hashTypedData(typed);
 }
-function fixture() {
+function fixture(nftContract = NFT, quantity = "1") {
   const request: ApiMarketPrepareRequest = {
     profile_id: "profile",
     wallet: MAKER,
     recipient: MAKER,
-    asset_key: `1:${NFT}:1`,
+    asset_key: `1:${nftContract}:1`,
     kind: ApiMarketKind.List,
-    quantity: "1",
+    quantity,
     currency: MARKET_ZERO,
     amount_wei: "1000",
     expires_at: NOW / 1000 + 3600,
@@ -67,10 +68,10 @@ function fixture() {
   };
   const nft = {
     item_type: 3,
-    token: NFT,
+    token: nftContract,
     identifier_or_criteria: "1",
-    start_amount: "1",
-    end_amount: "1",
+    start_amount: quantity,
+    end_amount: quantity,
   };
   const payment = {
     item_type: 0,
@@ -90,7 +91,7 @@ function fixture() {
     recipient: request.recipient,
     recipient_in_profile: true,
     asset_key: request.asset_key,
-    quantity: "1",
+    quantity,
     currency: MARKET_ZERO,
     total_wei: "1000",
     potential_liability_wei: "0",
@@ -124,8 +125,8 @@ function fixture() {
   reseal(operation);
   return { request, operation };
 }
-function buyFixture() {
-  const { request, operation } = fixture();
+function buyFixture(nftContract = NFT, quantity = "1") {
+  const { request, operation } = fixture(nftContract, quantity);
   request.kind = ApiMarketKind.Buy;
   request.wallet = PAYER;
   request.recipient = RECIPIENT;
@@ -169,8 +170,8 @@ function buyFixture() {
   return { request, operation, transaction };
 }
 
-function offerFixture() {
-  const { request, operation } = fixture();
+function offerFixture(nftContract = NFT, quantity = "1") {
+  const { request, operation } = fixture(nftContract, quantity);
   request.kind = ApiMarketKind.Offer;
   request.currency = MARKET_WETH;
   operation.kind = ApiMarketKind.Offer;
@@ -206,9 +207,10 @@ function offerFixture() {
 function criteriaAcceptFixture(
   root = 0n,
   proof: readonly Hex[] = [],
-  identifier = 1n
+  identifier = 1n,
+  nftContract = NFT
 ) {
-  const { request, operation } = offerFixture();
+  const { request, operation } = offerFixture(nftContract);
   request.kind = ApiMarketKind.Accept;
   request.wallet = PAYER;
   request.recipient = PAYER;
@@ -326,6 +328,57 @@ describe("collection and trait offer acceptance", () => {
 });
 
 describe("independent marketplace review validation", () => {
+  it("validates Meme Lab edition listing, offer and purchase terms, including exact third-party delivery", () => {
+    const contract = MEMELAB_CONTRACT.toLowerCase();
+    const purchase = buyFixture(contract, "3");
+    for (const f of [
+      fixture(contract, "3"),
+      offerFixture(contract, "3"),
+      purchase,
+    ]) {
+      expect(() =>
+        validateMarketOperation(f.operation, f.request, NOW)
+      ).not.toThrow();
+    }
+    expect(() =>
+      validateMarketTransaction(
+        purchase.transaction,
+        purchase.operation,
+        purchase.request
+      )
+    ).not.toThrow();
+    purchase.request.recipient = MAKER;
+    expect(() =>
+      validateMarketTransaction(
+        purchase.transaction,
+        purchase.operation,
+        purchase.request
+      )
+    ).toThrow();
+  });
+  it("validates a collection-wide Meme Lab offer only for its bound NFT", () => {
+    const f = criteriaAcceptFixture(0n, [], 1n, MEMELAB_CONTRACT.toLowerCase());
+    expect(() =>
+      validateMarketOperation(f.operation, f.request, NOW)
+    ).not.toThrow();
+    f.request.asset_key = f.request.asset_key.replace(/:1$/, ":2");
+    f.operation.asset_key = f.request.asset_key;
+    expect(() =>
+      validateMarketOperation(f.operation, f.request, NOW)
+    ).toThrow();
+  });
+  it("rejects an unknown edition contract and a Lab order claiming ERC721 semantics", () => {
+    const unknown = fixture(MAKER, "3");
+    expect(() =>
+      validateMarketOperation(unknown.operation, unknown.request, NOW)
+    ).toThrow();
+    const lab = fixture(MEMELAB_CONTRACT.toLowerCase());
+    lab.operation.order!.components.offer[0]!.item_type = 2;
+    reseal(lab.operation);
+    expect(() =>
+      validateMarketOperation(lab.operation, lab.request, NOW)
+    ).toThrow();
+  });
   it("accepts an exact allowlisted listing", () => {
     const f = fixture();
     expect(() =>

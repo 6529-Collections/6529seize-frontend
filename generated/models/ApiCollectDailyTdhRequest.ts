@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiCollectFamily } from '../models/ApiCollectFamily';
+import { ApiCollectPlanningFamily } from '../models/ApiCollectPlanningFamily';
 import { HttpFile } from '../http/http';
 
 /**
@@ -26,7 +26,7 @@ export class ApiCollectDailyTdhRequest {
     /**
     * Distinct families only. Defaults to all supported families.
     */
-    'families'?: Array<ApiCollectFamily>;
+    'families'?: Array<ApiCollectPlanningFamily>;
     'mode': ApiCollectDailyTdhRequestModeEnum;
     /**
     * Required only for BASE_TDH_TARGET. Integer hundredths of nominal base TDH per day (divide by 100), at most 9007199254740991.
@@ -57,7 +57,7 @@ export class ApiCollectDailyTdhRequest {
         {
             "name": "families",
             "baseName": "families",
-            "type": "Array<ApiCollectFamily>",
+            "type": "Array<ApiCollectPlanningFamily>",
             "format": ""
         },
         {

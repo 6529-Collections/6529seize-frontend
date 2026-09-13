@@ -1,5 +1,7 @@
 "use client";
 
+import { isCollectEdition } from "./collect-families";
+
 import Button from "@/components/utils/button/Button";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
 import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
@@ -185,7 +187,7 @@ function StandardTradeForm({
         (props.selectedOrder
           ? collectOrderAvailableQuantity(props.selectedOrder)
           : null) ??
-        (props.asset?.family.toString() === "memes" ? "100" : "1")
+        (isCollectEdition(props.asset?.family) ? "100" : "1")
       }
       makerLabel={props.makerLabel}
       currencyLabel={

@@ -1,5 +1,5 @@
 import CollectDetailActions from "@/components/collect/CollectDetailActions";
-import { MEMES_CONTRACT } from "@/constants/constants";
+import { MEMES_CONTRACT, MEMELAB_CONTRACT } from "@/constants/constants";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
 import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -11,7 +11,10 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import type { CollectTradeAction } from "@/components/collect/collect.types";
+import type {
+  CollectTradeAction,
+  CollectTradeCollection,
+} from "@/components/collect/collect.types";
 import userEvent from "@testing-library/user-event";
 import { useState, type ReactNode } from "react";
 
@@ -108,14 +111,18 @@ const asset: ApiCollectAsset = {
   hodl_rate: 1,
   tdh_eligible: true,
 };
-function renderActions(tokenId = "5", onMarketChange?: () => void) {
+function renderActions(
+  tokenId = "5",
+  onMarketChange?: () => void,
+  collection: CollectTradeCollection = "memes"
+) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
   });
   const content = (token: string) => (
     <QueryClientProvider client={client}>
       <CollectDetailActions
-        collection="memes"
+        collection={collection}
         tokenId={token}
         title="Meme Five"
         locale="en-US"
@@ -163,6 +170,28 @@ it("loads canonical inline Collect without a modal or initial Collect click", as
     page: 1,
     signal: expect.any(AbortSignal),
   });
+});
+it("loads the exact Meme Lab asset through its explicit family and retains shared controls", async () => {
+  const lab = {
+    ...asset,
+    family: ApiCollectFamily.Memelab,
+    contract: MEMELAB_CONTRACT,
+    asset_key: `1:${MEMELAB_CONTRACT.toLowerCase()}:5`,
+    tdh_eligible: false,
+  };
+  mockFetchAssets.mockResolvedValue({ data: [lab] });
+  renderActions("5", undefined, "memelab");
+  expect(await screen.findByTestId("inline-trade")).toHaveAttribute(
+    "data-asset",
+    lab.asset_key
+  );
+  expect(mockFetchAssets).toHaveBeenCalledWith(
+    expect.objectContaining({ family: ApiCollectFamily.Memelab })
+  );
+  expect(screen.getByRole("button", { name: "Collect" })).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "View listings & offers" })
+  ).toBeInTheDocument();
 });
 it("keeps one modal and inert background while an offer waits for shared canonical lookup", async () => {
   let finish: ((value: { data: ApiCollectAsset[] }) => void) | undefined;

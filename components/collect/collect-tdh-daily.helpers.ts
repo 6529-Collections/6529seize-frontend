@@ -1,4 +1,6 @@
 import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import type { ApiCollectPlanningFamily } from "@/generated/models/ApiCollectPlanningFamily";
+import { COLLECT_PLANNER_FAMILIES } from "./collect-families";
 import {
   ApiCollectDailyTdhPlanStatusEnum,
   type ApiCollectDailyTdhPlan,
@@ -41,11 +43,13 @@ function unsigned(value: string): bigint {
   const parsed = BigInt(value);
   return parsed < 2n ** 256n ? parsed : reject();
 }
-const families = (collection: CollectCollection): ApiCollectFamily[] =>
-  Object.values(ApiCollectFamily).filter(
+const families = (collection: CollectCollection): ApiCollectPlanningFamily[] =>
+  COLLECT_PLANNER_FAMILIES.filter(
     (family) => collection === "all" || family.toString() === collection
   );
-const sortedFamilies = (values: readonly ApiCollectFamily[] | undefined) =>
+const sortedFamilies = (
+  values: readonly ApiCollectPlanningFamily[] | undefined
+) =>
   [...(values ?? [])]
     .sort((left, right) => {
       if (left < right) return -1;
@@ -117,7 +121,9 @@ function validateItems(
       item.asset.chain_id !== 1 ||
       item.asset.asset_key !==
         `1:${item.asset.contract.toLowerCase()}:${item.asset.token_id}` ||
-      !(expected.families ?? []).includes(item.asset.family) ||
+      !(expected.families ?? []).some(
+        (family) => family.toString() === item.asset.family.toString()
+      ) ||
       item.recipient.toLowerCase() !== expected.recipient.toLowerCase() ||
       orders.has(key) ||
       !/^0x[\da-f]{64}$/i.test(item.order.identity.order_hash) ||

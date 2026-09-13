@@ -14,9 +14,11 @@ import {
 import {
   GRADIENT_CONTRACT,
   MEMES_CONTRACT,
+  MEMELAB_CONTRACT,
   NEXTGEN_CONTRACT,
 } from "@/constants/constants";
 import { fetchCollectAssets } from "@/services/api/collect-api";
+import { isCollectEdition } from "@/components/collect/collect-families";
 import {
   collectBuyAmount,
   collectBuyListings,
@@ -77,6 +79,7 @@ export function marketDepthCollectFamily(
 ): ApiCollectFamily | null {
   const families: Readonly<Record<string, ApiCollectFamily>> = {
     [MEMES_CONTRACT.toLowerCase()]: ApiCollectFamily.Memes,
+    [MEMELAB_CONTRACT.toLowerCase()]: ApiCollectFamily.Memelab,
     [GRADIENT_CONTRACT.toLowerCase()]: ApiCollectFamily.Gradients,
     [NEXTGEN_CONTRACT.toLowerCase()]: ApiCollectFamily.Pebbles,
   };
@@ -181,7 +184,7 @@ export function marketDepthListingSelection(options: {
   if (
     depthOrder.side !== ApiMarketOrderSideEnum.Ask ||
     !same(order.currency, MARKET_ZERO) ||
-    (asset.family !== ApiCollectFamily.Memes && quantity !== "1") ||
+    (!isCollectEdition(asset.family) && quantity !== "1") ||
     collectBuyListings({
       orders: [order],
       assetKey: asset.asset_key,
@@ -200,7 +203,7 @@ export function marketDepthListingQuantityIsValid(
   quantity: string
 ): boolean {
   return (
-    (asset.family === ApiCollectFamily.Memes || quantity === "1") &&
+    (isCollectEdition(asset.family) || quantity === "1") &&
     collectBuyAmount(order, quantity) !== null
   );
 }
@@ -296,7 +299,7 @@ export function marketDepthSelectionConflict(
   )
     return "duplicate";
   if (
-    candidate.asset.family !== ApiCollectFamily.Memes &&
+    !isCollectEdition(candidate.asset.family) &&
     selected.some((item) => item.asset.asset_key === candidate.asset.asset_key)
   )
     return "overlap";

@@ -5,6 +5,7 @@ import { ApiCollectKind } from "@/generated/models/ApiCollectKind";
 import type { ApiCollectCapabilities } from "@/generated/models/ApiCollectCapabilities";
 import type { ApiCollectCatalog } from "@/generated/models/ApiCollectCatalog";
 import type { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import type { ApiCollectPlanningFamily } from "@/generated/models/ApiCollectPlanningFamily";
 import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
 import type { ApiCollectPlanRequest } from "@/generated/models/ApiCollectPlanRequest";
 import type { ApiCollectTdhRequest } from "@/generated/models/ApiCollectTdhRequest";
@@ -29,7 +30,7 @@ export const fetchCollectAssetOwnership = (
   });
 
 export const fetchCollectTdhListings = (
-  family: ApiCollectFamily,
+  family: ApiCollectPlanningFamily,
   cursor: string | null,
   signal?: AbortSignal
 ) =>

@@ -4,6 +4,9 @@ import type { CollectPurchaseAmounts } from "./collect-review-amounts";
 
 /** Display models only. API adapters must use the generated marketplace contract. */
 export type CollectCollection = "all" | "memes" | "gradients" | "pebbles";
+export type CollectTradeCollection =
+  | Exclude<CollectCollection, "all">
+  | "memelab";
 export type CollectIntent =
   | "explore"
   | "lowest"

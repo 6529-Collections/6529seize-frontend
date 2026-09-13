@@ -11,7 +11,7 @@
  * Do not edit the class manually.
  */
 
-import { ApiCollectFamily } from '../models/ApiCollectFamily';
+import { ApiCollectPlanningFamily } from '../models/ApiCollectPlanningFamily';
 import { HttpFile } from '../http/http';
 
 export class ApiCollectTdhTargetRequest {
@@ -35,7 +35,7 @@ export class ApiCollectTdhTargetRequest {
     /**
     * Distinct families only. Defaults to all supported families.
     */
-    'families'?: Array<ApiCollectFamily>;
+    'families'?: Array<ApiCollectPlanningFamily>;
     /**
     * Optional uint256 purchase subtotal ceiling including signed fees, excluding unquoted gas.
     */
@@ -79,7 +79,7 @@ export class ApiCollectTdhTargetRequest {
         {
             "name": "families",
             "baseName": "families",
-            "type": "Array<ApiCollectFamily>",
+            "type": "Array<ApiCollectPlanningFamily>",
             "format": ""
         },
         {

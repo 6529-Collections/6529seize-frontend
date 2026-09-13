@@ -3,8 +3,8 @@
 ## Overview
 
 Collecting tools help you complete profile sets, collect selected NFTs, plan offers
-and explore TDH. Browse individual artworks on The Memes, 6529 Gradient and NextGen
-Pebbles collection pages, and review trades on the artwork's own page.
+and explore TDH. Browse individual artworks on The Memes, Meme Lab, 6529 Gradient
+and NextGen Pebbles collection pages, and review trades on the artwork's own page.
 Collecting belongs to your profile: holdings across its confirmed consolidated
 wallets count together.
 
@@ -12,7 +12,7 @@ wallets count together.
 
 - `/collect`: opens the set planner, with **Lowest listings** and **TDH** tools.
 - `/collect/orders`: inspect trades, potential offers and transaction recovery.
-- `/the-memes`, `/6529-gradient` and `/nextgen/collection/pebbles`: browse artwork
+- `/the-memes`, `/meme-lab`, `/6529-gradient` and `/nextgen/collection/pebbles`: browse artwork
   and open individual cards.
 
 ## Entry Points
@@ -33,7 +33,9 @@ terms for wallet approval. A changed order requires another review.
 **View listings & offers** selects the card's **Listings & offers** tab and moves
 focus to the market. The price summary and order levels appear immediately,
 without a second accordion. Switching tabs retains selections and active reviews.
-Memes, Gradients and Pebbles use the same trading controls and review layout.
+Memes, Meme Lab, Gradients and Pebbles use the same trading controls and review layout.
+Meme Lab supports trades on individual card pages; the set planner, Lowest
+listings and TDH tools cover Memes, Gradients and Pebbles.
 Memes and Meme Lab show traits, metadata and original files below the description
 in **Overview**; existing `focus=the-art` links still reach that artwork information.
 

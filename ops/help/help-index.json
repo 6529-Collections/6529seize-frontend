@@ -132,10 +132,10 @@
         "Each price list starts with up to five levels; Show all levels reveals the complete list and Show fewer levels restores the short view. The summaries show the lowest captured ETH listing and highest captured WETH offer. Currencies stay separate; a unit price applies to one edition and partially filled orders contribute only their remaining quantity. On narrow screens, quantity and cumulative total appear below the exact price, with a separate Collect or Sell button.",
         "On Memes, Meme Lab and Gradient cards, artwork details retain mint, edition, collector and TDH information where applicable. Prices appear in Listings & offers, without another price summary or market-cap estimate in artwork details. Memes supply shows Edition size, Ex. research, Ex. museum & research, and Holding wallets. Excluded counts remove burned editions and the named reserve holdings; the combined count excludes each reserve once. These are supply counts, not listed inventory. Supply details & rankings shows exclusions and ranks Ex. research and Ex. museum & research: smallest first, equal supplies share a rank and subsequent ranks skip ties. A card without a recorded ranking shows Unranked.",
         "Expand a price row to inspect quoted remaining quantity, expiry, scope and applicability. Order information reveals the wallet, order reference and currency contract. Up to five orders appear initially; Show all orders reveals the rest. Orders requiring verification are separate because they do not contribute to displayed price levels. Order details load a complete snapshot; a changed snapshot triggers one automatic refresh before offering Retry details.",
-        "On Memes, Gradients and Pebbles cards, Collect appears beside listing prices and Sell beside offer prices. One loaded order can be selected directly; a level containing several orders opens them for an explicit choice. Expanded order actions appear before Order information. The exact listing is checked before selection. Set Quantity for supported editions; some listings require a complete lot. Remove takes an order out of the selection. Review selected listings checks every chosen order and opens one purchase review with separate paying and delivery wallets, Price breakdown, Exact amounts and Contract details. Continue in wallet rechecks the exact orders; changed terms require another review. Supported purchases and deliveries all succeed together or all revert; a revert can cost gas. No unavailable listing is silently replaced or removed.",
-        "Memes, Gradients and Pebbles share the same market controls and trade review layout. NextGen has a Listings & offers token view at /nextgen/token/{token}/listings-and-offers. View listings & offers selects it from About, Provenance, Display Center or Rarity. Token navigation preserves the chosen view and existing query context. Gradient keeps artwork and identity information above Overview and Listings & offers; description and card activity remain in Overview.",
+        "On Memes, Meme Lab, Gradients and Pebbles cards, Collect appears beside listing prices and Sell beside offer prices. One loaded order can be selected directly; a level containing several orders opens them for an explicit choice. Expanded order actions appear before Order information. The exact listing is checked before selection. Set Quantity for supported editions; some listings require a complete lot. Remove takes an order out of the selection. Review selected listings checks every chosen order and opens one purchase review with separate paying and delivery wallets, Price breakdown, Exact amounts and Contract details. Continue in wallet rechecks the exact orders; changed terms require another review. Supported purchases and deliveries all succeed together or all revert; a revert can cost gas. No unavailable listing is silently replaced or removed.",
+        "Memes, Meme Lab, Gradients and Pebbles share the same market controls and trade review layout. NextGen has a Listings & offers token view at /nextgen/token/{token}/listings-and-offers. View listings & offers selects it from About, Provenance, Display Center or Rarity. Token navigation preserves the chosen view and existing query context. Gradient keeps artwork and identity information above Overview and Listings & offers; description and card activity remain in Overview.",
         "Listings from the same seller can share inventory, so this card's selection does not combine them. A unique NFT can be selected only once. Quoted cumulative quantities do not guarantee that every copy can be collected together.",
-        "Sell is available for supported WETH offers on this specific card. Connect the wallet that holds the NFT; a different consolidated wallet cannot sign for it. Supported editions allow a quantity within the signing wallet's holdings and the offer's remaining amount. Review net WETH received after fees, token permissions and gas. Sale proceeds go to the signing wallet. Purchase delivery and gifting controls do not apply to accepting an offer. Collection-wide and verified trait offers can be accepted for the NFT on the current page without choosing another token. The site checks that exact NFT against the signed criteria before review. Unverified eligibility stays unavailable. Meme Lab prices are informational.",
+        "Sell is available for supported WETH offers on this specific card. Connect the wallet that holds the NFT; a different consolidated wallet cannot sign for it. Supported editions allow a quantity within the signing wallet's holdings and the offer's remaining amount. Review net WETH received after fees, token permissions and gas. Sale proceeds go to the signing wallet. Purchase delivery and gifting controls do not apply to accepting an offer. Collection-wide and verified trait offers can be accepted for the NFT on the current page without choosing another token. The site checks that exact NFT against the signed criteria before review. Unverified eligibility stays unavailable. Meme Lab uses the same purchase, listing and offer controls as Memes, including edition quantities and delivery choices.",
         "These are captured OpenSea quotes, not guaranteed executable liquidity. Several listings may share seller inventory, several offers may share bidder funding, and a collection offer has one shared budget across eligible cards, so quoted quantities can overlap.",
         "Private, inactive and expired orders do not contribute to current public depth. An unavailable capture differs from a completed update with no matching price levels; individual unpriced or unverified offers may still be available. Stale data is marked with its older Updated time. Retry failed requests and reload order pagination if the book changes.",
         "Recorded marketplace actions appear alongside on-chain transactions in NFT Activity and supported card activity sections. Off-chain actions may have no Ethereum transaction hash."
@@ -148,11 +148,19 @@
         "/nextgen/token/{token}",
         "/nft-activity"
       ],
-      "tags": ["nft", "market", "memes", "gradients", "nextgen"],
+      "tags": [
+        "nft",
+        "market",
+        "memes",
+        "gradients",
+        "nextgen"
+      ],
       "source_refs": [
         "components/nft-market-depth/MarketDepthPanel.tsx",
         "components/nft-market-activity/NftMarketActivity.tsx",
-        "ops/docs/media/feature-card-market-depth.md"
+        "ops/docs/media/feature-card-market-depth.md",
+        "components/memelab/MemeLabCardHeader.tsx",
+        "components/nft-market-depth/market-depth-trade.helpers.ts"
       ]
     },
     {
@@ -6984,18 +6992,35 @@
         "meme lab card tabs",
         "meme lab distribution"
       ],
-      "keywords": ["meme", "lab", "card", "tabs", "distribution"],
+      "keywords": [
+        "meme",
+        "lab",
+        "card",
+        "tabs",
+        "distribution"
+      ],
       "facts": [
         "Meme Lab card pages live at /meme-lab/{id}.",
         "Meme Lab distribution pages live at /meme-lab/{id}/distribution.",
-        "Meme Lab routes are separate from The Memes routes. Its card tabs are Overview, Listings & offers, Collectors, History and References. Original files, metadata, properties and card details follow the description in Overview; existing /meme-lab/{id}?focus=the-art links open Overview. focus=listings-and-offers opens the informational market tab directly without another accordion. Primary and History tab switches keep the tab row visible with the selected section at its top."
+        "Meme Lab routes are separate from The Memes routes. Its card tabs are Overview, Listings & offers, Collectors, History and References. Original files, metadata, properties and card details follow the description in Overview; existing /meme-lab/{id}?focus=the-art links open Overview. focus=listings-and-offers opens the market tab directly without another accordion. Primary and History tab switches keep the tab row visible with the selected section at its top.",
+        "Meme Lab cards use the same marketplace controls as The Memes. Collect shows the lowest supported listing and Other listings exposes alternatives. Make an offer opens a WETH offer for the exact card. List requires the wallet holding the editions. In Listings & offers, Collect selects an exact listing and Sell opens an eligible offer; orders sharing a price require an explicit choice. Edition quantities are supported. Collection-wide and trait offers are checked for this exact Meme Lab card before review.",
+        "Purchase review separates Pay with and Deliver to. Choose a confirmed profile wallet or Send to a fren, check the resolved destination and review fees before authorizing. Expand a delivery row in any supported purchase review to change those copies' destination without starting over, including selected listings and split deliveries. Current terms are checked again automatically before wallet authorization; changed terms require another review. Meme Lab trading is available on card pages; set planning, Lowest listings and TDH tools continue to cover Memes, Gradients and Pebbles."
       ],
       "canonical_path": "/meme-lab/{id}",
-      "related_paths": ["/meme-lab/{id}/distribution", "/meme-lab"],
-      "tags": ["meme-lab", "card"],
+      "related_paths": [
+        "/meme-lab/{id}/distribution",
+        "/meme-lab"
+      ],
+      "tags": [
+        "meme-lab",
+        "card"
+      ],
       "source_refs": [
         "app/meme-lab/[id]/page.tsx",
-        "ops/docs/media/collections/feature-meme-lab-card-route-tabs-and-navigation.md"
+        "ops/docs/media/collections/feature-meme-lab-card-route-tabs-and-navigation.md",
+        "components/memelab/MemeLabCardHeader.tsx",
+        "components/collect/CollectDetailActions.tsx",
+        "components/collect/CollectReviewRecipient.tsx"
       ]
     },
     {
@@ -8085,7 +8110,7 @@
         "Every supported purchase review allows choosing a new destination from its expanded delivery row, including individual artworks, selected listings, purchases from Collect and saved purchase reviews in Orders. Send to me shows the profile's confirmed wallets. Send to a fren supports searching a profile or ENS name, or entering a wallet address. Choose the receiving wallet and check its full resolved address; an address outside the profile requires confirmation. Use this address applies that destination and prepares a fresh review without signing or sending. Review the updated address and terms before Continue in wallet. Cancel retains the current destination. Delivery editing is unavailable while a wallet transaction or outcome recovery is in progress. For multiple NFTs or split deliveries, each row changes only those copies and retains the other items and destinations. Choosing another existing destination for the same NFT combines its copies. The review explains that copies delivered outside the profile do not count toward its collecting goals or TDH. After a confirmed purchase, calculate a new TDH projection using the updated holdings.",
         "The expanded destination chooser shows the selected profile's picture, name, profile level and profile TDH where available. Level belongs to the profile. Individual wallet rows show Wallet TDH when that wallet's value is known. These details help identify the profile; they do not replace checking the full resolved destination address before applying it.",
         "Continue in wallet stays disabled until the destination edit is applied or cancelled. Applying keeps confirmation unavailable while the new destination review prepares.",
-        "Contract details preserves NFT and exchange contracts, fee recipients, approval scope and order identifiers separately from prices. Known Ethereum addresses receive names for their applicable roles: The Memes, 6529 Gradient, NextGen, Seaport 1.6 and OpenSea. Expand the contract row for its full address, copy it or open the explorer. Unfamiliar addresses keep generic labels; a display name does not replace exact-address checks or grant spending permission. New listings include configured creator support; standard offers include required provider fees; purchases and accepted offers preserve signed fees. The 6529 platform fee is zero.",
+        "Contract details preserves NFT and exchange contracts, fee recipients, approval scope and order identifiers separately from prices. Known Ethereum addresses receive names for their applicable roles: The Memes, Meme Lab, 6529 Gradient, NextGen, Seaport 1.6 and OpenSea. Expand the contract row for its full address, copy it or open the explorer. Unfamiliar addresses keep generic labels; a display name does not replace exact-address checks or grant spending permission. New listings include configured creator support; standard offers include required provider fees; purchases and accepted offers preserve signed fees. The 6529 platform fee is zero.",
         "Reviews stay available while you read. Continue in wallet checks current terms and automatically refreshes execution quotes when needed for purchases, listings, offers, accepting offers and cancellations, including supported multiple-item purchases. Unchanged terms proceed to the wallet without a separate Refresh quote action. Changed prices, fees, quantities, recipients, approval scopes or network fee caps require another review and consent. Checking terms never signs or sends by itself. Execution quote freshness is separate from the signed order's expiry; refreshing does not extend the order.",
         "Orders at /collect/orders tracks operation recovery. Potential offer exposure begins when signable terms are revealed, even if no signature or publication is confirmed. Execution quote freshness does not expire a signed order.",
         "If a wallet may have submitted a transaction but its hash was not returned, the review shows Checking the outcome and blocks another send for that operation across browsers. Copy the hash from wallet activity into Transaction hash from your wallet and select Check this transaction. The site verifies the exact transaction; this does not send a replacement. Approvals and recovery without local browser data use the same flow. A failed recovery check shows an error while retaining the unresolved transaction for another attempt.",
@@ -8093,7 +8118,8 @@
         "TDH opens Memes listings immediately, ranked by base TDH per full held day per ETH without requiring a profile, budget or horizon. A direct link can keep another collection. Each NFT appears at its best supported indexed ETH ask including signed fees; gas is checked at purchase. The rate excludes seller TDH and profile/set multipliers. How TDH value works explains coverage. Find your daily TDH links editable Base TDH per day and Purchase budget (ETH): editing either automatically estimates the other for actual NFT quantities after a short pause, with a connected profile and profile-wallet delivery. Personal boost/rate effects and changes to already accumulated TDH are shown separately. Reach target TDH remains a separate future total/timeframe projection. Back to TDH listings returns to browsing and the daily tool.",
         "A Safe can receive a gift purchase. Execution from smart contract wallets and inside the native app is unavailable until those paths are supported. Programmatic preparation still requires owner review and wallet authorization; the backend does not hold user signing keys.",
         "Saved rules freeze exact targets, funding wallet, recipient, unit and total review limits, gas reserve, expiry and action count. They prepare one ETH purchase at a time for wallet approval. Pause and expiry retain unresolved operations, and confirmed acquisitions count permanently even if the NFT is later sold or transferred. Rules do not grant unattended wallet execution authority.",
-        "Offers and listings support 1, 7 or 30 days or Custom… with an exact local date and time. The displayed time zone applies. Custom times must be at least five minutes away and within the supported 30-day window; invalid, missing or repeated daylight-saving times require a different time. Quote refresh does not extend a signed order. Eligible collection-wide or verified trait offers can be accepted through Sell or Accept offer for the NFT on the current artwork page. The holding wallet signs and receives sale proceeds; profile consolidation does not transfer signing authority."
+        "Offers and listings support 1, 7 or 30 days or Custom… with an exact local date and time. The displayed time zone applies. Custom times must be at least five minutes away and within the supported 30-day window; invalid, missing or repeated daylight-saving times require a different time. Quote refresh does not extend a signed order. Eligible collection-wide or verified trait offers can be accepted through Sell or Accept offer for the NFT on the current artwork page. The holding wallet signs and receives sale proceeds; profile consolidation does not transfer signing authority.",
+        "Meme Lab cards at /meme-lab/{id} share the Memes trading controls, edition quantities and purchase review. This card-level trading support does not add Meme Lab to the set planner, Lowest listings or TDH tools."
       ],
       "canonical_path": "/collect",
       "link_label": "Open collecting tools",

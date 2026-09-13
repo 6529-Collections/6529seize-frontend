@@ -73,6 +73,11 @@ terms require another review; unresolved sends are checked instead of resent.
 View listings & offers selects the market tab from other token detail views;
 switching tabs retains the market selection and active review.
 
+Meme Lab card records include the shared Collect, Make an offer, List and Sell
+controls, exact-card eligibility checks, edition quantities and purchase delivery
+choices. Meme Lab trading is distinct from the Memes, Gradients and Pebbles
+universe used by the set planner, Lowest listings and TDH tools.
+
 Collecting strategy records cover Collect now, At WETH offer, WETH + %, Ask − %,
 and Blended. They distinguish per-NFT calculations, separate ETH purchase and
 WETH offer budgets, exact listing quantities, and reservations that do not imply

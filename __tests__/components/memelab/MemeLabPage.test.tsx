@@ -32,6 +32,27 @@ jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
   __esModule: true,
   default: () => <div data-testid="marketplace-links" />,
 }));
+jest.mock("@/components/collect/CollectDetailActions", () => ({
+  __esModule: true,
+  default: ({
+    collection,
+    tokenId,
+    onMarketChange,
+  }: {
+    collection: string;
+    tokenId: string;
+    onMarketChange?: () => void;
+  }) => (
+    <button
+      data-testid="collect-detail-actions"
+      data-collection={collection}
+      data-token-id={tokenId}
+      onClick={onMarketChange}
+    >
+      Complete marketplace action
+    </button>
+  ),
+}));
 
 jest.mock("@/components/download/Download", () => ({
   __esModule: true,
@@ -169,8 +190,18 @@ jest.mock("@/components/nft-market-activity/NftMarketActivity", () => ({
 }));
 jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
   __esModule: true,
-  default: ({ active }: { readonly active: boolean }) => (
-    <div data-testid="market-depth" hidden={!active} />
+  default: ({
+    active,
+    refreshKey,
+  }: {
+    readonly active: boolean;
+    readonly refreshKey?: number;
+  }) => (
+    <div
+      data-testid="market-depth"
+      data-refresh-key={refreshKey}
+      hidden={!active}
+    />
   ),
 }));
 
@@ -425,6 +456,19 @@ describe("MemeLabPageComponent", () => {
     await act(async () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
+
+    const actions = screen.getByTestId("collect-detail-actions");
+    expect(actions).toHaveAttribute("data-collection", "memelab");
+    expect(actions).toHaveAttribute("data-token-id", "1");
+    expect(screen.getByTestId("market-depth")).toHaveAttribute(
+      "data-refresh-key",
+      "0"
+    );
+    fireEvent.click(actions);
+    expect(screen.getByTestId("market-depth")).toHaveAttribute(
+      "data-refresh-key",
+      "1"
+    );
 
     expect(
       screen.getByRole("heading", { name: "Meme Lab Card 1 - Test NFT" })

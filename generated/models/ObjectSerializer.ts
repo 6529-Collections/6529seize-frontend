@@ -171,6 +171,7 @@ export * from '../models/ApiCollectPlanLeg';
 export * from '../models/ApiCollectPlanOptions';
 export * from '../models/ApiCollectPlanRemaining';
 export * from '../models/ApiCollectPlanRequest';
+export * from '../models/ApiCollectPlanningFamily';
 export * from '../models/ApiCollectProjectedAccount';
 export * from '../models/ApiCollectProjectedToken';
 export * from '../models/ApiCollectPurchaseAllocation';
@@ -1031,6 +1032,7 @@ import { ApiCollectPlanLeg } from '../models/ApiCollectPlanLeg';
 import { ApiCollectPlanOptions } from '../models/ApiCollectPlanOptions';
 import { ApiCollectPlanRemaining } from '../models/ApiCollectPlanRemaining';
 import { ApiCollectPlanRequest } from '../models/ApiCollectPlanRequest';
+import { ApiCollectPlanningFamily } from '../models/ApiCollectPlanningFamily';
 import { ApiCollectProjectedAccount } from '../models/ApiCollectProjectedAccount';
 import { ApiCollectProjectedToken        } from '../models/ApiCollectProjectedToken';
 import { ApiCollectPurchaseAllocation } from '../models/ApiCollectPurchaseAllocation';
@@ -1799,6 +1801,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCollectOfferAnalysisRowStatusEnum",
     "ApiCollectOfferPriceReferenceKindEnum",
     "ApiCollectPlanStateEnum",
+    "ApiCollectPlanningFamily",
     "ApiCollectRuleModeEnum",
     "ApiCollectRuleStateEnum",
     "ApiCollectTdhListingsStatusEnum",
