@@ -29,7 +29,8 @@ export function matchesDocumentationSchema(
         Array.from(value).length >=
           (wireProperty(schema, "min_length", "minLength") ?? 0) &&
         Array.from(value).length <=
-          (wireProperty(schema, "max_length", "maxLength") ?? Infinity)
+          (wireProperty(schema, "max_length", "maxLength") ?? Infinity) &&
+        matchesDocumentationUriFormat(value, schema.format)
       );
     case "integer":
       return (
@@ -82,6 +83,36 @@ export function matchesDocumentationSchema(
     default:
       return true;
   }
+}
+
+function matchesDocumentationUriFormat(
+  value: string,
+  format?: string
+): boolean {
+  if (format !== "uri" && format !== "authority-uri") return true;
+  try {
+    const url = new URL(value);
+    const protocols =
+      format === "uri" ? ["https:", "ipfs:", "ar:"] : ["http:", "https:"];
+    return protocols.includes(url.protocol) && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}
+
+function hasRequiredRightsDetails(
+  moduleId: string,
+  fieldId: string,
+  value: unknown
+): boolean {
+  if (moduleId !== "rights" || value === null || typeof value !== "object")
+    return true;
+  const item = value as Record<string, unknown>;
+  if (fieldId === "rights_basis" && item["kind"] !== "artist_owned")
+    return Boolean(item["detail"]);
+  if (fieldId === "third_party_material" && item["kind"] === "present")
+    return Boolean(item["details"]);
+  return true;
 }
 
 // common-api returns wire JSON; the generator renames a few JSON Schema keywords.
@@ -144,5 +175,8 @@ export function validDocumentationAnswer(
     return false;
   if (answer.status !== ApiArtworkDocumentationAnswerStatusEnum.Provided)
     return !answer.explanation || Array.from(answer.explanation).length <= 1000;
-  return matchesDocumentationSchema(answer.value, definition.value_schema);
+  return (
+    matchesDocumentationSchema(answer.value, definition.value_schema) &&
+    hasRequiredRightsDetails(moduleId, fieldId, answer.value)
+  );
 }

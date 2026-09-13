@@ -30,6 +30,9 @@ interface Props {
   readonly draft: ReturnType<typeof useDocumentationDraft>;
   readonly section: DocumentationSection;
   readonly onNavigateSection: (section: DocumentationSection) => void;
+  readonly onNavigateField?:
+    | ((moduleId: string, fieldId: string) => void)
+    | undefined;
 }
 const FILE_FIELDS = [
   "artwork.canonical_asset_id",
@@ -40,6 +43,7 @@ export function DocumentationWritingChapter({
   draft,
   section,
   onNavigateSection,
+  onNavigateField,
 }: Props) {
   const { context, controller } = draft;
   const draftRecord = documentationDraftRecord(context, draft.edits);
@@ -130,6 +134,7 @@ export function DocumentationWritingChapter({
               saveState={draft.state}
               edits={draft.edits}
               onNavigateSection={onNavigateSection}
+              onNavigateField={onNavigateField}
             />
             {museum && (
               <DocumentationModules
@@ -268,6 +273,7 @@ export function DocumentationReadingChapter({
   draft,
   section,
   onNavigateSection,
+  onNavigateField,
 }: Props) {
   const { context, controller } = draft;
   const museum = isMuseumRecord(context.profile);
@@ -278,6 +284,7 @@ export function DocumentationReadingChapter({
         controller={controller}
         saveState={draft.state}
         onNavigateSection={onNavigateSection}
+        onNavigateField={onNavigateField}
       />
       <DocumentationFeedback context={context} />
     </>
