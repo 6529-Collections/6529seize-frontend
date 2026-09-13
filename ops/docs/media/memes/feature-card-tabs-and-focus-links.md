@@ -4,6 +4,8 @@
 
 - `/the-memes/{id}` uses `focus` to open a specific card tab.
 - Missing or invalid `focus` opens the default Overview tab.
+- Overview includes other published Memes by the card's credited artists, followed
+  by a collapsed `References: Meme Lab & ReMemes` section.
 - Tab changes and card arrows keep URL query state and update in place.
 - Primary and History tab switches keep the tab row visible and show the new
   section from its top, including while its content loads.
@@ -32,20 +34,21 @@
 
 - Supported `focus` values map to the visible detail UI as follows:
 
-| Focus Value           | User-Visible Area                                  |
-| --------------------- | -------------------------------------------------- |
-| `live`                | `Overview` primary tab                             |
-| `your-cards`          | `History` primary tab, `Your Transactions` sub-tab |
-| `the-art`             | `Overview` primary tab, including artwork details  |
-| `listings-and-offers` | `Listings & offers` primary tab                    |
-| `references`          | `References` primary tab                           |
-| `collectors`          | `Collectors` primary tab                           |
-| `history`             | `History` primary tab, default history sub-tab     |
-| `your-transactions`   | `History` primary tab, `Your Transactions` sub-tab |
-| `activity`            | `History` primary tab, `Card Activity` sub-tab     |
-| `timeline`            | `History` primary tab, `Timeline` sub-tab          |
+| Focus Value           | User-Visible Area                                          |
+| --------------------- | ---------------------------------------------------------- |
+| `live`                | `Overview` primary tab                                     |
+| `your-cards`          | `History` primary tab, `Your Transactions` sub-tab         |
+| `the-art`             | `Overview` primary tab, including artwork details          |
+| `listings-and-offers` | `Listings & offers` primary tab                            |
+| `references`          | `Overview`, with `References: Meme Lab & ReMemes` expanded |
+| `collectors`          | `Collectors` primary tab                                   |
+| `history`             | `History` primary tab, default history sub-tab             |
+| `your-transactions`   | `History` primary tab, `Your Transactions` sub-tab         |
+| `activity`            | `History` primary tab, `Card Activity` sub-tab             |
+| `timeline`            | `History` primary tab, `Timeline` sub-tab                  |
 
 - Missing or invalid `focus` opens `Overview`.
+- The primary tabs are `Overview`, `Listings & offers`, `Collectors`, and `History`.
 - `Your Transactions` appears only when the connected wallet has transactions
   for the card; otherwise the route falls back to `Card Activity`.
 
@@ -66,7 +69,7 @@
 9. `Timeline` uses the active supported `locale` for its region label, UTC date
    formatting, URI/TXN link labels, change field labels, and timeline media
    accessible names.
-10. `References` uses the active supported `locale` for Meme Lab/ReMemes
+10. The expandable References section uses the active supported `locale` for Meme Lab/ReMemes
     descriptions, logo alt text, sort labels, refresh labels, ReMeme empty
     state, ReMeme card accessible names, ReMeme link locale preservation, and
     replica counts.
@@ -96,6 +99,15 @@
 
 ## Common Scenarios
 
+- In Overview, explore `More by {artist}` for up to four other published Meme
+  Cards per credited artist directly after the description, before detailed metadata.
+  Cards are ordered by newest card number first. Each preview
+  links to its card page and preserves the selected locale.
+- Use `View all` to expand an artist's remaining cards in place, and `Show fewer`
+  to return to the four-card preview. The current card is excluded.
+- Expand `References: Meme Lab & ReMemes` below the artist galleries to see works
+  related to the current card. The URL uses `focus=references`, so the expanded
+  section can be shared directly. Collapsing it returns to `focus=live`.
 - Share a direct `Activity` or `Timeline` link by sharing `focus=...`.
 - Keep the same tab while stepping through cards with previous/next arrows.
 - Open an unresolved numeric card URL and use the fallback mint timing panel.
@@ -105,6 +117,13 @@
 
 ## Edge Cases
 
+- Artist galleries use the credited artist profiles' earlier cards and explicit
+  Main Stage winner-to-card links. Cards without artist profile handles use the
+  collection's artist catalogue. Collaborating artists can each have a gallery; cards credited
+  to more than one artist may appear in more than one gallery.
+- An artist with no other cards has no gallery. For cards without profile handles,
+  no gallery appears if the catalogue has no matching card; the card's artist links remain
+  available above.
 - Unknown `focus` values open `Overview`.
 - Tab URL replacements preserve other existing query keys and only change
   `focus`.
@@ -122,6 +141,8 @@
 
 ## Failure and Recovery
 
+- If artist works cannot load, use their `Try again` button. A failed image
+  displays `Artwork preview unavailable` while keeping its card link usable.
 - If a numeric ID resolves to fallback mode, use fallback timing details or return to `/the-memes` and open a nearby card.
 - If card content fails to load, use the inline `Try again` action.
 - If a deep link opens the wrong tab, replace `focus` with a supported value.
@@ -150,12 +171,14 @@
   open/download labels, and TDH/rank number formatting are routed through the
   progressive i18n helpers. Property trait names/values and media URLs remain
   source-data copy.
-- References tab Meme Lab/ReMemes descriptions, logo alt text, sort labels,
+- References section Meme Lab/ReMemes descriptions, logo alt text, sort labels,
   refresh labels, ReMeme empty state, ReMeme card accessible names, ReMeme link
   locale preservation, and replica counts are routed through the progressive
   i18n helpers. ReMeme names, collection names, token IDs, and source NFT
   metadata remain source-data copy.
-- The References refresh action is keyboard reachable with a semantic button.
+- The References disclosure and refresh action are keyboard reachable with semantic buttons.
+- Artist-gallery and References-disclosure labels use the selected locale's
+  messages, with `en-US` fallback until translations are supplied.
 - The header calendar period strip has message-backed period labels and
   accessible names, locale-aware number formatting, locale-preserving season
   links, a labelled group for the secondary period cluster, and a 24px minimum
