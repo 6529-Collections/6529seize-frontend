@@ -30,24 +30,30 @@ describe("Meebits #445 compatibility scope", () => {
     expect(isMeebits445ViewerRepair(nft, undefined)).toBe(false);
   });
 
-  it("permits the exact bundled script and isolates direct navigation", () => {
-    const html = readFileSync(
-      join(process.cwd(), "public/artwork/the-memes/445.html"),
-      "utf8"
-    ).replaceAll("\r\n", "\n");
-    const script = html
-      .split('<script type="module">')[1]
-      ?.split("</script>")[0];
-    expect(script).toBeDefined();
-    const hash = createHash("sha256")
-      .update(script ?? "")
-      .digest("base64");
-    const csp = meebits445Headers.headers.find(
-      (header) => header.key === "Content-Security-Policy"
-    )?.value;
-    expect(csp).toContain(`'sha256-${hash}'`);
-    expect(csp).toContain("sandbox allow-scripts allow-downloads");
-    expect(csp).not.toContain("allow-same-origin");
-    expect(csp).toContain("frame-ancestors 'self'");
-  });
+  it.each(["LF", "CRLF"])(
+    "permits the parsed %s script and isolates direct navigation",
+    (lineEnding) => {
+      const source = readFileSync(
+        join(process.cwd(), "public/artwork/the-memes/445.html"),
+        "utf8"
+      ).replaceAll("\r\n", "\n");
+      const html =
+        lineEnding === "CRLF" ? source.replaceAll("\n", "\r\n") : source;
+      // HTML parsing normalizes line endings before CSP hashes the inline source.
+      const script = new DOMParser()
+        .parseFromString(html, "text/html")
+        .querySelector('script[type="module"]')?.textContent;
+      expect(script).toBeDefined();
+      const hash = createHash("sha256")
+        .update(script ?? "")
+        .digest("base64");
+      const csp = meebits445Headers.headers.find(
+        (header) => header.key === "Content-Security-Policy"
+      )?.value;
+      expect(csp).toContain(`'sha256-${hash}'`);
+      expect(csp).toContain("sandbox allow-scripts allow-downloads");
+      expect(csp).not.toContain("allow-same-origin");
+      expect(csp).toContain("frame-ancestors 'self'");
+    }
+  );
 });

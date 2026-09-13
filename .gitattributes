@@ -4,4 +4,3 @@ bin/*.cmd text eol=crlf
 generated/**/*.ts text eol=lf
 generated/**/*.tsx text eol=lf
 public/review-data/** -text linguist-generated=true
-public/artwork/the-memes/445.html text eol=lf

@@ -295,9 +295,13 @@ describe("Meebits #445 ETH price updates", () => {
       <button id="pauseButton"></button>
       <button id="regenerateButton"></button>
     `;
+    const motionListener = jest.fn<
+      void,
+      ["change", (event: { readonly matches: boolean }) => void]
+    >();
     const motionPreference = {
       matches: true,
-      addEventListener: jest.fn(),
+      addEventListener: motionListener,
     };
     Object.assign(context, {
       document: artworkDocument,
@@ -320,5 +324,18 @@ describe("Meebits #445 ETH price updates", () => {
       "change",
       expect.any(Function)
     );
+
+    const onMotionChange = motionListener.mock.calls[0]?.[1];
+    expect(onMotionChange).toBeDefined();
+    // Turning the OS preference off must not resume a user's paused artwork.
+    runInContext("sceneReady = true; isPaused = true", context);
+    onMotionChange?.({ matches: false });
+    expect(runInContext("isPaused", context)).toBe(true);
+    runInContext("isPaused = false", context);
+    onMotionChange?.({ matches: true });
+    expect(runInContext("isPaused", context)).toBe(true);
+    expect(
+      artworkDocument.getElementById("pauseButton")?.getAttribute("aria-label")
+    ).toBe("Resume animation");
   });
 });

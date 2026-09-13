@@ -510,8 +510,10 @@
       const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
       isPaused = motionPreference.matches;
       motionPreference.addEventListener('change', event => {
-        isPaused = event.matches;
-        updatePauseButton();
+        if (event.matches) {
+          isPaused = true;
+          if (sceneReady) updatePauseButton();
+        }
       });
 
       try {
