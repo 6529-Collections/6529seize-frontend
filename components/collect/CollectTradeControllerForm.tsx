@@ -80,9 +80,11 @@ function StandardOrderBook({
         value={selectedOrder?.identity.order_hash ?? null}
         onChange={onSelectOrder}
       />
-      <Button variant="secondary" onClick={onRefreshOrders}>
-        {t(locale, "collect.trade.refreshOrders")}
-      </Button>
+      {failed && (
+        <Button variant="secondary" onClick={onRefreshOrders}>
+          {t(locale, "collect.retry")}
+        </Button>
+      )}
     </div>
   );
 }
@@ -243,11 +245,9 @@ export default function CollectTradeControllerForm(
       {props.inlineBuy &&
         !props.fixedOrder &&
         !props.ordersLoading &&
-        (!props.selectedOrder ||
-          props.error !== undefined ||
-          props.ordersFailed) && (
+        props.ordersFailed && (
           <Button variant="secondary" size="sm" onClick={props.onRefreshOrders}>
-            {t(props.locale, "collect.trade.refreshOrders")}
+            {t(props.locale, "collect.retry")}
           </Button>
         )}
       {props.showConnect && (

@@ -5,8 +5,9 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import { fetchMarketOrders } from "@/services/api/market-api";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
+import { useAutomaticMarketRefresh } from "./useAutomaticMarketRefresh";
 import {
   collectBuyListings,
   collectOrderPurchaseQuantity,
@@ -21,6 +22,7 @@ interface UseCollectTradeOrdersOptions {
   readonly action: CollectTradeAction;
   readonly assetKey: string;
   readonly operation: ApiMarketOperation | null;
+  readonly preparing?: boolean;
   readonly layout: "standard" | "inline-buy";
   readonly initialOrder?: ApiMarketTradeOrder | undefined;
   readonly fixedOrder?: boolean | undefined;
@@ -38,6 +40,7 @@ export function useCollectTradeOrders({
   action,
   assetKey,
   operation,
+  preparing = false,
   layout,
   initialOrder,
   fixedOrder = false,
@@ -49,6 +52,7 @@ export function useCollectTradeOrders({
   profile,
   wallet,
 }: UseCollectTradeOrdersOptions) {
+  const queryClient = useQueryClient();
   const [chosenOrder, setSelectedOrder] = useState<ApiMarketTradeOrder | null>(
     initialOrder ?? null
   );
@@ -77,6 +81,31 @@ export function useCollectTradeOrders({
     enabled: needsOrder && !fixedOrder && !operation && Boolean(assetKey),
     staleTime: 0,
   });
+  const updateBrowsingOrders = useCallback(
+    async (signal: AbortSignal) => {
+      const data = await fetchMarketOrders(
+        assetKey,
+        action === "buy" ? "LISTING" : "OFFER",
+        signal
+      );
+      if (!signal.aborted)
+        queryClient.setQueryData(
+          [QueryKey.MARKET_ORDERS, assetKey, action],
+          data
+        );
+    },
+    [action, assetKey, queryClient]
+  );
+  useAutomaticMarketRefresh(
+    needsOrder &&
+      !fixedOrder &&
+      !operation &&
+      !preparing &&
+      !chosenOrder &&
+      !orders.isFetching &&
+      Boolean(assetKey),
+    updateBrowsingOrders
+  );
   const buyOrders = inlineBuy
     ? collectBuyListings({
         orders: orders.data?.orders ?? [],

@@ -266,6 +266,9 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   await expect(
     market.getByRole("button", { name: "Sell", exact: true })
   ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /^(Refresh|Refresh orders)$/ })
+  ).toHaveCount(0);
   expect(lookups).toContain("memelab");
   expect(lookups).not.toContain("memes");
   const offer = page.getByRole("button", {

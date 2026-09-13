@@ -245,6 +245,7 @@ function CollectTradeControllerContent({
     action,
     assetKey,
     operation,
+    preparing: preparing || splitPurchase !== null,
     layout,
     initialOrder,
     fixedOrder,
