@@ -86,7 +86,7 @@ same context.
   Declining keeps the draft and shows the review again on the next attempt.
 - When posting is blocked, thread content stays readable and the composer area
   shows blocked states (for example
-  `Connect your wallet to participate in this wave`,
+  `Sign in to 6529 to post`,
   `Create a profile to participate in this wave`, `Wave is closed`, or
   `You cannot participate in this wave at the moment`).
 
