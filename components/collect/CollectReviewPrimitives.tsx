@@ -5,7 +5,10 @@ import { t } from "@/i18n/messages";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 import { formatCollectReviewWei } from "./collect-review-amounts";
-import { formatCollectReviewCap } from "./collect-review-presentation";
+import {
+  compactCollectReviewAmount,
+  formatCollectReviewCap,
+} from "./collect-review-presentation";
 
 export function CollectReviewAmountRow({
   label,
@@ -47,13 +50,17 @@ export function CollectReviewMoney({
   currency,
   cap = false,
   capDecimals = 8,
+  compact = false,
 }: {
   readonly wei: string;
   readonly currency: "ETH" | "WETH";
   readonly cap?: boolean;
   readonly capDecimals?: number;
+  readonly compact?: boolean;
 }) {
   const locale = useBrowserLocale();
+  const display =
+    compact && !cap ? compactCollectReviewAmount(locale, wei) : null;
   return (
     <span className="tw-tabular-nums">
       {cap && (
@@ -66,9 +73,19 @@ export function CollectReviewMoney({
           </span>
         </>
       )}
+      {display?.approximate && (
+        <>
+          <span className="tw-sr-only">
+            {t(locale, "collect.checkout.approximate")}{" "}
+          </span>
+          <span aria-hidden="true" className="tw-mr-1 tw-text-iron-400">
+            ≈
+          </span>
+        </>
+      )}
       {cap
         ? formatCollectReviewCap(locale, wei, capDecimals)
-        : formatCollectReviewWei(locale, wei)}{" "}
+        : (display?.text ?? formatCollectReviewWei(locale, wei))}{" "}
       <span className="tw-text-xs tw-font-normal tw-text-iron-400">
         {currency}
       </span>

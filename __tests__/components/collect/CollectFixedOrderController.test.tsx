@@ -120,6 +120,7 @@ jest.mock("@/components/collect/market-recovery", () => ({
 }));
 jest.mock("@/components/collect/useMarketExecution", () => ({
   useMarketExecution: () => ({
+    ready: true,
     confirm: mockConfirm,
     recoverTransaction: jest.fn(),
     stage: null,

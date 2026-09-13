@@ -210,7 +210,11 @@ it.each([
     case "changed fee":
       refresh.mockResolvedValue({
         ...f.operation,
-        transaction: { ...f.operation.transaction!, max_fee_per_gas: "9" },
+        transaction: {
+          ...f.operation.transaction!,
+          gas_limit: "500000",
+          max_fee_per_gas: "11",
+        },
       });
       break;
     case "wrong chain":
@@ -248,17 +252,45 @@ it.each([
   expect(f.wallet.sendTransaction).not.toHaveBeenCalled();
   expect(submit).not.toHaveBeenCalled();
 });
-it("requires a new visible confirmation when a refreshed gas cap changes", async () => {
+it("continues when refreshed gas caps decrease", async () => {
   const f = setup(),
     changed = {
       ...f.operation,
       transaction: { ...f.operation.transaction!, max_fee_per_gas: "9" },
     };
   refresh.mockResolvedValue(changed);
-  expect(await confirmMarketBatch(f.options)).toBe("UPDATED_REVIEW");
+  expect(await confirmMarketBatch(f.options)).toBe("COMPLETE");
   expect(f.options.onOperation).toHaveBeenCalledWith(changed);
-  expect(send).not.toHaveBeenCalled();
+  expect(send).toHaveBeenCalledTimes(1);
 });
+
+it.each([false, true])(
+  "never sends again when a known hash acknowledgement fails (persistent=%s)",
+  async (persistent) => {
+    const f = setup();
+    const onStage = jest.fn(),
+      onKnownHash = jest.fn();
+    if (persistent)
+      submit.mockRejectedValue(new Error("acknowledgement unavailable"));
+    else submit.mockRejectedValueOnce(new Error("acknowledgement unavailable"));
+    const confirming = confirmMarketBatch({
+      ...f.options,
+      onStage,
+      onKnownHash,
+    });
+    if (persistent)
+      await expect(confirming).rejects.toThrow("MARKET_SUBMISSION_PENDING");
+    else await expect(confirming).resolves.toBe("COMPLETE");
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(submit).toHaveBeenCalledTimes(2);
+    expect(submit.mock.calls[0]).toEqual(submit.mock.calls[1]);
+    expect(onKnownHash).toHaveBeenCalledWith(`0x${"a".repeat(64)}`);
+    expect(onStage.mock.calls.map(([stage]) => stage)).toEqual([
+      "submitted",
+      "reconciling",
+    ]);
+  }
+);
 it.each([0, NOW - 1])(
   "refreshes the stored review deadline %s before one exact wallet request",
   async (deadline) => {
@@ -304,7 +336,11 @@ it("compares refreshed economics against the shown review even when the GET has 
   const f = setup();
   const changed = {
     ...f.operation,
-    transaction: { ...f.operation.transaction!, max_fee_per_gas: "9" },
+    transaction: {
+      ...f.operation.transaction!,
+      gas_limit: "500000",
+      max_fee_per_gas: "11",
+    },
   };
   fetch.mockResolvedValue(changed);
   refresh.mockResolvedValue(changed);

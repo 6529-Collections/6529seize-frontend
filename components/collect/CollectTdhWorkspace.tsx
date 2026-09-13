@@ -80,6 +80,7 @@ export default function CollectTdhWorkspace({
       {projection ? (
         <div className="tw-col-span-2">
           <CollectTdhTargetController
+            collection={collection}
             profile={profile}
             payingWallet={payingWallet}
             onConnect={onConnect}

@@ -1,4 +1,37 @@
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
+import {
+  marketGasCapsWithinReview,
+  withReviewedGasCaps,
+} from "./market-review-caps";
+
+export function marketReviewChange(
+  shown: ApiMarketOperation,
+  fresh: ApiMarketOperation
+): "terms" | "gas" | null {
+  const masked = {
+    ...fresh,
+    ...(fresh.transaction && shown.transaction
+      ? {
+          transaction: withReviewedGasCaps(
+            fresh.transaction,
+            shown.transaction
+          ),
+        }
+      : {}),
+    approval_transactions: fresh.approval_transactions.map((tx, index) =>
+      shown.approval_transactions[index]
+        ? withReviewedGasCaps(tx, shown.approval_transactions[index])
+        : tx
+    ),
+  };
+  if (marketReviewTerms(masked) !== marketReviewTerms(shown)) return "terms";
+  return marketGasCapsWithinReview(shown.transaction, fresh.transaction) &&
+    fresh.approval_transactions.every((tx, index) =>
+      marketGasCapsWithinReview(shown.approval_transactions[index], tx)
+    )
+    ? null
+    : "gas";
+}
 
 /** Quote refreshes may change zone authorization and timestamps, but never silently change economics. */
 export function marketReviewTerms(operation: ApiMarketOperation): string {

@@ -6,6 +6,8 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatNumber } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { useId, useState } from "react";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { compactCollectReviewAmount } from "./collect-review-presentation";
 import CollectBatchDestination from "./CollectBatchDestination";
 import CollectBatchReviewItem from "./CollectBatchReviewItem";
 import {
@@ -90,6 +92,14 @@ function BatchReviewDraft({
     maxAllocations
   );
   const total = collectSelectionTotal(chosen);
+  const compactTotal =
+    total === null ? null : compactCollectReviewAmount(locale, total);
+  const estimatedTotal =
+    compactTotal === null
+      ? t(locale, "collect.buy.listingChanged")
+      : t(locale, "collect.batchReview.estimate", {
+          price: `${compactTotal.approximate ? "≈ " : ""}${t(locale, "collect.batchReview.ethAmount", { amount: compactTotal.text })}`,
+        });
   const allocationCount = draft.items.reduce(
     (count, item) => count + item.allocations.length,
     0
@@ -215,13 +225,32 @@ function BatchReviewDraft({
       )}
       <div className="tw-sticky tw-bottom-0 tw-z-20 tw-space-y-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-3">
         <div aria-live="polite" className="tw-space-y-1">
-          <p className="tw-m-0 tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100">
-            {total === null
-              ? t(locale, "collect.buy.listingChanged")
-              : t(locale, "collect.batchReview.estimate", {
-                  price: collectBatchEthAmount(locale, total),
+          {total !== null && compactTotal?.approximate ? (
+            <details className="tw-group/total tw-min-w-0">
+              <summary
+                aria-label={t(locale, "collect.batchReview.estimate", {
+                  price: `${t(locale, "collect.checkout.approximate")} ${t(locale, "collect.batchReview.ethAmount", { amount: compactTotal.text })}`,
                 })}
-          </p>
+                className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-gap-1 tw-rounded-md tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden"
+              >
+                {estimatedTotal}
+                <ChevronDownIcon
+                  aria-hidden="true"
+                  className="tw-size-3 tw-shrink-0 tw-text-iron-400 group-open/total:tw-rotate-180"
+                />
+              </summary>
+              <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400 [overflow-wrap:anywhere]">
+                <span className="tw-block">
+                  {t(locale, "collect.review.exactAmounts")}
+                </span>
+                {collectBatchEthAmount(locale, total)}
+              </p>
+            </details>
+          ) : (
+            <p className="tw-m-0 tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100">
+              {estimatedTotal}
+            </p>
+          )}
           <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
             {t(locale, "collect.batchReview.nextStep")}
           </p>

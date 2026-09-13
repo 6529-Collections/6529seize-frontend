@@ -241,3 +241,28 @@ it("blocks expired plans and offers to a destination different from the paying w
   expect(screen.getByText(/Offers deliver to the paying wallet/)).toBeVisible();
   expect(props.onPlanOffers).not.toHaveBeenCalled();
 });
+
+it("uses the shared collection and ignores an in-flight result after it changes", async () => {
+  let resolveOld!: (value: ApiCollectTdhTargetPlan) => void;
+  api.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        resolveOld = resolve;
+      })
+  );
+  const { props, rerender } = mount({ collection: "gradients" });
+  expect(screen.queryByLabelText("Collection to buy")).not.toBeInTheDocument();
+  submit();
+  const request = api.mock.calls[0]![0];
+  const signal = api.mock.calls[0]![1];
+  expect(request.families).toEqual(["gradients"]);
+  rerender(<CollectTdhTargetController {...props} collection="pebbles" />);
+  expect(signal?.aborted).toBe(true);
+  await act(async () => resolveOld(targetPlan(request)));
+  expect(
+    screen.queryByRole("heading", { name: "Best purchase plan found" })
+  ).not.toBeInTheDocument();
+  expect(screen.getByLabelText("Target TDH")).toHaveValue("");
+  submit();
+  expect(api.mock.calls.at(-1)![0].families).toEqual(["pebbles"]);
+});

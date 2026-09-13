@@ -14,10 +14,12 @@ import CollectTradeForm from "./CollectTradeForm";
 import { CollectOrderBook } from "./CollectOrderPicker";
 import type { CollectTradeAction, CollectTradeDraft } from "./collect.types";
 import {
+  collectBuyListings,
   collectBuyAmount,
   collectOrderAvailableQuantity,
   collectOrderQuantityStep,
 } from "./collect-buy.helpers";
+import { collectProfileWallets } from "./collect-recipient.helpers";
 import { MARKET_ZERO } from "./market-validation";
 
 interface CollectTradeControllerFormProps {
@@ -33,6 +35,7 @@ interface CollectTradeControllerFormProps {
   readonly selectedOrder: ApiMarketTradeOrder | null;
   readonly orders: readonly ApiMarketTradeOrder[];
   readonly buyOrders: readonly ApiMarketTradeOrder[];
+  readonly ordersUpdatedAt?: number;
   readonly ordersLoading: boolean;
   readonly ordersFailed: boolean;
   readonly makerLabel: string;
@@ -96,17 +99,22 @@ function getNoInlineOrderMessage({
   ordersLoading,
   ordersFailed,
   selectedOrder,
+  orders,
 }: {
   readonly locale: SupportedLocale;
   readonly ordersLoading: boolean;
   readonly ordersFailed: boolean;
   readonly selectedOrder: ApiMarketTradeOrder | null;
+  readonly orders: readonly ApiMarketTradeOrder[];
 }) {
   if (selectedOrder) return undefined;
   if (ordersFailed) return t(locale, "collect.error.orders");
+  if (ordersLoading) return t(locale, "collect.buy.loadingListings");
   return t(
     locale,
-    ordersLoading ? "collect.buy.loadingListings" : "collect.buy.noListings"
+    orders.length === 0
+      ? "collect.buy.notListed"
+      : "collect.buy.noMatchingListing"
   );
 }
 
@@ -116,6 +124,19 @@ function InlineTradeForm({
   readonly props: CollectTradeControllerFormProps;
 }) {
   const noInlineOrder = getNoInlineOrderMessage(props);
+  // An eligible alternative supplies edit bounds only, never a selected price or request.
+  const quantityOrder =
+    props.selectedOrder ??
+    (!props.fixedOrder && props.asset
+      ? collectBuyListings({
+          orders: props.orders,
+          assetKey: props.asset.asset_key,
+          nowSeconds: (props.ordersUpdatedAt ?? 0) / 1000,
+          profileWallets: collectProfileWallets(props.recipientProfile).map(
+            (item) => item.wallet
+          ),
+        })[0]
+      : undefined);
   const inlineDraftChange = (next: CollectTradeDraft) => {
     if (next.quantity !== props.draft.quantity) {
       props.onQuantityEdited();
@@ -141,21 +162,39 @@ function InlineTradeForm({
       </details>
     ) : undefined;
 
+  if (
+    !props.fixedOrder &&
+    !props.selectedOrder &&
+    (props.ordersLoading || props.ordersFailed || !quantityOrder)
+  )
+    return (
+      <div className="tw-space-y-3">
+        <p
+          role={props.ordersFailed ? "alert" : "status"}
+          className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-300"
+        >
+          {noInlineOrder}
+        </p>
+        {props.secondaryActions !== undefined &&
+          props.secondaryActions !== null && (
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+              {props.secondaryActions}
+            </div>
+          )}
+      </div>
+    );
+
   return (
     <CollectInlineBuyForm
       action="buy"
       draft={props.draft}
       maxQuantity={
         (props.fixedOrder ? props.maximumOrderQuantity : undefined) ??
-        (props.selectedOrder
-          ? collectOrderAvailableQuantity(props.selectedOrder)
-          : null) ??
+        (quantityOrder ? collectOrderAvailableQuantity(quantityOrder) : null) ??
         "1"
       }
       quantityStep={
-        props.selectedOrder
-          ? (collectOrderQuantityStep(props.selectedOrder) ?? "1")
-          : "1"
+        quantityOrder ? (collectOrderQuantityStep(quantityOrder) ?? "1") : "1"
       }
       makerLabel={props.makerLabel}
       currencyLabel="ETH"

@@ -154,6 +154,8 @@ jest.mock("@/components/collect/useMarketExecution", () => ({
     clearMessage: jest.fn(),
     stage: null,
     message: undefined,
+    ready: true,
+    readinessReason: undefined,
   }),
 }));
 jest.mock("@/components/collect/market-recovery", () => ({
@@ -193,7 +195,9 @@ jest.mock("@/components/collect/market.adapters", () => ({
     expiresAt: Date.now() + 60_000,
   }),
 }));
-function renderBuy() {
+function renderBuy(
+  props: Partial<ComponentProps<typeof CollectTradeController>> = {}
+) {
   return render(
     <QueryClientProvider
       client={
@@ -206,6 +210,7 @@ function renderBuy() {
         layout="inline-buy"
         presentation="contents"
         onClose={jest.fn()}
+        {...props}
       />
     </QueryClientProvider>
   );
@@ -358,7 +363,10 @@ it("shows an observed listing to a guest after loading without preparing or conn
   expect(await screen.findByRole("status")).toHaveTextContent(
     "Loading listings"
   );
-  expect(await screen.findByRole("button", { name: "Collect" })).toBeDisabled();
+  expect(
+    screen.queryByRole("button", { name: "Collect" })
+  ).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Draft recipient")).not.toBeInTheDocument();
   await act(async () => {
     resolveOrders({ orders: [order] });
   });
@@ -378,37 +386,62 @@ it("keeps a guest order error visible and offers retry without preparing", async
   renderBuy();
 
   await waitFor(() =>
-    expect(screen.getByRole("status")).toHaveTextContent(
+    expect(screen.getByRole("alert")).toHaveTextContent(
       "Orders could not be loaded"
     )
   );
   expect(screen.getByRole("button", { name: "Try again" })).toBeEnabled();
-  expect(screen.getByRole("button", { name: "Collect" })).toBeDisabled();
-  expect(screen.getByRole("button", { name: "Connect wallet" })).toBeEnabled();
-  expect(mockPrepare).not.toHaveBeenCalled();
-  expect(mockConfirm).not.toHaveBeenCalled();
-  expect(mockSeizeConnect).not.toHaveBeenCalled();
-});
-
-it("keeps a guest empty market visible without a routine refresh action", async () => {
-  mockFetchOrders.mockResolvedValueOnce({ orders: [] });
-  setGuestSession();
-  renderBuy();
-
-  await waitFor(() =>
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "No NFTs are currently available to collect."
-    )
-  );
   expect(
-    screen.queryByRole("button", { name: /refresh|try again/i })
+    screen.queryByRole("button", { name: "Collect" })
   ).not.toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Collect" })).toBeDisabled();
+  expect(screen.queryByLabelText("Draft recipient")).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Connect wallet" })).toBeEnabled();
   expect(mockPrepare).not.toHaveBeenCalled();
   expect(mockConfirm).not.toHaveBeenCalled();
   expect(mockSeizeConnect).not.toHaveBeenCalled();
 });
+
+it.each([
+  [ApiCollectFamily.Memes, "0x33fd426905f149f8376e227d0c9d3340aad17af1"],
+  [ApiCollectFamily.Memelab, "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb"],
+  [ApiCollectFamily.Gradients, "0x0c58ef43ff3032005e472cb5709f8908acb00205"],
+  [ApiCollectFamily.Pebbles, "0x45882f9bc325e14fbb298a1df930c43a874b83ae"],
+] as const)(
+  "shows one useful unlisted artwork state for %s without purchase controls",
+  async (family, contract) => {
+    mockFetchOrders.mockResolvedValueOnce({ orders: [] });
+    setGuestSession();
+    const offer = jest.fn();
+    renderBuy({
+      asset: { ...asset, family, contract, asset_key: `1:${contract}:1` },
+      secondaryActions: <button onClick={offer}>Make an offer</button>,
+    });
+
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "This artwork is not currently listed."
+      )
+    );
+    expect(
+      screen.queryByRole("button", { name: /refresh|try again/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Collect" })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Draft recipient")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("textbox", { name: "Quantity" })
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Make an offer" }));
+    expect(offer).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByRole("button", { name: "Connect wallet" })
+    ).toBeEnabled();
+    expect(mockPrepare).not.toHaveBeenCalled();
+    expect(mockConfirm).not.toHaveBeenCalled();
+    expect(mockSeizeConnect).not.toHaveBeenCalled();
+  }
+);
 
 it("quietly discovers a new listing from an empty market without preparing", async () => {
   jest.useFakeTimers();
@@ -416,7 +449,7 @@ it("quietly discovers a new listing from an empty market without preparing", asy
     mockFetchOrders.mockResolvedValueOnce({ orders: [] });
     setGuestSession();
     renderBuy();
-    await screen.findByText("No NFTs are currently available to collect.");
+    await screen.findByText("This artwork is not currently listed.");
     await act(async () => jest.advanceTimersByTimeAsync(60_000));
     expect(
       await screen.findByRole("button", { name: "Collect 0.1 ETH" })
@@ -426,6 +459,66 @@ it("quietly discovers a new listing from an empty market without preparing", asy
     expect(mockConfirm).not.toHaveBeenCalled();
   } finally {
     jest.useRealTimers();
+  }
+});
+
+it("does not call an own-wallet listing unlisted or show a purchase that cannot be made", async () => {
+  mockFetchOrders.mockResolvedValueOnce({
+    orders: [{ ...order, maker: payer }],
+  });
+  const list = jest.fn();
+  renderBuy({ secondaryActions: <button onClick={list}>List</button> });
+  await screen.findByText("No matching listing is available to collect here.");
+  expect(
+    screen.queryByText("This artwork is not currently listed.")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: /^Collect/ })
+  ).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Draft recipient")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "List" }));
+  expect(list).toHaveBeenCalledTimes(1);
+  expect(mockPrepare).not.toHaveBeenCalled();
+});
+
+it("uses the fetched book time to keep quantity editable without pricing or preparing a later-starting alternative", async () => {
+  const mountedAt = Date.now();
+  const fetchedAt = mountedAt + 2000;
+  const now = jest.spyOn(Date, "now").mockReturnValue(mountedAt);
+  const editions = {
+    ...order,
+    start_time: String(Math.floor(fetchedAt / 1000)),
+    available_quantity: "3",
+    purchase_quantity: "1",
+    quantity_step: "1",
+  };
+  let resolve!: (value: { orders: ApiMarketTradeOrder[] }) => void;
+  mockFetchOrders.mockReturnValue(
+    new Promise((complete) => {
+      resolve = complete;
+    })
+  );
+  try {
+    renderBuy({ initialQuantity: "4" });
+    now.mockReturnValue(fetchedAt);
+    await act(async () => {
+      resolve({ orders: [editions] });
+    });
+    await screen.findByText(
+      "No matching listing is available to collect here."
+    );
+    const quantity = screen.getByRole("textbox", { name: "Quantity" });
+    expect(quantity).toHaveValue("4");
+    expect(screen.getByRole("button", { name: "Collect" })).toBeDisabled();
+    expect(mockPrepare).not.toHaveBeenCalled();
+    fireEvent.change(quantity, { target: { value: "2" } });
+    expect(
+      await screen.findByRole("button", { name: "Collect 0.2 ETH" })
+    ).toBeEnabled();
+    expect(mockPrepare).not.toHaveBeenCalled();
+    expect(mockConfirm).not.toHaveBeenCalled();
+  } finally {
+    now.mockRestore();
   }
 });
 
@@ -448,7 +541,7 @@ it("recovers an edited two-copy choice after its listing disappears, preserving 
       target: { value: "2" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Collect 0.2 ETH" }));
-    await screen.findByText("No NFTs are currently available to collect.");
+    await screen.findByText("This artwork is not currently listed.");
     expect(mockPrepare).not.toHaveBeenCalled();
     await act(async () => jest.advanceTimersByTimeAsync(60_000));
     const collect = await screen.findByRole("button", {

@@ -16,6 +16,9 @@ import type {
 } from "@/components/collect/collect.types";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
+import type { readMarketIntent } from "@/components/collect/market-operation-storage";
+
+let mockSavedIntent: ReturnType<typeof readMarketIntent> = null;
 
 const mockRecover = jest.fn();
 const mockConfirm = jest.fn();
@@ -70,6 +73,7 @@ jest.mock("@tanstack/react-query", () => ({
 }));
 jest.mock("@/components/collect/useMarketExecution", () => ({
   useMarketExecution: () => ({
+    ready: true,
     confirm: mockConfirm,
     recoverTransaction: mockRecover,
     clearMessage: jest.fn(),
@@ -81,7 +85,7 @@ jest.mock("@/components/collect/useMarketSettlement", () => ({
   useMarketSettlement: jest.fn(),
 }));
 jest.mock("@/components/collect/market-operation-storage", () => ({
-  readMarketIntent: () => null,
+  readMarketIntent: () => mockSavedIntent,
 }));
 jest.mock("@/components/collect/market-recovery", () => ({
   fetchRecoverableMarketOperation: (...args: unknown[]) =>
@@ -167,6 +171,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockQueries.length = 0;
   mockRecover.mockResolvedValue(undefined);
+  mockSavedIntent = null;
   mockAuth.isAuthenticated = true;
   mockAuth.activeProfileProxy = null;
   mockPayingWallet = mockAuth.connectedProfile.primary_wallet;
@@ -222,6 +227,59 @@ it("offers hash recovery with no local intent after profile migration and disabl
   );
   expect(mockConfirm).not.toHaveBeenCalled();
 });
+
+it.each(["approval", "later fulfillment", "server hash"])(
+  "shows manual recovery only when the active %s has no matching known hash",
+  (scenario) => {
+    const hash = `0x${"c".repeat(64)}` as const;
+    const active = {
+      ...operation,
+      send_attempt: {
+        ...operation.send_attempt!,
+        purpose:
+          scenario === "approval"
+            ? ApiMarketSendAttemptPurposeEnum.Approval
+            : ApiMarketSendAttemptPurposeEnum.Transaction,
+        transaction_hash: scenario === "server hash" ? hash : null,
+      },
+    };
+    mockSavedIntent = {
+      request: {
+        profile_id: operation.profile_id,
+        wallet: operation.wallet,
+        recipient: operation.recipient,
+        asset_key: operation.asset_key,
+        kind: operation.kind,
+        quantity: operation.quantity,
+        currency: operation.currency,
+        amount_wei: operation.total_wei,
+        acknowledge_external_recipient: false,
+      },
+      approvalHash: hash,
+      sendAttempt: {
+        id: active.send_attempt.attempt_id,
+        purpose: "APPROVAL",
+        digest: active.send_attempt.transaction_digest,
+        snapshotBlock: active.send_attempt.snapshot_block,
+        walletRequested: true,
+        expectedRevision: "revision",
+      },
+    };
+    render(
+      <CollectTradeController
+        action="buy"
+        initialOperation={active}
+        onClose={jest.fn()}
+      />
+    );
+    const input = screen.queryByRole("textbox", {
+      name: "Transaction hash from your wallet",
+    });
+    if (scenario === "later fulfillment") expect(input).toBeInTheDocument();
+    else expect(input).not.toBeInTheDocument();
+    expect(mockConfirm).not.toHaveBeenCalled();
+  }
+);
 it.each(["unauthenticated", "proxy"])(
   "disables the recovery callback for an %s session",
   (mode) => {

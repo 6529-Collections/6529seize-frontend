@@ -17,7 +17,7 @@ import {
 import { getOtherOrderCount, getOtherOrders } from "./market-depth-orders";
 import { MarketDepthOrderAction } from "./MarketDepthTradeActions";
 
-const INITIAL_ORDER_COUNT = 5;
+const INITIAL_ORDER_COUNT = 10;
 const QUIET_BUTTON =
   "tw-font-inherit tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-meta tw-font-medium tw-text-iron-300 hover:tw-bg-white/5 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 
