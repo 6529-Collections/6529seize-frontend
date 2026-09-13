@@ -13,12 +13,14 @@ import { batchFixture, PAYER, FREN, NOW } from "./market-batch.fixture";
 
 const mockFetch = jest.fn();
 const mockPrepare = jest.fn();
+const mockLock = jest.fn();
 jest.mock("@/services/api/market-batch-api", () => ({
   fetchMarketBatch: (...args: unknown[]) => mockFetch(...args),
   prepareMarketBatch: (...args: unknown[]) => mockPrepare(...args),
 }));
 jest.mock("@/components/collect/market-operation-lock", () => ({
-  withMarketOperationLock: (_key: string, action: () => unknown) => action(),
+  withMarketOperationLock: (key: string, action: () => unknown) =>
+    mockLock(key, action),
 }));
 const OWN = "0x5555555555555555555555555555555555555555";
 const OUTSIDE = "0x6666666666666666666666666666666666666666";
@@ -117,6 +119,9 @@ function options(value = fixture()) {
 }
 beforeEach(() => {
   jest.clearAllMocks();
+  mockLock.mockImplementation((_key: string, action: () => unknown) =>
+    action()
+  );
   localStorage.clear();
   jest.spyOn(Date, "now").mockReturnValue(NOW);
 });
@@ -296,4 +301,50 @@ test("discards an old actor response even after switching back to that actor", a
     expect(await update).toBe(false);
   });
   expect(input.onUpdated).not.toHaveBeenCalled();
+});
+
+test("rejects a changed operation revision after acquiring the replacement lock without publishing or changing either journal", async () => {
+  const input = options();
+  let replacementId = "";
+  mockPrepare.mockImplementation((request: ApiMarketBatchPrepareRequest) => {
+    const operation = prepared(request);
+    replacementId = operation.id;
+    return Promise.resolve(operation);
+  });
+  let locks = 0;
+  let complete!: () => void;
+  mockLock.mockImplementation((_key: string, action: () => unknown) => {
+    if (++locks !== 3) return action();
+    return new Promise((resolve, reject) => {
+      complete = () => {
+        try {
+          resolve(action());
+        } catch (failure) {
+          reject(failure);
+        }
+      };
+    });
+  });
+  const { result, rerender } = renderHook(
+    (props) => useCollectBatchRecipientUpdate(props),
+    { initialProps: input }
+  );
+  let update!: Promise<boolean>;
+  await act(async () => {
+    update = result.current.update(0, 0, OWN, false);
+  });
+  expect(mockLock).toHaveBeenLastCalledWith(
+    replacementId,
+    expect.any(Function)
+  );
+  rerender({ ...input, operation: { ...input.operation, revision: "2" } });
+  await act(async () => {
+    complete();
+    expect(await update).toBe(false);
+  });
+  expect(input.onUpdated).not.toHaveBeenCalled();
+  expect(readMarketBatch("profile", input.operation.id)?.request).toEqual(
+    input.expected
+  );
+  expect(readMarketBatch("profile", replacementId)).toBeNull();
 });

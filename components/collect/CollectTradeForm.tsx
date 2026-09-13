@@ -177,6 +177,7 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
         >
           <CollectRecipientPicker
             key={props.recipientProfile?.id ?? "no-profile"}
+            compact
             profile={props.recipientProfile}
             payingWallet={props.makerLabel}
             value={props.draft.recipient}

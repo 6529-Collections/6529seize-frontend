@@ -1,4 +1,5 @@
 import CollectDeliveryControl from "@/components/collect/CollectDeliveryControl";
+import CollectTradeForm from "@/components/collect/CollectTradeForm";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -18,19 +19,20 @@ jest.mock("@/components/nft-transfer/TransferModalPfp", () => () => null);
 
 const payer = "0x2222222222222222222222222222222222222222";
 const custody = "0xde709f2102306220921060314715629080e2fb77";
+const profile = {
+  id: "profile",
+  primary_wallet: payer,
+  handle: "collector",
+  level: 12,
+  tdh: 1500,
+  wallets: [
+    { wallet: payer, display: "collector.eth", tdh: 1000 },
+    { wallet: custody, display: "custody.collector.eth", tdh: 500 },
+  ],
+} as ApiIdentity;
 function setup(disabled = false) {
   const props: ComponentProps<typeof CollectDeliveryControl> = {
-    profile: {
-      id: "profile",
-      primary_wallet: payer,
-      handle: "collector",
-      level: 12,
-      tdh: 1500,
-      wallets: [
-        { wallet: payer, display: "collector.eth", tdh: 1000 },
-        { wallet: custody, display: "custody.collector.eth", tdh: 500 },
-      ],
-    } as ApiIdentity,
+    profile,
     payingWallet: payer,
     value: payer,
     onChange: jest.fn(),
@@ -77,4 +79,50 @@ it("does not mount or change a destination while the form is disabled", async ()
   await user.click(screen.getByRole("button", { name: "Change" }));
   expect(screen.queryByText("Profile level 12")).not.toBeInTheDocument();
   expect(props.onChange).not.toHaveBeenCalled();
+});
+
+it("gives the single purchase entry form the same profile and wallet context without preparing on selection", async () => {
+  const user = userEvent.setup();
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: 0 } },
+  });
+  const onChange = jest.fn();
+  const onPrepare = jest.fn();
+  render(
+    <QueryClientProvider client={client}>
+      <CollectTradeForm
+        action="buy"
+        draft={{
+          recipient: payer,
+          quantity: "2",
+          unitPriceEth: "",
+          expiryHours: "168",
+        }}
+        maxQuantity="5"
+        makerLabel={payer}
+        currencyLabel="ETH"
+        recipientProfile={profile}
+        loading={false}
+        onChange={onChange}
+        onPrepare={onPrepare}
+      />
+    </QueryClientProvider>
+  );
+  expect(screen.getByText("Profile level 12")).toBeVisible();
+  expect(screen.getByText("Profile TDH: 1,500")).toBeVisible();
+  const destination = screen.getByRole("button", {
+    name: /^custody.collector.eth /,
+  });
+  expect(destination).toHaveAccessibleDescription("Wallet TDH: 500");
+  await user.click(destination);
+  expect(onChange).toHaveBeenCalledWith(
+    expect.objectContaining({
+      recipient: getAddress(custody),
+      quantity: "2",
+      acknowledgeExternalRecipient: false,
+    })
+  );
+  expect(onPrepare).not.toHaveBeenCalled();
+  expect(commonApiFetch).not.toHaveBeenCalled();
+  expect(screen.getByText(`Paying wallet: ${payer}`)).toBeVisible();
 });

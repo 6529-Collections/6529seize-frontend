@@ -157,6 +157,11 @@ function BatchQuoteReview({
     operation.state === ApiMarketBatchOperationStateEnum.Review &&
     gas !== undefined;
   const recipientDisabled = !ready || busy || Boolean(disabledReason);
+  const hasExternalRecipient = operation.items.some((item) =>
+    item.allocations.some(
+      (allocation) => allocation.recipient_in_profile === false
+    )
+  );
   const changeEditing = (key: string, editing: boolean) => {
     if (editing && editingRecipient.current !== null) return;
     editingRecipient.current = editing ? key : null;
@@ -247,18 +252,16 @@ function BatchQuoteReview({
           />
         ))}
       </ul>
-      {operation.items.some((item) =>
-        item.allocations.some(
-          (allocation) => allocation.recipient_in_profile === false
-        )
-      ) && (
-        <p
-          role="status"
-          className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
-        >
-          {t(locale, "collect.review.giftOutcome")}
-        </p>
-      )}
+      <output
+        aria-live="polite"
+        className={
+          hasExternalRecipient
+            ? "tw-m-0 tw-block tw-text-xs tw-leading-5 tw-text-iron-400"
+            : "tw-sr-only"
+        }
+      >
+        {hasExternalRecipient ? t(locale, "collect.review.giftOutcome") : ""}
+      </output>
       <dl className="tw-m-0 tw-space-y-3">
         <AmountRow label={t(locale, "collect.batchReview.purchaseTotal")}>
           <Money wei={operation.total_wei} currency="ETH" />
