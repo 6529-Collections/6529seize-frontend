@@ -51,6 +51,7 @@ import type {
 } from "./create-drop-content/drop-submission.types";
 import { getDropSubmissionErrorContent } from "./create-drop-content/drop-submission-error.helpers";
 import type { CreateDropProps } from "./create-drop-content/create-drop.types";
+import { reportDropSubmissionFailure } from "@/utils/monitoring/dropSubmissionMonitoring";
 
 export default function CreateDrop({
   activeDrop,
@@ -467,6 +468,7 @@ export default function CreateDrop({
       }
     },
     onError: (error, body) => {
+      reportDropSubmissionFailure(error);
       clearSlowModeChatPending(body.slowModeChatReservation);
       const isContentModerationRejection =
         getStructuredApiErrorStatus(error) === 422 &&

@@ -2089,9 +2089,7 @@ describe("Auth component", () => {
       );
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Sign Authentication Request")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Sign in to 6529")).toBeInTheDocument();
       });
     });
 
@@ -2754,21 +2752,17 @@ describe("Auth component", () => {
       renderAuthModalHarness();
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Sign Authentication Request")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Sign in to 6529")).toBeInTheDocument();
       });
 
       // Check that modal content is present
       expect(
-        screen.getByText(
-          "To connect your wallet, you will need to sign a message to confirm your identity."
-        )
+        screen.getByText("Sign a message to confirm this address is yours.")
       ).toBeInTheDocument();
       expect(screen.getByText("Cancel")).toBeInTheDocument();
-      expect(screen.getByText("Sign")).toBeInTheDocument();
+      expect(screen.getByText("Sign message")).toBeInTheDocument();
 
-      await userEvent.click(screen.getByText("Sign"));
+      await userEvent.click(screen.getByText("Sign message"));
       await waitFor(() => {
         expect(mockSignMessage).toHaveBeenCalledWith(
           "sign this message exactly"
@@ -2789,9 +2783,7 @@ describe("Auth component", () => {
         await waitFor(() => {
           expect(mockValidateAuthImmediate).toHaveBeenCalled();
         });
-        expect(
-          screen.queryByText("Sign Authentication Request")
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText("Sign in to 6529")).not.toBeInTheDocument();
         expect(mockSignMessage).not.toHaveBeenCalled();
         expect(
           require("@/services/auth/session-v2.utils").getSessionNonce
@@ -2807,17 +2799,13 @@ describe("Auth component", () => {
       await waitFor(() => {
         expect(mockValidateAuthImmediate).toHaveBeenCalled();
       });
-      expect(
-        screen.queryByText("Sign Authentication Request")
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Sign in to 6529")).not.toBeInTheDocument();
 
       mockActiveChainId = 1;
       view.rerender(getAuthModalHarnessElement());
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Sign Authentication Request")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Sign in to 6529")).toBeInTheDocument();
       });
     });
 
@@ -2826,18 +2814,14 @@ describe("Auth component", () => {
       const view = renderAuthModalHarness();
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Sign Authentication Request")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Sign in to 6529")).toBeInTheDocument();
       });
 
       mockActiveChainId = 137;
       view.rerender(getAuthModalHarnessElement());
 
       await waitFor(() => {
-        expect(
-          screen.queryByText("Sign Authentication Request")
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText("Sign in to 6529")).not.toBeInTheDocument();
       });
       expect(mockSeizeDisconnect).not.toHaveBeenCalled();
       expect(mockSeizeDisconnectAndLogout).not.toHaveBeenCalled();
@@ -3049,9 +3033,7 @@ describe("Auth component", () => {
       );
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Sign Authentication Request")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Sign in to 6529")).toBeInTheDocument();
       });
 
       const reauthPromptCalls = mockTrackAuthImpactEvent.mock.calls.filter(
@@ -3865,7 +3847,7 @@ describe("Auth component", () => {
       });
 
       const user = userEvent.setup();
-      await user.click(screen.getByText("Sign"));
+      await user.click(screen.getByText("Sign message"));
 
       await waitFor(() => {
         expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
@@ -3911,7 +3893,9 @@ describe("Auth component", () => {
       });
 
       expect(screen.queryByText("Remind me later")).not.toBeInTheDocument();
-      expect(screen.getByText(/Confirm in your wallet/i)).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /Check your wallet/i })
+      ).toBeInTheDocument();
     });
 
     it("keeps the session upgrade modal visible while validation reruns", async () => {
@@ -4010,7 +3994,7 @@ describe("Auth component", () => {
       expect(
         screen.getByText(/Reshare the connection from a device/i)
       ).toBeInTheDocument();
-      expect(screen.queryByText("Sign")).not.toBeInTheDocument();
+      expect(screen.queryByText("Sign message")).not.toBeInTheDocument();
       expect(screen.getByText("Remind me later")).toBeInTheDocument();
     });
 
@@ -4051,7 +4035,7 @@ describe("Auth component", () => {
         screen.getByText(/If this is a shared connection, reshare/i)
       ).toBeInTheDocument();
       expect(screen.getByText("Remind me later")).toBeInTheDocument();
-      expect(screen.queryByText("Sign")).not.toBeInTheDocument();
+      expect(screen.queryByText("Sign message")).not.toBeInTheDocument();
 
       mockSeizeConnect.mockImplementationOnce(() => {
         expect(
@@ -4461,9 +4445,7 @@ describe("Auth component", () => {
 
       expect(mockCommonApiPost).not.toHaveBeenCalled();
       expect(mockSignMessage).not.toHaveBeenCalled();
-      expect(
-        screen.queryByText("Sign Authentication Request")
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Sign in to 6529")).not.toBeInTheDocument();
     });
   });
 
