@@ -140,10 +140,22 @@ it.each([
   (contract, tokenId, label) => {
     const result = review(operation({ asset_key: `1:${contract}:${tokenId}` }));
     expect(result?.artworkLabel).toBe(label);
+    expect(result).toMatchObject({
+      chainId: 1,
+      nftContract: getAddress(contract),
+      exchangeContract: getAddress(MARKET_SEAPORT),
+    });
     expect(result?.contractFacts).toEqual(
+      expect.arrayContaining([{ label: "Token ID", value: tokenId }])
+    );
+    expect(result?.contractFacts).not.toEqual(
       expect.arrayContaining([
-        { label: "NFT contract", value: getAddress(contract) },
-        { label: "Token ID", value: tokenId },
+        expect.objectContaining({ label: "NFT contract" }),
+      ])
+    );
+    expect(result?.contractFacts).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Exchange contract" }),
       ])
     );
   }
@@ -290,12 +302,8 @@ it("preserves approval spender, recovered transaction and revision without dupli
   ).toHaveLength(1);
   expect(
     result?.contractFacts.filter((fact) => fact.label === "Exchange contract")
-  ).toEqual([
-    {
-      label: "Exchange contract",
-      value: `Seaport · ${getAddress(MARKET_SEAPORT)}`,
-    },
-  ]);
+  ).toEqual([]);
+  expect(result?.exchangeContract).toBe(getAddress(MARKET_SEAPORT));
   expect(
     result?.contractFacts.some((fact) => fact.value === `1:${MEMES}:546`)
   ).toBe(false);

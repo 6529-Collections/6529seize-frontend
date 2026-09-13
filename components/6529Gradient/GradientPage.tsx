@@ -12,6 +12,8 @@ import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import CollectDetailActions from "@/components/collect/CollectDetailActions";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
+import NftDetailTabSection from "@/components/nft-navigation/NftDetailTabSection";
+import { MemePageTabButton } from "@/components/the-memes/MemePageTabButton";
 import { TransferSingleActions } from "@/components/nft-transfer/TransferSingle";
 import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
 import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
@@ -33,6 +35,7 @@ import {
   areEqualAddresses,
   numberWithCommas,
   printMintDate,
+  parseNftDescriptionToHtml,
 } from "@/helpers/Helpers";
 import {
   getProfileCollectedReturnContext,
@@ -48,6 +51,7 @@ import { ContractType } from "@/types/enums";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import {
   useCallback,
@@ -69,6 +73,7 @@ type GradientNftsResponse = Omit<DBResponse<NftWithOwner>, "next"> & {
 
 const GRADIENT_COLLECTION_START_INDEX = 0;
 const GRADIENT_COLLECTION_END_INDEX = 100;
+const MARKET_TAB_FOCUS = "listings-and-offers";
 
 function formatGradientNumber(value: number, decimals = 100) {
   return numberWithCommas(Math.round(value * decimals) / decimals);
@@ -378,6 +383,18 @@ export default function GradientPageComponent({
 }) {
   const capacitor = useCapacitor();
   const locale = useBrowserLocale();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const marketActive = searchParams.get("focus") === MARKET_TAB_FOCUS;
+  const selectMarketTab = (market: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("focus", market ? MARKET_TAB_FOCUS : "live");
+    globalThis.history.replaceState(
+      null,
+      "",
+      `${pathname}?${params.toString()}`
+    );
+  };
   const returnContext = useMemo(
     () =>
       getProfileCollectedReturnContext(
@@ -387,15 +404,15 @@ export default function GradientPageComponent({
       ),
     [searchParamsString]
   );
-  const navigationParams = useMemo(
-    () =>
-      new URLSearchParams(
-        returnContext
-          ? { [PROFILE_COLLECTED_RETURN_PARAM]: returnContext.href }
-          : undefined
-      ),
-    [returnContext]
-  );
+  const navigationParams = useMemo(() => {
+    const params = new URLSearchParams(
+      returnContext
+        ? { [PROFILE_COLLECTED_RETURN_PARAM]: returnContext.href }
+        : undefined
+    );
+    if (marketActive) params.set("focus", MARKET_TAB_FOCUS);
+    return params;
+  }, [returnContext, marketActive]);
   const { country } = useCookieConsent();
   const { address: connectedAddress } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
@@ -613,14 +630,52 @@ export default function GradientPageComponent({
                 />
               </div>
             </div>
-            <MarketDepthPanel
-              contract={GRADIENT_CONTRACT}
-              tokenId={nft.id}
-              refreshKey={marketRefreshVersion}
-            />
-            <div ref={activitySectionRef} className="tw-min-h-px">
-              {activityNearViewport && <GradientActivitySection nft={nft} />}
-            </div>
+            <NftDetailTabSection
+              activeFocus={marketActive ? MARKET_TAB_FOCUS : "live"}
+              locale={locale}
+              navigation={
+                <nav
+                  aria-label={t(locale, "theMemes.detail.tabs.overview")}
+                  className="tw-mb-6 tw-flex tw-gap-x-6 tw-overflow-x-auto"
+                >
+                  <MemePageTabButton
+                    title={t(locale, "theMemes.detail.tabs.overview")}
+                    isActive={!marketActive}
+                    onClick={() => selectMarketTab(false)}
+                  />
+                  <MemePageTabButton
+                    title={t(locale, "marketDepth.disclosure")}
+                    isActive={marketActive}
+                    onClick={() => selectMarketTab(true)}
+                  />
+                </nav>
+              }
+            >
+              <div hidden={marketActive}>
+                {nft.description && (
+                  <div
+                    className="tw-max-w-4xl tw-pb-6 tw-text-base tw-text-iron-300"
+                    dangerouslySetInnerHTML={{
+                      __html: parseNftDescriptionToHtml(nft.description),
+                    }}
+                  />
+                )}
+                <div ref={activitySectionRef} className="tw-min-h-px">
+                  {activityNearViewport && (
+                    <GradientActivitySection nft={nft} />
+                  )}
+                </div>
+              </div>
+              <MarketDepthPanel
+                contract={GRADIENT_CONTRACT}
+                tokenId={nft.id}
+                refreshKey={marketRefreshVersion}
+                locale={locale}
+                embedded
+                active={marketActive}
+                onReveal={() => selectMarketTab(true)}
+              />
+            </NftDetailTabSection>
           </>
         ) : (
           <MemePageSkeleton />

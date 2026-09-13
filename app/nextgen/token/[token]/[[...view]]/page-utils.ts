@@ -6,6 +6,7 @@ import type {
 import { isEmptyObject } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { NextgenCollectionView } from "@/types/enums";
+import { getNextgenTokenView } from "@/components/nextGen/collections/nextgenToken/nextgen-token-view.helpers";
 
 interface TokenData {
   tokenId: number;
@@ -58,12 +59,5 @@ export async function fetchTokenData(
 }
 
 export function getContentView(view: string): NextgenCollectionView {
-  view = view?.toLowerCase().replaceAll("-", " ") ?? "";
-  const allowedViews = [
-    NextgenCollectionView.DISPLAY_CENTER,
-    NextgenCollectionView.PROVENANCE,
-    NextgenCollectionView.RARITY,
-  ];
-  const matchedView = allowedViews.find((v) => v.toLowerCase() === view);
-  return matchedView ?? NextgenCollectionView.ABOUT;
+  return getNextgenTokenView(view);
 }

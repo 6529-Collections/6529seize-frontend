@@ -3,16 +3,33 @@
 Parent: [Media Index](README.md)
 
 The Memes, Meme Lab, Gradients and NextGen card pages show captured OpenSea
-quotes in a Listings and Offers section. Where a card has Additional details,
-that content appears as a compact disclosure above Listings and Offers and
-starts collapsed unless a link opens those details directly. Listings and
-Offers gives you a quick Lowest listing and Highest offer view, then lets you
-inspect the quoted levels and the orders behind those prices.
+quotes in the **Listings & offers** tab. Opening the tab immediately shows the
+lowest ETH listing, highest WETH offer and quoted levels, without another
+accordion to open. **View listings & offers** beside the artwork's Collect
+action selects that tab and moves focus to its market section.
+Memes, Gradients and Pebbles share the same market controls and trade review
+layout. **View listings & offers** works from the other token views, and
+switching tabs retains a market selection and active review.
 
 On Memes, Meme Lab and Gradient cards, artwork details retain mint, edition,
 collector and TDH information where applicable. Listing and offer summaries appear
-in Listings and Offers, without a second set of prices or a market-cap estimate
+in Listings & offers, without a second set of prices or a market-cap estimate
 in the artwork details.
+
+On Memes and Meme Lab, **Overview** includes traits, metadata and original files
+below the artwork description. Existing `focus=the-art` links open Overview;
+`focus=listings-and-offers` opens the market tab. Other artwork pages keep their
+collection-specific details. Gradient Overview retains the description and card
+activity, with its artwork and identity information above the tab row.
+
+On Memes cards, supply shows **Edition size**, **Ex. research** and
+**Ex. museum & research**, alongside **Holding wallets**. Excluded counts remove
+burned editions and the named reserve holdings; the combined count removes each
+reserve once. These counts do not describe editions listed for sale.
+**Supply details & rankings** explains the exclusions and ranks **Ex. research**
+and **Ex. museum & research**. Smaller supplies rank first; equal supplies share a
+rank and the next rank skips those ties. A card without a recorded ranking shows
+**Unranked**.
 
 ## Read listings and offers
 
@@ -21,9 +38,12 @@ offer in WETH. Each price list starts with up to five levels. Use Show all level
 to reveal the complete list, and Show fewer levels to return to the short view.
 Listings are ordered from lowest price upward and
 offers from highest price downward. Each level shows its unit price and quantity
-at that price. Total shows the cumulative quoted quantity. Expand a price row to
+at that price. Total shows the cumulative quoted quantity. On narrow screens,
+quantity and total appear below the exact price, with **Collect** or **Sell** in
+a separate column. Expand a price row to
 inspect the captured orders behind that quote, including quoted remaining
-quantity, expiry, scope and applicability. Open Order information for the wallet,
+quantity, expiry, scope and applicability. Supported order actions appear before
+the technical disclosure. Open Order information for the wallet,
 order reference and currency contract. Each expanded price initially shows up to
 five orders; Show all orders reveals the rest.
 Payment currencies stay separate, including ETH and WETH; other currencies are
@@ -47,7 +67,10 @@ Select one or more listings, then choose **Review selected listings**. The site
 checks each selected order again before opening the purchase review. Choose your
 delivery wallet using the same **Deliver to · Change** picker as minting, including
 your consolidated wallets or **Send to a fren**. Review the total, fees and gas
-before authorizing in your wallet. Supported purchases and deliveries succeed
+before authorizing in your wallet. The review separates **Pay with** from each
+delivery address and offers **Price breakdown**, **Exact amounts** and
+**Contract details**. **Continue in wallet** checks the exact orders again;
+changed terms require another review. Supported purchases and deliveries succeed
 together in one transaction or all revert; a revert can still cost gas.
 
 Quoted quantities can overlap. Two listings from the same seller can offer the
@@ -64,7 +87,10 @@ fees, token permissions and gas before authorizing. Sale proceeds go to your
 signing wallet. Purchase delivery and gifting controls do not apply to accepting
 an offer.
 
-Collection and trait offers remain visible but cannot be accepted here yet.
+Collection-wide offers and verified trait offers can be accepted for the NFT
+on the current page. The site binds that exact NFT to the signed criteria;
+the displayed row alone is not proof of eligibility. If eligibility cannot be
+verified, the offer remains unavailable instead of selling another NFT.
 Meme Lab prices are informational. Supported order types, connected wallets and
 current market conditions determine which actions can complete. See
 [Collecting Tools](collecting.md) for wallet support and transaction recovery.

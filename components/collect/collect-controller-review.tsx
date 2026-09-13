@@ -1,6 +1,7 @@
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
+import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
 import {
   assertCollectOfferAmount,
@@ -14,6 +15,7 @@ import CollectAssetMedia from "./CollectAssetMedia";
 import { marketOperationReview } from "./market.adapters";
 import { readMarketIntent } from "./market-operation-storage";
 import { collectPurchaseReview } from "./collect-purchase-review";
+import { collectProfileWallets } from "./collect-recipient.helpers";
 
 export function collectOfferLimitReason(
   expected: ApiMarketPrepareRequest | null,
@@ -82,6 +84,21 @@ export function collectControllerReview({
     ];
     return {
       ...review,
+      ...(operation.kind !== ApiMarketKind.Buy
+        ? {
+            orderReview: {
+              operation,
+              walletName:
+                profile?.id === operation.profile_id
+                  ? collectProfileWallets(profile).find(
+                      (wallet) =>
+                        wallet.wallet.toLowerCase() ===
+                        operation.wallet.toLowerCase()
+                    )?.display
+                  : undefined,
+            },
+          }
+        : {}),
       technicalFacts,
       purchase: collectPurchaseReview(
         operation,

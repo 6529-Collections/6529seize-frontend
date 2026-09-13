@@ -9,7 +9,7 @@ import type { ApiArtworkDocumentationAnswer } from "@/generated/models/ApiArtwor
 import type { ApiArtworkDocumentationProfile } from "@/generated/models/ApiArtworkDocumentationProfile";
 
 /** Client guidance uses the server's registered schema; server validation remains authoritative. */
-function matchesDocumentationSchema(
+export function matchesDocumentationSchema(
   value: unknown,
   schema: ApiArtworkDocumentationValueSchema
 ): boolean {
@@ -39,7 +39,12 @@ function matchesDocumentationSchema(
         value <= (schema.maximum ?? Infinity)
       );
     case "number":
-      return typeof value === "number" && Number.isFinite(value);
+      return (
+        typeof value === "number" &&
+        Number.isFinite(value) &&
+        value >= (schema.minimum ?? -Infinity) &&
+        value <= (schema.maximum ?? Infinity)
+      );
     case "boolean":
       return typeof value === "boolean";
     case "array":

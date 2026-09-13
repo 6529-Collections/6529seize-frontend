@@ -12,10 +12,14 @@
  */
 
 import { ApiArtworkDocumentationInterviewInstrument } from '../models/ApiArtworkDocumentationInterviewInstrument';
+import { ApiArtworkDocumentationMediaProfile } from '../models/ApiArtworkDocumentationMediaProfile';
 import { ApiArtworkDocumentationProfileModule } from '../models/ApiArtworkDocumentationProfileModule';
+import { ApiArtworkDocumentationProgramRules } from '../models/ApiArtworkDocumentationProgramRules';
 import { HttpFile } from '../http/http';
 
 export class ApiArtworkDocumentationProfile {
+    'media_profiles'?: Array<ApiArtworkDocumentationMediaProfile>;
+    'program_rules'?: ApiArtworkDocumentationProgramRules;
     /**
     * All artwork answers and selected files are intended for public publication. Absent on legacy private-intake profiles. Team questions are separate drafting discussion and never part of the confirmed artwork record.
     */
@@ -41,6 +45,18 @@ export class ApiArtworkDocumentationProfile {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "media_profiles",
+            "baseName": "media_profiles",
+            "type": "Array<ApiArtworkDocumentationMediaProfile>",
+            "format": ""
+        },
+        {
+            "name": "program_rules",
+            "baseName": "program_rules",
+            "type": "ApiArtworkDocumentationProgramRules",
+            "format": ""
+        },
         {
             "name": "intake_mode",
             "baseName": "intake_mode",

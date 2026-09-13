@@ -459,40 +459,35 @@ describe("MemePageLiveRightMenu distribution link", () => {
     expect(screen.queryByText("not available")).not.toBeInTheDocument();
   });
 
-  it("shows collector count alongside edition size stats", () => {
+  it("shows reserve-adjusted supply without ambiguous headline ranks", () => {
     render(
       <MemePageLiveRightMenu
         show
         nft={createNft()}
         nftMeta={{
           ...createMeta(),
-          collection_size: 498,
+          edition_size: 310,
+          edition_size_ex_research: 50,
+          edition_size_ex_museum_and_research: 17,
+          research_holdings: 260,
           hodlers: 97,
           hodlers_rank: 480,
         }}
       />
     );
-
     expect(screen.getByText("Edition size")).toBeInTheDocument();
-    const collectorsLabel = screen.getByText("Collectors");
-    const exMuseumLabel = screen.getByText("ex. 6529 museum");
-    expect(collectorsLabel).toBeInTheDocument();
+    expect(screen.getByText("Ex. research")).toBeInTheDocument();
+    expect(screen.getByText("Ex. museum & research")).toBeInTheDocument();
+    expect(screen.getByText("Holding wallets")).toBeInTheDocument();
+    expect(screen.getByText("17")).toBeInTheDocument();
     expect(screen.getByText("97")).toBeInTheDocument();
-    expect(screen.getByText("Rank 480/498")).toHaveClass(
-      "tw-text-[10px]",
-      "md:tw-text-[11px]"
-    );
-    expect(exMuseumLabel).toBeInTheDocument();
+    expect(screen.queryByText(/Rank 480/)).not.toBeInTheDocument();
     expect(
-      exMuseumLabel.compareDocumentPosition(collectorsLabel) &
-        Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
-    expect(
-      collectorsLabel.parentElement?.parentElement?.parentElement
-    ).toHaveClass("tw-grid", "tw-grid-cols-2", "lg:tw-grid-cols-3");
+      screen.getByText("Supply details & rankings").closest("details")
+    ).not.toHaveAttribute("open");
   });
 
-  it("uses ranked collection size for live rank totals when provided", () => {
+  it("shows shared ranks for excluded supply without presenting the TDH edition rank as raw supply", () => {
     render(
       <MemePageLiveRightMenu
         show
@@ -501,19 +496,21 @@ describe("MemePageLiveRightMenu distribution link", () => {
           ...createMeta(),
           collection_size: 498,
           ranked_collection_size: 497,
-          hodlers: 97,
-          hodlers_rank: 480,
+          edition_size_rank: 99,
+          edition_size_ex_research_rank: 1,
+          edition_size_ex_museum_and_research_rank: 1,
         }}
       />
     );
-
-    expect(screen.getByText("Rank 480/497")).toBeInTheDocument();
+    expect(screen.getAllByText("Rank 1/497")).toHaveLength(2);
+    expect(screen.queryByText("Rank 99/497")).not.toBeInTheDocument();
+    expect(screen.queryByText("Edition size rank")).not.toBeInTheDocument();
     expect(
-      screen.getByLabelText("Collectors: Rank 480/497")
+      screen.getByText(/Supply after exclusions ranks from smallest to largest/)
     ).toBeInTheDocument();
   });
 
-  it("shows one unranked status and pending TDH for memes not recorded in TDH", () => {
+  it("shows unavailable reserve counts without inventing zero and preserves pending TDH", () => {
     render(
       <MemePageLiveRightMenu
         show
@@ -525,20 +522,14 @@ describe("MemePageLiveRightMenu distribution link", () => {
           edition_size_rank: -1,
           edition_size_cleaned_rank: -1,
           hodlers_rank: -1,
+          research_holdings: null,
+          edition_size_ex_research: null,
+          edition_size_ex_museum_and_research: null,
         }}
       />
     );
-
     expect(screen.getAllByText("Unranked")).toHaveLength(1);
-    expect(screen.getByLabelText("Edition size: Unranked")).toBeInTheDocument();
-    const exMuseumMetric =
-      screen.getByText("ex. 6529 museum").parentElement?.parentElement;
-    const collectorsMetric =
-      screen.getByText("Collectors").parentElement?.parentElement;
-    expect(exMuseumMetric).toHaveTextContent(/ex\. 6529 museum\s*100/);
-    expect(exMuseumMetric).not.toHaveTextContent(/Rank|Unranked/);
-    expect(collectorsMetric).toHaveTextContent(/Collectors\s*0/);
-    expect(collectorsMetric).not.toHaveTextContent(/Rank|Unranked/);
+    expect(screen.getAllByText("Not yet available")).toHaveLength(3);
     expect(screen.getByText("Pending")).toBeInTheDocument();
     expect(screen.queryByText("22.65")).not.toBeInTheDocument();
   });
@@ -583,14 +574,6 @@ describe("MemePageLiveRightMenu distribution link", () => {
     ).toBeGreaterThan(0);
     expect(
       screen.getByText(formatInteger("de-DE", nftMeta.hodlers))
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        t("de-DE", "theMemes.detail.live.rank", {
-          rank: formatInteger("de-DE", nftMeta.hodlers_rank),
-          total: formatInteger("de-DE", nftMeta.collection_size),
-        })
-      )
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -715,7 +698,7 @@ describe("MemePageLiveSubMenu details", () => {
     expect(onMarketChange).toHaveBeenCalledTimes(1);
   });
 
-  it("uses its parent market refresh version without duplicating actions", () => {
+  it("keeps description separate from the parent market tab and its actions", () => {
     render(
       <MemePageLiveSubMenu
         show
@@ -726,15 +709,8 @@ describe("MemePageLiveSubMenu details", () => {
     expect(
       screen.queryByRole("button", { name: "Collect artwork" })
     ).not.toBeInTheDocument();
-    expect(screen.getByTestId("market-depth")).toHaveAttribute(
-      "data-refresh-key",
-      "3"
-    );
-    expect(
-      screen
-        .getByText("d")
-        .compareDocumentPosition(screen.getByTestId("market-depth"))
-    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(screen.queryByTestId("market-depth")).not.toBeInTheDocument();
+    expect(screen.getByText("d")).toBeVisible();
   });
 
   it("renders the media type badge", () => {
@@ -751,71 +727,14 @@ describe("MemePageLiveSubMenu details", () => {
     expect(screen.getByText("Interactive - HTML")).toBeInTheDocument();
   });
 
-  it("opens additional details when the default flag changes", async () => {
-    const nft = createNft();
-    const nftMeta = createMeta();
-
-    const { rerender } = render(
-      <MemePageLiveSubMenu
-        show
-        nft={nft}
-        nftMeta={nftMeta}
-        defaultAdditionalDetailsOpen={false}
-      />
-    );
-
-    const detailsButton = screen.getByRole("button", {
-      name: /additional details/i,
-    });
-    expect(detailsButton).toHaveAttribute("aria-expanded", "false");
-    const detailsPanelId = detailsButton.getAttribute("aria-controls") ?? "";
-    expect(detailsPanelId).toBeTruthy();
-    expect(document.getElementById(detailsPanelId)).toHaveAttribute("hidden");
-    expect(
-      detailsButton.compareDocumentPosition(screen.getByTestId("market-depth"))
-    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(screen.queryByTestId("meme-page-art")).not.toBeInTheDocument();
-    fireEvent.click(detailsButton);
-    expect(detailsButton).toHaveAttribute("aria-expanded", "true");
-    expect(document.getElementById(detailsPanelId)).not.toHaveAttribute(
-      "hidden"
-    );
-    await waitFor(() =>
-      expect(screen.getByTestId("meme-page-art")).toBeInTheDocument()
-    );
-    fireEvent.click(detailsButton);
-
-    rerender(
-      <MemePageLiveSubMenu
-        show
-        nft={nft}
-        nftMeta={nftMeta}
-        defaultAdditionalDetailsOpen={true}
-      />
-    );
-
-    await waitFor(() =>
-      expect(
-        screen.getByRole("button", { name: /additional details/i })
-      ).toHaveAttribute("aria-expanded", "true")
-    );
-    expect(screen.getByTestId("meme-page-art")).toBeInTheDocument();
-  });
-
-  it("passes locale into additional details content", () => {
+  it("leaves the parent Overview responsible for artwork details", () => {
     render(
-      <MemePageLiveSubMenu
-        show
-        nft={createNft()}
-        nftMeta={createMeta()}
-        defaultAdditionalDetailsOpen={true}
-        locale="de-DE"
-      />
+      <MemePageLiveSubMenu show nft={createNft()} nftMeta={createMeta()} />
     );
-
-    expect(mockMemePageArt).toHaveBeenCalledWith(
-      expect.objectContaining({ locale: "de-DE" }),
-      undefined
-    );
+    expect(
+      screen.queryByRole("button", { name: /about this artwork/i })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("meme-page-art")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("market-depth")).not.toBeInTheDocument();
   });
 });

@@ -11,6 +11,7 @@ const SERVICE_MESSAGE = "collect.error.prepareService";
 const UNSUPPORTED_MESSAGE = "collect.error.prepareUnsupported";
 
 const LOCAL_ERRORS = new Map<string, MessageKey>([
+  ["MARKET_ORDER_EXPIRY_INVALID", "collect.trade.invalid.expiry"],
   ["MARKET_REVIEW_MISMATCH", "collect.trade.checkFailed"],
   ["MARKET_CONNECTION_CHANGED", "collect.error.prepareConnectionChanged"],
   ["MARKET_FIXED_ORDER_CHANGED", "collect.trade.exactOrderChanged"],

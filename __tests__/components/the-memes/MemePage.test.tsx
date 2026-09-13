@@ -54,6 +54,21 @@ jest.mock("@/components/the-memes/MemePageLive", () => ({
     ) : null,
 }));
 
+jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
+  __esModule: true,
+  default: ({
+    active,
+    onReveal,
+  }: {
+    readonly active: boolean;
+    readonly onReveal: () => void;
+  }) => (
+    <div data-testid="market-depth" hidden={!active}>
+      <button onClick={onReveal}>Reveal market</button>
+    </div>
+  ),
+}));
+
 jest.mock("@/components/the-memes/MemePageYourCards", () => ({
   MemePageYourCardsRightMenu: ({ show, wallets }: any) =>
     show ? (
@@ -84,8 +99,9 @@ jest.mock("@/components/the-memes/MemePageArtViewer", () => ({
 }));
 
 jest.mock("@/components/the-memes/MemePageArt", () => ({
-  MemePageArt: ({ show }: any) =>
-    show ? <div data-testid="art">Art</div> : null,
+  MemePageArt: ({ locale }: { readonly locale: string }) => (
+    <div data-testid="art-details" data-locale={locale} />
+  ),
 }));
 
 jest.mock("@/components/the-memes/MemePageReferences", () => ({
@@ -353,6 +369,7 @@ describe("MemePage tab navigation", () => {
   });
 
   it.each([
+    ["Listings & offers", MEME_FOCUS.MARKET, "market-depth"],
     ["Collectors", MEME_FOCUS.COLLECTORS, "collectors-sub"],
     ["History", MEME_FOCUS.ACTIVITY, "activity"],
     ["References", MEME_FOCUS.REFERENCES, "references-sub"],
@@ -376,10 +393,29 @@ describe("MemePage tab navigation", () => {
       page.rerenderPage();
 
       await waitFor(() => {
-        expect(screen.getByTestId(testId)).toBeInTheDocument();
+        expect(screen.getByTestId(testId)).toBeVisible();
       });
     }
   );
+
+  it("opens legacy artwork links in Overview with locale and artwork details preserved", async () => {
+    currentFocus = MEME_FOCUS.THE_ART;
+    currentLocale = "de-DE";
+    renderPage();
+    expect(await screen.findByTestId("art-details")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
+    expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+    expect(screen.getByTestId("live-sub")).toBeVisible();
+    expect(screen.getByTestId("market-depth")).not.toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Details" })
+    ).not.toBeInTheDocument();
+  });
 
   it("selects the Timeline history subtab", async () => {
     const page = renderPage();

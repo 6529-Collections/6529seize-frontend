@@ -111,7 +111,8 @@ interface CollectTradeControllerProps {
   readonly initialQuantity?: string;
   readonly initialRecipient?: string;
   readonly initialUnitPriceEth?: string;
-  readonly initialExpiryHours?: "24" | "168" | "720";
+  readonly initialExpiryHours?: "24" | "168" | "720" | "custom";
+  readonly initialExpiryDateTime?: string;
   readonly maximumOfferAmountWei?: string;
   readonly fixedOfferQuantity?: string;
   readonly cancelTarget?: ApiMarketOperation;
@@ -151,6 +152,7 @@ export default function CollectTradeController(
           props.initialRecipient,
           props.initialUnitPriceEth,
           props.initialExpiryHours,
+          props.initialExpiryDateTime,
           props.maximumOfferAmountWei,
           props.fixedOfferQuantity,
           props.fixedOrder,
@@ -179,6 +181,7 @@ function CollectTradeControllerContent({
   initialRecipient,
   initialUnitPriceEth,
   initialExpiryHours,
+  initialExpiryDateTime,
   maximumOfferAmountWei,
   fixedOfferQuantity,
   cancelTarget,
@@ -246,6 +249,7 @@ function CollectTradeControllerContent({
     initialRecipient,
     initialUnitPriceEth,
     initialExpiryHours,
+    initialExpiryDateTime,
     profile: connectedProfile,
     wallet: connection.address,
   });

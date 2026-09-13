@@ -10,6 +10,12 @@ export * from '../models/ApiAggregatedActivityMemes';
 export * from '../models/ApiAggregatedActivityPage';
 export * from '../models/ApiArchiveProfileCmsPackageRequest';
 export * from '../models/ApiArtistNameItem';
+export * from '../models/ApiArtworkAssetC2paResult';
+export * from '../models/ApiArtworkAssetFormatIdentification';
+export * from '../models/ApiArtworkAssetTechnicalMetadata';
+export * from '../models/ApiArtworkAssetTechnicalMetadataArchive';
+export * from '../models/ApiArtworkAssetTechnicalMetadataArchiveInventoryInner';
+export * from '../models/ApiArtworkAssetTechnicalMetadataPropertiesValue';
 export * from '../models/ApiArtworkDocumentationAnswer';
 export * from '../models/ApiArtworkDocumentationAsset';
 export * from '../models/ApiArtworkDocumentationAssetLink';
@@ -43,6 +49,7 @@ export * from '../models/ApiArtworkDocumentationIdBody';
 export * from '../models/ApiArtworkDocumentationInterviewInstrument';
 export * from '../models/ApiArtworkDocumentationInterviewPrompt';
 export * from '../models/ApiArtworkDocumentationLifecycleRequest';
+export * from '../models/ApiArtworkDocumentationMediaProfile';
 export * from '../models/ApiArtworkDocumentationModule';
 export * from '../models/ApiArtworkDocumentationOperation';
 export * from '../models/ApiArtworkDocumentationPatchModule';
@@ -51,6 +58,8 @@ export * from '../models/ApiArtworkDocumentationPreviewModule';
 export * from '../models/ApiArtworkDocumentationProfile';
 export * from '../models/ApiArtworkDocumentationProfileModule';
 export * from '../models/ApiArtworkDocumentationProfilesResponse';
+export * from '../models/ApiArtworkDocumentationProgramRules';
+export * from '../models/ApiArtworkDocumentationProgramRulesFixedArtworkLicense';
 export * from '../models/ApiArtworkDocumentationPublicPreview';
 export * from '../models/ApiArtworkDocumentationReceivedPart';
 export * from '../models/ApiArtworkDocumentationReview';
@@ -78,6 +87,17 @@ export * from '../models/ApiArtworkDocumentationUploadPart';
 export * from '../models/ApiArtworkDocumentationUploadSession';
 export * from '../models/ApiArtworkDocumentationValueSchema';
 export * from '../models/ApiArtworkDocumentationWork';
+export * from '../models/ApiArtworkDossier';
+export * from '../models/ApiArtworkDossierExport';
+export * from '../models/ApiArtworkDossierExportRequest';
+export * from '../models/ApiArtworkDossierFile';
+export * from '../models/ApiArtworkDossierIssue';
+export * from '../models/ApiArtworkMuseumRecord';
+export * from '../models/ApiArtworkMuseumRecordDefinition';
+export * from '../models/ApiArtworkMuseumRecordInput';
+export * from '../models/ApiArtworkMuseumRecordPayload';
+export * from '../models/ApiArtworkMuseumRecordPayloadEvidenceInner';
+export * from '../models/ApiArtworkMuseumRecords';
 export * from '../models/ApiAttachment';
 export * from '../models/ApiAttachmentKind';
 export * from '../models/ApiAttachmentSafety';
@@ -130,6 +150,10 @@ export * from '../models/ApiCollectCapabilities';
 export * from '../models/ApiCollectCapability';
 export * from '../models/ApiCollectCatalog';
 export * from '../models/ApiCollectCatalogTdhSnapshot';
+export * from '../models/ApiCollectDailyTdhPersonalEffects';
+export * from '../models/ApiCollectDailyTdhPlan';
+export * from '../models/ApiCollectDailyTdhRequest';
+export * from '../models/ApiCollectDailyTdhSearch';
 export * from '../models/ApiCollectFacet';
 export * from '../models/ApiCollectFamily';
 export * from '../models/ApiCollectHolding';
@@ -486,6 +510,16 @@ export * from '../models/ApiMintingClaimActionUpdateRequest';
 export * from '../models/ApiMintingClaimActionsResponse';
 export * from '../models/ApiMintingClaimsPhaseTotalItem';
 export * from '../models/ApiModeratedProfileStatus';
+export * from '../models/ApiModerationAccess';
+export * from '../models/ApiModerationAction';
+export * from '../models/ApiModerationActionRequest';
+export * from '../models/ApiModerationAudit';
+export * from '../models/ApiModerationCheck';
+export * from '../models/ApiModerationCheckDetail';
+export * from '../models/ApiModerationCheckPage';
+export * from '../models/ApiModerationCounts';
+export * from '../models/ApiModerationCurrentState';
+export * from '../models/ApiModerationEvaluation';
 export * from '../models/ApiNft';
 export * from '../models/ApiNftActivityEvent';
 export * from '../models/ApiNftActivityPage';
@@ -836,8 +870,14 @@ import { ApiAggregatedActivityMemes } from '../models/ApiAggregatedActivityMemes
 import { ApiAggregatedActivityPage } from '../models/ApiAggregatedActivityPage';
 import { ApiArchiveProfileCmsPackageRequest } from '../models/ApiArchiveProfileCmsPackageRequest';
 import { ApiArtistNameItem } from '../models/ApiArtistNameItem';
+import { ApiArtworkAssetC2paResult, ApiArtworkAssetC2paResultStatusEnum        , ApiArtworkAssetC2paResultTrustEnum      , ApiArtworkAssetC2paResultIntegrityEnum   } from '../models/ApiArtworkAssetC2paResult';
+import { ApiArtworkAssetFormatIdentification, ApiArtworkAssetFormatIdentificationStatusEnum       , ApiArtworkAssetFormatIdentificationIdentificationScopeEnum   } from '../models/ApiArtworkAssetFormatIdentification';
+import { ApiArtworkAssetTechnicalMetadata , ApiArtworkAssetTechnicalMetadataCharacterizationEnum            } from '../models/ApiArtworkAssetTechnicalMetadata';
+import { ApiArtworkAssetTechnicalMetadataArchive } from '../models/ApiArtworkAssetTechnicalMetadataArchive';
+import { ApiArtworkAssetTechnicalMetadataArchiveInventoryInner } from '../models/ApiArtworkAssetTechnicalMetadataArchiveInventoryInner';
+import { ApiArtworkAssetTechnicalMetadataPropertiesValueClass } from '../models/ApiArtworkAssetTechnicalMetadataPropertiesValue';
 import { ApiArtworkDocumentationAnswer, ApiArtworkDocumentationAnswerStatusEnum    , ApiArtworkDocumentationAnswerIntendedVisibilityEnum    } from '../models/ApiArtworkDocumentationAnswer';
-import { ApiArtworkDocumentationAsset               , ApiArtworkDocumentationAssetAccessClassEnum    } from '../models/ApiArtworkDocumentationAsset';
+import { ApiArtworkDocumentationAsset               , ApiArtworkDocumentationAssetAccessClassEnum       } from '../models/ApiArtworkDocumentationAsset';
 import { ApiArtworkDocumentationAssetLink } from '../models/ApiArtworkDocumentationAssetLink';
 import { ApiArtworkDocumentationAssetLinkRequest } from '../models/ApiArtworkDocumentationAssetLinkRequest';
 import { ApiArtworkDocumentationAssetResponse } from '../models/ApiArtworkDocumentationAssetResponse';
@@ -861,7 +901,7 @@ import { ApiArtworkDocumentationCreateWork    , ApiArtworkDocumentationCreateWor
 import { ApiArtworkDocumentationDownloadRequest, ApiArtworkDocumentationDownloadRequestVariantEnum   } from '../models/ApiArtworkDocumentationDownloadRequest';
 import { ApiArtworkDocumentationDownloadResponse } from '../models/ApiArtworkDocumentationDownloadResponse';
 import { ApiArtworkDocumentationEmptyResponse } from '../models/ApiArtworkDocumentationEmptyResponse';
-import { ApiArtworkDocumentationField } from '../models/ApiArtworkDocumentationField';
+import { ApiArtworkDocumentationField    , ApiArtworkDocumentationFieldEditorEnum          } from '../models/ApiArtworkDocumentationField';
 import { ApiArtworkDocumentationGrant } from '../models/ApiArtworkDocumentationGrant';
 import { ApiArtworkDocumentationGrantRequest } from '../models/ApiArtworkDocumentationGrantRequest';
 import { ApiArtworkDocumentationGrantsResponse } from '../models/ApiArtworkDocumentationGrantsResponse';
@@ -869,14 +909,17 @@ import { ApiArtworkDocumentationIdBody } from '../models/ApiArtworkDocumentation
 import { ApiArtworkDocumentationInterviewInstrument } from '../models/ApiArtworkDocumentationInterviewInstrument';
 import { ApiArtworkDocumentationInterviewPrompt } from '../models/ApiArtworkDocumentationInterviewPrompt';
 import { ApiArtworkDocumentationLifecycleRequest, ApiArtworkDocumentationLifecycleRequestLifecycleEnum   } from '../models/ApiArtworkDocumentationLifecycleRequest';
+import { ApiArtworkDocumentationMediaProfile } from '../models/ApiArtworkDocumentationMediaProfile';
 import { ApiArtworkDocumentationModule } from '../models/ApiArtworkDocumentationModule';
 import { ApiArtworkDocumentationOperation, ApiArtworkDocumentationOperationOpEnum     } from '../models/ApiArtworkDocumentationOperation';
 import { ApiArtworkDocumentationPatchModule } from '../models/ApiArtworkDocumentationPatchModule';
 import { ApiArtworkDocumentationPatchThread } from '../models/ApiArtworkDocumentationPatchThread';
 import { ApiArtworkDocumentationPreviewModule } from '../models/ApiArtworkDocumentationPreviewModule';
-import { ApiArtworkDocumentationProfile, ApiArtworkDocumentationProfileIntakeModeEnum       , ApiArtworkDocumentationProfileReviewLanesEnum            } from '../models/ApiArtworkDocumentationProfile';
+import { ApiArtworkDocumentationProfile  , ApiArtworkDocumentationProfileIntakeModeEnum       , ApiArtworkDocumentationProfileReviewLanesEnum            } from '../models/ApiArtworkDocumentationProfile';
 import { ApiArtworkDocumentationProfileModule, ApiArtworkDocumentationProfileModuleIdEnum     } from '../models/ApiArtworkDocumentationProfileModule';
 import { ApiArtworkDocumentationProfilesResponse } from '../models/ApiArtworkDocumentationProfilesResponse';
+import { ApiArtworkDocumentationProgramRules } from '../models/ApiArtworkDocumentationProgramRules';
+import { ApiArtworkDocumentationProgramRulesFixedArtworkLicense } from '../models/ApiArtworkDocumentationProgramRulesFixedArtworkLicense';
 import { ApiArtworkDocumentationPublicPreview } from '../models/ApiArtworkDocumentationPublicPreview';
 import { ApiArtworkDocumentationReceivedPart } from '../models/ApiArtworkDocumentationReceivedPart';
 import { ApiArtworkDocumentationReview , ApiArtworkDocumentationReviewLaneEnum   , ApiArtworkDocumentationReviewStatusEnum      } from '../models/ApiArtworkDocumentationReview';
@@ -904,6 +947,17 @@ import { ApiArtworkDocumentationUploadPart } from '../models/ApiArtworkDocumenta
 import { ApiArtworkDocumentationUploadSession } from '../models/ApiArtworkDocumentationUploadSession';
 import { ApiArtworkDocumentationValueSchema } from '../models/ApiArtworkDocumentationValueSchema';
 import { ApiArtworkDocumentationWork } from '../models/ApiArtworkDocumentationWork';
+import { ApiArtworkDossier   , ApiArtworkDossierConfirmationEnum     , ApiArtworkDossierPublicationStateEnum   } from '../models/ApiArtworkDossier';
+import { ApiArtworkDossierExport   , ApiArtworkDossierExportStateEnum         } from '../models/ApiArtworkDossierExport';
+import { ApiArtworkDossierExportRequest } from '../models/ApiArtworkDossierExportRequest';
+import { ApiArtworkDossierFile } from '../models/ApiArtworkDossierFile';
+import { ApiArtworkDossierIssue  , ApiArtworkDossierIssueSeverityEnum    } from '../models/ApiArtworkDossierIssue';
+import { ApiArtworkMuseumRecord } from '../models/ApiArtworkMuseumRecord';
+import { ApiArtworkMuseumRecordDefinition   , ApiArtworkMuseumRecordDefinitionLaneEnum     } from '../models/ApiArtworkMuseumRecordDefinition';
+import { ApiArtworkMuseumRecordInput   , ApiArtworkMuseumRecordInputEventStatusEnum        } from '../models/ApiArtworkMuseumRecordInput';
+import { ApiArtworkMuseumRecordPayload   , ApiArtworkMuseumRecordPayloadEventStatusEnum         , ApiArtworkMuseumRecordPayloadRecordingBasisEnum   } from '../models/ApiArtworkMuseumRecordPayload';
+import { ApiArtworkMuseumRecordPayloadEvidenceInner } from '../models/ApiArtworkMuseumRecordPayloadEvidenceInner';
+import { ApiArtworkMuseumRecords } from '../models/ApiArtworkMuseumRecords';
 import { ApiAttachment         } from '../models/ApiAttachment';
 import { ApiAttachmentKind } from '../models/ApiAttachmentKind';
 import { ApiAttachmentSafety      } from '../models/ApiAttachmentSafety';
@@ -956,6 +1010,10 @@ import { ApiCollectCapabilities  , ApiCollectCapabilitiesProfileScopeEnum     , 
 import { ApiCollectCapability, ApiCollectCapabilityActionEnum     } from '../models/ApiCollectCapability';
 import { ApiCollectCatalog } from '../models/ApiCollectCatalog';
 import { ApiCollectCatalogTdhSnapshot } from '../models/ApiCollectCatalogTdhSnapshot';
+import { ApiCollectDailyTdhPersonalEffects } from '../models/ApiCollectDailyTdhPersonalEffects';
+import { ApiCollectDailyTdhPlan  , ApiCollectDailyTdhPlanStatusEnum                     } from '../models/ApiCollectDailyTdhPlan';
+import { ApiCollectDailyTdhRequest   , ApiCollectDailyTdhRequestModeEnum     } from '../models/ApiCollectDailyTdhRequest';
+import { ApiCollectDailyTdhSearch  , ApiCollectDailyTdhSearchStopReasonEnum  , ApiCollectDailyTdhSearchOptimalityEnum   } from '../models/ApiCollectDailyTdhSearch';
 import { ApiCollectFacet, ApiCollectFacetTraitEnum    } from '../models/ApiCollectFacet';
 import { ApiCollectFamily } from '../models/ApiCollectFamily';
 import { ApiCollectHolding } from '../models/ApiCollectHolding';
@@ -1293,7 +1351,7 @@ import { ApiMediaResolveRequest } from '../models/ApiMediaResolveRequest';
 import { ApiMediaResolveResponse } from '../models/ApiMediaResolveResponse';
 import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
 import { ApiMemeCardDropMapping } from '../models/ApiMemeCardDropMapping';
-import { ApiMemesExtendedData                             , ApiMemesExtendedDataTokenTypeEnum                               } from '../models/ApiMemesExtendedData';
+import { ApiMemesExtendedData                                   , ApiMemesExtendedDataTokenTypeEnum                               } from '../models/ApiMemesExtendedData';
 import { ApiMemesExtendedDataPage } from '../models/ApiMemesExtendedDataPage';
 import { ApiMemesMintStat } from '../models/ApiMemesMintStat';
 import { ApiMemesMintStatsPage } from '../models/ApiMemesMintStatsPage';
@@ -1312,6 +1370,16 @@ import { ApiMintingClaimActionUpdateRequest } from '../models/ApiMintingClaimAct
 import { ApiMintingClaimActionsResponse } from '../models/ApiMintingClaimActionsResponse';
 import { ApiMintingClaimsPhaseTotalItem } from '../models/ApiMintingClaimsPhaseTotalItem';
 import { ApiModeratedProfileStatus } from '../models/ApiModeratedProfileStatus';
+import { ApiModerationAccess } from '../models/ApiModerationAccess';
+import { ApiModerationAction } from '../models/ApiModerationAction';
+import { ApiModerationActionRequest     } from '../models/ApiModerationActionRequest';
+import { ApiModerationAudit } from '../models/ApiModerationAudit';
+import { ApiModerationCheck , ApiModerationCheckSubjectTypeEnum      , ApiModerationCheckPolicyFamilyEnum     , ApiModerationCheckOutcomeEnum   , ApiModerationCheckReviewStatusEnum  , ApiModerationCheckOverrideEnum            } from '../models/ApiModerationCheck';
+import { ApiModerationCheckDetail       , ApiModerationCheckDetailActionEffectEnum    } from '../models/ApiModerationCheckDetail';
+import { ApiModerationCheckPage } from '../models/ApiModerationCheckPage';
+import { ApiModerationCounts } from '../models/ApiModerationCounts';
+import { ApiModerationCurrentState, ApiModerationCurrentStateProfileStatusEnum  , ApiModerationCurrentStateDropStatusEnum      } from '../models/ApiModerationCurrentState';
+import { ApiModerationEvaluation    , ApiModerationEvaluationOutcomeEnum           } from '../models/ApiModerationEvaluation';
 import { ApiNft      , ApiNftTokenTypeEnum                               } from '../models/ApiNft';
 import { ApiNftActivityEvent , ApiNftActivityEventKindEnum                   } from '../models/ApiNftActivityEvent';
 import { ApiNftActivityPage } from '../models/ApiNftActivityPage';
@@ -1665,6 +1733,12 @@ let primitives = [
 
 let enumsMap: Set<string> = new Set<string>([
     "AcceptActionRequestActionEnum",
+    "ApiArtworkAssetC2paResultStatusEnum",
+    "ApiArtworkAssetC2paResultTrustEnum",
+    "ApiArtworkAssetC2paResultIntegrityEnum",
+    "ApiArtworkAssetFormatIdentificationStatusEnum",
+    "ApiArtworkAssetFormatIdentificationIdentificationScopeEnum",
+    "ApiArtworkAssetTechnicalMetadataCharacterizationEnum",
     "ApiArtworkDocumentationAnswerStatusEnum",
     "ApiArtworkDocumentationAnswerIntendedVisibilityEnum",
     "ApiArtworkDocumentationAssetAccessClassEnum",
@@ -1678,6 +1752,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiArtworkDocumentationCreateThreadRestrictedClassEnum",
     "ApiArtworkDocumentationCreateWorkStartModeEnum",
     "ApiArtworkDocumentationDownloadRequestVariantEnum",
+    "ApiArtworkDocumentationFieldEditorEnum",
     "ApiArtworkDocumentationLifecycleRequestLifecycleEnum",
     "ApiArtworkDocumentationOperationOpEnum",
     "ApiArtworkDocumentationProfileIntakeModeEnum",
@@ -1688,6 +1763,14 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiArtworkDocumentationReviewRequestStatusEnum",
     "ApiArtworkDocumentationThreadAudienceEnum",
     "ApiArtworkDocumentationThreadRestrictedClassEnum",
+    "ApiArtworkDossierConfirmationEnum",
+    "ApiArtworkDossierPublicationStateEnum",
+    "ApiArtworkDossierExportStateEnum",
+    "ApiArtworkDossierIssueSeverityEnum",
+    "ApiArtworkMuseumRecordDefinitionLaneEnum",
+    "ApiArtworkMuseumRecordInputEventStatusEnum",
+    "ApiArtworkMuseumRecordPayloadEventStatusEnum",
+    "ApiArtworkMuseumRecordPayloadRecordingBasisEnum",
     "ApiAttachmentKind",
     "ApiAttachmentSafetyScanner",
     "ApiAttachmentSafetyStatus",
@@ -1705,6 +1788,10 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCollectCapabilitiesProfileScopeEnum",
     "ApiCollectCapabilitiesCreatorFeesEnum",
     "ApiCollectCapabilityActionEnum",
+    "ApiCollectDailyTdhPlanStatusEnum",
+    "ApiCollectDailyTdhRequestModeEnum",
+    "ApiCollectDailyTdhSearchStopReasonEnum",
+    "ApiCollectDailyTdhSearchOptimalityEnum",
     "ApiCollectFacetTraitEnum",
     "ApiCollectFamily",
     "ApiCollectKind",
@@ -1805,6 +1892,16 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiMediaUploadMimeType",
     "ApiMemesExtendedDataTokenTypeEnum",
     "ApiModeratedProfileStatus",
+    "ApiModerationAction",
+    "ApiModerationCheckSubjectTypeEnum",
+    "ApiModerationCheckPolicyFamilyEnum",
+    "ApiModerationCheckOutcomeEnum",
+    "ApiModerationCheckReviewStatusEnum",
+    "ApiModerationCheckOverrideEnum",
+    "ApiModerationCheckDetailActionEffectEnum",
+    "ApiModerationCurrentStateProfileStatusEnum",
+    "ApiModerationCurrentStateDropStatusEnum",
+    "ApiModerationEvaluationOutcomeEnum",
     "ApiNftTokenTypeEnum",
     "ApiNftActivityEventKindEnum",
     "ApiNftLinkMediaPreviewStatusEnum",
@@ -1911,6 +2008,12 @@ let typeMap: {[index: string]: any} = {
     "ApiAggregatedActivityPage": ApiAggregatedActivityPage,
     "ApiArchiveProfileCmsPackageRequest": ApiArchiveProfileCmsPackageRequest,
     "ApiArtistNameItem": ApiArtistNameItem,
+    "ApiArtworkAssetC2paResult": ApiArtworkAssetC2paResult,
+    "ApiArtworkAssetFormatIdentification": ApiArtworkAssetFormatIdentification,
+    "ApiArtworkAssetTechnicalMetadata": ApiArtworkAssetTechnicalMetadata,
+    "ApiArtworkAssetTechnicalMetadataArchive": ApiArtworkAssetTechnicalMetadataArchive,
+    "ApiArtworkAssetTechnicalMetadataArchiveInventoryInner": ApiArtworkAssetTechnicalMetadataArchiveInventoryInner,
+    "ApiArtworkAssetTechnicalMetadataPropertiesValue": ApiArtworkAssetTechnicalMetadataPropertiesValueClass,
     "ApiArtworkDocumentationAnswer": ApiArtworkDocumentationAnswer,
     "ApiArtworkDocumentationAsset": ApiArtworkDocumentationAsset,
     "ApiArtworkDocumentationAssetLink": ApiArtworkDocumentationAssetLink,
@@ -1944,6 +2047,7 @@ let typeMap: {[index: string]: any} = {
     "ApiArtworkDocumentationInterviewInstrument": ApiArtworkDocumentationInterviewInstrument,
     "ApiArtworkDocumentationInterviewPrompt": ApiArtworkDocumentationInterviewPrompt,
     "ApiArtworkDocumentationLifecycleRequest": ApiArtworkDocumentationLifecycleRequest,
+    "ApiArtworkDocumentationMediaProfile": ApiArtworkDocumentationMediaProfile,
     "ApiArtworkDocumentationModule": ApiArtworkDocumentationModule,
     "ApiArtworkDocumentationOperation": ApiArtworkDocumentationOperation,
     "ApiArtworkDocumentationPatchModule": ApiArtworkDocumentationPatchModule,
@@ -1952,6 +2056,8 @@ let typeMap: {[index: string]: any} = {
     "ApiArtworkDocumentationProfile": ApiArtworkDocumentationProfile,
     "ApiArtworkDocumentationProfileModule": ApiArtworkDocumentationProfileModule,
     "ApiArtworkDocumentationProfilesResponse": ApiArtworkDocumentationProfilesResponse,
+    "ApiArtworkDocumentationProgramRules": ApiArtworkDocumentationProgramRules,
+    "ApiArtworkDocumentationProgramRulesFixedArtworkLicense": ApiArtworkDocumentationProgramRulesFixedArtworkLicense,
     "ApiArtworkDocumentationPublicPreview": ApiArtworkDocumentationPublicPreview,
     "ApiArtworkDocumentationReceivedPart": ApiArtworkDocumentationReceivedPart,
     "ApiArtworkDocumentationReview": ApiArtworkDocumentationReview,
@@ -1979,6 +2085,17 @@ let typeMap: {[index: string]: any} = {
     "ApiArtworkDocumentationUploadSession": ApiArtworkDocumentationUploadSession,
     "ApiArtworkDocumentationValueSchema": ApiArtworkDocumentationValueSchema,
     "ApiArtworkDocumentationWork": ApiArtworkDocumentationWork,
+    "ApiArtworkDossier": ApiArtworkDossier,
+    "ApiArtworkDossierExport": ApiArtworkDossierExport,
+    "ApiArtworkDossierExportRequest": ApiArtworkDossierExportRequest,
+    "ApiArtworkDossierFile": ApiArtworkDossierFile,
+    "ApiArtworkDossierIssue": ApiArtworkDossierIssue,
+    "ApiArtworkMuseumRecord": ApiArtworkMuseumRecord,
+    "ApiArtworkMuseumRecordDefinition": ApiArtworkMuseumRecordDefinition,
+    "ApiArtworkMuseumRecordInput": ApiArtworkMuseumRecordInput,
+    "ApiArtworkMuseumRecordPayload": ApiArtworkMuseumRecordPayload,
+    "ApiArtworkMuseumRecordPayloadEvidenceInner": ApiArtworkMuseumRecordPayloadEvidenceInner,
+    "ApiArtworkMuseumRecords": ApiArtworkMuseumRecords,
     "ApiAttachment": ApiAttachment,
     "ApiAttachmentSafety": ApiAttachmentSafety,
     "ApiAuthSettings": ApiAuthSettings,
@@ -2024,6 +2141,10 @@ let typeMap: {[index: string]: any} = {
     "ApiCollectCapability": ApiCollectCapability,
     "ApiCollectCatalog": ApiCollectCatalog,
     "ApiCollectCatalogTdhSnapshot": ApiCollectCatalogTdhSnapshot,
+    "ApiCollectDailyTdhPersonalEffects": ApiCollectDailyTdhPersonalEffects,
+    "ApiCollectDailyTdhPlan": ApiCollectDailyTdhPlan,
+    "ApiCollectDailyTdhRequest": ApiCollectDailyTdhRequest,
+    "ApiCollectDailyTdhSearch": ApiCollectDailyTdhSearch,
     "ApiCollectFacet": ApiCollectFacet,
     "ApiCollectHolding": ApiCollectHolding,
     "ApiCollectOfferAnalysis": ApiCollectOfferAnalysis,
@@ -2344,6 +2465,15 @@ let typeMap: {[index: string]: any} = {
     "ApiMintingClaimActionUpdateRequest": ApiMintingClaimActionUpdateRequest,
     "ApiMintingClaimActionsResponse": ApiMintingClaimActionsResponse,
     "ApiMintingClaimsPhaseTotalItem": ApiMintingClaimsPhaseTotalItem,
+    "ApiModerationAccess": ApiModerationAccess,
+    "ApiModerationActionRequest": ApiModerationActionRequest,
+    "ApiModerationAudit": ApiModerationAudit,
+    "ApiModerationCheck": ApiModerationCheck,
+    "ApiModerationCheckDetail": ApiModerationCheckDetail,
+    "ApiModerationCheckPage": ApiModerationCheckPage,
+    "ApiModerationCounts": ApiModerationCounts,
+    "ApiModerationCurrentState": ApiModerationCurrentState,
+    "ApiModerationEvaluation": ApiModerationEvaluation,
     "ApiNft": ApiNft,
     "ApiNftActivityEvent": ApiNftActivityEvent,
     "ApiNftActivityPage": ApiNftActivityPage,

@@ -1,0 +1,379 @@
+{
+  "pages": [
+    {
+      "slug": "home",
+      "title": "JPG PEOPLE.",
+      "description": "An eight-page, single-sheet zine with three CC0 works and members' notes. Issue one includes the complete artworks, a drawing spread and links to every source record.",
+      "navigation": true,
+      "blocks": [
+        {
+          "id": "meme-v2-home-001",
+          "block_type": "heading",
+          "text": "JPG PEOPLE.",
+          "level": 1,
+          "presentation": {
+            "span": "full",
+            "role": "hero",
+            "variant": "hero",
+            "group": "meme-v2-home-group-1"
+          }
+        },
+        {
+          "id": "meme-v2-home-002",
+          "block_type": "rich_text",
+          "content": "Art we collect, projects we make, and notes from the group.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "hero",
+            "group": "meme-v2-home-group-2"
+          }
+        },
+        {
+          "id": "meme-v2-home-003",
+          "block_type": "image",
+          "asset_id": "meme-1",
+          "title": "6529Seizing",
+          "caption": "6529Seizing 6529er · CC0 artwork OPEN THE CARD ↗",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "artwork"
+          }
+        },
+        {
+          "id": "meme-v2-home-004",
+          "block_type": "button_link",
+          "label": "OPEN THE CARD ↗",
+          "href": "https://6529.io/the-memes/1",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "meme-v2-home-005",
+          "block_type": "heading",
+          "text": "Club selection.",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "meme-v2-home-group-3"
+          }
+        },
+        {
+          "id": "meme-v2-home-006",
+          "block_type": "rich_text",
+          "content": "September 2026 Selected for issue one",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "meme-v2-home-group-3"
+          }
+        },
+        {
+          "id": "meme-v2-home-007",
+          "block_type": "gallery",
+          "asset_ids": ["meme-2", "meme-52", "meme-103"],
+          "items": [
+            {
+              "asset_id": "meme-2",
+              "title": "SeizeJPGs",
+              "subtitle": "6529er · The Memes #2 · Jo's cover choice for issue one. We're keeping the full poster and placing the credit beneath it; the club title belongs on the facing panel."
+            },
+            {
+              "asset_id": "meme-52",
+              "title": "MEME FACTORY",
+              "subtitle": "Grant Riven Yun · The Memes #52 · Sam paired this with SeizeJPGs: two treatments of the same slogan by different artists. That comparison will open our September discussion."
+            },
+            {
+              "asset_id": "meme-103",
+              "title": "Don't Trust, Check.",
+              "subtitle": "Jack Butcher · The Memes #103 · Mina chose this after our discussion about verification badges. Her note asks what a badge proves, and what still needs checking."
+            }
+          ],
+          "searchable": false,
+          "display_modes": ["grid"],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "gallery",
+            "group": "meme-v2-home-group-3"
+          }
+        },
+        {
+          "id": "meme-v2-home-008",
+          "block_type": "rich_text",
+          "content": "Club project 01 · In production",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "meme-v2-home-group-4"
+          }
+        },
+        {
+          "id": "meme-v2-home-009",
+          "block_type": "heading",
+          "text": "Small print.",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "meme-v2-home-group-4"
+          }
+        },
+        {
+          "id": "meme-v2-home-010",
+          "block_type": "rich_text",
+          "content": "An eight-page, single-sheet zine with three CC0 works and members' notes. Issue one includes the complete artworks, a drawing spread and links to every source record.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "meme-v2-home-group-4"
+          }
+        },
+        {
+          "id": "meme-v2-home-011",
+          "block_type": "rich_text",
+          "content": "Jo is editing the layout and Mina is preparing a folded proof. We'll review it at the September workshop before printing copies for the group.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "meme-v2-home-group-4"
+          }
+        },
+        {
+          "id": "meme-v2-home-012",
+          "block_type": "callout",
+          "title": "See the page plan",
+          "content": "Cover: title and SeizeJPGs by 6529er.\n\nPages 2–3: MEME FACTORY and a group note.\n\nPages 4–5: Don't Trust, Check. and Mina's note.\n\nPages 6–7: a blank spread for a reader's drawing.\n\nBack cover: all artist credits and work-record links.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "meme-v2-home-group-4"
+          }
+        },
+        {
+          "id": "meme-v2-home-013",
+          "block_type": "image",
+          "asset_id": "meme-2",
+          "title": "SeizeJPGs by 6529er, shown in the club's example zine cover layout.",
+          "caption": "Cover artwork: SeizeJPGs / 6529er / CC0",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "project",
+            "group": "meme-v2-home-group-4"
+          }
+        },
+        {
+          "id": "meme-v2-home-014",
+          "block_type": "rich_text",
+          "content": "Saturday · 26 September · Online",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "meme-v2-home-group-5"
+          }
+        },
+        {
+          "id": "meme-v2-home-015",
+          "block_type": "heading",
+          "text": "Zine workshop.",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "meme-v2-home-group-5"
+          }
+        },
+        {
+          "id": "meme-v2-home-016",
+          "block_type": "rich_text",
+          "content": "10:00–12:00 UTC Bring an A4 printout, scissors and a cutting mat. We'll assemble the first issue and review the proofs; observers are welcome.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "meme-v2-home-group-5"
+          }
+        },
+        {
+          "id": "meme-v2-home-017",
+          "block_type": "callout",
+          "title": "",
+          "content": "10:00: Discuss the selection Members introduce their choices and notes for issue one.\n10:25: Print and fold Check page order, colour and legibility in the folded proof.\n11:30: Review the proofs Agree on revisions and assign the remaining layout work.",
+          "rows": [
+            {
+              "label": "10:00",
+              "value": "Discuss the selection Members introduce their choices and notes for issue one."
+            },
+            {
+              "label": "10:25",
+              "value": "Print and fold Check page order, colour and legibility in the folded proof."
+            },
+            {
+              "label": "11:30",
+              "value": "Review the proofs Agree on revisions and assign the remaining layout work."
+            }
+          ],
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "schedule",
+            "group": "meme-v2-home-group-5"
+          }
+        },
+        {
+          "id": "meme-v2-home-018",
+          "block_type": "heading",
+          "text": "About the club.",
+          "level": 2,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "meme-v2-home-group-6"
+          }
+        },
+        {
+          "id": "meme-v2-home-019",
+          "block_type": "rich_text",
+          "content": "JPG People is a monthly discussion group for digital art collectors. Between sessions, we publish members' notes and make print editions using CC0 artwork.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "meme-v2-home-group-6"
+          }
+        },
+        {
+          "id": "meme-v2-home-020",
+          "block_type": "rich_text",
+          "content": "Jo Pages & layout",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "meme-v2-home-group-6"
+          }
+        },
+        {
+          "id": "meme-v2-home-021",
+          "block_type": "rich_text",
+          "content": "Mina Print & paper",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "meme-v2-home-group-6"
+          }
+        },
+        {
+          "id": "meme-v2-home-022",
+          "block_type": "rich_text",
+          "content": "Sam Artwork notes",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro",
+            "group": "meme-v2-home-group-6"
+          }
+        },
+        {
+          "id": "meme-v2-home-023",
+          "block_type": "callout",
+          "title": "Come to a session",
+          "content": "Email us to join the September workshop. We'll send the meeting link and print file; please mention any access requirements.\n\nhello@example.org ↗\n\nExample club contact. No registration is submitted by this page.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note",
+            "group": "meme-v2-home-group-6"
+          }
+        },
+        {
+          "id": "meme-v2-home-024",
+          "block_type": "callout",
+          "title": "hello@example.org ↗",
+          "email": "hello@example.org",
+          "content": "",
+          "subject": "Enquiry",
+          "form": false,
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "contact",
+            "group": "meme-v2-home-group-6"
+          }
+        },
+        {
+          "id": "meme-v2-home-025",
+          "block_type": "rich_text",
+          "content": "THE MEMES · CC0 · INDIVIDUAL ART CREDITS ABOVE",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          }
+        },
+        {
+          "id": "meme-v2-home-026",
+          "block_type": "button_link",
+          "label": "BACK TO THE JPG ↑",
+          "page_id": "page-home",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "intro"
+          },
+          "block_id": "meme-v2-home-003"
+        },
+        {
+          "id": "meme-v2-example-disclosure",
+          "block_type": "rich_text",
+          "content": "JPG People is a fictional art club. Projects and programme are sample content.",
+          "presentation": {
+            "span": "full",
+            "role": "body",
+            "variant": "note"
+          }
+        }
+      ],
+      "navigationLabel": "JPG PEOPLE."
+    }
+  ],
+  "navigation": [
+    {
+      "label": "ART",
+      "pageSlug": "home",
+      "blockId": "meme-v2-home-005"
+    },
+    {
+      "label": "PROJECT",
+      "pageSlug": "home",
+      "blockId": "meme-v2-home-008"
+    },
+    {
+      "label": "MEETUP",
+      "pageSlug": "home",
+      "blockId": "meme-v2-home-014"
+    },
+    {
+      "label": "THE CLUB",
+      "pageSlug": "home",
+      "blockId": "meme-v2-home-018"
+    }
+  ]
+}

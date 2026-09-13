@@ -13,6 +13,8 @@ import { useEffect, useRef, useState } from "react";
 import { formatEther } from "viem";
 import CollectTradeController from "./CollectTradeController";
 import OfferPlanPanel from "./OfferPlanPanel";
+import CollectAssetMedia from "./CollectAssetMedia";
+import marketplaceFont from "./marketplace-font.module.css";
 import { analyzeCollectOffers } from "./analyze-collect-offers";
 import { collectProfileWallets } from "./collect-recipient.helpers";
 import type {
@@ -34,7 +36,7 @@ interface Commitment {
   readonly published: boolean;
 }
 type ReviewedOffer = Omit<OfferPlanReview, "expiryHours"> & {
-  readonly expiryHours: "24" | "168" | "720";
+  readonly expiryHours: "24" | "168" | "720" | "custom";
 };
 
 const PENDING_PAGE_SIZE = 8;
@@ -61,6 +63,7 @@ function OfferWorkspace({
   strategySessionKey,
   blended,
   buyOptions,
+  buyObservedAt,
   buyLockedAssetKeys,
   onReviewBuys,
 }: Props) {
@@ -135,7 +138,7 @@ function OfferWorkspace({
         locale,
         blended === true ? "collect.blend.title" : "collect.offerPlan.title"
       )}
-      className="tw-space-y-5 focus:tw-outline-none"
+      className={`${marketplaceFont["surface"] ?? ""} tw-space-y-5 focus:tw-outline-none`}
     >
       <button
         type="button"
@@ -162,7 +165,7 @@ function OfferWorkspace({
         </Button>
       )}
       {pending.length > 0 && (
-        <details className="tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-px-3">
+        <details className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-4">
           <summary className="tw-min-h-11 tw-cursor-pointer tw-rounded-md tw-py-3 tw-text-sm tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
             {t(locale, "collect.offerPlan.pending")} (
             {formatInteger(locale, pending.length)})
@@ -178,6 +181,14 @@ function OfferWorkspace({
                   key={operation.id}
                   className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-py-3"
                 >
+                  {offer.asset.image_url && (
+                    <div className="tw-relative tw-size-12 tw-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-900">
+                      <CollectAssetMedia
+                        src={offer.asset.image_url}
+                        name={offer.asset.name}
+                      />
+                    </div>
+                  )}
                   <div className="tw-min-w-0 tw-flex-1">
                     <p className="tw-m-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100">
                       {offer.asset.name}
@@ -196,6 +207,7 @@ function OfferWorkspace({
                   <Button
                     variant="secondary"
                     size="sm"
+                    className="tw-min-h-11"
                     disabled={Boolean(disabledReason)}
                     onClick={() => reviewPending(operation.id)}
                   >
@@ -214,6 +226,7 @@ function OfferWorkspace({
               <Button
                 variant="tertiary"
                 size="sm"
+                className="tw-min-h-11"
                 disabled={visiblePendingPage === 0}
                 onClick={() => setPendingPage(visiblePendingPage - 1)}
               >
@@ -228,6 +241,7 @@ function OfferWorkspace({
               <Button
                 variant="tertiary"
                 size="sm"
+                className="tw-min-h-11"
                 disabled={visiblePendingPage === lastPendingPage}
                 onClick={() => setPendingPage(visiblePendingPage + 1)}
               >
@@ -243,6 +257,7 @@ function OfferWorkspace({
         strategySessionKey={strategySessionKey}
         blended={blended}
         buyOptions={buyOptions}
+        buyObservedAt={buyObservedAt}
         buyLockedAssetKeys={buyLockedAssetKeys}
         onReviewBuys={onReviewBuys}
         profile={auth.connectedProfile}
@@ -259,7 +274,7 @@ function OfferWorkspace({
           amountWei: operation.total_wei,
         }))}
         onReviewOffer={(offer) => {
-          const expiryHours = (["24", "168", "720"] as const).find(
+          const expiryHours = (["24", "168", "720", "custom"] as const).find(
             (hours) => hours === offer.expiryHours
           );
           if (expiryHours) setReview({ offer: { ...offer, expiryHours } });
@@ -277,6 +292,9 @@ function OfferWorkspace({
           fixedOfferQuantity={review.offer.quantity}
           initialUnitPriceEth={review.offer.unitPriceEth}
           initialExpiryHours={review.offer.expiryHours}
+          {...(review.offer.expiryDateTime === undefined
+            ? {}
+            : { initialExpiryDateTime: review.offer.expiryDateTime })}
           {...(review.offer.maximumOfferAmountWei === undefined
             ? {}
             : {

@@ -1,6 +1,12 @@
 import { posix } from "node:path";
 import { sha256 } from "js-sha256";
 import { CmsRecoveryError } from "./errors";
+import { getCmsPublicPath } from "../runtime/routes";
+import {
+  recoveredBlockPresentation,
+  recoveredNativeDesign,
+  RECOVERED_NATIVE_CSS,
+} from "./native-presentation";
 
 import type {
   CmsAssetV1,
@@ -16,6 +22,7 @@ type RenderContext = {
   assets: Map<string, CmsAssetV1>;
   pages: Map<string, CmsPageV1>;
   routes: Map<string, CmsPackageV1["payload"]["routes"][number]>;
+  routeAliases: Map<string, string>;
 };
 
 /** An archival 2D rendering: no application bundle, wallet, API, iframe or executable author HTML. */
@@ -32,9 +39,24 @@ export function renderRecoveredCmsSite(
   const routes = new Map(
     cmsPackage.payload.routes.map((route) => [route.path, route])
   );
+  const routeAliases = new Map<string, string>();
+  for (const route of cmsPackage.payload.routes) {
+    routeAliases.set(route.path, route.path);
+    routeAliases.set(getCmsPublicPath(cmsPackage, route.path), route.path);
+  }
+  for (const page of cmsPackage.payload.pages) {
+    routeAliases.set(page.metadata.canonical_url, page.path);
+  }
   for (const route of cmsPackage.payload.routes) {
     const outputPath = cmsRecoveryFilePath(route.path);
-    const context = { cmsPackage, pagePath: outputPath, assets, pages, routes };
+    const context = {
+      cmsPackage,
+      pagePath: outputPath,
+      assets,
+      pages,
+      routes,
+      routeAliases,
+    };
     const destination = resolveRoute(route.path, context);
     if (files.has(outputPath))
       throw new CmsRecoveryError("Recovered route output collision");
@@ -156,13 +178,40 @@ function resolveRoute(
 }
 
 function renderDocument(page: CmsPageV1, context: RenderContext): string {
-  const sections = page.blocks
+  const native = recoveredNativeDesign(context.cmsPackage);
+  const sections = native
+    ? renderNativeSections(page.blocks, context)
+    : page.blocks
+        .map(
+          (block) =>
+            `<section id="${escapeHtml(block.id)}">${renderBlock(block, context)}</section>`
+        )
+        .join("\n");
+  return renderShell(page.metadata, sections, context);
+}
+
+function renderNativeSections(
+  blocks: CmsBlockV1[],
+  context: RenderContext
+): string {
+  const groups: Array<{ name: string; blocks: CmsBlockV1[] }> = [];
+  for (const block of blocks) {
+    const { group } = recoveredBlockPresentation(block);
+    const previous = groups.at(-1);
+    if (group && previous?.name === group) previous.blocks.push(block);
+    else groups.push({ name: group, blocks: [block] });
+  }
+  return groups
     .map(
-      (block) =>
-        `<section id="${escapeHtml(block.id)}">${renderBlock(block, context)}</section>`
+      (group) =>
+        `<div class="cms-group">${group.blocks
+          .map((block) => {
+            const presentation = recoveredBlockPresentation(block);
+            return `<section id="${escapeHtml(block.id)}" class="cms-block cms-span-${presentation.span} cms-variant-${presentation.variant}">${renderBlock(block, context)}</section>`;
+          })
+          .join("\n")}</div>`
     )
     .join("\n");
-  return renderShell(page.metadata, sections, context);
 }
 
 function renderExternalRoute(
@@ -196,14 +245,22 @@ function renderShell(
   const links = renderNavigation(navigation?.items ?? [], context);
   const title = escapeHtml(metadata.title);
   const mode = cmsPackage.site.theme.mode === "light" ? "light" : "dark";
+  const design = recoveredNativeDesign(cmsPackage);
+  const nativeStyles = design ? `<style>${RECOVERED_NATIVE_CSS}</style>` : "";
+  const bodyAttributes = design
+    ? ` class="cms-native" data-design="${design}"`
+    : "";
+  const profileLink = design
+    ? `<a class="cms-profile" href="https://6529.io/${encodeURIComponent(cmsPackage.profile.handle)}" rel="noreferrer">${escapeHtml(cmsPackage.profile.handle)} · 6529 profile ↗</a>`
+    : "";
   return `<!doctype html>
 <html lang="${escapeHtml(metadata.locale)}" dir="${cmsPackage.site.direction ?? "ltr"}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https:; media-src https:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer"><meta name="description" content="${escapeHtml(metadata.description)}">
 <meta name="robots" content="${metadata.robots === "noindex" ? "noindex" : "index"}"><title>${title}</title>
-<style>:root{color-scheme:${mode};font:18px/1.65 system-ui,sans-serif;background:${mode === "dark" ? "#101014" : "#fff"};color:${mode === "dark" ? "#eee" : "#161616"}}body{max-width:1080px;margin:0 auto;padding:24px;overflow-wrap:anywhere}a{color:${mode === "dark" ? "#9ecaff" : "#124fb0"};overflow-wrap:anywhere}a:focus-visible{outline:3px solid currentColor;outline-offset:4px}nav ul{display:flex;gap:8px 24px;flex-wrap:wrap;padding-inline-start:20px}main{border-top:3px solid ${cmsPackage.site.theme.accent}}section{margin-block:32px}img,video{display:block;max-width:100%;max-height:85vh;object-fit:contain}audio{max-width:100%}figure{margin:20px 0}figcaption{font-size:.9rem}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.8rem}.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:24px}h1,h2,h3,h4,h5,h6{line-height:1.2;overflow-wrap:anywhere}footer{margin-top:48px;border-top:1px solid #777;padding-top:16px;font-size:.8rem}</style></head>
-<body><header><p>${escapeHtml(cmsPackage.site.title)}</p><nav><ul>${links}</ul></nav></header>
+<style>:root{color-scheme:${mode};font:18px/1.65 system-ui,sans-serif;background:${mode === "dark" ? "#101014" : "#fff"};color:${mode === "dark" ? "#eee" : "#161616"}}body{max-width:1080px;margin:0 auto;padding:24px;overflow-wrap:anywhere}a{color:${mode === "dark" ? "#9ecaff" : "#124fb0"};overflow-wrap:anywhere}a:focus-visible{outline:3px solid currentColor;outline-offset:4px}nav ul{display:flex;gap:8px 24px;flex-wrap:wrap;padding-inline-start:20px}main{border-top:3px solid ${cmsPackage.site.theme.accent}}section{margin-block:32px}img,video{display:block;max-width:100%;max-height:85vh;object-fit:contain}audio{max-width:100%}figure{margin:20px 0}figcaption{font-size:.9rem}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.8rem}.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:24px}h1,h2,h3,h4,h5,h6{line-height:1.2;overflow-wrap:anywhere}footer{margin-top:48px;border-top:1px solid #777;padding-top:16px;font-size:.8rem}</style>${nativeStyles}</head>
+<body${bodyAttributes}><header><p class="cms-brand">${escapeHtml(cmsPackage.site.title)}</p><nav><ul>${links}</ul></nav>${profileLink}</header>
 <main><h1>${title}</h1>${sections}</main><footer><code>${escapeHtml(cmsPackage.integrity.package_hash)}</code></footer></body></html>`;
 }
 
@@ -240,11 +297,11 @@ function renderBlock(block: CmsBlockV1, context: RenderContext): string {
     case "quote":
       return `<blockquote>${paragraphs(text(block, "quote") || text(block, "content") || text(block, "text"))}<cite>${escapeHtml(text(block, "citation") || text(block, "attribution"))}</cite></blockquote>`;
     case "callout":
-      return `<aside>${paragraphs(text(block, "tone"))}${renderTitle(block)}${paragraphs(text(block, "content") || text(block, "text"))}</aside>`;
+      return renderCallout(block, context);
     case "button_link":
       return renderLink(block, context);
     case "image":
-      return `${renderTitle(block)}${renderAsset(text(block, "asset_id"), context, text(block, "caption") || undefined)}`;
+      return `${renderTitle(block)}${renderAsset(text(block, "asset_id"), context, text(block, "caption") || undefined, text(block, "page_id"))}`;
     case "video":
     case "audio":
       return `${renderAsset(text(block, "poster_asset_id"), context)}${renderAsset(
@@ -319,7 +376,82 @@ function renderGallery(block: CmsBlockV1, context: RenderContext): string {
     ...stringArray(blockValue(block, "asset_ids")),
     ...stringArray(blockValue(block, "featured_asset_ids")),
   ];
-  return `${renderTitle(block)}${paragraphs(text(block, "description"))}<div class="gallery">${ids.map((id) => renderAsset(id, context)).join("")}</div>`;
+  const items = recordArray(blockValue(block, "items"));
+  const recoveredIds = ids.length
+    ? ids
+    : items
+        .map((item) => text(item, "asset_id"))
+        .filter((assetId) => assetId.length > 0);
+  const artwork = recoveredIds
+    .map((id) => {
+      const index = items.findIndex((entry) => entry["asset_id"] === id);
+      const item = index < 0 ? undefined : items.splice(index, 1)[0];
+      if (!item) return renderAsset(id, context);
+      const title =
+        [text(item, "title"), context.assets.get(id)?.alt_text].find(
+          (value) => typeof value === "string" && value.length > 0
+        ) ?? id;
+      const pageId = text(item, "page_id");
+      const titleLink = pageId
+        ? linkToPage(pageId, title, context)
+        : escapeHtml(title);
+      return `<article class="cms-gallery-item">${renderAsset(id, context, undefined, pageId, false)}<h3>${titleLink}</h3>${paragraphs(text(item, "subtitle"))}<small>${escapeHtml(text(item, "category"))}</small></article>`;
+    })
+    .join("");
+  return `${renderTitle(block)}${paragraphs(text(block, "description"))}<div class="gallery">${artwork}</div>`;
+}
+
+function renderCallout(block: CmsBlockV1, context: RenderContext): string {
+  const entries = recordArray(blockValue(block, "rows"));
+  const rows = entries
+    .map((row) => {
+      const value = text(row, "value");
+      const pageId = text(row, "page_id");
+      return `<div><dt>${escapeHtml(text(row, "label"))}</dt><dd>${pageId ? linkToPage(pageId, value, context) : escapeHtml(value)}</dd></div>`;
+    })
+    .join("");
+  const rowsMarkup = rows ? `<dl>${rows}</dl>` : "";
+  const style = text(block, "mockup_style");
+  const presentation = recoveredBlockPresentation(block);
+  if (
+    recoveredNativeDesign(context.cmsPackage) &&
+    presentation.variant === "project" &&
+    presentation.role === "card" &&
+    (style === "planner" || style === "catalogue")
+  ) {
+    const heading = text(block, "mockup_heading");
+    const headingMarkup = heading ? `<h3>${escapeHtml(heading)}</h3>` : "";
+    return `<aside>${paragraphs(text(block, "mockup_kicker"))}${renderTitle(block)}${headingMarkup}${paragraphs(text(block, "mockup_period"))}${paragraphs(text(block, "mockup_description"))}${rowsMarkup}<footer>${paragraphs(text(block, "mockup_footer"))}</footer></aside>`;
+  }
+  const content = text(block, "content") || text(block, "text");
+  const rowFallback = entries
+    .map((row) => {
+      const label = text(row, "label");
+      const value = text(row, "value");
+      return label ? `${label}: ${value}` : value;
+    })
+    .join("\n");
+  const contentMarkup =
+    entries.length && content.trim() === rowFallback ? "" : paragraphs(content);
+  return `<aside>${renderAsset(text(block, "asset_id"), context)}${paragraphs(text(block, "tone"))}${renderTitle(block)}${contentMarkup}${rowsMarkup}${renderContact(block)}</aside>`;
+}
+
+function renderContact(block: CmsBlockV1): string {
+  if (recoveredBlockPresentation(block).variant !== "contact") return "";
+  const email = text(block, "email");
+  const href = contactHref(email, text(block, "subject"));
+  return href
+    ? `<p><a href="${escapeHtml(href)}">${escapeHtml(email)}</a></p>`
+    : "";
+}
+
+function contactHref(email: string, rawSubject: string): string | null {
+  if (email.length > 254 || !/^[^\s<>"@]+@[^\s<>"@]+\.[^\s<>"@]+$/.test(email))
+    return null;
+  const address = email.split("@").map(encodeURIComponent).join("@");
+  const subject = rawSubject.slice(0, 300).replace(/[\r\n]/g, " ");
+  const subjectQuery = subject ? `?subject=${encodeURIComponent(subject)}` : "";
+  return `mailto:${address}${subjectQuery}`;
 }
 
 function renderNft(block: CmsBlockV1, context: RenderContext): string {
@@ -350,7 +482,9 @@ function renderRoom(block: CmsBlockV1, context: RenderContext): string {
 function renderAsset(
   id: string,
   context: RenderContext,
-  caption?: string
+  caption?: string,
+  pageId?: string,
+  includeCaption = true
 ): string {
   const asset = context.assets.get(id);
   const uri = asset ? independentCmsUri(asset.uri) : null;
@@ -359,21 +493,54 @@ function renderAsset(
   const label = escapeHtml(caption ?? asset.alt_text ?? id);
   let media: string;
   if (asset.kind === "image" || asset.kind === "social_image") {
-    media = `<img src="${href}" alt="${escapeHtml(asset.alt_text ?? "")}" loading="lazy">`;
+    const imageClass = id.startsWith("blitmap-")
+      ? ' class="cms-pixel-art"'
+      : "";
+    media = `<img${imageClass} src="${href}" alt="${escapeHtml(asset.alt_text ?? "")}" loading="lazy">`;
+    const page = pageId ? context.pages.get(pageId) : undefined;
+    if (page)
+      media = `<a href="${escapeHtml(relativeRouteHref(page.path, context))}">${media}</a>`;
   } else if (asset.kind === "audio" || asset.kind === "video") {
     media = `<${asset.kind} controls preload="none" src="${href}"></${asset.kind}>`;
   } else {
     media = `<a href="${href}" rel="noreferrer">${label}</a>`;
   }
-  return `<figure>${media}<figcaption>${label}</figcaption></figure>`;
+  const captionMarkup = includeCaption
+    ? `<figcaption>${label}</figcaption>`
+    : "";
+  return `<figure>${media}${captionMarkup}</figure>`;
 }
 
 function renderLink(block: CmsBlockV1, context: RenderContext): string {
   const pageId = text(block, "page_id");
   const label = text(block, "label") || text(block, "text");
-  if (pageId) return linkToPage(pageId, label, context);
+  if (pageId) {
+    const inquiry = recoveredInquiryHref(block, context);
+    if (inquiry)
+      return `<a href="${escapeHtml(inquiry)}">${escapeHtml(label)}</a>`;
+    return linkToPage(pageId, label, context, text(block, "block_id"));
+  }
   const raw = text(block, "url") || text(block, "href");
   return renderHref(raw, label, context);
+}
+
+function recoveredInquiryHref(
+  block: CmsBlockV1,
+  context: RenderContext
+): string | null {
+  const subject = text(block, "subject");
+  if (!subject) return null;
+  const page = context.pages.get(text(block, "page_id"));
+  for (const candidate of page?.blocks ?? []) {
+    if (
+      candidate.block_type !== "callout" ||
+      recoveredBlockPresentation(candidate).variant !== "contact"
+    )
+      continue;
+    const href = contactHref(text(candidate, "email"), subject);
+    if (href) return href;
+  }
+  return null;
 }
 
 function renderHref(
@@ -390,22 +557,27 @@ function renderHref(
 }
 
 function localRouteHref(raw: string, context: RenderContext): string | null {
-  if (
-    !raw.startsWith("/") ||
-    raw.startsWith("//") ||
-    /[\\\u0000-\u001f\u007f]/.test(raw)
-  )
-    return null;
+  if (raw.startsWith("//") || /[\\\u0000-\u001f\u007f]/.test(raw)) return null;
   const suffixAt = raw.search(/[?#]/);
   const path = suffixAt < 0 ? raw : raw.slice(0, suffixAt);
-  if (!context.routes.has(path)) return null;
-  return `${relativeRouteHref(path, context)}${suffixAt < 0 ? "" : raw.slice(suffixAt)}`;
+  const route = context.routeAliases.get(path);
+  if (!route) return null;
+  return `${relativeRouteHref(route, context)}${suffixAt < 0 ? "" : raw.slice(suffixAt)}`;
 }
 
-function linkToPage(id: string, label: string, context: RenderContext): string {
+function linkToPage(
+  id: string,
+  label: string,
+  context: RenderContext,
+  blockId?: string
+): string {
   const page = context.pages.get(id);
   if (!page) return escapeHtml(label);
-  return `<a href="${escapeHtml(relativeRouteHref(page.path, context))}">${escapeHtml(label)}</a>`;
+  const fragment =
+    blockId && page.blocks.some((block) => block.id === blockId)
+      ? `#${encodeURIComponent(blockId)}`
+      : "";
+  return `<a href="${escapeHtml(relativeRouteHref(page.path, context) + fragment)}">${escapeHtml(label)}</a>`;
 }
 
 function relativeRouteHref(path: string, context: RenderContext): string {
@@ -435,6 +607,15 @@ function blockValue(record: Record<string, unknown>, key: string): unknown {
 function stringArray(value: unknown): string[] {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
+    : [];
+}
+
+function recordArray(value: unknown): Record<string, unknown>[] {
+  return Array.isArray(value)
+    ? value.filter(
+        (entry): entry is Record<string, unknown> =>
+          entry !== null && typeof entry === "object" && !Array.isArray(entry)
+      )
     : [];
 }
 

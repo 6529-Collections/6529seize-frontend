@@ -18,6 +18,7 @@ import { notFound } from "next/navigation";
 import { getNextgenTitle } from "../../../title-utils";
 import NextGenTokenPageClient from "./NextGenTokenPageClient";
 import { fetchTokenData, getContentView } from "./page-utils";
+import { getNextgenTokenViewSegment } from "@/components/nextGen/collections/nextgenToken/nextgen-token-view.helpers";
 
 const isUsableImageSource = (
   source: string | null | undefined
@@ -29,10 +30,8 @@ const getFirstUsableImage = (
 ): string | undefined => sources.find(isUsableImageSource);
 
 const getTokenPath = (tokenId: number, view: NextgenCollectionView): string => {
-  const viewPath =
-    view === NextgenCollectionView.ABOUT
-      ? ""
-      : `/${view.toLowerCase().replaceAll(" ", "-")}`;
+  const viewSegment = getNextgenTokenViewSegment(view);
+  const viewPath = viewSegment ? `/${viewSegment}` : "";
   return `/nextgen/token/${tokenId}${viewPath}`;
 };
 

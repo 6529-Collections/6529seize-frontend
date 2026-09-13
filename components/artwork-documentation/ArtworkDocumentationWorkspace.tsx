@@ -4,23 +4,15 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import {
-  ApiArtworkDocumentationContextConfirmationStatusEnum,
-  ApiArtworkDocumentationContextLifecycleEnum,
-} from "@/generated/models/ApiArtworkDocumentationContext";
+import { ApiArtworkDocumentationContextConfirmationStatusEnum } from "@/generated/models/ApiArtworkDocumentationContext";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import { useDocumentationDraft } from "@/hooks/artwork-documentation/useDocumentationDraft";
 import { documentationQueryKey } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
 import {
-  changeDocumentationLifecycle,
   documentationWorkspacePath,
   getDocumentationContext,
   getDocumentationRevision,
 } from "@/services/api/artwork-documentation-api";
-import {
-  documentationTitle,
-  readAnswer,
-} from "@/lib/artwork-documentation/answers";
 import { documentationDraftRecord } from "@/lib/artwork-documentation/record";
 import {
   canWriteDocumentation,
@@ -28,11 +20,13 @@ import {
 } from "@/lib/artwork-documentation/capabilities";
 import {
   parseSection,
-  SECTIONS,
-  MODULE_FIELDS,
   type DocumentationSection,
 } from "@/lib/artwork-documentation/registry";
-import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
+import {
+  documentationChapterKey,
+  documentationSections,
+  isMuseumRecord,
+} from "@/lib/artwork-documentation/catalogue";
 import { formatDate, formatNumber } from "@/i18n/format";
 import DocumentationAuthGate, {
   useDocumentationActor,
@@ -43,25 +37,16 @@ import {
   inputClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
-import DocumentationModules from "./DocumentationModules";
-import DocumentationUpload from "./DocumentationUpload";
 import DocumentationSaveStatus from "./DocumentationSaveStatus";
-import DocumentationReview from "./DocumentationReview";
 import DocumentationSummary from "./DocumentationSummary";
-import DocumentationFeedback from "./DocumentationFeedback";
-import DocumentationAccess from "./DocumentationAccess";
-import DocumentationSources from "./DocumentationSources";
-import DocumentationArtistPin from "./DocumentationArtistPin";
 import DocumentationArtworkPreview from "./DocumentationArtworkPreview";
-import DocumentationNewContext from "./DocumentationNewContext";
-import DocumentationWorkedExample from "./DocumentationWorkedExample";
-import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
-
-const FILE_FIELDS = [
-  "artwork.canonical_asset_id",
-  "artwork.declared_dimensions",
-  ...MODULE_FIELDS.files.map((field) => `files.${field.id}`),
-];
+import {
+  DocumentationWritingChapter,
+  DocumentationReadingChapter,
+} from "./DocumentationRecordChapters";
+import DocumentationDossier from "./DocumentationDossier";
+import DocumentationMuseumJournal from "./DocumentationMuseumJournal";
+import DocumentationRecordHeader from "./DocumentationRecordHeader";
 
 interface Props {
   readonly workId: string;
@@ -132,10 +117,31 @@ function WorkspaceEditor({
   readonly initial: ApiArtworkDocumentationContext;
   readonly initialSection: DocumentationSection;
 }) {
+  const draft = useDocumentationDraft(initial);
+  return (
+    <ArtworkDocumentationRecordView
+      draft={draft}
+      initialSection={initialSection}
+    />
+  );
+}
+
+export function ArtworkDocumentationRecordView({
+  draft,
+  initialSection = "artwork",
+  embedded = false,
+  onExit,
+}: {
+  readonly draft: ReturnType<typeof useDocumentationDraft>;
+  readonly initialSection?: DocumentationSection;
+  readonly embedded?: boolean;
+  readonly onExit?: (() => void) | undefined;
+}) {
   const { msg, locale } = useDocumentationMessages();
   const router = useRouter();
-  const draft = useDocumentationDraft(initial);
   const { context, controller } = draft;
+  const sections = documentationSections(context.profile);
+  const museum = isMuseumRecord(context.profile);
   const draftRecord = documentationDraftRecord(context, draft.edits);
   const canWrite = canWriteDocumentation(mutationCapabilities(context));
   const listPath = context.program_id
@@ -144,14 +150,10 @@ function WorkspaceEditor({
   const viewOnlyBackLabel = context.program_id ? "backToResults" : "backToList";
   const backLabel =
     context.program_id || !canWrite ? viewOnlyBackLabel : "back";
-  const publicationOnly = isPublicationOnly(context.profile);
-  const [section, setSection] = useState(initialSection);
+  const [section, setSection] = useState(
+    sections.includes(initialSection) ? initialSection : "artwork"
+  );
   const [reading, setReading] = useState(false);
-  const credit: unknown = readAnswer(
-    draftRecord,
-    "identity",
-    "preferred_credit"
-  )?.value;
   const counts = Object.values(context.modules).reduce(
     (total, module) => ({
       required: total.required + module.completeness.required,
@@ -159,18 +161,17 @@ function WorkspaceEditor({
     }),
     { required: 0, addressed: 0 }
   );
-  const assets = context.assets
-    .filter((asset) => asset.state === "ready")
-    .map((asset) => ({ id: asset.id, label: asset.filename }));
   const focusHeading = (id: string) => {
     requestAnimationFrame(() => document.getElementById(id)?.focus());
   };
   const navigateSection = (next: DocumentationSection) => {
     setSection(next);
     setReading(false);
-    const url = new URL(globalThis.location.href);
-    url.searchParams.set("section", next);
-    globalThis.history.replaceState(null, "", url);
+    if (!embedded) {
+      const url = new URL(globalThis.location.href);
+      url.searchParams.set("section", next);
+      globalThis.history.replaceState(null, "", url);
+    }
     focusHeading("documentation-chapter-title");
   };
   useEffect(() => {
@@ -181,6 +182,7 @@ function WorkspaceEditor({
           : null;
       if (
         target &&
+        target.getAttribute("target") !== "_blank" &&
         controller.snapshot().dirty &&
         // Cancel captured navigation before unsaved edits are lost.
         !globalThis.confirm(msg("leave"))
@@ -193,284 +195,44 @@ function WorkspaceEditor({
     return () => document.removeEventListener("click", handler, true);
   }, [controller, msg]);
   const saveExit = async () => {
-    if (await controller.flush()) router.push(listPath);
+    if (await controller.flush()) {
+      if (onExit) onExit();
+      else if (!embedded) router.push(listPath);
+    }
   };
   const showWriting = () => {
     setReading(false);
     focusHeading("documentation-chapter-title");
   };
-  const writingChapter = (
-    <>
-      {section === "artwork" && (
-        <DocumentationArtworkPreview
-          context={draftRecord}
-          allowSubmissionReference
-        />
-      )}
-      <DocumentationWorkedExample
-        key={`${context.id}-${section}`}
-        context={context}
-        edits={draft.edits}
-        section={section}
-      />
-      <div
-        id={`documentation-answers-${context.id}-${section}`}
-        tabIndex={-1}
-        className="tw-min-w-0 tw-space-y-10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-      >
-        {section === "artwork" && (
-          <DocumentationSources context={context} controller={controller} />
-        )}
-        {section === "artist" && (
-          <DocumentationArtistPin context={context} controller={controller} />
-        )}
-        {section === "rights" && (
-          <details className="tw-text-sm tw-leading-6 tw-text-iron-400">
-            <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2">
-              {msg("why")}
-            </summary>
-            <p>
-              {msg(publicationOnly ? "publication.whyRights" : "why.rights")}
-            </p>
-            <p>
-              {msg("cc0")}{" "}
-              <a
-                href="https://creativecommons.org/publicdomain/zero/1.0/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="tw-text-primary-300"
-              >
-                {msg("cc0Link")}
-              </a>
-            </p>
-          </details>
-        )}
-        {section === "review" ? (
-          <>
-            <DocumentationReview
-              context={context}
-              controller={controller}
-              saveState={draft.state}
-              edits={draft.edits}
-            />
-            <DocumentationFeedback context={context} />
-            {(mutationCapabilities(context).manage_assignments ||
-              mutationCapabilities(context).manage_context) && (
-              <details className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5">
-                <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-text-iron-400">
-                  {msg("chapters.recordManagement")}
-                </summary>
-                <div className="tw-mt-5 tw-space-y-6">
-                  <DocumentationAccess context={context} />
-                  <DocumentationNewContext
-                    context={context}
-                    controller={controller}
-                  />
-                  {mutationCapabilities(context).manage_context && (
-                    <DocumentationButton
-                      secondary
-                      onClick={() => {
-                        void controller.mutate((current, signal) =>
-                          changeDocumentationLifecycle(
-                            current,
-                            current.lifecycle ===
-                              ApiArtworkDocumentationContextLifecycleEnum.Active
-                              ? "archived"
-                              : "active",
-                            signal
-                          )
-                        );
-                      }}
-                    >
-                      {msg(
-                        context.lifecycle ===
-                          ApiArtworkDocumentationContextLifecycleEnum.Active
-                          ? "archive"
-                          : "restore"
-                      )}
-                    </DocumentationButton>
-                  )}
-                </div>
-              </details>
-            )}
-          </>
-        ) : (
-          <>
-            <DocumentationModules
-              key={`${context.id}-${section}`}
-              context={context}
-              edits={draft.edits}
-              section={section}
-              excludeFields={section === "artwork" ? FILE_FIELDS : undefined}
-              onChange={(moduleId, operation) =>
-                controller.edit(moduleId, operation)
-              }
-              onBlur={() => {
-                void controller.flush();
-              }}
-              readOnly={
-                context.lifecycle ===
-                ApiArtworkDocumentationContextLifecycleEnum.Archived
-              }
-              assets={assets}
-            />
-            {section === "artwork" && (
-              <section
-                className="tw-space-y-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8"
-                aria-labelledby="documentation-files-title"
-              >
-                <h3
-                  id="documentation-files-title"
-                  className="tw-m-0 tw-font-serif tw-text-2xl tw-font-normal"
-                >
-                  {msg("chapters.files")}
-                </h3>
-                <p className="tw-m-0 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-400">
-                  {msg("chapters.filesHelp")}
-                </p>
-                <DocumentationUpload
-                  context={context}
-                  controller={controller}
-                />
-                <DocumentationModules
-                  context={context}
-                  edits={draft.edits}
-                  inlineFields={FILE_FIELDS}
-                  onChange={(moduleId, operation) =>
-                    controller.edit(moduleId, operation)
-                  }
-                  onBlur={() => {
-                    void controller.flush();
-                  }}
-                  readOnly={
-                    context.lifecycle ===
-                    ApiArtworkDocumentationContextLifecycleEnum.Archived
-                  }
-                  assets={assets}
-                />
-              </section>
-            )}
-          </>
-        )}
-      </div>
-    </>
-  );
-  const readingChapter =
-    section === "review" ? (
-      <>
-        <DocumentationReview
-          context={context}
-          controller={controller}
-          saveState={draft.state}
-        />
-        <DocumentationFeedback context={context} />
-      </>
-    ) : (
-      <>
-        {section === "artwork" && (
-          <DocumentationArtworkPreview
-            context={context}
-            allowSubmissionReference
-          />
-        )}
-        <DocumentationSummary
-          context={context}
-          section={section}
-          showHeading={false}
-        />
-        {section === "artwork" && (
-          <>
-            <DocumentationSources context={context} controller={controller} />
-            <DocumentationUpload context={context} controller={controller} />
-          </>
-        )}
-      </>
-    );
   return (
     <div className="tw-space-y-10 sm:tw-space-y-14">
       <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-4">
-        <Link
-          href={listPath}
-          className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-        >
-          ← {msg(backLabel)}
-        </Link>
+        {!embedded && (
+          <Link
+            href={listPath}
+            className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            ← {msg(backLabel)}
+          </Link>
+        )}
         {canWrite && (
           <DocumentationSaveStatus snapshot={draft} controller={controller} />
         )}
       </div>
-      <header className="tw-space-y-6">
-        <div className="tw-max-w-3xl">
-          <p className="tw-mb-4 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-iron-400">
-            {documentationOptionLabel(
-              context.program_id ?? context.profile.profile_id
-            )}
-          </p>
-          <h1 className="tw-m-0 tw-break-words tw-font-serif tw-text-4xl tw-font-normal tw-leading-[1.08] tw-tracking-tight sm:tw-text-6xl">
-            {documentationTitle(draftRecord) ??
-              msg(canWrite && !reading ? "chapters.beginRecord" : "untitled")}
-          </h1>
-          {typeof credit === "string" && credit.trim() && (
-            <p className="tw-mb-0 tw-mt-4 tw-text-lg tw-leading-7 tw-text-iron-200">
-              {credit}
-            </p>
-          )}
-          <p className="tw-mb-0 tw-mt-5 tw-text-xs tw-leading-5 tw-text-iron-400">
-            {msg("savedAt", { date: formatDate(locale, context.updated_at) })} ·{" "}
-            {documentationOptionLabel(context.confirmation_status)}
-          </p>
-        </div>
-        {canWrite ? (
-          <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-6">
-            <div className="tw-max-w-prose tw-space-y-3">
-              <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-200">
-                {msg("chapters.welcome")}
-              </p>
-              <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
-                {msg(
-                  publicationOnly
-                    ? "chapters.publication"
-                    : "publication.legacy"
-                )}
-              </p>
-              <details className="tw-text-sm tw-leading-6 tw-text-iron-400">
-                <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
-                  {msg("chapters.aboutRecord")}
-                </summary>
-                <div className="tw-space-y-3 tw-pb-3">
-                  <p className="tw-m-0">
-                    {context.program_id === "6529NM-AP-01"
-                      ? msg("keysHelp")
-                      : msg("description")}
-                  </p>
-                  <p className="tw-m-0">
-                    {msg(publicationOnly ? "publication.draft" : "privacy")}
-                  </p>
-                </div>
-              </details>
-            </div>
-            <DocumentationButton
-              secondary
-              onClick={() => {
-                if (reading) showWriting();
-                else {
-                  setReading(true);
-                  focusHeading("documentation-reading-title");
-                }
-              }}
-            >
-              {msg(reading ? "chapters.returnToWriting" : "chapters.readDraft")}
-            </DocumentationButton>
-          </div>
-        ) : (
-          <p
-            role="status"
-            className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-300"
-          >
-            {msg("viewOnly")}
-          </p>
-        )}
-      </header>
+      <DocumentationRecordHeader
+        context={context}
+        draftRecord={draftRecord}
+        canWrite={canWrite}
+        reading={reading}
+        headingLevel={embedded ? 2 : 1}
+        onToggleReading={() => {
+          if (reading) showWriting();
+          else {
+            setReading(true);
+            focusHeading("documentation-reading-title");
+          }
+        }}
+      />
       {context.confirmation_status ===
         ApiArtworkDocumentationContextConfirmationStatusEnum.NewerDraft && (
         <DocumentationNotice>{msg("newerDraft")}</DocumentationNotice>
@@ -512,7 +274,7 @@ function WorkspaceEditor({
               className="tw-hidden lg:tw-block"
             >
               <ol className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0">
-                {SECTIONS.map((item, index) => (
+                {sections.map((item, index) => (
                   <li key={item}>
                     <button
                       type="button"
@@ -528,7 +290,7 @@ function WorkspaceEditor({
                           minimumIntegerDigits: 2,
                         })}
                       </span>
-                      {msg(`chapters.${item}`)}
+                      {msg(documentationChapterKey(context.profile, item))}
                     </button>
                   </li>
                 ))}
@@ -543,9 +305,9 @@ function WorkspaceEditor({
                   navigateSection(parseSection(event.target.value))
                 }
               >
-                {SECTIONS.map((item) => (
+                {sections.map((item) => (
                   <option key={item} value={item}>
-                    {msg(`chapters.${item}`)}
+                    {msg(documentationChapterKey(context.profile, item))}
                   </option>
                 ))}
               </select>
@@ -560,7 +322,7 @@ function WorkspaceEditor({
             <div className="tw-max-w-prose">
               <p className="tw-mb-3 tw-text-xs tw-uppercase tw-tracking-widest tw-text-iron-400">
                 {msg("chapters.number", {
-                  number: formatNumber(locale, SECTIONS.indexOf(section) + 1),
+                  number: formatNumber(locale, sections.indexOf(section) + 1),
                 })}
               </p>
               <h2
@@ -568,15 +330,29 @@ function WorkspaceEditor({
                 tabIndex={-1}
                 className="tw-m-0 tw-font-serif tw-text-4xl tw-font-normal tw-leading-tight focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               >
-                {msg(`chapters.${section}`)}
+                {msg(documentationChapterKey(context.profile, section))}
               </h2>
               {canWrite && (
                 <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
-                  {msg(`chapters.purpose.${section}`)}
+                  {msg(
+                    `${museum ? "museum.purpose" : "chapters.purpose"}.${section}`
+                  )}
                 </p>
               )}
             </div>
-            {canWrite ? writingChapter : readingChapter}
+            {canWrite ? (
+              <DocumentationWritingChapter
+                draft={draft}
+                section={section}
+                onNavigateSection={navigateSection}
+              />
+            ) : (
+              <DocumentationReadingChapter
+                draft={draft}
+                section={section}
+                onNavigateSection={navigateSection}
+              />
+            )}
             <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6">
               <DocumentationButton
                 secondary
@@ -591,19 +367,36 @@ function WorkspaceEditor({
                 <DocumentationButton
                   onClick={() =>
                     navigateSection(
-                      SECTIONS[SECTIONS.indexOf(section) + 1] ?? "review"
+                      sections[sections.indexOf(section) + 1] ?? "review"
                     )
                   }
                 >
                   {msg("chapters.nextChapter", {
                     chapter: msg(
-                      `chapters.${SECTIONS[SECTIONS.indexOf(section) + 1] ?? "review"}`
+                      documentationChapterKey(
+                        context.profile,
+                        sections[sections.indexOf(section) + 1] ?? "review"
+                      )
                     ),
                   })}
                 </DocumentationButton>
               )}
             </div>
           </div>
+        </div>
+      )}
+      {museum && (
+        <div hidden={section !== "review" || reading} className="tw-space-y-10">
+          <DocumentationDossier
+            context={context}
+            controller={controller}
+            active={section === "review"}
+          />
+          <DocumentationMuseumJournal
+            context={context}
+            controller={controller}
+            active={section === "review" && !reading}
+          />
         </div>
       )}
     </div>

@@ -28,11 +28,11 @@ shell gains meaningful iOS-native behavior.
 
 ## Packs
 
-| Pack | Device Farm test type | Devices | What it validates |
-| --- | --- | --- | --- |
-| `devicefarm:mobile-web-smoke` | `APPIUM_WEB_NODE` | Android phones (pool `android-phones-smoke`), iPhone (pool `ios-phones-web-smoke`) | Deployed frontend renders `/`, `/the-memes`, `/network`, and the public `6529 Releases` wave without crash markers (including the app's branded "Page of Doom" error boundary), exposes navigation chrome, no horizontal overflow, and long-press on a wave message opens the touch action sheet. Read-only. |
-| `devicefarm:native-android-smoke` | `APPIUM_NODE` | Android phones | Debug shell APK launches, WebView boots `6529.io`, `mobile6529://navigate/...` deep links navigate the WebView. Read-only. |
-| `devicefarm:native-android-fuzz` | `BUILTIN_FUZZ` | Android phones | 2500 random UI events per device (fixed seed `6529`) surface crashes/ANRs in the shell. |
+| Pack                              | Device Farm test type | Devices                                                                            | What it validates                                                                                                                                                                                                                                                                                            |
+| --------------------------------- | --------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `devicefarm:mobile-web-smoke`     | `APPIUM_WEB_NODE`     | Android phones (pool `android-phones-smoke`), iPhone (pool `ios-phones-web-smoke`) | Deployed frontend renders `/`, `/the-memes`, `/network`, and the public `6529 Releases` wave without crash markers (including the app's branded "Page of Doom" error boundary), exposes navigation chrome, no horizontal overflow, and long-press on a wave message opens the touch action sheet. Read-only. |
+| `devicefarm:native-android-smoke` | `APPIUM_NODE`         | Android phones                                                                     | Debug shell APK launches, WebView boots `6529.io`, `mobile6529://navigate/...` deep links navigate the WebView. Read-only.                                                                                                                                                                                   |
+| `devicefarm:native-android-fuzz`  | `BUILTIN_FUZZ`        | Android phones                                                                     | 2500 random UI events per device (fixed seed `6529`) surface crashes/ANRs in the shell.                                                                                                                                                                                                                      |
 
 Suite code lives in `tests/device-farm/` (self-contained npm package — see its
 README). Device Farm test spec files live in `tests/device-farm/testspecs/`.
@@ -42,7 +42,12 @@ README). Device Farm test spec files live in `tests/device-farm/testspecs/`.
 - `workflow_dispatch` with `target` (`production` default, or `staging`) and
   `packs` (`all` default, `web`, `native`). The native pack always exercises
   production content because the shell hardcodes `https://6529.io`.
-- Weekly schedule (Mondays 04:00 UTC): full pack against production.
+- Daily schedule (04:00 UTC): mobile web smoke against production. Monday's
+  full pack includes web smoke plus native Android smoke and fuzz; Tuesday
+  through Sunday run web only. The two schedules do not overlap.
+- Scheduled failures notify Discord and the shared CI wave receiver. Missing
+  credentials or a missing mobile repository token still produce explicit skip
+  notices; inspect the plan and pack results to distinguish a skip from a pass.
 - Post-release: `deploy-6529` may dispatch the workflow after production
   validation (`gh workflow run device-farm-qa.yml --ref main`) and record the
   run URL as release evidence. Non-gating unless the release is mobile-focused.
@@ -53,15 +58,14 @@ only, no authentication, no mutations — consistent with the
 
 ## Cost model
 
-Device Farm metered pricing is $0.17 per device-minute (first 1,000 minutes
-free on new accounts). The default regime is sized deliberately small:
+Metered use depends on the configured device pools and actual execution time.
+The schedule runs seven web passes and one native smoke/fuzz pass per week.
+Changing the web cadence from weekly to daily adds six web passes; the native
+cadence stays weekly. Check AWS billing and current Device Farm pricing when
+estimating cost rather than treating an old device-count estimate as a budget.
 
-- weekly full pack ≈ 2 Android + 1 iOS web jobs (~10 min each) + native smoke
-  and fuzz on 2 Android devices (~15 min each) ≈ 90 device-minutes ≈ $15/week.
-- `jobTimeoutMinutes` caps runaway runs (30 min web/smoke, 20 min fuzz).
-
-Increase cadence (e.g. nightly web smoke) only after the weekly signal proves
-stable; unmetered slots ($250/device/month) only pay off past ~25 runs/week.
+`jobTimeoutMinutes` caps each device job at 30 minutes for web/native smoke and
+20 minutes for fuzz. Queueing and test packaging are separate from device time.
 
 ## One-time provisioning
 
@@ -72,7 +76,7 @@ stable; unmetered slots ($250/device/month) only pay off past ~25 runs/week.
    ```
 
    Defaults: project `6529-mobile-qa`, pools `android-phones-smoke` and
-   `ios-phones-web-smoke`. The script is idempotent and *converging*:
+   `ios-phones-web-smoke`. The script is idempotent and _converging_:
    re-running it updates existing pools to the rules in the script, so pool
    composition is version-controlled here. Override names via env vars and
    mirror them in repository variables `DEVICEFARM_PROJECT_NAME`,
@@ -84,10 +88,10 @@ stable; unmetered slots ($250/device/month) only pay off past ~25 runs/week.
    near-identical Pixels; `MODEL IN` rules select the same model on multiple
    OS versions — both observed live.)
 
-   | Pool | Devices | Why |
-   | --- | --- | --- |
-   | `android-phones-smoke` | Samsung Galaxy S24 (Android 14), Google Pixel 8 (Android 15), Samsung Galaxy A15 (Android 14) | One UI flagship (dominant real-world OEM skin), stock Android, and the mid-range/low-perf class that is the most common Android tier globally. |
-   | `ios-phones-web-smoke` | iPhone 16 (iOS 18.6.2), iPhone SE 2022 (iOS 16.4) | Current mainstream iOS, plus the 4.7" small screen on the oldest supported Safari — the viewport that makes the horizontal-overflow check earn its keep. |
+   | Pool                   | Devices                                                                                       | Why                                                                                                                                                      |
+   | ---------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | `android-phones-smoke` | Samsung Galaxy S24 (Android 14), Google Pixel 8 (Android 15), Samsung Galaxy A15 (Android 14) | One UI flagship (dominant real-world OEM skin), stock Android, and the mid-range/low-perf class that is the most common Android tier globally.           |
+   | `ios-phones-web-smoke` | iPhone 16 (iOS 18.6.2), iPhone SE 2022 (iOS 16.4)                                             | Current mainstream iOS, plus the 4.7" small screen on the oldest supported Safari — the viewport that makes the horizontal-overflow check earn its keep. |
 
    ARN-pinned (static) pools queue for a busy device instead of silently
    substituting another. If a pinned device is retired from the public fleet,
@@ -132,11 +136,11 @@ stable; unmetered slots ($250/device/month) only pay off past ~25 runs/week.
 
 3. **Repository secrets**:
 
-   | Secret | Required for | Notes |
-   | --- | --- | --- |
-   | `DEVICEFARM_AWS_ACCESS_KEY_ID` / `DEVICEFARM_AWS_SECRET_ACCESS_KEY` | all packs | Credentials for the IAM principal above. Kept separate from the deploy credentials so Device Farm access never widens the deploy user. |
-   | `MOBILE_REPO_TOKEN` | native pack | Fine-grained PAT with read-only `contents` access to `6529-Collections/6529-core-mobile`. |
-   | `MOBILE_GOOGLE_SERVICES_JSON` | optional | Raw `google-services.json` for Firebase push in the QA build. The shell builds fine without it (the Gradle project applies the google-services plugin only when the file exists); push registration is simply inert. |
+   | Secret                                                              | Required for | Notes                                                                                                                                                                                                                |
+   | ------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | `DEVICEFARM_AWS_ACCESS_KEY_ID` / `DEVICEFARM_AWS_SECRET_ACCESS_KEY` | all packs    | Credentials for the IAM principal above. Kept separate from the deploy credentials so Device Farm access never widens the deploy user.                                                                               |
+   | `MOBILE_REPO_TOKEN`                                                 | native pack  | Fine-grained PAT with read-only `contents` access to `6529-Collections/6529-core-mobile`.                                                                                                                            |
+   | `MOBILE_GOOGLE_SERVICES_JSON`                                       | optional     | Raw `google-services.json` for Firebase push in the QA build. The shell builds fine without it (the Gradle project applies the google-services plugin only when the file exists); push registration is simply inert. |
 
    Until the secrets exist, every job in the workflow skips with a `::notice`
    and the scheduled run stays green — provisioning can land after the code.
@@ -176,14 +180,14 @@ templating, not syntax. Device Farm rejects the braces with
 
 ## Failure triage
 
-| Symptom | Likely cause | Action |
-| --- | --- | --- |
-| All packs skipped with notices | Secrets not configured | Complete provisioning above. |
-| `projectArn`/`devicePoolArn` lookup errors | Bootstrap not run, or names drifted from repo variables | Re-run bootstrap; align variables. |
-| Web pack fails only on one platform | Real-device/browser-specific frontend regression | Reproduce with Playwright mobile projects first; real-device video is in the run artifacts. |
-| Native smoke fails at WebView boot | Shell regression, production outage, or WebView debuggability | Check production health first; confirm the APK is a debug build (WebView contexts are only visible to Appium in debug builds). |
-| Deep-link test fails | `useDeepLinkNavigation` regression in this repo or intent-filter change in the shell | Compare against `__tests__/app/openMobile.test.tsx` expectations. |
-| Fuzz fails | Shell crash/ANR under monkey input | Pull the crash video + logcat from artifacts; file against `6529-core-mobile` if native. |
+| Symptom                                    | Likely cause                                                                         | Action                                                                                                                         |
+| ------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| All packs skipped with notices             | Secrets not configured                                                               | Complete provisioning above.                                                                                                   |
+| `projectArn`/`devicePoolArn` lookup errors | Bootstrap not run, or names drifted from repo variables                              | Re-run bootstrap; align variables.                                                                                             |
+| Web pack fails only on one platform        | Real-device/browser-specific frontend regression                                     | Reproduce with Playwright mobile projects first; real-device video is in the run artifacts.                                    |
+| Native smoke fails at WebView boot         | Shell regression, production outage, or WebView debuggability                        | Check production health first; confirm the APK is a debug build (WebView contexts are only visible to Appium in debug builds). |
+| Deep-link test fails                       | `useDeepLinkNavigation` regression in this repo or intent-filter change in the shell | Compare against `__tests__/app/openMobile.test.tsx` expectations.                                                              |
+| Fuzz fails                                 | Shell crash/ANR under monkey input                                                   | Pull the crash video + logcat from artifacts; file against `6529-core-mobile` if native.                                       |
 
 Flaky-signal policy mirrors the staging E2E rules in
 `ops/skills/deploy-6529/SKILL.md`: rerun once with evidence, then harden the

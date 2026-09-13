@@ -1,16 +1,145 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import DocumentationValueEditor from "@/components/artwork-documentation/DocumentationValueEditor";
+import { editorForSchema } from "@/lib/artwork-documentation/catalogue";
 import DocumentationModules from "@/components/artwork-documentation/DocumentationModules";
 import { documentationFixture } from "@/__tests__/fixtures/artwork-documentation";
 import type { ApiArtworkDocumentationOperation } from "@/generated/models/ApiArtworkDocumentationOperation";
 import type { PendingEdit } from "@/lib/artwork-documentation/draft-controller";
 import { validDocumentationOperation } from "@/lib/artwork-documentation/validation";
+import museumProfile from "@/__tests__/fixtures/artwork-documentation-profile-v3.json";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
 
 describe("artwork documentation modules", () => {
+  it("names a document's nested group using its singular item label", () => {
+    const context = documentationFixture();
+    context.profile = museumProfile as never;
+    context.modules["context"]!.answers["documents"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: [
+        {
+          id: "document",
+          kind: "production_account",
+          title: "A document about the work",
+          language: "en",
+          text: "The complete production account.",
+        },
+      ],
+    } as never;
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="story"
+        onChange={jest.fn()}
+      />
+    );
+    fireEvent.click(screen.getByText("A document about the work"));
+    const document = screen.getByRole("group", { name: "Document" });
+    expect(document.querySelector("legend")).toHaveTextContent("Document");
+    expect(within(document).getByRole("textbox", { name: "Text" })).toHaveValue(
+      "The complete production account."
+    );
+    const collection = screen.getByRole("group", {
+      name: "Full accounts & documents",
+    });
+    expect(collection).toContainElement(document);
+    expect(collection.querySelector("legend")).toHaveClass("tw-sr-only");
+    expect(document.querySelector("legend")).not.toHaveClass("tw-sr-only");
+  });
+  it("names the nested video duration group while retaining the Type control's label", () => {
+    const context = documentationFixture();
+    context.profile = museumProfile as never;
+    context.modules["artwork"]!.answers["media_profiles"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: ["video"],
+    } as never;
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="story"
+        onChange={jest.fn()}
+      />
+    );
+    const duration = screen.getByRole("group", {
+      name: "Duration",
+    });
+    expect(
+      within(duration).getByRole("combobox", { name: "Type" })
+    ).toBeInTheDocument();
+    expect(duration.querySelector("legend")).not.toHaveClass("tw-sr-only");
+    const examples = within(duration).getAllByText(
+      "See an example for this answer",
+      { exact: true }
+    );
+    for (const example of examples)
+      expect(
+        duration.querySelector("legend")!.compareDocumentPosition(example) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+  });
+  it("guides a generic Stream caption without assigning a program to the work", () => {
+    const context = documentationFixture();
+    context.profile = museumProfile as never;
+    context.program_id = null;
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="story"
+        onChange={jest.fn()}
+      />
+    );
+    expect(
+      within(screen.getByRole("region", { name: "Caption" })).getByText(
+        "Give a reader a way into the work. Aim for 75–150 words in your chosen language."
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/For Keys and Gates, aim/)).toBeNull();
+  });
+  it("lets artists choose the work's media before media-specific facts and preserves combined choices", () => {
+    const context = documentationFixture();
+    context.profile = museumProfile as never;
+    context.modules["artwork"]!.answers["media_profiles"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: ["photography"],
+    } as never;
+    context.modules["artwork"]!.answers["capture_date"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: { precision: "year", start: "2026", approximate: false },
+    } as never;
+    const onChange = jest.fn();
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="artwork"
+        onChange={onChange}
+      />
+    );
+    const media = screen.getByRole("region", { name: "The form of the work" });
+    const capture = screen.getByRole("region", { name: "Capture date" });
+    expect(
+      media.compareDocumentPosition(capture) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    fireEvent.click(
+      within(media).getByRole("checkbox", { name: /Audio, sound & music/ })
+    );
+    expect(onChange).toHaveBeenLastCalledWith(
+      "artwork",
+      expect.objectContaining({
+        field: "media_profiles",
+        answer: expect.objectContaining({ value: ["photography", "audio"] }),
+      })
+    );
+  });
   it("associates a nested Label with its input rather than the surrounding field heading", () => {
     const context = documentationFixture();
     const artwork = context.profile.modules.find(
@@ -436,4 +565,31 @@ describe("artwork documentation modules", () => {
     );
     expect(onChange).toHaveBeenLastCalledWith({ height: 800 });
   });
+  it.each([undefined, []])(
+    "shows a fresh object's inputs when required is %s",
+    (required) => {
+      const editor = editorForSchema(
+        {
+          type: "object",
+          properties: {
+            title: { type: "string", title: "Title" },
+            note: { type: "string", title: "Note" },
+          },
+          ...(required ? { required } : {}),
+        },
+        "fresh"
+      );
+      render(
+        <DocumentationValueEditor
+          id="fresh"
+          label="Fresh object"
+          editor={editor}
+          value={{}}
+          onChange={jest.fn()}
+        />
+      );
+      expect(screen.getByRole("textbox", { name: "Title" })).toBeVisible();
+      expect(screen.getByRole("textbox", { name: "Note" })).toBeVisible();
+    }
+  );
 });

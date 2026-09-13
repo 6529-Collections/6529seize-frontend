@@ -25,6 +25,7 @@ import {
   startDocumentationUpload,
 } from "@/services/api/artwork-documentation-assets-api";
 import { transferDocumentationFile } from "@/lib/artwork-documentation/upload";
+import { pollDocumentationProcessing } from "@/lib/artwork-documentation/poll-processing";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
@@ -136,6 +137,150 @@ beforeEach(() => {
 });
 
 describe("publication-only artwork uploads", () => {
+  it.each(["consent_instrument", "rights_instrument"])(
+    "uploads v3 %s as public material while legacy rules remain separate",
+    async (role) => {
+      const props = setup();
+      props.context.profile.version = 3;
+      props.context.profile.media_profiles = [{ id: "photography" }] as never;
+      props.context.modules["artwork"]!.answers["media_profiles"] = {
+        status: ApiArtworkDocumentationAnswerStatusEnum.Provided,
+        value: ["photography"],
+      } as never;
+      jest
+        .mocked(startDocumentationUpload)
+        .mockResolvedValue(uploadSession({ role }));
+      jest
+        .mocked(transferDocumentationFile)
+        .mockResolvedValue({ asset: uploadSession().asset });
+      render(<DocumentationUpload {...props} />);
+      fireEvent.change(
+        screen.getByRole("combobox", { name: "What is this file for?" }),
+        { target: { value: role } }
+      );
+      selectFile();
+      fireEvent.click(screen.getByRole("button", { name: "Upload file" }));
+      await waitFor(() =>
+        expect(startDocumentationUpload).toHaveBeenCalledWith(
+          props.context.id,
+          expect.objectContaining({
+            role,
+            intended_visibility: "public_record",
+          }),
+          expect.any(String),
+          expect.any(AbortSignal)
+        )
+      );
+    }
+  );
+  it("stops an oversized queued file before creating its upload while retaining the first transfer", async () => {
+    const props = setup();
+    props.context.profile.limits["asset_bytes"] = 5;
+    jest.mocked(startDocumentationUpload).mockResolvedValue(uploadSession());
+    jest
+      .mocked(getDocumentationUpload)
+      .mockResolvedValue(uploadSession({ state: "ready" }));
+    jest
+      .mocked(transferDocumentationFile)
+      .mockResolvedValue({ asset: uploadSession().asset });
+    render(<DocumentationUpload {...props} />);
+    fireEvent.change(screen.getByLabelText("Select file"), {
+      target: {
+        files: [
+          new File(["one"], "small.png", { type: "image/png" }),
+          new File(["too-large"], "oversized.png", { type: "image/png" }),
+        ],
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload file" }));
+    await waitFor(() => expect(pollDocumentationProcessing).toHaveBeenCalled());
+    const poll = jest.mocked(pollDocumentationProcessing).mock.calls.at(-1)![0];
+    await act(async () => {
+      await poll.poll(new AbortController().signal);
+    });
+    await waitFor(() => expect(screen.getByRole("alert")).toBeVisible());
+    expect(startDocumentationUpload).toHaveBeenCalledTimes(1);
+    expect(transferDocumentationFile).toHaveBeenCalledTimes(1);
+    expect(linkDocumentationAsset).toHaveBeenCalledTimes(1);
+  });
+  it.each([
+    [1, "1 B"],
+    [1510, "1.5 KB"],
+    [1024 * 1024, "1 MB"],
+  ] as const)("shows a nonzero received size for %s bytes", (size, label) => {
+    const props = setup();
+    const asset = uploadSession({ state: "ready", size_bytes: size }).asset;
+    props.context.assets = [asset];
+    props.context.asset_links = [assetLink(asset)];
+    render(<DocumentationUpload {...props} />);
+    expect(
+      screen.getByText(`Final artwork · ${label} · Ready`)
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/0 MiB/)).toBeNull();
+  });
+  it("transfers and attaches a selected batch once in order, retaining distinct originals", async () => {
+    const props = setup();
+    jest
+      .mocked(startDocumentationUpload)
+      .mockImplementation(async (_id, body) => ({
+        ...uploadSession({ id: body.filename, filename: body.filename }),
+        upload_id: body.filename,
+      }));
+    jest.mocked(getDocumentationUpload).mockImplementation(async (_id, id) => ({
+      ...uploadSession({ id, filename: id, state: "ready" }),
+      upload_id: id,
+    }));
+    jest
+      .mocked(transferDocumentationFile)
+      .mockResolvedValue({ asset: uploadSession().asset });
+    render(<DocumentationUpload {...props} />);
+    fireEvent.change(screen.getByLabelText("Select file"), {
+      target: {
+        files: [
+          new File(["one"], "one.png", { type: "image/png" }),
+          new File(["two"], "two.png", { type: "image/png" }),
+        ],
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload file" }));
+    await waitFor(() => expect(pollDocumentationProcessing).toHaveBeenCalled());
+    const firstPoll = jest
+      .mocked(pollDocumentationProcessing)
+      .mock.calls.at(-1)![0];
+    await act(async () => {
+      await firstPoll.poll(new AbortController().signal);
+    });
+    await waitFor(() =>
+      expect(startDocumentationUpload).toHaveBeenCalledTimes(2)
+    );
+    await waitFor(() =>
+      expect(pollDocumentationProcessing).toHaveBeenCalledTimes(2)
+    );
+    const secondPoll = jest
+      .mocked(pollDocumentationProcessing)
+      .mock.calls.at(-1)![0];
+    await act(async () => {
+      await secondPoll.poll(new AbortController().signal);
+    });
+    expect(
+      jest
+        .mocked(startDocumentationUpload)
+        .mock.calls.map((call) => call[1].filename)
+    ).toEqual(["one.png", "two.png"]);
+    expect(
+      jest
+        .mocked(transferDocumentationFile)
+        .mock.calls.map((call) => call[0].file.name)
+    ).toEqual(["one.png", "two.png"]);
+    expect(
+      jest
+        .mocked(linkDocumentationAsset)
+        .mock.calls.map((call) => call[1].asset_id)
+    ).toEqual(["one.png", "two.png"]);
+    expect(jest.mocked(startDocumentationUpload).mock.calls[0]![2]).not.toEqual(
+      jest.mocked(startDocumentationUpload).mock.calls[1]![2]
+    );
+  });
   it.each([true, false, undefined])(
     "uses explicit original upload authorization can_mutate=%s for recovery after reload",
     async (canMutate) => {
@@ -430,7 +575,9 @@ describe("publication-only artwork uploads", () => {
         screen.getByRole("button", { name: "Cancel upload" })
       ).toBeEnabled()
     );
-    expect(screen.getByRole("button", { name: "Try again" })).toBeDisabled();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Try again" })).toBeDisabled()
+    );
     expect(screen.getByText(/This upload is still pending/)).toHaveTextContent(
       "Cancel upload to release it"
     );

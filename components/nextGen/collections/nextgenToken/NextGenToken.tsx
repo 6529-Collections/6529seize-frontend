@@ -32,6 +32,9 @@ import NextgenTokenRarity, {
 } from "./NextGenTokenProperties";
 import NextGenTokenProvenance from "./NextGenTokenProvenance";
 import NextGenTokenRenderCenter from "./NextGenTokenRenderCenter";
+import { getNextgenTokenViewSegment } from "./nextgen-token-view.helpers";
+import { t } from "@/i18n/messages";
+import NftDetailTabSection from "@/components/nft-navigation/NftDetailTabSection";
 
 interface Props {
   collection: NextGenCollection;
@@ -51,6 +54,9 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
   const refreshMarket = useCallback(() => {
     setMarketRefreshVersion((version) => version + 1);
   }, []);
+  const revealMarket = () => {
+    props.setView(NextgenCollectionView.LISTINGS_AND_OFFERS);
+  };
 
   const { address: connectedAddress } = useSeizeConnectContext();
 
@@ -86,36 +92,60 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
 
   function printDetails() {
     return (
-      <>
-        <nav
-          aria-label={`${props.token.name} sections`}
-          className="tw-mt-6 tw-overflow-x-auto tw-border-0 tw-border-b tw-border-solid tw-border-white/15"
+      <NftDetailTabSection
+        activeFocus={props.view}
+        locale={locale}
+        persistentContent={
+          <MarketDepthPanel
+            contract={NEXTGEN_CONTRACT}
+            tokenId={props.token.id}
+            locale={locale}
+            refreshKey={marketRefreshVersion}
+            embedded
+            active={props.view === NextgenCollectionView.LISTINGS_AND_OFFERS}
+            onReveal={revealMarket}
+          />
+        }
+        navigation={
+          <nav
+            aria-label={`${props.token.name} sections`}
+            className="tw-mb-6 tw-mt-6 tw-overflow-x-auto tw-border-0 tw-border-b tw-border-solid tw-border-white/15"
+          >
+            <div className="-tw-mb-px tw-inline-flex tw-min-w-max tw-gap-6 sm:tw-gap-8">
+              {printViewButton(
+                props.view,
+                NextgenCollectionView.ABOUT,
+                props.setView
+              )}
+              {printViewButton(
+                props.view,
+                NextgenCollectionView.LISTINGS_AND_OFFERS,
+                props.setView,
+                t(locale, "marketDepth.disclosure")
+              )}
+              {printViewButton(
+                props.view,
+                NextgenCollectionView.PROVENANCE,
+                props.setView
+              )}
+              {printViewButton(
+                props.view,
+                NextgenCollectionView.DISPLAY_CENTER,
+                props.setView
+              )}
+              {printViewButton(
+                props.view,
+                NextgenCollectionView.RARITY,
+                props.setView
+              )}
+            </div>
+          </nav>
+        }
+      >
+        <section
+          hidden={props.view === NextgenCollectionView.LISTINGS_AND_OFFERS}
+          className="tw-pb-6"
         >
-          <div className="-tw-mb-px tw-inline-flex tw-min-w-max tw-gap-6 sm:tw-gap-8">
-            {printViewButton(
-              props.view,
-              NextgenCollectionView.ABOUT,
-              props.setView
-            )}
-            {printViewButton(
-              props.view,
-              NextgenCollectionView.PROVENANCE,
-              props.setView
-            )}
-            {printViewButton(
-              props.view,
-              NextgenCollectionView.DISPLAY_CENTER,
-              props.setView
-            )}
-            {printViewButton(
-              props.view,
-              NextgenCollectionView.RARITY,
-              props.setView
-            )}
-          </div>
-        </nav>
-
-        <section className="tw-pb-6 tw-pt-6">
           {props.view === NextgenCollectionView.ABOUT && (
             <section>
               <div className="tw-mb-5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
@@ -145,12 +175,6 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
                   </div>
                 </div>
               </div>
-              <MarketDepthPanel
-                contract={NEXTGEN_CONTRACT}
-                tokenId={props.token.id}
-                locale={locale}
-                refreshKey={marketRefreshVersion}
-              />
             </section>
           )}
           {props.view === NextgenCollectionView.PROVENANCE && (
@@ -177,7 +201,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
             </div>
           )}
         </section>
-      </>
+      </NftDetailTabSection>
     );
   }
 
@@ -260,10 +284,8 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
   }
 
   function navigateToToken(tokenId: number) {
-    const viewPath =
-      props.view === NextgenCollectionView.ABOUT
-        ? ""
-        : `/${props.view.toLowerCase().replaceAll(" ", "-")}`;
+    const viewSegment = getNextgenTokenViewSegment(props.view);
+    const viewPath = viewSegment ? `/${viewSegment}` : "";
     const query = searchParams.toString();
     const pathname = `/nextgen/token/${tokenId}${viewPath}`;
     router.push(query ? `${pathname}?${query}` : pathname, {

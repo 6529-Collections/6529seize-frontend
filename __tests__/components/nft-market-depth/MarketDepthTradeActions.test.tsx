@@ -312,12 +312,17 @@ describe("MarketDepthTradeActions", () => {
     const disclosure = screen.getByRole("button", { name: /^Listings at / });
     const collect = screen.getByRole("button", { name: "Collect" });
     expect(disclosure).toHaveAttribute("aria-expanded", "false");
+    expect(collect).toHaveAttribute("aria-pressed", "false");
     await user.tab();
     expect(disclosure).toHaveFocus();
     await user.tab();
     expect(collect).toHaveFocus();
     await user.keyboard("{Enter}");
     await screen.findByRole("textbox", { name: "Quantity" });
+    expect(screen.getByRole("button", { name: "Remove" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
     expect(disclosure).toHaveAttribute("aria-expanded", "false");
     expect(onLoadOrders).not.toHaveBeenCalled();
     expect(mockFetchExactOrder).toHaveBeenCalledTimes(1);
@@ -491,8 +496,8 @@ describe("MarketDepthTradeActions", () => {
     view.rerender(
       content({
         ...exact,
-        scope: ApiMarketOrderScopeEnum.Collection,
-        applicability: ApiMarketOrderApplicabilityEnum.Collection,
+        scope: ApiMarketOrderScopeEnum.Trait,
+        applicability: ApiMarketOrderApplicabilityEnum.CriteriaUnverified,
         token_id: null,
       })
     );
@@ -593,19 +598,19 @@ describe("MarketDepthTradeActions", () => {
     expect(mockBatch).not.toHaveBeenCalled();
   });
 
-  it("keeps collection and criteria offers non-executable without requesting a trade order", () => {
+  it("keeps unverified trait offers unavailable without requesting a trade order", () => {
     renderAction(
       depthOrder({
         side: ApiMarketOrderSideEnum.Bid,
-        scope: ApiMarketOrderScopeEnum.Collection,
-        applicability: ApiMarketOrderApplicabilityEnum.Collection,
+        scope: ApiMarketOrderScopeEnum.Trait,
+        applicability: ApiMarketOrderApplicabilityEnum.CriteriaUnverified,
         token_id: null,
         currency: { address: MARKET_WETH, symbol: "WETH", decimals: 18 },
       })
     );
     expect(
       screen.getByText(
-        "This collection or criteria offer cannot be accepted here yet."
+        "This offer’s eligibility for this NFT has not been verified."
       )
     ).toBeInTheDocument();
     expect(mockFetchExactOrder).not.toHaveBeenCalled();
@@ -640,7 +645,7 @@ describe("MarketDepthTradeActions", () => {
     expect(mockTrade).not.toHaveBeenCalled();
   });
 
-  it("requires full current signer ownership and binds an accepted WETH offer", async () => {
+  it.each([false, true])("requires signer ownership and binds the page NFT when accepting a WETH offer (collection-wide: %s)", async (collectionWide) => {
     const offer = executableOrder({
       side: ApiMarketTradeOrderSideEnum.Offer,
       currency: MARKET_WETH,
@@ -675,6 +680,7 @@ describe("MarketDepthTradeActions", () => {
       depthOrder({
         side: ApiMarketOrderSideEnum.Bid,
         currency: { address: MARKET_WETH, symbol: "WETH", decimals: 18 },
+        ...(collectionWide ? { scope: ApiMarketOrderScopeEnum.Collection, applicability: ApiMarketOrderApplicabilityEnum.Collection, token_id: null } : {}),
       })
     );
     fireEvent.click(screen.getByRole("button", { name: "Accept offer" }));
