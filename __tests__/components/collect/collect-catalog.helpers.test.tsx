@@ -6,6 +6,7 @@ import { ApiMarketTradeOrderSideEnum } from "@/generated/models/ApiMarketTradeOr
 import {
   MARKET_SEAPORT,
   MARKET_ZERO,
+  MARKET_WETH,
 } from "@/components/collect/market-validation";
 
 jest.mock("@/components/collect/CollectAssetMedia", () => ({
@@ -103,6 +104,50 @@ it("prices a supported unit instead of its remaining lot and omits repetitive on
     collectCatalogArtwork(entry("2", "10", "b"), undefined, undefined, "en-US")
       .priceDescription
   ).toBeUndefined();
+});
+
+it.each([
+  ["en-US", "0.0372 ETH", "0.0371998999999 ETH"],
+  ["de-DE", "0,0372 ETH", "0,0371998999999 ETH"],
+] as const)(
+  "compacts the displayed native price in %s while preserving the exact listing",
+  (locale, compact, exact) => {
+    const item = entry("1", "37199899999900000", "a");
+    const original = JSON.stringify(item);
+    const view = collectCatalogArtwork(item, undefined, undefined, locale);
+    expect(view.priceLabel).toBe(compact);
+    expect(view.priceExactLabel).toBe(exact);
+    expect(JSON.stringify(item)).toBe(original);
+  }
+);
+
+it("uses the supported unit for both compact and exact prices without changing fees or quantity", () => {
+  const item = entry("1", "74399799999800000", "a");
+  Object.assign(item.order!, {
+    quantity: "2",
+    purchase_quantity: "1",
+    quantity_step: "1",
+    net_wei: "74000000000000000",
+    fees: [{ recipient: seller, amount_wei: "399799999800000" }],
+  });
+  const original = JSON.stringify(item);
+  const view = collectCatalogArtwork(item, undefined, undefined, "en-US");
+  expect(view.priceLabel).toBe("0.0372 ETH");
+  expect(view.priceExactLabel).toBe("0.0371998999999 ETH");
+  expect(JSON.stringify(item)).toBe(original);
+});
+
+it("retains indivisible lot pricing and never relabels WETH as native ETH", () => {
+  const lot = entry("1", "74399799999800000", "a");
+  lot.order!.quantity = "2";
+  const view = collectCatalogArtwork(lot, undefined, undefined, "en-US");
+  expect(view.priceLabel).toBe("0.0744 ETH");
+  expect(view.priceExactLabel).toBe("0.0743997999998 ETH");
+  expect(view.priceDescription).toBe("Price for 2 copies");
+  lot.order!.currency = MARKET_WETH;
+  const wrapped = collectCatalogArtwork(lot, undefined, undefined, "en-US");
+  expect(wrapped.priceLabel).toBe("0.0743997999998 WETH");
+  expect(wrapped.priceExactLabel).toBeUndefined();
 });
 
 it("labels indivisible lot prices and uses TDH's explicit availability", () => {
