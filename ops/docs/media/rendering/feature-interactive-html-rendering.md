@@ -67,6 +67,8 @@
   If prices are unavailable, the viewer says so, retains its current colors,
   and retries automatically. The card's `Details` tab still links to the
   original Arweave artwork and metadata.
+  Pause stops the cube, background, and lighting motion. The viewer also
+  respects reduced-motion preferences.
 - Shared wave/drop cards without a preview-image override render the host
   banner plus a borderless sandboxed iframe. The banner keeps its uppercase
   untrusted-content label at 11px and a separate source link.

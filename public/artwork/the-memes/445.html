@@ -58,7 +58,7 @@
       top: 15px;
       text-align: center;
       width: fit-content;
-      height: auto;
+      max-width: calc(100% - 40px);
       padding: 0 20px;
       box-sizing: border-box;
       pointer-events: none;
@@ -68,9 +68,10 @@
       border: 1px solid #ccc;
       border-radius: 10px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 40px;
+      min-height: 40px;
     }
 
     h1 {
@@ -255,7 +256,7 @@
         transform: none;
         text-align: left;
         padding: 0 16px;
-        justify-content: flex-start;
+        align-items: flex-start;
       }
 
 
@@ -371,6 +372,11 @@
         width: 180px;
       }
     }
+    @media (prefers-reduced-motion: reduce) {
+      #info, #controlGroup, .button {
+        transition: none;
+      }
+    }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -379,24 +385,25 @@
 
 <body>
   <div id="info">
-    <p id="ethStatus" role="status">Fetching ETH price...</p>
+    <output id="ethStatus">Fetching ETH price...</output>
+    <output id="artworkStatus" hidden>Interactive artwork unavailable. Reload to try again.</output>
   </div>
 
   <canvas id="bgCanvas"></canvas>
 
   <div id="controlGroup">
     <div id="zoomControls">
-      <button id="pauseButton" class="button" aria-label="Pause rotation"></button>
-      <button id="zoomInButton" class="button">+</button>
-      <button id="zoomOutButton" class="button">-</button>
-      <button id="zoomResetButton" class="button" data-full="Reset" data-short="Reset">Reset</button>
-      <button id="insideButton" class="button" data-full="Inside" data-short="In">Inside</button>
+      <button id="pauseButton" class="button" aria-label="Pause animation" aria-pressed="false"></button>
+      <button id="zoomInButton" class="button" aria-label="Zoom in">+</button>
+      <button id="zoomOutButton" class="button" aria-label="Zoom out">-</button>
+      <button id="zoomResetButton" class="button" aria-label="Reset zoom" data-full="Reset" data-short="Reset">Reset</button>
+      <button id="insideButton" class="button" aria-label="Zoom inside" data-full="Inside" data-short="In">Inside</button>
     </div>
     <button id="regenerateButton" class="button" data-full="Regenerate Camo" data-short="Regenerate">Regenerate
       Camo</button>
   </div>
 
-  <button id="hideToggleButton" class="button" aria-label="Toggle UI"></button>
+  <button id="hideToggleButton" class="button" aria-label="Hide controls" aria-expanded="true" aria-controls="controlGroup info saveImageButton"></button>
   <button id="saveImageButton" class="button" aria-label="Save image"></button>
   <img id="brandLogo" src="https://cdn.meebco.com/brand/BLACK-BLOCKHEAD-ONALPHA.png" alt="">
 
@@ -405,7 +412,10 @@
 
     let scene, camera, renderer, mainCube;
     let pixelFaces = [];
+    let sceneReady = false;
     let isPaused = false;
+    let animationTime = Date.now();
+    let lastFrameTime = animationTime;
 
     let isDragging = false;
     let previousMousePosition = { x: 0, y: 0 };
@@ -470,6 +480,8 @@
       svg.setAttribute('viewBox', '0 0 24 24');
       svg.setAttribute('width', String(size));
       svg.setAttribute('height', String(size));
+      svg.setAttribute('aria-hidden', 'true');
+      svg.setAttribute('focusable', 'false');
       const path = document.createElementNS(svgNS, 'path');
       path.setAttribute('d', pathD);
       path.setAttribute('fill', 'currentColor');
@@ -483,6 +495,39 @@
     const playD = "M8 5v14l11-7z";
 
     async function init() {
+      zoomInButton = document.getElementById('zoomInButton');
+      zoomOutButton = document.getElementById('zoomOutButton');
+      zoomResetButton = document.getElementById('zoomResetButton');
+      insideButton = document.getElementById('insideButton');
+      regenerateButton = document.getElementById('regenerateButton');
+      hideToggleButton = document.getElementById('hideToggleButton');
+      pauseButton = document.getElementById('pauseButton');
+      infoEl = document.getElementById('info');
+      controlGroupEl = document.getElementById('controlGroup');
+      saveImageButton = document.getElementById('saveImageButton');
+      ethStatusEl = document.getElementById('ethStatus');
+
+      const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+      isPaused = motionPreference.matches;
+      motionPreference.addEventListener('change', event => {
+        isPaused = event.matches;
+        updatePauseButton();
+      });
+
+      try {
+        await initScene();
+      } catch {
+        sceneReady = false;
+        document.getElementById('artworkStatus').hidden = false;
+        for (const button of document.querySelectorAll('button')) {
+          button.disabled = true;
+        }
+      } finally {
+        void refreshPrice();
+      }
+    }
+
+    async function initScene() {
       scene = new THREE.Scene();
 
       if (ENABLE_DYNAMIC_BACKGROUND) {
@@ -547,18 +592,6 @@
         mainCube.add(pixelsFace);
       });
 
-      zoomInButton = document.getElementById('zoomInButton');
-      zoomOutButton = document.getElementById('zoomOutButton');
-      zoomResetButton = document.getElementById('zoomResetButton');
-      insideButton = document.getElementById('insideButton');
-      regenerateButton = document.getElementById('regenerateButton');
-      hideToggleButton = document.getElementById('hideToggleButton');
-      pauseButton = document.getElementById('pauseButton');
-      infoEl = document.getElementById('info');
-      controlGroupEl = document.getElementById('controlGroup');
-      saveImageButton = document.getElementById('saveImageButton');
-      ethStatusEl = document.getElementById('ethStatus');
-
       window.addEventListener('resize', () => {
         onWindowResize();
         applyResponsiveLabels();
@@ -574,7 +607,7 @@
       renderer.domElement.addEventListener('touchmove', onTouchMove, { passive: false });
       renderer.domElement.addEventListener('touchend', onMouseUp, { passive: true });
 
-      regenerateButton.addEventListener('click', regenerateCamoOnly);
+      regenerateButton.addEventListener('click', () => { void regenerateCamoOnly(); });
       saveImageButton.addEventListener('click', saveImage);
       hideToggleButton.addEventListener('click', toggleUi);
       pauseButton.addEventListener('click', togglePause);
@@ -586,22 +619,22 @@
 
       appendSvgIcon(hideToggleButton, eyeSlashD, 24);
       appendSvgIcon(saveImageButton, saveD, 22);
-      appendSvgIcon(pauseButton, pauseD, 16);
+      updatePauseButton();
 
       updateButtonStates();
       applyResponsiveLabels();
 
       if (ENABLE_DYNAMIC_BACKGROUND) updateBackgroundPalette(currentEthChange >= 0);
       await regenerateCamoOnly(true);
+      sceneReady = true;
       animate();
-      void refreshPrice();
     }
 
     function applyResponsiveLabels() {
       const compact = window.innerWidth <= 420;
       document.querySelectorAll('[data-full]').forEach(el => {
-        const full = el.getAttribute('data-full');
-        const short = el.getAttribute('data-short') || full;
+        const full = el.dataset.full;
+        const short = el.dataset.short || full;
         el.textContent = compact ? short : full;
       });
     }
@@ -648,14 +681,14 @@
         const data = await response.json();
 
         if (typeof data.last !== 'string' || typeof data.open !== 'string') {
-          throw new Error('Invalid ETH price response');
+          throw new TypeError('Invalid ETH price response');
         }
         const price = Number(data.last);
         const open = Number(data.open);
         const ethChange = (price - open) / open * 100;
         if (!Number.isFinite(price) || price <= 0 ||
             !Number.isFinite(open) || open <= 0 || !Number.isFinite(ethChange)) {
-          throw new Error('Invalid ETH price data');
+          throw new TypeError('Invalid ETH price data');
         }
         currentEthChange = ethChange;
 
@@ -734,7 +767,7 @@
     }
 
     async function fetchAndApplyColors() {
-      if (await fetchEthPrice()) {
+      if (await fetchEthPrice() && sceneReady) {
         await regenerateCamoOnly(true);
       }
     }
@@ -766,11 +799,19 @@
       infoEl.classList.toggle('ui-hidden', isHidden);
       saveImageButton.classList.toggle('ui-hidden', isHidden);
       appendSvgIcon(hideToggleButton, isHidden ? eyeD : eyeSlashD, 24);
+      hideToggleButton.setAttribute('aria-label', isHidden ? 'Show controls' : 'Hide controls');
+      hideToggleButton.setAttribute('aria-expanded', String(!isHidden));
     }
 
     function togglePause() {
       isPaused = !isPaused;
+      updatePauseButton();
+    }
+
+    function updatePauseButton() {
       appendSvgIcon(pauseButton, isPaused ? playD : pauseD, 16);
+      pauseButton.setAttribute('aria-label', isPaused ? 'Resume animation' : 'Pause animation');
+      pauseButton.setAttribute('aria-pressed', String(isPaused));
     }
 
     function zoomIn() { if (zoomSteps < maxZoomSteps) { zoomSteps++; camera.position.z -= zoomStep; updateButtonStates(); } }
@@ -789,7 +830,7 @@
       const dataURL = renderer.domElement.toDataURL('image/png');
       const link = document.createElement('a');
       link.href = dataURL; link.download = 'RedLightGreenLight.png';
-      document.body.appendChild(link); link.click(); document.body.removeChild(link);
+      document.body.appendChild(link); link.click(); link.remove();
     }
 
     function onWindowResize() {
@@ -800,7 +841,12 @@
 
 
     function animate() {
+      if (!sceneReady) return;
       requestAnimationFrame(animate);
+
+      const frameTime = Date.now();
+      if (!isPaused) animationTime += frameTime - lastFrameTime;
+      lastFrameTime = frameTime;
 
       if (ENABLE_DYNAMIC_BACKGROUND) {
         animateBackground();
@@ -825,7 +871,7 @@
       const currentBreathSpeed = baseBreathSpeed + (pulseSpeedScale * (maxBreathSpeed - baseBreathSpeed));
 
 
-      const t = Date.now();
+      const t = animationTime;
       const heartPulseFactor = (Math.sin(t * currentPulseSpeed) * 0.5 + 0.5);
       const breathPulseFactor = (Math.sin(t * currentBreathSpeed) * 0.5 + 0.5);
 
@@ -958,13 +1004,12 @@
 
       bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
 
-      const time = Date.now() * 0.001;
+      const time = animationTime * 0.001;
       const waveSpeed = 0.5;
 
       const waveFrequency = window.innerWidth < 768 ? 2.0 : 4.0;
 
-      for (let i = 0; i < bgGrid.length; i++) {
-        const pixel = bgGrid[i];
+      for (const pixel of bgGrid) {
 
 
         const phase = (time * waveSpeed) - (pixel.distance * waveFrequency);

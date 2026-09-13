@@ -24,7 +24,7 @@
       ],
       "facts": [
         "The Memes card 445, Red Light, Green Light by Meebits x DocLove, uses a compatibility viewer for its published interactive artwork. It displays Coinbase ETH/USD and the 24-hour percentage change, refreshing about once a minute.",
-        "The artwork, animated background and controls load without waiting for prices. If the price feed is unavailable, the viewer reports that prices are unavailable, retains its current colors and retries automatically.",
+        "The artwork, animated background and controls load without waiting for prices. If the price feed is unavailable, the viewer reports that prices are unavailable, retains its current colors and retries automatically. Pause stops cube, background and lighting motion, and the viewer respects reduced-motion preferences.",
         "The card's Details tab preserves links to the original Arweave artwork and metadata. The compatibility viewer repairs the display on 6529.io; it does not replace the original token metadata or the artwork displayed on other sites."
       ],
       "canonical_path": "/the-memes/445",

@@ -59,6 +59,7 @@ function createArtwork() {
       ethStatusEl = status;
       regenerateButton = button;
       currentEthChange = -2;
+      sceneReady = true;
       updateBackgroundPalette(false);
       ({
         fetchEthPrice,
@@ -69,7 +70,7 @@ function createArtwork() {
     `,
     context
   );
-  return { artwork, fetch, regenerateButton, status };
+  return { artwork, context, fetch, regenerateButton, status };
 }
 
 function priceResponse(data: unknown): PriceResponse {
@@ -253,5 +254,71 @@ describe("Meebits #445 ETH price updates", () => {
     expect(fetch).toHaveBeenCalledTimes(2);
     await jest.advanceTimersByTimeAsync(10);
     expect(jest.getTimerCount()).toBe(1);
+  });
+
+  it("keeps the shared motion clock and rotation still while paused", () => {
+    const { context } = createArtwork();
+    const snapshot = runInContext(
+      `
+        animationTime = 1000;
+        lastFrameTime = 1000;
+        Date.now = () => 2000;
+        mainCube = { rotation: { x: 0, y: 0 } };
+        renderer = { render() {} };
+        requestAnimationFrame = () => 1;
+        isPaused = true;
+        animate();
+        ({ time: animationTime, rotation: { ...mainCube.rotation } });
+      `,
+      context
+    );
+    expect(snapshot).toEqual({ time: 1000, rotation: { x: 0, y: 0 } });
+
+    const resumed = runInContext(
+      `
+        isPaused = false;
+        Date.now = () => 2100;
+        animate();
+        ({ time: animationTime, rotation: { ...mainCube.rotation } });
+      `,
+      context
+    );
+    expect(resumed).toEqual({ time: 1100, rotation: { x: 0.002, y: 0.002 } });
+  });
+
+  it("shows a scene failure and still starts the independent price tracker", async () => {
+    const { context, fetch } = createArtwork();
+    const artworkDocument = document.implementation.createHTMLDocument();
+    artworkDocument.body.innerHTML = `
+      <output id="ethStatus"></output>
+      <output id="artworkStatus" hidden></output>
+      <button id="pauseButton"></button>
+      <button id="regenerateButton"></button>
+    `;
+    const motionPreference = {
+      matches: true,
+      addEventListener: jest.fn(),
+    };
+    Object.assign(context, {
+      document: artworkDocument,
+      window: { innerWidth: 1024, matchMedia: () => motionPreference },
+    });
+    fetch.mockResolvedValue(priceResponse({ last: "2200", open: "2000" }));
+
+    // No THREE implementation is supplied: scene setup fails before any WebGL work.
+    await runInContext("init()", context);
+    await jest.advanceTimersByTimeAsync(0);
+
+    expect(artworkDocument.getElementById("artworkStatus")?.hidden).toBe(false);
+    expect(artworkDocument.querySelector("button")?.disabled).toBe(true);
+    expect(artworkDocument.getElementById("ethStatus")?.textContent).toContain(
+      "ETH: $2,200.00"
+    );
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(runInContext("isPaused", context)).toBe(true);
+    expect(motionPreference.addEventListener).toHaveBeenCalledWith(
+      "change",
+      expect.any(Function)
+    );
   });
 });
