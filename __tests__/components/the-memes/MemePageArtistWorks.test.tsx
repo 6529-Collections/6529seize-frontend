@@ -47,7 +47,10 @@ function mockCatalogue(artists = catalogue) {
   });
 }
 
-function renderGallery(locale: SupportedLocale = "en-US", artistHandles = "") {
+function renderGallery(
+  locale: SupportedLocale = "en-US",
+  artistHandles: string | null = ""
+) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -97,6 +100,12 @@ it("uses catalogue authorship, excludes the current card and orders other works 
   );
 });
 
+it("uses the catalogue when the API has a null artist profile handle", async () => {
+  renderGallery("en-US", null);
+  expect(
+    await screen.findByRole("link", { name: /Artwork 6/ })
+  ).toBeInTheDocument();
+});
 it("expands the complete deduplicated gallery and can restore the preview", async () => {
   renderGallery();
   const gallery = await screen.findByRole("region", {

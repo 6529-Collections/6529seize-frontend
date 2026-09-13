@@ -2,7 +2,6 @@
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { MEMES_CONTRACT } from "@/constants/constants";
-import type { NFT } from "@/entities/INFT";
 import type { ApiArtistNameItem } from "@/generated/models/ApiArtistNameItem";
 import type { ApiNft } from "@/generated/models/ApiNft";
 import type { ApiNftsPage } from "@/generated/models/ApiNftsPage";
@@ -27,12 +26,12 @@ export default function MemePageArtistWorks({
   nft,
   locale,
 }: Readonly<{
-  nft: Pick<NFT, "id" | "artist_seize_handle">;
+  nft: Pick<ApiNft, "id" | "artist_seize_handle">;
   locale: SupportedLocale;
 }>) {
   const handles = [
     ...new Set(
-      nft.artist_seize_handle
+      (nft.artist_seize_handle ?? "")
         .split(",")
         .map((handle) => handle.trim().toLowerCase())
         .filter(Boolean)
