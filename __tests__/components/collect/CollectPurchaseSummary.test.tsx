@@ -126,6 +126,30 @@ it("keeps an external destination marker visible and never borrows the payer nam
   expect(screen.getByText(getAddress(RECIPIENT))).toBeVisible();
 });
 
+it("keeps the gift announcement mounted as the reviewed destination changes", () => {
+  const { container, rerender } = summary();
+  const announcement = container.querySelector("section > output");
+  expect(announcement).toHaveAttribute("aria-live", "polite");
+  expect(announcement).toBeEmptyDOMElement();
+  rerender(
+    <CollectPurchaseSummary
+      title="Open Source"
+      purchase={{
+        ...purchase,
+        recipientAddress: RECIPIENT,
+        recipientInProfile: false,
+      }}
+    />
+  );
+  expect(container.querySelector("section > output")).toBe(announcement);
+  expect(announcement).toHaveTextContent(
+    "Copies delivered outside this profile do not count toward its collecting goals or TDH."
+  );
+  rerender(<CollectPurchaseSummary title="Open Source" purchase={purchase} />);
+  expect(container.querySelector("section > output")).toBe(announcement);
+  expect(announcement).toBeEmptyDOMElement();
+});
+
 it("names only exact role and chain identities while every contract address stays reachable", () => {
   summary();
   expect(screen.getByText("The Memes")).not.toBeVisible();
