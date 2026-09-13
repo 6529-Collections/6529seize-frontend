@@ -39,6 +39,7 @@ interface ArtworkSubmissionData {
   operationalData?: OperationalData;
   isAdditionalActionPromised: boolean;
   waveId: string;
+  waveName: string;
   termsOfService: string | null;
 }
 
@@ -354,6 +355,7 @@ export function useArtworkSubmissionMutation() {
       const signatureResult = await signDrop({
         drop: transformedRequest,
         termsOfService: data.termsOfService,
+        memesWave: { id: data.waveId, name: data.waveName },
       });
 
       if (!signatureResult.success) {

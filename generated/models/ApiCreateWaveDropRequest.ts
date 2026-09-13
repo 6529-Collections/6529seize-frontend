@@ -29,11 +29,11 @@ export class ApiCreateWaveDropRequest {
     'mentioned_waves'?: Array<ApiCreateMentionedWave>;
     'metadata': Array<ApiDropMetadata>;
     /**
-    * If wave requires drop signatures then this needs to be set. Signature of a drop is ethSign(creatorWallet, sha256(oneLineJsonWithAlphabeticallySortedFieldsRecursive(ApiCreateDropRequest - signature - signature_message (+ wave.participation.terms if it exists))))
+    * Wallet signature, required when the wave requires signed drops. Use personal_sign for a version-2 structured text signature_message, or eth_signTypedData_v4 for the MemeCardSubmission EIP-712 envelope supported only when creating a participatory drop in the configured Main Stage wave through POST /drops. EOA and EIP-1271 contract-wallet verification are supported. When legacy signatures are enabled and signature_message is absent, personal-sign signatures of the canonical payload hash remain supported. The payload hash is SHA256 of single-line recursively key-sorted JSON of the original request, excluding signature and signature_message, with terms_of_service added from the wave\'s current participation terms when present.
     */
     'signature': string | null;
     /**
-    * Optional request-only structured wallet signature message. Present when structured signatures are enabled and omitted from the payload hash before signature verification.
+    * Optional request-only signed content, excluded from the payload hash and not persisted. Existing structured signatures use version-2 text. POST /drops also supports the JSON-serialized EIP-712 envelope {domain, types, primaryType, message} for MemeCardSubmission version 1 in the configured Main Stage wave. Its fixed schema binds the action, normalized artwork title, authoritative destination and current terms, complete payload hash, signing wallet, API audience, client origin, canonical timestamps and single-use UUID v4 nonce. Its lifetime must not exceed five minutes. This typed authorization creates a new submission; POST /drops/{drop_id} rejects it for updates. Other drop and wave-creation flows retain their existing signature formats.
     */
     'signature_message'?: string | null;
     'is_safe_signature'?: boolean;

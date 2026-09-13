@@ -510,6 +510,10 @@ const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
 } as const);
 
 const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
+  "agreement.changed":
+    "The submission destination or terms changed. Review and agree again to continue. Your artwork draft has been kept.",
+  "agreement.reviewRequired":
+    "Review and agree to the current submission terms before submitting. Your artwork draft has been kept.",
   "media.missingUpload": "Select artwork or choose Interactive HTML.",
   "media.missingInteractive": "Enter a valid hash or choose Upload File.",
   "identity.connectPrompt":

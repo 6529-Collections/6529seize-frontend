@@ -14,11 +14,14 @@ import type {
   FormAction,
   FormState,
   ProfileDefaults,
+  SubmissionAgreement,
 } from "./artworkSubmissionFormState";
 
 interface UseArtworkSubmissionFormActionsParams {
   readonly state: FormState;
   readonly dispatch: Dispatch<FormAction>;
+  readonly agreement: SubmissionAgreement;
+  readonly agreements: boolean;
   readonly profileDefaults?: ProfileDefaults | undefined;
   readonly shouldApplyProfileDefaults?: boolean | undefined;
 }
@@ -26,6 +29,8 @@ interface UseArtworkSubmissionFormActionsParams {
 export function useArtworkSubmissionFormActions({
   state,
   dispatch,
+  agreement,
+  agreements,
   profileDefaults,
   shouldApplyProfileDefaults = true,
 }: UseArtworkSubmissionFormActionsParams) {
@@ -41,9 +46,10 @@ export function useArtworkSubmissionFormActions({
   }, [dispatch, profileDefaults, shouldApplyProfileDefaults]);
 
   const handleContinueFromTerms = useCallback(() => {
+    if (!agreements) return;
     applyProfileDefaults();
     dispatch({ type: "SET_STEP", payload: SubmissionStep.ARTWORK });
-  }, [applyProfileDefaults, dispatch]);
+  }, [agreements, applyProfileDefaults, dispatch]);
 
   const handleContinueFromArtwork = useCallback(() => {
     applyProfileDefaults();
@@ -56,9 +62,9 @@ export function useArtworkSubmissionFormActions({
 
   const setAgreements = useCallback(
     (value: boolean) => {
-      dispatch({ type: "SET_AGREEMENTS", payload: value });
+      dispatch({ type: "SET_AGREEMENTS", payload: value ? agreement : null });
     },
-    [dispatch]
+    [agreement, dispatch]
   );
 
   const setAdditionalActionPromised = useCallback(
@@ -128,12 +134,8 @@ export function useArtworkSubmissionFormActions({
   );
 
   const getSubmissionData = useCallback(() => {
-    const {
-      artworkUrl,
-      isAdditionalActionPromised,
-      operationalData,
-      traits,
-    } = state;
+    const { artworkUrl, isAdditionalActionPromised, operationalData, traits } =
+      state;
     return {
       imageUrl: artworkUrl,
       traits: {

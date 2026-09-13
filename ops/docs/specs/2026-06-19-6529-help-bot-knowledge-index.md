@@ -31,6 +31,15 @@ post**, the wallet chooser, and the **Sign message** step. The sign-in explanati
 confirms address ownership, with no transaction or gas fees. Profile setup and
 Wave permissions still determine participation after authentication.
 
+The Memes submission profile and wallet signing record covers the EIP-712
+**Submit a Meme Card to The Memes** action, readable artwork and destination,
+terms agreement, and submission-only scope with no gas fee. Its five-minute
+authorization expiry does not expire a completed submission or the agreement.
+The record distinguishes canceling a wallet request, which retains the open
+draft, from closing the submission modal, which discards it. Wallet layout and
+classification vary; failed typed signing does not trigger a text-signature
+fallback.
+
 The Stream review record includes its four current entry guides and the
 **All topics** navigation. Its collector and code-review guide links refer to
 current pages; those guides are not invented as historical snapshot routes.
