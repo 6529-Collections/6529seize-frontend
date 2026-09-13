@@ -5,6 +5,25 @@ import {
   sanitizeUrlString,
 } from "@/utils/sentry-sanitizer";
 
+it("redacts sensitive top-level span data as well as nested evidence", () => {
+  const span = sanitizeSentrySpan({
+    data: {
+      evidence: "private",
+      content_snapshot: "private",
+      preview: "private",
+      nested: { moderator_note: "private" },
+      safe: "visible",
+    },
+  });
+  expect(span.data).toEqual({
+    evidence: "[Filtered]",
+    content_snapshot: "[Filtered]",
+    preview: "[Filtered]",
+    nested: { moderator_note: "[Filtered]" },
+    safe: "visible",
+  });
+});
+
 const SYNTHETIC_WAVE_ID = `${"1".repeat(8)}-${"2".repeat(4)}-4${"3".repeat(3)}-8${"4".repeat(3)}-${"5".repeat(12)}`;
 const SYNTHETIC_DROP_ID = `${"6".repeat(8)}-${"7".repeat(4)}-4${"8".repeat(3)}-8${"9".repeat(3)}-${"a".repeat(12)}`;
 const SYNTHETIC_AUTHOR_ID = `${"a".repeat(8)}-${"b".repeat(4)}-4${"c".repeat(3)}-8${"d".repeat(3)}-${"e".repeat(12)}`;
@@ -786,4 +805,19 @@ describe("sentry-sanitizer", () => {
       "/[waveid]/drops"
     );
   });
+});
+
+it("filters saved moderation evidence from telemetry context", () => {
+  const event = sanitizeSentryEvent({
+    extra: {
+      evidence: { text: "synthetic private material" },
+      content_snapshot: { parts: ["synthetic private material"] },
+      preview: "synthetic private material",
+      statement_value: "synthetic private material",
+      moderator_note: "synthetic private material",
+      error_code: "MODERATION_STORAGE_UNAVAILABLE",
+    },
+  });
+  expect(JSON.stringify(event)).not.toContain("synthetic private material");
+  expect(event.extra?.["error_code"]).toBe("MODERATION_STORAGE_UNAVAILABLE");
 });

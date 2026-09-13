@@ -1,4 +1,6 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
+import { sha256 } from "js-sha256";
+import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
 import { useMutation } from "@tanstack/react-query";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
@@ -98,6 +100,11 @@ export const useGroupMutations = ({
   requestAuth,
   onGroupCreate,
 }: UseGroupMutationsArgs) => {
+  const submitting = useRef(false);
+  const pendingPublication = useRef<{
+    fingerprint: string;
+    group: ApiGroupFull;
+  } | null>(null);
   const createGroupMutation = useMutation({
     mutationFn: async ({
       payload,
@@ -199,7 +206,11 @@ export const useGroupMutations = ({
       currentHandle = null,
       publish = true,
     }: SubmitArgs): Promise<SubmitResult> => {
-      if (createGroupMutation.isPending || publishGroupMutation.isPending) {
+      if (
+        submitting.current ||
+        createGroupMutation.isPending ||
+        publishGroupMutation.isPending
+      ) {
         return {
           ok: false,
           reason: "busy",
@@ -226,62 +237,86 @@ export const useGroupMutations = ({
         };
       }
 
-      const authResult = await requestAuth();
-      if (!authResult.success) {
-        return {
-          ok: false,
-          reason: "auth",
-          error: "Authentication was cancelled.",
-        };
-      }
-
-      let created: ApiGroupFull;
+      submitting.current = true;
       try {
-        created = await createGroupMutation.mutateAsync({
-          payload,
-          nameOverride: trimmedName,
-        });
-      } catch (error) {
-        return {
-          ok: false,
-          reason: "api",
-          error: toErrorMessage(error),
-        };
-      }
+        const authResult = await requestAuth();
+        if (!authResult.success) {
+          return {
+            ok: false,
+            reason: "auth",
+            error: "Authentication was cancelled.",
+          };
+        }
 
-      if (!publish) {
+        const oldVersionId = resolveOldVersionId({
+          previousGroup,
+          currentHandle,
+        });
+        const fingerprint = sha256(
+          JSON.stringify([
+            getWalletAddress()?.toLowerCase(),
+            getWalletRole(),
+            currentHandle?.toLowerCase(),
+            oldVersionId,
+            { ...payload, name: trimmedName },
+          ])
+        );
+        if (
+          pendingPublication.current?.fingerprint !== fingerprint ||
+          !publish
+        ) {
+          pendingPublication.current = null;
+        }
+        let created: ApiGroupFull;
+        try {
+          created =
+            pendingPublication.current?.group ??
+            (await createGroupMutation.mutateAsync({
+              payload,
+              nameOverride: trimmedName,
+            }));
+          if (publish)
+            pendingPublication.current = { fingerprint, group: created };
+        } catch (error) {
+          return {
+            ok: false,
+            reason: "api",
+            error: toErrorMessage(error),
+          };
+        }
+
+        if (!publish) {
+          return {
+            ok: true,
+            group: created,
+            published: false,
+          };
+        }
+
+        const visibilityResult = await updateVisibility({
+          groupId: created.id,
+          visible: true,
+          oldVersionId,
+          skipAuth: true,
+        });
+
+        if (!visibilityResult.ok) {
+          return {
+            ok: false,
+            reason: visibilityResult.reason,
+            error: visibilityResult.error,
+          };
+        }
+
+        pendingPublication.current = null;
         return {
           ok: true,
-          group: created,
-          published: false,
+          group: visibilityResult.group ?? created,
+          published: true,
         };
+      } finally {
+        submitting.current = false;
       }
-
-      const oldVersionId = resolveOldVersionId({
-        previousGroup,
-        currentHandle,
-      });
-
-      const visibilityResult = await updateVisibility({
-        groupId: created.id,
-        visible: true,
-        oldVersionId,
-        skipAuth: true,
-      });
-
-      if (!visibilityResult.ok) {
-        return {
-          ok: false,
-          reason: visibilityResult.reason,
-          error: visibilityResult.error,
-        };
-      }
-
-      return {
-        ok: true,
-        group: visibilityResult.group ?? created,
-        published: true,
-      };
     },
     [createGroupMutation, publishGroupMutation, requestAuth, updateVisibility]
   );

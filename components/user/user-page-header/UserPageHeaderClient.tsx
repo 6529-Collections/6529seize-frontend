@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
 
@@ -11,7 +11,6 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { ApiModeratedProfileStatus } from "@/generated/models/ApiModeratedProfileStatus";
 import { amIUser } from "@/helpers/Helpers";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
@@ -27,11 +26,7 @@ import { useIdentity } from "@/hooks/useIdentity";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
-import { setModeratedProfileStatus } from "@/services/api/content-moderation-api";
-import {
-  PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY,
-  SUSPENDED_MODERATION_PROFILES_QUERY_KEY,
-} from "@/services/content-moderation/content-moderation-query";
+
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import WebsiteIcon from "../utils/icons/WebsiteIcon";
 import UserPageHeaderAbout from "./about/UserPageHeaderAbout";
@@ -396,14 +391,13 @@ export default function UserPageHeaderClient({
 }: Readonly<Props>) {
   const params = useParams();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { hasTouchScreen, isApp } = useDeviceInfo();
   const routeHandleOrWallet = params["user"]?.toString().toLowerCase() ?? null;
   const normalizedHandleOrWallet =
     routeHandleOrWallet ?? handleOrWallet.toLowerCase();
 
   const { address } = useSeizeConnectContext();
-  const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
+  const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
 
   const { profile: hydratedProfile } = useIdentity({
@@ -490,50 +484,6 @@ export default function UserPageHeaderClient({
   const moderatorAccess = useContentModeratorAccess();
   const canModerateProfile =
     !isMyProfile && !!profile.id && moderatorAccess.data?.moderator === true;
-  const profileModerationMutation = useMutation({
-    mutationFn: async (status: ApiModeratedProfileStatus) => {
-      if (!profile.id) {
-        throw new Error("Profile ID unavailable");
-      }
-      const { success } = await requestAuth();
-      if (!success) {
-        throw new Error("Authentication was cancelled");
-      }
-      return setModeratedProfileStatus(profile.id, { status, reason: null });
-    },
-    onSuccess: async () => {
-      setProfileBlockConfirmation(null);
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: [...PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY, profile.id],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: SUSPENDED_MODERATION_PROFILES_QUERY_KEY,
-        }),
-      ]);
-      setToast({
-        message: t(
-          DEFAULT_LOCALE,
-          "contentModeration.moderator.profileSuccess"
-        ),
-        type: "success",
-      });
-    },
-    onError: (error) => {
-      if (
-        error instanceof Error &&
-        error.message === "Authentication was cancelled"
-      ) {
-        return;
-      }
-      setToast({
-        type: "error",
-        title: t(DEFAULT_LOCALE, "contentModeration.moderator.profileError"),
-        description: t(DEFAULT_LOCALE, "contentModeration.error.retry"),
-        details: getToastErrorDetails(error),
-      });
-    },
-  });
   const canManageProfilePreferences = isMyProfile && !activeProfileProxy;
   const showSubscriptionStatus = canManageProfilePreferences;
 
@@ -572,8 +522,7 @@ export default function UserPageHeaderClient({
 
   const isProfileBlockMutationPending =
     profileBlockState.isBlocking || profileBlockState.isUnblocking;
-  const isProfileActionPending =
-    isProfileBlockMutationPending || profileModerationMutation.isPending;
+  const isProfileActionPending = isProfileBlockMutationPending;
   const closeProfileBlockConfirmation = () => {
     if (!isProfileActionPending) {
       setProfileBlockConfirmation(null);
@@ -589,10 +538,8 @@ export default function UserPageHeaderClient({
       } else if (profileBlockConfirmation === "unblock") {
         await profileBlockState.unblock();
       } else {
-        profileModerationMutation.mutate(
-          profileBlockConfirmation === "suspend"
-            ? ApiModeratedProfileStatus.Suspended
-            : ApiModeratedProfileStatus.Active
+        router.push(
+          `/content-moderation/checks?profile=${encodeURIComponent(profile.id ?? "")}`
         );
         return;
       }
@@ -674,7 +621,15 @@ export default function UserPageHeaderClient({
     isLoading: profileBlockState.isLoading,
     isSuspended: profileModerationStatus.isSuspended,
     isUnblocking: profileBlockState.isUnblocking,
-    onSelectAction: setProfileBlockConfirmation,
+    onSelectAction: (action) => {
+      if (action === "suspend" || action === "reinstate") {
+        router.push(
+          `/content-moderation/checks?profile=${encodeURIComponent(profile.id ?? "")}`
+        );
+      } else {
+        setProfileBlockConfirmation(action);
+      }
+    },
   };
 
   return (

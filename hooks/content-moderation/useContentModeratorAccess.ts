@@ -2,61 +2,52 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { fetchContentModeratorAccess } from "@/services/api/content-moderation-api";
-import {
-  BLOCK_ACTIVITY_QUERY_KEY,
-  MODERATION_QUEUE_QUERY_KEY,
-  SUSPENDED_MODERATION_PROFILES_QUERY_KEY,
-} from "@/services/content-moderation/content-moderation-query";
+import { clearPrivateModerationQueries } from "@/services/content-moderation/content-moderation-query";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { CONTENT_MODERATOR_ACCESS_QUERY_KEY } from "./useContentModerationStateScope";
 
-export const CONTENT_MODERATOR_ACCESS_QUERY_KEY = [
-  "content-moderation",
-  "moderator-access",
-] as const;
-
-const MODERATOR_ACCESS_REFRESH_INTERVAL_MS = 60_000;
-
-const PRIVATE_MODERATOR_QUERY_KEYS = [
-  [...MODERATION_QUEUE_QUERY_KEY, "OPEN"],
-  [...MODERATION_QUEUE_QUERY_KEY, "RESOLVED"],
-  SUSPENDED_MODERATION_PROFILES_QUERY_KEY,
-  BLOCK_ACTIVITY_QUERY_KEY,
-] as const;
+export { CONTENT_MODERATOR_ACCESS_QUERY_KEY } from "./useContentModerationStateScope";
 
 export const useContentModeratorAccess = () => {
-  const { connectedProfile, activeProfileProxy } = useAuth();
+  const { connectedProfile, activeProfileProxy, isDirectProfileSession } =
+    useAuth();
   const queryClient = useQueryClient();
-  const hasModeratorIdentity =
-    Boolean(connectedProfile?.id) && activeProfileProxy === null;
-
-  useEffect(() => {
-    if (hasModeratorIdentity) {
-      return;
-    }
-    // Removing queries also cancels pending results, so a late response cannot
-    // restore private data after switching to a proxy or signing out.
-    queryClient.removeQueries({
-      queryKey: CONTENT_MODERATOR_ACCESS_QUERY_KEY,
-    });
-    for (const queryKey of PRIVATE_MODERATOR_QUERY_KEYS) {
-      queryClient.removeQueries({ queryKey, exact: true });
-    }
-  }, [hasModeratorIdentity, queryClient]);
-
-  return useQuery({
-    queryKey: [
-      ...CONTENT_MODERATOR_ACCESS_QUERY_KEY,
-      hasModeratorIdentity ? connectedProfile?.id : null,
-    ],
-    queryFn: fetchContentModeratorAccess,
-    enabled: hasModeratorIdentity,
-    staleTime: 5 * 60 * 1000,
-    refetchInterval: (query) =>
-      query.state.data?.moderator === true
-        ? MODERATOR_ACCESS_REFRESH_INTERVAL_MS
-        : false,
+  const profileId =
+    isDirectProfileSession === true && activeProfileProxy === null
+      ? connectedProfile?.id
+      : null;
+  const previousProfileId = useRef(profileId);
+  const query = useQuery({
+    queryKey: [...CONTENT_MODERATOR_ACCESS_QUERY_KEY, profileId ?? null],
+    queryFn: ({ signal }) => fetchContentModeratorAccess(signal),
+    enabled: Boolean(profileId),
+    staleTime: 0,
+    refetchInterval: profileId ? 60_000 : false,
     refetchIntervalInBackground: false,
     retry: false,
   });
+
+  useEffect(() => {
+    if (!profileId || previousProfileId.current !== profileId) {
+      clearPrivateModerationQueries(queryClient, profileId);
+      queryClient.removeQueries({
+        queryKey: CONTENT_MODERATOR_ACCESS_QUERY_KEY,
+        predicate: (entry) => entry.queryKey[2] !== profileId,
+      });
+    }
+    previousProfileId.current = profileId;
+  }, [profileId, queryClient]);
+
+  useEffect(() => {
+    if (query.isError || query.data?.moderator === false) {
+      clearPrivateModerationQueries(queryClient);
+    }
+  }, [query.isError, query.data?.moderator, queryClient]);
+
+  // A failed refresh must not leave stale authorization on screen.
+  return {
+    ...query,
+    data: query.isError || !profileId ? undefined : query.data,
+  };
 };

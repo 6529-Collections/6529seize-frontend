@@ -14,7 +14,10 @@ import {
   STATEMENT_TYPE,
 } from "@/helpers/Types";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { commonApiPost } from "@/services/api/common-api";
+import {
+  commonApiPost,
+  getStructuredApiErrorCode,
+} from "@/services/api/common-api";
 import { useMutation, type UseMutationResult } from "@tanstack/react-query";
 import { useContext, useState } from "react";
 import UserPageIdentityAddStatementsInput from "./UserPageIdentityAddStatementsInput";
@@ -57,6 +60,7 @@ export default function UserPageIdentityAddStatementsForm({
       return commonApiPost<ApiCreateOrUpdateProfileCicStatement, CicStatement>({
         endpoint: `profiles/${profile.query}/cic/statements`,
         body: statement,
+        errorMode: "structured",
       });
     },
     onSuccess: () => {
@@ -74,7 +78,9 @@ export default function UserPageIdentityAddStatementsForm({
         title: t(locale, "user.profile.identity.statements.addErrorTitle"),
         description: t(
           locale,
-          "user.profile.identity.statements.addErrorDescription"
+          getStructuredApiErrorCode(error) === "MODERATION_PERMIT_CONSUMED"
+            ? "contentModeration.approvalConsumed"
+            : "user.profile.identity.statements.addErrorDescription"
         ),
         details: getToastErrorDetails(error),
       });

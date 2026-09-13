@@ -21,6 +21,9 @@ import { publicEnv } from "@/config/env";
 
 const mockQueryClient = {
   getQueryData: jest.fn(),
+  removeQueries: jest.fn(),
+  getMutationCache: () => ({ getAll: () => [] }),
+  getQueryCache: () => ({ subscribe: () => jest.fn() }),
 };
 const mockRouterReplace = jest.fn();
 const mockRouterPush = jest.fn();
@@ -2413,6 +2416,54 @@ describe("Auth component", () => {
   describe("Profile Management", () => {
     const mockValidateAuthImmediate =
       require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
+
+    it("exposes proxy-token scope before the proxy lookup completes", () => {
+      const authUtils = jest.mocked(
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule
+      );
+      const roleModule = jest.mocked(
+        require("@/services/auth/jwt-validation.utils") as typeof import("@/services/auth/jwt-validation.utils")
+      );
+      authUtils.getAuthJwt.mockReturnValue("proxy-session");
+      roleModule.getRole.mockReturnValue("delegating-profile");
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "developer",
+          handle: "developer",
+          query: "developer",
+          primary_wallet: walletAddress,
+          wallets: [],
+        },
+        isLoading: false,
+      });
+      const observed: Array<{ direct: boolean | undefined; proxy: unknown }> =
+        [];
+      const Child = () => {
+        const auth = React.useContext(AuthContext);
+        observed.push({
+          direct: auth.isDirectProfileSession,
+          proxy: auth.activeProfileProxy,
+        });
+        return null;
+      };
+      try {
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={createReactQueryWrapperContextValue()}
+          >
+            <Auth>
+              <Child />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+        expect(observed.length).toBeGreaterThan(0);
+        expect(observed[0]).toEqual({ direct: false, proxy: null });
+        expect(observed.every((value) => value.direct === false)).toBe(true);
+      } finally {
+        roleModule.getRole.mockReturnValue(null);
+        authUtils.getAuthJwt.mockReturnValue(null);
+      }
+    });
 
     it("should fetch and set connected profile when address is provided", async () => {
       mockValidateAuthImmediate.mockResolvedValue({

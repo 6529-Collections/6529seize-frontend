@@ -1,5 +1,9 @@
 import type { Breadcrumb, Event } from "@sentry/nextjs";
 import {
+  isSensitiveSentryField,
+  isSensitiveSentryHeader,
+} from "./monitoring/sentrySensitiveFields";
+import {
   sanitizeEndpointGroup,
   sanitizeRouteFamily,
 } from "./monitoring/mobileLaunchTimingSanitizers";
@@ -40,12 +44,6 @@ const HOST_ATTRIBUTION_VALUES = new Set(
   `first-party first-party-api first-party-app ${THIRD_PARTY}`.split(" ")
 );
 const OMIT_SANITIZED_VALUE = Symbol("omit-sanitized-value");
-
-const SENSITIVE_KEY_FRAGMENT_PATTERN =
-  /(auth|authorization|cookie|set-cookie|token|secret|password|passwd|session|api[_-]?key|private[_-]?key|signature|body|payload)/i;
-
-const SENSITIVE_HEADER_NAME_PATTERN =
-  /^(authorization|cookie|set-cookie|x-api-key|x-auth-token|x-csrf-token|x-xsrf-token|proxy-authorization|x-forwarded-for|x-real-ip|cf-connecting-ip)$/i;
 
 type SanitizableSentrySpan = {
   description?: string | undefined;
@@ -411,7 +409,7 @@ function sanitizeObjectValue(
   if (URL_DETAIL_KEY_PATTERN.test(key)) {
     return OMIT_SANITIZED_VALUE;
   }
-  if (SENSITIVE_KEY_FRAGMENT_PATTERN.test(key)) {
+  if (isSensitiveSentryField(key)) {
     return REDACTED;
   }
   if (HOST_VALUE_KEY_PATTERN.test(key)) {
@@ -477,7 +475,7 @@ function sanitizeHeaders(
       continue;
     }
 
-    if (SENSITIVE_HEADER_NAME_PATTERN.test(key)) {
+    if (isSensitiveSentryHeader(key)) {
       result[key] = REDACTED;
       continue;
     }
@@ -700,7 +698,9 @@ function sanitizeSpanData(
         typeof value === "string" ? sanitizeUrlLikeString(value, kind) : value;
       continue;
     }
-    nextData[key] = sanitizeUnknown(value, 0, new WeakSet<object>());
+    nextData[key] = isSensitiveSentryField(key)
+      ? REDACTED
+      : sanitizeUnknown(value, 0, new WeakSet<object>());
   }
   return nextData;
 }

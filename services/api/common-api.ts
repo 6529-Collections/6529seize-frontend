@@ -1,6 +1,12 @@
 import { publicEnv } from "@/config/env";
 import { recordMobileLaunchApiRequest } from "@/utils/monitoring/mobileLaunchTiming";
-import { getAuthJwt, getStagingAuth } from "../auth/auth.utils";
+import {
+  getAuthJwt,
+  getStagingAuth,
+  getWalletAddress,
+  getWalletRole,
+} from "../auth/auth.utils";
+import { prepareSubmissionRequestKey } from "./submission-request-key";
 
 type ApiErrorMode = "legacy-string" | "structured";
 type ApiRequestOrigin = "api" | "app";
@@ -564,16 +570,33 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
     param.params as Record<string, string> | undefined
   );
 
-  return executeApiRequest<U>({
+  const submission =
+    param.includeWalletAuth === false
+      ? null
+      : prepareSubmissionRequestKey(param.endpoint, param.body, () => {
+          const address = getWalletAddress();
+          return address
+            ? `${address.toLowerCase()}:${getWalletRole() ?? ""}`
+            : "";
+        });
+  const result = await executeApiRequest<U>({
     url,
     method: "POST",
-    headers: getHeaders(param.headers, true, param.includeWalletAuth !== false),
+    headers: getHeaders(
+      submission
+        ? { "Idempotency-Key": submission.key, ...param.headers }
+        : param.headers,
+      true,
+      param.includeWalletAuth !== false
+    ),
     body: JSON.stringify(param.body),
     signal: param.signal,
     parseJson: param.parseJson ?? true,
     errorMode: param.errorMode ?? "legacy-string",
     credentials: param.credentials,
   });
+  submission?.complete();
+  return result;
 };
 
 export const commonApiPostWithoutBodyAndResponse = async (param: {

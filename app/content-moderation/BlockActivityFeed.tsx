@@ -13,14 +13,17 @@ const BLOCK_ACTIVITY_PAGE_SIZE = 50;
 
 export default function BlockActivityFeed({
   enabled,
+  profileId,
 }: {
   readonly enabled: boolean;
+  readonly profileId: string;
 }) {
   const locale = useBrowserLocale();
   const query = useInfiniteQuery({
-    queryKey: BLOCK_ACTIVITY_QUERY_KEY,
-    queryFn: ({ pageParam }) =>
+    queryKey: [...BLOCK_ACTIVITY_QUERY_KEY, profileId],
+    queryFn: ({ pageParam, signal }) =>
       fetchContentModerationBlockActivity({
+        signal,
         limit: BLOCK_ACTIVITY_PAGE_SIZE,
         ...(pageParam === undefined ? {} : { before: pageParam }),
       }),
@@ -31,6 +34,7 @@ export default function BlockActivityFeed({
         : undefined,
     enabled,
     retry: false,
+    gcTime: 0,
   });
   const items = useMemo(() => query.data?.pages.flat() ?? [], [query.data]);
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = query;

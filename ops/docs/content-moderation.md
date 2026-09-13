@@ -3,7 +3,7 @@
 ## Overview
 
 Content moderation gives users private control over what they see, provides a
-clear way to flag posts, and gives authorized occasional moderators a queue for
+clear way to flag posts, and gives authorized developers a queue for
 serious reports. It also applies a narrow safety check before new or edited
 Wave posts are accepted.
 
@@ -21,7 +21,7 @@ being objectionable.
   adjacent **Reports** tab to track reports and their public outcomes. The
   older `/content-preferences` and `?tab=content` routes remain compatible and
   resolve to the blocked-profile view.
-- Authorized moderators can open **WatchTower** at `/content-moderation` from
+- Authorized developer profiles can open **WatchTower** at `/content-moderation` from
   the desktop, mobile-browser, and mobile-app side navigation. It is not shown
   in the profile menu. The page heading is **WatchTower - Content Moderation**.
 
@@ -149,6 +149,9 @@ direct link to the exact post, using the direct-message route when applicable.
 Open reports can also be withdrawn there. Resolved reports show the public
 moderator outcome, but never expose AI assessment details, reply-parent
 evidence, internal notes or reasons, moderator identity, or other reporters.
+Personal report history is scoped to the signed-in profile. Switching profiles,
+signing out, or entering a proxy session clears the previous profile's cached
+reports and cancels its outstanding report requests.
 
 ## Posts from blocked profiles
 
@@ -214,11 +217,12 @@ A high-confidence urgent report assessment may temporarily quarantine a post.
 Other assessments remain in the occasional moderator queue without changing
 the post's global visibility.
 
-Authorized moderators can review open reports in **WatchTower** at
+Developer profiles can review open reports in **WatchTower** at
 `/content-moderation`, which defaults to **Open reports**. All tabs share the
 site's bordered page frame and consistent content padding:
 
 - **Open reports**: `/content-moderation/open-reports`
+- **Checks**: `/content-moderation/checks`
 - **Resolved reports**: `/content-moderation/resolved-reports`
 - **Suspended profiles**: `/content-moderation/suspended-profiles`
 - **Block activity**: `/content-moderation/block-activity`
@@ -227,6 +231,48 @@ Selecting a tab updates the URL without reloading the page. Direct links and
 refresh open the selected tab, and browser Back and Forward restore previous
 tab selections. Arrow keys, Home, and End move focus between tabs; Enter or
 Space activates the focused tab. Unknown tab URLs show the not-found page.
+On narrow screens, a labelled selector switches between the same views.
+
+The summary shows items needing review, quarantined posts, rejected checks
+today, and evaluator failures today. These totals cover all items independently
+of filters; today uses UTC.
+
+**Checks** covers REP categories, About text, group names, and posts. Filter by
+content type, outcome, policy, trigger, review status, UTC date range, or an
+exact profile or subject ID. Filtered views and selected checks have direct
+links. For REP categories, use the opaque **Subject ID** shown in the check's
+**Context** section; category text is never used as a URL filter.
+**Public-facing text** is the stricter policy for REP, About, and group
+names; **Wave safety** is the permissive policy for posts and reports.
+
+Select **Review check** to open saved evidence, scope and current state,
+evaluation history, decision history, and review actions. Desktop shows the
+detail next to the list; mobile shows a full detail view with a section
+selector and **Back to checks**. Saved evidence is inert text. External
+references are collapsed and require an explicit click; opening them can
+reveal your IP address to the host. A media URL in an evaluation does not imply
+that the evaluator inspected the media itself.
+
+The action panel offers only actions valid for that item and requires a reason:
+
+- A REP category can be allowed or blocked for future exact category use,
+  re-evaluated, or have its override revoked. Existing ratings do not change.
+- Rejected About text, group names, and posts can receive **Approve exact
+  resubmission**. This creates a single-use permit valid for seven days for
+  the same author, content, and context. It publishes nothing from WatchTower;
+  the author must submit again. Posting permissions and other safety checks
+  still apply.
+- A current About field or group name can be suppressed or restored for the
+  reviewed revision. This changes presentation without overwriting the
+  author's stored text.
+- Published posts support visibility decisions and author posting controls.
+- **Re-evaluate** records a new evaluator result without undoing an explicit
+  human decision. **Mark reviewed** adds a reason to the decision history.
+
+An item that changed during review requires **Load latest version** before
+another decision. A failed request can be retried safely with the same
+decision key. Expired evidence is labelled, its decision history remains
+available, and actions that require missing evidence are unavailable.
 
 Block activity is a newest-first,
 continuously loaded trail showing who blocked or unblocked whom. Each compact
@@ -242,9 +288,9 @@ and profile suspension. Each report identifies both the author
 and the profile that submitted it, makes the content primary, shows a compact
 AI summary with expandable detail, and keeps audit history available. A neutral
 AI category is omitted; a substantive category is labelled **Potential
-category** to make clear that it is not the moderator decision. For an open
-report the moderator first selects one explained content decision, may add an
-optional internal note, and then applies it once:
+category** to make clear that it is not the moderator decision. Select
+**Review evidence and decide** to open the report's saved revision in Checks,
+review the applicable effect, select a decision, enter a reason, and confirm:
 
 - **Allow** keeps or restores the post to visible and closes its reports;
 - **Quarantine** hides it globally while its reports stay open; and
@@ -252,9 +298,10 @@ optional internal note, and then applies it once:
 
 Author suspension is a separate, confirmation-backed action. **Suspend Profile**
 prevents future creates and edits without changing existing posts. Suspended
-profiles can be found and reinstated from the central Suspended profiles view,
-without first locating a report. Moderators also see **Suspend Profile** or
-**Reinstate Profile** in another profile's action menu. That global moderation
+profiles can be found in the central Suspended profiles view and opened in
+Checks for review and reinstatement without first locating a report. Developers
+also see **Suspend Profile** or **Reinstate Profile** in another profile's action
+menu; these open the same review page. That global moderation
 action remains independent of the moderator's personal Blocked state.
 
 In primary Wave chat views, globally quarantined or moderator-removed posts
@@ -272,7 +319,7 @@ than through the ordinary Wave post. Authors do not see the reporter, report
 reason, or pending report details.
 
 The WatchTower link is shown only to profiles whose server-provided access
-state allows it. A red indicator appears while the queue contains open reports;
+state grants developer access. Proxy sessions cannot use WatchTower. A red indicator appears while the queue contains open reports;
 the client refreshes this lightweight state periodically while active, without
 a WebSocket. The backend checks every moderator request; hiding the link is not
 the authorization boundary. A user who opens `/content-moderation` without
@@ -280,6 +327,10 @@ access, including through a direct tab link, sees the no-access countdown and
 is redirected home. A failed access
 request shows an error instead of incorrectly treating the user as
 unauthorized.
+Switching identity, entering proxy mode, signing out, or losing server access
+clears private review data. Private evidence is excluded from session replay.
+Private review data and personal Reports stay hidden until the current sign-in
+token identifies a direct profile session, including while proxy details load.
 
 ## Common scenarios
 
@@ -338,6 +389,16 @@ mistake.
 - Reporters see only their own report status and public outcome in Preferences.
   Open reports can be withdrawn; the full moderation record remains available
   only in WatchTower.
+
+## Checks localization follow-up
+
+The developer-only `/content-moderation/checks` surface currently uses the `en-US`
+source for its `checks.*` copy in `en-GB`, `fr-FR`, `es-ES` and `de-DE`. Dates and
+numbers still follow the selected locale. Frontend maintainers own the follow-up:
+translate this namespace and verify expanded labels on mobile before declaring
+those locale dictionaries complete. Provider, model, policy-version and unknown
+future audit identifiers remain exact server values for diagnosis; known review
+actions and operations have translated message keys.
 
 ## Related pages
 
