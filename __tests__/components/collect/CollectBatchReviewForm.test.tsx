@@ -418,6 +418,9 @@ it("shortens draft prices with exact disclosures without changing amounts, quant
   const estimated = screen.getByText("Estimated total ≈ 0.03422 ETH", {
     exact: true,
   });
+  expect(estimated).toHaveAccessibleName(
+    "Estimated total Approximately 0.03422 ETH"
+  );
   const exactTotal = screen.getByText("0.034217345 ETH", { exact: true });
   expect(exactTotal).not.toBeVisible();
   fireEvent.click(estimated);

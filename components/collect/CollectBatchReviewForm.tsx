@@ -227,7 +227,12 @@ function BatchReviewDraft({
         <div aria-live="polite" className="tw-space-y-1">
           {total !== null && compactTotal?.approximate ? (
             <details className="tw-group/total tw-min-w-0">
-              <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-gap-1 tw-rounded-md tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+              <summary
+                aria-label={t(locale, "collect.batchReview.estimate", {
+                  price: `${t(locale, "collect.checkout.approximate")} ${t(locale, "collect.batchReview.ethAmount", { amount: compactTotal.text })}`,
+                })}
+                className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-gap-1 tw-rounded-md tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden"
+              >
                 {estimatedTotal}
                 <ChevronDownIcon
                   aria-hidden="true"

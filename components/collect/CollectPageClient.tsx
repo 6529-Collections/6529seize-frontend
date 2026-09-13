@@ -108,13 +108,42 @@ function CollectCatalogController({
     return () => globalThis.clearInterval(timer);
   }, []);
   const router = useRouter();
+  // Compose rapid control changes before App Router commits their URLs. An
+  // intermediate local commit must not replace a newer requested destination.
+  const requestedNavigation = useRef({
+    query: queryString,
+    pending: new Set<string>(),
+  });
+  useLayoutEffect(() => {
+    const requested = requestedNavigation.current;
+    if (requested.pending.delete(queryString)) {
+      if (requested.query === queryString) requested.pending.clear();
+    } else {
+      requested.query = queryString;
+      requested.pending.clear();
+    }
+  }, [queryString]);
+  useEffect(() => {
+    const followHistory = () => {
+      requestedNavigation.current.query = new URLSearchParams(
+        window.location.search
+      ).toString();
+      requestedNavigation.current.pending.clear();
+    };
+    window.addEventListener("popstate", followHistory);
+    return () => window.removeEventListener("popstate", followHistory);
+  }, []);
   const params = new URLSearchParams(queryString);
   const location = collectLocation(queryString);
   const { collection, intent, definitionId } = location;
   const tdhProjection = intent === "tdh" && params.get("view") === "projection";
   useEffect(() => {
-    if (location.query !== queryString)
+    const requested = requestedNavigation.current;
+    if (location.query !== queryString && requested.query === queryString) {
+      requested.query = location.query;
+      requested.pending = new Set([...requested.pending, location.query]);
       router.replace(`/collect?${location.query}`, { scroll: false });
+    }
   }, [location.query, queryString, router]);
   const routeGoal = JSON.stringify([intent, collection, definitionId]);
   const [goalState, setGoalState] = useState<{
@@ -385,27 +414,32 @@ function CollectCatalogController({
     };
   const updateQuery = (patch: Readonly<Record<string, string>>) => {
     setOfferWorkspaceActive(false);
-    const next = new URLSearchParams(queryString);
+    const requested = requestedNavigation.current;
+    const next = new URLSearchParams(requested.query);
     for (const [key, value] of Object.entries(patch)) {
       if (value) next.set(key, value);
       else next.delete(key);
     }
-    router.replace(`/collect?${next.toString()}`, { scroll: false });
+    requested.query = next.toString();
+    requested.pending.add(requested.query);
+    router.replace(`/collect?${requested.query}`, { scroll: false });
   };
   const changeCollection = (value: CollectCollection) => {
-    if (value === collection) return;
+    const requested = collectLocation(requestedNavigation.current.query);
+    if (value === requested.collection) return;
     updateQuery({
       collection: value,
-      intent: collectIntentForCollection(intent, value),
+      intent: collectIntentForCollection(requested.intent, value),
       definition: "",
       token: "",
       q: "",
     });
   };
   const changeIntent = (value: CollectIntent) => {
+    const requested = collectLocation(requestedNavigation.current.query);
     updateQuery({
-      collection,
-      intent: collectIntentForCollection(value, collection),
+      collection: requested.collection,
+      intent: collectIntentForCollection(value, requested.collection),
       definition: "",
       view: "",
       token: "",
@@ -443,7 +477,14 @@ function CollectCatalogController({
         snapshot={discovery.tdhSnapshot}
         projection={tdhProjection}
         onToggleProjection={() =>
-          updateQuery({ view: tdhProjection ? "" : "projection" })
+          updateQuery({
+            view:
+              new URLSearchParams(requestedNavigation.current.query).get(
+                "view"
+              ) === "projection"
+                ? ""
+                : "projection",
+          })
         }
         onConnect={connect}
         onReviewPurchase={(items, recipient) => setBatch({ items, recipient })}
