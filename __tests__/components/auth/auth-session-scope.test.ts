@@ -1,6 +1,7 @@
 import {
   getAuthSessionRole,
   isDirectProfileAuthSession,
+  resolveActiveProfileProxy,
 } from "@/components/auth/auth-session-scope";
 import { getAuthJwt } from "@/services/auth/auth.utils";
 import { getRole } from "@/services/auth/jwt-validation.utils";
@@ -74,4 +75,47 @@ describe("direct profile session scope", () => {
       ).toBe(expected);
     }
   );
+});
+
+describe("active proxy resolution", () => {
+  const proxy = { id: "proxy-2", created_by: { id: "profile-2" } };
+  const receivedProfileProxies = [
+    { id: "proxy-3", created_by: { id: "profile-3" } },
+    proxy,
+  ];
+
+  it("preserves the matching received proxy and its identity", () => {
+    expect(
+      resolveActiveProfileProxy({
+        address: "0x1",
+        authRole: "profile-2",
+        receivedProfileProxies,
+      })
+    ).toBe(proxy);
+  });
+
+  it.each([
+    [null, "profile-2"],
+    [undefined, "profile-2"],
+    ["0x1", null],
+    ["0x1", undefined],
+    ["0x1", "own-profile"],
+  ] as const)(
+    "clears the proxy for address %s and role %s",
+    (address, authRole) => {
+      expect(
+        resolveActiveProfileProxy({ address, authRole, receivedProfileProxies })
+      ).toBeUndefined();
+    }
+  );
+
+  it("keeps a foreign-role session without loaded proxies unresolved", () => {
+    expect(
+      resolveActiveProfileProxy({
+        address: "0x1",
+        authRole: "profile-2",
+        receivedProfileProxies: undefined,
+      })
+    ).toBeUndefined();
+  });
 });

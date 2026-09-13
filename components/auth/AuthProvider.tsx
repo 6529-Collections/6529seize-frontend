@@ -47,6 +47,7 @@ import { AuthContext } from "./authContext";
 import {
   getAuthSessionRole,
   isDirectProfileAuthSession,
+  resolveActiveProfileProxy,
 } from "./auth-session-scope";
 import { useAuthImpactTracking } from "./auth-impact-tracking";
 import { navigateAfterProfileSwitch } from "./authProfileNavigation";
@@ -259,20 +260,11 @@ export default function Auth({
   );
 
   useEffect(() => {
-    if (!address) {
-      setActiveProfileProxy(null);
-      return;
-    }
-
-    if (!authRole) {
-      setActiveProfileProxy(null);
-      return;
-    }
-
-    const activeProxy = receivedProfileProxies?.find(
-      (proxy) => proxy.created_by.id === authRole
-    );
-
+    const activeProxy = resolveActiveProfileProxy({
+      address,
+      authRole,
+      receivedProfileProxies,
+    });
     setActiveProfileProxy(activeProxy ?? null);
   }, [address, authRole, receivedProfileProxies]);
 
