@@ -22,7 +22,7 @@ export const CMS_STUDIO_COLORWAYS = [
 ] as const;
 export type CmsColorwayId = (typeof CMS_STUDIO_COLORWAYS)[number];
 
-export interface CmsColorway {
+interface CmsColorway {
   readonly id: CmsColorwayId;
   readonly name: string;
   readonly swatches: readonly string[];
