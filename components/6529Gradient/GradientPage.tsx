@@ -137,7 +137,7 @@ function GradientMarketMetric({
 
 function GradientMarketplaceLinks({ nft }: { readonly nft: NftWithOwner }) {
   return (
-    <div className="tw-flex tw-min-w-[8.5rem] tw-flex-wrap tw-items-end tw-gap-3">
+    <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-end tw-gap-3">
       <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
     </div>
   );
