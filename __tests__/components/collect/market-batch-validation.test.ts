@@ -1,5 +1,6 @@
 import {
   validateMarketBatchOperation,
+  validateMarketBatchOperationForRefresh,
   validateMarketBatchRequest,
   marketBatchReviewTerms,
 } from "@/components/collect/market-batch-validation";
@@ -11,6 +12,43 @@ function validate(f: ReturnType<typeof batchFixture>) {
 }
 it("accepts exact mixed ERC721 and partial ERC1155 allocations in one native transaction", () =>
   expect(() => validate(batchFixture())).not.toThrow());
+it.each([0, NOW - 1])(
+  "binds old review deadline %s solely for refresh while execution still rejects it",
+  (expiresAt) => {
+    const f = batchFixture();
+    f.operation.expires_at = expiresAt;
+    expect(() =>
+      validateMarketBatchOperationForRefresh(
+        f.operation,
+        f.request,
+        [PAYER],
+        NOW
+      )
+    ).not.toThrow();
+    expect(() => validate(f)).toThrow("MARKET_REVIEW_MISMATCH");
+    f.orders[2]!.parameters.consideration[0]!.recipient = MAKER;
+    f.reencode();
+    expect(() =>
+      validateMarketBatchOperationForRefresh(
+        f.operation,
+        f.request,
+        [PAYER],
+        NOW
+      )
+    ).toThrow("MARKET_REVIEW_MISMATCH");
+  }
+);
+it("still rejects expired seller orders when validating an old review for refresh", () => {
+  const f = batchFixture();
+  expect(() =>
+    validateMarketBatchOperationForRefresh(
+      f.operation,
+      f.request,
+      [PAYER],
+      NOW + 3_600_001
+    )
+  ).toThrow("MARKET_REVIEW_MISMATCH");
+});
 it.each([
   ["request kind", (f) => Object.assign(f.request, { kind: ["BUY_BATCH"] })],
   [

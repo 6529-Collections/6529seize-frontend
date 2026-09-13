@@ -94,6 +94,38 @@ Useful commands:
 reporting only lines changed from the branch's merge base with `origin/main`.
 Legacy violations on untouched lines do not block a focused contribution.
 
+Changed-file lint and format commands use a Node runner to select files and
+split large lists into bounded chunks before invoking the installed tools.
+Paths with spaces, brackets, and parentheses stay intact, including when pnpm
+uses the default Windows shell. An empty change set skips the tool, and any
+failing chunk makes the command fail.
+
+E2E selectors have a separate gate: `6529 run lint:e2e-selectors` checks all
+JavaScript and TypeScript under `tests/` and `e2e/`, including helpers and TSX.
+Start element queries with `getByRole`, `getByLabel`, or another Playwright
+`getBy*` query; `getByTestId` is also supported, though it does not establish
+accessibility. CSS/XPath narrowing may follow that query in the same chain,
+for example `page.getByRole("button", { name: "Save" }).locator("svg")`.
+Standalone `html`, `body`, `head`, and `meta[name="..."]` or
+`meta[property="..."]` selectors are explicit document-state exceptions.
+
+The gate reads existing violations from the Git merge base with `origin/main`
+(CI supplies its exact base SHA). It allows only the same call text and count
+in the same file. New or duplicated calls in an old file fail; deleted calls
+lose their allowance once merged. Moving a call to another file or changing
+its formatting requires migrating that call too. There is no editable legacy
+allowlist, and inline ESLint disables cannot bypass this gate. The rule checks
+direct `.locator()` calls regardless of receiver name, including template and
+dynamic arguments; it does not perform Page type inference or resolve method
+aliases. Keep narrowing in a direct accessible chain so the scope is visible
+to both readers and the rule. Run `6529 run test:e2e-selectors` when changing
+this policy.
+
+Same-repository PRs run both selector commands in the installed quality lane.
+Fork PRs retain the existing untrusted-PR policy and skip installed app checks;
+run the commands locally and validate the contribution on a maintainer-owned
+branch before merging. This gate does not expand dependency execution on forks.
+
 Use focused checks for narrow changes. Use `6529 run build` when changes touch
 build-time behavior, generated API models, Next.js configuration, routing, or
 deployment-sensitive code.

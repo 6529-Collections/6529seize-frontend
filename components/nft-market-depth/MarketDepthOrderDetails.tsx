@@ -19,7 +19,7 @@ import { MarketDepthOrderAction } from "./MarketDepthTradeActions";
 
 const INITIAL_ORDER_COUNT = 5;
 const QUIET_BUTTON =
-  "tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-sm tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-300 tw-underline-offset-4 hover:tw-text-white hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
+  "tw-font-inherit tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-meta tw-font-medium tw-text-iron-300 hover:tw-bg-white/5 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 
 interface OrderDetailsProps {
   readonly orders: readonly ApiMarketOrder[];
@@ -47,19 +47,19 @@ function OrderInformation({
   ] as const;
 
   return (
-    <details className="tw-group/order tw-mt-1">
-      <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-gap-2 tw-text-xs tw-text-iron-400 focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+    <details className="tw-group/order tw-mt-2">
+      <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-gap-2 tw-rounded-lg tw-text-xs tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
         {t(locale, "marketDepth.orders.information")}
         <ChevronDownIcon
           aria-hidden="true"
           className="tw-h-3 tw-w-3 tw-transition-transform group-open/order:tw-rotate-180 motion-reduce:tw-transition-none"
         />
       </summary>
-      <dl className="tw-m-0 tw-space-y-3 tw-pb-2 tw-text-xs">
+      <dl className="tw-m-0 tw-space-y-3 tw-pb-2 tw-text-xs tw-leading-5">
         {fields.map(([label, value]) => (
           <div key={label}>
             <dt className="tw-text-iron-500">{t(locale, label)}</dt>
-            <dd className="tw-m-0 tw-mt-1 tw-break-all tw-text-iron-300">
+            <dd className="tw-m-0 tw-mt-1 tw-break-all tw-font-mono tw-text-iron-400">
               {value}
             </dd>
           </div>
@@ -81,9 +81,9 @@ function IndividualOrder({
   readonly enableTradeActions: boolean;
 }) {
   return (
-    <li className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-py-4 last:tw-border-b-0">
+    <li className="tw-min-w-0 tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-py-4 last:tw-border-b-0">
       {showPrice && (
-        <p className="tw-mb-3 tw-mt-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-200">
+        <p className="tw-mb-3 tw-mt-0 tw-text-meta tw-font-medium tw-tabular-nums tw-text-iron-200 [overflow-wrap:anywhere]">
           {t(
             locale,
             order.side === ApiMarketOrderSideEnum.Ask
@@ -94,8 +94,8 @@ function IndividualOrder({
           {formatDecimal(locale, order.unit_price)} {order.currency.symbol}
         </p>
       )}
-      <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-gap-x-5 tw-gap-y-2 tw-text-xs">
-        <div>
+      <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-2 tw-text-xs tw-leading-5">
+        <div className="tw-min-w-0">
           <dt className="tw-text-iron-500">
             {t(locale, "marketDepth.orders.quotedQuantity")}
           </dt>
@@ -103,11 +103,11 @@ function IndividualOrder({
             {formatInteger(locale, order.remaining_quantity)}
           </dd>
         </div>
-        <div>
+        <div className="tw-min-w-0">
           <dt className="tw-text-iron-500">
             {t(locale, "marketDepth.orders.expires")}
           </dt>
-          <dd className="tw-m-0 tw-mt-1 tw-text-iron-200">
+          <dd className="tw-m-0 tw-mt-1 tw-text-iron-300">
             {formatDate(order.expires_at, locale) ??
               t(locale, "marketDepth.orders.noExpiry")}
           </dd>
@@ -118,10 +118,10 @@ function IndividualOrder({
         {" · "}
         {getApplicabilityLabel(locale, order.applicability)}
       </p>
-      <OrderInformation order={order} locale={locale} />
       {enableTradeActions && (
         <MarketDepthOrderAction order={order} locale={locale} />
       )}
+      <OrderInformation order={order} locale={locale} />
     </li>
   );
 }
@@ -230,14 +230,14 @@ export function MarketDepthOtherOrders({
   if (count === 0) return null;
   return (
     <details
-      className="tw-group/other tw-mt-6 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-py-4"
+      className="tw-group/other tw-mt-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-py-2"
       onToggle={(event) => {
         const open = event.currentTarget.open;
         setIsOpen(open);
         if (open) onRetry();
       }}
     >
-      <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+      <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-text-meta tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
         {t(locale, "marketDepth.orders.otherTitle", {
           count: formatInteger(locale, String(count)),
         })}

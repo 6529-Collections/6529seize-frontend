@@ -7,51 +7,47 @@ import {
   type ApiMarketBatchOperation,
 } from "@/generated/models/ApiMarketBatchOperation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatDate, formatDecimalString } from "@/i18n/format";
+import { formatDecimalString } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import type { ReactNode } from "react";
-import { getAddress } from "viem";
+import { zeroAddress } from "viem";
 import CollectAssetMedia from "./CollectAssetMedia";
+import CollectReviewContract from "./CollectReviewContract";
+import {
+  CollectReviewAmountRow as AmountRow,
+  CollectReviewDisclosure,
+  CollectReviewMoney as Money,
+} from "./CollectReviewPrimitives";
+import CollectReviewWallet from "./CollectReviewWallet";
+import { resolveCollectContractIdentity } from "./collect-contract-identity";
 import type { CollectSelectedListing } from "./collect-selection.helpers";
 import { marketBatchStage } from "./market-batch.adapters";
-import { collectBatchEthAmount as ethAmount } from "./collect-batch-review.helpers";
 
 function focusReviewHeading(element: HTMLHeadingElement | null) {
   element?.focus();
 }
 
-function Fact({
-  label,
-  children,
-}: {
-  readonly label: string;
-  readonly children: ReactNode;
-}) {
-  return (
-    <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-4 tw-gap-y-1">
-      <dt className="tw-text-xs tw-text-iron-400">{label}</dt>
-      <dd className="tw-m-0 tw-max-w-full tw-break-all tw-text-right tw-text-xs tw-tabular-nums tw-text-iron-100">
-        {children}
-      </dd>
-    </div>
-  );
+function assetContract(item: ApiMarketBatchItem) {
+  const [chain, address] = item.asset_key.split(":");
+  return { chainId: chain === "1" ? 1 : undefined, address };
 }
 
 function QuotedItem({
   item,
   selection,
   locale,
+  walletNames,
 }: {
   readonly item: ApiMarketBatchItem;
   readonly selection: CollectSelectedListing | undefined;
   readonly locale: SupportedLocale;
+  readonly walletNames: Readonly<Record<string, string>> | undefined;
 }) {
   return (
-    <li className="tw-space-y-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-4">
+    <li className="tw-space-y-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-4">
       <div className="tw-flex tw-items-start tw-gap-3">
         {selection && (
-          <div className="tw-relative tw-flex tw-size-14 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-900 [&_img]:tw-max-h-full [&_img]:tw-object-contain">
+          <div className="tw-relative tw-flex tw-size-14 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 [&_img]:tw-max-h-full [&_img]:tw-object-contain">
             <CollectAssetMedia
               src={selection.asset.image_url}
               name={selection.asset.name}
@@ -67,30 +63,26 @@ function QuotedItem({
               quantity: formatDecimalString(locale, item.quantity),
             })}
           </p>
+          <p className="tw-m-0 tw-break-words tw-text-sm tw-font-normal tw-tabular-nums tw-text-iron-100">
+            <Money wei={item.amount_wei} currency="ETH" />
+          </p>
         </div>
-        <p className="tw-m-0 tw-break-words tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100">
-          {ethAmount(locale, item.amount_wei)}
-        </p>
       </div>
-      <dl className="tw-m-0 tw-space-y-2">
-        {item.allocations.map((allocation) => (
-          <Fact
-            key={allocation.recipient.toLowerCase()}
-            label={t(locale, "collect.batchReview.deliveryCopies", {
-              quantity: formatDecimalString(locale, allocation.quantity),
-            })}
-          >
-            <span className="tw-font-mono">
-              {getAddress(allocation.recipient)}
-            </span>
-            {allocation.recipient_in_profile === false && (
-              <span className="tw-block tw-text-iron-400">
-                {t(locale, "collect.batchReview.outsideProfile")}
-              </span>
-            )}
-          </Fact>
-        ))}
-      </dl>
+      {item.allocations.map((allocation) => (
+        <CollectReviewWallet
+          key={allocation.recipient.toLowerCase()}
+          label={t(locale, "collect.batchReview.deliveryCopies", {
+            quantity: formatDecimalString(locale, allocation.quantity),
+          })}
+          address={allocation.recipient}
+          name={walletNames?.[allocation.recipient.toLowerCase()]}
+          detail={
+            allocation.recipient_in_profile === false
+              ? t(locale, "collect.batchReview.outsideProfile")
+              : undefined
+          }
+        />
+      ))}
     </li>
   );
 }
@@ -103,6 +95,7 @@ export default function CollectBatchQuoteReview({
   canEdit = true,
   disabledReason,
   message,
+  walletNames,
   onConfirm,
   onEdit,
   onClose,
@@ -113,16 +106,22 @@ export default function CollectBatchQuoteReview({
   readonly canEdit?: boolean;
   readonly disabledReason?: string | null | undefined;
   readonly message?: string | null | undefined;
+  /** Names must come from the operation's current, confirmed profile wallets. */
+  readonly walletNames?: Readonly<Record<string, string>> | undefined;
   readonly onConfirm: () => Promise<void>;
   readonly onEdit: () => void;
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
   const gas = operation.transaction?.gas_reserve_wei;
+  // The validated native batch has no approvals. Do not invent a mixed-currency or incomplete maximum.
   const maximum =
-    gas === undefined
-      ? null
-      : (BigInt(operation.total_wei) + BigInt(gas)).toString();
+    gas !== undefined &&
+    operation.currency.toLowerCase() === zeroAddress &&
+    operation.approval_transactions.length === 0 &&
+    operation.transaction?.value === operation.total_wei
+      ? (BigInt(operation.total_wei) + BigInt(gas)).toString()
+      : null;
   const ready =
     operation.state === ApiMarketBatchOperationStateEnum.Review &&
     gas !== undefined;
@@ -138,17 +137,17 @@ export default function CollectBatchQuoteReview({
   return (
     <section
       aria-label={t(locale, "collect.batchReview.quoteTitle")}
-      className="tw-space-y-4"
+      className="tw-min-w-0 tw-space-y-5"
     >
       <div className="tw-space-y-1">
         <h2
           ref={focusReviewHeading}
           tabIndex={-1}
-          className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100"
+          className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-snug tw-tracking-tight tw-text-iron-100"
         >
           {t(locale, "collect.batchReview.quoteTitle")}
         </h2>
-        <p role="status" className="tw-m-0 tw-text-sm tw-text-iron-200">
+        <p role="status" className="tw-m-0 tw-text-xs tw-text-iron-300">
           {t(locale, `collect.trade.stage.${marketBatchStage(operation)}`)}
         </p>
         <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
@@ -162,71 +161,39 @@ export default function CollectBatchQuoteReview({
             item={item}
             selection={itemFor(item)}
             locale={locale}
+            walletNames={walletNames}
           />
         ))}
       </ul>
       <dl className="tw-m-0 tw-space-y-3">
-        <Fact label={t(locale, "collect.trade.payingWallet")}>
-          <span className="tw-font-mono">{getAddress(operation.wallet)}</span>
-        </Fact>
-        <Fact label={t(locale, "collect.batchReview.purchaseTotal")}>
-          {ethAmount(locale, operation.total_wei)}
-        </Fact>
-        <Fact label={t(locale, "collect.trade.gasCap")}>
-          {gas === undefined
-            ? t(locale, "collect.batchReview.gasUnavailable")
-            : ethAmount(locale, gas)}
-        </Fact>
+        <AmountRow label={t(locale, "collect.batchReview.purchaseTotal")}>
+          <Money wei={operation.total_wei} currency="ETH" />
+        </AmountRow>
+        <AmountRow label={t(locale, "collect.review.networkCap")}>
+          {gas === undefined ? (
+            t(locale, "collect.batchReview.gasUnavailable")
+          ) : (
+            <Money wei={gas} currency="ETH" cap />
+          )}
+        </AmountRow>
       </dl>
-      <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-        {t(locale, "collect.batchReview.gasNote")}
-      </p>
-      <details>
-        <summary className="tw-min-h-11 tw-cursor-pointer tw-rounded-lg tw-py-3 tw-text-xs tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
-          {t(locale, "collect.batchReview.feesDetails")}
-        </summary>
-        <div className="tw-space-y-4 tw-py-2">
-          {operation.items.map((item) => (
-            <dl
-              key={`${item.order.protocol_address}:${item.order.order_hash}`}
-              className="tw-m-0 tw-space-y-2"
-            >
-              <Fact label={t(locale, "collect.trade.asset")}>
-                {itemFor(item)?.asset.name ?? item.asset_key}
-              </Fact>
-              {item.net_wei !== undefined && (
-                <Fact label={t(locale, "collect.trade.sellerReceives")}>
-                  {ethAmount(locale, item.net_wei)}
-                </Fact>
-              )}
-              {item.fees?.map((fee, index) => (
-                <Fact
-                  key={`${fee.recipient}:${index}`}
-                  label={t(locale, "collect.batchReview.fee", {
-                    number: index + 1,
-                  })}
-                >
-                  {ethAmount(locale, fee.amount_wei)}
-                  <span className="tw-block tw-font-mono">
-                    {getAddress(fee.recipient)}
-                  </span>
-                </Fact>
-              ))}
-              <Fact label={t(locale, "collect.batchReview.orderHash")}>
-                {item.order.order_hash}
-              </Fact>
-            </dl>
-          ))}
-          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-            {t(locale, "collect.trade.expiry", {
-              time: formatDate(locale, operation.expires_at, {
-                dateStyle: "medium",
-                timeStyle: "medium",
-              }),
-            })}
-          </p>
-        </div>
-      </details>
+      <CollectReviewWallet
+        label={t(locale, "collect.review.payWith")}
+        address={operation.wallet}
+        name={walletNames?.[operation.wallet.toLowerCase()]}
+      />
+      <div className="tw-space-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-4">
+        {maximum !== null && (
+          <dl className="tw-m-0">
+            <AmountRow prominent label={t(locale, "collect.review.maximum")}>
+              <Money wei={maximum} currency="ETH" cap capDecimals={5} />
+            </AmountRow>
+          </dl>
+        )}
+        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+          {t(locale, "collect.batchReview.gasNote")}
+        </p>
+      </div>
       {message && (
         <p
           role="status"
@@ -243,27 +210,19 @@ export default function CollectBatchQuoteReview({
           {disabledReason}
         </p>
       )}
-      <div className="tw-sticky tw-bottom-0 tw-z-20 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-3">
-        {maximum !== null && (
-          <dl className="tw-m-0 tw-w-full">
-            <Fact label={t(locale, "collect.batchReview.maximumTotal")}>
-              {ethAmount(locale, maximum)}
-            </Fact>
-          </dl>
-        )}
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
         {operation.state === ApiMarketBatchOperationStateEnum.Review && (
           <Button
             variant="action"
             size="lg"
+            fullWidth
             loading={busy}
             disabled={!ready || Boolean(disabledReason)}
             onClick={() => {
               void onConfirm();
             }}
           >
-            {t(locale, "collect.buy.atPrice", {
-              price: ethAmount(locale, operation.total_wei),
-            })}
+            {t(locale, "collect.trade.continue")}
           </Button>
         )}
         {canEdit && (
@@ -282,6 +241,112 @@ export default function CollectBatchQuoteReview({
         <Button variant="secondary" size="lg" disabled={busy} onClick={onClose}>
           {t(locale, "collect.batchReview.close")}
         </Button>
+      </div>
+      <div>
+        <CollectReviewDisclosure
+          label={t(locale, "collect.review.priceDetails")}
+        >
+          {operation.items.map((item) => (
+            <div
+              key={`${item.order.protocol_address}:${item.order.order_hash}`}
+              className="tw-space-y-3"
+            >
+              <p className="tw-m-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-200">
+                {itemFor(item)?.asset.name ?? item.asset_key}
+              </p>
+              <dl className="tw-m-0 tw-space-y-3">
+                {item.net_wei !== undefined && (
+                  <AmountRow label={t(locale, "collect.trade.sellerReceives")}>
+                    <Money wei={item.net_wei} currency="ETH" />
+                  </AmountRow>
+                )}
+                {item.fees?.map((fee, index) => (
+                  <AmountRow
+                    key={`${fee.recipient}:${index}`}
+                    label={t(
+                      locale,
+                      resolveCollectContractIdentity(
+                        assetContract(item).chainId,
+                        fee.recipient,
+                        "fee"
+                      ).name === "OpenSea"
+                        ? "collect.review.openSeaFee"
+                        : "collect.review.fee"
+                    )}
+                  >
+                    <Money wei={fee.amount_wei} currency="ETH" />
+                  </AmountRow>
+                ))}
+              </dl>
+            </div>
+          ))}
+          <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+            {t(locale, "collect.review.feesIncluded")}
+          </p>
+          <CollectReviewDisclosure
+            label={t(locale, "collect.review.exactAmounts")}
+            nested
+          >
+            <dl className="tw-m-0 tw-space-y-3">
+              {gas !== undefined && (
+                <AmountRow label={t(locale, "collect.review.exactGas")}>
+                  <Money wei={gas} currency="ETH" />
+                </AmountRow>
+              )}
+              {maximum !== null && (
+                <AmountRow label={t(locale, "collect.review.exactMaximum")}>
+                  <Money wei={maximum} currency="ETH" />
+                </AmountRow>
+              )}
+            </dl>
+          </CollectReviewDisclosure>
+        </CollectReviewDisclosure>
+        <CollectReviewDisclosure
+          label={t(locale, "collect.review.contractDetails")}
+        >
+          {operation.items.map((item) => (
+            <div
+              key={`${item.order.protocol_address}:${item.order.order_hash}`}
+              className="tw-space-y-3"
+            >
+              <p className="tw-m-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-200">
+                {itemFor(item)?.asset.name ?? item.asset_key}
+              </p>
+              {assetContract(item).address && (
+                <CollectReviewContract
+                  chainId={assetContract(item).chainId}
+                  address={assetContract(item).address!}
+                  role="nft"
+                />
+              )}
+              <CollectReviewContract
+                chainId={assetContract(item).chainId}
+                address={item.order.protocol_address}
+                role="exchange"
+              />
+              {[
+                ...new Set(
+                  item.fees?.map((fee) => fee.recipient.toLowerCase())
+                ),
+              ].map((recipient) => (
+                <CollectReviewContract
+                  key={recipient}
+                  chainId={assetContract(item).chainId}
+                  address={recipient}
+                  role="fee"
+                />
+              ))}
+              <dl className="tw-m-0">
+                <AmountRow label={t(locale, "collect.batchReview.orderHash")}>
+                  {item.order.order_hash}
+                </AmountRow>
+              </dl>
+            </div>
+          ))}
+          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+            {t(locale, "collect.review.liveCheck")}
+          </p>
+        </CollectReviewDisclosure>
       </div>
     </section>
   );

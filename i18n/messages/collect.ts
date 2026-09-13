@@ -1,4 +1,149 @@
 export const COLLECT_MESSAGES = {
+  "collect.tdhDaily.recalculate": "Recalculate",
+  "collect.tdhDaily.resultTitle": "Daily TDH purchase plan",
+  "collect.tdhDaily.shortfall":
+    "The best basket found is {value} base TDH/day short of your target.",
+  "collect.tdhDaily.more": "Show more listings ({count} remaining)",
+  "collect.tdhDaily.personal": "Your profile’s boost effect",
+  "collect.tdhDaily.boost": "Profile boost",
+  "collect.tdhDaily.boostChange": "{before}× → {after}×",
+  "collect.tdhDaily.personalRate": "Profile’s boosted daily TDH",
+  "collect.tdhDaily.rateChange": "{before} → {after} TDH/day",
+  "collect.tdhDaily.existingStock": "Change to existing accumulated TDH",
+  "collect.tdhDaily.stockExplanation":
+    "The profile calculation includes your existing holdings and set boosts. Accumulated TDH is separate from the daily earning rate.",
+  "collect.tdhDaily.limit":
+    "Best basket found in the available indexed listings. Discrete editions can exceed a daily target or leave ETH unspent. Purchase costs include listing fees; gas is quoted at review.",
+
+  "collect.blend.approach": "Approach",
+  "collect.blend.tier.conservative": "Conservative",
+  "collect.blend.tier.base": "Base",
+  "collect.blend.tier.aggressive": "Aggressive",
+  "collect.blend.offerBudget": "Offer budget (WETH, optional)",
+  "collect.blend.help.conservative":
+    "Favor patient offers. Collect now only where the observed listing is especially competitive.",
+  "collect.blend.help.base":
+    "Balance offers with competitively priced listings for each NFT.",
+  "collect.blend.help.aggressive":
+    "Favor completing your selection sooner, within the observed prices and your limits. Edited prices and chosen routes stay yours.",
+  "collect.blend.refreshRequired":
+    "These market references have expired. Refresh prices before reviewing a proposal.",
+  "collect.blend.reason.excluded": "This NFT is not selected.",
+  "collect.blend.reason.locked":
+    "An existing purchase or offer keeps this NFT reserved.",
+  "collect.blend.reason.invalidQuantity":
+    "Choose a valid quantity for this NFT.",
+  "collect.blend.reason.manualPrice": "Your edited price is preserved.",
+  "collect.blend.reason.manualBuy": "You chose to collect this NFT now.",
+  "collect.blend.reason.manualOffer":
+    "You chose to make an offer for this NFT.",
+  "collect.blend.reason.buyUnavailable":
+    "No exact listing covers this quantity. Rebuild your plan to check availability.",
+  "collect.blend.reason.staleReference":
+    "The market reference needs refreshing. Rebuild your plan for current listings.",
+  "collect.blend.reason.noReference":
+    "There is not enough applicable market evidence. Enter your own price.",
+  "collect.blend.reason.crossedMarket":
+    "The observed offer meets or exceeds the listing. Choose your own price after checking the market.",
+  "collect.blend.reason.tightSpread":
+    "The listing is close to the observed WETH offer for this approach.",
+  "collect.blend.reason.spreadOffer":
+    "The proposal uses the gap between the observed offer and listing.",
+  "collect.blend.reason.askOffer":
+    "The proposal is discounted from the observed listing.",
+  "collect.blend.reason.askBuy":
+    "This approach favors collecting at the observed listing.",
+  "collect.blend.reason.bidOnly":
+    "Only an applicable WETH offer is available as a reference.",
+  "collect.blend.reason.invalidAmount":
+    "A valid exact amount could not be calculated. Enter your own price.",
+  "collect.offerPlan.blendTier.label": "Strategy",
+  "collect.offerPlan.blendTier.conservative": "Conservative",
+  "collect.offerPlan.blendTier.base": "Base",
+  "collect.offerPlan.blendTier.aggressive": "Aggressive",
+  "collect.offerPlan.blendTier.conservativeDescription":
+    "Match the observed bid. Suggest buying when the gap is at most 2% of the listed cost. With only a listing, propose 70% of its cost.",
+  "collect.offerPlan.blendTier.baseDescription":
+    "Propose one third of the way from the observed bid toward the listed cost. Suggest buying when the gap is at most 8%. With only a listing, propose 85% of its cost.",
+  "collect.offerPlan.blendTier.aggressiveDescription":
+    "Propose two thirds of the way from the observed bid toward the listed cost. Suggest buying when the gap is at most 20%, or when only a listing is available.",
+  "collect.offerPlan.blendTier.disclaimer":
+    "These editable suggestions use observed prices, not estimated acceptance rates. Prices, availability, budget and funding are checked before each review. Purchases use ETH; offers use WETH.",
+  "collect.offerPlan.blendReason.excluded": "Not selected",
+  "collect.offerPlan.blendReason.locked":
+    "An existing commitment is being tracked",
+  "collect.offerPlan.blendReason.invalid_quantity":
+    "Enter a supported quantity",
+  "collect.offerPlan.blendReason.manual_price": "Your price",
+  "collect.offerPlan.blendReason.manual_buy": "Your choice to buy",
+  "collect.offerPlan.blendReason.manual_offer":
+    "Your choice to offer; enter a price",
+  "collect.offerPlan.blendReason.buy_unavailable":
+    "Refresh listings for this quantity",
+  "collect.offerPlan.blendReason.stale_reference": "Refresh observed prices",
+  "collect.offerPlan.blendReason.no_reference":
+    "No usable price reference; enter your price",
+  "collect.offerPlan.blendReason.crossed_market":
+    "Bid and listing prices conflict; refresh or enter your price",
+  "collect.offerPlan.blendReason.tight_spread":
+    "The observed bid is close to the listed cost",
+  "collect.offerPlan.blendReason.spread_offer":
+    "Proposed within this artwork’s observed price gap",
+  "collect.offerPlan.blendReason.ask_offer":
+    "Proposed from the listed cost; no bid reference",
+  "collect.offerPlan.blendReason.ask_buy":
+    "Listing available; no bid reference",
+  "collect.offerPlan.blendReason.bid_only":
+    "Matched the observed bid; no whole-quantity purchase available",
+  "collect.offerPlan.blendReason.invalid_amount":
+    "Enter a valid price for this quantity",
+  "collect.tdhBrowse.metricValue": "≈ {value}",
+  "collect.tdhBrowse.metricUnit": "base TDH/day per ETH",
+  "collect.tdhDaily.title": "Find your daily TDH",
+  "collect.tdhDaily.description":
+    "Enter a daily target or an ETH budget. We’ll calculate the other using current listings.",
+  "collect.tdhDaily.target": "Base TDH per day",
+  "collect.tdhDaily.budget": "Purchase budget (ETH)",
+  "collect.tdhDaily.targetPlaceholder": "Enter a daily target",
+  "collect.tdhDaily.budgetPlaceholder": "Enter an ETH budget",
+  "collect.tdhDaily.calculating": "Calculating from current listings…",
+  "collect.tdhDaily.calculatingField": "Calculating…",
+  "collect.tdhDaily.basis":
+    "Base earning rate per full held day. Listing fees included; gas quoted at review. Personal boosts are shown separately.",
+  "collect.tdhDaily.invalidTarget":
+    "Enter a positive daily rate with up to 2 decimal places.",
+  "collect.tdhDaily.invalidBudget":
+    "Enter a positive ETH amount with up to 18 decimal places.",
+  "collect.tdhDaily.failed":
+    "This estimate could not be calculated. Please try again.",
+  "collect.tdhDaily.retry": "Try again",
+  "collect.tdhDaily.achieved": "Selected NFTs earn {value} base TDH per day.",
+  "collect.tdhDaily.purchase": "Current listing cost: {value} ETH.",
+  "collect.tdhDaily.connect":
+    "Connect your profile to calculate a purchase plan.",
+  "collect.tdhDaily.connectAction": "Connect profile",
+  "collect.tdhDaily.derivedTarget": "Calculated from your ETH budget",
+  "collect.tdhDaily.derivedBudget":
+    "Calculated from your daily target; rounded up to 4 decimals",
+  "collect.plan.exactAmounts": "Exact amounts",
+  "collect.plan.exactPurchases": "NFT purchases",
+  "collect.plan.exactGas": "Network fee reserve",
+  "collect.offerPlan.refreshPrices": "Refresh prices",
+  "collect.offerPlan.introCalculated":
+    "Prices are calculated for each NFT using your chosen method. Review the proposals, edit any price, then choose Review offer. Accepted offers deliver to your paying wallet.",
+  "collect.expiry.custom": "Custom…",
+  "collect.expiry.endsAt": "Expiry date and time",
+  "collect.expiry.timezone": "Your timezone: {zone}",
+  "collect.expiry.exact": "Expires {date}",
+  "collect.expiry.range": "Choose an expiry within the next 30 days.",
+  "collect.expiry.invalid.invalid":
+    "Enter a valid date and time. Times skipped when the clocks change cannot be used.",
+  "collect.expiry.invalid.ambiguous":
+    "This local time occurs twice when the clocks change. Choose a later time.",
+  "collect.expiry.invalid.tooSoon":
+    "Choose an expiry at least 5 minutes from now.",
+  "collect.expiry.invalid.tooLate":
+    "Choose an expiry earlier than 30 days from now.",
   "collect.blend.retainedPurchase": "Your purchase review is saved here.",
   "collect.blend.previousPurchase":
     "A purchase review from an earlier plan is still open. Its NFTs and destination have been kept.",
@@ -68,7 +213,7 @@ export const COLLECT_MESSAGES = {
   "collect.offerPlan.budget": "Offer budget (WETH)",
   "collect.offerPlan.defaultExpiry": "Default expiry",
   "collect.offerPlan.expiry": "Expiry",
-  "collect.offerPlan.unitPrice": "WETH per NFT",
+  "collect.offerPlan.unitPrice": "Price per NFT",
   "collect.offerPlan.tokenFallback": "NFT #{token}",
   "collect.offerPlan.selectNFT": "Select {title} for an offer",
   "collect.offerPlan.priceFor": "WETH price per NFT for {title}",
@@ -125,7 +270,8 @@ export const COLLECT_MESSAGES = {
     "Enter 1–100 copies for a Meme, or 1 for a unique NFT.",
   "collect.offerPlan.invalid.price":
     "Enter a positive WETH price with up to 18 decimal places.",
-  "collect.offerPlan.invalid.expiry": "Choose an expiry of 1, 7 or 30 days.",
+  "collect.offerPlan.invalid.expiry":
+    "Choose a preset or a valid custom expiry between 5 minutes and 30 days from now.",
   "collect.offerPlan.invalid.discount":
     "Enter a discount from 0% to 99.99%, with at most two decimal places.",
   "collect.offerPlan.invalid.improvement":
@@ -372,7 +518,7 @@ export const COLLECT_MESSAGES = {
   "collect.trade.checkFailed":
     "This payload did not match your reviewed trade. Nothing was sent to your wallet.",
   "collect.trade.refreshReview":
-    "The trade was refreshed. Review all details before continuing.",
+    "Terms changed. Review the updated details before continuing.",
   "collect.trade.walletFailed":
     "The wallet action did not finish. Check Orders before trying again.",
   "collect.trade.pendingHash":
@@ -381,6 +527,32 @@ export const COLLECT_MESSAGES = {
   "collect.trade.cancelled": "Order cancelled",
   "collect.menuLabel": "Collect",
   "collect.review.summary": "Purchase summary",
+  "collect.review.exactAmounts": "Exact amounts",
+  "collect.review.exchangeContract": "Exchange contract",
+  "collect.review.approvalContract": "Approval contract",
+  "collect.review.marketplaceFee": "Marketplace fee",
+  "collect.review.unknownContract": "Unknown contract",
+  "collect.review.unknownRecipient": "Unknown recipient",
+  "collect.review.copyAddress": "Copy {label} address",
+  "collect.review.openExplorer": "Open {label} on Etherscan",
+  "collect.review.openSeaFee": "OpenSea fee",
+  "collect.review.atMost": "At most",
+  "collect.review.sellFrom": "Sell from",
+  "collect.review.receiveTo": "Receive payment",
+  "collect.review.signWith": "Sign with",
+  "collect.review.orderTerms": "Order details",
+  "collect.review.edit.buy": "Edit purchase",
+  "collect.review.edit.offer": "Edit offer",
+  "collect.review.edit.list": "Edit listing",
+  "collect.review.edit.accept": "Back to offers",
+  "collect.review.edit.cancel": "Back to order",
+  "collect.review.orderNet": "You receive",
+  "collect.review.feesIncluded": "Fees included",
+  "collect.review.offerNote":
+    "If accepted, this offer delivers to your paying wallet.",
+  "collect.trade.reviewOffer": "Review offer",
+  "collect.trade.reviewListing": "Review listing",
+  "collect.orders.details": "Order details",
   "collect.review.copies": "Quantity: {quantity}",
   "collect.review.payWith": "Pay with",
   "collect.review.deliverTo": "Deliver to",
@@ -392,8 +564,7 @@ export const COLLECT_MESSAGES = {
   "collect.review.networkCap": "Network fee cap",
   "collect.review.upTo": "Up to {amount}",
   "collect.review.maximum": "Maximum total",
-  "collect.review.maximumNote":
-    "Includes the purchase and network fee cap. Actual network cost may be lower.",
+  "collect.review.maximumNote": "Actual network cost may be lower.",
   "collect.review.exactNote":
     "Fee caps are rounded up in the summary. Exact amounts are shown here.",
   "collect.review.gasUnknown": "Not available yet",
@@ -417,7 +588,7 @@ export const COLLECT_MESSAGES = {
   "collect.review.quoteRefreshRequired":
     "Refresh quote to continue. Your purchase choices are kept.",
   "collect.trade.refreshRequired":
-    "Refresh the review to continue with current terms.",
+    "Current terms could not be verified. Please try again.",
   "collect.trade.refreshing": "Refreshing review…",
   "collect.review.refreshQuote": "Refresh quote",
   "collect.review.total.buy": "Purchase price",
@@ -589,13 +760,14 @@ export const COLLECT_MESSAGES = {
     "Enter a positive price with at most 18 decimal places.",
   "collect.trade.invalid.recipient":
     "Enter the full receiving wallet address. Names must be resolved before review.",
-  "collect.trade.invalid.expiry": "Choose a supported order duration.",
+  "collect.trade.invalid.expiry":
+    "Choose a preset or a valid custom expiry between 5 minutes and 30 days from now.",
   "collect.trade.details": "Transaction details",
   "collect.trade.expiry": "Review valid until {time}",
   "collect.trade.expired":
     "This review has expired. Refresh it before continuing.",
   "collect.trade.refresh": "Refresh review",
-  "collect.trade.continue": "Continue to wallet",
+  "collect.trade.continue": "Continue in wallet",
   "collect.trade.close": "Close",
   "collect.trade.orderWarning":
     "A signed order can be filled while you are away until it expires or is effectively cancelled.",
@@ -605,6 +777,7 @@ export const COLLECT_MESSAGES = {
     "A wallet approval and an order signature are separate permissions.",
   "collect.trade.stage.review": "Review the exact terms",
   "collect.trade.stage.preparing": "Checking the action",
+  "collect.trade.stage.wallet": "Confirm in your wallet",
   "collect.trade.stage.approval": "Approval requested in your wallet",
   "collect.trade.stage.signature": "Signature requested in your wallet",
   "collect.trade.stage.publishing": "Publishing the signed order",

@@ -18,7 +18,7 @@ export const ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES = {
   "artworkDocumentation.publicationUpload":
     "Add the final artwork or public supporting material",
   "artworkDocumentation.publicationUploadHelp":
-    "Upload the exact file you intend to publish. Keep its original dimensions; there is no need to upscale. Only include supporting files intended for publication. Check the file's embedded location and other metadata before uploading; the original file is preserved as supplied.",
+    "Upload the exact file you intend to publish. Only include supporting files intended for publication. Check the file's embedded location and other metadata before uploading; the original file is preserved as supplied.",
   "artworkDocumentation.publicationUploadStorage":
     "Files are saved with your draft. Include only the artwork and supporting material you intend to publish.",
   "artworkDocumentation.publicationMasterRole":

@@ -292,6 +292,13 @@ it("orders the native actions Collect, Make an offer, then List", async () => {
   expect(offer.compareDocumentPosition(list)).toBe(
     Node.DOCUMENT_POSITION_FOLLOWING
   );
+  const marketNavigation = screen.getByRole("button", {
+    name: "View listings & offers",
+  });
+  expect(trade).not.toContainElement(marketNavigation);
+  expect(list.compareDocumentPosition(marketNavigation)).toBe(
+    Node.DOCUMENT_POSITION_FOLLOWING
+  );
 });
 it("stops a catalog repeatedly returning another token", async () => {
   mockFetchAssets.mockResolvedValue({

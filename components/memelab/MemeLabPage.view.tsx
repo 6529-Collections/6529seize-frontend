@@ -13,25 +13,11 @@ import { formatInteger, formatPercent } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
-export function MemeLabOverview({
-  nft,
-  defaultAdditionalDetailsOpen,
-  locale,
-}: {
-  readonly nft: LabNFT | undefined;
-  readonly defaultAdditionalDetailsOpen: boolean;
-  readonly locale: SupportedLocale;
-}) {
+export function MemeLabOverview({ nft }: { readonly nft: LabNFT | undefined }) {
   if (!nft) {
     return null;
   }
-  return (
-    <MemeLabOverviewDetails
-      nft={nft}
-      defaultAdditionalDetailsOpen={defaultAdditionalDetailsOpen}
-      locale={locale}
-    />
-  );
+  return <MemeLabOverviewDetails nft={nft} />;
 }
 
 export function MemeLabReferences({

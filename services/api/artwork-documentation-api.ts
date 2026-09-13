@@ -11,6 +11,8 @@ import type { ApiArtworkDocumentationSourceImportPreview } from "@/generated/mod
 import type { ApiArtworkDocumentationGrantsResponse } from "@/generated/models/ApiArtworkDocumentationGrantsResponse";
 import type { ApiArtworkDocumentationCreateContext } from "@/generated/models/ApiArtworkDocumentationCreateContext";
 import type { ApiArtworkDocumentationPublicPreview } from "@/generated/models/ApiArtworkDocumentationPublicPreview";
+import type { ApiArtworkDocumentationUpgradePreview } from "@/generated/models/ApiArtworkDocumentationUpgradePreview";
+import type { ApiArtworkDocumentationAvailableArtistRecord } from "@/generated/models/ApiArtworkDocumentationAvailableArtistRecord";
 import {
   commonApiDelete,
   commonApiFetch,
@@ -20,6 +22,35 @@ import {
 } from "./common-api";
 
 const documentationEndpoint = "artwork-documentation";
+const museumProfileUpgrade = {
+  profile_id: "stream_artwork_basic_v1",
+  profile_version: 3,
+};
+export const previewDocumentationUpgrade = (
+  contextId: string,
+  signal?: AbortSignal
+) =>
+  commonApiPost<
+    typeof museumProfileUpgrade,
+    ApiArtworkDocumentationUpgradePreview
+  >({
+    endpoint: `${documentationContextPath(contextId)}/profile-upgrades/preview`,
+    body: museumProfileUpgrade,
+    signal,
+    errorMode: "structured",
+  });
+export const upgradeDocumentationProfile = (
+  context: ApiArtworkDocumentationContext,
+  key: string,
+  signal?: AbortSignal
+) =>
+  commonApiPost<typeof museumProfileUpgrade, ApiArtworkDocumentationContext>({
+    endpoint: `${documentationContextPath(context.id)}/profile-upgrades`,
+    body: museumProfileUpgrade,
+    headers: documentationHeaders(context.draft_version, key),
+    signal,
+    errorMode: "structured",
+  });
 export const documentationHeaders = (
   version?: number,
   key = crypto.randomUUID()
@@ -29,6 +60,17 @@ export const documentationHeaders = (
 });
 export const documentationContextPath = (id: string) =>
   `${documentationEndpoint}/contexts/${encodeURIComponent(id)}`;
+export const getDocumentationArtistRecord = (
+  contextId: string,
+  revisionId: string,
+  signal?: AbortSignal
+) =>
+  commonApiFetch<ApiArtworkDocumentationAvailableArtistRecord>({
+    endpoint: `${documentationContextPath(contextId)}/artist-records/${encodeURIComponent(revisionId)}`,
+    signal,
+    errorMode: "structured",
+    cache: "no-store",
+  });
 export const getDocumentationPublicPreview = (
   id: string,
   signal?: AbortSignal

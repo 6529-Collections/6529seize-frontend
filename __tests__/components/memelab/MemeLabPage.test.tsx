@@ -169,7 +169,9 @@ jest.mock("@/components/nft-market-activity/NftMarketActivity", () => ({
 }));
 jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
   __esModule: true,
-  default: () => <div data-testid="market-depth" />,
+  default: ({ active }: { readonly active: boolean }) => (
+    <div data-testid="market-depth" hidden={!active} />
+  ),
 }));
 
 jest.mock("@/components/pagination/Pagination", () => ({
@@ -629,61 +631,47 @@ describe("MemeLabPageComponent", () => {
     });
   });
 
-  it("syncs additional details default with legacy The Art focus changes", async () => {
+  it("keeps artwork details in Overview and opens the market in its own tab", async () => {
     setupMockApiCalls();
-
     const queryClient = createTestQueryClient();
-    const page = (nftId = "1") => (
+    const page = () => (
       <QueryClientProvider client={queryClient}>
-        <MemeLabPageComponent nftId={nftId} />
+        <MemeLabPageComponent nftId="1" />
       </QueryClientProvider>
     );
     const { rerender } = render(page());
-
-    const detailsButton = await screen.findByRole("button", {
-      name: "Additional details",
+    const details = await screen.findByRole("button", {
+      name: "Listings & offers",
     });
-    expect(detailsButton).toHaveAttribute("aria-expanded", "false");
-    const detailsPanelId = detailsButton.getAttribute("aria-controls") ?? "";
-    expect(detailsPanelId).toBeTruthy();
-    expect(document.getElementById(detailsPanelId)).toHaveAttribute(
-      "aria-hidden",
-      "true"
+    expect(details).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("heading", { name: "Properties" })).toBeVisible();
+    fireEvent.click(details);
+    expect(mockUseRouter().replace).toHaveBeenLastCalledWith(
+      "/meme-lab/1?focus=listings-and-offers",
+      { scroll: false }
     );
+    mockSearchParamsWithFocus(MEME_FOCUS.MARKET);
+    rerender(page());
+    expect(screen.getByTestId("market-depth")).toBeVisible();
     expect(
-      detailsButton.compareDocumentPosition(screen.getByTestId("market-depth"))
-    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    fireEvent.click(detailsButton);
-    expect(detailsButton).toHaveAttribute("aria-expanded", "true");
-    expect(document.getElementById(detailsPanelId)).toHaveAttribute(
-      "aria-hidden",
-      "false"
-    );
-    fireEvent.click(detailsButton);
-
+      screen.queryByRole("heading", { name: "Properties" })
+    ).not.toBeInTheDocument();
     mockSearchParamsWithFocus(MEME_FOCUS.THE_ART);
-
-    await act(async () => {
-      rerender(page());
-    });
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: "Additional details" })
-      ).toHaveAttribute("aria-expanded", "true");
-    });
-
+    rerender(page());
+    expect(
+      await screen.findByRole("heading", { name: "Properties" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+    expect(screen.getAllByTestId("market-depth")).toHaveLength(1);
     mockSearchParamsWithFocus(MEME_FOCUS.LIVE);
-
-    await act(async () => {
-      rerender(page());
-    });
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: "Additional details" })
-      ).toHaveAttribute("aria-expanded", "false");
-    });
+    rerender(page());
+    expect(screen.getByRole("heading", { name: "Properties" })).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "About this artwork" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders activity tab content", async () => {
@@ -958,9 +946,10 @@ describe("MemeLabPageComponent", () => {
 
     await waitFor(() => {
       expect(screen.getAllByTestId("nft-image")).toHaveLength(2);
-      expect(
-        screen.getByRole("button", { name: "Additional details" })
-      ).toHaveAttribute("aria-expanded", "true");
+      expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
+        "aria-current",
+        "page"
+      );
       expect(
         screen.getByRole("link", {
           name: "https://metadata.example/animation.html",

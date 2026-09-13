@@ -233,7 +233,7 @@ it("starts ordinary offers in a fresh manual session after a preset, then preser
 
 it("initializes all plan offer strategies with the clicked method and a distinct explicit session", () => {
   start();
-  expect(workspace().initialMethod).toBe("goal");
+  expect(workspace().initialMethod).toBe("match_bid");
   expect(workspace().blended).toBe(true);
   const session = workspace().strategySessionKey;
   act(() => view().onPlanStrategyChange?.("match_bid"));

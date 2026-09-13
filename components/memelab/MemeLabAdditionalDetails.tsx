@@ -17,15 +17,11 @@ import {
   getImageDimensionsFromMetadata,
   getImageFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
-import type { SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
 import {
   ChartBarIcon,
-  ChevronDownIcon,
   LinkIcon,
   SwatchIcon,
 } from "@heroicons/react/24/outline";
-import { type ReactNode, useId, useState } from "react";
 
 type MemeLabMediaMetadata = Parameters<typeof getImageFileTypeFromMetadata>[0];
 type MemeLabMetadataLinks = {
@@ -167,58 +163,6 @@ function getMemeLabDetailRows(nft: LabNFT) {
   ];
 }
 
-function MemeLabAdditionalDetailsAccordion({
-  defaultOpen,
-  children,
-  locale,
-}: {
-  readonly defaultOpen: boolean;
-  readonly children: ReactNode;
-  readonly locale: SupportedLocale;
-}) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-  const panelId = useId();
-
-  return (
-    <section className="tw-mt-4 tw-border-0 tw-border-y tw-border-solid tw-border-white/10">
-      <button
-        type="button"
-        aria-expanded={isOpen}
-        aria-controls={panelId}
-        onClick={() => setIsOpen((current) => !current)}
-        className="tw-group tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-bg-transparent tw-px-0 tw-py-2.5 tw-text-left tw-text-iron-300 tw-transition-colors tw-duration-150 tw-ease-out hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none"
-      >
-        <span className="tw-text-sm tw-font-medium tw-text-iron-300 group-hover:tw-text-white sm:tw-text-base">
-          {t(locale, "memeLab.detail.additionalDetails")}
-        </span>
-        <ChevronDownIcon
-          aria-hidden="true"
-          className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 tw-ease-out group-hover:tw-text-white motion-reduce:tw-transition-none ${
-            isOpen ? "tw-rotate-180 tw-text-iron-100" : ""
-          }`}
-        />
-      </button>
-      <div
-        id={panelId}
-        aria-hidden={!isOpen}
-        inert={!isOpen}
-        className={`tw-grid tw-transition-[grid-template-rows,opacity] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none ${
-          isOpen
-            ? "tw-grid-rows-[1fr] tw-opacity-100"
-            : "tw-grid-rows-[0fr] tw-opacity-0"
-        }`}
-      >
-        <div
-          tabIndex={isOpen ? undefined : -1}
-          className={isOpen ? "tw-overflow-visible" : "tw-overflow-hidden"}
-        >
-          {children}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function MemeLabCardDescription({ nft }: { readonly nft: LabNFT }) {
   return (
     <section className="tw-max-w-4xl tw-text-pretty tw-pb-4">
@@ -232,7 +176,11 @@ function MemeLabCardDescription({ nft }: { readonly nft: LabNFT }) {
   );
 }
 
-function MemeLabAdditionalDetailsContent({ nft }: { readonly nft: LabNFT }) {
+export function MemeLabAdditionalDetailsContent({
+  nft,
+}: {
+  readonly nft: LabNFT;
+}) {
   const arweaveRows = getMemeLabArweaveRows(nft);
   const detailRows = getMemeLabDetailRows(nft);
   const attributes = getMemeLabMetadataAttributes(nft.metadata);
@@ -276,25 +224,6 @@ function MemeLabAdditionalDetailsContent({ nft }: { readonly nft: LabNFT }) {
   );
 }
 
-export function MemeLabOverviewDetails({
-  nft,
-  defaultAdditionalDetailsOpen,
-  locale,
-}: {
-  readonly nft: LabNFT;
-  readonly defaultAdditionalDetailsOpen: boolean;
-  readonly locale: SupportedLocale;
-}) {
-  return (
-    <>
-      <MemeLabCardDescription nft={nft} />
-      <MemeLabAdditionalDetailsAccordion
-        key={defaultAdditionalDetailsOpen ? "details-open" : "details-closed"}
-        defaultOpen={defaultAdditionalDetailsOpen}
-        locale={locale}
-      >
-        <MemeLabAdditionalDetailsContent nft={nft} />
-      </MemeLabAdditionalDetailsAccordion>
-    </>
-  );
+export function MemeLabOverviewDetails({ nft }: { readonly nft: LabNFT }) {
+  return <MemeLabCardDescription nft={nft} />;
 }

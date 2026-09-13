@@ -1,4 +1,5 @@
 import { CMS_VALIDATION_RESULT_SCHEMA } from "./constants";
+import { validateNativeCmsContent } from "./validation-native-content";
 import {
   cmsPackageSchema,
   validationResultSchema,
@@ -206,6 +207,7 @@ function validateSemantics(
   validateRoutes(cmsPackage, pageMap, issues);
   validateSiteManifest(cmsPackage, assetMap, issues);
   validatePages(cmsPackage, context);
+  validateNativeCmsContent(cmsPackage, issues);
   validateAssets(payload.assets, issues);
   validateNftMediaProfiles(payload.nft_media_profiles ?? [], assetMap, issues);
   validateDeepZoomManifests(

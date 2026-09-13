@@ -282,6 +282,7 @@ describe("NextGen metadata", () => {
   it.each([
     [undefined, "Pebble #42"],
     ["provenance", "Provenance | Pebble #42"],
+    ["listings-and-offers", "Listings & offers | Pebble #42"],
     ["display-center", "Display Center | Pebble #42"],
     ["rarity", "Rarity | Pebble #42"],
   ])("uses branded NFT metadata for the %s token view", async (view, title) => {
@@ -352,6 +353,7 @@ describe("NextGen metadata", () => {
   it.each([
     [undefined, ""],
     ["display-center", "/display-center"],
+    ["listings-and-offers", "/listings-and-offers"],
     ["rarity", "/rarity"],
     ["unsupported", ""],
   ])(

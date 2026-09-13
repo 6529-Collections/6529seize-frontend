@@ -150,8 +150,12 @@ export function marketOperationReview(
                 locale,
                 Number(operation.order.components.end_time) * 1000,
                 {
-                  dateStyle: "medium",
-                  timeStyle: "short",
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  timeZoneName: "shortOffset",
                 }
               ),
             },

@@ -25,6 +25,7 @@ import {
   isFreshMarketReviewExpiry,
   isValidMarketReviewExpiry,
 } from "./market-review-expiry";
+import { validateMarketCriteriaResolution } from "./market-criteria-validation";
 
 // Independent browser allowlist. Never obtain signing contracts or EIP-712 types from a response.
 export const MARKET_SEAPORT = "0x0000000000000068f116a894984e2db1123eb395";
@@ -285,9 +286,11 @@ function validateTokenFlow(
   const nft = listing ? c.offer[0] : c.consideration[0];
   assert(
     nft &&
-      nft.itemType === NFT_TYPES[contract.toLowerCase()] &&
       same(nft.token, contract) &&
-      nft.identifierOrCriteria === uint(tokenId)
+      ((nft.itemType === NFT_TYPES[contract.toLowerCase()] &&
+        nft.identifierOrCriteria === uint(tokenId)) ||
+        (expected.kind === ApiMarketKind.Accept &&
+          nft.itemType === NFT_TYPES[contract.toLowerCase()]! + 2))
   );
   const quantity = uint(expected.quantity);
   assert(
@@ -382,6 +385,14 @@ function validateMarketOperationBindings(
     listing,
   });
   validatePaymentFlow(c, operation, expected, listing, scale);
+  // Verify criteria before even offering an NFT approval, not only at fulfillment.
+  if (
+    expected.kind === ApiMarketKind.Accept &&
+    c.consideration[0]!.itemType >= 4
+  ) {
+    assert(operation.transaction);
+    validateMarketTransaction(operation.transaction, operation, expected);
+  }
   return c;
 }
 
@@ -396,16 +407,20 @@ export function validateMarketOperation(
   });
 }
 
-/** Bind a previous purchase/cancellation review before mandatory fresh continuation. */
+/** Bind previous intent before mandatory fresh continuation; this never authorizes a send or signature. */
 export function validateMarketOperationForRefresh(
   operation: ApiMarketOperation,
   expected: ApiMarketPrepareRequest,
   now = Date.now()
 ): void {
   assert(
-    expected.kind === ApiMarketKind.Buy ||
-      expected.kind === ApiMarketKind.Accept ||
-      expected.kind === ApiMarketKind.Cancel
+    [
+      ApiMarketKind.Buy,
+      ApiMarketKind.Accept,
+      ApiMarketKind.Cancel,
+      ApiMarketKind.List,
+      ApiMarketKind.Offer,
+    ].includes(expected.kind)
   );
   validateMarketOperationBindings(operation, expected, now, {
     requireFreshReview: false,
@@ -606,10 +621,19 @@ export function validateMarketTransaction(
   );
   const [advanced, criteria, conduit, recipient] = decoded.args;
   assert(
-    criteria.length === 0 &&
-      same(conduit, MARKET_CONDUIT_KEY) &&
-      same(recipient, expected.recipient)
+    same(conduit, MARKET_CONDUIT_KEY) && same(recipient, expected.recipient)
   );
+  const nft =
+    expected.kind === ApiMarketKind.Buy ? c.offer[0] : c.consideration[0];
+  assert(nft);
+  validateMarketCriteriaResolution({
+    accepting: expected.kind === ApiMarketKind.Accept,
+    itemType: nft.itemType,
+    expectedType: NFT_TYPES[contract.toLowerCase()]!,
+    root: nft.identifierOrCriteria,
+    tokenId: uint(tokenId),
+    resolvers: criteria,
+  });
   assert(
     advanced.parameters.totalOriginalConsiderationItems ===
       BigInt(c.consideration.length)
