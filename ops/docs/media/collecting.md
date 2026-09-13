@@ -186,7 +186,11 @@ trait requirements with one token. Artist goals let you include collaborations.
 Choose **Lowest listings**, then The Memes, Gradients or Pebbles. This tool shows
 observed listings with prices and quantities, showing each NFT once at its lowest
 supported purchase price. An indivisible lot says how many copies its price
-includes. Open an artwork for its card page, or select its **+** to add it to
+includes. Cards in Lowest listings and TDH use compact ETH prices with up to four
+decimal places, rounded upward. Positive amounts below 0.0001 ETH show
+**<0.0001 ETH**. Expand a shortened price to read **Exact amounts**; the listing
+price and purchase quantity remain unchanged.
+Open an artwork for its card page, or select its **+** to add it to
 your purchase selection. The control becomes a checkmark; select it again to
 remove that NFT. The selection stays available while switching between Lowest
 listings and TDH, with its actions kept in view while you scroll.

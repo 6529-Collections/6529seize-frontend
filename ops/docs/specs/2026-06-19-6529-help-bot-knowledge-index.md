@@ -42,6 +42,8 @@ card's **Details** tab for the original Arweave artwork and metadata.
 The collecting record describes results below the goal controls, priced
 quantities, costs and explicit budget-versus-available scenarios. **Collect now**
 opens purchase selection and **Make offers** opens per-NFT offer pricing.
+Listing-card facts distinguish compact ETH prices from expandable Exact amounts;
+shortened prices do not change listing terms or purchase quantities.
 The card records preserve `focus=the-art` deep links to the Memes and Meme Lab
 **Overview**, where artwork details follow the description. The **Listings & offers**
 tab opens the market directly without another accordion. Primary and History tab changes keep the tab row visible and
