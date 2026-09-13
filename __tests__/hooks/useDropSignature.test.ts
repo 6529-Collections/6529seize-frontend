@@ -44,14 +44,32 @@ const memesDrop: ApiCreateDropRequest = {
 };
 const memesWave = { id: "wave-1", name: "The Memes Main Stage" };
 const mockSignTypedDataAsync = jest.fn();
+const idleMutationState = {
+  context: undefined,
+  data: undefined,
+  error: null,
+  failureCount: 0,
+  failureReason: null,
+  isError: false,
+  isIdle: true,
+  isPaused: false,
+  isPending: false,
+  isSuccess: false,
+  reset: jest.fn(),
+  status: "idle",
+  submittedAt: 0,
+  variables: undefined,
+} as const;
 
 describe("useDropSignature", () => {
   beforeEach(() => {
     mockSetToast.mockClear();
     mockSignTypedDataAsync.mockReset();
     jest.mocked(useSignTypedData).mockReturnValue({
+      ...idleMutationState,
+      signTypedData: jest.fn(),
       signTypedDataAsync: mockSignTypedDataAsync,
-    } as ReturnType<typeof useSignTypedData>);
+    });
     jest.spyOn(React, "useContext").mockReturnValue({ setToast: mockSetToast });
   });
 
@@ -132,11 +150,11 @@ describe("useDropSignature", () => {
 
   it("signs the Memes typed fields through the connected wallet and submits the same envelope", async () => {
     const signMessageAsync = jest.fn();
-    jest
-      .mocked(useSignMessage)
-      .mockReturnValue({ signMessageAsync } as ReturnType<
-        typeof useSignMessage
-      >);
+    jest.mocked(useSignMessage).mockReturnValue({
+      ...idleMutationState,
+      signMessage: jest.fn(),
+      signMessageAsync,
+    });
     mockSignTypedDataAsync.mockResolvedValue("0xtyped");
     const { result } = renderHook(() => useDropSignature());
     let signed: Awaited<ReturnType<typeof result.current.signDrop>> | undefined;
@@ -175,11 +193,11 @@ describe("useDropSignature", () => {
     "does not retry text signing after typed signing fails with $code",
     async ({ code, expectedMessage }) => {
       const signMessageAsync = jest.fn();
-      jest
-        .mocked(useSignMessage)
-        .mockReturnValue({ signMessageAsync } as ReturnType<
-          typeof useSignMessage
-        >);
+      jest.mocked(useSignMessage).mockReturnValue({
+        ...idleMutationState,
+        signMessage: jest.fn(),
+        signMessageAsync,
+      });
       mockSignTypedDataAsync.mockRejectedValue({ code });
       const { result } = renderHook(() => useDropSignature());
       await act(async () => {

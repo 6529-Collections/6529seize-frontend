@@ -41,6 +41,15 @@ const build = (drop = makeDrop(), terms = termsOfService) =>
     origin: "https://6529.io",
   });
 
+// An explicit EIP712Domain schema gives viem's uint256 a bigint type.
+// The JSON envelope keeps a numeric chain ID; both encode identically.
+const toViemTypedData = (
+  typedData: ReturnType<typeof buildMemesSubmissionTypedData>
+) => ({
+  ...typedData,
+  domain: { ...typedData.domain, chainId: BigInt(typedData.domain.chainId) },
+});
+
 describe("Memes submission typed signing", () => {
   it("matches the backend ethers golden vector using viem independently", async () => {
     const verification = golden.typedData.message.Verification;
@@ -54,21 +63,23 @@ describe("Memes submission typed signing", () => {
       origin: verification.Origin,
     });
     expect(typedData).toEqual(golden.typedData);
-    expect(hashTypedData(typedData)).toBe(golden.typedDataHash);
+    expect(hashTypedData(toViemTypedData(typedData))).toBe(
+      golden.typedDataHash
+    );
     expect(
       await recoverTypedDataAddress({
-        ...typedData,
+        ...toViemTypedData(typedData),
         signature: golden.signature as `0x${string}`,
       })
     ).toBe(golden.drop.signer_address);
   });
   it("recovers a real signature over the exact JSON envelope", async () => {
     const typedData = build();
-    const signature = await account.signTypedData(typedData);
+    const signature = await account.signTypedData(toViemTypedData(typedData));
     const received: typeof typedData = JSON.parse(JSON.stringify(typedData));
-    expect(await recoverTypedDataAddress({ ...received, signature })).toBe(
-      account.address
-    );
+    expect(
+      await recoverTypedDataAddress({ ...toViemTypedData(received), signature })
+    ).toBe(account.address);
     expect(received.message).toMatchObject({
       Action: "Submit a Meme Card to The Memes",
       Artwork: "An original Meme — 你好",
@@ -100,14 +111,16 @@ describe("Memes submission typed signing", () => {
       expect(changed.message.Verification.PayloadHash).not.toBe(
         original.message.Verification.PayloadHash
       );
-      expect(hashTypedData(changed)).not.toBe(hashTypedData(original));
+      expect(hashTypedData(toViemTypedData(changed))).not.toBe(
+        hashTypedData(toViemTypedData(original))
+      );
     }
     expect(
       hashTypedData({
-        ...original,
+        ...toViemTypedData(original),
         message: { ...original.message, Destination: "Another wave" },
       })
-    ).not.toBe(hashTypedData(original));
+    ).not.toBe(hashTypedData(toViemTypedData(original)));
     expect(
       build(makeDrop(), "Changed terms").message.Verification.TermsHash
     ).not.toBe(original.message.Verification.TermsHash);
