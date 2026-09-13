@@ -15,6 +15,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import type CollectBatchController from "@/components/collect/CollectBatchController";
+import type CollectRecipientPicker from "@/components/collect/CollectRecipientPicker";
 import type { ComponentProps } from "react";
 
 const payer = "0x1111111111111111111111111111111111111111";
@@ -132,7 +133,7 @@ jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => ({
 }));
 jest.mock("@/services/api/collect-api", () => ({
   fetchCollectCapabilities: async () => ({
-    actions: [{ action: "BUY", enabled: true }],
+    actions: ["BUY", "ACCEPT"].map((action) => ({ action, enabled: true })),
   }),
 }));
 jest.mock("@/services/api/market-api", () => ({
@@ -168,7 +169,9 @@ jest.mock("@/components/collect/market-validation", () => ({
 }));
 jest.mock("@/components/collect/CollectRecipientPicker", () => ({
   __esModule: true,
-  default: () => null,
+  default: (props: ComponentProps<typeof CollectRecipientPicker>) => (
+    <output aria-label="Draft recipient">{props.value}</output>
+  ),
 }));
 jest.mock("@/components/collect/CollectAssetMedia", () => ({
   __esModule: true,
@@ -217,6 +220,123 @@ beforeEach(() => {
   mockFetchOrders.mockResolvedValue({ orders: [order] });
   mockPrepare.mockResolvedValue(operation);
 });
+
+it.each(["accept", "buy"] as const)(
+  "recovers a failed standard %s preparation without replacing the order or discarding the draft",
+  async (action) => {
+    const destination = "0x3333333333333333333333333333333333333333";
+    mockAuth.connectedProfile = {
+      ...mockProfile,
+      wallets: [
+        ...mockProfile.wallets,
+        { wallet: destination, display: "delivery.eth", tdh: 1 },
+      ],
+    };
+    const requestRecipient = action === "buy" ? destination : payer;
+    const first = {
+      ...order,
+      quantity: "3",
+      total_wei: "300000000000000000",
+      net_wei: "300000000000000000",
+      side:
+        action === "accept"
+          ? ApiMarketTradeOrderSideEnum.Offer
+          : ApiMarketTradeOrderSideEnum.Listing,
+      currency:
+        action === "accept"
+          ? "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+          : zero,
+    };
+    const second = {
+      ...first,
+      identity: { ...first.identity, order_hash: `0x${"b".repeat(64)}` },
+    };
+    mockFetchOrders
+      .mockResolvedValueOnce({ orders: [first] })
+      .mockResolvedValue({ orders: [second] });
+    mockPrepare
+      .mockRejectedValueOnce(
+        Object.assign(new Error("Order changed"), { status: 409 })
+      )
+      .mockReturnValue(new Promise(() => undefined));
+    render(
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
+        <CollectTradeController
+          asset={asset}
+          action={action}
+          initialRecipient={destination}
+          presentation="contents"
+          onClose={jest.fn()}
+        />
+      </QueryClientProvider>
+    );
+    fireEvent.click(await screen.findByRole("radio"));
+    const quantity = screen.getByRole("textbox", { name: "Quantity" });
+    fireEvent.change(quantity, { target: { value: "2" } });
+    const prepare = screen.getByRole("button", { name: "Review exact terms" });
+    await waitFor(() => expect(prepare).toBeEnabled());
+    expect(
+      screen.queryByRole("button", { name: "Try again" })
+    ).not.toBeInTheDocument();
+    fireEvent.click(prepare);
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The current trade terms could not be verified"
+    );
+    expect(
+      screen.queryByText("Orders could not be loaded. Please try again.")
+    ).not.toBeInTheDocument();
+    expect(mockFetchOrders).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("radio")).toBeChecked();
+    expect(mockPrepare.mock.calls[0]![0]).toEqual(
+      expect.objectContaining({
+        order: first.identity,
+        quantity: "2",
+        recipient: requestRecipient,
+      })
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    await waitFor(() => expect(mockFetchOrders).toHaveBeenCalledTimes(2));
+    await waitFor(() =>
+      expect(screen.getByRole("radio")).toHaveAttribute(
+        "value",
+        second.identity.order_hash
+      )
+    );
+    expect(screen.getByRole("radio")).not.toBeChecked();
+    expect(quantity).toHaveValue("2");
+    if (action === "buy")
+      expect(screen.getByLabelText("Draft recipient")).toHaveTextContent(
+        destination
+      );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Try again" })
+    ).not.toBeInTheDocument();
+    expect(prepare).toBeDisabled();
+    expect(mockPrepare).toHaveBeenCalledTimes(1);
+    expect(mockSave).not.toHaveBeenCalled();
+    expect(mockConfirm).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("radio"));
+    expect(quantity).toHaveValue("1");
+    fireEvent.click(prepare);
+    await waitFor(() => expect(mockPrepare).toHaveBeenCalledTimes(2));
+    expect(mockPrepare.mock.calls[1]![0]).toEqual(
+      expect.objectContaining({
+        order: second.identity,
+        quantity: "1",
+        recipient: requestRecipient,
+        amount_wei: "100000000000000000",
+      })
+    );
+    expect(mockConfirm).not.toHaveBeenCalled();
+  }
+);
 
 function setGuestSession() {
   mockAuth.connectedProfile = null;
