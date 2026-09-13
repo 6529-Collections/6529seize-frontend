@@ -3,6 +3,10 @@ import { join } from "node:path";
 import NFTHTMLRenderer from "@/components/nft-image/renderers/NFTHTMLRenderer";
 import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
 import type { BaseNFT } from "@/entities/INFT";
+import {
+  MEEBITS_445_ORIGINAL_URL,
+  MEEBITS_445_VIEWER_PATH,
+} from "@/lib/media/meebits-445";
 import { render, screen } from "@testing-library/react";
 
 // Mock NFTImageBalance to match new interface
@@ -131,6 +135,25 @@ describe("NFTHTMLRenderer", () => {
   });
 
   describe("Animation Source Selection", () => {
+    it("isolates the repair for the published Meebits card", () => {
+      const nft = createMockNFT({
+        id: 445,
+        contract: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
+        animation: MEEBITS_445_ORIGINAL_URL,
+      });
+      render(
+        <NFTHTMLRenderer {...createDefaultProps({ nft, id: "repair" })} />
+      );
+
+      const iframe = screen.getByTitle("repair");
+      expect(iframe).toHaveAttribute("src", MEEBITS_445_VIEWER_PATH);
+      expect(iframe).toHaveAttribute(
+        "sandbox",
+        "allow-scripts allow-downloads"
+      );
+      expect(iframe).toHaveAttribute("referrerpolicy", "no-referrer");
+    });
+
     it("uses top-level animation when available on BaseNFT", () => {
       const nft = createMockNFT({
         animation: "https://example.com/top-level-animation.html",

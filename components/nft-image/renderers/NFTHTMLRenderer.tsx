@@ -11,6 +11,10 @@ import {
   shouldUseIframeFallbackTimeout,
 } from "@/components/nft-image/utils/gateway-fallback";
 import { getNFTMediaRendererAttributes } from "@/components/nft-image/media-renderer-marker";
+import {
+  isMeebits445ViewerRepair,
+  MEEBITS_445_VIEWER_PATH,
+} from "@/lib/media/meebits-445";
 
 const IFRAME_FALLBACK_TIMEOUT_MS = 8000;
 
@@ -19,7 +23,9 @@ function getSrc(nft: BaseRendererProps["nft"]): string | undefined {
 }
 
 export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
-  const src = getSrc(props.nft);
+  const originalSrc = getSrc(props.nft);
+  const repaired = isMeebits445ViewerRepair(props.nft, originalSrc);
+  const src = repaired ? MEEBITS_445_VIEWER_PATH : originalSrc;
   const animationClassName = styles["nftAnimation"] ?? "";
   const urls = useMemo(
     () => (src ? getMediaGatewayFallbackUrls(src) : []),
@@ -88,6 +94,8 @@ export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
           {...getNFTMediaRendererAttributes("html")}
           title={props.id}
           src={activeUrl}
+          sandbox={repaired ? "allow-scripts allow-downloads" : undefined}
+          referrerPolicy={repaired ? "no-referrer" : undefined}
           id={props.id ?? `iframe-${props.nft.id}`}
           key={`${props.nft.contract}-${props.nft.id}-${activeUrl}`}
           onLoad={() => {
