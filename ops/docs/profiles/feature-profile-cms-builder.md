@@ -42,7 +42,7 @@ Your normal profile remains at `/{user}`.
 4. Click a section in the page or select it in **Content**. Edit its text, image,
    caption, credit, link, width, or treatment. Add, duplicate, remove, or move
    sections with the available controls.
-5. Use **Design** for the site name, description, layout, palette, typography,
+5. Use **Design** for the site name, description, layout, color scheme, typography,
    spacing, and accent color. Use **Add your art** for image uploads and wallet
    gallery imports.
 6. Check every page in **Preview**, including the phone view and internal links.
@@ -54,6 +54,31 @@ Your normal profile remains at `/{user}`.
    content. Keep the signed publication manifest and recovery receipt.
 
 ## Common Scenarios
+
+### Color schemes and custom accents
+
+In **Design**, all 18 color schemes are available on each of the six complete
+templates, including **Original** and **6529**. **Original** uses the template's
+original color family with contrast adjustments. A scheme changes backgrounds,
+text, borders, controls, and the default accent across every page. Artwork colors,
+content, layout, typography, and spacing stay as you set them.
+
+The built-in schemes target WCAG AAA text contrast: at least 7:1 for normal text
+and 4.5:1 for large text. Controls and focus indicators target at least 3:1
+against adjacent colors. Your artwork and custom colors need their own review;
+choosing a palette does not certify the complete website's accessibility.
+
+Selecting a scheme applies its colors and default accent together. One **Undo**
+restores the previous scheme and accent; **Redo** reapplies both. To use your own
+accent afterward, edit **Accent color** and choose **Apply changes**. That custom
+accent stays until you edit it again or select another color scheme, which
+replaces it with that scheme's default accent.
+
+Choose **Apply changes** or **Discard form changes** before selecting a scheme
+if you have unfinished design fields. Existing saved drafts and published sites
+keep their appearance until you explicitly choose a scheme. Save and publish a
+revision to update the public website. Older template designs retain the
+**Ink**, **Paper**, **Stone**, and **Night** palette controls.
 
 ### Pages and navigation
 
