@@ -49,11 +49,9 @@ describe("useDropSignature", () => {
   beforeEach(() => {
     mockSetToast.mockClear();
     mockSignTypedDataAsync.mockReset();
-    jest
-      .mocked(useSignTypedData)
-      .mockReturnValue({
-        signTypedDataAsync: mockSignTypedDataAsync,
-      } as ReturnType<typeof useSignTypedData>);
+    jest.mocked(useSignTypedData).mockReturnValue({
+      signTypedDataAsync: mockSignTypedDataAsync,
+    } as ReturnType<typeof useSignTypedData>);
     jest.spyOn(React, "useContext").mockReturnValue({ setToast: mockSetToast });
   });
 
@@ -132,7 +130,7 @@ describe("useDropSignature", () => {
     });
   });
 
-  it("signs the Memes typed fields with the intended wallet and submits the same envelope", async () => {
+  it("signs the Memes typed fields through the connected wallet and submits the same envelope", async () => {
     const signMessageAsync = jest.fn();
     jest
       .mocked(useSignMessage)
@@ -157,8 +155,12 @@ describe("useDropSignature", () => {
     expect(envelope.message.Action).toBe("Submit a Meme Card to The Memes");
     expect(mockSignTypedDataAsync).toHaveBeenCalledWith({
       ...envelope,
-      account: memesDrop.signer_address,
+      types: {
+        MemeCardSubmission: envelope.types.MemeCardSubmission,
+        SubmissionVerification: envelope.types.SubmissionVerification,
+      },
     });
+    expect(envelope.message.Verification.Wallet).toBe(memesDrop.signer_address);
     expect(signMessageAsync).not.toHaveBeenCalled();
     expect(result.current.isLoading).toBe(false);
   });

@@ -157,10 +157,17 @@ export const useDropSignature = () => {
     userRejected: boolean;
   }> => {
     try {
+      // Preserve the connector's account object so App Wallets sign locally.
+      // The API checks the signed Wallet field against the request's signer.
       const signedMessage = typedData
         ? await signTypedData.signTypedDataAsync({
             ...typedData,
-            account: typedData.message.Verification.Wallet,
+            // viem supplies EIP712Domain from the domain; the API envelope
+            // retains its explicit schema for strict server verification.
+            types: {
+              MemeCardSubmission: typedData.types.MemeCardSubmission,
+              SubmissionVerification: typedData.types.SubmissionVerification,
+            },
           })
         : await signMessage.signMessageAsync({ message });
       return {
