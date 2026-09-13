@@ -1,3 +1,4 @@
+import type { ApiArtworkDocumentationConfirmRequest } from "@/generated/models/ApiArtworkDocumentationConfirmRequest";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import type { ApiArtworkDocumentationProfile } from "@/generated/models/ApiArtworkDocumentationProfile";
 import type { ApiArtworkDocumentationOperation } from "@/generated/models/ApiArtworkDocumentationOperation";
@@ -244,10 +245,14 @@ export const confirmDocumentation = (
   key: string,
   signal?: AbortSignal
 ) =>
-  commonApiPost<unknown, ApiArtworkDocumentationRevision>({
+  commonApiPost<
+    ApiArtworkDocumentationConfirmRequest,
+    ApiArtworkDocumentationRevision
+  >({
     endpoint: `${documentationContextPath(context.id)}/confirmations`,
     body: {
       confirmation_copy_version: context.profile.confirmation_copy_version,
+      accepted: true,
     },
     headers: documentationHeaders(context.draft_version, key),
     signal,
