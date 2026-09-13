@@ -213,5 +213,27 @@
   "profileCms.approved.mockupCatalogue": "Book catalogue",
   "profileCms.approved.posterStyle": "Poster illustration",
   "profileCms.approved.posterRings": "Rings",
-  "profileCms.approved.posterEllipses": "Ellipses"
+  "profileCms.approved.posterEllipses": "Ellipses",
+
+  "profileCms.palette.original": "Original",
+  "profileCms.palette.seize": "6529",
+  "profileCms.palette.midnight": "Midnight",
+  "profileCms.palette.olive": "Olive",
+  "profileCms.palette.plum": "Plum",
+  "profileCms.palette.galleryWhite": "Gallery White",
+  "profileCms.palette.carbon": "Carbon",
+  "profileCms.palette.clay": "Clay",
+  "profileCms.palette.whiteCube": "White Cube",
+  "profileCms.palette.oxblood": "Oxblood",
+  "profileCms.palette.slate": "Slate",
+  "profileCms.palette.newsprint": "Newsprint",
+  "profileCms.palette.acid": "Acid",
+  "profileCms.palette.cobalt": "Cobalt",
+  "profileCms.palette.forest": "Forest",
+  "profileCms.palette.navy": "Navy",
+  "profileCms.palette.burgundy": "Burgundy",
+  "profileCms.palette.graphite": "Graphite",
+  "profileCms.palette.help": "Choose a palette for your whole website. Your artwork keeps its original colours.",
+  "profileCms.palette.pending": "Apply or discard your form changes before choosing a palette.",
+  "profileCms.palette.accentHelp": "Customise this palette. Text and controls use a contrast-safe shade when needed. Choosing another palette resets the accent."
 }

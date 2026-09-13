@@ -1,4 +1,5 @@
 import type { CmsBlockV1, CmsPackageV1 } from "../protocol/v1";
+import { resolveCmsColorway } from "../studio/palettes";
 
 const DESIGNS = [
   "personal-v2",
@@ -35,6 +36,30 @@ export function recoveredNativeDesign(
   const tokens = cmsPackage.site.theme.tokens;
   if (tokens?.["studio_revision"] !== 1) return null;
   return DESIGNS.find((design) => design === tokens["studio_design"]) ?? null;
+}
+
+/** Only registry-generated finite colour values are emitted; never author CSS. */
+export function recoveredColorwayStyles(cmsPackage: CmsPackageV1): string {
+  const design = recoveredNativeDesign(cmsPackage);
+  const colorway = cmsPackage.site.theme.tokens?.["studio_colorway"];
+  if (!design || typeof colorway !== "string") return "";
+  const variables = resolveCmsColorway(
+    design,
+    colorway,
+    cmsPackage.site.theme.accent
+  );
+  if (!variables) return "";
+  const declarations = Object.entries(variables)
+    .map(([name, value]) => `${name}:${value}`)
+    .join(";");
+  return `:root{${declarations};background:var(--cms-colorway-paper);color:var(--cms-colorway-ink)}
+.cms-native[data-design]{background:var(--cms-colorway-paper);color:var(--cms-colorway-ink);--cms-mat:var(--cms-colorway-mat)}
+.cms-native a{color:var(--cms-colorway-accent-text)}
+.cms-native a:focus-visible{outline:3px solid currentColor;outline-offset:4px}
+.cms-native header a,.cms-native .cms-gallery-item a{color:inherit}
+.cms-native .cms-variant-contact,.cms-native .cms-variant-poster{background:var(--cms-colorway-panel);color:var(--cms-colorway-panel-ink)}
+.cms-native[data-design="fund-v2"] header{background:var(--cms-colorway-header);color:var(--cms-colorway-header-ink);border-color:var(--cms-colorway-header-line)}
+.cms-native footer{border-color:var(--cms-colorway-line)}`;
 }
 
 export function recoveredBlockPresentation(block: CmsBlockV1) {

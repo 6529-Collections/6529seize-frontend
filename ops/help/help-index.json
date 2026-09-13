@@ -7907,7 +7907,11 @@
         "DAO",
         "visual editor",
         "project mockup",
-        "book catalogue"
+        "book catalogue",
+        "color scheme",
+        "palette",
+        "custom accent",
+        "website colors"
       ],
       "facts": [
         "Browse six complete examples: Personal, Artist, Collector, Meme, Organization, and Fund / DAO. Open a full example, explore its pages and artwork, then choose Use this template.",
@@ -7917,6 +7921,9 @@
         "Personal includes project planner and book catalogue portfolio illustrations. Select their section in Content to edit the title, small label, mockup heading, date or period, description and footer note. Mockup style switches between Project planner and Book catalogue. Edit rows for tasks and statuses or books, authors and loan notes, then choose Apply changes.",
         "Pages supports adding and duplicating pages, page settings, choosing the home page, showing a page in the site menu, and changing menu order. A page referenced by another link, gallery work, record or the homepage cannot be removed until those references are changed.",
         "Design restyles the current site. Start a new site replaces the draft with a new template after confirmation; save or download the current draft first. This is not automatic content-preserving template conversion.",
+        "In Design, all 18 color schemes are available on each of the six complete templates, including Original and 6529. Original uses the template's original color family with contrast adjustments. A scheme updates backgrounds, text, borders, controls and the default accent across all pages while preserving artwork colors, content, layout, typography and spacing. Built-in schemes target WCAG AAA text contrast of at least 7:1 for normal text and 4.5:1 for large text; controls and focus indicators target at least 3:1 against adjacent colors. Uploaded artwork and embedded content need separate review; choosing a palette does not certify a complete website's accessibility.",
+        "Selecting a color scheme changes the scheme and accent together in one Undo step; Redo restores both. Edit Accent color and choose Apply changes for a custom accent. Selecting another color scheme replaces that custom accent with the new scheme's default. Apply changes or Discard form changes before selecting a scheme if design fields are unfinished.",
+        "Opening an existing saved draft or published site preserves its appearance until a color scheme is explicitly selected. Save and publish the revision to change the public site. Older template designs retain the Ink, Paper, Stone and Night palette controls.",
         "Examples include generated original artwork and credited CC0 works from The Memes and Blitmap. Animated originals use still previews with original-media links. Sample people, organizations, records and edition offers are fictional; replace their claims and contact details before publishing. Template use does not claim NFT ownership, authorship or artist endorsement."
       ],
       "canonical_path": "/{user}/cms/builder",
@@ -7927,6 +7934,7 @@
         "lib/profile-cms/studio/templates-approved.ts",
         "lib/profile-cms/studio/approved-assets.ts",
         "components/profile-cms-builder/studio/StudioTemplateLibrary.tsx",
+        "components/profile-cms-builder/studio/StudioDesignPanel.tsx",
         "components/profile-cms-builder/studio/StudioCollectionFields.tsx",
         "components/profile-cms-builder/studio/StudioBlockInspector.tsx",
         "components/profile-cms/approved-renderer/ProjectMockup.tsx",

@@ -413,7 +413,7 @@ export default function ProfileCmsStudioEditor({
       ) : null}
       {panel === "design" ? (
         <StudioDesignPanel
-          key={`${document.integrity.package_hash}-${formRevision}`}
+          key={formRevision}
           document={document}
           locale={locale}
           onOperation={operate}
