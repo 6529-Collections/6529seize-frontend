@@ -16,6 +16,7 @@ import {
   validateCmsPackageV1,
   withComputedCmsHashes,
 } from "@/lib/profile-cms/protocol/v1";
+import tailwindConfig from "@/tailwind.config";
 
 type Role = keyof CmsColorwayVariables extends `--cms-colorway-${infer R}`
   ? R
@@ -212,7 +213,7 @@ it("uses actual 6529 iron and primary tokens while deriving a safe text-bearing 
   const definition = getCmsColorways("fund-v2").find(
     (choice) => choice.id === "seize"
   )!;
-  expect(definition.accent).toBe("#406afe");
+  expect(definition.accent).toBe("#3f69fc");
   const variables = resolveCmsColorway("fund-v2", "seize")!;
   expect(variables["--cms-colorway-paper"]).toBe("#131316");
   expect(variables["--cms-colorway-panel"]).toBe("#1c1c21");
@@ -221,6 +222,17 @@ it("uses actual 6529 iron and primary tokens while deriving a safe text-bearing 
   expect(variables["--cms-colorway-muted"]).toBe("#cecfd4");
   expect(variables["--cms-colorway-accent"]).toBe("#84adff");
   expect(variables["--cms-colorway-accent-ink"]).toBe("#000000");
+  expect(tailwindConfig.theme?.extend?.colors).toMatchObject({
+    "primary-500": definition.accent.toUpperCase(),
+    "primary-300": variables["--cms-colorway-accent"].toUpperCase(),
+    iron: {
+      950: variables["--cms-colorway-paper"].toUpperCase(),
+      900: variables["--cms-colorway-panel"].toUpperCase(),
+      800: variables["--cms-colorway-mat"].toUpperCase(),
+      100: variables["--cms-colorway-ink"].toUpperCase(),
+      300: variables["--cms-colorway-muted"].toUpperCase(),
+    },
+  });
   expect(
     contrastRatio(
       variables["--cms-colorway-accent"],

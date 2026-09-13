@@ -62,7 +62,7 @@ const SEEDS = {
     panel: "#1c1c21",
     ink: "#efeff1",
     muted: "#cecfd4",
-    accent: "#406afe",
+    accent: "#3f69fc",
     deep: "#131316",
     soft: "#26272b",
     secondary: "#395fe4",
