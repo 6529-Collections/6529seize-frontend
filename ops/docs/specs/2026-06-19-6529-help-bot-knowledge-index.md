@@ -30,6 +30,10 @@ The Stream review record includes its four current entry guides and the
 **All topics** navigation. Its collector and code-review guide links refer to
 current pages; those guides are not invented as historical snapshot routes.
 
+The Meebits #445 record explains the compatibility viewer's Coinbase ETH/USD
+feed, automatic retries, and animated background. It directs users to the
+card's **Details** tab for the original Arweave artwork and metadata.
+
 The collecting record describes results below the goal controls, priced
 quantities, costs and explicit budget-versus-available scenarios. **Collect now**
 opens purchase selection and **Make offers** opens per-NFT offer pricing.

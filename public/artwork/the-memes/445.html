@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<!-- Viewer compatibility copy of Meebits x DocLove's Red Light, Green Light.
+     Original: https://arweave.net/D9DkfXrSSyViJyEFXtk15I789v-cuKS03tpaZztpESk
+     Repair: bounded Coinbase ETH/USD feed and rendering independent of that feed.
+     The original artwork and NFT metadata remain available from the card Details. -->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Red Light, Green Light</title>
+  <style>
+    :root {
+      --ui-gap: 10px;
+      --ui-bottom: max(30px, env(safe-area-inset-bottom) + 10px);
+      --ui-btn-h: 40px;
+      --ui-btn-fs: 1.1rem;
+      --ui-small-gap: 8px;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Rajdhani', sans-serif;
+      background-color: #f0f0f0;
+      color: #333;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      height: 100dvh;
+
+      position: fixed;
+      width: 100%;
+      overscroll-behavior: none;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+
+    #bgCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.6;
+    }
+
+    #info {
+      position: absolute;
+      top: 15px;
+      text-align: center;
+      width: fit-content;
+      height: auto;
+      padding: 0 20px;
+      box-sizing: border-box;
+      pointer-events: none;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      z-index: 3;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 40px;
+    }
+
+    h1 {
+      font-weight: 600;
+      font-size: 1.5rem;
+      margin: 0;
+      color: rgba(0, 0, 0, 0.8);
+    }
+
+    #ethStatus {
+      font-size: 1rem;
+      font-weight: 500;
+      margin: 0;
+      color: #555;
+    }
+
+    .price-up {
+      color: #008000 !important;
+    }
+
+    .price-down {
+      color: #D93025 !important;
+    }
+
+    #controlGroup {
+      position: absolute;
+      bottom: var(--ui-bottom);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: var(--ui-gap);
+      align-items: center;
+      transition: opacity 0.3s ease, visibility 0.3s ease, bottom .2s ease;
+      z-index: 4;
+    }
+
+    #zoomControls {
+      display: flex;
+      flex-direction: row;
+      gap: var(--ui-gap);
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #pauseButton {
+      width: 50px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #pauseButton svg {
+      width: 16px;
+      height: 16px;
+      fill: #333;
+    }
+
+    .button {
+      height: var(--ui-btn-h);
+      font-size: var(--ui-btn-fs);
+      font-weight: 600;
+      font-family: inherit;
+      line-height: var(--ui-btn-h);
+      text-align: center;
+      color: #333;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      transition: all 0.2s ease;
+      padding: 0 12px;
+      user-select: none;
+    }
+
+    .button:hover {
+      background-color: #f5f5f5;
+    }
+
+    .button:active {
+      background-color: #e0e0e0;
+      transform: translateY(1px);
+    }
+
+    .button:disabled {
+      background-color: #e8e8e8;
+      color: #aaa;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    #zoomInButton,
+    #zoomOutButton {
+      width: 50px;
+      font-size: 1.5rem;
+    }
+
+    #zoomResetButton,
+    #insideButton {
+      width: 78px;
+      font-size: 0.95rem;
+    }
+
+    #regenerateButton {
+      width: 280px;
+      color: rgb(0, 0, 0);
+      background-color: #ffffff;
+      border: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    #regenerateButton:hover:not(:disabled) {
+      background-color: #357ae8;
+    }
+
+    #regenerateButton:active:not(:disabled) {
+      background-color: #2a6ae0;
+    }
+
+    #regenerateButton:disabled {
+      background-color: #e8e8e8;
+      color: #aaa;
+    }
+
+    #saveImageButton,
+    #hideToggleButton {
+      position: absolute;
+      bottom: var(--ui-bottom);
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      z-index: 5;
+      backdrop-filter: saturate(1.2);
+    }
+
+    #saveImageButton {
+      right: 16px;
+    }
+
+    #hideToggleButton {
+      left: 16px;
+    }
+
+    #saveImageButton svg,
+    #hideToggleButton svg {
+      width: 22px;
+      height: 22px;
+      fill: #333;
+    }
+
+    .ui-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #brandLogo {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 35px;
+      z-index: 10;
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    @media (min-width: 769px) {
+
+      #info {
+        top: auto;
+        bottom: 120px;
+        left: 20px;
+        right: auto;
+        transform: none;
+        text-align: left;
+        padding: 0 16px;
+        justify-content: flex-start;
+      }
+
+
+      #ethStatus {
+        margin: 0;
+      }
+
+      #controlGroup {
+        left: 20px;
+        bottom: 20px;
+        transform: none;
+        align-items: flex-start;
+      }
+
+      #regenerateButton {
+        width: 245px;
+        margin-left: 100px;
+      }
+
+
+      #hideToggleButton {
+        left: 20px;
+        bottom: 20px;
+      }
+
+      #saveImageButton {
+        left: 70px;
+        right: auto;
+        bottom: 20px;
+      }
+
+      #brandLogo {
+        top: auto;
+        bottom: 15px;
+        right: 15px;
+        width: 70px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.2rem;
+      }
+
+      #ethStatus {
+        font-size: 0.9rem;
+      }
+
+      :root {
+        --ui-gap: 8px;
+        --ui-bottom: 18px;
+        --ui-btn-h: 34px;
+        --ui-btn-fs: .95rem;
+      }
+
+      #zoomControls {
+        gap: var(--ui-small-gap);
+      }
+
+      #zoomInButton,
+      #zoomOutButton {
+        width: 42px;
+        font-size: 1.2rem;
+      }
+
+      #zoomResetButton,
+      #insideButton {
+        width: 64px;
+        font-size: 0.85rem;
+      }
+
+      #regenerateButton {
+        width: 220px;
+      }
+
+      #saveImageButton,
+      #hideToggleButton {
+        width: 38px;
+        height: 38px;
+      }
+
+      #saveImageButton svg,
+      #hideToggleButton svg {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      :root {
+        --ui-bottom: 16px;
+        --ui-btn-h: 30px;
+        --ui-btn-fs: .85rem;
+      }
+
+      #zoomInButton,
+      #zoomOutButton {
+        width: 36px;
+        font-size: 1rem;
+      }
+
+      #pauseButton {
+        width: 36px;
+      }
+
+      #zoomResetButton,
+      #insideButton {
+        width: 56px;
+        font-size: 0.78rem;
+      }
+
+      #regenerateButton {
+        width: 180px;
+      }
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <div id="info">
+    <p id="ethStatus" role="status">Fetching ETH price...</p>
+  </div>
+
+  <canvas id="bgCanvas"></canvas>
+
+  <div id="controlGroup">
+    <div id="zoomControls">
+      <button id="pauseButton" class="button" aria-label="Pause rotation"></button>
+      <button id="zoomInButton" class="button">+</button>
+      <button id="zoomOutButton" class="button">-</button>
+      <button id="zoomResetButton" class="button" data-full="Reset" data-short="Reset">Reset</button>
+      <button id="insideButton" class="button" data-full="Inside" data-short="In">Inside</button>
+    </div>
+    <button id="regenerateButton" class="button" data-full="Regenerate Camo" data-short="Regenerate">Regenerate
+      Camo</button>
+  </div>
+
+  <button id="hideToggleButton" class="button" aria-label="Toggle UI"></button>
+  <button id="saveImageButton" class="button" aria-label="Save image"></button>
+  <img id="brandLogo" src="https://cdn.meebco.com/brand/BLACK-BLOCKHEAD-ONALPHA.png" alt="">
+
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js';
+
+    let scene, camera, renderer, mainCube;
+    let pixelFaces = [];
+    let isPaused = false;
+
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+
+    const ENABLE_DYNAMIC_BACKGROUND = true;
+
+    let bgCanvas, bgCtx;
+    let bgGrid = [];
+    let bgCols, bgRows;
+    let bgPixelSize = 20;
+    let bgPalette = [];
+
+    const gridSize = 22;
+    const pixelSize = 0.8;
+    const wallThickness = 0.1;
+
+    const originalZoom = 40;
+    const zoomStep = 5;
+    const maxZoomSteps = 7;
+    let zoomSteps = 0;
+
+    let zoomInButton, zoomOutButton, zoomResetButton, insideButton, regenerateButton, saveImageButton;
+    let hideToggleButton, pauseButton, infoEl, controlGroupEl, ethStatusEl;
+
+    let currentEthChange = 0;
+
+    let pigLight;
+
+    const camoGreen = [0x4b5320, 0x6b8e23, 0x8b8467, 0xa0a880, 0x36454F, 0x5a5a5a, 0x909090];
+    const insideGreen = [0x32CD32, 0x7CFC00, 0xADFF2F, 0x90EE90, 0x98FB98, 0x00FF7F, 0x39FF14];
+    const camoRed = [0x5C0000, 0x3D0000, 0x8B0000, 0x36454F, 0x5a5a5a, 0x222222, 0x2C0000];
+    const insideRed = [0xFF4500, 0xFF0000, 0xFF8C00, 0xDC143C, 0xB22222, 0xFF2400, 0xFF6347];
+    const tattooColor = 0x000000;
+
+    const pigColorDown = 0xFFC0CB;
+    const pigColorUp = 0x98FB98;
+
+
+
+    const creationFee = 0.33809862;
+    const tattooCount = 994;
+    const totalPixels = 12 * (gridSize * gridSize);
+    const tattooRatio = tattooCount / totalPixels;
+
+
+    const pigLightIntensity = 0.711;
+    const baseHeartRate = 0.003;
+    const maxHeartRate = 0.015;
+
+
+    const baseBreathSpeed = 0.0005;
+    const maxBreathSpeed = 0.002;
+    const maxBreathIntensity = 0.4;
+    const breathColorUp = 0x004400;
+    const breathColorDown = 0x440000;
+
+    const baseRotationSpeed = 0.002;
+
+    function appendSvgIcon(target, pathD, size = 22) {
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('width', String(size));
+      svg.setAttribute('height', String(size));
+      const path = document.createElementNS(svgNS, 'path');
+      path.setAttribute('d', pathD);
+      path.setAttribute('fill', 'currentColor');
+      svg.appendChild(path);
+      target.replaceChildren(svg);
+    }
+    const eyeD = "M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5zm0 13c-3.04 0-5.5-2.46-5.5-5.5S8.96 6.5 12 6.5s5.5 2.46 5.5 5.5S15.04 17.5 12 17.5zm0-9C10.07 8.5 8.5 10.07 8.5 12S10.07 15.5 12 15.5 15.5 13.93 15.5 12 13.93 8.5 12 8.5z";
+    const eyeSlashD = "M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L21.73 22 20.27 23.46 3.41 5.73 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78 3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z";
+    const saveD = "M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z";
+    const pauseD = "M6 19h4V5H6v14zm8-14v14h4V5h-4z";
+    const playD = "M8 5v14l11-7z";
+
+    async function init() {
+      scene = new THREE.Scene();
+
+      if (ENABLE_DYNAMIC_BACKGROUND) {
+        initBackground();
+        scene.background = null;
+      } else {
+        scene.background = new THREE.Color(0xf0f0f0);
+      }
+
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+      camera.position.z = originalZoom;
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(0, 5, 7.5);
+      scene.add(directionalLight);
+
+
+      pigLight = new THREE.PointLight(pigColorUp, 0, 100);
+      pigLight.position.set(0, 0, 0);
+      scene.add(pigLight);
+
+      mainCube = new THREE.Group();
+      scene.add(mainCube);
+
+      const halfGridSize = (gridSize * pixelSize) / 2;
+      const shellOffset = halfGridSize;
+      const innerShellOffset = shellOffset - (wallThickness / 2);
+      const outerShellOffset = shellOffset + (wallThickness / 2);
+
+      const faceDefinitions = [
+        { key: 'outer-front', pos: new THREE.Vector3(0, 0, outerShellOffset), rot: new THREE.Euler(0, 0, 0), type: 'outside' },
+        { key: 'outer-right', pos: new THREE.Vector3(outerShellOffset, 0, 0), rot: new THREE.Euler(0, Math.PI / 2, 0), type: 'outside' },
+        { key: 'outer-top', pos: new THREE.Vector3(0, outerShellOffset, 0), rot: new THREE.Euler(-Math.PI / 2, 0, 0), type: 'outside' },
+
+        { key: 'inner-back', pos: new THREE.Vector3(0, 0, -innerShellOffset), rot: new THREE.Euler(0, 0, 0), type: 'inside' },
+        { key: 'inner-left', pos: new THREE.Vector3(-innerShellOffset, 0, 0), rot: new THREE.Euler(0, Math.PI / 2, 0), type: 'inside' },
+        { key: 'inner-bottom', pos: new THREE.Vector3(0, -innerShellOffset, 0), rot: new THREE.Euler(-Math.PI / 2, 0, 0), type: 'inside' },
+
+        { key: 'outer-back', pos: new THREE.Vector3(0, 0, -outerShellOffset), rot: new THREE.Euler(0, Math.PI, 0), type: 'outside' },
+        { key: 'outer-left', pos: new THREE.Vector3(-outerShellOffset, 0, 0), rot: new THREE.Euler(0, -Math.PI / 2, 0), type: 'outside' },
+        { key: 'outer-bottom', pos: new THREE.Vector3(0, -outerShellOffset, 0), rot: new THREE.Euler(Math.PI / 2, 0, 0), type: 'outside' },
+
+        { key: 'inner-front', pos: new THREE.Vector3(0, 0, innerShellOffset), rot: new THREE.Euler(0, Math.PI, 0), type: 'inside' },
+        { key: 'inner-right', pos: new THREE.Vector3(innerShellOffset, 0, 0), rot: new THREE.Euler(0, -Math.PI / 2, 0), type: 'inside' },
+        { key: 'inner-top', pos: new THREE.Vector3(0, innerShellOffset, 0), rot: new THREE.Euler(Math.PI / 2, 0, 0), type: 'inside' }
+      ];
+
+      faceDefinitions.forEach(def => {
+        const pixelsFace = createPixelFace();
+        pixelsFace.userData.key = def.key;
+        const faceData = { mesh: pixelsFace, type: def.type, key: def.key };
+        pixelFaces.push(faceData);
+        pixelsFace.position.copy(def.pos);
+        pixelsFace.rotation.copy(def.rot);
+        mainCube.add(pixelsFace);
+      });
+
+      zoomInButton = document.getElementById('zoomInButton');
+      zoomOutButton = document.getElementById('zoomOutButton');
+      zoomResetButton = document.getElementById('zoomResetButton');
+      insideButton = document.getElementById('insideButton');
+      regenerateButton = document.getElementById('regenerateButton');
+      hideToggleButton = document.getElementById('hideToggleButton');
+      pauseButton = document.getElementById('pauseButton');
+      infoEl = document.getElementById('info');
+      controlGroupEl = document.getElementById('controlGroup');
+      saveImageButton = document.getElementById('saveImageButton');
+      ethStatusEl = document.getElementById('ethStatus');
+
+      window.addEventListener('resize', () => {
+        onWindowResize();
+        applyResponsiveLabels();
+        if (ENABLE_DYNAMIC_BACKGROUND) onBackgroundResize();
+      }, false);
+
+      renderer.domElement.addEventListener('mousedown', onMouseDown, false);
+      renderer.domElement.addEventListener('mousemove', onMouseMove, false);
+      renderer.domElement.addEventListener('mouseup', onMouseUp, false);
+      renderer.domElement.addEventListener('mouseleave', onMouseUp, false);
+
+      renderer.domElement.addEventListener('touchstart', onTouchStart, { passive: false });
+      renderer.domElement.addEventListener('touchmove', onTouchMove, { passive: false });
+      renderer.domElement.addEventListener('touchend', onMouseUp, { passive: true });
+
+      regenerateButton.addEventListener('click', regenerateCamoOnly);
+      saveImageButton.addEventListener('click', saveImage);
+      hideToggleButton.addEventListener('click', toggleUi);
+      pauseButton.addEventListener('click', togglePause);
+
+      zoomInButton.addEventListener('click', zoomIn);
+      zoomOutButton.addEventListener('click', zoomOut);
+      zoomResetButton.addEventListener('click', zoomReset);
+      insideButton.addEventListener('click', zoomInside);
+
+      appendSvgIcon(hideToggleButton, eyeSlashD, 24);
+      appendSvgIcon(saveImageButton, saveD, 22);
+      appendSvgIcon(pauseButton, pauseD, 16);
+
+      updateButtonStates();
+      applyResponsiveLabels();
+
+      if (ENABLE_DYNAMIC_BACKGROUND) updateBackgroundPalette(currentEthChange >= 0);
+      await regenerateCamoOnly(true);
+      animate();
+      void refreshPrice();
+    }
+
+    function applyResponsiveLabels() {
+      const compact = window.innerWidth <= 420;
+      document.querySelectorAll('[data-full]').forEach(el => {
+        const full = el.getAttribute('data-full');
+        const short = el.getAttribute('data-short') || full;
+        el.textContent = compact ? short : full;
+      });
+    }
+
+    function createPixelFace() {
+      const pixelGeometry = new THREE.BoxGeometry(pixelSize, pixelSize, pixelSize);
+
+      const pixelMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        emissive: 0x000000,
+        emissiveIntensity: 0
+      });
+      const count = gridSize * gridSize;
+      const instancedMesh = new THREE.InstancedMesh(pixelGeometry, pixelMaterial, count);
+
+      const dummy = new THREE.Object3D();
+      dummy.scale.set(1, 1, 1);
+
+      let i = 0;
+      for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+          const gridX = (x - (gridSize - 1) / 2) * pixelSize;
+          const gridY = ((gridSize - 1) / 2 - y) * pixelSize;
+          dummy.position.set(gridX, gridY, 0);
+          dummy.updateMatrix();
+          instancedMesh.setMatrixAt(i, dummy.matrix);
+          i++;
+        }
+      }
+      instancedMesh.instanceMatrix.needsUpdate = true;
+      return instancedMesh;
+    }
+
+    async function fetchEthPrice() {
+      const url = 'https://api.exchange.coinbase.com/products/ETH-USD/stats';
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+
+      try {
+        const response = await fetch(url, {
+          cache: 'no-store', credentials: 'omit', signal: controller.signal
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+
+        if (typeof data.last !== 'string' || typeof data.open !== 'string') {
+          throw new Error('Invalid ETH price response');
+        }
+        const price = Number(data.last);
+        const open = Number(data.open);
+        const ethChange = (price - open) / open * 100;
+        if (!Number.isFinite(price) || price <= 0 ||
+            !Number.isFinite(open) || open <= 0 || !Number.isFinite(ethChange)) {
+          throw new Error('Invalid ETH price data');
+        }
+        currentEthChange = ethChange;
+
+        const rounded = ethChange.toFixed(2);
+        const formattedPrice = price.toLocaleString('en-US', {
+          style: 'currency',
+          currency: 'USD',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+
+        if (ethChange >= 0) {
+          ethStatusEl.textContent = `ETH: ${formattedPrice} | 24h: +${rounded}% (UP)`;
+          ethStatusEl.className = 'price-up';
+          if (ENABLE_DYNAMIC_BACKGROUND) updateBackgroundPalette(true);
+        } else {
+          ethStatusEl.textContent = `ETH: ${formattedPrice} | 24h: ${rounded}% (DOWN)`;
+          ethStatusEl.className = 'price-down';
+          if (ENABLE_DYNAMIC_BACKGROUND) updateBackgroundPalette(false);
+        }
+
+        ethStatusEl.title = 'Coinbase ETH/USD market · refreshes every minute';
+        return true;
+      } catch {
+        ethStatusEl.textContent = 'ETH price unavailable. Retrying shortly.';
+        ethStatusEl.className = '';
+        return false;
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    async function refreshPrice() {
+      try {
+        await fetchAndApplyColors();
+      } finally {
+        setTimeout(refreshPrice, 60000);
+      }
+    }
+
+    function generateCamoPattern(palette) {
+      const pattern = new Array(gridSize * gridSize).fill(0).map(
+        () => Math.floor(Math.random() * palette.length)
+      );
+      for (let k = 0; k < 4; k++) {
+        const next = pattern.slice();
+        for (let y = 0; y < gridSize; y++) {
+          for (let x = 0; x < gridSize; x++) {
+            const neighbors = [];
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                if (dx === 0 && dy === 0) continue;
+                const nx = x + dx, ny = y + dy;
+                if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize) neighbors.push(pattern[ny * gridSize + nx]);
+              }
+            }
+
+            if (neighbors.length && Math.random() < creationFee) {
+              next[y * gridSize + x] = neighbors[Math.floor(Math.random() * neighbors.length)];
+            }
+          }
+        }
+        for (let i = 0; i < pattern.length; i++) pattern[i] = next[i];
+      }
+      return pattern;
+    }
+
+    function applyFaceColors(instancedMesh, camoPattern, palette) {
+      const color = new THREE.Color();
+      for (let i = 0; i < camoPattern.length; i++) {
+        const idx = camoPattern[i];
+        instancedMesh.setColorAt(i, color.setHex(palette[idx]));
+        if (Math.random() < tattooRatio) instancedMesh.setColorAt(i, color.setHex(tattooColor));
+      }
+      if (instancedMesh.instanceColor) instancedMesh.instanceColor.needsUpdate = true;
+    }
+
+    async function fetchAndApplyColors() {
+      if (await fetchEthPrice()) {
+        await regenerateCamoOnly(true);
+      }
+    }
+
+    function regenerateCamoOnly(isInitialLoad = false) {
+      if (!isInitialLoad) {
+        regenerateButton.disabled = true;
+        regenerateButton.textContent = (window.innerWidth <= 420 ? 'Regenerate' : 'Generating...');
+      }
+      const outsidePalette = (currentEthChange >= 0) ? camoGreen : camoRed;
+      const insidePalette = (currentEthChange >= 0) ? insideGreen : insideRed;
+
+      return new Promise(resolve => {
+        setTimeout(() => {
+          pixelFaces.forEach(face => {
+            const palette = (face.type === 'outside') ? outsidePalette : insidePalette;
+            const pattern = generateCamoPattern(palette);
+            applyFaceColors(face.mesh, pattern, palette);
+          });
+          regenerateButton.disabled = false;
+          regenerateButton.textContent = (window.innerWidth <= 420 ? 'Regenerate' : 'Regenerate Camo');
+          resolve();
+        }, 10);
+      });
+    }
+
+    function toggleUi() {
+      const isHidden = document.getElementById('controlGroup').classList.toggle('ui-hidden');
+      infoEl.classList.toggle('ui-hidden', isHidden);
+      saveImageButton.classList.toggle('ui-hidden', isHidden);
+      appendSvgIcon(hideToggleButton, isHidden ? eyeD : eyeSlashD, 24);
+    }
+
+    function togglePause() {
+      isPaused = !isPaused;
+      appendSvgIcon(pauseButton, isPaused ? playD : pauseD, 16);
+    }
+
+    function zoomIn() { if (zoomSteps < maxZoomSteps) { zoomSteps++; camera.position.z -= zoomStep; updateButtonStates(); } }
+    function zoomOut() { if (zoomSteps > -maxZoomSteps) { zoomSteps--; camera.position.z += zoomStep; updateButtonStates(); } }
+    function zoomReset() { zoomSteps = 0; camera.position.z = originalZoom; updateButtonStates(); }
+    function zoomInside() { zoomSteps = maxZoomSteps; camera.position.z = originalZoom - (maxZoomSteps * zoomStep); updateButtonStates(); }
+    function updateButtonStates() {
+      zoomInButton.disabled = (zoomSteps >= maxZoomSteps);
+      zoomOutButton.disabled = (zoomSteps <= -maxZoomSteps);
+      insideButton.disabled = (zoomSteps === maxZoomSteps);
+      zoomResetButton.disabled = (zoomSteps === 0);
+    }
+
+    function saveImage() {
+      renderer.render(scene, camera);
+      const dataURL = renderer.domElement.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = dataURL; link.download = 'RedLightGreenLight.png';
+      document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (ENABLE_DYNAMIC_BACKGROUND) {
+        animateBackground();
+      }
+
+      if (!isDragging && !isPaused) {
+        mainCube.rotation.y += baseRotationSpeed;
+        mainCube.rotation.x += baseRotationSpeed;
+      }
+
+
+      const changePercent = Math.abs(currentEthChange);
+
+
+      const cappedPercent = Math.min(changePercent, 10.0);
+
+
+      const pulseSpeedScale = cappedPercent / 10.0;
+
+
+      const currentPulseSpeed = baseHeartRate + (pulseSpeedScale * (maxHeartRate - baseHeartRate));
+      const currentBreathSpeed = baseBreathSpeed + (pulseSpeedScale * (maxBreathSpeed - baseBreathSpeed));
+
+
+      const t = Date.now();
+      const heartPulseFactor = (Math.sin(t * currentPulseSpeed) * 0.5 + 0.5);
+      const breathPulseFactor = (Math.sin(t * currentBreathSpeed) * 0.5 + 0.5);
+
+
+      if (pigLight) {
+
+        pigLight.intensity = heartPulseFactor * pigLightIntensity;
+
+
+        if (currentEthChange >= 0) {
+          pigLight.color.setHex(pigColorUp);
+        } else {
+          pigLight.color.setHex(pigColorDown);
+        }
+      }
+
+
+      const currentBreathIntensity = breathPulseFactor * maxBreathIntensity;
+      const breathColor = (currentEthChange >= 0) ? breathColorUp : breathColorDown;
+
+      pixelFaces.forEach(face => {
+        if (face.type === 'outside') {
+          face.mesh.material.emissive.setHex(breathColor);
+          face.mesh.material.emissiveIntensity = currentBreathIntensity;
+        }
+      });
+
+
+      renderer.render(scene, camera);
+    }
+
+
+    function onMouseDown(e) {
+      isDragging = true;
+      previousMousePosition.x = e.clientX;
+      previousMousePosition.y = e.clientY;
+    }
+    function onMouseMove(e) {
+      if (!isDragging) return;
+      const dx = e.clientX - previousMousePosition.x;
+      const dy = e.clientY - previousMousePosition.y;
+      mainCube.rotation.y += dx * 0.01;
+      mainCube.rotation.x += dy * 0.01;
+      previousMousePosition.x = e.clientX;
+      previousMousePosition.y = e.clientY;
+    }
+    function onTouchStart(e) {
+      if (e.touches.length === 1) {
+        isDragging = true;
+        previousMousePosition.x = e.touches[0].clientX;
+        previousMousePosition.y = e.touches[0].clientY;
+      }
+    }
+    function onTouchMove(e) {
+      if (!isDragging || e.touches.length !== 1) return;
+      e.preventDefault();
+      const dx = e.touches[0].clientX - previousMousePosition.x;
+      const dy = e.touches[0].clientY - previousMousePosition.y;
+      mainCube.rotation.y += dx * 0.01;
+      mainCube.rotation.x += dy * 0.01;
+      previousMousePosition.x = e.touches[0].clientX;
+      previousMousePosition.y = e.touches[0].clientY;
+    }
+    function onMouseUp() { isDragging = false; }
+
+    init();
+
+
+    function initBackground() {
+      bgCanvas = document.getElementById('bgCanvas');
+      if (!bgCanvas) return;
+      bgCtx = bgCanvas.getContext('2d');
+      onBackgroundResize();
+    }
+
+    function onBackgroundResize() {
+      if (!bgCanvas) return;
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+
+
+      bgPixelSize = window.innerWidth < 768 ? 12 : 20;
+
+      bgCols = Math.ceil(bgCanvas.width / bgPixelSize);
+      bgRows = Math.ceil(bgCanvas.height / bgPixelSize);
+      initBackgroundGrid();
+    }
+
+    function initBackgroundGrid() {
+      bgGrid = [];
+      for (let y = 0; y < bgRows; y++) {
+        for (let x = 0; x < bgCols; x++) {
+
+          const normX = x / bgCols;
+          const normY = y / bgRows;
+
+
+          const distance = normX + normY;
+
+          bgGrid.push({
+            x: x * bgPixelSize,
+            y: y * bgPixelSize,
+            centerX: x * bgPixelSize + bgPixelSize / 2,
+            centerY: y * bgPixelSize + bgPixelSize / 2,
+            baseColorIndex: Math.floor(Math.random() * 4),
+            opacity: Math.random() * 0.5 + 0.1,
+            distance: distance
+          });
+        }
+      }
+    }
+
+    function updateBackgroundPalette(isUp) {
+
+      if (isUp) {
+
+        bgPalette = [
+          '#1b5e20', '#2e7d32', '#388e3c', '#4caf50', '#81c784'
+        ];
+      } else {
+
+        bgPalette = [
+          '#b71c1c', '#c62828', '#d32f2f', '#f44336', '#e57373'
+        ];
+      }
+    }
+
+    function animateBackground() {
+      if (!bgCtx || !bgPalette.length) return;
+
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+      const time = Date.now() * 0.001;
+      const waveSpeed = 0.5;
+
+      const waveFrequency = window.innerWidth < 768 ? 2.0 : 4.0;
+
+      for (let i = 0; i < bgGrid.length; i++) {
+        const pixel = bgGrid[i];
+
+
+        const phase = (time * waveSpeed) - (pixel.distance * waveFrequency);
+
+
+
+        const wave = (Math.sin(phase) + 1) / 2;
+        const activation = Math.pow(wave, 15);
+
+        const baseScale = 0.85;
+        const peakScale = 1.25;
+        const currentScale = baseScale + (activation * (peakScale - baseScale));
+
+
+        const finalOpacity = pixel.opacity;
+
+        bgCtx.fillStyle = bgPalette[pixel.baseColorIndex];
+        bgCtx.globalAlpha = finalOpacity;
+
+
+        const size = bgPixelSize * currentScale;
+        const offset = (bgPixelSize - size) / 2;
+
+        bgCtx.fillRect(pixel.x + offset, pixel.y + offset, size, size);
+      }
+      bgCtx.globalAlpha = 1.0;
+    }
+  </script>
+</body>
+
+</html>

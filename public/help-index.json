@@ -5,6 +5,39 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "nft.meebits-445",
+      "kind": "workflow",
+      "title": "Meebits card 445 ETH price and animated background",
+      "aliases": [
+        "Red Light, Green Light",
+        "Meebits price tracker",
+        "card 445 background"
+      ],
+      "keywords": [
+        "Meebits",
+        "DocLove",
+        "445",
+        "ETH",
+        "price",
+        "background",
+        "interactive"
+      ],
+      "facts": [
+        "The Memes card 445, Red Light, Green Light by Meebits x DocLove, uses a compatibility viewer for its published interactive artwork. It displays Coinbase ETH/USD and the 24-hour percentage change, refreshing about once a minute.",
+        "The artwork, animated background and controls load without waiting for prices. If the price feed is unavailable, the viewer reports that prices are unavailable, retains its current colors and retries automatically.",
+        "The card's Details tab preserves links to the original Arweave artwork and metadata. The compatibility viewer repairs the display on 6529.io; it does not replace the original token metadata or the artwork displayed on other sites."
+      ],
+      "canonical_path": "/the-memes/445",
+      "link_label": "Open Red Light, Green Light",
+      "related_paths": ["/the-memes/445?focus=the-art"],
+      "tags": ["nft", "memes", "media"],
+      "source_refs": [
+        "components/nft-image/renderers/NFTHTMLRenderer.tsx",
+        "public/artwork/the-memes/445.html",
+        "ops/docs/media/rendering/feature-interactive-html-rendering.md"
+      ]
+    },
+    {
       "id": "nft.artwork-sharing",
       "kind": "workflow",
       "title": "Share artwork to social apps",
