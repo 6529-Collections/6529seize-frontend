@@ -481,12 +481,15 @@ describe("independent marketplace review validation", () => {
     }
   });
 
-  it("does not authorize signing a listing or offer through the refresh-only validator", () => {
+  it("binds stale listing and offer intent for refresh while strict validation still prevents signing", () => {
     for (const f of [fixture(), offerFixture()]) {
       f.operation.expires_at = 0;
       expect(() =>
         validateMarketOperationForRefresh(f.operation, f.request, NOW)
-      ).toThrow("MARKET_REVIEW_MISMATCH");
+      ).not.toThrow();
+      expect(() =>
+        validateMarketOperation(f.operation, f.request, NOW)
+      ).toThrow("MARKET_REVIEW_REFRESH_REQUIRED");
     }
   });
 

@@ -163,7 +163,7 @@ it("explains a failed connection and retries the exact batch without signing", a
   expect(mockConfirm).not.toHaveBeenCalled();
   await waitFor(() => expect(prepare).toBeEnabled());
   fireEvent.click(prepare);
-  await screen.findByRole("button", { name: /^Collect / });
+  await screen.findByRole("button", { name: "Continue in wallet" });
   expect(mockPrepare).toHaveBeenCalledTimes(2);
   expect(mockPrepare.mock.calls[1]).toEqual(mockPrepare.mock.calls[0]);
   expect(mockConfirm).not.toHaveBeenCalled();
@@ -178,7 +178,9 @@ it("prepares once, focuses review without signing, and preserves the edited dest
   });
   await waitFor(() => expect(prepare).toBeEnabled());
   fireEvent.click(prepare);
-  const buy = await screen.findByRole("button", { name: /^Collect / });
+  const buy = await screen.findByRole("button", {
+    name: "Continue in wallet",
+  });
   expect(mockPrepare).toHaveBeenCalledTimes(1);
   expect(mockConfirm).not.toHaveBeenCalled();
   expect(screen.getByRole("heading", { level: 2 })).toHaveFocus();
@@ -195,6 +197,32 @@ it("prepares once, focuses review without signing, and preserves the edited dest
   expect(screen.getByLabelText("Delivery draft")).toBe(draft);
   expect(draft).toHaveValue("selected fren");
 });
+it.each([0, NOW - 1])(
+  "continues a saved review with deadline %s through fresh revalidation without a manual refresh step",
+  async (expiresAt) => {
+    mockFixture.operation.expires_at = expiresAt;
+    localStorage.setItem(
+      `6529-market-batch:${mockFixture.request.profile_id}:${mockFixture.operation.id}`,
+      JSON.stringify({ request: mockFixture.request })
+    );
+    mount(true);
+    const proceed = screen.getByRole("button", {
+      name: "Continue in wallet",
+    });
+    await waitFor(() => expect(proceed).toBeEnabled());
+    expect(mockConfirm).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole("button", { name: /refresh|retry/i })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/expired/i)).not.toBeInTheDocument();
+    fireEvent.click(proceed);
+    expect(mockConfirm).toHaveBeenCalledTimes(1);
+    expect(mockConfirm).toHaveBeenCalledWith(
+      mockFixture.operation,
+      mockFixture.request
+    );
+  }
+);
 it.each([
   ApiMarketBatchOperationStateEnum.Unknown,
   ApiMarketBatchOperationStateEnum.Submitted,
@@ -209,7 +237,7 @@ it.each([
     const first = mount();
     await screen.findByRole("heading", { level: 2 });
     expect(
-      screen.queryByRole("button", { name: /^Collect / })
+      screen.queryByRole("button", { name: "Continue in wallet" })
     ).not.toBeInTheDocument();
     first.unmount();
     mount();
@@ -226,8 +254,28 @@ it("cannot open a new empty edit form for a recovered operation", async () => {
   expect(
     screen.queryByRole("button", { name: "Edit purchase" })
   ).not.toBeInTheDocument();
-  expect(screen.getByRole("button", { name: /^Collect / })).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Continue in wallet" })
+  ).toBeDisabled();
   expect(mockPrepare).not.toHaveBeenCalled();
+});
+it("shows a verified wallet name only for its exact address and removes it when the profile changes", async () => {
+  mockProfile = {
+    ...mockProfile,
+    display: "Not a name for every wallet",
+    wallets: [{ wallet: PAYER, display: "paying.wallet.eth", tdh: 0 }],
+  };
+  const view = mount(true);
+  screen.getAllByText("paying.wallet.eth").forEach((name) => {
+    expect(name).toBeVisible();
+  });
+  expect(
+    screen.queryByText("Not a name for every wallet")
+  ).not.toBeInTheDocument();
+  mockProfile = { ...mockProfile, id: "another-profile" };
+  view.rerenderScope();
+  expect(screen.queryByText("paying.wallet.eth")).not.toBeInTheDocument();
+  expect(mockConfirm).not.toHaveBeenCalled();
 });
 it("preserves the native purchasing gate before preparation", async () => {
   mockNative = true;
@@ -267,7 +315,7 @@ it.each(["profile", "paying wallet"])(
       finish(prior);
     });
     expect(
-      screen.queryByRole("button", { name: /^Collect / })
+      screen.queryByRole("button", { name: "Continue in wallet" })
     ).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Check selected purchases" })

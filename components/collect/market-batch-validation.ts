@@ -296,6 +296,38 @@ export function validateMarketBatchOperation(
   profileWallets: readonly string[],
   now = Date.now()
 ): void {
+  validateBatchOperationBindings(
+    operation,
+    expected,
+    profileWallets,
+    now,
+    true
+  );
+}
+
+/** Verify stored terms before mandatory refresh; this never authorizes a wallet request. */
+export function validateMarketBatchOperationForRefresh(
+  operation: ApiMarketBatchOperation,
+  expected: ApiMarketBatchPrepareRequest,
+  profileWallets: readonly string[],
+  now = Date.now()
+): void {
+  validateBatchOperationBindings(
+    operation,
+    expected,
+    profileWallets,
+    now,
+    false
+  );
+}
+
+function validateBatchOperationBindings(
+  operation: ApiMarketBatchOperation,
+  expected: ApiMarketBatchPrepareRequest,
+  profileWallets: readonly string[],
+  now: number,
+  requireFreshReview: boolean
+): void {
   validateMarketBatchRequest(expected, profileWallets);
   assertBatch(
     marketBatchLiteral(operation.kind, expected.kind) &&
@@ -310,7 +342,9 @@ export function validateMarketBatchOperation(
       operation.total_wei === expected.amount_wei
   );
   assertBatch(
-    Number.isSafeInteger(operation.expires_at) && operation.expires_at > now
+    Number.isSafeInteger(operation.expires_at) &&
+      operation.expires_at >= 0 &&
+      (!requireFreshReview || operation.expires_at > now)
   );
   assertBatch(
     operation.approval_transactions.length === 0 &&
@@ -335,7 +369,8 @@ export function validateMarketBatchOperation(
     salt = batchUint(terms.salt);
   assertBatch(
     start <= seconds &&
-      seconds < end &&
+      start < end &&
+      (!requireFreshReview || seconds < end) &&
       operation.expires_at <= Number(end * 1000n)
   );
   assertBatch(

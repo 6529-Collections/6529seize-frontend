@@ -7,12 +7,12 @@ import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { fetchUrl } from "@/services/6529api";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   usePathname: () => "/6529-gradient",
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: jest.fn(() => new URLSearchParams()),
 }));
 
 jest.mock("@/services/6529api", () => ({
@@ -56,8 +56,25 @@ jest.mock("@/components/nft-market-activity/NftMarketActivity", () => ({
 }));
 jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
   __esModule: true,
-  default: ({ refreshKey }: { refreshKey?: number }) => (
-    <div data-refresh-key={refreshKey} data-testid="market-depth" />
+  default: ({
+    refreshKey,
+    active,
+    embedded,
+    onReveal,
+  }: {
+    refreshKey?: number;
+    active?: boolean;
+    embedded?: boolean;
+    onReveal?: () => void;
+  }) => (
+    <div
+      data-refresh-key={refreshKey}
+      data-testid="market-depth"
+      hidden={!active}
+      data-embedded={embedded}
+    >
+      <button onClick={onReveal}>Reveal market</button>
+    </div>
   ),
 }));
 jest.mock("@/components/collect/CollectDetailActions", () => ({
@@ -127,6 +144,7 @@ function mockGradientFetches({
 
 beforeEach(() => {
   jest.clearAllMocks();
+  (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
   mockConnectedAddress = undefined;
   const collection = mockGradientCollection(3);
   if (collection[0]) {
@@ -167,6 +185,39 @@ function renderPage({
 }
 
 describe("GradientPage", () => {
+  it("opens the market as a dedicated tab and preserves query context", async () => {
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams("focus=listings-and-offers&locale=de-DE")
+    );
+    const replace = jest
+      .spyOn(globalThis.history, "replaceState")
+      .mockImplementation(() => undefined);
+    renderPage();
+    expect(await screen.findByTestId("market-depth")).toBeVisible();
+    expect(screen.getByTestId("market-depth")).toHaveAttribute(
+      "data-embedded",
+      "true"
+    );
+    expect(
+      screen.getByRole("button", { name: "Listings & offers" })
+    ).toHaveAttribute("aria-current", "page");
+    expect(
+      screen.queryByRole("heading", { name: "Card Activity" })
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Overview" }));
+    expect(replace).toHaveBeenLastCalledWith(
+      null,
+      "",
+      "/6529-gradient?focus=live&locale=de-DE"
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Reveal market" }));
+    expect(replace).toHaveBeenLastCalledWith(
+      null,
+      "",
+      "/6529-gradient?focus=listings-and-offers&locale=de-DE"
+    );
+    replace.mockRestore();
+  });
   it("shows NFT data and owner badge", async () => {
     renderPage();
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));

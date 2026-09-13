@@ -1,5 +1,6 @@
 const mockIsNullAddress = jest.fn(() => false);
 const mockConnectedAddress = { value: undefined as string | undefined };
+const mockPush = jest.fn();
 
 jest.mock("@/helpers/Helpers", () => {
   const actual = jest.requireActual("@/helpers/Helpers");
@@ -17,7 +18,7 @@ jest.mock("next/navigation", () => {
   return {
     __esModule: true,
     useRouter: () => ({
-      push: jest.fn(),
+      push: mockPush,
       replace: jest.fn(),
       prefetch: jest.fn(),
       back: jest.fn(),
@@ -25,7 +26,7 @@ jest.mock("next/navigation", () => {
       refresh: jest.fn(),
     }),
     useParams: () => ({ view: undefined }),
-    useSearchParams: () => ({ get: jest.fn() }),
+    useSearchParams: () => new URLSearchParams("returnTo=owner"),
     usePathname: () => "/nextgen/collection/COL/token/1",
   };
 });
@@ -48,8 +49,25 @@ import { fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
   __esModule: true,
-  default: ({ refreshKey }: { refreshKey?: number }) => (
-    <div data-refresh-key={refreshKey} data-testid="market-depth" />
+  default: ({
+    refreshKey,
+    active,
+    embedded,
+    onReveal,
+  }: {
+    refreshKey?: number;
+    active?: boolean;
+    embedded?: boolean;
+    onReveal?: () => void;
+  }) => (
+    <div
+      data-refresh-key={refreshKey}
+      data-testid="market-depth"
+      hidden={!active}
+      data-embedded={embedded}
+    >
+      <button onClick={onReveal}>Reveal market</button>
+    </div>
   ),
 }));
 jest.mock("@/components/collect/CollectDetailActions", () => ({
@@ -205,6 +223,9 @@ describe("NextGenTokenPage", () => {
         screen.getByTestId("view-button-Display Center")
       ).toBeInTheDocument();
       expect(screen.getByTestId("view-button-Rarity")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("view-button-Listings & offers")
+      ).toBeInTheDocument();
     });
 
     it("renders back to collection link", () => {
@@ -282,6 +303,65 @@ describe("NextGenTokenPage", () => {
   });
 
   describe("view switching", () => {
+    it("anchors view changes to the section containing the navigation and persistent market", () => {
+      const scroll = jest.spyOn(HTMLElement.prototype, "scrollIntoView");
+      const view = renderComponent();
+      const navigation = screen.getByRole("navigation", {
+        name: "Token sections",
+      });
+      const market = screen.getByTestId("market-depth");
+      const section = navigation.closest("[data-nft-detail-tab-section]");
+      expect(section).toContainElement(market);
+      view.rerender(
+        <NextGenTokenPage
+          {...baseProps}
+          view={NextgenCollectionView.LISTINGS_AND_OFFERS}
+        />
+      );
+      expect(scroll.mock.contexts).toContain(section);
+      expect(scroll).toHaveBeenCalledWith({
+        block: "start",
+        behavior: "instant",
+      });
+      expect(screen.getByRole("navigation", { name: "Token sections" })).toBe(
+        navigation
+      );
+      expect(screen.getByTestId("market-depth")).toBe(market);
+      scroll.mockRestore();
+    });
+    it("keeps the market panel mounted but visible only in its own token view", () => {
+      const view = renderComponent();
+      const marketDepth = screen.getByTestId("market-depth");
+      expect(marketDepth).not.toBeVisible();
+      expect(marketDepth).toHaveAttribute("data-embedded", "true");
+
+      for (const nextView of [
+        NextgenCollectionView.PROVENANCE,
+        NextgenCollectionView.DISPLAY_CENTER,
+        NextgenCollectionView.RARITY,
+        NextgenCollectionView.LISTINGS_AND_OFFERS,
+        NextgenCollectionView.ABOUT,
+      ]) {
+        view.rerender(<NextGenTokenPage {...baseProps} view={nextView} />);
+        expect(screen.getByTestId("market-depth")).toBe(marketDepth);
+        if (nextView === NextgenCollectionView.LISTINGS_AND_OFFERS)
+          expect(marketDepth).toBeVisible();
+        else expect(marketDepth).not.toBeVisible();
+      }
+
+      fireEvent.click(screen.getByRole("button", { name: "Collect artwork" }));
+      expect(marketDepth).toHaveAttribute("data-refresh-key", "1");
+    });
+
+    it("opens the market view through the panel reveal seam", () => {
+      const setView = jest.fn();
+      renderComponent({ setView });
+      fireEvent.click(screen.getByText("Reveal market"));
+      expect(setView).toHaveBeenCalledWith(
+        NextgenCollectionView.LISTINGS_AND_OFFERS
+      );
+    });
+
     it("renders About view components by default", () => {
       renderComponent({ view: NextgenCollectionView.ABOUT });
       expect(screen.getByTestId("about")).toBeInTheDocument();
@@ -320,6 +400,14 @@ describe("NextGenTokenPage", () => {
   });
 
   describe("navigation", () => {
+    it("preserves the market view and query when moving to another token", () => {
+      renderComponent({ view: NextgenCollectionView.LISTINGS_AND_OFFERS });
+      fireEvent.click(screen.getByRole("button", { name: "Next token" }));
+      expect(mockPush).toHaveBeenCalledWith(
+        "/nextgen/token/2/listings-and-offers?returnTo=owner",
+        { scroll: false }
+      );
+    });
     it("disables previous button on first token", () => {
       renderComponent({ token: { ...baseProps.token, normalised_id: 0 } });
       const prev = screen.getByRole("button", { name: "Previous token" });

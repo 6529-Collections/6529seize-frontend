@@ -39,6 +39,11 @@ export function collectPurchaseReview(
   const recipient = operation.nft_recipient ?? operation.recipient;
   const [, contract, tokenId] = operation.asset_key.split(":");
   return {
+    chainId: Number(operation.asset_key.split(":")[0]),
+    ...(contract ? { nftContract: getAddress(contract) } : {}),
+    exchangeContract: getAddress(
+      operation.order?.protocol_address ?? MARKET_SEAPORT
+    ),
     amounts,
     currency: operation.currency.toLowerCase() === MARKET_ZERO ? "ETH" : "WETH",
     artworkLabel: identity
@@ -62,20 +67,10 @@ export function collectPurchaseReview(
       amountWei: approval.gas_reserve_wei ?? null,
     })),
     contractFacts: [
-      ...(contract && tokenId
-        ? [
-            {
-              label: t(locale, "collect.review.nftContract"),
-              value: getAddress(contract),
-            },
-            { label: t(locale, "collect.review.tokenId"), value: tokenId },
-          ]
+      ...(tokenId
+        ? [{ label: t(locale, "collect.review.tokenId"), value: tokenId }]
         : []),
       { label: t(locale, "collect.trade.network"), value: "Ethereum · 1" },
-      {
-        label: t(locale, "collect.trade.protocol"),
-        value: `Seaport · ${getAddress(MARKET_SEAPORT)}`,
-      },
       ...(operation.order
         ? [
             {

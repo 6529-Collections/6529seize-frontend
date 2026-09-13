@@ -3,21 +3,24 @@
 Parent: [Media Index](README.md)
 
 The Memes, Meme Lab, Gradients and NextGen card pages show captured OpenSea
-quotes in **Listings & offers**. The section starts collapsed, with the lowest
-ETH listing and highest WETH offer visible in its summary. **View listings & offers**
-beside the artwork's Collect action opens the section and moves focus to its
-heading. Expanding it lets you
-inspect the quoted levels and the orders behind those prices.
+quotes in the **Listings & offers** tab. Opening the tab immediately shows the
+lowest ETH listing, highest WETH offer and quoted levels, without another
+accordion to open. **View listings & offers** beside the artwork's Collect
+action selects that tab and moves focus to its market section.
+Memes, Gradients and Pebbles share the same market controls and trade review
+layout. **View listings & offers** works from the other token views, and
+switching tabs retains a market selection and active review.
 
 On Memes, Meme Lab and Gradient cards, artwork details retain mint, edition,
 collector and TDH information where applicable. Listing and offer summaries appear
 in Listings & offers, without a second set of prices or a market-cap estimate
 in the artwork details.
 
-**About this artwork** contains traits, metadata and original files where
-available. It starts collapsed on ordinary artwork URLs; existing artwork-focus
-links open it. You can expand or collapse it independently of the market section.
-Collapsing a section keeps its selection and active review state.
+On Memes and Meme Lab, **Overview** includes traits, metadata and original files
+below the artwork description. Existing `focus=the-art` links open Overview;
+`focus=listings-and-offers` opens the market tab. Other artwork pages keep their
+collection-specific details. Gradient Overview retains the description and card
+activity, with its artwork and identity information above the tab row.
 
 On Memes cards, supply shows **Edition size**, **Ex. research** and
 **Ex. museum & research**, alongside **Holding wallets**. Excluded counts remove
@@ -35,9 +38,12 @@ offer in WETH. Each price list starts with up to five levels. Use Show all level
 to reveal the complete list, and Show fewer levels to return to the short view.
 Listings are ordered from lowest price upward and
 offers from highest price downward. Each level shows its unit price and quantity
-at that price. Total shows the cumulative quoted quantity. Expand a price row to
+at that price. Total shows the cumulative quoted quantity. On narrow screens,
+quantity and total appear below the exact price, with **Collect** or **Sell** in
+a separate column. Expand a price row to
 inspect the captured orders behind that quote, including quoted remaining
-quantity, expiry, scope and applicability. Open Order information for the wallet,
+quantity, expiry, scope and applicability. Supported order actions appear before
+the technical disclosure. Open Order information for the wallet,
 order reference and currency contract. Each expanded price initially shows up to
 five orders; Show all orders reveals the rest.
 Payment currencies stay separate, including ETH and WETH; other currencies are
@@ -61,7 +67,10 @@ Select one or more listings, then choose **Review selected listings**. The site
 checks each selected order again before opening the purchase review. Choose your
 delivery wallet using the same **Deliver to · Change** picker as minting, including
 your consolidated wallets or **Send to a fren**. Review the total, fees and gas
-before authorizing in your wallet. Supported purchases and deliveries succeed
+before authorizing in your wallet. The review separates **Pay with** from each
+delivery address and offers **Price breakdown**, **Exact amounts** and
+**Contract details**. **Continue in wallet** checks the exact orders again;
+changed terms require another review. Supported purchases and deliveries succeed
 together in one transaction or all revert; a revert can still cost gas.
 
 Quoted quantities can overlap. Two listings from the same seller can offer the

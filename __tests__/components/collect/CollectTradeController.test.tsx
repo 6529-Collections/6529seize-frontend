@@ -1,6 +1,15 @@
 import CollectTradeController from "@/components/collect/CollectTradeController";
 import { CollectTradeDialog } from "@/components/collect/CollectTradeSheet";
-import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
+import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
+import {
+  type ApiMarketOperation,
+  ApiMarketOperationStateEnum,
+} from "@/generated/models/ApiMarketOperation";
+import {
+  ApiMarketSendAttemptPurposeEnum,
+  ApiMarketSendAttemptStatusEnum,
+} from "@/generated/models/ApiMarketSendAttempt";
+import { ApiMarketTransactionPurposeEnum } from "@/generated/models/ApiMarketTransaction";
 import type {
   CollectTradeDraft,
   CollectTradeReview,
@@ -118,13 +127,42 @@ jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
   ),
 }));
 
-const operation = {
+const operation: ApiMarketOperation = {
   id: "operation",
   profile_id: "original-profile",
   revision: "revision",
-  state: "REVIEW",
-  send_attempt: { status: "ACTIVE" },
-} as ApiMarketOperation;
+  state: ApiMarketOperationStateEnum.Review,
+  kind: ApiMarketKind.Buy,
+  asset_key: "1:0x33fd426905f149f8376e227d0c9d3340aad17af1:545",
+  quantity: "1",
+  wallet: "0x1111111111111111111111111111111111111111",
+  recipient: "0x1111111111111111111111111111111111111111",
+  recipient_in_profile: true,
+  currency: "0x0000000000000000000000000000000000000000",
+  total_wei: "1000000000000000000",
+  net_wei: "1000000000000000000",
+  fees: [],
+  approval_transactions: [],
+  potential_liability_wei: "0",
+  expires_at: 0,
+  updated_at: 0,
+  send_attempt: {
+    attempt_id: "00000000-0000-4000-8000-000000000001",
+    purpose: ApiMarketSendAttemptPurposeEnum.Transaction,
+    transaction_digest: `0x${"a".repeat(64)}`,
+    snapshot_block: 1,
+    status: ApiMarketSendAttemptStatusEnum.Active,
+    transaction: {
+      chain_id: 1,
+      to: "0x0000000000000068F116a894984e2DB1123eB395",
+      value: "1000000000000000000",
+      data: "0x1234",
+      purpose: ApiMarketTransactionPurposeEnum.Fulfill,
+      sender: "0x1111111111111111111111111111111111111111",
+    },
+    transaction_hash: null,
+  },
+};
 beforeEach(() => {
   jest.clearAllMocks();
   mockQueries.length = 0;
@@ -162,9 +200,11 @@ it("offers hash recovery with no local intent after profile migration and disabl
       onClose={jest.fn()}
     />
   );
-  expect(screen.getByRole("status")).toHaveTextContent("Checking the outcome");
+  expect(screen.getByText(/Checking the outcome/)).toHaveTextContent(
+    "Checking the outcome"
+  );
   expect(
-    screen.queryByRole("button", { name: "Continue to wallet" })
+    screen.queryByRole("button", { name: "Continue in wallet" })
   ).not.toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: "Refresh review" })
@@ -236,11 +276,13 @@ it("keeps embedded recovery in the existing dialog without creating a second mod
   );
   expect(screen.getAllByRole("dialog")).toHaveLength(1);
   expect(screen.getByRole("dialog", { name: "Meme card" })).toContainElement(
-    screen.getByRole("status")
+    screen.getByText(/Checking the outcome/)
   );
-  expect(screen.getByRole("status")).toHaveTextContent("Checking the outcome");
+  expect(screen.getByText(/Checking the outcome/)).toHaveTextContent(
+    "Checking the outcome"
+  );
   expect(
-    screen.queryByRole("button", { name: "Continue to wallet" })
+    screen.queryByRole("button", { name: "Continue in wallet" })
   ).not.toBeInTheDocument();
   const hash = `0x${"d".repeat(64)}`;
   fireEvent.change(

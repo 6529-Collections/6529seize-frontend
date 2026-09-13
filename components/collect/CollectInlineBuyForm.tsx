@@ -144,7 +144,12 @@ export default function CollectInlineBuyForm(props: Props) {
                 price: marketAmount(props.amountWei, MARKET_ZERO),
               })}
         </Button>
-        {props.secondaryActions}
+        {props.secondaryActions !== null &&
+          props.secondaryActions !== undefined && (
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+              {props.secondaryActions}
+            </div>
+          )}
       </div>
       <CollectDeliveryControl
         profile={props.recipientProfile}

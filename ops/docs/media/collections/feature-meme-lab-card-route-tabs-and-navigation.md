@@ -32,7 +32,7 @@ pagination.
 
 1. Open `/meme-lab/{id}`.
 2. The route reads `focus` and resolves one visible tab:
-   `Overview`, `Details`, `Collectors`, `History`, or `References`.
+   `Overview`, `Listings & offers`, `Collectors`, `History`, or `References`.
 3. If `focus` is missing or unsupported, the page opens `Overview`.
 4. Switch tabs from the tab row; each switch rewrites `focus` in place while
    preserving supported `locale` query values. Primary and History tab switches
@@ -41,8 +41,10 @@ pagination.
    current query string.
 6. On `Overview`, review card stats, collection links, ownership summary when
    connected, original media controls, and marketplace shortcuts when available.
-7. `Details` contains original files, metadata, properties, and card details.
-   Existing `focus=the-art` URLs open this tab directly.
+7. Original files, metadata, properties and card details follow the description
+   in Overview. Existing `focus=the-art` URLs open Overview. The
+   `focus=listings-and-offers` tab shows market prices immediately without a
+   second accordion; Meme Lab market data remains informational.
 8. On `Collectors`, review the holder leaderboard.
 9. On `References`, review linked The Memes cards referenced by the Meme Lab
    card.
@@ -81,7 +83,7 @@ pagination.
 - If card metadata does not resolve for `{id}`, the route can render only the
   page heading, with no inline not-found panel.
 - Previous/next arrows are disabled at the first and last available card index.
-- `Details` resolves animation media from metadata when top-level `animation`
+- Artwork details in Overview resolve animation media from metadata when top-level `animation`
   is blank but metadata provides `animation` or `animation_url`.
 - Only available original media links appear, with matching open/download
   actions.

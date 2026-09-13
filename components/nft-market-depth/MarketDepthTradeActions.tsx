@@ -557,10 +557,10 @@ function SupportedMarketDepthTradeProvider({
       {children}
       <NftPurchasingGate>
         {selected.length > 0 && (
-          <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-4">
+          <div className="tw-mt-5 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-4">
             <button
               type="button"
-              className={ACTION_CLASS}
+              className={`${ACTION_CLASS} tw-w-full sm:tw-w-auto`}
               disabled={!selectionValid || reviewState.busy}
               onClick={(event) => {
                 reviewOpener.current = event.currentTarget;
