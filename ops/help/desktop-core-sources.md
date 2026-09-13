@@ -1,13 +1,24 @@
 # Desktop Core corpus maintenance
 
 The frontend publishes `desktop.*` records through the existing help index.
-The backend recognizes the `desktop-core` tag for bounded detailed answers.
-Core controls are explained by their native menu labels, never linked as public
-`/core` routes. `canonical_path` remains the real Apps route; source links are
-suppressed for these procedural answers. The onboarding fact intentionally links
-to the public `https://6529.io/about/6529-apps` installer page in every environment.
-It is an official distribution destination, not navigation within the requesting
-site; do not replace it with a bare relative path in bot replies.
+The backend recognizes the `desktop-core` tag for local support. `facts` retain
+source-backed detail, while `brief_answer` provides a concise default and fallback
+(maximum 900 characters). Keep warnings beside any destructive action even in the
+short answer. Separate definitions, onboarding, initial triage, and later recovery
+stages. Use symptom language such as “my node does not match 6529.io”.
+
+`answer_links` contains up to three named public 6529.io destinations, validated
+against static application routes. The backend appends these once in a final `More info` footer;
+keep links out of prose facts. The official installer destination is
+`https://6529.io/about/6529-apps` in every environment. Native menu paths are
+instructions, not public `/core` links. Omit answer links for a recovery step when
+no relevant public destination exists. Provenance `source_refs` are not reply links.
+
+`desktop-dialogue` records use their short answer directly for normal turns, so
+model rephrasing cannot erase acknowledged progress. Normal answers give a few
+sentences or the next diagnostic question. Detailed
+walkthroughs require an explicit request. Recalculation and reconciliation follow-ups
+acknowledge reported progress; they must not imply an unreported action succeeded.
 
 ## Evidence baseline
 
