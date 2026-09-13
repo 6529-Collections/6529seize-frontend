@@ -97,7 +97,7 @@ function GradientInfoMetric({
   readonly valueClassName?: string | undefined;
 }) {
   return (
-    <div className="tw-min-w-[8.5rem]">
+    <div className="tw-min-w-0">
       <div className="tw-mb-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 md:tw-mb-2">
         {label}
       </div>

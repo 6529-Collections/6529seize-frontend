@@ -61,7 +61,7 @@ export default function NextGenNavigationHeader(
   return (
     <header className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-py-5 md:tw-px-6 md:tw-py-6 lg:tw-px-8">
       <div className="tw-flex tw-flex-col tw-gap-4 min-[1200px]:tw-flex-row min-[1200px]:tw-items-center min-[1200px]:tw-justify-between">
-        <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 sm:tw-w-auto sm:tw-justify-start">
+        <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 sm:tw-w-auto sm:tw-justify-start">
           <div className="tw-min-w-0 min-[1200px]:tw-hidden">
             <CollectionsDropdown
               activePage="nextgen"

@@ -32,7 +32,7 @@ export default function CollectArtworkCard({
 }) {
   const selectionReasonId = useId();
   return (
-    <article className="tw-flex tw-min-w-0 tw-flex-col">
+    <article className="tw-flex tw-min-w-0 tw-flex-col tw-@container/artwork">
       <Link
         href={artwork.href}
         aria-label={t(locale, "collect.artworkLink", { title: artwork.title })}
@@ -72,7 +72,7 @@ export default function CollectArtworkCard({
           </p>
         )}
         {artwork.priceLabel && (
-          <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-2">
+          <div className="tw-flex tw-flex-col tw-flex-wrap tw-items-start tw-gap-2 @[16rem]/artwork:tw-flex-row @[16rem]/artwork:tw-justify-between">
             <div className="tw-min-w-0 tw-max-w-full [overflow-wrap:anywhere]">
               {artwork.priceExactLabel &&
               artwork.priceExactLabel !== artwork.priceLabel ? (
