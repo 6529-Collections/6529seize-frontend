@@ -207,7 +207,7 @@ export function ArtworkDocumentationRecordView({
         {!embedded && (
           <Link
             href={listPath}
-            className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-text-iron-400 hover:tw-text-white focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-primary-400"
           >
             ← {msg(backLabel)}
           </Link>
@@ -441,7 +441,7 @@ function HistoricalDocumentation({
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-4">
         <Link
           href={documentationWorkspacePath(context.work_id, context.id)}
-          className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-text-iron-400 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-text-iron-400 hover:tw-text-white focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-primary-400"
         >
           ← {msg("currentDraft")}
         </Link>

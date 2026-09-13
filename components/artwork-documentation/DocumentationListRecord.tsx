@@ -73,7 +73,7 @@ export default function DocumentationListRecord({
         <h2 className="tw-m-0 tw-break-words tw-font-serif tw-text-3xl tw-font-normal tw-leading-tight tw-text-iron-100">
           <Link
             href={documentationWorkspacePath(record.work_id, record.id)}
-            className="tw-text-inherit tw-no-underline hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            className="tw-text-inherit tw-no-underline hover:tw-text-white focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-primary-400"
           >
             {record.title ?? msg("untitled")}
           </Link>
@@ -117,7 +117,7 @@ export default function DocumentationListRecord({
         )}
         <Link
           href={documentationWorkspacePath(record.work_id, record.id)}
-          className="tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          className="tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-primary-400"
         >
           {msg("editorial.openRecord")}{" "}
           <span className="tw-ml-2" aria-hidden>

@@ -202,7 +202,7 @@ function DocumentationListContent({
     }
   };
   return (
-    <div className="tw-space-y-8">
+    <div className="tailwind-scope tw-space-y-8">
       <header className="tw-grid tw-gap-8 tw-pb-4 lg:tw-grid-cols-[minmax(0,1fr)_20rem] lg:tw-gap-16">
         <div>
           <p className="tw-mb-6 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.18em] tw-text-iron-400">
@@ -235,7 +235,7 @@ function DocumentationListContent({
               sourceRecord.work_id,
               sourceRecord.id
             )}
-            className="tw-inline-flex tw-min-h-11 tw-items-center tw-font-semibold tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            className="tw-inline-flex tw-min-h-11 tw-items-center tw-font-semibold tw-text-primary-300 focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-primary-400"
           >
             {msg("editorial.openRecord")}
           </Link>
@@ -270,7 +270,7 @@ function DocumentationListContent({
           {programId && (
             <Link
               href="/artwork-documentation"
-              className="tw-ml-4 tw-inline-flex tw-min-h-11 tw-items-center tw-font-semibold tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              className="tw-ml-4 tw-inline-flex tw-min-h-11 tw-items-center tw-font-semibold tw-text-primary-300 focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-primary-400"
             >
               {msg("back")}
             </Link>
