@@ -6,6 +6,8 @@ import CollectAssetMedia from "./CollectAssetMedia";
 import { collectAssetHref } from "./collect.adapters";
 import type { CollectArtworkView } from "./collect.types";
 import { marketAmount } from "./market.adapters";
+import { MARKET_ZERO } from "./market-validation";
+import { collectPlanAmount } from "./collect-plan-amounts";
 import { collectTdhValueLabel } from "./collect-tdh-browse.helpers";
 import {
   collectBuyAmount,
@@ -27,6 +29,10 @@ export function collectCatalogArtwork(
   const { asset, order } = entry;
   const quantity = order ? collectOrderPurchaseQuantity(order) : null;
   const price = order && quantity ? collectBuyAmount(order, quantity) : null;
+  const displayedPrice =
+    order && price && order.currency.toLowerCase() === MARKET_ZERO
+      ? collectPlanAmount(locale, price)
+      : null;
   const availability =
     entry.tdh?.available_quantity ??
     (order ? collectOrderAvailableQuantity(order) : null);
@@ -62,7 +68,10 @@ export function collectCatalogArtwork(
       />
     ),
     ownedLabel: null,
-    priceLabel: order && price ? marketAmount(price, order.currency) : null,
+    priceLabel:
+      displayedPrice?.compact ??
+      (order && price ? marketAmount(price, order.currency) : null),
+    priceExactLabel: displayedPrice?.exact,
     priceDescription,
     ...(tdhValue === null
       ? {}

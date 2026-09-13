@@ -76,9 +76,15 @@ jest.mock("@/services/api/market-api", () => ({
 }));
 jest.mock("@/components/collect/CollectBatchController", () => ({
   __esModule: true,
-  default: (props: unknown) => {
+  default: (props: { onClose: () => void }) => {
     mockBatch(props);
-    return <div data-testid="batch-review" />;
+    return (
+      <div data-testid="batch-review">
+        <button type="button" onClick={props.onClose}>
+          Close batch review
+        </button>
+      </div>
+    );
   },
 }));
 jest.mock("@/components/collect/CollectTradeController", () => ({
@@ -175,13 +181,17 @@ function depthOrder(overrides: Partial<ApiMarketOrder> = {}): ApiMarketOrder {
   };
 }
 
-function renderAction(order: ApiMarketOrder) {
+function renderAction(
+  order: ApiMarketOrder,
+  onInteractionChange?: (busy: boolean) => void
+) {
   return render(
     <MarketDepthTradeProvider
       contract={MEMES_CONTRACT}
       tokenId="8"
       locale="en-US"
       onMarketChange={jest.fn()}
+      {...(onInteractionChange ? { onInteractionChange } : {})}
     >
       <MarketDepthOrderAction order={order} locale="en-US" />
     </MarketDepthTradeProvider>
@@ -235,13 +245,17 @@ function offerRow(orderHash: string, orderKey: string): ApiMarketOrder {
   });
 }
 
-function renderOfferRows(rows: readonly ApiMarketOrder[]) {
+function renderOfferRows(
+  rows: readonly ApiMarketOrder[],
+  onInteractionChange?: (busy: boolean) => void
+) {
   return render(
     <MarketDepthTradeProvider
       contract={MEMES_CONTRACT}
       tokenId="8"
       locale="en-US"
       onMarketChange={jest.fn()}
+      {...(onInteractionChange ? { onInteractionChange } : {})}
     >
       {rows.map((row) => (
         <MarketDepthOrderAction
@@ -306,6 +320,102 @@ beforeEach(() => {
 });
 
 describe("MarketDepthTradeActions", () => {
+  it("blocks background publication throughout an exact check, selection and batch review until deselection", async () => {
+    const interaction = jest.fn();
+    const resolve = deferExactOrders();
+    renderAction(depthOrder(), interaction);
+    expect(interaction).toHaveBeenLastCalledWith(false);
+    fireEvent.click(screen.getByRole("button", { name: "Collect" }));
+    expect(interaction).toHaveBeenLastCalledWith(true);
+    await waitFor(() => expect(mockFetchExactOrder).toHaveBeenCalledTimes(1));
+    await act(async () => resolve(HASH, executableOrder()));
+    await screen.findByRole("textbox", { name: "Quantity" });
+    expect(interaction).toHaveBeenLastCalledWith(true);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Review selected listings (1)" })
+    );
+    expect(interaction).toHaveBeenLastCalledWith(true);
+    await waitFor(() => expect(mockFetchExactOrder).toHaveBeenCalledTimes(2));
+    await act(async () => resolve(HASH, executableOrder()));
+    await screen.findByTestId("batch-review");
+    expect(interaction).toHaveBeenLastCalledWith(true);
+    fireEvent.click(screen.getByRole("button", { name: "Close batch review" }));
+    expect(screen.queryByTestId("batch-review")).toBeNull();
+    expect(interaction).toHaveBeenLastCalledWith(true);
+    fireEvent.click(screen.getByRole("button", { name: "Remove" }));
+    expect(interaction).toHaveBeenLastCalledWith(false);
+  });
+
+  it("releases a rejected exact lookup without retaining an interaction lock", async () => {
+    const interaction = jest.fn();
+    mockFetchExactOrder.mockRejectedValueOnce(new Error("unavailable"));
+    renderAction(depthOrder(), interaction);
+    fireEvent.click(screen.getByRole("button", { name: "Collect" }));
+    expect(interaction).toHaveBeenLastCalledWith(true);
+    await screen.findByRole("alert");
+    expect(interaction).toHaveBeenLastCalledWith(false);
+    expect(mockBatch).not.toHaveBeenCalled();
+  });
+
+  it("keeps the newer offer interaction busy when an aborted older lookup settles", async () => {
+    const interaction = jest.fn();
+    const resolve = deferExactOrders();
+    ownedAsset();
+    renderOfferRows(
+      [offerRow(HASH, "first"), offerRow(SECOND_HASH, "second")],
+      interaction
+    );
+    const actions = screen.getAllByRole("button", { name: "Accept offer" });
+    fireEvent.click(actions[0]!);
+    expect(interaction).toHaveBeenLastCalledWith(true);
+    await waitFor(() => expect(mockFetchExactOrder).toHaveBeenCalledTimes(1));
+    fireEvent.click(actions[1]!);
+    await waitFor(() => expect(mockFetchExactOrder).toHaveBeenCalledTimes(2));
+    await act(async () =>
+      resolve(
+        HASH,
+        executableOrder({
+          side: ApiMarketTradeOrderSideEnum.Offer,
+          currency: MARKET_WETH,
+        })
+      )
+    );
+    expect(interaction).toHaveBeenLastCalledWith(true);
+    expect(screen.queryByTestId("offer-review")).toBeNull();
+    await act(async () =>
+      resolve(
+        SECOND_HASH,
+        executableOrder({
+          identity: {
+            protocol_address: MARKET_SEAPORT,
+            order_hash: SECOND_HASH,
+          },
+          side: ApiMarketTradeOrderSideEnum.Offer,
+          currency: MARKET_WETH,
+        })
+      )
+    );
+    await screen.findByTestId("offer-review");
+    expect(interaction).toHaveBeenLastCalledWith(true);
+    fireEvent.click(screen.getByRole("button", { name: "Close offer review" }));
+    expect(interaction).toHaveBeenLastCalledWith(false);
+  });
+
+  it("releases the interaction on unmount and ignores its late exact response", async () => {
+    const interaction = jest.fn();
+    const resolve = deferExactOrders();
+    const view = renderAction(depthOrder(), interaction);
+    fireEvent.click(screen.getByRole("button", { name: "Collect" }));
+    await waitFor(() => expect(mockFetchExactOrder).toHaveBeenCalledTimes(1));
+    expect(interaction).toHaveBeenLastCalledWith(true);
+    view.unmount();
+    expect(interaction).toHaveBeenLastCalledWith(false);
+    interaction.mockClear();
+    await act(async () => resolve(HASH, executableOrder()));
+    expect(interaction).not.toHaveBeenCalled();
+    expect(mockBatch).not.toHaveBeenCalled();
+  });
+
   it("collects a single order from its collapsed price row with keyboard access", async () => {
     const user = userEvent.setup();
     const { onLoadOrders } = renderLevel([depthOrder()]);

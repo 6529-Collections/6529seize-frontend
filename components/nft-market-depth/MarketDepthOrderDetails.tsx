@@ -171,7 +171,7 @@ export default function MarketDepthOrderDetails({
           {t(locale, "marketDepth.orders.changed")}
         </p>
         <button type="button" onClick={onRefresh} className={QUIET_BUTTON}>
-          {t(locale, "marketDepth.refresh")}
+          {t(locale, "marketDepth.retry")}
         </button>
       </div>
     );
