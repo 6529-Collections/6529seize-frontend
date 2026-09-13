@@ -1,6 +1,7 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiMarketBatchItem } from "@/generated/models/ApiMarketBatchItem";
 import {
   ApiMarketBatchOperationStateEnum,
@@ -10,6 +11,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDecimalString } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { zeroAddress } from "viem";
 import CollectAssetMedia from "./CollectAssetMedia";
 import CollectReviewContract from "./CollectReviewContract";
@@ -19,7 +21,9 @@ import {
   CollectReviewMoney as Money,
 } from "./CollectReviewPrimitives";
 import CollectReviewWallet from "./CollectReviewWallet";
+import CollectReviewRecipient from "./CollectReviewRecipient";
 import { resolveCollectContractIdentity } from "./collect-contract-identity";
+import { collectProfileWallets } from "./collect-recipient.helpers";
 import type { CollectSelectedListing } from "./collect-selection.helpers";
 import { marketBatchStage } from "./market-batch.adapters";
 
@@ -36,12 +40,12 @@ function QuotedItem({
   item,
   selection,
   locale,
-  walletNames,
+  recipients,
 }: {
   readonly item: ApiMarketBatchItem;
   readonly selection: CollectSelectedListing | undefined;
   readonly locale: SupportedLocale;
-  readonly walletNames: Readonly<Record<string, string>> | undefined;
+  readonly recipients: ReactNode;
 }) {
   return (
     <li className="tw-space-y-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-4">
@@ -68,40 +72,15 @@ function QuotedItem({
           </p>
         </div>
       </div>
-      {item.allocations.map((allocation) => (
-        <CollectReviewWallet
-          key={allocation.recipient.toLowerCase()}
-          label={t(locale, "collect.batchReview.deliveryCopies", {
-            quantity: formatDecimalString(locale, allocation.quantity),
-          })}
-          address={allocation.recipient}
-          name={walletNames?.[allocation.recipient.toLowerCase()]}
-          detail={
-            allocation.recipient_in_profile === false
-              ? t(locale, "collect.batchReview.outsideProfile")
-              : undefined
-          }
-        />
-      ))}
+      {recipients}
     </li>
   );
 }
 
-/** Render only controller-validated terms; this component never prepares or sends a transaction. */
-export default function CollectBatchQuoteReview({
-  operation,
-  items,
-  busy,
-  canEdit = true,
-  disabledReason,
-  message,
-  walletNames,
-  onConfirm,
-  onEdit,
-  onClose,
-}: {
+interface CollectBatchQuoteReviewProps {
   readonly operation: ApiMarketBatchOperation;
   readonly items: readonly CollectSelectedListing[];
+  readonly profile: ApiIdentity | null;
   readonly busy: boolean;
   readonly canEdit?: boolean;
   readonly disabledReason?: string | null | undefined;
@@ -111,8 +90,60 @@ export default function CollectBatchQuoteReview({
   readonly onConfirm: () => Promise<void>;
   readonly onEdit: () => void;
   readonly onClose: () => void;
-}) {
+  readonly onRecipientChange?: (
+    itemIndex: number,
+    allocationIndex: number,
+    recipient: string,
+    acknowledgeExternal: boolean
+  ) => Promise<boolean>;
+  readonly onRecipientEditingChange?: (editing: boolean) => void;
+}
+
+/** Render only controller-validated terms; this component never prepares or sends a transaction. */
+export default function CollectBatchQuoteReview(
+  props: CollectBatchQuoteReviewProps
+) {
+  const scope = JSON.stringify([
+    props.operation.id,
+    props.profile?.id,
+    props.operation.wallet.toLowerCase(),
+    Boolean(props.onRecipientChange),
+    collectProfileWallets(props.profile)
+      .map((wallet) => wallet.wallet.toLowerCase())
+      .sort((left, right) => {
+        if (left < right) return -1;
+        return left > right ? 1 : 0;
+      }),
+  ]);
+  return <BatchQuoteReview key={scope} {...props} />;
+}
+
+function BatchQuoteReview({
+  operation,
+  items,
+  profile,
+  busy,
+  canEdit = true,
+  disabledReason,
+  message,
+  walletNames,
+  onConfirm,
+  onEdit,
+  onClose,
+  onRecipientChange,
+  onRecipientEditingChange,
+}: CollectBatchQuoteReviewProps) {
   const locale = useBrowserLocale();
+  const [activeRecipient, setActiveRecipient] = useState<string | null>(null);
+  const editingRecipient = useRef<string | null>(null);
+  const notifyEditing = useRef(onRecipientEditingChange);
+  useLayoutEffect(() => {
+    notifyEditing.current = onRecipientEditingChange;
+  });
+  useLayoutEffect(() => {
+    notifyEditing.current?.(false);
+    return () => notifyEditing.current?.(false);
+  }, []);
   const gas = operation.transaction?.gas_reserve_wei;
   // The validated native batch has no approvals. Do not invent a mixed-currency or incomplete maximum.
   const maximum =
@@ -125,6 +156,13 @@ export default function CollectBatchQuoteReview({
   const ready =
     operation.state === ApiMarketBatchOperationStateEnum.Review &&
     gas !== undefined;
+  const recipientDisabled = !ready || busy || Boolean(disabledReason);
+  const changeEditing = (key: string, editing: boolean) => {
+    if (editing && editingRecipient.current !== null) return;
+    editingRecipient.current = editing ? key : null;
+    setActiveRecipient(editingRecipient.current);
+    onRecipientEditingChange?.(editing);
+  };
   const itemFor = (item: ApiMarketBatchItem) =>
     items.find(
       (selection) =>
@@ -155,16 +193,72 @@ export default function CollectBatchQuoteReview({
         </p>
       </div>
       <ul className="tw-m-0 tw-list-none tw-p-0">
-        {operation.items.map((item) => (
+        {operation.items.map((item, itemIndex) => (
           <QuotedItem
             key={`${item.order.protocol_address}:${item.order.order_hash}`}
             item={item}
             selection={itemFor(item)}
             locale={locale}
-            walletNames={walletNames}
+            recipients={item.allocations.map((allocation, allocationIndex) => {
+              const key = `${itemIndex}:${allocationIndex}`;
+              const label = t(locale, "collect.batchReview.deliveryCopies", {
+                quantity: formatDecimalString(locale, allocation.quantity),
+              });
+              const name = walletNames?.[allocation.recipient.toLowerCase()];
+              return onRecipientChange && profile ? (
+                <CollectReviewRecipient
+                  key={key}
+                  label={label}
+                  address={allocation.recipient}
+                  name={name}
+                  profile={profile}
+                  payingWallet={operation.wallet}
+                  recipientInProfile={allocation.recipient_in_profile === true}
+                  disabled={
+                    recipientDisabled ||
+                    (activeRecipient !== null && activeRecipient !== key)
+                  }
+                  onEditingChange={(editing) => changeEditing(key, editing)}
+                  onApply={async (recipient, acknowledgeExternal) => {
+                    if (recipientDisabled || editingRecipient.current !== key)
+                      return false;
+                    return onRecipientChange(
+                      itemIndex,
+                      allocationIndex,
+                      recipient,
+                      acknowledgeExternal
+                    );
+                  }}
+                />
+              ) : (
+                <CollectReviewWallet
+                  key={key}
+                  label={label}
+                  address={allocation.recipient}
+                  name={name}
+                  detail={
+                    allocation.recipient_in_profile === false
+                      ? t(locale, "collect.batchReview.outsideProfile")
+                      : undefined
+                  }
+                />
+              );
+            })}
           />
         ))}
       </ul>
+      {operation.items.some((item) =>
+        item.allocations.some(
+          (allocation) => allocation.recipient_in_profile === false
+        )
+      ) && (
+        <p
+          role="status"
+          className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
+        >
+          {t(locale, "collect.review.giftOutcome")}
+        </p>
+      )}
       <dl className="tw-m-0 tw-space-y-3">
         <AmountRow label={t(locale, "collect.batchReview.purchaseTotal")}>
           <Money wei={operation.total_wei} currency="ETH" />
@@ -217,8 +311,10 @@ export default function CollectBatchQuoteReview({
             size="lg"
             fullWidth
             loading={busy}
-            disabled={!ready || Boolean(disabledReason)}
+            disabled={recipientDisabled || activeRecipient !== null}
             onClick={() => {
+              if (recipientDisabled || editingRecipient.current !== null)
+                return;
               void onConfirm();
             }}
           >
@@ -231,9 +327,13 @@ export default function CollectBatchQuoteReview({
             size="lg"
             disabled={
               busy ||
+              activeRecipient !== null ||
               operation.state !== ApiMarketBatchOperationStateEnum.Review
             }
-            onClick={onEdit}
+            onClick={() => {
+              if (busy || editingRecipient.current !== null) return;
+              onEdit();
+            }}
           >
             {t(locale, "collect.buy.editPurchase")}
           </Button>

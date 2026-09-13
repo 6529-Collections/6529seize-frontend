@@ -18,11 +18,13 @@ export default function CollectPurchaseSummary({
   title,
   media,
   actionSlot,
+  deliverySlot,
 }: {
   readonly purchase: CollectPurchaseReviewView;
   readonly title: string;
   readonly media?: ReactNode;
   readonly actionSlot?: ReactNode;
+  readonly deliverySlot?: ReactNode;
 }) {
   const locale = useBrowserLocale();
   const { amounts } = purchase;
@@ -78,17 +80,24 @@ export default function CollectPurchaseSummary({
           address={purchase.payerAddress}
           name={purchase.payerName}
         />
-        <CollectReviewWallet
-          label={t(locale, "collect.review.deliverTo")}
-          address={purchase.recipientAddress}
-          name={purchase.recipientName}
-          detail={
-            !purchase.recipientInProfile
-              ? t(locale, "collect.review.otherRecipient")
-              : undefined
-          }
-        />
+        {deliverySlot ?? (
+          <CollectReviewWallet
+            label={t(locale, "collect.review.deliverTo")}
+            address={purchase.recipientAddress}
+            name={purchase.recipientName}
+            detail={
+              !purchase.recipientInProfile
+                ? t(locale, "collect.review.otherRecipient")
+                : undefined
+            }
+          />
+        )}
       </div>
+      {!purchase.recipientInProfile && (
+        <p role="status" className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+          {t(locale, "collect.review.giftOutcome")}
+        </p>
+      )}
       <div className="tw-space-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-4">
         {maximum !== null && (
           <dl className="tw-m-0">

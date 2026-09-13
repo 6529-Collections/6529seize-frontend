@@ -678,6 +678,8 @@ export const COLLECT_MESSAGES = {
     "After this purchase: {owned} of {total} requirements complete",
   "collect.plan.giftOutcome":
     "Delivery outside this profile does not complete its collecting goal.",
+  "collect.review.giftOutcome":
+    "Copies delivered outside this profile do not count toward its collecting goals or TDH.",
   "collect.plan.costBreakdown": "NFTs {purchases} · gas reserve {gas}",
   "collect.plan.missingNfts": "Still to collect ({count})",
   "collect.plan.ownedNfts": "Already in your profile ({count})",
@@ -750,6 +752,13 @@ export const COLLECT_MESSAGES = {
     "Your profile’s confirmed wallets are not available. You can enter a receiving address with Send to a fren.",
   "collect.recipient.search": "Find a profile, ENS or wallet",
   "collect.recipient.direct": "Or enter a wallet address directly",
+  "collect.recipient.apply": "Use this address",
+  "collect.recipient.applying": "Updating delivery…",
+  "collect.recipient.cancel": "Cancel",
+  "collect.recipient.updateFailed": "Delivery could not be updated. Try again.",
+  "collect.recipient.profileLevel": "Profile level {level}",
+  "collect.recipient.profileTdh": "Profile TDH: {tdh}",
+  "collect.recipient.walletTdh": "Wallet TDH: {tdh}",
   "collect.recipient.inProfile":
     "Delivery to this profile. Your payer can be a different wallet.",
   "collect.recipient.external":
