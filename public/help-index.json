@@ -5852,6 +5852,9 @@
       "keywords": ["waves", "composer", "markdown", "code", "blank", "format"],
       "facts": [
         "Wave composer docs cover markdown code blocks and blank-line preservation.",
+        "Type ~hi~ or ~~hi~~ for strikethrough. Both forms show struck-through text in the composer and when editing, matching the posted message.",
+        "Backspace immediately after an inline Markdown shortcut restores the text minus the last typed closing character. This covers strikethrough, bold, italic, highlight, and inline code. Moving the cursor or typing more text returns Backspace to normal deletion.",
+        "Deleting a whole formatted word clears its typing format even when other message text remains. Partial deletion retains formatting, and formats still present at the cursor are preserved.",
         "Use markdown records when users ask how to format a drop.",
         "Markdown behavior belongs to composer content, not the wave creation form."
       ],
@@ -5859,6 +5862,7 @@
       "related_paths": ["/waves"],
       "tags": ["waves", "composer", "markdown"],
       "source_refs": [
+        "ops/docs/waves/composer/README.md",
         "ops/docs/waves/composer/feature-markdown-code-blocks.md",
         "ops/docs/waves/composer/feature-markdown-blank-line-preservation.md"
       ]

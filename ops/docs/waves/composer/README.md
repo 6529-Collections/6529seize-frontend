@@ -38,6 +38,23 @@ Use this area when you need behavior for:
 
 ### Mentions and Markdown
 
+Type `~hi~` or `~~hi~~` for strikethrough. Completing the closing tilde or pair
+of tildes replaces the markers with visibly struck-through text in the composer,
+matching the posted message. Both forms also display as strikethrough when
+reopening a message for editing.
+
+Press Backspace immediately after an inline Markdown shortcut converts to
+formatted text to restore the text minus the closing character you just typed.
+For example, `~test~` becomes literal `~test`, and `~~test~~` becomes literal
+`~~test~`. This also applies to the supported bold, italic, highlight, and inline
+code shortcuts. After typing more text or moving the cursor, Backspace deletes
+normally.
+
+Deleting a whole formatted word lets you resume typing without carrying its
+formatting into new text, even when other text remains in the message. Deleting
+part of a formatted word preserves its formatting. Formats still present at the
+cursor, such as bold surrounding a deleted struck-through word, are preserved.
+
 - [Wave Mentions](feature-wave-mentions.md)
 - [Global Mentions](feature-global-mentions.md)
 - [Quick Tags](feature-personal-mention-shortcuts.md)
