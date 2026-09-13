@@ -1,5 +1,6 @@
 import CollectRecipientPicker from "@/components/collect/CollectRecipientPicker";
 import CollectTradeForm from "@/components/collect/CollectTradeForm";
+import TransferModalPfp from "@/components/nft-transfer/TransferModalPfp";
 import type { CollectTradeDraft } from "@/components/collect/collect.types";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useIdentity } from "@/hooks/useIdentity";
@@ -50,7 +51,9 @@ jest.mock("@/hooks/useIdentity", () => ({
 }));
 jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
 jest.mock("@/helpers/server.helpers", () => ({ getUserProfile: jest.fn() }));
-jest.mock("@/components/nft-transfer/TransferModalPfp", () => () => null);
+jest.mock("@/components/nft-transfer/TransferModalPfp", () =>
+  jest.fn(() => null)
+);
 
 function withQuery(children: ReactNode) {
   const client = new QueryClient({
@@ -66,17 +69,20 @@ function Picker({
   recipientProfile = profile,
   payingWallet,
   onChange = jest.fn(),
+  compact = false,
 }: {
   readonly initialValue?: string;
   readonly recipientProfile?: ApiIdentity | null;
   readonly payingWallet?: string;
   readonly onChange?: (address: string) => void;
+  readonly compact?: boolean;
 }) {
   const [value, setValue] = useState(initialValue);
   return (
     <>
       <CollectRecipientPicker
         profile={recipientProfile}
+        compact={compact}
         {...(payingWallet ? { payingWallet } : {})}
         value={value}
         invalid={false}
@@ -98,6 +104,149 @@ beforeEach(() => {
     profile: handleOrWallet ? (mockFrenProfile as ApiIdentity) : null,
     isLoading: false,
   }));
+});
+
+it("shows profile identity and level once with each real wallet's own TDH in compact mode", () => {
+  const recipientProfile = {
+    ...profile,
+    handle: "collector",
+    pfp: "https://example.com/collector.png",
+    level: 72,
+    tdh: 42000,
+    wallets: [
+      { wallet: primary, display: "collector.eth", tdh: 1500 },
+      { wallet: custody, display: "custody.collector.eth", tdh: 0 },
+    ],
+  };
+  const onChange = jest.fn();
+  withQuery(
+    <Picker compact recipientProfile={recipientProfile} onChange={onChange} />
+  );
+  expect(screen.getByText("collector")).toBeVisible();
+  expect(screen.getAllByText("Profile level 72")).toHaveLength(1);
+  expect(screen.getByText("Profile TDH: 42,000")).toBeVisible();
+  expect(jest.mocked(TransferModalPfp).mock.calls[0]?.[0]).toMatchObject({
+    src: recipientProfile.pfp,
+    level: 72,
+    alt: "",
+  });
+  const mainWallet = screen.getByRole("button", { name: /^collector.eth / });
+  expect(mainWallet).toHaveTextContent("Wallet TDH: 1,500");
+  expect(mainWallet).toHaveAccessibleDescription("Wallet TDH: 1,500");
+  expect(mainWallet).not.toHaveTextContent("Profile level");
+  expect(
+    screen.getByRole("button", { name: /custody.collector.eth/ })
+  ).toHaveTextContent("Wallet TDH: 0");
+  expect(commonApiFetch).not.toHaveBeenCalled();
+  expect(onChange).not.toHaveBeenCalled();
+});
+
+it("does not invent wallet TDH for a primary-wallet fallback without API wallet metadata", () => {
+  const withoutWallets = { ...profile, handle: "collector", level: 0, tdh: 0 };
+  delete withoutWallets.wallets;
+  withQuery(<Picker compact recipientProfile={withoutWallets} />);
+  expect(screen.getByText("Profile level 0")).toBeVisible();
+  expect(screen.getByText("Profile TDH: 0")).toBeVisible();
+  expect(screen.queryByText(/Wallet TDH:/)).not.toBeInTheDocument();
+});
+
+it.each([null, undefined])(
+  "keeps an exact address selectable when a wallet display is %s",
+  (display) => {
+    const incomplete = {
+      ...profile,
+      wallets: [{ wallet: primary, display, tdh: 0 }],
+    } as unknown as ApiIdentity;
+    withQuery(<Picker compact recipientProfile={incomplete} />);
+    const wallet = screen.getByRole("button", { name: getAddress(primary) });
+    expect(wallet).toHaveAttribute("aria-pressed", "true");
+    expect(wallet).toHaveTextContent("Wallet TDH: 0");
+  }
+);
+
+it("keeps unavailable profile metrics absent instead of claiming a zero level", () => {
+  withQuery(
+    <Picker
+      compact
+      recipientProfile={{
+        ...profile,
+        handle: "collector",
+        level: Number.NaN,
+        tdh: Number.NaN,
+      }}
+    />
+  );
+  expect(screen.getByText("collector")).toBeVisible();
+  expect(
+    screen.queryByText(/Profile level|Profile TDH/)
+  ).not.toBeInTheDocument();
+  expect(TransferModalPfp).not.toHaveBeenCalled();
+});
+
+it("shows selected fren context without redundant entry fields and restores search with Change", async () => {
+  const user = userEvent.setup();
+  jest.mocked(commonApiFetch).mockResolvedValue([
+    {
+      ...frenResult,
+      level: 28,
+      tdh: 2300,
+      pfp: "https://example.com/fren.png",
+    },
+  ]);
+  jest.mocked(useIdentity).mockImplementation(({ handleOrWallet }) => ({
+    profile: handleOrWallet
+      ? ({
+          ...mockFrenProfile,
+          wallets: [{ wallet: fren, display: "fren.eth", tdh: 725 }],
+        } as ApiIdentity)
+      : null,
+    isLoading: false,
+  }));
+  withQuery(<Picker compact />);
+  await user.click(screen.getByRole("button", { name: "Send to a fren" }));
+  fireEvent.change(
+    screen.getByRole("textbox", { name: "Find a profile, ENS or wallet" }),
+    { target: { value: "fren.eth" } }
+  );
+  await waitFor(() =>
+    expect(screen.getByText("Profile level 28")).toBeVisible()
+  );
+  expect(screen.getByText("Profile TDH: 2,300")).toBeVisible();
+  expect(screen.getByText("Wallet TDH: 725")).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: /fren.eth.*Wallet TDH: 725/ })
+  ).toHaveAttribute("aria-pressed", "true");
+  expect(
+    screen.queryByText("Find a profile, ENS or wallet")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("textbox", {
+      name: "Or enter a wallet address directly",
+    })
+  ).not.toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Change" }));
+  expect(
+    screen.getByRole("textbox", { name: "Find a profile, ENS or wallet" })
+  ).toHaveFocus();
+  expect(
+    screen.getByRole("textbox", { name: "Or enter a wallet address directly" })
+  ).toHaveValue("");
+  fireEvent.change(
+    screen.getByLabelText("Or enter a wallet address directly"),
+    { target: { value: primary } }
+  );
+  expect(
+    screen.queryByText(/Profile level|Profile TDH|Wallet TDH/)
+  ).not.toBeInTheDocument();
+});
+
+it("leaves existing non-compact mint-style presentation unchanged", () => {
+  withQuery(
+    <Picker recipientProfile={{ ...profile, level: 72, tdh: 42000 }} />
+  );
+  expect(
+    screen.queryByText(/Profile level|Profile TDH|Wallet TDH/)
+  ).not.toBeInTheDocument();
 });
 
 it("immediately shows every confirmed wallet, preserving primary selection and full addresses", async () => {
@@ -225,9 +374,7 @@ it("resolves a fren's ENS through the mint selector and reviews its full checksu
 
 it("restores the confirmed paying wallet when returning from Send to a fren", async () => {
   withQuery(<Picker payingWallet={custody} initialValue={fren} />);
-  await userEvent.click(
-    screen.getByRole("button", { name: "Send to me" })
-  );
+  await userEvent.click(screen.getByRole("button", { name: "Send to me" }));
   expect(screen.getByLabelText("Selected recipient")).toHaveTextContent(
     custody
   );

@@ -1,8 +1,21 @@
 import CollectPageClient from "@/components/collect/CollectPageClient";
 import type CollectGoalsController from "@/components/collect/CollectGoalsController";
+import type CollectBatchController from "@/components/collect/CollectBatchController";
+import type CollectTdhTargetController from "@/components/collect/CollectTdhTargetController";
+import type CollectTdhDailyWorkspace from "@/components/collect/CollectTdhDailyWorkspace";
 import CollectCompletionControls from "@/components/collect/CollectCompletionControls";
-import type { ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { targetPlan } from "./collect-tdh-target.fixture";
+import { batchFixture } from "./market-batch.fixture";
+import { ApiMarketBatchOperationStateEnum } from "@/generated/models/ApiMarketBatchOperation";
+
+const mockTarget = targetPlan();
+const mockPurchaseItems = mockTarget.items.map((item) => ({
+  asset: item.asset,
+  order: item.order,
+  quantity: item.quantity,
+}));
 
 let mockSearchParams = new URLSearchParams();
 const mockReplace = jest.fn();
@@ -87,7 +100,63 @@ jest.mock("@/components/collect/CollectGoalsController", () => ({
 }));
 jest.mock("@/components/collect/CollectTdhTargetController", () => ({
   __esModule: true,
-  default: () => <div data-testid="profile-tdh-projection" />,
+  default: function MockTarget({
+    onReviewPurchase,
+  }: ComponentProps<typeof CollectTdhTargetController>) {
+    const [calculated, setCalculated] = useState(false);
+    return (
+      <div data-testid="profile-tdh-projection">
+        <button onClick={() => setCalculated(true)}>
+          Calculate projection
+        </button>
+        {calculated && (
+          <>
+            <output>Calculated TDH benefit</output>
+            <button
+              onClick={() =>
+                onReviewPurchase(
+                  mockPurchaseItems,
+                  mockTarget.request.recipient
+                )
+              }
+            >
+              Review planned NFTs
+            </button>
+          </>
+        )}
+      </div>
+    );
+  },
+}));
+jest.mock("@/components/collect/CollectTdhDailyWorkspace", () => ({
+  __esModule: true,
+  default: function MockDaily({
+    onReviewPurchase,
+  }: ComponentProps<typeof CollectTdhDailyWorkspace>) {
+    const [calculated, setCalculated] = useState(false);
+    return (
+      <div>
+        <button onClick={() => setCalculated(true)}>
+          Calculate projection
+        </button>
+        {calculated && (
+          <>
+            <output>Calculated TDH benefit</output>
+            <button
+              onClick={() =>
+                onReviewPurchase(
+                  mockPurchaseItems,
+                  mockTarget.request.recipient
+                )
+              }
+            >
+              Review planned NFTs
+            </button>
+          </>
+        )}
+      </div>
+    );
+  },
 }));
 jest.mock("@/components/collect/CollectPlanBasket", () => ({
   __esModule: true,
@@ -99,7 +168,29 @@ jest.mock("@/components/collect/CollectTradeController", () => ({
 }));
 jest.mock("@/components/collect/CollectBatchController", () => ({
   __esModule: true,
-  default: () => null,
+  default: function MockBatch({
+    items,
+    onSettled,
+  }: ComponentProps<typeof CollectBatchController>) {
+    const [gift, setGift] = useState(false);
+    return (
+      <div data-testid="active-purchase-review">
+        <output>{items.length} reserved selections</output>
+        <button onClick={() => setGift(true)}>Change delivery to a fren</button>
+        {gift && <output>Gift delivery selected</output>}
+        <button
+          onClick={() =>
+            onSettled?.({
+              ...batchFixture().operation,
+              state: ApiMarketBatchOperationStateEnum.Confirmed,
+            })
+          }
+        >
+          Purchase confirmed
+        </button>
+      </div>
+    );
+  },
 }));
 
 beforeEach(() => {
@@ -374,3 +465,40 @@ it("keeps time-based profile projection separate from the immediate TDH listings
     { scroll: false }
   );
 });
+
+it.each(["", "&view=projection"])(
+  "invalidates settled TDH results without interrupting delivery edits or the active review: %s",
+  (view) => {
+    mockSearchParams = new URLSearchParams(
+      `intent=tdh&collection=memes${view}`
+    );
+    const { rerender } = render(<CollectPageClient />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Calculate projection" })
+    );
+    const calculation = screen.getByText("Calculated TDH benefit");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Review planned NFTs" })
+    );
+    const review = screen.getByTestId("active-purchase-review");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Change delivery to a fren" })
+    );
+    rerender(<CollectPageClient />);
+    expect(screen.getByText("Calculated TDH benefit")).toBe(calculation);
+    expect(screen.getByTestId("active-purchase-review")).toBe(review);
+    expect(screen.getByText("Gift delivery selected")).toBeVisible();
+    expect(screen.getByText("1 reserved selections")).toBeVisible();
+
+    fireEvent.click(screen.getByRole("button", { name: "Purchase confirmed" }));
+    expect(
+      screen.queryByText("Calculated TDH benefit")
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("active-purchase-review")).toBe(review);
+    expect(screen.getByText("Gift delivery selected")).toBeVisible();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Calculate projection" })
+    );
+    expect(screen.getByText("Calculated TDH benefit")).not.toBe(calculation);
+  }
+);
