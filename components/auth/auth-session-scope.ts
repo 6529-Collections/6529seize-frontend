@@ -6,9 +6,23 @@ import { logErrorSecurely } from "@/utils/error-sanitizer";
 export const getAuthSessionRole = (): string | null | undefined => {
   try {
     const token = getAuthJwt();
-    return token ? getRole(token) : undefined;
+    // Legacy tokens can omit role; a missing or unreadable token stays unresolved.
+    return token ? (getRole(token) ?? null) : undefined;
   } catch (error) {
     logErrorSecurely("derive_auth_role", error);
     return undefined;
   }
 };
+
+export const isDirectProfileAuthSession = ({
+  authRole,
+  profileId,
+  hasActiveProxy,
+}: {
+  readonly authRole: string | null | undefined;
+  readonly profileId: string | null | undefined;
+  readonly hasActiveProxy: boolean;
+}): boolean =>
+  Boolean(profileId) &&
+  !hasActiveProxy &&
+  (authRole === null || authRole === profileId);

@@ -14,16 +14,25 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
+import { isDirectProfileAuthSession as mockIsDirectProfileAuthSession } from "@/components/auth/auth-session-scope";
 
 let mockProfileId: string | null = "moderator-1";
 let mockProxy: { id: string } | null = null;
 let mockDirectSession = true;
+let mockUseRoleScope = false;
+let mockRole: string | null | undefined;
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
     connectedProfile: mockProfileId === null ? null : { id: mockProfileId },
     activeProfileProxy: mockProxy,
-    isDirectProfileSession: mockDirectSession,
+    isDirectProfileSession: mockUseRoleScope
+      ? mockIsDirectProfileAuthSession({
+          authRole: mockRole,
+          profileId: mockProfileId,
+          hasActiveProxy: mockProxy !== null,
+        })
+      : mockDirectSession,
   }),
 }));
 
@@ -60,7 +69,44 @@ describe("useContentModeratorAccess identity privacy", () => {
     mockProfileId = "moderator-1";
     mockProxy = null;
     mockDirectSession = true;
+    mockUseRoleScope = false;
+    mockRole = undefined;
     jest.mocked(fetchContentModeratorAccess).mockResolvedValue(access);
+  });
+
+  it("checks own-role access on the server and discards late access across a profile/token switch", async () => {
+    mockUseRoleScope = true;
+    mockRole = "moderator-1";
+    let resolveFirstAccess!: (value: ApiContentModeratorAccess) => void;
+    jest.mocked(fetchContentModeratorAccess).mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveFirstAccess = resolve;
+      })
+    );
+    const client = new QueryClient();
+    const { result, rerender } = mountAccess(client);
+    await waitFor(() =>
+      expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1)
+    );
+    expect(result.current.data).toBeUndefined();
+
+    mockProfileId = "moderator-2";
+    rerender();
+    expect(result.current.data).toBeUndefined();
+    expect(client.getQueryData(accessKey)).toBeUndefined();
+    await act(async () => resolveFirstAccess(access));
+    expect(result.current.data).toBeUndefined();
+    expect(client.getQueryData(accessKey)).toBeUndefined();
+    expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1);
+
+    jest.mocked(fetchContentModeratorAccess).mockResolvedValue({
+      ...access,
+      moderator: false,
+    });
+    mockRole = "moderator-2";
+    rerender();
+    await waitFor(() => expect(result.current.data?.moderator).toBe(false));
+    expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(2);
   });
 
   it.each(["proxy", "signed out"])(

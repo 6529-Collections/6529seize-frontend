@@ -44,7 +44,10 @@ import {
 import { AuthSignModal } from "./AuthSignModal";
 import { createAuthRequestActions } from "./authActions";
 import { AuthContext } from "./authContext";
-import { getAuthSessionRole } from "./auth-session-scope";
+import {
+  getAuthSessionRole,
+  isDirectProfileAuthSession,
+} from "./auth-session-scope";
 import { useAuthImpactTracking } from "./auth-impact-tracking";
 import { navigateAfterProfileSwitch } from "./authProfileNavigation";
 import { isProfileForAddress } from "./authProfileUtils";
@@ -244,8 +247,11 @@ export default function Auth({
   const [activeProfileProxy, setActiveProfileProxy] =
     useState<ApiProfileProxy | null>(null);
   const authRole = getAuthSessionRole();
-  const isDirectProfileSession =
-    authRole === null && activeProfileProxy === null;
+  const isDirectProfileSession = isDirectProfileAuthSession({
+    authRole,
+    profileId: connectedProfile?.id,
+    hasActiveProxy: activeProfileProxy !== null,
+  });
   useContentModerationStateScope(
     connectedProfile?.id,
     activeProfileProxy?.id,

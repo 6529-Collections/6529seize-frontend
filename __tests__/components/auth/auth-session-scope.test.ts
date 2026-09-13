@@ -1,4 +1,7 @@
-import { getAuthSessionRole } from "@/components/auth/auth-session-scope";
+import {
+  getAuthSessionRole,
+  isDirectProfileAuthSession,
+} from "@/components/auth/auth-session-scope";
 import { getAuthJwt } from "@/services/auth/auth.utils";
 import { getRole } from "@/services/auth/jwt-validation.utils";
 
@@ -31,3 +34,44 @@ it.each([null, "delegating-profile"])(
     expect(getAuthSessionRole()).toBe(role);
   }
 );
+
+it("recognizes an omitted legacy role only after decoding a present token", () => {
+  const actualGetRole = jest.requireActual<
+    typeof import("@/services/auth/jwt-validation.utils")
+  >("@/services/auth/jwt-validation.utils").getRole;
+  jest.mocked(getRole).mockImplementation(actualGetRole);
+  const payload = btoa(JSON.stringify({ sub: "0x1", exp: 2_000_000_000 }));
+  jest.mocked(getAuthJwt).mockReturnValue(`e30.${payload}.signature`);
+  expect(getAuthSessionRole()).toBeNull();
+
+  jest.mocked(getAuthJwt).mockReturnValue("not-a-token");
+  expect(getAuthSessionRole()).toBeUndefined();
+});
+
+describe("direct profile session scope", () => {
+  it.each([
+    ["own profile role", "profile-1", "profile-1", false, true],
+    ["legacy null role", null, "profile-1", false, true],
+    [
+      "foreign role before proxy lookup",
+      "profile-2",
+      "profile-1",
+      false,
+      false,
+    ],
+    ["unavailable token", undefined, "profile-1", false, false],
+    ["unresolved profile", "profile-1", undefined, false, false],
+    ["unresolved token and profile", undefined, undefined, false, false],
+    ["legacy token without profile", null, null, false, false],
+    ["empty profile", null, "", false, false],
+    ["active proxy with own role", "profile-1", "profile-1", true, false],
+    ["active proxy with legacy role", null, "profile-1", true, false],
+  ] as const)(
+    "handles %s",
+    (_case, authRole, profileId, hasActiveProxy, expected) => {
+      expect(
+        isDirectProfileAuthSession({ authRole, profileId, hasActiveProxy })
+      ).toBe(expected);
+    }
+  );
+});
