@@ -369,7 +369,7 @@ function BatchQuoteReview({
         <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
           {t(locale, "collect.checkout.summary")}
         </h3>
-        {commonRecipient && onAllRecipientsChange && profile ? (
+        {commonRecipient && onAllRecipientsChange && profile && (
           <CollectReviewRecipient
             label={t(
               locale,
@@ -393,13 +393,16 @@ function BatchQuoteReview({
                 : onAllRecipientsChange(recipient, acknowledged)
             }
           />
-        ) : commonRecipient && uniformDelivery ? (
-          <CollectReviewWallet
-            label={t(locale, "collect.checkout.deliverAll")}
-            address={commonRecipient.recipient}
-            name={walletNames?.[commonRecipient.recipient.toLowerCase()]}
-          />
-        ) : null}
+        )}
+        {commonRecipient &&
+          uniformDelivery &&
+          (!onAllRecipientsChange || !profile) && (
+            <CollectReviewWallet
+              label={t(locale, "collect.checkout.deliverAll")}
+              address={commonRecipient.recipient}
+              name={walletNames?.[commonRecipient.recipient.toLowerCase()]}
+            />
+          )}
         {!uniformDelivery && (
           <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
             {t(locale, "collect.checkout.deliveryExceptions")}

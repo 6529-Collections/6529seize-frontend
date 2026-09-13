@@ -119,6 +119,46 @@ function destinations(review: Review): string {
   ]);
 }
 
+function gasComponentChanges(
+  shown: Review,
+  fresh: Review,
+  locale: SupportedLocale,
+  explainDecreases: boolean
+): string[] {
+  const changes: string[] = [];
+  const before = shown.transaction;
+  const after = fresh.transaction;
+  for (const key of ["gas_limit", "max_fee_per_gas"] as const) {
+    const previous = amount(before?.[key]);
+    const current = amount(after?.[key]);
+    if (
+      previous === null ||
+      current === null ||
+      previous === current ||
+      (!explainDecreases && current < previous)
+    )
+      continue;
+    const format = (value: bigint) =>
+      formatDecimalString(
+        locale,
+        key === "max_fee_per_gas" ? formatUnits(value, 9) : value.toString()
+      );
+    changes.push(
+      t(
+        locale,
+        key === "gas_limit"
+          ? "collect.trade.changedGasLimit"
+          : "collect.trade.changedGasPrice",
+        {
+          before: format(previous),
+          after: format(current),
+        }
+      )
+    );
+  }
+  return changes;
+}
+
 /** Explain only differences present in the two validated snapshots. Never authorizes a send. */
 export function marketReviewChangeDescription(
   shown: Review,
@@ -164,37 +204,9 @@ export function marketReviewChangeDescription(
     "ETH"
   );
   if (change === "gas") {
-    const explainDecreases = changes.length === 0;
-    const before = shown.transaction;
-    const after = fresh.transaction;
-    for (const key of ["gas_limit", "max_fee_per_gas"] as const) {
-      const previous = amount(before?.[key]);
-      const current = amount(after?.[key]);
-      if (
-        previous === null ||
-        current === null ||
-        previous === current ||
-        (!explainDecreases && current < previous)
-      )
-        continue;
-      const format = (value: bigint) =>
-        formatDecimalString(
-          locale,
-          key === "max_fee_per_gas" ? formatUnits(value, 9) : value.toString()
-        );
-      changes.push(
-        t(
-          locale,
-          key === "gas_limit"
-            ? "collect.trade.changedGasLimit"
-            : "collect.trade.changedGasPrice",
-          {
-            before: format(previous),
-            after: format(current),
-          }
-        )
-      );
-    }
+    changes.push(
+      ...gasComponentChanges(shown, fresh, locale, changes.length === 0)
+    );
   }
   if (changes.length === 0)
     return t(

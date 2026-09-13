@@ -39,12 +39,12 @@ export function collectLocation(query: string) {
     collection = explicit;
   }
   const compatibleIntent = collectIntentForCollection(intent, collection);
-  const definitionId =
-    compatibleIntent === "full_set"
-      ? collection
-      : compatibleIntent === intent
-        ? (explicit ?? "")
-        : "";
+  let definitionId = "";
+  if (compatibleIntent === "full_set") {
+    definitionId = collection;
+  } else if (compatibleIntent === intent) {
+    definitionId = explicit ?? "";
+  }
   if (params.has("collection") && params.get("collection") !== collection)
     params.set("collection", collection);
   if (

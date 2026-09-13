@@ -35,7 +35,7 @@ export default function CollectCheckoutScreen({
           if (!busy) onClose();
         }}
         unmount={false}
-        className={`tailwind-scope tw-relative tw-z-[1000] ${styles["surface"]}`}
+        className={`tailwind-scope tw-relative tw-z-[1000] ${styles["surface"] ?? ""}`}
       >
         <div className="tw-fixed tw-inset-0 tw-overflow-y-auto tw-overscroll-contain tw-bg-iron-950 tw-scrollbar-thin tw-scrollbar-track-iron-950 tw-scrollbar-thumb-iron-700">
           <DialogPanel className="tw-min-h-dvh tw-pb-[env(safe-area-inset-bottom)]">

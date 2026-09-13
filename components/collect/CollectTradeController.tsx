@@ -592,7 +592,6 @@ function CollectTradeControllerContent({
                   disabled={
                     !isAuthenticated ||
                     Boolean(activeProfileProxy) ||
-                    execution.busy ||
                     recipientUpdate.pending
                   }
                   onRecover={(hash) =>

@@ -338,7 +338,10 @@ test("listing selection carries across browsing and opens one wallet-gated purch
   const dialog = page.getByRole("dialog");
   await expect(dialog).toHaveCount(1);
   await expect(dialog).toHaveAttribute("aria-modal", "true");
-  const checkoutSurface = dialog.locator(":scope > div").first();
+  const checkoutSurface = page
+    .getByRole("dialog")
+    .locator(":scope > div")
+    .first();
   const checkoutBounds = await checkoutSurface.evaluate((node) => {
     const rect = node.getBoundingClientRect();
     const style = getComputedStyle(node);

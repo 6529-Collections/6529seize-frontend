@@ -36,7 +36,10 @@ import {
 import { batchSendAttempt } from "./market-batch-send";
 import { readMarketBatch, saveMarketBatch } from "./market-batch-storage";
 import { knownMarketTransactionHash } from "./market-known-transaction";
-import { validateMarketBatchOperation } from "./market-batch-validation";
+import {
+  validateMarketBatchOperation,
+  validateMarketBatchOperationForRefresh,
+} from "./market-batch-validation";
 import { useMarketBatchExecution } from "./useMarketBatchExecution";
 import { useCollectBatchRecipientUpdate } from "./useCollectBatchRecipientUpdate";
 import { useMarketSettlement } from "./useMarketSettlement";
@@ -120,6 +123,7 @@ function ScopedBatchController({
     setAvailableItems(remaining);
     onItemsChange?.(remaining);
   };
+  const adoptedResume = useRef(false);
   const [preparedRequest, setExpected] =
     useState<ApiMarketBatchPrepareRequest | null>(() =>
       initialOperation
@@ -166,11 +170,59 @@ function ScopedBatchController({
       JSON.stringify(resumeItems),
       editedOperationId,
     ],
-    queryFn: ({ signal }) =>
-      findResumableMarketBatch(auth.connectedProfile!.id!, resumeItems, {
-        signal,
-        ...(editedOperationId ? { excludeId: editedOperationId } : {}),
-      }),
+    queryFn: async ({ signal }) => {
+      const resumed = await findResumableMarketBatch(
+        auth.connectedProfile!.id!,
+        resumeItems,
+        {
+          signal,
+          ...(editedOperationId ? { excludeId: editedOperationId } : {}),
+        }
+      );
+      if (
+        signal.aborted ||
+        !scopeIsActive() ||
+        adoptedResume.current ||
+        pending.current ||
+        discarded ||
+        initialOperation ||
+        operation !== null ||
+        !resumed ||
+        !auth.isAuthenticated ||
+        auth.activeProfileProxy ||
+        auth.connectedProfile?.id !== resumed.request.profile_id ||
+        connection.address?.toLowerCase() !==
+          resumed.request.wallet.toLowerCase()
+      )
+        return resumed;
+      const recovered = resumed.operation;
+      if (
+        recovered.state !== ApiMarketBatchOperationStateEnum.Review ||
+        batchNeedsPolling(recovered) ||
+        knownMarketTransactionHash(
+          recovered,
+          batchSendAttempt(recovered),
+          readMarketBatch(recovered.profile_id, recovered.id)
+        )
+      )
+        return resumed;
+      try {
+        validateMarketBatchOperationForRefresh(
+          recovered,
+          resumed.request,
+          collectProfileWallets(auth.connectedProfile).map(
+            (item) => item.wallet
+          )
+        );
+      } catch {
+        // Invalid or unresolved recovery must not change the browsing selection.
+        return resumed;
+      }
+      adoptedResume.current = true;
+      // Adopt the authoritative read once without remounting the quote or replacing item references.
+      keepRequestedItems(resumed.request);
+      return resumed;
+    },
     enabled:
       !discarded &&
       !initialOperation &&
@@ -214,6 +266,7 @@ function ScopedBatchController({
   const displayed = discarded ? null : (polling.data ?? activeOperation);
   const receive = (value: ApiMarketBatchOperation) => {
     if (!mounted.current) return;
+    adoptedResume.current = true;
     const queryKey = [
       QueryKey.MARKET_OPERATION,
       "BUY_BATCH",
@@ -361,6 +414,7 @@ function ScopedBatchController({
     },
     onError: (failure) => setError(marketPreparationError(failure, locale)),
     onEmpty: () => {
+      adoptedResume.current = true;
       setDiscarded(true);
       setOperation(null);
       setExpected(null);

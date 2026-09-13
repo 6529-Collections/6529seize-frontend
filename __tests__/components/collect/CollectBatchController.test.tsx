@@ -21,6 +21,7 @@ import {
 } from "@/generated/models/ApiMarketBatchSendAttempt";
 
 import * as recipientHooks from "@/components/collect/useCollectBatchRecipientUpdate";
+import { validateMarketBatchOperation } from "@/components/collect/market-batch-validation";
 
 let mockFixture = batchFixture();
 let mockNative = false;
@@ -28,6 +29,7 @@ let mockAddress = PAYER;
 let mockProfile: ApiIdentity;
 const mockPrepare = jest.fn(),
   mockConfirm = jest.fn();
+const mockReviewForm = jest.fn();
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
     connectedProfile: mockProfile,
@@ -65,19 +67,25 @@ jest.mock("@/components/collect/CollectCheckoutScreen", () => ({
 }));
 jest.mock("@/components/collect/CollectBatchReviewForm", () => ({
   __esModule: true,
-  default: (props: ComponentProps<typeof CollectBatchReviewForm>) => (
-    <div>
-      <input aria-label="Delivery draft" defaultValue="unchanged destination" />
-      <button
-        disabled={props.loading || Boolean(props.disabledReason)}
-        onClick={() => props.onPrepare({ items: [] })}
-      >
-        Check selected purchases
-      </button>
-      {props.error && <p role="alert">{props.error}</p>}
-      {props.disabledReason && <p role="status">{props.disabledReason}</p>}
-    </div>
-  ),
+  default: (props: ComponentProps<typeof CollectBatchReviewForm>) => {
+    mockReviewForm(props);
+    return (
+      <div>
+        <input
+          aria-label="Delivery draft"
+          defaultValue="unchanged destination"
+        />
+        <button
+          disabled={props.loading || Boolean(props.disabledReason)}
+          onClick={() => props.onPrepare({ items: [] })}
+        >
+          Check selected purchases
+        </button>
+        {props.error && <p role="alert">{props.error}</p>}
+        {props.disabledReason && <p role="status">{props.disabledReason}</p>}
+      </div>
+    );
+  },
 }));
 jest.mock("@/components/collect/CollectAssetMedia", () => ({
   __esModule: true,
@@ -420,3 +428,154 @@ it("does not reopen a retained review after the guarded final-item removal callb
   expect(mockConfirm).not.toHaveBeenCalled();
   expect(mockPrepare).not.toHaveBeenCalled();
 });
+
+function resumeSecondSelectedOrder() {
+  const items = mockFixture.request.items.map((item, index) => ({
+    asset: {
+      asset_key: item.asset_key,
+      name: `Artwork ${index === 0 ? "A" : "B"}`,
+      image_url: null,
+    } as ApiCollectAsset,
+    order: { identity: item.order } as ApiMarketTradeOrder,
+    quantity: item.quantity,
+  }));
+  const selected = mockFixture.request.items[1]!;
+  mockFixture.request.items = [selected];
+  mockFixture.request.amount_wei = selected.amount_wei;
+  mockFixture.operation.items = [mockFixture.operation.items[1]!];
+  mockFixture.operation.total_wei = selected.amount_wei;
+  mockFixture.operation.potential_liability_wei = selected.amount_wei;
+  mockFixture.orders.splice(0, 1);
+  const mirror = mockFixture.orders[1]!;
+  mirror.parameters.offer[0]!.startAmount = BigInt(selected.amount_wei);
+  mirror.parameters.offer[0]!.endAmount = BigInt(selected.amount_wei);
+  mirror.parameters.consideration.splice(0, 1);
+  mirror.parameters.totalOriginalConsiderationItems = 2n;
+  const links = [
+    [0, 0, 1, 0],
+    [0, 0, 1, 1],
+    [1, 0, 0, 0],
+    [1, 0, 0, 1],
+  ];
+  mockFixture.fulfillments.splice(
+    0,
+    mockFixture.fulfillments.length,
+    ...links.map((link) => ({
+      offerComponents: [
+        { orderIndex: BigInt(link[0]!), itemIndex: BigInt(link[1]!) },
+      ],
+      considerationComponents: [
+        { orderIndex: BigInt(link[2]!), itemIndex: BigInt(link[3]!) },
+      ],
+    }))
+  );
+  mockFixture.reencode();
+  mockFixture.operation.transaction!.value = selected.amount_wei;
+  validateMarketBatchOperation(mockFixture.operation, mockFixture.request, [
+    PAYER,
+  ]);
+  localStorage.setItem(
+    `6529-market-batch:${mockFixture.request.profile_id}:${mockFixture.operation.id}`,
+    JSON.stringify({ request: mockFixture.request })
+  );
+  return items;
+}
+
+it("adopts only original B when resuming its unsigned review from an A+B selection, without remounting or repeating publication", async () => {
+  const items = resumeSecondSelectedOrder();
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: 0 } },
+  });
+  const onItemsChange = jest.fn();
+  const content = () => (
+    <QueryClientProvider client={client}>
+      <CollectBatchController
+        items={items}
+        onClose={jest.fn()}
+        onItemsChange={onItemsChange}
+      />
+    </QueryClientProvider>
+  );
+  const view = render(content());
+  const draft = screen.getByLabelText("Delivery draft");
+  fireEvent.change(draft, { target: { value: "retained delivery" } });
+  const confirm = await screen.findByRole("button", {
+    name: "Continue in wallet",
+  });
+  await waitFor(() => expect(onItemsChange).toHaveBeenCalledTimes(1));
+  expect(onItemsChange.mock.calls[0]![0]).toEqual([items[1]]);
+  expect(onItemsChange.mock.calls[0]![0][0]).toBe(items[1]);
+  expect(mockReviewForm.mock.lastCall![0].items).toEqual([items[1]]);
+  view.rerender(content());
+  await act(async () => {
+    await client.invalidateQueries({ queryKey: ["operation"] });
+  });
+  expect(onItemsChange).toHaveBeenCalledTimes(1);
+  expect(screen.getByRole("button", { name: "Continue in wallet" })).toBe(
+    confirm
+  );
+  expect(screen.getByLabelText("Delivery draft")).toBe(draft);
+  expect(draft).toHaveValue("retained delivery");
+  expect(mockPrepare).not.toHaveBeenCalled();
+  expect(mockConfirm).not.toHaveBeenCalled();
+});
+
+it.each(["invalid terms", "pending", "known hash", "active attempt"])(
+  "does not shrink selection for a resumed review with %s",
+  async (reason) => {
+    const items = resumeSecondSelectedOrder();
+    if (reason === "invalid terms") mockFixture.operation.total_wei = "41";
+    if (reason === "pending")
+      mockFixture.operation.state = ApiMarketBatchOperationStateEnum.Unknown;
+    if (reason === "known hash")
+      mockFixture.operation.transaction_hash = `0x${"a".repeat(64)}`;
+    if (reason === "active attempt") {
+      const transaction = mockFixture.operation.transaction!;
+      const attempt = createMarketSendAttempt(
+        transaction,
+        mockFixture.operation.block_number,
+        mockFixture.operation.revision
+      );
+      mockFixture.operation.send_attempt = {
+        attempt_id: attempt.id,
+        purpose: ApiMarketBatchSendAttemptPurposeEnum.Transaction,
+        transaction_digest: attempt.digest,
+        snapshot_block: attempt.snapshotBlock,
+        transaction,
+        status: ApiMarketBatchSendAttemptStatusEnum.Active,
+        transaction_hash: null,
+      };
+    }
+    const onItemsChange = jest.fn();
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: 0 } },
+    });
+    render(
+      <QueryClientProvider client={client}>
+        <CollectBatchController
+          items={items}
+          onClose={jest.fn()}
+          onItemsChange={onItemsChange}
+        />
+      </QueryClientProvider>
+    );
+    await screen.findByRole("heading", { level: 2 });
+    await act(async () => {
+      await client.invalidateQueries({ queryKey: ["operation"] });
+    });
+    expect(onItemsChange).not.toHaveBeenCalled();
+    expect(mockReviewForm.mock.lastCall![0].items).toBe(items);
+    expect(mockPrepare).not.toHaveBeenCalled();
+    expect(mockConfirm).not.toHaveBeenCalled();
+    if (reason === "pending")
+      expect(
+        screen.queryByRole("button", { name: "Continue in wallet" })
+      ).not.toBeInTheDocument();
+    if (reason === "active attempt")
+      expect(
+        screen.getByRole("textbox", {
+          name: "Transaction hash from your wallet",
+        })
+      ).toBeInTheDocument();
+  }
+);
