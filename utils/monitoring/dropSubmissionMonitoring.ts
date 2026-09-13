@@ -35,12 +35,23 @@ export function reportDropSubmissionFailure(error: unknown): void {
     const reported = new Error(`Drop submission failed (${kind})`);
     reported.name = "DropSubmissionError";
     Sentry.withScope((scope) => {
-      scope.clearBreadcrumbs();
-      scope.setUser(null);
       scope.setLevel("error");
       scope.setFingerprint(["drop-submission", kind]);
-      scope.setTag("feature", "drop-submission");
-      scope.setTag("failure_kind", kind);
+      // Isolation-scope data is merged after withScope. Remove inherited private
+      // context from this event without changing the scope used by other errors.
+      scope.addEventProcessor((event) => {
+        const bounded = {
+          ...event,
+          tags: { feature: "drop-submission", failure_kind: kind },
+        };
+        delete bounded.breadcrumbs;
+        delete bounded.extra;
+        delete bounded.request;
+        delete bounded.user;
+        delete bounded.contexts;
+        delete bounded.transaction;
+        return bounded;
+      });
       Sentry.captureException(reported);
     });
   } catch {
