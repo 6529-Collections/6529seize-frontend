@@ -1,3 +1,5 @@
+jest.mock("prettier", () => ({ format: jest.fn() }));
+
 const {
   getPublicationEnvironment,
   getPublishedHelpRecords,
@@ -73,6 +75,43 @@ describe("sync-help-index publication policy", () => {
 
     for (const recordId of STREAM_SUMMARY_RECORD_IDS) {
       expect(publishedRecordIds.has(recordId)).toBe(true);
+    }
+  });
+});
+
+describe("Desktop conversational answer metadata", () => {
+  const { validateIndex } = require("../../scripts/sync-help-index.cjs");
+
+  it.each([
+    { brief_answer: "x".repeat(901) },
+    { brief_answer: "" },
+    { answer_links: [{ label: "Download", url: "https://example.com/app" }] },
+    {
+      answer_links: [
+        {
+          label: "Download",
+          url: "https://6529.io/about/6529-apps/nonexistent-desktop-route",
+        },
+      ],
+    },
+    { answer_links: [null] },
+  ])("rejects invalid short answer or public link metadata: %j", (fields) => {
+    const index = JSON.parse(JSON.stringify(helpIndex));
+    Object.assign(
+      index.records.find(
+        (record: { id: string }) => record.id === "desktop.overview"
+      ),
+      fields
+    );
+    const error = jest.spyOn(console, "error").mockImplementation(() => {});
+    const exit = jest.spyOn(process, "exit").mockImplementation(() => {
+      throw new Error("validation rejected");
+    });
+    try {
+      expect(() => validateIndex(index)).toThrow("validation rejected");
+    } finally {
+      error.mockRestore();
+      exit.mockRestore();
     }
   });
 });
