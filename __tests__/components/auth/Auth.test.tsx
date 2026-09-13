@@ -2415,6 +2415,48 @@ describe("Auth component", () => {
     const mockValidateAuthImmediate =
       require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
 
+    it.each([null, "developer"])(
+      "exposes a direct session for a loaded own profile with role %s",
+      (role) => {
+        const authUtils = jest.mocked(
+          require("@/services/auth/auth.utils") as typeof AuthUtilsModule
+        );
+        const roleModule = jest.mocked(
+          require("@/services/auth/jwt-validation.utils") as typeof import("@/services/auth/jwt-validation.utils")
+        );
+        authUtils.getAuthJwt.mockReturnValue("direct-session");
+        roleModule.getRole.mockReturnValue(role);
+        mockUseIdentity.mockReturnValue({
+          profile: {
+            id: "developer",
+            handle: "developer",
+            query: "developer",
+            primary_wallet: walletAddress,
+            wallets: [],
+          },
+          isLoading: false,
+        });
+        const observed: Array<boolean | undefined> = [];
+        const Child = () => {
+          observed.push(useAuth().isDirectProfileSession);
+          return null;
+        };
+
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={createReactQueryWrapperContextValue()}
+          >
+            <Auth>
+              <Child />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+
+        expect(observed.length).toBeGreaterThan(0);
+        expect(observed.every((direct) => direct === true)).toBe(true);
+      }
+    );
+
     it("exposes proxy-token scope before the proxy lookup completes", () => {
       const authUtils = jest.mocked(
         require("@/services/auth/auth.utils") as typeof AuthUtilsModule
@@ -2461,6 +2503,64 @@ describe("Auth component", () => {
         roleModule.getRole.mockReturnValue(null);
         authUtils.getAuthJwt.mockReturnValue(null);
       }
+    });
+
+    it("closes direct scope until the switched wallet, loaded profile and token role agree", () => {
+      const authUtils = jest.mocked(
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule
+      );
+      const roleModule = jest.mocked(
+        require("@/services/auth/jwt-validation.utils") as typeof import("@/services/auth/jwt-validation.utils")
+      );
+      authUtils.getAuthJwt.mockReturnValue("direct-session");
+      roleModule.getRole.mockReturnValue("profile-1");
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "profile-1",
+          handle: "first",
+          query: "first",
+          primary_wallet: walletAddress,
+          wallets: [],
+        },
+        isLoading: false,
+      });
+      const Child = () => (
+        <div data-testid="direct-scope">
+          {String(useAuth().isDirectProfileSession)}
+        </div>
+      );
+      const view = () => (
+        <ReactQueryWrapperContext.Provider
+          value={createReactQueryWrapperContextValue()}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+      const { rerender } = render(view());
+      expect(screen.getByTestId("direct-scope")).toHaveTextContent("true");
+
+      walletAddress = "0x2";
+      rerender(view());
+      expect(screen.getByTestId("direct-scope")).toHaveTextContent("false");
+
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "profile-2",
+          handle: "second",
+          query: "second",
+          primary_wallet: walletAddress,
+          wallets: [],
+        },
+        isLoading: false,
+      });
+      rerender(view());
+      expect(screen.getByTestId("direct-scope")).toHaveTextContent("false");
+
+      roleModule.getRole.mockReturnValue("profile-2");
+      rerender(view());
+      expect(screen.getByTestId("direct-scope")).toHaveTextContent("true");
     });
 
     it("should fetch and set connected profile when address is provided", async () => {
