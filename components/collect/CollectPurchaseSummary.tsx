@@ -93,6 +93,11 @@ export default function CollectPurchaseSummary({
           />
         )}
       </div>
+      {!purchase.recipientInProfile && (
+        <p role="status" className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+          {t(locale, "collect.review.giftOutcome")}
+        </p>
+      )}
       <div className="tw-space-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-4">
         {maximum !== null && (
           <dl className="tw-m-0">

@@ -69,7 +69,7 @@ listings together. Collection-wide or trait offers are checked for this exact
 Meme Lab card before review.
 
 Purchases show separate **Pay with** and **Deliver to** wallets. Choose a confirmed
-profile wallet or **Send to a fren**; an individual purchase review also lets you
+profile wallet or **Send to a fren**; a purchase review also lets you
 change delivery from its expanded **Deliver to** row. Review quantities, fees and
 the resolved destination before continuing in your wallet. Prices and availability
 are checked again automatically, and changed terms require another review.

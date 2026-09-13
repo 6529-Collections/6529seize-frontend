@@ -45,7 +45,10 @@ The Listings and Offers record distinguishes direct **Collect** and **Sell**
 actions for one order from the explicit choice among multiple orders at a price.
 The Collect navigation label opens the set planner. Individual purchase facts
 describe separate Pay with and Deliver to rows, expandable full wallet addresses,
-and editing delivery from the expanded Deliver to row on single-artwork purchases.
+and editing delivery from expanded delivery rows on every supported purchase,
+including selected listings, Collect purchases and saved purchases in Orders.
+For multiple items or split deliveries, an edit retains all other NFTs and
+allocations. Choosing an existing destination for the same NFT combines its copies.
 Send to me offers confirmed profile wallets; Send to a fren supports a profile,
 ENS name or wallet address. The chooser shows available profile picture, name,
 profile level and profile TDH, plus each wallet's TDH when known. Level describes
