@@ -108,6 +108,9 @@ it("prices a supported unit instead of its remaining lot and omits repetitive on
 
 it.each([
   ["en-US", "0.0372 ETH", "0.0371998999999 ETH"],
+  ["en-GB", "0.0372 ETH", "0.0371998999999 ETH"],
+  ["fr-FR", "0,0372 ETH", "0,0371998999999 ETH"],
+  ["es-ES", "0,0372 ETH", "0,0371998999999 ETH"],
   ["de-DE", "0,0372 ETH", "0,0371998999999 ETH"],
 ] as const)(
   "compacts the displayed native price in %s while preserving the exact listing",

@@ -40,6 +40,7 @@ it("shows daily TDH value with a compact price and a separate exact-price disclo
   expect(exact).not.toBeVisible();
   await user.click(compact);
   expect(exact).toBeVisible();
+  expect(screen.getByText("Exact amounts")).toBeVisible();
   expect(screen.getByText("Price for 3 copies")).toBeVisible();
   fireEvent.click(
     screen.getByRole("button", { name: "Add Test artwork to selection" })

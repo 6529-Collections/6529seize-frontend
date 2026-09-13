@@ -432,9 +432,10 @@ test("set planning is the default and navigation opens observed listings", async
     .getByRole("button", { name: "Lowest listings", exact: true })
     .click();
   await expect(page.getByText("0.01 ETH", { exact: true })).toBeVisible();
-  const priceDisclosure = page
-    .locator("summary")
-    .filter({ hasText: "0.0243 ETH" });
+  const priceDisclosure = page.getByRole("button", {
+    name: "0.0243 ETH",
+    exact: true,
+  });
   const exactPrice = page.getByText("0.024217345 ETH", { exact: true });
   await expect(priceDisclosure).toBeVisible();
   await expect(exactPrice).toBeHidden();
