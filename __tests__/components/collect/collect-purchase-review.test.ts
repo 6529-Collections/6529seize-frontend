@@ -133,7 +133,7 @@ it.each([
   [
     "0x45882f9bc325e14fbb298a1df930c43a874b83ae",
     "10000000000",
-    "Pebbles #10000000000",
+    "Pebbles · NextGen #10000000000",
   ],
 ])(
   "preserves %s token %s as the artwork identity",

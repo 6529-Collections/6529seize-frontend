@@ -19,7 +19,7 @@ export const fetchMarketListings = (
 ) =>
   commonApiFetch<ApiMarketListings>({
     endpoint: "market/listings",
-    params: { family, limit: "24", ...(cursor ? { cursor } : {}) },
+    params: { family, limit: "48", ...(cursor ? { cursor } : {}) },
     signal,
     cache: "no-store",
     errorMode: "structured",

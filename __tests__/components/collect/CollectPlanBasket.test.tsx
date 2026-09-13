@@ -18,26 +18,10 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import type { ReactNode } from "react";
 import type { ApiCollectPlanLeg } from "@/generated/models/ApiCollectPlanLeg";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
-}));
-jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
-  __esModule: true,
-  default: ({
-    children,
-    onClose,
-  }: {
-    children: ReactNode;
-    onClose: () => void;
-  }) => (
-    <div role="dialog">
-      <button onClick={onClose}>Close dialog</button>
-      {children}
-    </div>
-  ),
 }));
 jest.mock("@/components/collect/CollectSaveRule", () => ({
   __esModule: true,
@@ -50,12 +34,23 @@ jest.mock("@/components/collect/collect-plan-selection.helpers", () => ({
 const mockBatch = jest.fn();
 jest.mock("@/components/collect/CollectBatchController", () => ({
   __esModule: true,
-  default: (props: { onSettled?: () => void }) => {
+  default: (props: {
+    onSettled?: () => void;
+    onClose: () => void;
+    onEmpty?: () => void;
+    open?: boolean;
+  }) => {
     mockBatch(props);
     return (
-      <section aria-label="Batch review">
-        <button onClick={props.onSettled}>Confirmed purchase</button>
-      </section>
+      <div role="dialog" hidden={props.open === false}>
+        <section aria-label="Batch review">
+          <button onClick={props.onClose}>Back to collecting</button>
+          <button onClick={props.onSettled}>Confirmed purchase</button>
+          <button onClick={props.onEmpty}>
+            Remove final unsigned purchase
+          </button>
+        </section>
+      </div>
     );
   },
 }));
@@ -210,10 +205,10 @@ it("does not expose discard once the batch controller has mounted", async () => 
   expect(
     screen.queryByRole("button", { name: /^Discard purchase/ })
   ).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "Close dialog" }));
+  fireEvent.click(screen.getByRole("button", { name: "Back to collecting" }));
   expect(onDiscard).not.toHaveBeenCalled();
 });
-it("resolves only chosen exact legs and retains one dialog through review and settlement", async () => {
+it("hands only chosen exact legs to one batch checkout surface through settlement", async () => {
   const plan = makePlan();
   const first = plan.result.legs[0]!;
   plan.result.legs.push({
@@ -236,11 +231,12 @@ it("resolves only chosen exact legs and retains one dialog through review and se
     plan.analysis.account.wallets,
     expect.any(AbortSignal)
   );
-  expect(screen.getByRole("dialog")).toBe(dialog);
+  expect(dialog).not.toBeInTheDocument();
+  expect(screen.getAllByRole("dialog")).toHaveLength(1);
   expect(mockBatch.mock.calls.at(-1)![0]).toMatchObject({
     items,
     initialRecipient: recipientWallet,
-    presentation: "contents",
+    open: true,
   });
   expect(onSettled).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("button", { name: "Confirmed purchase" }));
@@ -403,7 +399,9 @@ it.each(["close", "unmount"])(
     await waitFor(() => expect(resolve).toHaveBeenCalledTimes(1));
     const signal = resolve.mock.calls[0]![2];
     if (action === "close") {
-      fireEvent.click(screen.getByRole("button", { name: "Close dialog" }));
+      fireEvent.click(
+        screen.getByRole("button", { name: "Back to collecting" })
+      );
       expect(view.onClose).toHaveBeenCalledTimes(1);
     } else view.unmount();
     expect(signal.aborted).toBe(true);
@@ -423,7 +421,7 @@ it("can retry a lookup after closing and resuming while the old request is still
   fireEvent.click(check());
   await waitFor(() => expect(resolve).toHaveBeenCalledTimes(1));
   const signal = resolve.mock.calls[0]![2];
-  fireEvent.click(screen.getByRole("button", { name: "Close dialog" }));
+  fireEvent.click(screen.getByRole("button", { name: "Back to collecting" }));
   expect(signal.aborted).toBe(true);
   expect(check()).toBeEnabled();
   fireEvent.click(check());
@@ -435,4 +433,22 @@ it("can retry a lookup after closing and resuming while the old request is still
   );
   expect(mockBatch.mock.calls.at(-1)).toBe(reviewed);
   expect(view.onClose).toHaveBeenCalledTimes(1);
+});
+
+it("releases an empty unsigned reservation and never reopens its retained batch", async () => {
+  const onDiscard = jest.fn();
+  const view = show(makePlan(), jest.fn(), jest.fn(), undefined, onDiscard);
+  fireEvent.click(check());
+  await screen.findByRole("region", { name: "Batch review" });
+  fireEvent.click(
+    screen.getByRole("button", { name: "Remove final unsigned purchase" })
+  );
+  expect(onDiscard).toHaveBeenCalledTimes(1);
+  expect(view.onSettled).not.toHaveBeenCalled();
+  expect(
+    screen.queryByRole("region", { name: "Batch review" })
+  ).not.toBeInTheDocument();
+  expect(check()).toBeDisabled();
+  fireEvent.click(check());
+  expect(resolve).toHaveBeenCalledTimes(1);
 });

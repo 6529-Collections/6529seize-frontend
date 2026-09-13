@@ -10,6 +10,9 @@ action selects that tab and moves focus to its market section.
 Memes, Meme Lab, Gradients and Pebbles share the same market controls and trade review
 layout. **View listings & offers** works from the other token views, and
 switching tabs retains a market selection and active review.
+Gradients and Pebbles place the title and artwork before trading actions, with
+the market tab below. An unlisted artwork keeps offer and applicable owner
+actions without an empty Collect or delivery form.
 
 On Memes, Meme Lab and Gradient cards, artwork details retain mint, edition,
 collector and TDH information where applicable. Listing and offer summaries appear
@@ -34,7 +37,7 @@ rank and the next rank skips those ties. A card without a recorded ranking shows
 ## Read listings and offers
 
 The summaries show the lowest captured listing in ETH and the highest captured
-offer in WETH. Each price list starts with up to five levels. Use Show all levels
+offer in WETH. Each price list starts with up to ten levels. Use Show all levels
 to reveal the complete list, and Show fewer levels to return to the short view.
 Listings are ordered from lowest price upward and
 offers from highest price downward. Each level shows its unit price and quantity
@@ -45,7 +48,7 @@ inspect the captured orders behind that quote, including quoted remaining
 quantity, expiry, scope and applicability. Supported order actions appear before
 the technical disclosure. Open Order information for the wallet,
 order reference and currency contract. Each expanded price initially shows up to
-five orders; Show all orders reveals the rest.
+ten orders; Show all orders reveals the rest.
 Payment currencies stay separate, including ETH and WETH; other currencies are
 identified with their address. A partially filled order contributes only its
 remaining quantity. Non-priceable or unverified orders appear in a separate
@@ -59,6 +62,8 @@ listing price and **Sell** beside offer prices. A level with one loaded order
 acts on that exact order directly. When several orders share a price, the action
 opens the orders so you can choose one; it does not silently pick a seller or
 offer. The price disclosure remains available for inspecting details.
+The compact and expanded order actions use the same blue action buttons. A busy
+order check disables its action while keeping its accessible name.
 For **Collect**, the site checks that exact listing and adds it to your selection.
 Set **Quantity** for supported editions, or choose
 **Remove** to take it out. Some listings must be collected as a complete lot.
@@ -72,6 +77,12 @@ delivery address and offers **Price breakdown**, **Exact amounts** and
 **Contract details**. **Continue in wallet** checks the exact orders again;
 changed terms require another review. Supported purchases and deliveries succeed
 together in one transaction or all revert; a revert can still cost gas.
+The selection review fills the screen with a persistent **Back to collecting**
+control. **Deliver all to** sets a common destination; **Change delivery for this
+artwork** retains per-item exceptions and split details. **Remove** checks and
+requotes the remaining exact orders; a failed update keeps the original review.
+Removing the last item closes an unsigned review only after pending-purchase
+checks. These edits are unavailable while sending or recovering a transaction.
 
 Quoted quantities can overlap. Two listings from the same seller can offer the
 same copies, so they cannot both be added to this card's selection. A unique NFT

@@ -41,20 +41,20 @@ export default function CollectTdhDailyControls({
   return (
     <section
       aria-labelledby={`${id}-title`}
-      className="tw-min-w-0 tw-space-y-4"
+      className="tw-min-w-0 tw-space-y-3"
     >
       <div className="tw-space-y-1">
         <h2
           id={`${id}-title`}
-          className="tw-m-0 tw-text-lg tw-font-medium tw-text-iron-100"
+          className="tw-m-0 tw-text-base tw-font-medium tw-text-iron-100"
         >
           {t(locale, "collect.tdhDaily.title")}
         </h2>
-        <p className="tw-m-0 tw-max-w-2xl tw-text-sm tw-leading-6 tw-text-iron-400">
+        <p className="tw-m-0 tw-max-w-xl tw-text-xs tw-leading-5 tw-text-iron-400">
           {t(locale, "collect.tdhDaily.description")}
         </p>
       </div>
-      <div className="tw-grid tw-min-w-0 tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
+      <div className="tw-grid tw-min-w-0 tw-max-w-xl tw-grid-cols-1 tw-gap-3 min-[380px]:tw-grid-cols-2">
         {(["daily_tdh", "budget"] as const).map((mode) => {
           const driving = input.mode === mode;
           const derivedValue =
@@ -74,7 +74,7 @@ export default function CollectTdhDailyControls({
             <div key={mode} className="tw-min-w-0 tw-space-y-2">
               <label
                 htmlFor={`${id}-${mode}`}
-                className="tw-block tw-text-sm tw-font-medium tw-text-iron-200"
+                className="tw-block tw-text-xs tw-font-medium tw-text-iron-200"
               >
                 {t(
                   locale,
@@ -103,7 +103,7 @@ export default function CollectTdhDailyControls({
                 onChange={(event) =>
                   onChange({ mode, value: event.target.value })
                 }
-                className="tw-block tw-min-h-11 tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-tabular-nums tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                className="tw-block tw-min-h-11 tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-tabular-nums tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               />
               {calculated && (
                 <p
