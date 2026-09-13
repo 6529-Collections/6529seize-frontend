@@ -18,6 +18,7 @@ import {
   getCmsStudioBlockPresentation,
   type CmsStudioPresentation,
 } from "@/lib/profile-cms/studio/presentation";
+import { resolveCmsColorway } from "@/lib/profile-cms/studio/palettes";
 import type { CmsStudioEditingContext } from "./CmsStudioSiteRenderer";
 import { createRendererContext } from "./site-renderer/data";
 import type { RendererContext } from "./site-renderer/types";
@@ -64,6 +65,14 @@ export default function CmsApprovedSiteRenderer({
   });
   const sessionScope = `${cmsPackage.profile.handle.toLowerCase()}:${cmsPackage.package_id}`;
   const rootRef = useBlockEditing(!!editing?.onSelectBlock, sessionScope);
+  const colorway =
+    presentation.studio_design && presentation.studio_colorway
+      ? resolveCmsColorway(
+          presentation.studio_design,
+          presentation.studio_colorway,
+          cmsPackage.site.theme.accent
+        )
+      : null;
   return (
     <ApprovedSessionProvider key={sessionScope} scope={sessionScope}>
       <div
@@ -71,6 +80,7 @@ export default function CmsApprovedSiteRenderer({
         className={`tailwind-scope ${styles["root"] ?? ""}`}
         data-cms-approved-design={presentation.studio_design}
         data-palette={presentation.studio_palette}
+        data-colorway={colorway ? presentation.studio_colorway : undefined}
         data-typography={presentation.studio_type}
         data-density={presentation.studio_density}
         data-layout={presentation.studio_layout}
@@ -78,10 +88,13 @@ export default function CmsApprovedSiteRenderer({
         data-home={home?.id === page.id}
         style={
           {
-            "--approved-accent": cmsPackage.site.theme.accent,
-            "--approved-accent-ink": getApprovedAccentInk(
-              cmsPackage.site.theme.accent
-            ),
+            ...colorway,
+            "--approved-accent":
+              colorway?.["--cms-colorway-accent"] ??
+              cmsPackage.site.theme.accent,
+            "--approved-accent-ink":
+              colorway?.["--cms-colorway-accent-ink"] ??
+              getApprovedAccentInk(cmsPackage.site.theme.accent),
           } as CSSProperties
         }
       >

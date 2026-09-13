@@ -4,6 +4,7 @@ import { CmsRecoveryError } from "./errors";
 import { getCmsPublicPath } from "../runtime/routes";
 import {
   recoveredBlockPresentation,
+  recoveredColorwayStyles,
   recoveredNativeDesign,
   RECOVERED_NATIVE_CSS,
 } from "./native-presentation";
@@ -246,7 +247,9 @@ function renderShell(
   const title = escapeHtml(metadata.title);
   const mode = cmsPackage.site.theme.mode === "light" ? "light" : "dark";
   const design = recoveredNativeDesign(cmsPackage);
-  const nativeStyles = design ? `<style>${RECOVERED_NATIVE_CSS}</style>` : "";
+  const nativeStyles = design
+    ? `<style>${RECOVERED_NATIVE_CSS}${recoveredColorwayStyles(cmsPackage)}</style>`
+    : "";
   const bodyAttributes = design
     ? ` class="cms-native" data-design="${design}"`
     : "";

@@ -9,6 +9,10 @@ import {
   getCmsStudioPresentation,
 } from "@/lib/profile-cms/studio/presentation";
 import { instantiateCmsStudioTemplate } from "@/lib/profile-cms/studio/templates";
+import {
+  getCmsColorways,
+  resolveCmsColorway,
+} from "@/lib/profile-cms/studio/palettes";
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
@@ -58,6 +62,141 @@ it("leaves legacy publications on the legacy studio renderer", () => {
     studio_design: "unknown-design",
   };
   expect(getCmsStudioPresentation(document)?.studio_design).toBeUndefined();
+});
+
+it.each(CMS_STUDIO_DESIGNS)(
+  "switches every colourway on %s without changing artwork or page content",
+  (design) => {
+    const document = fixture(design);
+    delete document.site.theme.tokens?.["studio_colorway"];
+    const page = document.payload.pages[0]!;
+    const view = render(
+      <CmsSiteRenderer cmsPackage={document} page={page} locale="en-US" />
+    );
+    const sources = () =>
+      Array.from(view.container.querySelectorAll("img"), (image) =>
+        image.getAttribute("src")
+      );
+    const originalSources = sources();
+    const originalTitle = screen.getByRole("heading", { level: 1 }).textContent;
+    const legacyRoot = view.container.querySelector<HTMLElement>(
+      "[data-cms-approved-design]"
+    )!;
+    expect(legacyRoot).not.toHaveAttribute("data-colorway");
+    expect(legacyRoot.style.getPropertyValue("--cms-colorway-paper")).toBe("");
+
+    for (const choice of getCmsColorways(design)) {
+      const themed = {
+        ...document,
+        site: {
+          ...document.site,
+          theme: {
+            ...document.site.theme,
+            accent: choice.accent,
+            tokens: {
+              ...document.site.theme.tokens,
+              studio_colorway: choice.id,
+            },
+          },
+        },
+      };
+      view.rerender(
+        <CmsSiteRenderer cmsPackage={themed} page={page} locale="en-US" />
+      );
+      const root = view.container.querySelector<HTMLElement>(
+        "[data-cms-approved-design]"
+      )!;
+      const colors = resolveCmsColorway(design, choice.id, choice.accent)!;
+      expect(root).toHaveAttribute("data-colorway", choice.id);
+      expect(root.style.getPropertyValue("--cms-colorway-paper")).toBe(
+        colors["--cms-colorway-paper"]
+      );
+      expect(root.style.getPropertyValue("--approved-accent")).toBe(
+        colors["--cms-colorway-accent"]
+      );
+      expect(root.style.getPropertyValue("--approved-accent-ink")).toBe(
+        colors["--cms-colorway-accent-ink"]
+      );
+      expect(root.style.getPropertyValue("--cms-colorway-poster-one")).not.toBe(
+        ""
+      );
+      expect(
+        root.style.getPropertyValue("--cms-colorway-mockup-window")
+      ).not.toBe("");
+      expect(sources()).toEqual(originalSources);
+      expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+        originalTitle ?? ""
+      );
+    }
+
+    view.rerender(
+      <CmsSiteRenderer cmsPackage={document} page={page} locale="en-US" />
+    );
+    const restored = view.container.querySelector<HTMLElement>(
+      "[data-cms-approved-design]"
+    )!;
+    expect(restored).not.toHaveAttribute("data-colorway");
+    expect(restored.style.getPropertyValue("--cms-colorway-paper")).toBe("");
+    expect(sources()).toEqual(originalSources);
+  }
+);
+
+it("ignores an unrecognized imported colourway and retains the authored accent", () => {
+  const document = fixture();
+  document.site.theme.accent = "#aabbcc";
+  document.site.theme.tokens = {
+    ...document.site.theme.tokens,
+    studio_colorway: "future-choice",
+  };
+  const { container } = render(
+    <CmsSiteRenderer
+      cmsPackage={document}
+      page={document.payload.pages[0]!}
+      locale="en-US"
+    />
+  );
+  const root = container.querySelector<HTMLElement>(
+    "[data-cms-approved-design]"
+  )!;
+  expect(root).not.toHaveAttribute("data-colorway");
+  expect(root.style.getPropertyValue("--cms-colorway-paper")).toBe("");
+  expect(root.style.getPropertyValue("--approved-accent")).toBe("#aabbcc");
+});
+
+it("keeps inserted advanced reference content within the selected palette", () => {
+  const document = fixture("artist-v2");
+  document.site.theme.tokens = {
+    ...document.site.theme.tokens,
+    studio_colorway: "seize",
+  };
+  const page = {
+    ...document.payload.pages[0]!,
+    blocks: [
+      blockSchema.parse({
+        id: "collection-reference",
+        block_type: "collection_reference",
+        title: "Collected editions",
+        chain_id: 1,
+        contract: "0x0000000000000000000000000000000000000001",
+      }),
+    ],
+  };
+  const { container } = render(
+    <CmsSiteRenderer cmsPackage={document} page={page} locale="en-US" />
+  );
+  const fallback = container.querySelector<HTMLElement>(
+    "[data-cms-approved-fallback]"
+  )!;
+  expect(fallback.closest("[data-colorway]")).toHaveAttribute(
+    "data-colorway",
+    "seize"
+  );
+  expect(
+    within(fallback).getByRole("heading", { name: "Collected editions" })
+  ).toBeVisible();
+  expect(fallback).toHaveTextContent(
+    "0x0000000000000000000000000000000000000001"
+  );
 });
 
 it("searches across collections, combines filters, and changes the browsing view", () => {
