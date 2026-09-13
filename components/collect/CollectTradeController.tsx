@@ -510,7 +510,10 @@ function CollectTradeControllerContent({
       onRestoreSelectedOrder={setSelectedOrder}
       onSelectOrder={setSelectedOrder}
       onRefreshOrders={() => {
-        if (!inlineBuy) setSelectedOrder(null);
+        if (!inlineBuy) {
+          setSelectedOrder(null);
+          setError(undefined);
+        }
         void orders.refetch();
       }}
       onPrepare={(value) => {
