@@ -25,8 +25,12 @@ availability. Submission availability is exposed through the Chat tab
 
 - Composer visible: chat is allowed.
 - Logged-out blocked panel: if chat is blocked because the viewer is not
-  authenticated, footer shows
-  `Connect your wallet to participate in this wave`.
+  authenticated, footer offers a blue
+  `Sign in to 6529 to post` button. The helper explains that new users sign a
+  wallet message, with no transaction or gas fees. The button opens the existing
+  wallet chooser; connecting an unauthenticated wallet opens `Sign in to 6529`.
+  Choose `Sign message` and confirm in your wallet. After sign-in, posting access
+  is checked again; wallets without a profile still use profile setup.
 - Profile setup blocked panel: if the wallet is authenticated but does not have
   a profile handle yet, footer shows
   `Create a profile to participate in this wave` with a `Create profile`
@@ -77,8 +81,8 @@ availability. Submission availability is exposed through the Chat tab
 
 - This page covers availability only, not input formatting or submission
   syntax.
-- Most blocked panels are informational only; the profile setup blocked panel
-  links to profile creation.
+- The signed-out panel opens sign-in, and the profile setup panel links to profile
+  creation. Other blocked panels are informational.
 - When both chat and submission are blocked for non-auth reasons, messaging is
   generic, not reason-specific.
 

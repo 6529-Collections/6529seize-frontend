@@ -128,8 +128,8 @@ function StandaloneMintPageTopBar() {
         className="tw-flex tw-justify-center md:tw-justify-end"
         style={
           {
-            "--apkt-tokens-core-backgroundAccentPrimary": "#406AFE",
-            "--apkt-tokens-core-backgroundAccentPrimary-base": "#406AFE",
+            "--apkt-tokens-core-backgroundAccentPrimary": "#3F69FC",
+            "--apkt-tokens-core-backgroundAccentPrimary-base": "#3F69FC",
             "--apkt-tokens-theme-textInvert": "#FFFFFF",
             "--apkt-tokens-theme-iconInverse": "#FFFFFF",
             "--apkt-borderRadius-2": "10px",

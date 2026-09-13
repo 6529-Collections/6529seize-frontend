@@ -1,6 +1,6 @@
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 import { formatInteger } from "@/i18n/format";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   getAuthJwt,
@@ -207,9 +207,12 @@ export const dismissSessionUpgradePrompt = (
   };
 };
 
-export const formatSessionUpgradeTimeLeft = (timeLeftMs: number): string => {
+export const formatSessionUpgradeTimeLeft = (
+  timeLeftMs: number,
+  locale: SupportedLocale
+): string => {
   if (timeLeftMs <= 0) {
-    return t(AUTH_MODAL_LOCALE, "auth.signModal.timeLeft.now");
+    return t(locale, "auth.signModal.timeLeft.now");
   }
 
   const oneHourMs = 60 * 60 * 1000;
@@ -217,22 +220,22 @@ export const formatSessionUpgradeTimeLeft = (timeLeftMs: number): string => {
   const wholeDays = Math.floor(timeLeftMs / oneDayMs);
 
   if (wholeDays > 3) {
-    return t(AUTH_MODAL_LOCALE, "auth.signModal.timeLeft.days.many", {
-      count: formatInteger(AUTH_MODAL_LOCALE, wholeDays),
+    return t(locale, "auth.signModal.timeLeft.days.many", {
+      count: formatInteger(locale, wholeDays),
     });
   }
 
   const wholeHours = Math.floor(timeLeftMs / oneHourMs);
   if (wholeHours < 1) {
-    return t(AUTH_MODAL_LOCALE, "auth.signModal.timeLeft.lessThanOneHour");
+    return t(locale, "auth.signModal.timeLeft.lessThanOneHour");
   }
 
   return t(
-    AUTH_MODAL_LOCALE,
+    locale,
     wholeHours === 1
       ? "auth.signModal.timeLeft.hours.one"
       : "auth.signModal.timeLeft.hours.many",
-    { count: formatInteger(AUTH_MODAL_LOCALE, wholeHours) }
+    { count: formatInteger(locale, wholeHours) }
   );
 };
 
