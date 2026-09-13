@@ -189,7 +189,7 @@ export default function MarketDepthPriceLevels({
                       tableRow
                     />
                   )}
-                  <tr hidden={!open}>
+                  <tr hidden={!open} data-market-depth-order-details={open}>
                     <td
                       colSpan={tradeActionsAvailable ? 4 : 3}
                       className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-px-0 tw-py-0 tw-text-left"

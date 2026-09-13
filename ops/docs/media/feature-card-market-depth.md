@@ -118,10 +118,17 @@ error states are separate: unavailable means no completed capture exists. An
 update with no matching price levels can still contain individual unpriced or
 unverified offers in the contextual disclosure. A failed request can be retried.
 
+While the market tab is visible and idle, prices update periodically without a
+Refresh button. Updates pause while order details are expanded, a listing is
+selected or a trade review is open, so they do not replace your choice. Captured
+quotes still need the exact order checks described above before wallet approval.
+If a background update fails, the last captured prices remain visible with
+**Try again**.
+
 Expanded order details load all pages of the captured quote before showing
 individual orders. If the market changes during loading, the panel refreshes
-prices and retries once automatically. If loading still fails, use Retry details
-or Refresh. The panel never combines pages from different updates.
+prices and retries once automatically. If loading still fails, use **Try again** or
+**Retry details**, as shown. The panel never combines pages from different updates.
 
 ## Related pages
 

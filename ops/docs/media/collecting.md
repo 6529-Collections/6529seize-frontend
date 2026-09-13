@@ -44,6 +44,12 @@ the Collect area shows whether listings are loading, could not be loaded, or con
 no supported orders. **Connect wallet** remains available; connecting is required
 before reviewing a purchase.
 
+Listing availability updates quietly while the artwork page is visible and idle.
+The site preserves an active purchase choice or review instead of replacing it
+with a background update. A failed request offers **Try again**; an empty result
+does not require a routine Refresh action. Collect still checks the exact order
+before opening a review.
+
 **Make an offer** is visible beside Collect. **List** appears when a
 confirmed wallet in the profile holds the NFT. Connect that holding wallet to
 list it; profile consolidation does not grant another wallet permission to sign.
@@ -180,7 +186,11 @@ trait requirements with one token. Artist goals let you include collaborations.
 Choose **Lowest listings**, then The Memes, Gradients or Pebbles. This tool shows
 observed listings with prices and quantities, showing each NFT once at its lowest
 supported purchase price. An indivisible lot says how many copies its price
-includes. Open an artwork for its card page, or select its **+** to add it to
+includes. Cards in Lowest listings and TDH use compact ETH prices with up to four
+decimal places, rounded upward. Positive amounts below 0.0001 ETH show
+**<0.0001 ETH**. Expand a shortened price to read **Exact amounts**; the listing
+price and purchase quantity remain unchanged.
+Open an artwork for its card page, or select its **+** to add it to
 your purchase selection. The control becomes a checkmark; select it again to
 remove that NFT. The selection stays available while switching between Lowest
 listings and TDH, with its actions kept in view while you scroll.

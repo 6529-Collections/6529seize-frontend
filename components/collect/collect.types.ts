@@ -37,6 +37,7 @@ export interface CollectArtworkView {
   readonly media: ReactNode;
   readonly ownedLabel: string | null;
   readonly priceLabel: string | null;
+  readonly priceExactLabel?: string | undefined;
   readonly priceDescription?: string | undefined;
   readonly sourceLabel?: string | undefined;
   readonly valueMetric?: { readonly value: string; readonly label: string };

@@ -5,7 +5,11 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { CollectArtworkView, CollectTradeAction } from "./collect.types";
 import CollectTradeActions from "./CollectTradeActions";
-import { CheckIcon, PlusIcon } from "@heroicons/react/24/outline";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  PlusIcon,
+} from "@heroicons/react/24/outline";
 import { useId } from "react";
 
 export interface CollectArtworkSelection {
@@ -68,10 +72,29 @@ export default function CollectArtworkCard({
         )}
         {artwork.priceLabel && (
           <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-2">
-            <div className="tw-min-w-0 tw-max-w-full [overflow-wrap:anywhere]">
-              <p className="tw-m-0 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-100">
-                {artwork.priceLabel}
-              </p>
+            <div className="tw-min-w-0 tw-max-w-full [overflow-wrap:anywhere] max-[360px]:tw-w-full">
+              {artwork.priceExactLabel &&
+              artwork.priceExactLabel !== artwork.priceLabel ? (
+                <details className="tw-group/price">
+                  <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-gap-1 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+                    <span>{artwork.priceLabel}</span>
+                    <ChevronDownIcon
+                      aria-hidden="true"
+                      className="tw-size-3 tw-shrink-0 tw-text-iron-400 group-open/price:tw-rotate-180"
+                    />
+                  </summary>
+                  <p className="tw-m-0 tw-pb-1 tw-text-xs tw-tabular-nums tw-leading-5 tw-text-iron-300">
+                    <span className="tw-block tw-text-iron-400">
+                      {t(locale, "collect.review.exactAmounts")}
+                    </span>
+                    <span>{artwork.priceExactLabel}</span>
+                  </p>
+                </details>
+              ) : (
+                <p className="tw-m-0 tw-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-100">
+                  {artwork.priceLabel}
+                </p>
+              )}
               {artwork.priceDescription && (
                 <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-400">
                   {artwork.priceDescription}
