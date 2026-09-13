@@ -71,6 +71,8 @@ function render(ui: ReactNode) {
 
 let mockFetchingProfile = false;
 let mockCanModerate = true;
+let mockAccessState = "success";
+const mockRefetchAccess = jest.fn();
 let mockProfileId: string | null = "moderator-1";
 let mockActiveProfileProxy: { id: string } | null = null;
 let mockBlockActivityIntersection: ((isIntersecting: boolean) => void) | null =
@@ -95,9 +97,12 @@ jest.mock("@/hooks/content-moderation/useContentModeratorAccess", () => ({
       resolved_report_count: 0,
       suspended_profile_count: 0,
     },
-    isError: false,
-    isLoading: false,
-    isSuccess: true,
+    isError: mockAccessState === "error",
+    isLoading: mockAccessState === "retrying",
+    isFetching: mockAccessState === "retrying",
+    isFetched: true,
+    isSuccess: mockAccessState === "success",
+    refetch: mockRefetchAccess,
   }),
 }));
 
@@ -201,9 +206,73 @@ describe("ContentModerationPageClient pagination", () => {
     jest.mocked(fetchSuspendedModerationProfiles).mockResolvedValue([]);
     mockFetchingProfile = false;
     mockCanModerate = true;
+    mockAccessState = "success";
     mockProfileId = "moderator-1";
     mockActiveProfileProxy = null;
     mockBlockActivityIntersection = null;
+  });
+
+  it("hides stale authorization on failure and retries without treating it as denial", async () => {
+    mockAccessState = "error";
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const page = () => (
+      <QueryClientProvider client={client}>
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+    const { rerender } = render(page());
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Couldn't check your WatchTower access. Try again."
+    );
+    expect(screen.queryByText("No moderator access")).not.toBeInTheDocument();
+    expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+    expect(mockFetchContentModerationQueue).not.toHaveBeenCalled();
+    expect(fetchSuspendedModerationProfiles).not.toHaveBeenCalled();
+
+    const retry = screen.getByRole("button", {
+      name: "Retry permission check",
+    });
+    await userEvent.click(retry);
+    expect(mockRefetchAccess).toHaveBeenCalledTimes(1);
+    mockAccessState = "retrying";
+    rerender(page());
+    expect(screen.getByRole("button", { name: "Retry permission check" })).toBe(
+      retry
+    );
+    expect(retry).toBeDisabled();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Checking permissions…"
+    );
+    expect(screen.queryByText("No moderator access")).not.toBeInTheDocument();
+    expect(screen.queryByRole("tablist")).not.toBeInTheDocument();
+    expect(mockFetchContentModerationQueue).not.toHaveBeenCalled();
+
+    mockAccessState = "success";
+    mockFetchContentModerationQueue.mockResolvedValue([]);
+    rerender(page());
+    expect(await screen.findByRole("tablist")).toBeVisible();
+    await waitFor(() =>
+      expect(mockFetchContentModerationQueue).toHaveBeenCalled()
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Retry permission check" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the access requirement only after a successful denial", () => {
+    mockCanModerate = false;
+    const client = new QueryClient();
+    render(
+      <QueryClientProvider client={client}>
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+    expect(screen.getByText("No moderator access")).toBeVisible();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(mockFetchContentModerationQueue).not.toHaveBeenCalled();
   });
 
   describe.each(["proxy", "signed out"])("when %s", (identity) => {
@@ -624,9 +693,7 @@ describe("ContentModerationPageClient pagination", () => {
     );
 
     expect(screen.getByText("Checking permissions…")).toBeVisible();
-    expect(
-      screen.queryByText("You have no power here")
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("No moderator access")).not.toBeInTheDocument();
   });
 
   it("loads the next cursor page and renders author context", async () => {

@@ -47,12 +47,13 @@ export function offerPrice(
 export function offerAnalysis(
   prices = [offerPrice(1), offerPrice(2)]
 ): OfferPlanAnalysisView {
+  const createdAt = Date.now();
   return {
     id: "analysis",
     policy: "test-v1",
     policyDescription: "A fixed conservative opening policy.",
-    createdAt: new Date().toISOString(),
-    validUntil: new Date(Date.now() + 60000).toISOString(),
+    createdAt: new Date(createdAt).toISOString(),
+    validUntil: new Date(createdAt + 60000).toISOString(),
     prices,
     trackedLiabilityWei: "100000000000000000",
     balanceWei: "2000000000000000000",

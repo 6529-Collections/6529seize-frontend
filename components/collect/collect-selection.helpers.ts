@@ -1,5 +1,5 @@
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
-import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import { isCollectEdition } from "./collect-families";
 import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import {
   collectBuyAmount,
@@ -24,7 +24,7 @@ export function collectSelectionItem(options: {
   const { asset, order } = options;
   const quantity = collectOrderPurchaseQuantity(order);
   if (quantity === null) return null;
-  if (asset.family !== ApiCollectFamily.Memes && quantity !== "1") return null;
+  if (!isCollectEdition(asset.family) && quantity !== "1") return null;
   const eligible = collectBuyListings({
     ...options,
     orders: [order],
@@ -43,7 +43,7 @@ export function toggleCollectSelection(
     return selected.filter((entry) => collectListingKey(entry.order) !== key);
   // An ERC721 can only be bought once. Different listings of editions stay distinct.
   if (
-    item.asset.family !== ApiCollectFamily.Memes &&
+    !isCollectEdition(item.asset.family) &&
     selected.some((entry) => entry.asset.asset_key === item.asset.asset_key)
   )
     return [...selected];

@@ -24,7 +24,7 @@ export const MODERATION_CHECK_MESSAGES = {
   "checks.policyNotice":
     "Public-facing text uses a stricter policy for REP categories, About text and group names. Wave safety applies to posts and reports.",
   "checks.privateNotice":
-    "Developer access only. Evidence is private and may contain harmful content. Links and media are shown as text until you choose to open them.",
+    "6529 Dev Team group members only. Evidence is private and may contain harmful content. Links and media are shown as text until you choose to open them.",
   "checks.count.needs_review": "Items needing review",
   "checks.count.quarantined": "Quarantined posts",
   "checks.count.rejected_today": "Rejected checks today",

@@ -94,6 +94,7 @@ export default function MemeLabPageComponent({
   const [nftLoading, setNftLoading] = useState(true);
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [marketRefreshVersion, setMarketRefreshVersion] = useState(0);
 
   const [userLoaded, setUserLoaded] = useState(false);
   const [originalMemesLoaded, setOriginalMemesLoaded] = useState(false);
@@ -636,6 +637,9 @@ export default function MemeLabPageComponent({
               locale={locale}
               hasOwnershipContext={hasOwnershipContext}
               nftBalance={nftBalance}
+              onMarketChange={() =>
+                setMarketRefreshVersion((version) => version + 1)
+              }
             />
             <NftDetailTabSection
               activeFocus={routeFocus}
@@ -646,6 +650,7 @@ export default function MemeLabPageComponent({
                   tokenId={nft.id}
                   locale={locale}
                   embedded
+                  refreshKey={marketRefreshVersion}
                   active={activeTab === MEME_FOCUS.MARKET}
                   onReveal={() => setActiveMemeLabTab(MEME_FOCUS.MARKET)}
                 />

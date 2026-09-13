@@ -25,6 +25,7 @@ import {
   parseCollectTdhTargetBudget,
 } from "./collect-tdh-target.validation";
 import { MARKET_SEAPORT, MARKET_ZERO } from "./market-validation";
+import { COLLECT_PLANNER_FAMILIES } from "./collect-families";
 
 const sorted = (values: readonly string[]) =>
   [...values]
@@ -67,6 +68,7 @@ export function collectTdhTargetRequest(
     budget === null ||
     typeof horizon !== "number" ||
     mode === undefined ||
+    !COLLECT_PLANNER_FAMILIES.some((family) => family === draft.family) ||
     !isCollectProfileWallet(profile, recipient)
   )
     return reject();
@@ -88,6 +90,10 @@ function validateRequest(
 ) {
   const actual = plan.request;
   if (
+    expected.families?.some(
+      (family) =>
+        !COLLECT_PLANNER_FAMILIES.some((supported) => supported === family)
+    ) ||
     actual.profile_id !== expected.profile_id ||
     actual.target_tdh !== expected.target_tdh ||
     actual.target_mode !== expected.target_mode ||
@@ -142,7 +148,9 @@ function validateItem(
     item.asset.chain_id !== 1 ||
     item.asset.asset_key !==
       `1:${item.asset.contract.toLowerCase()}:${item.asset.token_id}` ||
-    !(expected.families ?? []).includes(item.asset.family) ||
+    !(expected.families ?? []).some(
+      (family) => family.toString() === item.asset.family.toString()
+    ) ||
     item.recipient.toLowerCase() !== expected.recipient.toLowerCase()
   )
     return reject();

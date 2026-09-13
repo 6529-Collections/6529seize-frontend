@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
-import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import { COLLECT_PLANNER_FAMILIES } from "./collect-families";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useId, type ReactNode } from "react";
@@ -99,14 +99,14 @@ export default function CollectTdhTargetForm({
           <select
             value={draft.family}
             onChange={(event) => {
-              const family = Object.values(ApiCollectFamily).find(
+              const family = COLLECT_PLANNER_FAMILIES.find(
                 (value) => value.toString() === event.target.value
               );
               if (family !== undefined) change({ family });
             }}
             className={COLLECT_INPUT_CLASS}
           >
-            {Object.values(ApiCollectFamily).map((family) => (
+            {COLLECT_PLANNER_FAMILIES.map((family) => (
               <option key={family} value={family}>
                 {t(locale, `collect.collection.${family}`)}
               </option>

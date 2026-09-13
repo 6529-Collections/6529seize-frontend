@@ -12,7 +12,7 @@ import type {
 } from "@/components/collect/collect-offer-plan.types";
 import type { ApiCollectPlanLeg } from "@/generated/models/ApiCollectPlanLeg";
 import { formatEther } from "viem";
-import { offerAsset } from "./offer-plan.fixture";
+import { offerAnalysis, offerAsset } from "./offer-plan.fixture";
 
 const NOW = Date.parse("2026-09-12T12:00:00.000Z");
 const AT = new Date(NOW).toISOString();
@@ -102,6 +102,23 @@ function first(overrides: Partial<BlendedPolicyInput> = {}) {
   if (!proposal) throw new Error("Expected a proposal");
   return proposal;
 }
+
+it("keeps generated test evidence valid when the clock ticks during response construction", () => {
+  jest.useFakeTimers({ now: NOW });
+  const clock = jest.spyOn(Date, "now").mockReturnValue(NOW + 1);
+  try {
+    expect(
+      first({ analysis: offerAnalysis([price()]), nowMs: NOW + 1 })
+    ).toMatchObject({
+      route: "offer",
+      unitAmountWei: "60",
+      reason: "spread_offer",
+    });
+  } finally {
+    clock.mockRestore();
+    jest.useRealTimers();
+  }
+});
 
 it.each<readonly [BlendTier, string]>([
   ["conservative", "40"],

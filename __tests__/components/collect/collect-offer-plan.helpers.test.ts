@@ -15,6 +15,7 @@ import {
   OFFER_PAYER,
   OFFER_PROFILE,
 } from "./offer-plan.fixture";
+import { MEMELAB_CONTRACT } from "@/constants/constants";
 
 it("keeps 18-decimal prices exact and rejects unsupported input before order construction", () => {
   expect(offerUnitWei("0.000000000000000001")).toBe(1n);
@@ -56,6 +57,14 @@ it("accepts canonical unlisted NFT keys without inventing metadata", () => {
   ]);
   expect(row?.asset).toBeUndefined();
   expect(row && offerQuantity(row)).toBe(2n);
+});
+it("preserves Meme Lab edition quantities with the same per-NFT limit", () => {
+  const row = {
+    assetKey: `1:${MEMELAB_CONTRACT.toLowerCase()}:70`,
+    quantity: "100",
+  };
+  expect(offerQuantity(row)).toBe(100n);
+  expect(offerQuantity({ ...row, quantity: "101" })).toBeNull();
 });
 it("never overwrites a manual pin and clears a previous generated price when a reference disappears", () => {
   const original = initialOfferRows([

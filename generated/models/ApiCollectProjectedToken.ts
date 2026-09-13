@@ -11,12 +11,12 @@
  * Do not edit the class manually.
  */
 
-import { ApiCollectFamily } from '../models/ApiCollectFamily';
+import { ApiCollectPlanningFamily } from '../models/ApiCollectPlanningFamily';
 import { HttpFile } from '../http/http';
 
 export class ApiCollectProjectedToken {
     'asset_key': string;
-    'family': ApiCollectFamily;
+    'family': ApiCollectPlanningFamily;
     'balance': number;
     'raw_days_held': number;
     'hodl_rate': number;
@@ -37,7 +37,7 @@ export class ApiCollectProjectedToken {
         {
             "name": "family",
             "baseName": "family",
-            "type": "ApiCollectFamily",
+            "type": "ApiCollectPlanningFamily",
             "format": ""
         },
         {

@@ -156,9 +156,14 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.moderator.tabs.blockActivityCompact": "Blocks",
   "contentModeration.moderator.blockActivity.blocked": "Blocked",
   "contentModeration.moderator.blockActivity.unblocked": "Unblocked",
-  "contentModeration.moderator.noPower":
-    "WatchTower requires developer access. Use a developer profile and switch out of proxy mode.",
-  "contentModeration.moderator.redirecting": "Redirecting in {seconds}",
+  "contentModeration.moderator.accessRequirement":
+    "WatchTower requires membership in the 6529 Dev Team group.",
+  "contentModeration.moderator.accessRecovery":
+    "Sign in with a wallet linked to your group member profile. Switch out of proxy mode to use your own profile.",
+  "contentModeration.moderator.goHome": "Go home",
+  "contentModeration.moderator.accessError":
+    "Couldn't check your WatchTower access. Try again.",
+  "contentModeration.moderator.retryAccess": "Retry permission check",
   "contentModeration.moderator.openReportsIndicator":
     "Open reports need review",
   "contentModeration.moderator.loadError": "Couldn't load WatchTower.",

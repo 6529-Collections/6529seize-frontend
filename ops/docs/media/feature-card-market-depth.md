@@ -7,7 +7,7 @@ quotes in the **Listings & offers** tab. Opening the tab immediately shows the
 lowest ETH listing, highest WETH offer and quoted levels, without another
 accordion to open. **View listings & offers** beside the artwork's Collect
 action selects that tab and moves focus to its market section.
-Memes, Gradients and Pebbles share the same market controls and trade review
+Memes, Meme Lab, Gradients and Pebbles share the same market controls and trade review
 layout. **View listings & offers** works from the other token views, and
 switching tabs retains a market selection and active review.
 
@@ -54,7 +54,7 @@ levels.
 
 ## Collect a listing or accept an offer
 
-On Memes, Gradients and Pebbles cards, **Collect** appears beside each supported
+On Memes, Meme Lab, Gradients and Pebbles cards, **Collect** appears beside each supported
 listing price and **Sell** beside offer prices. A level with one loaded order
 acts on that exact order directly. When several orders share a price, the action
 opens the orders so you can choose one; it does not silently pick a seller or
@@ -91,7 +91,8 @@ Collection-wide offers and verified trait offers can be accepted for the NFT
 on the current page. The site binds that exact NFT to the signed criteria;
 the displayed row alone is not proof of eligibility. If eligibility cannot be
 verified, the offer remains unavailable instead of selling another NFT.
-Meme Lab prices are informational. Supported order types, connected wallets and
+Meme Lab uses the same purchase, listing and offer controls as Memes, including
+edition quantities and delivery choices. Supported order types, connected wallets and
 current market conditions determine which actions can complete. See
 [Collecting Tools](collecting.md) for wallet support and transaction recovery.
 

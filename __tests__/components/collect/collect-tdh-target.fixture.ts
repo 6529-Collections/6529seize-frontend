@@ -1,4 +1,5 @@
 import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import { ApiCollectPlanningFamily } from "@/generated/models/ApiCollectPlanningFamily";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   ApiCollectTdhTargetPlanStatusEnum,
@@ -42,7 +43,7 @@ export function targetRequest(): ApiCollectTdhTargetRequest {
     target_tdh: "150",
     target_mode: ApiCollectTdhTargetRequestTargetModeEnum.TotalAtDeadline,
     horizon_days: ApiCollectTdhTargetRequestHorizonDaysEnum.NUMBER_30,
-    families: [ApiCollectFamily.Memes],
+    families: [ApiCollectPlanningFamily.Memes],
   };
 }
 export function targetPlan(request = targetRequest()): ApiCollectTdhTargetPlan {

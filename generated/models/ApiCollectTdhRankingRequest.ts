@@ -11,12 +11,12 @@
  * Do not edit the class manually.
  */
 
-import { ApiCollectFamily } from '../models/ApiCollectFamily';
+import { ApiCollectPlanningFamily } from '../models/ApiCollectPlanningFamily';
 import { HttpFile } from '../http/http';
 
 export class ApiCollectTdhRankingRequest {
     'profile_id': string;
-    'family': ApiCollectFamily;
+    'family': ApiCollectPlanningFamily;
     'plan_id'?: string;
     'recipient': string;
     'horizon_days': ApiCollectTdhRankingRequestHorizonDaysEnum;
@@ -35,7 +35,7 @@ export class ApiCollectTdhRankingRequest {
         {
             "name": "family",
             "baseName": "family",
-            "type": "ApiCollectFamily",
+            "type": "ApiCollectPlanningFamily",
             "format": ""
         },
         {

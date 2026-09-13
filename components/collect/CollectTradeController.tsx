@@ -1,5 +1,7 @@
 "use client";
 
+import { isCollectEdition } from "./collect-families";
+
 import {
   fetchRecoverableMarketOperation,
   marketOperationHasUnresolvedSend,
@@ -514,7 +516,8 @@ function CollectTradeControllerContent({
         void prepare(value);
       }}
       onSplitDelivery={
-        asset?.family.toString() === "memes" &&
+        asset &&
+        isCollectEdition(asset.family) &&
         selectedOrder &&
         collectBuyAmount(selectedOrder, draft.quantity) !== null &&
         BigInt(draft.quantity) > 1n

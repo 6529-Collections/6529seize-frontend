@@ -6,14 +6,14 @@ import type { ApiMarketSubmission } from "@/generated/models/ApiMarketSubmission
 import type { ApiMarketSendAttemptRequest } from "@/generated/models/ApiMarketSendAttemptRequest";
 import type { ApiMarketSendAttemptRejection } from "@/generated/models/ApiMarketSendAttemptRejection";
 import type { ApiMarketListings } from "@/generated/models/ApiMarketListings";
-import type { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import type { ApiCollectPlanningFamily } from "@/generated/models/ApiCollectPlanningFamily";
 import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import { commonApiFetch, commonApiPost } from "./common-api";
 
 const operationPath = (id: string) =>
   `market/operations/${encodeURIComponent(id)}`;
 export const fetchMarketListings = (
-  family: ApiCollectFamily,
+  family: ApiCollectPlanningFamily,
   cursor: string | null,
   signal?: AbortSignal
 ) =>

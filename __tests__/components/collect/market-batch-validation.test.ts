@@ -6,12 +6,24 @@ import {
 } from "@/components/collect/market-batch-validation";
 import { batchFixture, PAYER, FREN, NOW, MAKER } from "./market-batch.fixture";
 import { MARKET_ZERO } from "@/components/collect/market-validation";
+import { MEMELAB_CONTRACT } from "@/constants/constants";
 
 function validate(f: ReturnType<typeof batchFixture>) {
   validateMarketBatchOperation(f.operation, f.request, [PAYER], NOW);
 }
 it("accepts exact mixed ERC721 and partial ERC1155 allocations in one native transaction", () =>
   expect(() => validate(batchFixture())).not.toThrow());
+it("accepts partial Meme Lab editions split between the profile and a fren", () => {
+  const f = batchFixture(MEMELAB_CONTRACT.toLowerCase());
+  expect(() => validate(f)).not.toThrow();
+  expect(f.request.items[1]).toMatchObject({ quantity: "2", amount_wei: "40" });
+  f.orders[2]!.parameters.consideration[2]!.recipient = MAKER;
+  f.reencode();
+  expect(() => validate(f)).toThrow("MARKET_REVIEW_MISMATCH");
+});
+it("still rejects an unrecognized edition contract with internally consistent batch hashes", () => {
+  expect(() => validate(batchFixture(MAKER))).toThrow("MARKET_REVIEW_MISMATCH");
+});
 it.each([0, NOW - 1])(
   "binds old review deadline %s solely for refresh while execution still rejects it",
   (expiresAt) => {

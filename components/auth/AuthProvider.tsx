@@ -44,7 +44,11 @@ import {
 import { AuthSignModal } from "./AuthSignModal";
 import { createAuthRequestActions } from "./authActions";
 import { AuthContext } from "./authContext";
-import { getAuthSessionRole } from "./auth-session-scope";
+import {
+  getAuthSessionRole,
+  isDirectProfileAuthSession,
+  resolveActiveProfileProxy,
+} from "./auth-session-scope";
 import { useAuthImpactTracking } from "./auth-impact-tracking";
 import { navigateAfterProfileSwitch } from "./authProfileNavigation";
 import { isProfileForAddress } from "./authProfileUtils";
@@ -244,8 +248,11 @@ export default function Auth({
   const [activeProfileProxy, setActiveProfileProxy] =
     useState<ApiProfileProxy | null>(null);
   const authRole = getAuthSessionRole();
-  const isDirectProfileSession =
-    authRole === null && activeProfileProxy === null;
+  const isDirectProfileSession = isDirectProfileAuthSession({
+    authRole,
+    profileId: connectedProfile?.id,
+    hasActiveProxy: activeProfileProxy !== null,
+  });
   useContentModerationStateScope(
     connectedProfile?.id,
     activeProfileProxy?.id,
@@ -253,20 +260,11 @@ export default function Auth({
   );
 
   useEffect(() => {
-    if (!address) {
-      setActiveProfileProxy(null);
-      return;
-    }
-
-    if (!authRole) {
-      setActiveProfileProxy(null);
-      return;
-    }
-
-    const activeProxy = receivedProfileProxies?.find(
-      (proxy) => proxy.created_by.id === authRole
-    );
-
+    const activeProxy = resolveActiveProfileProxy({
+      address,
+      authRole,
+      receivedProfileProxies,
+    });
     setActiveProfileProxy(activeProxy ?? null);
   }, [address, authRole, receivedProfileProxies]);
 

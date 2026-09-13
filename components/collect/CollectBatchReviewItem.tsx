@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
-import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import { isCollectEdition } from "./collect-families";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDecimalString } from "@/i18n/format";
@@ -48,9 +48,7 @@ export default function CollectBatchReviewItem({
   const amount = collectBuyAmount(item.order, item.quantity);
   const copies = collectAllocationQuantity(item.quantity);
   const canSplit =
-    item.asset.family === ApiCollectFamily.Memes &&
-    copies !== null &&
-    copies > 1n;
+    isCollectEdition(item.asset.family) && copies !== null && copies > 1n;
   const donor = allocations.findIndex((allocation) => {
     const quantity = collectAllocationQuantity(allocation.quantity);
     return quantity !== null && quantity > 1n;

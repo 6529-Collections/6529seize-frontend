@@ -10,6 +10,7 @@ import { t } from "@/i18n/messages";
 import { formatDecimalString, formatNumber } from "@/i18n/format";
 import {
   MEMES_CONTRACT,
+  MEMELAB_CONTRACT,
   GRADIENT_CONTRACT,
   NEXTGEN_CONTRACT,
 } from "@/constants/constants";
@@ -23,6 +24,7 @@ import type {
 export function collectAssetHref(asset: ApiCollectAsset): string {
   const token = encodeURIComponent(asset.token_id);
   if (asset.family === ApiCollectFamily.Memes) return `/the-memes/${token}`;
+  if (asset.family === ApiCollectFamily.Memelab) return `/meme-lab/${token}`;
   if (asset.family === ApiCollectFamily.Gradients)
     return `/6529-gradient/${token}`;
   return `/nextgen/token/${token}`;
@@ -41,6 +43,7 @@ export function collectAssetIdentity(
     return null;
   const families: Readonly<Record<string, ApiCollectFamily>> = {
     [MEMES_CONTRACT.toLowerCase()]: ApiCollectFamily.Memes,
+    [MEMELAB_CONTRACT.toLowerCase()]: ApiCollectFamily.Memelab,
     [GRADIENT_CONTRACT.toLowerCase()]: ApiCollectFamily.Gradients,
     [NEXTGEN_CONTRACT.toLowerCase()]: ApiCollectFamily.Pebbles,
   };
