@@ -13,6 +13,19 @@ import { formatSessionUpgradeTimeLeft } from "./authSessionUpgrade";
 import styles from "./Auth.module.css";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
 
+const SIGN_IN_CLASSES = {
+  signModalSurface:
+    "tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-shadow-2xl",
+  signModalHeader:
+    "tw-flex tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-pb-0 tw-pt-5",
+  signModalTitle:
+    "tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-text-iron-50",
+  signModalBody: "tw-px-5 tw-pb-5 tw-pt-3",
+  signModalLead: "tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300",
+  signModalFooter:
+    "tw-flex tw-flex-wrap tw-justify-end tw-gap-3 tw-px-5 tw-pb-5",
+};
+
 function closeDialog(dialog: HTMLDialogElement) {
   if (typeof dialog.close === "function" && dialog.open) {
     dialog.close();
@@ -54,6 +67,7 @@ export function AuthSignModal({
   readonly shouldShowSignModal: boolean;
 }) {
   const locale = useBrowserLocale();
+  const modalStyles = isSessionUpgradePrompt ? styles : SIGN_IN_CLASSES;
   const { address } = useSeizeConnectContext();
   const sessionUpgradeTimeLeftText = useMemo(
     () => formatSessionUpgradeTimeLeft(sessionUpgradeTimeLeftMs, locale),
@@ -180,28 +194,9 @@ export function AuthSignModal({
       }}
       tabIndex={-1}
     >
-      <div
-        className={
-          isSessionUpgradePrompt
-            ? styles["signModalSurface"]
-            : "tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-shadow-2xl"
-        }
-      >
-        <div
-          className={
-            isSessionUpgradePrompt
-              ? styles["signModalHeader"]
-              : "tw-flex tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-pb-0 tw-pt-5"
-          }
-        >
-          <h2
-            id={signModalTitleId}
-            className={
-              isSessionUpgradePrompt
-                ? styles["signModalTitle"]
-                : "tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-text-iron-50"
-            }
-          >
+      <div className={modalStyles["signModalSurface"]}>
+        <div className={modalStyles["signModalHeader"]}>
+          <h2 id={signModalTitleId} className={modalStyles["signModalTitle"]}>
             {signModalTitle}
           </h2>
           {!isSessionUpgradePrompt && !isSignRequestInProgress && (
@@ -216,20 +211,10 @@ export function AuthSignModal({
             </Button>
           )}
         </div>
-        <div
-          className={
-            isSessionUpgradePrompt
-              ? styles["signModalBody"]
-              : "tw-px-5 tw-pb-5 tw-pt-3"
-          }
-        >
+        <div className={modalStyles["signModalBody"]}>
           <p
             id={signModalDescriptionId}
-            className={
-              isSessionUpgradePrompt
-                ? styles["signModalLead"]
-                : "tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300"
-            }
+            className={modalStyles["signModalLead"]}
           >
             {signModalLead}
           </p>
@@ -276,13 +261,7 @@ export function AuthSignModal({
             </p>
           )}
         </div>
-        <div
-          className={
-            isSessionUpgradePrompt
-              ? styles["signModalFooter"]
-              : "tw-flex tw-flex-wrap tw-justify-end tw-gap-3 tw-px-5 tw-pb-5"
-          }
-        >
+        <div className={modalStyles["signModalFooter"]}>
           {!isSignRequestInProgress &&
             (!isSessionUpgradePrompt || sessionUpgradeCanDismiss) && (
               <Button
@@ -297,11 +276,11 @@ export function AuthSignModal({
                   : t(locale, "auth.signModal.cancel")}
               </Button>
             )}
-          <span role="status" className="tw-sr-only">
+          <output className="tw-sr-only">
             {isSigningPending
               ? t(locale, "auth.signModal.confirmInWallet")
               : ""}
-          </span>
+          </output>
           {!isConnectionShareUpgradePrompt && (
             <Button
               type="button"

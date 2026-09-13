@@ -87,7 +87,7 @@ function getChatMessage(
 ): ReactNode {
   switch (restriction) {
     case ChatRestriction.NOT_LOGGED_IN:
-      return "Please log in to participate in chat";
+      return null;
     case ChatRestriction.NEEDS_PROFILE:
       return getProfileSetupMessage(profileSetupHref, "to participate in chat");
     case ChatRestriction.PROXY_USER:
@@ -109,7 +109,7 @@ function getSubmissionMessage(
 ): ReactNode {
   switch (restriction) {
     case SubmissionRestriction.NOT_LOGGED_IN:
-      return "Please log in to make submissions";
+      return null;
     case SubmissionRestriction.NEEDS_PROFILE:
       return getProfileSetupMessage(profileSetupHref, "to submit in this wave");
     case SubmissionRestriction.PROXY_USER:
