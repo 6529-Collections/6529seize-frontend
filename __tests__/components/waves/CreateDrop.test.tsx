@@ -299,19 +299,15 @@ describe("CreateDrop", () => {
       <AuthContext.Provider
         value={{ setToast } as React.ContextType<typeof AuthContext>}
       >
-        <ReactQueryWrapperContext.Provider
-          value={{ waitAndInvalidateDrops: jest.fn() }}
-        >
-          <CreateDrop
-            activeDrop={null}
-            onCancelReplyQuote={() => {}}
-            onDropAddedToQueue={jest.fn()}
-            wave={wave}
-            dropId={null}
-            fixedDropMode={DropMode.CHAT}
-            privileges={{ chatRestriction: null, submissionRestriction: null }}
-          />
-        </ReactQueryWrapperContext.Provider>
+        <CreateDrop
+          activeDrop={null}
+          onCancelReplyQuote={() => {}}
+          onDropAddedToQueue={jest.fn()}
+          wave={wave}
+          dropId={null}
+          fixedDropMode={DropMode.CHAT}
+          privileges={{ chatRestriction: null, submissionRestriction: null }}
+        />
       </AuthContext.Provider>
     );
     await userEvent.click(screen.getByText("submit current mode"));
