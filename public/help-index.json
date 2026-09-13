@@ -8098,7 +8098,6 @@
         "components/collect/useMarketExecution.ts",
         "components/collect/CollectOfferWorkspace.tsx",
         "components/collect/CollectTdhWorkspace.tsx",
-        "components/collect/CollectBatchQuoteReview.tsx",
         "components/collect/useCollectBatchRecipientUpdate.ts"
       ]
     },

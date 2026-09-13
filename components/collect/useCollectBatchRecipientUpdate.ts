@@ -8,13 +8,14 @@ import {
   fetchMarketBatch,
   prepareMarketBatch,
 } from "@/services/api/market-batch-api";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { getAddress, isAddress, zeroAddress } from "viem";
 import {
   collectProfileWallets,
   isCollectProfileWallet,
 } from "./collect-recipient.helpers";
 import { withMarketOperationLock } from "./market-operation-lock";
+import { useCollectRecipientScope } from "./useCollectRecipientScope";
 import { readMarketBatch, saveMarketBatch } from "./market-batch-storage";
 import { marketBatchProfileLock } from "./market-batch-resume";
 import { batchSendAttempt } from "./market-batch-send";
@@ -160,25 +161,6 @@ function persistBatchReview(
     throw new Error("MARKET_RECOVERY_STORAGE_UNAVAILABLE");
 }
 
-function recipientScopes(options: BatchRecipientUpdateOptions) {
-  const membership = collectProfileWallets(options.profile)
-    .map((item) => item.wallet.toLowerCase())
-    .sort((a, b) => a.localeCompare(b));
-  const idleIdentity = JSON.stringify({
-    id: options.operation?.id,
-    expected: options.expected,
-    profile: options.profile?.id,
-    membership,
-    wallet: options.wallet?.toLowerCase(),
-  });
-  const updateIdentity = JSON.stringify({
-    idleIdentity,
-    operation: options.operation,
-    enabled: options.enabled,
-  });
-  return { idleIdentity, updateIdentity };
-}
-
 /** Reprepare one allocation of an exact, unsigned batch purchase; never alter an operation's recovery journal. */
 export function useCollectBatchRecipientUpdate(
   options: BatchRecipientUpdateOptions
@@ -190,43 +172,8 @@ export function useCollectBatchRecipientUpdate(
     request: ApiMarketBatchPrepareRequest;
     key: string;
   } | null>(null);
-  const { idleIdentity, updateIdentity } = recipientScopes(options);
-  const idleGeneration = useMemo(
-    () => ({ identity: idleIdentity }),
-    [idleIdentity]
-  );
-  const updateGeneration = useMemo(
-    () => ({ identity: updateIdentity }),
-    [updateIdentity]
-  );
-  const live = useRef<{
-    idle: object;
-    update: object;
-    options: BatchRecipientUpdateOptions;
-  } | null>(null);
-  useLayoutEffect(() => {
-    live.current = { idle: idleGeneration, update: updateGeneration, options };
-    return () => {
-      live.current = null;
-    };
-  }, [idleGeneration, updateGeneration, options]);
-
-  const assertIdle = () => {
-    if (
-      live.current?.idle !== idleGeneration ||
-      !boundActor(live.current.options) ||
-      pendingAttempt.current
-    )
-      throw new Error("MARKET_CONNECTION_CHANGED");
-  };
-  const assertUpdate = () => {
-    if (
-      live.current?.update !== updateGeneration ||
-      !live.current.options.enabled ||
-      !boundActor(live.current.options)
-    )
-      throw new Error("MARKET_CONNECTION_CHANGED");
-  };
+  const { live, updateGeneration, assertIdle, assertUpdate } =
+    useCollectRecipientScope(options, boundActor, pendingAttempt);
   const canEdit =
     options.enabled &&
     boundActor(options) &&
@@ -313,9 +260,9 @@ export function useCollectBatchRecipientUpdate(
             });
           })
       );
-    } catch (failure) {
+    } catch (error_) {
       if (live.current?.update === updateGeneration)
-        live.current.options.onError(failure);
+        live.current.options.onError(error_);
       return false;
     } finally {
       if (pendingAttempt.current === attempt) {

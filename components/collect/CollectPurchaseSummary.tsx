@@ -93,11 +93,18 @@ export default function CollectPurchaseSummary({
           />
         )}
       </div>
-      {!purchase.recipientInProfile && (
-        <p role="status" className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-          {t(locale, "collect.review.giftOutcome")}
-        </p>
-      )}
+      <output
+        aria-live="polite"
+        className={
+          purchase.recipientInProfile
+            ? "tw-sr-only"
+            : "tw-m-0 tw-block tw-text-xs tw-leading-5 tw-text-iron-400"
+        }
+      >
+        {purchase.recipientInProfile
+          ? ""
+          : t(locale, "collect.review.giftOutcome")}
+      </output>
       <div className="tw-space-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-4">
         {maximum !== null && (
           <dl className="tw-m-0">
