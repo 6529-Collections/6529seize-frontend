@@ -76,14 +76,25 @@ export default function DocumentationReview({
   const [preview, setPreview] = useState(false);
   const actionRunning = useRef(false);
   const [confirmationState, setConfirmationState] = useState<
-    "idle" | "confirming" | "unverified" | "checking" | "unconfirmed"
+    | "idle"
+    | "confirming"
+    | "unverified"
+    | "checking"
+    | "unconfirmed"
+    | "needs_readback"
   >(() => {
     const snapshot = controller.snapshot();
+    if (
+      snapshot.context.confirmation_status ===
+        ApiArtworkDocumentationContextConfirmationStatusEnum.Current &&
+      snapshot.context.latest_revision_id
+    )
+      return "idle";
     return !snapshot.dirty &&
       ["invalid", "offline", "auth_expired", "conflict"].includes(
         snapshot.state
       )
-      ? "unverified"
+      ? "needs_readback"
       : "idle";
   });
   const busy =
@@ -163,7 +174,7 @@ export default function DocumentationReview({
     actionRunning.current = true;
     try {
       setConfirmationState("confirming");
-      let submitted = false;
+      const submission = { attempted: false };
       const success = await controller.mutate(async (current, signal) => {
         // A queued save may finish after the click. Never attest to an unseen version.
         if (
@@ -171,7 +182,7 @@ export default function DocumentationReview({
           controller.snapshot().dirty
         )
           return current;
-        submitted = true;
+        submission.attempted = true;
         await confirmDocumentation(current, key.current.value, signal);
         return getDocumentationContext(current.id, signal);
       });
@@ -182,7 +193,9 @@ export default function DocumentationReview({
         saved.confirmation_status ===
           ApiArtworkDocumentationContextConfirmationStatusEnum.Current &&
         !!saved.latest_revision_id;
-      setConfirmationState(submitted && !verified ? "unverified" : "idle");
+      setConfirmationState(
+        submission.attempted && !verified ? "unverified" : "idle"
+      );
       if (verified) void revisions.refetch();
     } finally {
       actionRunning.current = false;
@@ -192,6 +205,7 @@ export default function DocumentationReview({
     if (actionRunning.current || controller.snapshot().state === "conflict")
       return;
     actionRunning.current = true;
+    const uncertainConfirmation = confirmationState === "unverified";
     setAcknowledgedVersion(null);
     setConfirmationState("checking");
     let verified = false;
@@ -213,15 +227,17 @@ export default function DocumentationReview({
     } finally {
       actionRunning.current = false;
       const saved = controller.snapshot().context;
-      setConfirmationState(
-        !verified
-          ? "unverified"
-          : saved.confirmation_status ===
-                ApiArtworkDocumentationContextConfirmationStatusEnum.Current &&
-              saved.latest_revision_id
-            ? "idle"
-            : "unconfirmed"
-      );
+      if (!verified)
+        setConfirmationState(
+          uncertainConfirmation ? "unverified" : "needs_readback"
+        );
+      else if (
+        saved.confirmation_status ===
+          ApiArtworkDocumentationContextConfirmationStatusEnum.Current &&
+        saved.latest_revision_id
+      )
+        setConfirmationState("idle");
+      else setConfirmationState("unconfirmed");
     }
   };
   const navigateMissing = (path: string) => {
@@ -280,7 +296,7 @@ export default function DocumentationReview({
             <h3 className="tw-m-0 tw-font-serif tw-text-3xl tw-font-normal">
               {msg("confirm")}
             </h3>
-            {confirmed && (
+            {confirmed && context.latest_revision_id && (
               <DocumentationNotice>
                 <p className="tw-m-0">{msg("confirmation.recorded")}</p>
                 <Link
@@ -303,7 +319,7 @@ export default function DocumentationReview({
                 )}
               </p>
             )}
-            {confirmationState === "unconfirmed" && (
+            {!confirmed && confirmationState === "unconfirmed" && (
               <p
                 role="status"
                 className="tw-text-sm tw-leading-7 tw-text-iron-300"
@@ -311,7 +327,17 @@ export default function DocumentationReview({
                 {msg("confirmation.notRecorded")}
               </p>
             )}
-            {confirmationState === "unverified" && (
+            {!confirmed &&
+              confirmationState === "needs_readback" &&
+              saveState === "clean" && (
+                <p
+                  role="status"
+                  className="tw-text-sm tw-leading-7 tw-text-iron-300"
+                >
+                  {msg("save.actionUnverified")}
+                </p>
+              )}
+            {!confirmed && confirmationState === "unverified" && (
               <DocumentationNotice error>
                 <p className="tw-m-0">{msg("confirmation.unverified")}</p>
               </DocumentationNotice>
@@ -324,18 +350,20 @@ export default function DocumentationReview({
                 onNavigateField={onNavigateField}
               />
             )}
-            {(confirmationState === "unverified" ||
-              confirmationState === "checking") && (
-              <DocumentationButton
-                secondary
-                disabled={busy || saveState === "conflict"}
-                onClick={() => {
-                  void checkConfirmation();
-                }}
-              >
-                {msg("confirmation.check")}
-              </DocumentationButton>
-            )}
+            {!confirmed &&
+              (confirmationState === "unverified" ||
+                confirmationState === "needs_readback" ||
+                confirmationState === "checking") && (
+                <DocumentationButton
+                  secondary
+                  disabled={busy || saveState === "conflict"}
+                  onClick={() => {
+                    void checkConfirmation();
+                  }}
+                >
+                  {msg("confirmation.check")}
+                </DocumentationButton>
+              )}
             {needsFreshReview && !confirmed && (
               <p
                 role="status"

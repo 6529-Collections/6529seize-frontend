@@ -109,16 +109,17 @@ export default function DocumentationSaveStatus({
                 edit.moduleId,
                 edit.operation
               );
-              const guidance =
-                edit.moduleId === "rights" &&
-                edit.operation.field === "intended_license"
-                  ? "save.licenseGuidance"
-                  : edit.moduleId === "rights" &&
-                      ["rights_basis", "third_party_material"].includes(
-                        edit.operation.field
-                      )
-                    ? "save.rightsGuidance"
-                    : "save.answerGuidance";
+              let guidance = "save.answerGuidance";
+              if (edit.moduleId === "rights") {
+                if (edit.operation.field === "intended_license")
+                  guidance = "save.licenseGuidance";
+                else if (
+                  ["rights_basis", "third_party_material"].includes(
+                    edit.operation.field
+                  )
+                )
+                  guidance = "save.rightsGuidance";
+              }
               return (
                 <li key={`${edit.moduleId}.${edit.operation.field}`}>
                   {onNavigateSection && fieldModule ? (

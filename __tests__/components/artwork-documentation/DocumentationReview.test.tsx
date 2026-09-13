@@ -573,7 +573,7 @@ describe("artist confirmation recovery", () => {
     controller.dispose();
     client.clear();
   });
-  it("requires readback when returning to review after a rejected action", async () => {
+  it("uses neutral readback recovery after an unknown rejected action", async () => {
     const context = documentationFixture();
     const controller = new DocumentationDraftController(
       context,
@@ -595,13 +595,17 @@ describe("artist confirmation recovery", () => {
       </QueryClientProvider>
     );
     const rendered = render(view("invalid"));
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "We could not verify your confirmation"
-    );
+    expect(
+      screen.getByText(/The last action could not be verified/)
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     await act(async () => {
       await controller.retry();
     });
     rendered.rerender(view("clean"));
+    expect(
+      screen.getByText(/The last action could not be verified/)
+    ).toBeInTheDocument();
     expect(screen.getByRole("checkbox")).toBeDisabled();
     expect(
       screen.getByRole("button", { name: "Check confirmation status" })
@@ -609,5 +613,118 @@ describe("artist confirmation recovery", () => {
     expect(confirmDocumentation).not.toHaveBeenCalled();
     controller.dispose();
     client.clear();
+  });
+
+  it("keeps a recorded confirmation authoritative after another mutation fails", async () => {
+    const context = recordedContext(documentationFixture());
+    const controller = new DocumentationDraftController(
+      context,
+      { read: jest.fn(), save: jest.fn() },
+      jest.fn()
+    );
+    await controller.mutate(async () => {
+      throw { status: 422 };
+    });
+    const client = new QueryClient();
+    render(
+      <QueryClientProvider client={client}>
+        <DocumentationReview
+          context={context}
+          controller={controller}
+          saveState="invalid"
+          onNavigateSection={jest.fn()}
+        />
+      </QueryClientProvider>
+    );
+    expect(
+      screen.getByText(/Your confirmation is recorded for this saved version/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/The last action could not be verified/)
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Check confirmation status" })
+    ).not.toBeInTheDocument();
+    expect(confirmDocumentation).not.toHaveBeenCalled();
+    controller.dispose();
+    client.clear();
+  });
+
+  it("keeps failed readback neutral when no confirmation was attempted", async () => {
+    const context = documentationFixture();
+    const controller = new DocumentationDraftController(
+      context,
+      { read: jest.fn(), save: jest.fn() },
+      jest.fn()
+    );
+    await controller.mutate(async () => {
+      throw { status: 422 };
+    });
+    jest
+      .mocked(getDocumentationContext)
+      .mockRejectedValue(new Error("offline"));
+    const client = new QueryClient();
+    render(
+      <QueryClientProvider client={client}>
+        <DocumentationReview
+          context={context}
+          controller={controller}
+          saveState="invalid"
+          onNavigateSection={jest.fn()}
+        />
+      </QueryClientProvider>
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Check confirmation status" })
+    );
+    await waitFor(() =>
+      expect(getDocumentationContext).toHaveBeenCalledTimes(1)
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Checking your saved confirmation…")
+      ).not.toBeInTheDocument()
+    );
+    expect(
+      screen.getByText(/The last action could not be verified/)
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByRole("checkbox")).toBeDisabled();
+    expect(confirmDocumentation).not.toHaveBeenCalled();
+    controller.dispose();
+    client.clear();
+  });
+
+  it("replaces an uncertain confirmation notice when conflict recovery reads the confirmed version", async () => {
+    const context = documentationFixture();
+    jest.mocked(confirmDocumentation).mockRejectedValueOnce({ status: 409 });
+    jest
+      .mocked(getDocumentationContext)
+      .mockResolvedValue(recordedContext(context));
+    const view = renderLiveReview(context);
+    clickConfirm();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "We could not verify your confirmation"
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Use latest saved version" })
+    );
+    expect(
+      await screen.findByText(
+        /Your confirmation is recorded for this saved version/
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/This saved version has no recorded confirmation/)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Check confirmation status" })
+    ).not.toBeInTheDocument();
+    expect(confirmDocumentation).toHaveBeenCalledTimes(1);
+    view.unmount();
+    view.client.clear();
   });
 });
