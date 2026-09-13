@@ -45,8 +45,14 @@ The Listings and Offers record distinguishes direct **Collect** and **Sell**
 actions for one order from the explicit choice among multiple orders at a price.
 The Collect navigation label opens the set planner. Individual purchase facts
 describe separate Pay with and Deliver to rows, expandable full wallet addresses,
-included order fees, network fee caps and conditional maximum totals. Price
-breakdown, nested Exact amounts and Contract details preserve precise amounts,
+and editing delivery from the expanded Deliver to row on single-artwork purchases.
+Send to me offers confirmed profile wallets; Send to a fren supports a profile,
+ENS name or wallet address. Use this address applies the selected destination to
+a fresh review, Cancel retains the current one, and an external address requires
+confirmation. Delivery editing is unavailable during a wallet transaction or
+outcome recovery. Purchase facts also describe included order fees, network fee
+caps and conditional maximum totals. Price breakdown, nested Exact amounts and
+Contract details preserve precise amounts,
 permissions and named Ethereum contract identities. Continue in wallet checks
 current terms and refreshes quotes when needed for purchases, listings, offers,
 sales and cancellations, including supported multiple-item purchases. Changed

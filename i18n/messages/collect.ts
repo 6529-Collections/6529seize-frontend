@@ -750,6 +750,10 @@ export const COLLECT_MESSAGES = {
     "Your profile’s confirmed wallets are not available. You can enter a receiving address with Send to a fren.",
   "collect.recipient.search": "Find a profile, ENS or wallet",
   "collect.recipient.direct": "Or enter a wallet address directly",
+  "collect.recipient.apply": "Use this address",
+  "collect.recipient.applying": "Updating delivery…",
+  "collect.recipient.cancel": "Cancel",
+  "collect.recipient.updateFailed": "Delivery could not be updated. Try again.",
   "collect.recipient.inProfile":
     "Delivery to this profile. Your payer can be a different wallet.",
   "collect.recipient.external":

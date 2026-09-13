@@ -114,6 +114,18 @@ wallet name or an abbreviated address identifies each wallet. Click or tap its
 row to reveal the full checksummed address and copy control. Check the destination
 address before continuing, especially for a wallet outside your profile.
 
+On a Memes, Gradient or NextGen artwork purchase, expanding **Deliver to** also
+lets you choose a different destination. **Send to me** shows your profile's
+confirmed wallets. **Send to a fren** lets you search a profile or ENS name, or
+enter a wallet address. Choose the receiving wallet and check its full resolved
+address. Confirm an address outside your profile before applying it.
+
+**Use this address** applies the destination and prepares a fresh purchase review;
+it does not sign or send a transaction. Review the updated address and terms
+before choosing **Continue in wallet**. **Cancel** keeps the current destination.
+Delivery changes are unavailable while a wallet transaction or outcome recovery
+is in progress.
+
 **Purchase price** includes the signed order fees. **Network fee cap** covers
 the quoted purchase transaction and any required approvals. For an ETH purchase
 with complete fee caps, **Maximum total** adds the price and those caps. Summary

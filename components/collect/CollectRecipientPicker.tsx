@@ -7,6 +7,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { CheckIcon } from "@heroicons/react/24/outline";
 import { useMemo, useState } from "react";
 import { getAddress, isAddress } from "viem";
 import { COLLECT_INPUT_CLASS } from "./CollectGoalForm";
@@ -39,6 +40,7 @@ export default function CollectRecipientPicker({
   invalid,
   errorId,
   onChange,
+  compact = false,
 }: {
   readonly profile: ApiIdentity | null;
   readonly payingWallet?: string;
@@ -46,6 +48,7 @@ export default function CollectRecipientPicker({
   readonly invalid: boolean;
   readonly errorId: string;
   readonly onChange: (address: string) => void;
+  readonly compact?: boolean;
 }) {
   const locale = useBrowserLocale();
   const [otherProfile, setOtherProfile] =
@@ -85,19 +88,21 @@ export default function CollectRecipientPicker({
   };
   return (
     <div className="tw-space-y-3">
-      <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
-        {t(locale, "collect.trade.recipient")}
-      </p>
+      {!compact && (
+        <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
+          {t(locale, "collect.trade.recipient")}
+        </p>
+      )}
       <div
         role="group"
         aria-label={t(locale, "collect.recipient.mode")}
-        className={`tw-grid tw-gap-0 ${profile ? "tw-grid-cols-2" : "tw-grid-cols-1"}`}
+        className={`tw-grid ${compact ? "tw-gap-2" : "tw-gap-0"} ${profile ? "tw-grid-cols-2" : "tw-grid-cols-1"}`}
       >
         {profile && (
           <Button
-            variant={mode === "profile" ? "primary" : "secondary"}
+            variant={!compact && mode === "profile" ? "primary" : "secondary"}
             size="sm"
-            className="tw-min-h-11 tw-w-full tw-rounded-md tw-font-normal"
+            className={`tw-min-h-11 tw-w-full tw-rounded-md tw-font-normal ${compact ? "!tw-border-white/10 !tw-bg-transparent !tw-px-2 !tw-text-[13px] aria-pressed:!tw-bg-white/[0.06] aria-pressed:!tw-text-white" : ""}`}
             aria-pressed={mode === "profile"}
             onClick={() => changeMode("profile")}
           >
@@ -105,9 +110,9 @@ export default function CollectRecipientPicker({
           </Button>
         )}
         <Button
-          variant={mode === "other" ? "primary" : "secondary"}
+          variant={!compact && mode === "other" ? "primary" : "secondary"}
           size="sm"
-          className="tw-min-h-11 tw-w-full tw-rounded-md tw-font-normal"
+          className={`tw-min-h-11 tw-w-full tw-rounded-md tw-font-normal ${compact ? "!tw-border-white/10 !tw-bg-transparent !tw-px-2 !tw-text-[13px] aria-pressed:!tw-bg-white/[0.06] aria-pressed:!tw-text-white" : ""}`}
           aria-pressed={mode === "other"}
           onClick={() => changeMode("other")}
         >
@@ -121,7 +126,48 @@ export default function CollectRecipientPicker({
           aria-describedby={invalid ? errorId : undefined}
           className="tw-pb-1 tw-pt-2"
         >
-          {ownIdentity.wallets.length > 0 ? (
+          {compact && ownIdentity.wallets.length > 0 && (
+            <div className="tw-space-y-1">
+              {ownIdentity.wallets.map((wallet) => {
+                const selected = areEqualAddresses(wallet.wallet, value);
+                const display = wallet.display.trim();
+                return (
+                  <button
+                    key={wallet.wallet}
+                    type="button"
+                    aria-pressed={selected}
+                    aria-label={
+                      display ? `${display} ${wallet.wallet}` : wallet.wallet
+                    }
+                    onClick={() => onChange(wallet.wallet)}
+                    className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-left aria-pressed:tw-bg-white/[0.04] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/[0.04]"
+                  >
+                    <span className="tw-min-w-0 tw-flex-1">
+                      {display && !isAddress(display, { strict: false }) && (
+                        <bdi className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100 [overflow-wrap:anywhere]">
+                          {display}
+                        </bdi>
+                      )}
+                      <code
+                        aria-hidden="true"
+                        dir="ltr"
+                        className="tw-block tw-break-all tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-400"
+                      >
+                        {`${wallet.wallet.slice(0, 6)}…${wallet.wallet.slice(-4)}`}
+                      </code>
+                    </span>
+                    {selected && (
+                      <CheckIcon
+                        aria-hidden="true"
+                        className="tw-size-4 tw-shrink-0 tw-text-iron-200"
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {!compact && ownIdentity.wallets.length > 0 && (
             <RecipientSelector
               open
               selectedProfile={ownProfile}
@@ -135,7 +181,8 @@ export default function CollectRecipientPicker({
               showSelectedProfileCard={false}
               locale={locale}
             />
-          ) : (
+          )}
+          {ownIdentity.wallets.length === 0 && (
             <p role="status" className="tw-m-0 tw-text-xs tw-text-iron-400">
               {t(locale, "collect.recipient.walletsUnavailable")}
             </p>
@@ -143,7 +190,31 @@ export default function CollectRecipientPicker({
         </div>
       )}
       {mode === "other" && (
-        <>
+        <div
+          className={
+            compact
+              ? "tw-min-w-0 tw-space-y-3 [overflow-wrap:anywhere] [&_.tw-font-bold]:!tw-font-normal [&_.tw-tracking-wider]:tw-tracking-normal [&_.tw-uppercase]:tw-normal-case [&_button>div]:tw-max-w-full [&_button>div]:!tw-font-normal [&_button]:tw-min-h-11 [&_button]:tw-min-w-0 [&_button]:tw-rounded-lg [&_button]:tw-text-left [&_input]:tw-rounded-lg"
+              : "tw-space-y-3"
+          }
+        >
+          {compact && otherProfile && (
+            <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
+              <bdi className="tw-min-w-0 tw-flex-1 tw-text-sm tw-font-normal tw-text-iron-200">
+                {otherProfile.handle ?? otherProfile.display}
+              </bdi>
+              <button
+                type="button"
+                onClick={() => {
+                  setOtherProfile(null);
+                  setSearchRevision((revision) => revision + 1);
+                  onChange("");
+                }}
+                className="tw-shrink-0 tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              >
+                {t(locale, "collect.buy.changeDelivery")}
+              </button>
+            </div>
+          )}
           <RecipientSelector
             key={searchRevision}
             open
@@ -158,6 +229,8 @@ export default function CollectRecipientPicker({
               onChange(wallet && isAddress(wallet) ? getAddress(wallet) : "")
             }
             label={t(locale, "collect.recipient.search")}
+            {...(compact ? { onSearchChange: () => onChange("") } : {})}
+            showSelectedProfileCard={!compact}
             locale={locale}
           />
           <label className="tw-block tw-space-y-2 tw-text-xs tw-text-iron-300">
@@ -177,9 +250,9 @@ export default function CollectRecipientPicker({
               className={`${COLLECT_INPUT_CLASS} tw-font-mono tw-text-xs`}
             />
           </label>
-        </>
+        </div>
       )}
-      {isAddress(value) && (
+      {!compact && isAddress(value) && (
         <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-3">
           <p className="tw-m-0 tw-break-all tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-200">
             {getAddress(value)}

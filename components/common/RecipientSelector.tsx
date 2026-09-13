@@ -256,6 +256,7 @@ function RecipientSearchDisplay({
   searchInputRef,
   placeholder,
   autoFocus,
+  label,
   locale,
 }: {
   readonly query: string;
@@ -269,6 +270,7 @@ function RecipientSearchDisplay({
   readonly searchInputRef: React.RefObject<HTMLInputElement | null>;
   readonly placeholder?: string;
   readonly autoFocus: boolean;
+  readonly label: string;
   readonly locale: SupportedLocale;
 }) {
   return (
@@ -277,6 +279,7 @@ function RecipientSearchDisplay({
         <input
           autoFocus={autoFocus}
           type="text"
+          aria-label={label}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={
@@ -331,6 +334,7 @@ function RecipientSearchDisplay({
 }
 
 interface RecipientSelectorProps {
+  readonly onSearchChange?: (query: string) => void;
   readonly open: boolean;
   readonly selectedProfile: CommunityMemberMinimal | null;
   /** Confirmed identity for the selected profile, supplied by its owning flow. */
@@ -356,6 +360,7 @@ export default function RecipientSelector({
   selectedWallet,
   onProfileSelect,
   onWalletSelect,
+  onSearchChange,
   placeholder,
   showLabel = true,
   label,
@@ -643,8 +648,12 @@ export default function RecipientSelector({
       ) : (
         <RecipientSearchDisplay
           autoFocus={autoFocusSearch}
+          label={label ?? translate(locale, "recipientSelector.label")}
           query={query}
-          setQuery={setQuery}
+          setQuery={(nextQuery) => {
+            setQuery(nextQuery);
+            onSearchChange?.(nextQuery);
+          }}
           searchStatusText={searchStatusText}
           results={results}
           onPick={(r) => {

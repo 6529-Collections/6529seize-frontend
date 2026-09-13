@@ -4,9 +4,11 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useRef, useState, type ReactNode } from "react";
 import CollectPurchaseSummary from "./CollectPurchaseSummary";
 import CollectOrderSummary from "./CollectOrderSummary";
+import CollectReviewRecipient from "./CollectReviewRecipient";
 import styles from "./marketplace-font.module.css";
 import type {
   CollectReviewFact,
@@ -28,6 +30,17 @@ interface CollectTradeSheetProps {
   readonly onConfirm: (reviewId: string, revision: string) => Promise<void>;
   readonly presentation?: CollectTradePresentation;
   readonly compact?: boolean;
+  readonly recipientEditor?:
+    | {
+        readonly profile: ApiIdentity | null;
+        readonly payingWallet: string;
+        readonly disabled: boolean;
+        readonly onApply: (
+          address: string,
+          acknowledgeExternal: boolean
+        ) => Promise<boolean>;
+      }
+    | undefined;
 }
 export function CollectTradeDialog({
   open,
@@ -78,14 +91,30 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
   const [confirming, setConfirming] = useState(false);
   const [localError, setLocalError] = useState(false);
   const inFlight = useRef(false);
+  const [editingRecipientFor, setEditingRecipientFor] = useState<string | null>(
+    null
+  );
+  const editingRecipient = useRef<string | null>(null);
+  const recipientHost = useRef<HTMLDivElement>(null);
   const { review } = props;
+  const recipientScope = JSON.stringify([
+    review?.id,
+    props.recipientEditor?.profile?.id,
+    props.recipientEditor?.payingWallet.toLowerCase(),
+  ]);
   const canConfirm =
     review !== null &&
     props.stage === "review" &&
     !review.disabledReason &&
-    !confirming;
+    !confirming &&
+    editingRecipientFor !== recipientScope;
   const confirm = async () => {
-    if (!canConfirm || inFlight.current) return;
+    if (
+      !canConfirm ||
+      inFlight.current ||
+      editingRecipient.current === recipientScope
+    )
+      return;
     inFlight.current = true;
     setConfirming(true);
     setLocalError(false);
@@ -189,6 +218,47 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
           title={review.title}
           media={review.media}
           actionSlot={actionSlot}
+          deliverySlot={
+            props.recipientEditor && (
+              <div ref={recipientHost}>
+                <CollectReviewRecipient
+                  key={recipientScope}
+                  address={review.purchase.recipientAddress}
+                  name={review.purchase.recipientName}
+                  recipientInProfile={review.purchase.recipientInProfile}
+                  profile={props.recipientEditor.profile}
+                  payingWallet={props.recipientEditor.payingWallet}
+                  disabled={
+                    props.recipientEditor.disabled ||
+                    props.stage !== "review" ||
+                    confirming
+                  }
+                  onEditingChange={(open) => {
+                    editingRecipient.current = open ? recipientScope : null;
+                    setEditingRecipientFor(open ? recipientScope : null);
+                  }}
+                  onApply={async (address, acknowledgeExternal) => {
+                    if (inFlight.current || !props.recipientEditor)
+                      return false;
+                    const updated = await props.recipientEditor.onApply(
+                      address,
+                      acknowledgeExternal
+                    );
+                    if (updated) {
+                      requestAnimationFrame(() => {
+                        recipientHost.current
+                          ?.querySelector<HTMLButtonElement>(
+                            "button[aria-expanded]"
+                          )
+                          ?.focus({ preventScroll: true });
+                      });
+                    }
+                    return updated;
+                  }}
+                />
+              </div>
+            )
+          }
         />
       );
     if (review.orderReview)
