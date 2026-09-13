@@ -279,6 +279,38 @@ function validateSourceRefs(record) {
   }
 }
 
+function validateAnswerMetadata(record, routePatterns) {
+  if (record.brief_answer !== undefined) {
+    requireString(record.brief_answer, "brief_answer", record.id);
+    if (record.brief_answer.length > 900)
+      fail(`${record.id}: brief_answer exceeds 900 characters`);
+  }
+  if (record.answer_links !== undefined) {
+    if (!Array.isArray(record.answer_links) || record.answer_links.length > 3) {
+      fail(
+        `${record.id}: answer_links must be an array of at most three links`
+      );
+    }
+    for (const link of record.answer_links) {
+      if (!link || typeof link !== "object")
+        fail(`${record.id}: answer_links entries must be objects`);
+      requireString(link.label, "answer_links.label", record.id);
+      requireString(link.url, "answer_links.url", record.id);
+      if (!/^https:\/\/6529\.io\/[a-zA-Z0-9/_-]*$/.test(link.url)) {
+        fail(`${record.id}: answer_links must target a public 6529.io page`);
+      }
+      validateInternalPath(
+        new URL(link.url).pathname,
+        "answer_links",
+        record.id,
+        routePatterns.filter((route) =>
+          route.segments.every((segment) => segment.kind === "static")
+        )
+      );
+    }
+  }
+}
+
 function validateRecord(record, ids, routePatterns) {
   requireString(record.id, "id", "record");
   if (ids.has(record.id)) {
@@ -304,6 +336,7 @@ function validateRecord(record, ids, routePatterns) {
   requireStringArray(record.aliases, "aliases", record.id);
   requireStringArray(record.keywords, "keywords", record.id);
   requireStringArray(record.facts, "facts", record.id);
+  validateAnswerMetadata(record, routePatterns);
 
   for (const field of ["related_paths", "tags", "source_refs"]) {
     if (record[field] !== undefined) {
