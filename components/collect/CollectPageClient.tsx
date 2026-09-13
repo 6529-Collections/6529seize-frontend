@@ -177,6 +177,11 @@ function CollectCatalogController({
   }, [planFingerprint]);
   const setCostPlan = (plan: ApiCollectPlan | null) =>
     setStoredCostPlan(plan ? { revision: goalState.revision, plan } : null);
+  const [settlementRevision, setSettlementRevision] = useState(0);
+  const invalidateSettledPlans = () => {
+    setCostPlan(null);
+    setSettlementRevision((revision) => revision + 1);
+  };
   const [basketOpen, setBasketOpen] = useState(false);
   const [blendedPurchase, setBlendedPurchase] = useState<{
     fingerprint: string;
@@ -461,6 +466,7 @@ function CollectCatalogController({
   else if (intent === "tdh")
     goalContent = (
       <CollectTdhWorkspace
+        key={settlementRevision}
         collection={collection}
         profile={connectedProfile}
         payingWallet={payingWallet}
@@ -708,7 +714,7 @@ function CollectCatalogController({
         <CollectPlanBasket
           plan={costPlan}
           onClose={() => setBasketOpen(false)}
-          onSettled={() => setCostPlan(null)}
+          onSettled={invalidateSettledPlans}
         />
       )}
       {blendedPurchase && (
@@ -721,7 +727,7 @@ function CollectCatalogController({
           onSettled={() => {
             if (currentBlendedPurchase.current !== blendedPurchase) return;
             releasePurchase();
-            setCostPlan(null);
+            invalidateSettledPlans();
           }}
         />
       )}
@@ -734,7 +740,7 @@ function CollectCatalogController({
           {...(trade.quantity ? { initialQuantity: trade.quantity } : {})}
           {...(trade.recipient ? { initialRecipient: trade.recipient } : {})}
           onClose={() => setTrade(null)}
-          onSettled={() => setCostPlan(null)}
+          onSettled={invalidateSettledPlans}
         />
       )}
       {batch && (
@@ -754,7 +760,7 @@ function CollectCatalogController({
                   )
               )
             );
-            setCostPlan(null);
+            invalidateSettledPlans();
           }}
         />
       )}

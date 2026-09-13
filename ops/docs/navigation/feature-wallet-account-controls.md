@@ -223,6 +223,16 @@ action.
 - After web `Disconnect Wallet`, dropdown actions change to `Connect Wallet`
   and `Logout`; `Connect Wallet` remains grouped with `Connect Device`.
 
+## Signing In
+
+Connecting an unauthenticated wallet opens `Sign in to 6529`. The dialog shows
+the wallet address and explains: `Sign a message to confirm this address is yours.`
+Choose `Sign message`, then confirm in the wallet when `Check your wallet…` appears.
+The sign-in message does not create a transaction, cost gas, or approve tokens.
+Cancel or Escape before signing returns to browsing. If signing is rejected,
+reconnect and try again. Once signed in, existing profile and posting permissions
+still apply; a wallet without a profile is offered profile setup.
+
 ## Failure and Recovery
 
 - If wallet connect is canceled, stay on the same surface and retry `Connect`.

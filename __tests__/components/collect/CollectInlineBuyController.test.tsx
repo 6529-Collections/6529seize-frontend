@@ -324,7 +324,11 @@ it("automatically selects the cheapest exact listing, refreshes it, validates, a
     await screen.findByRole("button", { name: "Continue in wallet" })
   );
   await waitFor(() =>
-    expect(mockConfirm).toHaveBeenCalledWith(operation, request)
+    expect(mockConfirm).toHaveBeenCalledWith(
+      operation,
+      request,
+      expect.any(Function)
+    )
   );
 });
 it("shows a changed price without preparing or substituting until the user accepts it", async () => {

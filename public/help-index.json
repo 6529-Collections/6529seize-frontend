@@ -1510,6 +1510,7 @@
       ],
       "facts": [
         "Wallet authentication lets a user connect, sign in, and act as a 6529 profile.",
+        "After connecting an unauthenticated wallet, the Sign in to 6529 dialog shows the wallet address and explains: Sign a message to confirm this address is yours. Choose Sign message, then confirm in the wallet when Check your wallet appears. Signing in creates no transaction, costs no gas, and approves no tokens. Cancel or Escape before signing returns to browsing; after rejection, reconnect and retry.",
         "Profile switching and account controls live in the wallet/account area of the app header.",
         "In the app sidebar, selecting another connected profile switches to it and closes the drawer; the add-profile button closes the drawer as the wallet connection flow opens.",
         "In Capacitor, Connect and add-profile open a shared Connect sheet with App Wallets, External Wallets, and Scan Connection QR options.",
@@ -3101,6 +3102,7 @@
       ],
       "facts": [
         "The wave composer is where users post drops and replies inside a wave.",
+        "Signed-out viewers of a public wave can choose the blue Sign in to 6529 to post button in the footer. New here? Sign a message with your wallet to get started explains the wallet signature, with no transaction or gas fees. The existing wallet chooser and sign-in dialog handle authentication. Posting access is checked again after sign-in, and wallets without a profile still need profile setup.",
         "If a wave has guidelines and the profile has posted neither a chat message nor a participation drop there, submitting its first chat message opens a Wave guidelines dialog before the message is sent.",
         "Agree sends the pending first message and prevents repeat prompts in that wave. Decline or dismissing the dialog does not send the message, keeps the draft, and shows the guidelines again on the next submit attempt.",
         "Composer docs cover markdown, mentions, NFT hashtag references, curation URLs, media uploads, and Enter-key behavior.",
@@ -8028,7 +8030,9 @@
         "lowest listings",
         "purchase price breakdown",
         "quote expired",
-        "paying and receiving wallets"
+        "paying and receiving wallets",
+        "change purchase recipient",
+        "send to a fren"
       ],
       "keywords": [
         "Collect",
@@ -8059,6 +8063,9 @@
         "Review live total checks every selected exact ETH listing before a multiple-item purchase. Supported selections use one Ethereum transaction: all selected purchases and recipient deliveries succeed together or all revert, although a revert can cost gas. The site does not silently substitute listings, drop items or split the selection into several transactions. Review each artwork's quantities and delivery allocations, the paying wallet, total, included fees and network fee cap. Continue in wallet refreshes the complete quote and compares it with the reviewed terms; changed terms require another review. Orders confirms the purchase only after verifying all selected deliveries.",
         "Supported execution uses Ethereum mainnet, exact NFTs, explicit quantities and ETH or WETH. Fixed-price offers use WETH and receive NFTs in the signing wallet. Profile consolidation and social proxy access do not grant trading authority over another wallet.",
         "An individual purchase summary shows artwork and quantity, with separate Pay with and Deliver to rows even when both use the same wallet. Click or tap each profile wallet name or abbreviated address to reveal the full checksummed address and copy control. Purchase price includes signed order fees. Network fee cap includes required approvals when quoted. An ETH Maximum total appears only with complete fee caps; summary caps round upward without changing submitted amounts. Missing caps say Not available yet; WETH prices and ETH gas stay separate. Price breakdown shows seller proceeds and included fees; nested Exact amounts retains unrounded network and approval fee caps and the maximum where available.",
+        "Every supported purchase review allows choosing a new destination from its expanded delivery row, including individual artworks, selected listings, purchases from Collect and saved purchase reviews in Orders. Send to me shows the profile's confirmed wallets. Send to a fren supports searching a profile or ENS name, or entering a wallet address. Choose the receiving wallet and check its full resolved address; an address outside the profile requires confirmation. Use this address applies that destination and prepares a fresh review without signing or sending. Review the updated address and terms before Continue in wallet. Cancel retains the current destination. Delivery editing is unavailable while a wallet transaction or outcome recovery is in progress. For multiple NFTs or split deliveries, each row changes only those copies and retains the other items and destinations. Choosing another existing destination for the same NFT combines its copies. The review explains that copies delivered outside the profile do not count toward its collecting goals or TDH. After a confirmed purchase, calculate a new TDH projection using the updated holdings.",
+        "The expanded destination chooser shows the selected profile's picture, name, profile level and profile TDH where available. Level belongs to the profile. Individual wallet rows show Wallet TDH when that wallet's value is known. These details help identify the profile; they do not replace checking the full resolved destination address before applying it.",
+        "Continue in wallet stays disabled until the destination edit is applied or cancelled. Applying keeps confirmation unavailable while the new destination review prepares.",
         "Contract details preserves NFT and exchange contracts, fee recipients, approval scope and order identifiers separately from prices. Known Ethereum addresses receive names for their applicable roles: The Memes, 6529 Gradient, NextGen, Seaport 1.6 and OpenSea. Expand the contract row for its full address, copy it or open the explorer. Unfamiliar addresses keep generic labels; a display name does not replace exact-address checks or grant spending permission. New listings include configured creator support; standard offers include required provider fees; purchases and accepted offers preserve signed fees. The 6529 platform fee is zero.",
         "Reviews stay available while you read. Continue in wallet checks current terms and automatically refreshes execution quotes when needed for purchases, listings, offers, accepting offers and cancellations, including supported multiple-item purchases. Unchanged terms proceed to the wallet without a separate Refresh quote action. Changed prices, fees, quantities, recipients, approval scopes or network fee caps require another review and consent. Checking terms never signs or sends by itself. Execution quote freshness is separate from the signed order's expiry; refreshing does not extend the order.",
         "Orders at /collect/orders tracks operation recovery. Potential offer exposure begins when signable terms are revealed, even if no signature or publication is confirmed. Execution quote freshness does not expire a signed order.",
@@ -8089,6 +8096,7 @@
         "components/collect/CollectTradeSheet.tsx",
         "components/collect/CollectPurchaseSummary.tsx",
         "components/collect/CollectReviewWallet.tsx",
+        "components/collect/CollectRecipientPicker.tsx",
         "components/collect/CollectOrderSummary.tsx",
         "components/collect/CollectBatchQuoteReview.tsx",
         "components/collect/collect-contract-identity.ts",
@@ -8096,7 +8104,8 @@
         "components/collect/useCollectCatalog.ts",
         "components/collect/useMarketExecution.ts",
         "components/collect/CollectOfferWorkspace.tsx",
-        "components/collect/CollectTdhWorkspace.tsx"
+        "components/collect/CollectTdhWorkspace.tsx",
+        "components/collect/useCollectBatchRecipientUpdate.ts"
       ]
     },
     {

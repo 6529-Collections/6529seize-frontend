@@ -2962,13 +2962,18 @@ export const EN_US_MESSAGES = {
   "auth.sessionUpgrade.action": "Upgrade Authentication",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",
   "auth.signModal.upgradeAuthentication": "Upgrade Authentication",
-  "auth.signModal.authenticationRequest": "Sign Authentication Request",
+  "waves.signIn.post": "Sign in to 6529 to post",
+  "waves.signIn.newHere":
+    "New here? Sign a message with your wallet to get started.",
+  "auth.signModal.authenticationRequest": "Sign in to 6529",
+  "auth.signModal.cancelSignIn": "Cancel sign-in",
+  "auth.signModal.walletAddress": "Wallet address",
+  "auth.signModal.noTransaction": "No transaction or gas fees.",
   "auth.signModal.connectionShareLead":
     "This shared connection uses the previous authentication flow. Reshare the connection from a device that is already signed in with the new authentication.",
   "auth.signModal.sessionUpgradeLead":
     "We have upgraded wallet authentication. Sign once to move this connected wallet to the new secure session.",
-  "auth.signModal.authLead":
-    "To connect your wallet, you will need to sign a message to confirm your identity.",
+  "auth.signModal.authLead": "Sign a message to confirm this address is yours.",
   "auth.signModal.connectionSharePrimary":
     "Use connection sharing from an active session-v2 web connection, then open the new shared connection on this device.",
   "auth.signModal.disconnectedUpgradePrimary":
@@ -2992,11 +2997,11 @@ export const EN_US_MESSAGES = {
   "auth.signModal.noGas":
     "Your signature will not cost any gas and is purely for authentication purposes.",
   "auth.signModal.connect": "Connect",
-  "auth.signModal.sign": "Sign",
+  "auth.signModal.sign": "Sign message",
   "auth.signModal.learnMore": "Learn more about this update",
   "auth.signModal.remindLater": "Remind me later",
   "auth.signModal.cancel": "Cancel",
-  "auth.signModal.confirmInWallet": "Confirm in your wallet",
+  "auth.signModal.confirmInWallet": "Check your wallet…",
   "acceptConnection.title": "Accept Connection Sharing",
   "acceptConnection.sharedConnectionFallback": "Shared connection",
   "acceptConnection.home": "Take me home",
