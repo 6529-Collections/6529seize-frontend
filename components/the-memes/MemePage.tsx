@@ -44,6 +44,7 @@ import { MemePageArtViewer } from "./MemePageArtViewer";
 import { MemePageTabButton } from "./MemePageTabButton";
 import NftArtworkShareButton from "@/components/artwork-share/NftArtworkShareButton";
 import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";
+import MemePageRelatedWorks from "./MemePageRelatedWorks";
 import {
   MemePageNavigationSkeleton,
   MemePageSkeleton,
@@ -84,17 +85,12 @@ const MemePageCollectorsSubMenu = dynamic(() =>
   import("./MemePageCollectors").then((mod) => mod.MemePageCollectorsSubMenu)
 );
 
-const MemePageReferencesSubMenu = dynamic(() =>
-  import("./MemePageReferences").then((mod) => mod.MemePageReferencesSubMenu)
-);
-
 const ACTIVITY_PAGE_SIZE = 25;
 const VISIBLE_MEME_TABS = [
   MEME_FOCUS.LIVE,
   MEME_FOCUS.MARKET,
   MEME_FOCUS.COLLECTORS,
   MEME_FOCUS.HISTORY,
-  MEME_FOCUS.REFERENCES,
 ]
   .map((focus) => MEME_TABS.find((tab) => tab.focus === focus))
   .filter((tab): tab is (typeof MEME_TABS)[number] => tab !== undefined);
@@ -240,7 +236,10 @@ export default function MemePage({
     ) {
       return MEME_FOCUS.HISTORY;
     }
-    return focusParam === MEME_FOCUS.THE_ART ? MEME_FOCUS.LIVE : focusParam;
+    return focusParam === MEME_FOCUS.THE_ART ||
+      focusParam === MEME_FOCUS.REFERENCES
+      ? MEME_FOCUS.LIVE
+      : focusParam;
   }, [focusParam]);
 
   const activeTab = resolvedRouterFocus ?? MEME_FOCUS.LIVE;
@@ -589,16 +588,17 @@ export default function MemePage({
             locale={locale}
             marketRefreshVersion={marketRefreshVersion}
           />
-          {activeTab === MEME_FOCUS.LIVE && nft && nftMeta && (
-            <MemePageArt show nft={nft} nftMeta={nftMeta} locale={locale} />
-          )}
-          {(activeTab === MEME_FOCUS.REFERENCES ||
-            loadedPrimaryTabs.has(MEME_FOCUS.REFERENCES)) && (
-            <MemePageReferencesSubMenu
-              show={activeTab === MEME_FOCUS.REFERENCES}
+          {activeTab === MEME_FOCUS.LIVE && nft && (
+            <MemePageRelatedWorks
+              key={nft.id}
               nft={nft}
               locale={locale}
+              focus={focusParam}
+              onFocusChange={replaceRouteFocus}
             />
+          )}
+          {activeTab === MEME_FOCUS.LIVE && nft && nftMeta && (
+            <MemePageArt show nft={nft} nftMeta={nftMeta} locale={locale} />
           )}
           {userLoaded && (
             <MemePageYourCardsSubMenu

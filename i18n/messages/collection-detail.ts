@@ -459,6 +459,7 @@ export const THE_MEMES_DETAIL_TIMELINE_MESSAGES = namespaceMessages(
 export const THE_MEMES_DETAIL_REFERENCES_MESSAGES = namespaceMessages(
   "theMemes.detail.references",
   [
+    ["sectionTitle", "References: Meme Lab & ReMemes"],
     ["empty.rememes", "ReMemes that reference this NFT will appear here."],
     [
       "memeLab.description",
@@ -473,6 +474,20 @@ export const THE_MEMES_DETAIL_REFERENCES_MESSAGES = namespaceMessages(
     ],
     ["rememes.logoAlt", "ReMemes"],
     ["sort.trigger", "Sort: {sort}"],
+  ] as const
+);
+
+export const THE_MEMES_DETAIL_ARTIST_WORKS_MESSAGES = namespaceMessages(
+  "theMemes.detail.artistWorks",
+  [
+    ["title", "More by {artist}"],
+    ["collection", "In The Memes collection"],
+    ["viewAll", "View all ({count})"],
+    ["showFewer", "Show fewer"],
+    ["loading", "Loading artist works..."],
+    ["error", "Artist works could not be loaded."],
+    ["retry", "Try again"],
+    ["imageUnavailable", "Artwork preview unavailable"],
   ] as const
 );
 

@@ -109,6 +109,11 @@ jest.mock("@/components/the-memes/MemePageReferences", () => ({
     show ? <div data-testid="references-sub">References</div> : null,
 }));
 
+jest.mock("@/components/the-memes/MemePageArtistWorks", () => ({
+  __esModule: true,
+  default: () => <div data-testid="artist-works">Artist works</div>,
+}));
+
 jest.mock("@/components/the-memes/MemePageTimeline", () => ({
   MemePageTimeline: ({ show }: any) =>
     show ? <div data-testid="timeline">Timeline</div> : null,
@@ -372,7 +377,6 @@ describe("MemePage tab navigation", () => {
     ["Listings & offers", MEME_FOCUS.MARKET, "market-depth"],
     ["Collectors", MEME_FOCUS.COLLECTORS, "collectors-sub"],
     ["History", MEME_FOCUS.ACTIVITY, "activity"],
-    ["References", MEME_FOCUS.REFERENCES, "references-sub"],
   ])(
     "selecting %s shows component and updates query",
     async (label, focus, testId) => {
@@ -415,6 +419,54 @@ describe("MemePage tab navigation", () => {
     expect(
       screen.queryByRole("button", { name: "Details" })
     ).not.toBeInTheDocument();
+  });
+
+  it("keeps references below artist works and expands them in Overview", async () => {
+    const page = renderPage();
+    const references = await screen.findByRole("button", {
+      name: "References: Meme Lab & ReMemes",
+    });
+    expect(references).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByTestId("references-sub")).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId("artist-works").compareDocumentPosition(references) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+
+    expect(
+      references.compareDocumentPosition(screen.getByTestId("art-details")) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+
+    await userEvent.click(references);
+    page.rerenderPage();
+    expect(await screen.findByTestId("references-sub")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+    expect(references).toHaveAttribute("aria-expanded", "true");
+    const panel = screen.getByRole("region", {
+      name: "References: Meme Lab & ReMemes",
+    });
+    expect(references).toHaveAttribute("aria-controls", panel.id);
+    expect(panel).toContainElement(screen.getByTestId("references-sub"));
+
+    await userEvent.click(references);
+    page.rerenderPage();
+    expect(screen.queryByTestId("references-sub")).not.toBeInTheDocument();
+    expect(screen.getByTestId("artist-works")).toBeInTheDocument();
+  });
+
+  it("opens existing reference deep links inside Overview", async () => {
+    currentFocus = MEME_FOCUS.REFERENCES;
+    renderPage();
+    expect(await screen.findByTestId("references-sub")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+    expect(screen.getByTestId("artist-works")).toBeInTheDocument();
   });
 
   it("selects the Timeline history subtab", async () => {
@@ -584,7 +636,9 @@ describe("MemePage search params handling", () => {
       expect(screen.getByTestId("mint-countdown")).toBeInTheDocument()
     );
 
-    const referencesButton = screen.getByRole("button", { name: "References" });
+    const referencesButton = screen.getByRole("button", {
+      name: "References: Meme Lab & ReMemes",
+    });
     await userEvent.click(referencesButton);
 
     expect(mockReplaceState).toHaveBeenCalledWith(
@@ -616,7 +670,7 @@ describe("MemePage search params handling", () => {
       "1"
     );
 
-    await userEvent.click(screen.getByRole("button", { name: "References" }));
+    await userEvent.click(screen.getByRole("button", { name: "Collectors" }));
     page.rerenderPage();
     expect(screen.queryByTestId("live-sub")).not.toBeInTheDocument();
     expect(
