@@ -19,12 +19,27 @@ the artwork's menu also offers **Artwork documentation** on desktop and mobile.
 Sign in with the profile that owns the work. Being a Wave administrator does
 not automatically grant access to its documentation.
 
+Open an assigned record with **Open record** to continue; you do not need to
+start a new one. Existing records appear before new-record controls. The project
+team prepares program records for invited artists. **Start documenting** and
+**Document this work for another context** offer standalone records only when
+self-service creation is available. They do not grant program access. Opening
+documentation from an artwork with a listed source-linked record offers that
+existing record instead of creating a duplicate. If the submission's record
+may be on a later page, use **Load more** to finish looking before starting a
+new record.
+
+If a list is unavailable, return to **My artwork documentation** to open records
+you can access. **Try again** on a list reloads its information; a list-loading
+error does not mean that your artwork answers failed to save.
+
 An authorized program viewer can also open the program's artwork records,
 including their files, confirmed versions and **Questions for the team**.
 Viewer access may come from an individual profile or membership of an assigned
 group. The workspace identifies view-only access and offers navigation without
-save controls. **Back to results** returns to the program list. Viewing does
-not grant permission to change artwork answers,
+save controls. **My artwork documentation** returns to the list of records you
+can access. Access to one program record does not by itself grant access to the
+whole program list. Viewing does not grant permission to change artwork answers,
 send or resolve questions, import artist information or confirm a version.
 Artists and team members with separate editing or review permissions keep
 those permissions. Adding viewer access does not expand their editing scope:
@@ -161,8 +176,9 @@ previews do not prevent you from opening it.
 ## Saving and artwork files
 
 Changes save with 6529 while you prepare the draft. Check the save status
-before leaving, or use **Save and exit**. If saving fails or your session
-expires, keep the window open while you retry
+before leaving, or use **Save and exit**. After all pending changes save,
+**Save and exit** returns to **My artwork documentation**, where you can reopen
+the same record. If saving fails or your session expires, keep the window open while you retry
 or sign in again. Unsaved text is not kept after the window is closed.
 If another editor changes the record, resolve the version conflict before
 continuing; the app does not silently overwrite their work.

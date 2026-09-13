@@ -3,6 +3,9 @@
 import { ApiArtworkDocumentationCreateWorkStartModeEnum } from "@/generated/models/ApiArtworkDocumentationCreateWork";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { getStructuredApiErrorStatus } from "@/services/api/common-api";
+import { documentationCreationErrorMessage } from "@/lib/artwork-documentation/entry";
 import { useRef, useState } from "react";
 import {
   documentationQueryKey,
@@ -80,7 +83,7 @@ function DocumentationListContent({
     {}
   );
   const [starting, setStarting] = useState(false);
-  const [error, setError] = useState(false);
+  const [creationError, setCreationError] = useState<string | null>(null);
   const createKey = useRef(crypto.randomUUID());
   const query = useInfiniteQuery({
     queryKey: documentationQueryKey(
@@ -99,6 +102,9 @@ function DocumentationListContent({
     gcTime: 0,
     meta: { persist: false },
   });
+  const listUnavailable = [403, 404].includes(
+    getStructuredApiErrorStatus(query.error) ?? 0
+  );
   const records: DocumentationCatalogueItem[] =
     query.data?.pages.flatMap((page) => page.data) ?? [];
   const sourceIds = [
@@ -143,10 +149,20 @@ function DocumentationListContent({
         .filter((id): id is string => !!id)
     ),
   ];
+  // The catalogue describes forms, not permission to create program records.
+  const creationProfiles = access.profiles.filter(
+    (profile) => access.selfServiceEnabled && !profile.program_id
+  );
+  const sourceRecord = sourceDropId
+    ? records.find(
+        (record) => record.source_submission?.drop_id === sourceDropId
+      )
+    : undefined;
+  const sourceLookupComplete = !sourceDropId || !query.hasNextPage;
   const selected =
-    access.profiles.find(
+    creationProfiles.find(
       (profile) => documentationProfileKey(profile) === profileId
-    ) ?? access.profiles[0];
+    ) ?? creationProfiles[0];
   const generalHeading = programId
     ? msg("editorial.records")
     : msg("editorial.personalTitle");
@@ -155,9 +171,16 @@ function DocumentationListContent({
       ? msg("editorial.programTitle")
       : generalHeading;
   const start = async () => {
-    if (!selected) return;
+    if (
+      !access.enabled ||
+      !query.isSuccess ||
+      !sourceLookupComplete ||
+      !selected ||
+      starting
+    )
+      return;
     setStarting(true);
-    setError(false);
+    setCreationError(null);
     try {
       const context = await createDocumentationWork(
         {
@@ -172,14 +195,14 @@ function DocumentationListContent({
         createKey.current
       );
       router.push(documentationWorkspacePath(context.work_id, context.id));
-    } catch {
-      setError(true);
+    } catch (error) {
+      setCreationError(documentationCreationErrorMessage(error));
     } finally {
       setStarting(false);
     }
   };
   return (
-    <div className="tw-space-y-8">
+    <div className="tailwind-scope tw-space-y-8">
       <header className="tw-grid tw-gap-8 tw-pb-4 lg:tw-grid-cols-[minmax(0,1fr)_20rem] lg:tw-gap-16">
         <div>
           <p className="tw-mb-6 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.18em] tw-text-iron-400">
@@ -204,8 +227,22 @@ function DocumentationListContent({
           {msg("editorial.preparationNote")}
         </p>
       )}
-      {sourceDropId && (
-        <DocumentationNotice>{msg("sourceHelp")}</DocumentationNotice>
+      {sourceRecord && (
+        <DocumentationNotice>
+          <p>{msg("entry.sourceRecord")}</p>
+          <Link
+            href={documentationWorkspacePath(
+              sourceRecord.work_id,
+              sourceRecord.id
+            )}
+            className="tw-inline-flex tw-min-h-11 tw-items-center tw-font-semibold tw-text-primary-300 focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-primary-400"
+          >
+            {msg("editorial.openRecord")}
+          </Link>
+        </DocumentationNotice>
+      )}
+      {!sourceRecord && !sourceLookupComplete && (
+        <DocumentationNotice>{msg("entry.sourceMore")}</DocumentationNotice>
       )}
       {access.isLoading && (
         <DocumentationNotice>{msg("loading")}</DocumentationNotice>
@@ -213,9 +250,11 @@ function DocumentationListContent({
       {!access.isLoading && !access.enabled && (
         <DocumentationNotice>{msg("unavailable")}</DocumentationNotice>
       )}
-      {(error || query.isError || access.isError || sourceError) && (
+      {(query.isError || access.isError || sourceError) && (
         <DocumentationNotice error>
-          <p>{msg("error")}</p>
+          <p>
+            {msg(listUnavailable ? "entry.listUnavailable" : "entry.readError")}
+          </p>
           <DocumentationButton
             secondary
             onClick={() => {
@@ -228,43 +267,19 @@ function DocumentationListContent({
           >
             {msg("retry")}
           </DocumentationButton>
+          {programId && (
+            <Link
+              href="/artwork-documentation"
+              className="tw-ml-4 tw-inline-flex tw-min-h-11 tw-items-center tw-font-semibold tw-text-primary-300 focus-visible:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-primary-400"
+            >
+              {msg("back")}
+            </Link>
+          )}
         </DocumentationNotice>
       )}
       {access.enabled && (
         <>
-          {!programId && (
-            <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-3">
-              <label className="tw-grow tw-text-sm tw-text-iron-300">
-                {msg("editorial.recordFor")}
-                <select
-                  className={`${inputClass} tw-mt-2`}
-                  value={selected ? documentationProfileKey(selected) : ""}
-                  onChange={(event) => {
-                    setProfileId(event.target.value);
-                    createKey.current = crypto.randomUUID();
-                  }}
-                >
-                  {access.profiles.map((profile) => (
-                    <option
-                      key={documentationProfileKey(profile)}
-                      value={documentationProfileKey(profile)}
-                    >
-                      {profileLabel(profile)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <DocumentationButton
-                disabled={starting || !selected}
-                onClick={() => {
-                  void start();
-                }}
-              >
-                {starting ? msg("loading") : msg("start")}
-              </DocumentationButton>
-            </div>
-          )}
-          {programId && (
+          {programId && query.isSuccess && (
             <details className="tw-border-0 tw-border-y tw-border-solid tw-border-iron-800 tw-py-2">
               <summary className="tw-min-h-11 tw-cursor-pointer tw-py-3 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
                 {msg("editorial.filterRecords")}
@@ -377,9 +392,15 @@ function DocumentationListContent({
           {query.isLoading && (
             <DocumentationNotice>{msg("loading")}</DocumentationNotice>
           )}
-          {!query.isLoading && records.length === 0 && (
+          {!query.isLoading && !query.isError && records.length === 0 && (
             <div className={panelClass}>
-              <p className="tw-m-0 tw-text-iron-300">{msg("empty")}</p>
+              <p className="tw-m-0 tw-text-iron-300">
+                {msg(
+                  !programId && !access.selfServiceEnabled
+                    ? "entry.assignedEmpty"
+                    : "empty"
+                )}
+              </p>
             </div>
           )}
           <div className="tw-grid tw-gap-x-12 lg:tw-grid-cols-2">
@@ -408,6 +429,68 @@ function DocumentationListContent({
               {msg("more")}
             </DocumentationButton>
           )}
+          {!programId && records.length > 0 && !access.selfServiceEnabled && (
+            <p className="tw-max-w-prose tw-text-sm tw-leading-7 tw-text-iron-400">
+              {msg("entry.assignedRecords")}
+            </p>
+          )}
+          {creationError && (
+            <DocumentationNotice error>
+              <p>{msg(creationError)}</p>
+              <DocumentationButton
+                secondary
+                disabled={
+                  starting ||
+                  !selected ||
+                  !query.isSuccess ||
+                  !sourceLookupComplete
+                }
+                onClick={() => {
+                  void start();
+                }}
+              >
+                {msg("retry")}
+              </DocumentationButton>
+            </DocumentationNotice>
+          )}
+          {!programId &&
+            query.isSuccess &&
+            sourceLookupComplete &&
+            creationProfiles.length > 0 &&
+            !sourceRecord && (
+              <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-3">
+                <label className="tw-grow tw-text-sm tw-text-iron-300">
+                  {msg("editorial.recordFor")}
+                  <select
+                    className={`${inputClass} tw-mt-2`}
+                    disabled={starting}
+                    value={selected ? documentationProfileKey(selected) : ""}
+                    onChange={(event) => {
+                      setProfileId(event.target.value);
+                      setCreationError(null);
+                      createKey.current = crypto.randomUUID();
+                    }}
+                  >
+                    {creationProfiles.map((profile) => (
+                      <option
+                        key={documentationProfileKey(profile)}
+                        value={documentationProfileKey(profile)}
+                      >
+                        {profileLabel(profile)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <DocumentationButton
+                  disabled={starting || !selected}
+                  onClick={() => {
+                    void start();
+                  }}
+                >
+                  {starting ? msg("loading") : msg("start")}
+                </DocumentationButton>
+              </div>
+            )}
         </>
       )}
     </div>
