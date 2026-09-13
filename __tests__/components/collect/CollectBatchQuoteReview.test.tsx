@@ -17,6 +17,7 @@ function props() {
   return {
     operation,
     items: [],
+    profile: null,
     busy: false,
     onConfirm: jest.fn(async () => {}),
     onEdit: jest.fn(),

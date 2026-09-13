@@ -38,6 +38,7 @@ import { batchSendAttempt } from "./market-batch-send";
 import { readMarketBatch, saveMarketBatch } from "./market-batch-storage";
 import { validateMarketBatchOperation } from "./market-batch-validation";
 import { useMarketBatchExecution } from "./useMarketBatchExecution";
+import { useCollectBatchRecipientUpdate } from "./useCollectBatchRecipientUpdate";
 import { useMarketSettlement } from "./useMarketSettlement";
 import {
   findResumableMarketBatch,
@@ -105,6 +106,10 @@ function ScopedBatchController({
         : null
     );
   const [editedOperationId, setEditedOperationId] = useState<string>();
+  const recipientEditing = useRef<{
+    operationId: string;
+    open: boolean;
+  } | null>(null);
   const [preparing, setPreparing] = useState(false),
     [error, setError] = useState<string>();
   const mounted = useRef(false),
@@ -298,6 +303,21 @@ function ScopedBatchController({
     ? t(locale, "collect.trade.broadcastUnknown")
     : undefined;
   const reviewDisabledReason = disabledReason ?? operationDisabledReason;
+  const recipientUpdate = useCollectBatchRecipientUpdate({
+    operation: displayed,
+    expected,
+    profile: auth.connectedProfile,
+    wallet: connection.address,
+    enabled: !reviewDisabledReason && !preparing && !execution.busy,
+    onUpdated: (value, request) => {
+      setExpected(request);
+      setError(undefined);
+      execution.clearMessage();
+      recipientEditing.current = null;
+      receive(value);
+    },
+    onError: (failure) => setError(marketPreparationError(failure, locale)),
+  });
   const walletNames =
     displayed?.profile_id === auth.connectedProfile?.id
       ? Object.fromEntries(
@@ -350,17 +370,50 @@ function ScopedBatchController({
           canEdit={!initialOperation}
           operation={displayed}
           items={items}
-          busy={preparing || execution.busy}
+          profile={
+            displayed.profile_id === auth.connectedProfile?.id
+              ? auth.connectedProfile
+              : null
+          }
+          busy={preparing || execution.busy || recipientUpdate.pending}
           disabledReason={reviewDisabledReason}
           message={error ?? execution.message}
           walletNames={walletNames}
+          {...(recipientUpdate.canEdit || recipientUpdate.pending
+            ? { onRecipientChange: recipientUpdate.update }
+            : {})}
+          onRecipientEditingChange={(open) => {
+            recipientEditing.current = { operationId: displayed.id, open };
+          }}
           onConfirm={async () => {
-            if (expected && !disabledReason && !unresolved)
-              await execution.confirm(displayed, expected);
+            if (
+              expected &&
+              !disabledReason &&
+              !unresolved &&
+              !recipientUpdate.pending &&
+              !(
+                recipientEditing.current?.operationId === displayed.id &&
+                recipientEditing.current.open
+              )
+            )
+              await execution.confirm(displayed, expected, () => {
+                recipientUpdate.assertIdle();
+                if (
+                  recipientEditing.current?.operationId === displayed.id &&
+                  recipientEditing.current.open
+                )
+                  throw new Error("MARKET_REVIEW_MISMATCH");
+              });
           }}
           onEdit={() => {
             if (
               !unresolved &&
+              !recipientUpdate.pending &&
+              !execution.busy &&
+              !(
+                recipientEditing.current?.operationId === displayed.id &&
+                recipientEditing.current.open
+              ) &&
               displayed.state === ApiMarketBatchOperationStateEnum.Review
             ) {
               setOperation(null);
@@ -379,7 +432,7 @@ function ScopedBatchController({
       )}
       {displayed && unresolved && (
         <CollectTransactionRecovery
-          disabled={execution.busy}
+          disabled={execution.busy || recipientUpdate.pending}
           onRecover={(hash) => execution.recoverTransaction(displayed, hash)}
         />
       )}
