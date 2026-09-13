@@ -24,6 +24,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -126,12 +127,14 @@ export function MarketDepthTradeProvider({
   tokenId,
   locale,
   onMarketChange,
+  onInteractionChange,
   children,
 }: {
   readonly contract: string;
   readonly tokenId: string;
   readonly locale: SupportedLocale;
   readonly onMarketChange: () => void;
+  readonly onInteractionChange?: (busy: boolean) => void;
   readonly children: ReactNode;
 }) {
   if (marketDepthCollectFamily(contract) === null) return children;
@@ -141,6 +144,7 @@ export function MarketDepthTradeProvider({
       tokenId={tokenId}
       locale={locale}
       onMarketChange={onMarketChange}
+      {...(onInteractionChange ? { onInteractionChange } : {})}
     >
       {children}
     </MarketDepthTradeScope>
@@ -174,12 +178,14 @@ function SupportedMarketDepthTradeProvider({
   tokenId,
   locale,
   onMarketChange,
+  onInteractionChange,
   children,
 }: {
   readonly contract: string;
   readonly tokenId: string;
   readonly locale: SupportedLocale;
   readonly onMarketChange: () => void;
+  readonly onInteractionChange?: (busy: boolean) => void;
   readonly children: ReactNode;
 }) {
   const auth = useAuth();
@@ -205,6 +211,16 @@ function SupportedMarketDepthTradeProvider({
   const acceptGeneration = useRef(0);
   const acceptAttempt = useRef<AcceptAttempt | null>(null);
   const reviewOpener = useRef<HTMLButtonElement | null>(null);
+  const interactionBusy =
+    selected.length > 0 ||
+    reviewItems !== null ||
+    acceptedOffer !== null ||
+    reviewState.busy ||
+    Object.values(rowStates).some((row) => row.busy);
+  useLayoutEffect(() => {
+    onInteractionChange?.(interactionBusy);
+    return () => onInteractionChange?.(false);
+  }, [interactionBusy, rowStates, onInteractionChange]);
 
   const setSelected = useCallback(
     (next: readonly MarketDepthListingSelection[]) => {
@@ -276,6 +292,8 @@ function SupportedMarketDepthTradeProvider({
       suppliedController?: AbortController
     ) => {
       const controller = suppliedController ?? new AbortController();
+      // Block background publication before React commits the busy row state.
+      onInteractionChange?.(true);
       abortControllers.current.add(controller);
       setRowStates((current) => ({
         ...current,
@@ -301,7 +319,7 @@ function SupportedMarketDepthTradeProvider({
         abortControllers.current.delete(controller);
       }
     },
-    [locale]
+    [locale, onInteractionChange]
   );
 
   const invalidateAcceptAttempt = useCallback(() => {
@@ -467,6 +485,7 @@ function SupportedMarketDepthTradeProvider({
 
   const reviewSelection = useCallback(() => {
     if (selectedRef.current.length === 0 || reviewBusyRef.current) return;
+    onInteractionChange?.(true);
     const controller = new AbortController();
     abortControllers.current.add(controller);
     reviewBusyRef.current = true;
@@ -521,7 +540,7 @@ function SupportedMarketDepthTradeProvider({
         abortControllers.current.delete(controller);
       }
     })();
-  }, [locale, profileWallets, resolveOrder, setSelected]);
+  }, [locale, onInteractionChange, profileWallets, resolveOrder, setSelected]);
 
   const value = useMemo<TradeContextValue>(
     () => ({

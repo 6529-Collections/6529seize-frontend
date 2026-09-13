@@ -208,6 +208,20 @@ async function listingActionsFit(page: Page) {
       exact: true,
     });
     const card = page.locator("article").filter({ has: action });
+    const artwork = card.getByRole("img", {
+      name: `Catalog artwork ${id}`,
+      exact: true,
+    });
+    await expect
+      .poll(() =>
+        artwork.evaluate(
+          (node) =>
+            node instanceof HTMLImageElement &&
+            node.complete &&
+            node.naturalWidth > 0
+        )
+      )
+      .toBe(true);
     const actionBounds = (await action.boundingBox())!;
     const cardBounds = (await card.boundingBox())!;
     expect(actionBounds.width).toBeGreaterThanOrEqual(44);
@@ -217,8 +231,14 @@ async function listingActionsFit(page: Page) {
       cardBounds.x + cardBounds.width + 1
     );
     await expect(
-      card.getByText(id === 1 ? "0.01 ETH" : "0.024217345 ETH", { exact: true })
+      card.getByText(id === 1 ? "0.01 ETH" : "0.0243 ETH", { exact: true })
     ).toBeVisible();
+    if (id === 2) {
+      const compactBounds = await card
+        .getByText("0.0243 ETH", { exact: true })
+        .boundingBox();
+      expect(compactBounds!.height).toBeLessThanOrEqual(24);
+    }
   }
 }
 
@@ -432,18 +452,26 @@ test("set planning is the default and navigation opens observed listings", async
     .getByRole("button", { name: "Lowest listings", exact: true })
     .click();
   await expect(page.getByText("0.01 ETH", { exact: true })).toBeVisible();
-  await expect(
-    page.getByText("0.024217345 ETH", { exact: true })
-  ).toBeVisible();
+  const priceDisclosure = page
+    .getByText("0.0243 ETH", { exact: true })
+    .locator("xpath=ancestor::summary");
+  const exactPrice = page.getByText("0.024217345 ETH", { exact: true });
+  await expect(priceDisclosure).toBeVisible();
+  await expect(exactPrice).toBeHidden();
   const viewport = page.viewportSize()!;
   const widths = viewport.width < 640 ? [320, 390] : [viewport.width];
   for (const width of widths) {
     await page.setViewportSize({ ...viewport, width });
+    await priceDisclosure.focus();
+    await page.keyboard.press("Enter");
+    await expect(exactPrice).toBeVisible();
     await listingActionsFit(page);
     await page.screenshot({
       path: info.outputPath(`collect-listing-prices-${width}.png`),
       fullPage: true,
     });
+    await priceDisclosure.click();
+    await expect(exactPrice).toBeHidden();
   }
   await page.setViewportSize(viewport);
   await page.screenshot({

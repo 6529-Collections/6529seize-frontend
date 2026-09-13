@@ -45,7 +45,7 @@ describe("documentation confirmation request", () => {
 
   it.each([
     "artwork-documentation-confirmation-v1",
-    "keys-and-gates-confirmation-v2",
+    "artwork-documentation-confirmation-v2",
   ])(
     "sends the artist's acceptance with the active copy version %s",
     async (copyVersion) => {

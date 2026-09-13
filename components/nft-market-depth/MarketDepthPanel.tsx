@@ -13,6 +13,7 @@ import { t } from "@/i18n/messages";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import marketplaceStyles from "@/components/collect/marketplace-font.module.css";
+import { useAutomaticMarketRefresh } from "@/components/collect/useAutomaticMarketRefresh";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ArrowPathIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
@@ -61,6 +62,7 @@ interface MarketDepthState {
   readonly status: MarketDepthStatus;
   readonly data: ApiMarketDepth | null;
   readonly requestKey: string | null;
+  readonly backgroundFailed?: boolean;
 }
 
 const INITIAL_STATE: MarketDepthState = {
@@ -337,6 +339,13 @@ export default function MarketDepthPanel({
   );
   const [state, setState] = useState<MarketDepthState>(INITIAL_STATE);
   const [retryVersion, setRetryVersion] = useState(0);
+  const interaction = useRef({ busy: false, generation: 0 });
+  const onInteractionChange = useCallback((busy: boolean) => {
+    interaction.current = {
+      busy,
+      generation: interaction.current.generation + 1,
+    };
+  }, []);
   const refresh = useCallback(() => {
     setRetryVersion((version) => version + 1);
   }, []);
@@ -345,6 +354,7 @@ export default function MarketDepthPanel({
   const [loadingMoreKey, setLoadingMoreKey] = useState<string | null>(null);
   const [loadMoreErrorKey, setLoadMoreErrorKey] = useState<string | null>(null);
   const loadMoreAbortControllerRef = useRef<AbortController | null>(null);
+  const browsingRequest = useRef<AbortSignal | null>(null);
   const queryKey = useMemo(
     () => [MARKET_DEPTH_QUERY_KEY, contract, String(tokenId)] as const,
     [contract, tokenId]
@@ -372,6 +382,8 @@ export default function MarketDepthPanel({
   );
 
   const data = state.requestKey === requestKey ? state.data : null;
+  const backgroundFailed =
+    state.requestKey === requestKey && state.backgroundFailed === true;
   const effectiveStatus: MarketDepthStatus =
     state.requestKey === requestKey ? state.status : "loading";
   const isLoadingMore = loadingMoreKey === requestKey;
@@ -410,6 +422,8 @@ export default function MarketDepthPanel({
   }, [loadDepth, requestKey]);
 
   const loadOrders = useCallback(async () => {
+    // Opening details takes precedence over a read started before that click.
+    interaction.current.generation++;
     if (
       !data ||
       (!data.next && loadMoreErrorKey !== requestKey) ||
@@ -470,6 +484,43 @@ export default function MarketDepthPanel({
       }
     }
   }, [data, loadDepth, loadMoreErrorKey, requestKey]);
+  const updateBrowsingDepth = useCallback(
+    async (signal: AbortSignal) => {
+      const generation = interaction.current.generation;
+      const canPublish = () =>
+        !signal.aborted &&
+        !interaction.current.busy &&
+        interaction.current.generation === generation &&
+        !panel.current?.querySelector(
+          '[data-market-depth-order-details="true"], details[open]'
+        ) &&
+        !loadMoreAbortControllerRef.current;
+      if (!canPublish() || browsingRequest.current?.aborted === false) return;
+      browsingRequest.current = signal;
+      try {
+        const next = await loadDepth(undefined, signal);
+        setState((current) =>
+          canPublish() && current.requestKey === requestKey
+            ? { ...current, data: next, backgroundFailed: false }
+            : current
+        );
+      } catch {
+        // Keep the last observed book and its mounted trade state on failure.
+        setState((current) =>
+          canPublish() && current.requestKey === requestKey
+            ? { ...current, backgroundFailed: true }
+            : current
+        );
+      } finally {
+        if (browsingRequest.current === signal) browsingRequest.current = null;
+      }
+    },
+    [loadDepth, requestKey]
+  );
+  useAutomaticMarketRefresh(
+    active && open && data !== null && !isLoadingMore,
+    updateBrowsingDepth
+  );
   const ethBook = data
     ? getBookByAddress(data.books, NATIVE_ETH_ADDRESS)
     : undefined;
@@ -547,16 +598,6 @@ export default function MarketDepthPanel({
             </div>
           )}
         </div>
-        {data && (
-          <button
-            type="button"
-            onClick={refresh}
-            className="tw-font-inherit tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors hover:tw-bg-white/5 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-          >
-            <ArrowPathIcon aria-hidden="true" className="tw-h-3.5 tw-w-3.5" />
-            {t(resolvedLocale, "marketDepth.refresh")}
-          </button>
-        )}
       </div>
 
       {Boolean(renderedActions) && (
@@ -572,14 +613,17 @@ export default function MarketDepthPanel({
         </div>
       )}
 
-      {effectiveStatus === "error" && (
+      {(effectiveStatus === "error" || backgroundFailed) && (
         <div className="tw-mt-5 tw-border-0 tw-border-y tw-border-solid tw-border-white/10 tw-py-5">
           <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-200">
             {t(resolvedLocale, "marketDepth.error")}
           </p>
           <button
             type="button"
-            onClick={refresh}
+            onClick={() => {
+              if (data) void updateBrowsingDepth(new AbortController().signal);
+              else refresh();
+            }}
             className="tw-font-inherit tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-meta tw-font-medium tw-text-iron-200 tw-transition-colors hover:tw-bg-white/5 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
             <ArrowPathIcon aria-hidden="true" className="tw-h-4 tw-w-4" />
@@ -594,6 +638,7 @@ export default function MarketDepthPanel({
           tokenId={String(tokenId)}
           locale={resolvedLocale}
           onMarketChange={refresh}
+          onInteractionChange={onInteractionChange}
         >
           <div className="tw-mt-4">
             {data.status === ApiMarketDepthStatusEnum.Unavailable ? (

@@ -57,6 +57,7 @@ interface CollectTradeControllerFormProps {
 function StandardOrderBook({
   loading,
   failed,
+  preparationFailed,
   orders,
   selectedOrder,
   onSelectOrder,
@@ -65,6 +66,7 @@ function StandardOrderBook({
 }: {
   readonly loading: boolean;
   readonly failed: boolean;
+  readonly preparationFailed: boolean;
   readonly orders: readonly ApiMarketTradeOrder[];
   readonly selectedOrder: ApiMarketTradeOrder | null;
   readonly onSelectOrder: (order: ApiMarketTradeOrder) => void;
@@ -80,9 +82,11 @@ function StandardOrderBook({
         value={selectedOrder?.identity.order_hash ?? null}
         onChange={onSelectOrder}
       />
-      <Button variant="secondary" onClick={onRefreshOrders}>
-        {t(locale, "collect.trade.refreshOrders")}
-      </Button>
+      {(failed || preparationFailed) && (
+        <Button variant="secondary" onClick={onRefreshOrders}>
+          {t(locale, "collect.retry")}
+        </Button>
+      )}
     </div>
   );
 }
@@ -229,6 +233,7 @@ export default function CollectTradeControllerForm(
         <StandardOrderBook
           loading={props.ordersLoading}
           failed={props.ordersFailed}
+          preparationFailed={props.error !== undefined && !props.preparing}
           orders={props.orders}
           selectedOrder={props.selectedOrder}
           onSelectOrder={(order) => {
@@ -243,11 +248,9 @@ export default function CollectTradeControllerForm(
       {props.inlineBuy &&
         !props.fixedOrder &&
         !props.ordersLoading &&
-        (!props.selectedOrder ||
-          props.error !== undefined ||
-          props.ordersFailed) && (
+        props.ordersFailed && (
           <Button variant="secondary" size="sm" onClick={props.onRefreshOrders}>
-            {t(props.locale, "collect.trade.refreshOrders")}
+            {t(props.locale, "collect.retry")}
           </Button>
         )}
       {props.showConnect && (

@@ -15,13 +15,15 @@ const artwork: CollectArtworkView = {
   actions: [{ action: "offer" }],
 };
 
-it("shows daily TDH value prominently while keeping the exact purchase price and selection reachable", () => {
+it("shows daily TDH value with a compact price and a separate exact-price disclosure", async () => {
+  const user = userEvent.setup();
   const onToggle = jest.fn();
   render(
     <CollectArtworkCard
       artwork={{
         ...artwork,
-        priceLabel: "0.0123456789 ETH",
+        priceLabel: "0.0124 ETH",
+        priceExactLabel: "0.0123456789 ETH",
         priceDescription: "Price for 3 copies",
         valueMetric: { value: "≈ 125", label: "base TDH/day per ETH" },
       }}
@@ -32,12 +34,58 @@ it("shows daily TDH value prominently while keeping the exact purchase price and
   );
   expect(screen.getByText("≈ 125")).toBeVisible();
   expect(screen.getByText("base TDH/day per ETH")).toBeVisible();
-  expect(screen.getByText("0.0123456789 ETH")).toBeVisible();
+  const compact = screen.getByText("0.0124 ETH");
+  const exact = screen.getByText("0.0123456789 ETH");
+  expect(compact).toBeVisible();
+  expect(exact).not.toBeVisible();
+  await user.click(compact);
+  expect(exact).toBeVisible();
+  expect(screen.getByText("Exact amounts")).toBeVisible();
   expect(screen.getByText("Price for 3 copies")).toBeVisible();
   fireEvent.click(
     screen.getByRole("button", { name: "Add Test artwork to selection" })
   );
   expect(onToggle).toHaveBeenCalledTimes(1);
+  expect(exact).toBeVisible();
+  await user.click(compact);
+  expect(exact).not.toBeVisible();
+});
+
+it("uses a native summary with a visible focus style outside artwork navigation", () => {
+  render(
+    <CollectArtworkCard
+      artwork={{
+        ...artwork,
+        priceLabel: "<0.0001 ETH",
+        priceExactLabel: "0.000000000000000001 ETH",
+      }}
+      locale="en-US"
+      onTrade={jest.fn()}
+      selection={{ selected: false, onToggle: jest.fn() }}
+    />
+  );
+  const summary = screen.getByText("<0.0001 ETH").closest("summary");
+  expect(summary).toBe(summary?.parentElement?.firstElementChild);
+  expect(summary?.parentElement?.tagName).toBe("DETAILS");
+  expect(summary?.closest("a")).toBeNull();
+  expect(summary).toHaveClass("focus-visible:tw-outline");
+  expect(screen.getByText("0.000000000000000001 ETH")).not.toBeVisible();
+});
+
+it("does not add a disclosure when the compact price already retains every decimal", () => {
+  const { container } = render(
+    <CollectArtworkCard
+      artwork={{
+        ...artwork,
+        priceLabel: "0.01 ETH",
+        priceExactLabel: "0.01 ETH",
+      }}
+      locale="en-US"
+      onTrade={jest.fn()}
+    />
+  );
+  expect(screen.getByText("0.01 ETH")).toBeVisible();
+  expect(container.querySelector("details")).toBeNull();
 });
 
 it("keeps artwork navigation separate from compact transaction actions", async () => {

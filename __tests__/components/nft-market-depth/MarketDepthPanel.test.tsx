@@ -399,9 +399,7 @@ describe("MarketDepthPanel", () => {
       screen.getByText("Some orders in the collection could not be priced.")
     ).toBeInTheDocument();
 
-    act(() => {
-      jest.advanceTimersByTime(60_000);
-    });
+    await act(async () => jest.advanceTimersByTimeAsync(60_000));
     expect(screen.getByText("Updated 6 minutes ago")).toBeInTheDocument();
   });
 
@@ -459,6 +457,36 @@ describe("MarketDepthPanel", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Show fewer levels" }));
     expect(container.querySelector('[title="6.123"]')).not.toBeInTheDocument();
+  });
+
+  it("keeps opened paginated order details complete across automatic update intervals", async () => {
+    jest.useFakeTimers();
+    const complete = depth();
+    fetchMock
+      .mockResolvedValueOnce(depth({ orders: [], next: "cursor-1" }))
+      .mockResolvedValue(complete);
+    renderOpenDepth(
+      <MarketDepthPanel contract="0x1" tokenId="7" locale="en-US" />
+    );
+    const row = await screen.findByRole("button", {
+      name: "Listings at 1.25 ETH",
+    });
+    fireEvent.click(row);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Loading order details…")
+      ).not.toBeInTheDocument()
+    );
+    await act(async () => jest.advanceTimersByTimeAsync(120_000));
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(row).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.queryByText("Loading order details…")
+    ).not.toBeInTheDocument();
+    fireEvent.click(row);
+    await act(async () => jest.advanceTimersByTimeAsync(60_000));
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   it("renders the optional action slot once between the summary and prices", async () => {
