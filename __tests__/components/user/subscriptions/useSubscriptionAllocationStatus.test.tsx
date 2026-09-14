@@ -28,32 +28,41 @@ beforeEach(() => {
 });
 afterEach(() => client.clear());
 
-it.each([null, { phase: null, phase_position: -1 }])(
-  "reports absent allocation only after distribution is published (%j)",
-  async (final) => {
-    fetchMock.mockImplementation(async ({ endpoint }) => {
-      if (endpoint.startsWith("subscriptions/")) {
-        if (!final) throw { status: 404 };
-        return final;
-      }
-      return { has_distribution: true, allocations: [] };
-    });
-    const { result } = renderHook(
-      () => useSubscriptionAllocationStatus(baseProps),
-      { wrapper }
-    );
-    await waitFor(() => expect(result.current.hasNoAllocation).toBe(true));
-    expect(fetchMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        params: { wallet: profileKey.split("-")[0] },
-        includeWalletAuth: false,
-      })
-    );
-  }
-);
+it("reports absent allocation only after distribution is published", async () => {
+  fetchMock.mockImplementation(async ({ endpoint }) => {
+    if (endpoint.startsWith("subscriptions/")) throw { status: 404 };
+    return { has_distribution: true, allocations: [] };
+  });
+  const { result } = renderHook(
+    () => useSubscriptionAllocationStatus(baseProps),
+    { wrapper }
+  );
+  await waitFor(() => expect(result.current.hasNoAllocation).toBe(true));
+  expect(fetchMock).toHaveBeenCalledWith(
+    expect.objectContaining({
+      params: { wallet: profileKey.split("-")[0] },
+      includeWalletAuth: false,
+    })
+  );
+});
+it("keeps a phase-less finalized subscription in the pending state", async () => {
+  fetchMock.mockResolvedValue({ phase: null, phase_position: -1 });
+  const { result } = renderHook(
+    () => useSubscriptionAllocationStatus(baseProps),
+    { wrapper }
+  );
+  await waitFor(() =>
+    expect(result.current.final).toEqual({
+      phase: null,
+      phase_position: -1,
+    })
+  );
+  expect(result.current.hasNoAllocation).toBe(false);
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+});
 it("does not report absent allocation before publication", async () => {
   fetchMock
-    .mockResolvedValueOnce({ phase: null })
+    .mockRejectedValueOnce({ status: 404 })
     .mockResolvedValueOnce({ has_distribution: false, allocations: [] });
   const { result } = renderHook(
     () => useSubscriptionAllocationStatus(baseProps),
@@ -80,7 +89,7 @@ it.each([401, 403, 500])(
 );
 it("does not report absence if publication lookup fails", async () => {
   fetchMock
-    .mockResolvedValueOnce({ phase: null })
+    .mockRejectedValueOnce({ status: 404 })
     .mockRejectedValueOnce({ status: 500 });
   const { result } = renderHook(
     () => useSubscriptionAllocationStatus(baseProps),
@@ -117,7 +126,7 @@ it.each([
 });
 it("does not reuse a previous profile's absence while the new profile loads", async () => {
   fetchMock
-    .mockResolvedValueOnce({ phase: null })
+    .mockRejectedValueOnce({ status: 404 })
     .mockResolvedValueOnce({ has_distribution: true, allocations: [] });
   const { result, rerender } = renderHook(
     (props) => useSubscriptionAllocationStatus(props),
@@ -132,16 +141,10 @@ it("does not reuse a previous profile's absence while the new profile loads", as
   expect(result.current.hasNoAllocation).toBe(false);
 });
 it("does not confuse wallet allowlist spots with a subscription allocation", async () => {
-  fetchMock
-    .mockResolvedValueOnce({
-      phase: null,
-      phase_position: -1,
-      subscribed_count: 1,
-    })
-    .mockResolvedValueOnce({
-      has_distribution: true,
-      allocations: [{ phase: "Phase 1", spots_allowlist: 2, spots_airdrop: 0 }],
-    });
+  fetchMock.mockRejectedValueOnce({ status: 404 }).mockResolvedValueOnce({
+    has_distribution: true,
+    allocations: [{ phase: "Phase 1", spots_allowlist: 2, spots_airdrop: 0 }],
+  });
   const { result } = renderHook(
     () => useSubscriptionAllocationStatus(baseProps),
     { wrapper }

@@ -122,8 +122,9 @@ or an unavailable page. US iOS, web, and Android retain their existing behavior.
   - first row can show phase metadata (phase, position, airdrop address,
     subscribed count)
   - a subscribed first row shows `No subscription allocation` once distribution
-    is published and no subscription phase is assigned; no message appears for
-    unsubscribed rows, unpublished distribution, or failed lookups
+    is published and the finalized subscription list has no record for that
+    profile; a phase-less finalized record remains pending, and no message
+    appears for unsubscribed rows, unpublished distribution, or failed lookups
   - phase and publication details refresh once per minute while the tab is visible
   - subscribed rows show a quantity selector capped by eligibility count
 - `Subscription History`:

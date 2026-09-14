@@ -47,8 +47,11 @@ export function useSubscriptionAllocationStatus({
     refetchInterval: ALLOCATION_REFRESH_INTERVAL,
   });
 
+  // A final row with no phase is still awaiting allocation processing. Only a
+  // successful 404 proves this subscribed card was omitted from the finalized
+  // subscription list.
   const checkPublication =
-    first && subscribed && finalQuery.isSuccess && !finalQuery.data?.phase;
+    first && subscribed && finalQuery.isSuccess && finalQuery.data === null;
   // Publication is card-wide. Use a wallet from the viewed consolidation only
   // to satisfy the existing endpoint; its wallet allocations are not used here.
   const wallet = profileKey.split("-")[0] ?? "";
