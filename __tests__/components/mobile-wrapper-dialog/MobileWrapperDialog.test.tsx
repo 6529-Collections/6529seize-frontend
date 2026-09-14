@@ -379,7 +379,7 @@ describe("MobileWrapperDialog", () => {
       expect(onClose).toHaveBeenCalled();
     });
 
-    it("keeps nested dialogs dismissible when the outer dialog ignores Escape", async () => {
+    it("lets nested dialogs own Escape when the outer dialog preserves focus", async () => {
       const user = userEvent.setup();
       const onOuterClose = jest.fn();
       function NestedDialogs() {
@@ -389,7 +389,7 @@ describe("MobileWrapperDialog", () => {
             title="Creation"
             isOpen
             onClose={onOuterClose}
-            dismissOnBackdropOrEscape={false}
+            preserveFocusOnEscape
           >
             <button type="button" onClick={() => setNestedOpen(true)}>
               Open details
@@ -426,7 +426,7 @@ describe("MobileWrapperDialog", () => {
           isOpen
           onClose={onClose}
           dismissible={false}
-          dismissOnBackdropOrEscape={false}
+          preserveFocusOnEscape
         />
       );
       await user.keyboard("{Escape}");

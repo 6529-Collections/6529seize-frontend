@@ -1819,7 +1819,11 @@ const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
 } as const);
 
 const WAVE_CREATE_DIALOG_MESSAGES = objectMessages("waves.create.dialog", {
-  closeHint: "Use Close to leave. Closing can discard your work.",
+  discardTitle: "Discard your changes?",
+  discardMessage:
+    "Unsaved changes will be lost. Existing saved drafts will remain.",
+  discardConfirm: "Discard changes",
+  keepEditing: "Keep editing",
   subwaveOfTitle: 'Create subwave of "{parentWaveName}"',
   profileRequiredConfirm: "Go to Identity",
   profileRequiredDescription: "Set up your profile before creating a Wave.",

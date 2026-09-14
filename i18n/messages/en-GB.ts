@@ -691,8 +691,11 @@ export const EN_GB_MESSAGES = {
   "waves.create.review.outcome": "Outcome {number}",
   "waves.create.dialog.subwaveTitle": "Create subwave",
   "waves.create.dialog.waveTitle": "Create Wave",
-  "waves.create.dialog.closeHint":
-    "Use Close to leave. Closing can discard your work.",
+  "waves.create.dialog.discardTitle": "Discard your changes?",
+  "waves.create.dialog.discardMessage":
+    "Unsaved changes will be lost. Existing saved drafts will remain.",
+  "waves.create.dialog.discardConfirm": "Discard changes",
+  "waves.create.dialog.keepEditing": "Keep editing",
   "waves.create.actions.cancel": "Cancel",
   "waves.create.actions.backToCriteria": "Back to criteria",
   "waves.create.actions.complete": "Complete",

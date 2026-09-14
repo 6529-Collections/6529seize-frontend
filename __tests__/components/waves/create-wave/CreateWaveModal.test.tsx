@@ -41,7 +41,7 @@ describe("CreateWaveModal", () => {
     expect(mockedDialog).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'Create subwave of "Parent Wave"',
-        dismissOnBackdropOrEscape: false,
+        preserveFocusOnEscape: true,
       }),
       undefined
     );
