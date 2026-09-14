@@ -6,6 +6,7 @@ import Button from "@/components/utils/button/Button";
 import CreateDropPoll, {
   type CreateDropPollDraft,
 } from "@/components/waves/CreateDropPoll";
+import { useWaveDropLayers } from "@/components/waves/drops/WaveDropLayerContext";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
@@ -29,6 +30,7 @@ export default function CreateDropPollDialog({
   readonly validationError: string | null;
 }) {
   const [isOpen, setIsOpen] = useState(true);
+  const { mobileDialogZIndexClassName } = useWaveDropLayers();
   const title = t(locale, "waves.poll.composer.title");
   const postLabel = t(locale, "waves.header.postLabel.one");
   const postingLabel = t(locale, "waves.header.postLabel.inProgress");
@@ -53,6 +55,7 @@ export default function CreateDropPollDialog({
       showHeaderCloseButton={false}
       showHeaderDivider
       surfaceClassName="tw-bg-iron-950"
+      zIndexClassName={mobileDialogZIndexClassName}
     >
       <CreateDropPoll
         draft={draft}

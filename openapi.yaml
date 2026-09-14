@@ -16029,6 +16029,40 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiWaveDropsFeed"
   /waves/{id}/my-chat-history:
+    post:
+      tags:
+        - Waves
+      summary: Prepare a bounded deletion of the authenticated user's chat history
+      description: >-
+        Freezes a server-side cutoff without deleting any messages. Retain the
+        returned token before issuing DELETE requests, and reuse the same token
+        for every batch and retry. Messages sent after preparation are
+        preserved. Proxies cannot prepare a purge. Wave membership is not
+        required.
+      operationId: prepareMyWaveChatHistoryPurge
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/delete-my-wave-chat-history.handler"
+          name: handlePrepareMyWaveChatHistoryPurge
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Frozen purge scope; no messages have been deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveChatHistoryPurgePlan"
+        "403":
+          description: A profile is required and proxies cannot delete chat history
+        "404":
+          description: Wave not found
     delete:
       tags:
         - Waves
@@ -16038,6 +16072,12 @@ paths:
         in the wave, except for the wave's pinned drop. Participatory and winner
         drops are never deleted. This self-service cleanup remains available if
         the caller is no longer eligible to view or participate in the wave.
+        With purge_token, deletes at most 100 messages per request within the
+        prepared cutoff. Repeat with the SAME token until has_more is false,
+        including after a lost response. Each response lists only this batch's
+        deletions. The latest pinned drop is protected on each request. Without
+        a token, histories larger than one batch fail with 400 before any
+        deletion; legacy clients never receive a partial success.
       operationId: deleteMyWaveChatHistory
       x-6529-router:
         enabled: true
@@ -16051,6 +16091,15 @@ paths:
           required: true
           schema:
             type: string
+        - name: purge_token
+          in: query
+          required: false
+          description: >-
+            Token from prepareMyWaveChatHistoryPurge; reuse for every batch and
+            retry
+          schema:
+            type: string
+            maxLength: 2048
       responses:
         "200":
           description: Chat history deletion result
@@ -16058,6 +16107,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDeleteMyWaveChatHistoryResponse"
+        "400":
+          description: >-
+            Invalid token, or large history requiring a client that supports
+            batches
         "403":
           description: A profile is required and proxies cannot delete chat history
         "404":
@@ -26497,7 +26550,11 @@ components:
       required:
         - deleted_drop_ids
         - preserved_pinned_drop_id
+        - has_more
       properties:
+        has_more:
+          type: boolean
+          description: True when another bounded request with the same token is required
         deleted_drop_ids:
           type: array
           items:
@@ -35562,6 +35619,15 @@ components:
           type: integer
           format: int64
           minimum: 1000
+    ApiWaveChatHistoryPurgePlan:
+      type: object
+      additionalProperties: false
+      required:
+        - purge_token
+      properties:
+        purge_token:
+          type: string
+          description: Opaque signed cutoff bound to the authenticated author and wave
     ApiWaveConfig:
       type: object
       required:

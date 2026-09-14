@@ -212,7 +212,8 @@ async function runNativeInitialBackfill({
     throwIfAborted(controller.signal);
 
     if (backfillDrops === null) {
-      const failureError = fetchFailureError ?? createWaveFeedUnavailableError();
+      const failureError =
+        fetchFailureError ?? createWaveFeedUnavailableError();
       trackWaveFeedLoadTerminalFromError({
         error: failureError,
         hadCachedDrops: true,
@@ -781,11 +782,12 @@ export function useWaveDataFetching({
   const cancelWaveDataFetch = useCallback(
     (waveId: string) => {
       clearInitialBackfillTimeout(waveId);
+      clearLoadingState(waveId);
       cancelFetch(waveId, "wave_deactivated");
       cancelFetch(`${waveId}-initial-backfill`, "wave_deactivated");
       cancelFetch(getNewestSyncAbortKey(waveId), "wave_deactivated");
     },
-    [cancelFetch, clearInitialBackfillTimeout]
+    [cancelFetch, clearInitialBackfillTimeout, clearLoadingState]
   );
 
   return {
