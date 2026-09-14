@@ -19,6 +19,15 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.jso
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "singleDrop.share": "Teilen",
+  "singleDrop.shareLabel": "Drop teilen",
+  "singleDrop.shared": "Link geteilt",
+  "singleDrop.close": "Schließen",
+  "singleDrop.closeLabel": "Panel schließen",
+  "singleDrop.showChat": "Chat anzeigen",
+  "singleDrop.hideChat": "Chat ausblenden",
+  "singleDrop.chatLabel": "Drop-Chat",
+  "singleDrop.closeChat": "Chat schließen",
   ...artworkShareMessages,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
