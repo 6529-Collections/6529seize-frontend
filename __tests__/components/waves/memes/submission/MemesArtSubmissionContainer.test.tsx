@@ -327,7 +327,7 @@ describe("MemesArtSubmissionContainer", () => {
     act(() =>
       additionalInfoProps.onArtworkCommentaryChange("Retained commentary")
     );
-    act(() => additionalInfoProps.onPreview());
+    await act(async () => additionalInfoProps.onPreview());
     expect(screen.getByTestId("preview")).toBeInTheDocument();
 
     const updatedWave = {

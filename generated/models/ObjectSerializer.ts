@@ -607,6 +607,8 @@ export * from '../models/ApiProfileWave';
 export * from '../models/ApiProfileWaveActivity';
 export * from '../models/ApiProfileWaveActivityPage';
 export * from '../models/ApiProfileWaveActivityType';
+export * from '../models/ApiProposalFrameRequest';
+export * from '../models/ApiProposalFrameResponse';
 export * from '../models/ApiPublishProfileCmsPackageRequest';
 export * from '../models/ApiPushNotificationDevice';
 export * from '../models/ApiPushNotificationSettings';
@@ -1471,6 +1473,8 @@ import { ApiProfileWave } from '../models/ApiProfileWave';
 import { ApiProfileWaveActivity } from '../models/ApiProfileWaveActivity';
 import { ApiProfileWaveActivityPage } from '../models/ApiProfileWaveActivityPage';
 import { ApiProfileWaveActivityType } from '../models/ApiProfileWaveActivityType';
+import { ApiProposalFrameRequest , ApiProposalFrameRequestMimeTypeEnum   , ApiProposalFrameRequestLayoutEnum   } from '../models/ApiProposalFrameRequest';
+import { ApiProposalFrameResponse , ApiProposalFrameResponseMimeTypeEnum   } from '../models/ApiProposalFrameResponse';
 import { ApiPublishProfileCmsPackageRequest } from '../models/ApiPublishProfileCmsPackageRequest';
 import { ApiPushNotificationDevice } from '../models/ApiPushNotificationDevice';
 import { ApiPushNotificationSettings } from '../models/ApiPushNotificationSettings';
@@ -1947,6 +1951,9 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiProfilePreferencesNotificationLevelEnum",
     "ApiProfileProxyActionType",
     "ApiProfileWaveActivityType",
+    "ApiProposalFrameRequestMimeTypeEnum",
+    "ApiProposalFrameRequestLayoutEnum",
+    "ApiProposalFrameResponseMimeTypeEnum",
     "ApiRateMatter",
     "ApiRedeemConnectionShareRequestTargetClientTypeEnum",
     "ApiRedeemConnectionShareResponseClientTypeEnum",
@@ -2562,6 +2569,8 @@ let typeMap: {[index: string]: any} = {
     "ApiProfileWave": ApiProfileWave,
     "ApiProfileWaveActivity": ApiProfileWaveActivity,
     "ApiProfileWaveActivityPage": ApiProfileWaveActivityPage,
+    "ApiProposalFrameRequest": ApiProposalFrameRequest,
+    "ApiProposalFrameResponse": ApiProposalFrameResponse,
     "ApiPublishProfileCmsPackageRequest": ApiPublishProfileCmsPackageRequest,
     "ApiPushNotificationDevice": ApiPushNotificationDevice,
     "ApiPushNotificationSettings": ApiPushNotificationSettings,

@@ -7716,6 +7716,48 @@ paths:
           description: Only the author can toggle hide link preview
         "404":
           description: Drop not found
+  /drop-media/proposal-frame:
+    post:
+      tags:
+        - Drops
+      summary: Publish an optional proposal frame around uploaded artwork
+      description: >-
+        Requires an authenticated profile. Builds a fixed HTML template around
+        an owned, ready media upload or recognized decentralized artwork and
+        pins it to IPFS. The source is referenced, never fetched by this API.
+        The returned HTML URL can be submitted as drop media with an existing
+        additional_media.preview_image for mint and static previews.
+      operationId: createProposalFrame
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        handler:
+          import: "@/api/drops/proposal-frame.handlers"
+          name: handleCreateProposalFrame
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiProposalFrameRequest"
+      responses:
+        "200":
+          description: Published proposal frame
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProposalFrameResponse"
+        "400":
+          description: Invalid input or artwork still processing
+        "401":
+          description: Authentication required
+        "403":
+          description: A profile and ownership of uploaded media are required
+        "429":
+          description: API rate limit exceeded
   /drop-media/prep:
     post:
       tags:
@@ -33684,6 +33726,56 @@ components:
       enum:
         - CREATED
         - RECENT
+    ApiProposalFrameRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - media_url
+        - mime_type
+        - title
+        - layout
+      properties:
+        media_url:
+          type: string
+          minLength: 1
+          maxLength: 2048
+          description: >-
+            Owned drop upload URL or recognized IPFS, IPNS, or Arweave artwork
+            URL
+        mime_type:
+          type: string
+          enum:
+            - image/png
+            - image/jpeg
+            - image/jpg
+            - image/gif
+            - image/webp
+            - video/mp4
+            - video/x-msvideo
+            - video/quicktime
+            - text/html
+        title:
+          type: string
+          minLength: 1
+          maxLength: 250
+        layout:
+          type: string
+          enum:
+            - portrait
+            - landscape
+    ApiProposalFrameResponse:
+      type: object
+      required:
+        - url
+        - mime_type
+      properties:
+        url:
+          type: string
+          description: Published IPFS index.html URL
+        mime_type:
+          type: string
+          enum:
+            - text/html
     ApiPublishProfileCmsPackageRequest:
       type: object
       required:
