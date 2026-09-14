@@ -37,7 +37,8 @@ async function verifySnapshot(
     snapshot.timestamp !== BigInt(result.block_timestamp) ||
     typeof latest.timestamp !== "bigint" ||
     latest.timestamp < 0n ||
-    latest.timestamp - snapshot.timestamp > 120n
+    latest.timestamp - snapshot.timestamp > 120n ||
+    snapshot.timestamp - latest.timestamp > 120n
   )
     throw new Error("MARKET_REVIEW_MISMATCH");
 }

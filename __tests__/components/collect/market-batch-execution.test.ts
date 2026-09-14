@@ -432,23 +432,78 @@ it.each([
   }
 );
 
-it("rejects a simulation snapshot more than 120 seconds behind the independently read chain", async () => {
-  const f = setup();
-  f.client.getBlock.mockImplementation(
-    async (request: { blockTag?: string }) => ({
-      number: 12n,
-      hash: f.operation.block_hash,
-      timestamp: BigInt(NOW / 1000 + (request.blockTag === "latest" ? 121 : 0)),
-      baseFeePerGas: 8n,
-    })
-  );
-  await expect(confirmMarketBatch(f.options)).rejects.toThrow(
-    "MARKET_REVIEW_MISMATCH"
-  );
-  expect(send).not.toHaveBeenCalled();
-  expect(api.beginMarketBatchAttempt).not.toHaveBeenCalled();
-  expect(f.wallet.sendTransaction).not.toHaveBeenCalled();
-});
+it.each(["block_number", "block_timestamp"] as const)(
+  "rejects a review missing %s instead of treating it as an unbounded snapshot",
+  async (field) => {
+    const f = setup();
+    preflight.mockResolvedValue({
+      operation_id: f.operation.id,
+      revision: f.operation.revision,
+      transaction_digest: createMarketSendAttempt(f.operation.transaction!, 12)
+        .digest,
+      estimated_gas: "400000",
+      block_number: 12,
+      block_hash: f.operation.block_hash!,
+      block_timestamp: NOW / 1000,
+    });
+    delete f.operation[field];
+    await expect(confirmMarketBatch(f.options)).rejects.toThrow(
+      "MARKET_REVIEW_MISMATCH"
+    );
+    expect(preflight).toHaveBeenCalledTimes(1);
+    expect(send).not.toHaveBeenCalled();
+    expect(api.beginMarketBatchAttempt).not.toHaveBeenCalled();
+    expect(f.wallet.sendTransaction).not.toHaveBeenCalled();
+  }
+);
+
+it.each([-121, 121])(
+  "rejects a simulation snapshot differing from the independently read chain by %s seconds",
+  async (difference) => {
+    const f = setup();
+    f.client.getBlock.mockImplementation(
+      async (request: { blockTag?: string }) => ({
+        number: 12n,
+        hash: f.operation.block_hash,
+        timestamp: BigInt(
+          NOW / 1000 + (request.blockTag === "latest" ? difference : 0)
+        ),
+        baseFeePerGas: 8n,
+      })
+    );
+    await expect(confirmMarketBatch(f.options)).rejects.toThrow(
+      "MARKET_REVIEW_MISMATCH"
+    );
+    expect(send).not.toHaveBeenCalled();
+    expect(api.beginMarketBatchAttempt).not.toHaveBeenCalled();
+    expect(f.wallet.sendTransaction).not.toHaveBeenCalled();
+  }
+);
+
+it.each([-120, -12, 12, 120])(
+  "allows a bounded %s-second provider timestamp difference",
+  async (difference) => {
+    const f = setup();
+    f.client.getBlock.mockImplementation(
+      async (request: { blockTag?: string }) => ({
+        number: 12n,
+        hash: f.operation.block_hash,
+        timestamp: BigInt(
+          NOW / 1000 + (request.blockTag === "latest" ? difference : 0)
+        ),
+        baseFeePerGas: 8n,
+      })
+    );
+    f.wallet.sendTransaction.mockResolvedValue(`0x${"e".repeat(64)}`);
+    send.mockImplementationOnce(async (options) => ({
+      hash: await options.send(),
+      attempt: createMarketSendAttempt(options.operation.transaction!, 12),
+    }));
+    await expect(confirmMarketBatch(f.options)).resolves.toBe("COMPLETE");
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(f.wallet.sendTransaction).toHaveBeenCalledTimes(1);
+  }
+);
 
 it.each(["lost API response", "wallet changed", "review expired"])(
   "does not arm or send after preflight when %s",
