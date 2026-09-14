@@ -454,6 +454,8 @@ export * from '../models/ApiMarketBatchItem';
 export * from '../models/ApiMarketBatchItemRequest';
 export * from '../models/ApiMarketBatchMirrorTerms';
 export * from '../models/ApiMarketBatchOperation';
+export * from '../models/ApiMarketBatchPreflight';
+export * from '../models/ApiMarketBatchPreflightRequest';
 export * from '../models/ApiMarketBatchPrepareRequest';
 export * from '../models/ApiMarketBatchSendAttempt';
 export * from '../models/ApiMarketBatchSettlement';
@@ -1319,6 +1321,8 @@ import { ApiMarketBatchItem } from '../models/ApiMarketBatchItem';
 import { ApiMarketBatchItemRequest } from '../models/ApiMarketBatchItemRequest';
 import { ApiMarketBatchMirrorTerms } from '../models/ApiMarketBatchMirrorTerms';
 import { ApiMarketBatchOperation  , ApiMarketBatchOperationStateEnum               , ApiMarketBatchOperationKindEnum  , ApiMarketBatchOperationExecutionPolicyEnum        } from '../models/ApiMarketBatchOperation';
+import { ApiMarketBatchPreflight } from '../models/ApiMarketBatchPreflight';
+import { ApiMarketBatchPreflightRequest } from '../models/ApiMarketBatchPreflightRequest';
 import { ApiMarketBatchPrepareRequest, ApiMarketBatchPrepareRequestKindEnum    , ApiMarketBatchPrepareRequestCurrencyEnum  , ApiMarketBatchPrepareRequestExecutionPolicyEnum     } from '../models/ApiMarketBatchPrepareRequest';
 import { ApiMarketBatchSendAttempt , ApiMarketBatchSendAttemptPurposeEnum    , ApiMarketBatchSendAttemptStatusEnum     } from '../models/ApiMarketBatchSendAttempt';
 import { ApiMarketBatchSettlement, ApiMarketBatchSettlementOutcomeEnum        } from '../models/ApiMarketBatchSettlement';
@@ -2422,6 +2426,8 @@ let typeMap: {[index: string]: any} = {
     "ApiMarketBatchItemRequest": ApiMarketBatchItemRequest,
     "ApiMarketBatchMirrorTerms": ApiMarketBatchMirrorTerms,
     "ApiMarketBatchOperation": ApiMarketBatchOperation,
+    "ApiMarketBatchPreflight": ApiMarketBatchPreflight,
+    "ApiMarketBatchPreflightRequest": ApiMarketBatchPreflightRequest,
     "ApiMarketBatchPrepareRequest": ApiMarketBatchPrepareRequest,
     "ApiMarketBatchSendAttempt": ApiMarketBatchSendAttempt,
     "ApiMarketBatchSettlement": ApiMarketBatchSettlement,
