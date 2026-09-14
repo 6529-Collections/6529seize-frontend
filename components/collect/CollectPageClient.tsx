@@ -4,7 +4,6 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
-import { isCollectEdition } from "./collect-families";
 import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
 import type { ApiCollectPlanLeg } from "@/generated/models/ApiCollectPlanLeg";
 import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
@@ -56,16 +55,8 @@ import { collectProfileWallets } from "./collect-recipient.helpers";
 import { collectLowestArtworkEntries } from "./collect-catalog.helpers";
 import CollectSelectionBar from "./CollectSelectionBar";
 import CollectBatchController from "./CollectBatchController";
-import {
-  collectSelectionItem,
-  toggleCollectSelection,
-  type CollectSelectedListing,
-} from "./collect-selection.helpers";
-import {
-  collectListingKey,
-  collectOrderPurchaseQuantity,
-} from "./collect-buy.helpers";
-import type { CollectArtworkSelection } from "./CollectArtworkCard";
+import type { CollectSelectedListing } from "./collect-selection.helpers";
+import { collectArtworkSelection } from "./collect-artwork-selection";
 import CollectOfferWorkspace from "./CollectOfferWorkspace";
 import CollectStrategyPicker from "./CollectStrategyPicker";
 import CollectPlanMetadataProvider from "./CollectPlanMetadataProvider";
@@ -346,61 +337,20 @@ function CollectCatalogController({
           listingTime
         )
       : discovery.entries;
-  const selectionFor = (id: string): CollectArtworkSelection | undefined => {
-    const entry = discovery.entries.find(
-      (item) => collectCatalogEntryId(item) === id
-    );
-    if (!entry?.order) return undefined;
-    const order = entry.order,
-      key = collectListingKey(order);
-    const selected = selection.some(
-      (item) => collectListingKey(item.order) === key
-    );
-    const duplicate721 =
-      !isCollectEdition(entry.asset.family) &&
-      selection.some((item) => item.asset.asset_key === entry.asset.asset_key);
-    let disabledReason: string | undefined;
-    const pending = orderIsPending(order);
-    if (pending) disabledReason = t(locale, "collect.trade.submissionPending");
-    else if (!selected) {
-      if (duplicate721)
-        disabledReason = t(locale, "collect.selection.alreadySelected");
-      else if (selection.length >= 128)
-        disabledReason = t(locale, "collect.selection.limit", { count: 128 });
-      else if (collectOrderPurchaseQuantity(order) === null)
-        disabledReason = t(locale, "collect.trade.unavailable");
-    }
-    return {
-      selected,
-      pending,
-      disabledReason,
-      onToggle: () => {
-        if (orderIsPendingNow(order)) return;
-        if (selected) {
-          setSelection((items) =>
-            items.filter((item) => collectListingKey(item.order) !== key)
-          );
-          return;
-        }
-        if (disabledReason) return;
-        const candidate = collectSelectionItem({
-          asset: entry.asset,
-          order,
-          profileWallets: collectProfileWallets(connectedProfile).map(
-            (wallet) => wallet.wallet
-          ),
-          nowSeconds: Math.floor(Date.now() / 1000),
-        });
-        if (candidate)
-          setSelection((items) =>
-            toggleCollectSelection(items, {
-              ...candidate,
-              selectedAt: Date.now(),
-            })
-          );
-      },
-    };
-  };
+  const selectionFor = (id: string) =>
+    collectArtworkSelection({
+      entry: discovery.entries.find(
+        (item) => collectCatalogEntryId(item) === id
+      ),
+      selection,
+      profileWallets: collectProfileWallets(connectedProfile).map(
+        (wallet) => wallet.wallet
+      ),
+      locale,
+      orderIsPending,
+      orderIsPendingNow,
+      setSelection,
+    });
   const plan =
     sourceCostPlan && profile
       ? collectCostPlanView(
