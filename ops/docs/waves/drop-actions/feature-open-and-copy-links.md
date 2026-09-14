@@ -8,8 +8,9 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
 - `Open` / `Open drop` uses `drop={dropId}` to open single-drop view in the
   current thread.
 - The single-drop header has a visible `Share` button on desktop, mobile web,
-  and the native app. It opens the system share sheet when available and copies
-  the link otherwise.
+  and the native app. It shares a `drop={dropId}` URL that reopens the same
+  single-drop view, using the system share sheet when available and copying the
+  link otherwise.
 - Preview cards and quote cards expose a `Link actions` button with
   `Copy link` and `Open link`.
 - `Copy link` copies an absolute share URL that targets the drop with:
@@ -61,15 +62,17 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
 2. Select `Share` beside the chat control.
 3. Choose a destination in the system share sheet. A successful share shows
    `Link shared`. Cancelling leaves the drop open without copying or an error.
-4. If system sharing is unavailable or fails, the app copies the canonical
-   6529.io drop link. `Copied!` appears only after the clipboard confirms success.
+4. If system sharing is unavailable or fails, the app copies the 6529.io link
+   that reopens the same single-drop view. `Copied!` appears only after the
+   clipboard confirms success.
 5. If clipboard access fails, the button briefly shows `Copy failed`. Allow
    clipboard access and try again.
 
-Sharing uses the same link rules as other drop copy actions. Direct-message
-links use `/messages/{waveId}` and still require access to that conversation.
-The share action includes only the URL, without private drop text or wave names.
-Temporary drops that are still being created do not show the Share action.
+Shared links use `drop={dropId}` so they reopen the same single-drop view. Wave
+links use `/waves/{waveId}`; direct-message links use `/messages/{waveId}` and
+still require access to that conversation. The share action includes only the
+URL, without private drop text or wave names. Temporary drops that are still
+being created do not show the Share action.
 
 ## Common Scenarios
 
@@ -116,10 +119,6 @@ Temporary drops that are still being created do not show the Share action.
 
 ## Failure and Recovery
 
-- Share stays unavailable until wave settings finish loading. If it remains
-  unavailable after a connection failure, reload the page or restart the app
-  and try again.
-
 - If clipboard access is blocked, copy can fail without `Copied!`; restore
   clipboard access and try again.
 - If a serial link targets older history, loading can take longer before the
@@ -127,9 +126,9 @@ Temporary drops that are still being created do not show the Share action.
 
 ## Limitations / Notes
 
-- `Open` (`drop` query), most copied drop links (`serialNo` query), Main Stage and Quorum
-  participatory copied links (`drop` query), and link-card `Open link` are
-  different navigation mechanisms.
+- `Open` and single-drop `Share` use the `drop` query. Most copied drop links
+  use the `serialNo` query, Main Stage and Quorum participatory copied links use
+  the `drop` query, and link-card `Open link` follows its referenced URL.
 - Main Stage and Quorum participatory links open single-drop view. Other copied
   drop links jump to the drop in chat.
 - `Copy link` is unavailable for temporary drops.
