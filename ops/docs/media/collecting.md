@@ -282,6 +282,10 @@ wallet** rechecks every selected order together. A quote that aged while you rea
 is refreshed automatically. When available, the review identifies the old and new
 price, quantity, fees or maximum cost that require another decision. Changing the
 selection, quantity, payer or delivery addresses also requires another review.
+Before opening your wallet, the site simulates the complete reviewed transaction
+and checks its gas requirements against your fee caps. These checks do not sign
+or send a transaction. If they cannot finish, your selection stays available to
+retry; a successful check alone does not mean a purchase was submitted.
 Orders retains the purchase until its receipt confirms all selected deliveries.
 
 ### Make or accept an offer
