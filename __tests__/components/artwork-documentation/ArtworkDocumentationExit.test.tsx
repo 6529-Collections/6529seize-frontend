@@ -143,19 +143,21 @@ it("saves an assigned artist's pending title before exiting to the personal list
 it("retains the artist's unsaved title and stays in the editor when Save and exit is rejected", async () => {
   const user = userEvent.setup();
   const context = ownerContext();
-  jest
-    .mocked(patchDocumentationModule)
-    .mockRejectedValueOnce({
-      status: 422,
-      response: { body: { code: "INVALID_ANSWER" } },
-    });
+  jest.mocked(patchDocumentationModule).mockRejectedValueOnce({
+    status: 422,
+    response: { body: { code: "INVALID_ANSWER" } },
+  });
   render(<Editor context={context} />);
   fireEvent.change(screen.getByRole("textbox", { name: "Artwork title" }), {
     target: { value: "Still in this window" },
   });
   await user.click(screen.getByRole("button", { name: "Save and exit" }));
   await waitFor(() =>
-    expect(screen.getByRole("status")).toHaveTextContent("invalid")
+    expect(
+      screen
+        .getAllByRole("status")
+        .every((status) => status.textContent === "invalid")
+    ).toBe(true)
   );
   expect(mockPush).not.toHaveBeenCalled();
   expect(screen.getByRole("textbox", { name: "Artwork title" })).toHaveValue(
