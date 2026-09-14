@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://6529.io/schemas/cms-package-v1.schema.json",
+  "$id": "https://6529.io/profile-cms/agent/v1/cms-package-v1.schema.json",
   "title": "6529 CMS Package v1",
   "type": "object",
   "additionalProperties": false,

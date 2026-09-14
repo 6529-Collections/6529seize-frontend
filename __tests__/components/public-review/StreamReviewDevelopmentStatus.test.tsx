@@ -22,7 +22,7 @@ describe("StreamReviewDevelopmentStatus", () => {
     expect(screen.getByText("Not yet.")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Stream has working contracts and many tests. But important safety checks are still missing."
+        "Stream has implemented components and tests, but the complete system is unfinished. Minting, artist approval, royalties, sales, and payments still need working connections."
       )
     ).toBeInTheDocument();
     expect(
@@ -30,14 +30,16 @@ describe("StreamReviewDevelopmentStatus", () => {
         name: "Before launch, Stream still needs:",
       })
     ).toBeInTheDocument();
-    expect(within(launchReadiness).getAllByRole("listitem")).toHaveLength(3);
+    expect(within(launchReadiness).getAllByRole("listitem")).toHaveLength(4);
     expect(
       screen.getByText(
         "This page explains what works, what is still uncertain, and what must happen before Stream can launch."
       )
     ).toBeInTheDocument();
     expect(screen.getByText("Last checked")).toBeInTheDocument();
-    expect(screen.getByText("Open release blockers")).toBeInTheDocument();
+    expect(
+      screen.getByText("Open blockers in the saved risk register")
+    ).toBeInTheDocument();
     expect(within(launchReadiness).getByText("10")).toBeInTheDocument();
     expect(
       within(launchReadiness).queryByRole("link", {

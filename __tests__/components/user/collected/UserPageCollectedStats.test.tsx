@@ -561,7 +561,7 @@ describe("UserPageCollectedStats", () => {
     }
   });
 
-  it("fetches only collected-stats when the collected address changes while details are closed", async () => {
+  it("keeps profile counts when the custody address changes while details are closed", () => {
     const queryClient = new QueryClient({
       defaultOptions: {
         queries: {
@@ -592,13 +592,12 @@ describe("UserPageCollectedStats", () => {
       </QueryClientProvider>
     );
 
-    await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(1));
-    expect(apiMock.mock.calls[0]?.[0]?.endpoint).toBe(
-      "collected-stats/0x0000000000000000000000000000000000000001"
-    );
+    expect(apiMock).not.toHaveBeenCalled();
+    expect(screen.getByText("x62")).toBeInTheDocument();
+    expect(screen.getByText("2/3 started")).toBeInTheDocument();
   });
 
-  it("clears the previous collected stats while a new address fetch is in flight", async () => {
+  it("clears the previous collected stats while a different profile fetch is in flight", async () => {
     const nextCollectedStatsDeferred = createDeferred<typeof collectedStats>();
     const nextCollectedStats = {
       ...collectedStats,
@@ -616,10 +615,7 @@ describe("UserPageCollectedStats", () => {
     });
 
     apiMock.mockImplementation(({ endpoint }: { endpoint: string }) => {
-      if (
-        endpoint ===
-        "collected-stats/0x0000000000000000000000000000000000000001"
-      ) {
+      if (endpoint === "collected-stats/another-collector") {
         return nextCollectedStatsDeferred.promise;
       }
 
@@ -642,9 +638,15 @@ describe("UserPageCollectedStats", () => {
     rerender(
       <QueryClientProvider client={queryClient}>
         <UserPageCollectedStats
-          profile={profile}
+          profile={{
+            ...profile,
+            handle: "another-collector",
+            consolidation_key: "another-key",
+          }}
           activeAddress={"0x0000000000000000000000000000000000000001"}
-          initialStatsData={buildInitialStatsData()}
+          initialStatsData={buildInitialStatsData({
+            initialCollectedStats: undefined,
+          })}
         />
       </QueryClientProvider>
     );
@@ -785,12 +787,8 @@ describe("UserPageCollectedStats", () => {
     }
   });
 
-  it("clears previous detail stats while the next address detail queries are in flight", async () => {
+  it("keeps profile set and TDH details when the custody wallet changes", async () => {
     const user = userEvent.setup();
-    const nextCollectedStatsDeferred = createDeferred<Record<string, never>>();
-    const nextTdhDeferred = createDeferred<{ score: number }>();
-    const nextOwnerBalanceDeferred = createDeferred<{ total: number }>();
-    const nextBalanceMemesDeferred = createDeferred<Array<{ id: number }>>();
     const queryClient = new QueryClient({
       defaultOptions: {
         queries: {
@@ -809,14 +807,6 @@ describe("UserPageCollectedStats", () => {
           return Promise.resolve({ total: 1 });
         case "owners-balances/consolidation/key/memes":
           return Promise.resolve([{ id: 1 }]);
-        case "collected-stats/0x0000000000000000000000000000000000000001":
-          return nextCollectedStatsDeferred.promise;
-        case "tdh/wallet/0x0000000000000000000000000000000000000001":
-          return nextTdhDeferred.promise;
-        case "owners-balances/wallet/0x0000000000000000000000000000000000000001":
-          return nextOwnerBalanceDeferred.promise;
-        case "owners-balances/wallet/0x0000000000000000000000000000000000000001/memes":
-          return nextBalanceMemesDeferred.promise;
         default:
           return Promise.resolve({});
       }
@@ -859,24 +849,24 @@ describe("UserPageCollectedStats", () => {
       </QueryClientProvider>
     );
 
-    await waitFor(() =>
-      expect(screen.getByTestId("details")).toHaveAttribute(
-        "data-has-tdh",
-        "false"
-      )
+    expect(screen.getByTestId("details")).toHaveAttribute(
+      "data-has-tdh",
+      "true"
     );
     expect(screen.getByTestId("details")).toHaveAttribute(
       "data-has-owner-balance",
-      "false"
+      "true"
     );
     expect(screen.getByTestId("details")).toHaveAttribute(
       "data-balance-memes",
-      "0"
+      "1"
     );
 
-    nextCollectedStatsDeferred.resolve({});
-    nextTdhDeferred.resolve({ score: 2 });
-    nextOwnerBalanceDeferred.resolve({ total: 2 });
-    nextBalanceMemesDeferred.resolve([{ id: 2 }]);
+    expect(apiMock).toHaveBeenCalledTimes(4);
+    expect(
+      apiMock.mock.calls.every(
+        ([request]) => !request.endpoint.includes("wallet/")
+      )
+    ).toBe(true);
   });
 });

@@ -1,6 +1,7 @@
 import CmsSiteRenderer from "@/components/profile-cms/CmsSiteRenderer";
 import { ProfileCmsEmptyState } from "@/components/profile-cms/CmsSiteStates";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { publicEnv } from "@/config/env";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { getUserProfile } from "@/helpers/server.helpers";
 import {
@@ -10,14 +11,15 @@ import {
 } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getProfileCmsPrimarySite } from "@/lib/profile-cms/runtime/fetcher";
+import { getCmsPageSocialImage } from "@/lib/profile-cms/runtime/social-image";
 import {
   buildProfileCmsPath,
+  getCmsPublicPagePath,
+  getCmsPublicPath,
+  isProfileCmsIndexSegments,
   resolveCmsRoute,
 } from "@/lib/profile-cms/runtime/routes";
-import {
-  isSafeCmsRelativeUri,
-  resolveCmsUri,
-} from "@/lib/profile-cms/runtime/uri";
+import { isSafeCmsRelativeUri } from "@/lib/profile-cms/runtime/uri";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
@@ -47,6 +49,7 @@ export default async function ProfileCmsPage({
   }
 
   if (!context.site) {
+    if (context.isReadableRequest) return notFound();
     return <ProfileCmsEmptyState locale={locale} />;
   }
 
@@ -62,7 +65,9 @@ export default async function ProfileCmsPage({
         target: routeResolution.target,
       })
     ) {
-      redirect(routeResolution.target);
+      redirect(
+        getCmsPublicPath(context.site.cmsPackage, routeResolution.target)
+      );
     }
     return (
       <ProfileCmsEmptyState
@@ -73,6 +78,7 @@ export default async function ProfileCmsPage({
   }
 
   if (routeResolution.kind === "not_found") {
+    if (context.isReadableRequest) return notFound();
     return <ProfileCmsEmptyState locale={locale} />;
   }
 
@@ -115,12 +121,15 @@ export async function generateMetadata({
   }
 
   const page = routeResolution.page;
-  const socialImage = context.site.cmsPackage.payload.assets.find(
-    (asset) => asset.id === page.metadata.social_image_asset_id
+  const social = getCmsPageSocialImage(
+    context.site.cmsPackage,
+    page,
+    publicEnv.BASE_ENDPOINT
   );
-  const socialImageUrl = resolveCmsUri(socialImage?.uri);
+  const socialImage = social?.asset;
+  const socialImageUrl = social?.url;
 
-  return getAppMetadata({
+  const metadata = getAppMetadata({
     title: page.metadata.title,
     description: page.metadata.description,
     ...(socialImageUrl ? { ogImage: socialImageUrl } : {}),
@@ -128,6 +137,17 @@ export async function generateMetadata({
     ...(socialImage?.height ? { ogImageHeight: socialImage.height } : {}),
     ...(socialImage?.alt_text ? { ogImageAlt: socialImage.alt_text } : {}),
   });
+  const publicPath = getCmsPublicPagePath(context.site.cmsPackage, page.id);
+  if (!publicPath) return metadata;
+  const canonical = new URL(publicPath, publicEnv.BASE_ENDPOINT).href;
+  return {
+    ...metadata,
+    ...(page.metadata.robots === "noindex"
+      ? { robots: { index: false, follow: true } }
+      : {}),
+    alternates: { canonical },
+    openGraph: { ...metadata.openGraph, url: canonical },
+  };
 }
 
 async function getProfileCmsRouteContext(
@@ -141,6 +161,7 @@ async function getProfileCmsRouteContext(
   }
 
   const normalizedUser = user.toLowerCase();
+  const isReadableRequest = !isProfileCmsIndexSegments(cmsPathSegments);
   const requestCmsPath = buildProfileCmsPath({
     handle: normalizedUser,
     segments: cmsPathSegments,
@@ -168,6 +189,7 @@ async function getProfileCmsRouteContext(
   if (canonicalHandle !== normalizedUser) {
     return {
       cmsPath: requestCmsPath,
+      isReadableRequest,
       redirectTo: `/${encodeURIComponent(canonicalHandle)}/${cmsPathSegments
         .map(encodeCmsPathSegment)
         .join("/")}`,
@@ -182,6 +204,7 @@ async function getProfileCmsRouteContext(
   if (!site) {
     return {
       cmsPath: requestCmsPath,
+      isReadableRequest,
       redirectTo: null,
       site: null,
     };
@@ -201,6 +224,7 @@ async function getProfileCmsRouteContext(
 
   return {
     cmsPath: canonicalCmsPath,
+    isReadableRequest,
     redirectTo: null,
     site,
   };

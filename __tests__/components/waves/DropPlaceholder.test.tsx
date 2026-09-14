@@ -3,9 +3,76 @@ import {
   ChatRestriction,
   SubmissionRestriction,
 } from "@/hooks/useDropPriviledges";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+
+const mockSeizeConnect = jest.fn();
+let mockSeizeConnectOpen = false;
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({
+    seizeConnect: mockSeizeConnect,
+    seizeConnectOpen: mockSeizeConnectOpen,
+  }),
+}));
 
 describe("DropPlaceholder", () => {
+  beforeEach(() => {
+    mockSeizeConnect.mockClear();
+    mockSeizeConnectOpen = false;
+  });
+
+  it("opens the existing wallet chooser without starting a signature itself", () => {
+    render(
+      <DropPlaceholder
+        type="both"
+        chatRestriction={ChatRestriction.NOT_LOGGED_IN}
+        submissionRestriction={SubmissionRestriction.NOT_LOGGED_IN}
+      />
+    );
+    expect(mockSeizeConnect).not.toHaveBeenCalled();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sign in to 6529 to post" })
+    );
+    expect(mockSeizeConnect).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByText(
+        "New here? Sign a message with your wallet to get started."
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText("No transaction or gas fees.")).toBeInTheDocument();
+  });
+
+  it("prevents duplicate connection requests while the wallet chooser is open", () => {
+    mockSeizeConnectOpen = true;
+    render(
+      <DropPlaceholder
+        type="both"
+        chatRestriction={ChatRestriction.NOT_LOGGED_IN}
+        submissionRestriction={SubmissionRestriction.NOT_LOGGED_IN}
+      />
+    );
+    const button = screen.getByRole("button", {
+      name: "Sign in to 6529 to post",
+    });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("aria-busy", "true");
+    fireEvent.click(button);
+    expect(mockSeizeConnect).not.toHaveBeenCalled();
+  });
+
+  it("preserves mixed non-auth restrictions without offering sign-in", () => {
+    render(
+      <DropPlaceholder
+        type="both"
+        chatRestriction={ChatRestriction.NOT_LOGGED_IN}
+        submissionRestriction={SubmissionRestriction.PROXY_USER}
+      />
+    );
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(
+      screen.getByText("You cannot participate in this wave at the moment")
+    ).toBeInTheDocument();
+  });
+
   it("renders the posting access loading placeholder", () => {
     render(<DropPlaceholder type="profile-check" />);
 
@@ -54,9 +121,7 @@ describe("DropPlaceholder", () => {
         />
       );
 
-      expect(
-        screen.getByText("Please log in to participate in chat")
-      ).toBeInTheDocument();
+      expect(screen.getByText("Sign in to 6529 to post")).toBeInTheDocument();
     });
 
     it("renders needs profile message for chat", () => {
@@ -134,8 +199,8 @@ describe("DropPlaceholder", () => {
         />
       );
 
-      const message = screen.getByText("Please log in to participate in chat");
-      expect(message).toHaveClass("tw-text-iron-400");
+      const message = screen.getByText("Sign in to 6529 to post");
+      expect(message).toHaveClass("tw-text-white");
     });
   });
 
@@ -148,9 +213,7 @@ describe("DropPlaceholder", () => {
         />
       );
 
-      expect(
-        screen.getByText("Please log in to make submissions")
-      ).toBeInTheDocument();
+      expect(screen.getByText("Sign in to 6529 to post")).toBeInTheDocument();
     });
 
     it("renders needs profile message for submission", () => {
@@ -239,8 +302,8 @@ describe("DropPlaceholder", () => {
         />
       );
 
-      expect(screen.getByText("Please log in to make submissions")).toHaveClass(
-        "tw-text-iron-400"
+      expect(screen.getByText("Sign in to 6529 to post")).toHaveClass(
+        "tw-text-white"
       );
 
       rerender(
@@ -288,9 +351,9 @@ describe("DropPlaceholder", () => {
         />
       );
 
-      expect(
-        screen.getByText("Connect your wallet to participate in this wave")
-      ).toHaveClass("tw-text-iron-400");
+      expect(screen.getByText("Sign in to 6529 to post")).toHaveClass(
+        "tw-text-white"
+      );
     });
 
     it("renders inline create profile link for profileless users", () => {

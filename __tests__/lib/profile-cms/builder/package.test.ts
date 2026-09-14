@@ -1,4 +1,9 @@
 import {
+  buildWalletGalleryCmsPackage,
+  createMockWalletGallerySnapshot,
+  parseWalletGallerySources,
+} from "@/lib/profile-cms/builder/gallery";
+import {
   buildCmsPackageCandidate,
   createBuilderBlock,
   createBuilderStateFromPackage,
@@ -135,5 +140,87 @@ describe("profile CMS builder package helpers", () => {
         title: "Room Work",
       })
     );
+  });
+
+  it("round-trips a saved wallet-gallery draft back into gallery editor state instead of a homepage template", () => {
+    // Regression test for the WS-B round-trip gap: loading a saved gallery
+    // draft used to always call createBuilderStateFromPackage and land on the
+    // "homepage" template with the generated pages misread as authored
+    // blocks. A gallery-generated package must restore the gallery tab and
+    // its curation choices instead.
+    const sources = parseWalletGallerySources(
+      "punk6529.eth 0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0"
+    ).sources;
+    const snapshot = createMockWalletGallerySnapshot({
+      handle: "punk6529",
+      sources,
+    });
+    const cmsPackage = buildWalletGalleryCmsPackage({
+      handle: "punk6529",
+      siteTitle: "punk6529 Gallery",
+      siteDescription: "A reviewed wallet gallery.",
+      themeAccent: "#00a86b",
+      walletInput: "punk6529.eth 0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0",
+      snapshot,
+      hiddenAssetIds: ["work-memes-2"],
+      featuredAssetIds: ["work-memes-1"],
+      featuredCollectionIds: ["collection-the-memes"],
+      orderedAssetIds: ["work-memes-partial", "work-memes-1", "work-memes-2"],
+      now: new Date("2026-06-18T00:00:00.000Z"),
+    });
+
+    // Simulate reloading a saved draft: parse it back from JSON the way the
+    // builder does for loaded packages / JSON import.
+    const reloaded = parseCmsPackageCandidateJson(JSON.stringify(cmsPackage));
+    const imported = createBuilderStateFromPackage(reloaded);
+
+    expect(imported.template).toBe("wallet_gallery");
+    expect(imported.siteTitle).toBe("punk6529 Gallery");
+    expect(imported.gallery.walletInput).toBe(
+      "punk6529.eth 0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0"
+    );
+    expect(imported.gallery.hiddenAssetIds).toEqual(["work-memes-2"]);
+    expect(imported.gallery.featuredAssetIds).toEqual(["work-memes-1"]);
+    expect(imported.gallery.featuredCollectionIds).toEqual([
+      "collection-the-memes",
+    ]);
+    expect(imported.gallery.orderedAssetIds).toEqual([
+      "work-memes-partial",
+      "work-memes-1",
+      "work-memes-2",
+    ]);
+    expect(imported.gallery.snapshot?.assets.map((asset) => asset.id)).toEqual([
+      "work-memes-1",
+      "work-memes-2",
+      "work-memes-partial",
+    ]);
+  });
+
+  it("falls back to a fresh gallery state when a gallery package has no embedded round-trip payload", () => {
+    const cmsPackage = buildWalletGalleryCmsPackage({
+      handle: "punk6529",
+      siteTitle: "punk6529 Gallery",
+      siteDescription: "A reviewed wallet gallery.",
+      themeAccent: "#00a86b",
+      walletInput: "punk6529.eth",
+      snapshot: createMockWalletGallerySnapshot({
+        handle: "punk6529",
+        sources: parseWalletGallerySources("punk6529.eth").sources,
+      }),
+      hiddenAssetIds: [],
+      featuredAssetIds: [],
+      featuredCollectionIds: [],
+      orderedAssetIds: [],
+    });
+    const packet = cmsPackage.payload.source_packets?.find(
+      (candidate) => candidate.source_type === "wallet"
+    ) as Record<string, unknown>;
+    delete packet["6529_gallery_builder_state_v1"];
+
+    const imported = createBuilderStateFromPackage(cmsPackage);
+
+    expect(imported.template).toBe("wallet_gallery");
+    expect(imported.gallery.snapshot).toBeUndefined();
+    expect(imported.gallery.walletInput).toBe("punk6529.eth");
   });
 });

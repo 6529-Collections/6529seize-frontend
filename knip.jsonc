@@ -19,12 +19,19 @@
       "ops/skills/**/scripts/**/*.{js,cjs,mjs}", // repo-local skill CLIs invoked by SKILL.md instructions
       "ops/workstreams/**/scripts/**/*.{js,cjs,mjs}", // campaign/workstream CLIs invoked per their plan docs
       "ops/scripts/verify-production-artifact.cjs", // isolated production artifact verifier
+      "ops/scripts/profile-cms-recover.ts", // documented independent CMS recovery CLI
+      "ops/scripts/profile-cms/migrate-static-pages.ts", // documented static-page migration CLI
       "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
       "standalone/standalone-memes-mint/src/app/layout.tsx",
       "standalone/standalone-memes-mint/src/app/page.tsx",
       "standalone/standalone-memes-mint/src/next.config.ts",
       "standalone/standalone-memes-mint/src/postcss.config.js",
       "standalone/standalone-memes-mint/src/tailwind.config.cjs",
+      // Downloadable local MCP CLI and its deterministic build/protocol test runners.
+      "standalone/profile-cms-agent/main.mjs",
+      "standalone/profile-cms-agent/build.mjs",
+      "standalone/profile-cms-agent/*.test.mjs",
+      "standalone/profile-cms-agent/test-fixtures/api.mjs",
       "eslint.config.single.mjs",
       "eslint.config.tight.mjs",
       "eslint.config.diff.mjs",
@@ -93,6 +100,9 @@
       // adversarial Jest contract; Knip intentionally excludes test consumers.
       "scripts/museum-e2e-change-set.cjs": ["exports"],
       "scripts/museum-release-selection.cjs": ["exports"],
+      // The filesystem-contract CLI exposes pure selection and runner helpers
+      // to its focused Jest contract; Knip excludes test consumers.
+      "scripts/file-contract-tests.cjs": ["exports"],
       // The production artifact CLI exposes pure safety helpers to a focused
       // adversarial Jest contract, which Knip excludes from its usage graph.
       "ops/scripts/verify-production-artifact.cjs": ["exports"],

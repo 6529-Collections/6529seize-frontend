@@ -44,7 +44,7 @@ export const useSingleWaveDropData = (
     staleTime: DROP_DETAIL_STALE_TIME_MS,
   });
 
-  const voteDistribution = useDropVoteSummary({
+  const voteSummary = useDropVoteSummary({
     dropId: initialDrop.id,
     waveId: initialDrop.wave.id,
     enabled:
@@ -70,5 +70,5 @@ export const useSingleWaveDropData = (
     [drop, initialDrop.stableHash, initialDrop.stableKey]
   );
 
-  return { drop, wave, extendedDrop, voteDistribution };
+  return { drop, wave, extendedDrop, voteSummary };
 };

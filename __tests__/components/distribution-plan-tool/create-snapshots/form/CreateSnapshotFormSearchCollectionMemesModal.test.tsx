@@ -77,3 +77,22 @@ describe("CreateSnapshotFormSearchCollectionMemesModal", () => {
     });
   });
 });
+
+it("uses the full collection when every season is selected by keyboard", async () => {
+  fetchMock.mockResolvedValueOnce({ success: true, data: sampleSeasons });
+  const { onMemesCollection } = setup();
+  const user = userEvent.setup();
+  const first = await screen.findByRole("checkbox", { name: "SZN1 (1,2)" });
+  first.focus();
+  await user.keyboard(" ");
+  await user.tab();
+  await user.keyboard(" ");
+  expect(screen.getByRole("checkbox", { name: "SZN2 (3,4)" })).toBeChecked();
+  await user.tab();
+  await user.keyboard("{Enter}");
+  expect(onMemesCollection).toHaveBeenCalledWith({
+    address: MEMES_CONTRACT.toLowerCase(),
+    name: "The Memes by 6529",
+    tokenIds: null,
+  });
+});

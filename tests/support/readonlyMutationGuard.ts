@@ -64,7 +64,6 @@ const FIRST_PARTY_READONLY_API_POST_PATHS = new Set([
 
 const IGNORED_EXTERNAL_MUTATION_HOSTS = [
   /(^|\.)mixpanel\.com$/i,
-  /(^|\.)ingest\.sentry\.io$/i,
   /^dataplane\.rum\.[a-z0-9-]+\.amazonaws\.com$/i,
 ];
 const GOOGLE_COLLECT_HOSTS = new Set([
@@ -167,6 +166,18 @@ export function shouldUseReadonlyGuard(baseURL?: string) {
 
   const environment = inferPlaywrightEnvironment(baseURL);
   return environment === "staging" || environment === "production";
+}
+
+function isSentryEnvelopePost(method: string, url: URL) {
+  return (
+    method === "POST" &&
+    url.protocol === "https:" &&
+    url.port === "" &&
+    url.username === "" &&
+    url.password === "" &&
+    /^o[0-9]+\.ingest(?:\.(?:us|de))?\.sentry\.io$/.test(url.hostname) &&
+    /^\/api\/[0-9]+\/envelope\/$/.test(url.pathname)
+  );
 }
 
 function isIgnoredExternalMutation(url: URL) {
@@ -428,7 +439,10 @@ export function decideReadonlyRequest({
     return { action: "block", reason: "unsafe-ethereum-rpc" };
   }
 
-  if (isIgnoredExternalMutation(parsed)) {
+  if (
+    isSentryEnvelopePost(upperMethod, parsed) ||
+    isIgnoredExternalMutation(parsed)
+  ) {
     return { action: "abort", reason: "ignored-external-sdk-endpoint" };
   }
 

@@ -3,7 +3,7 @@
 ## Overview
 
 - Realtime docs cover two behaviors:
-  NFT transaction browsing on `/nft-activity`, and authenticated websocket
+  NFT transaction and market-action browsing on `/nft-activity`, and authenticated websocket
   session health on live-update routes.
 - Feed route: `/nft-activity` (`Network -> NFT Activity`).
 - Live-update consumers: `/waves`, `/waves/{id}`, `/messages`, plus routes that

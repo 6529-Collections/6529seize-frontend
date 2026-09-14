@@ -74,7 +74,6 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     onContractChange,
     chain: chainProp,
     outputMode = "number",
-    hideSpam: hideSpamProp = true,
     allowAll = true,
     allowRanges = true,
     fixedContract,
@@ -82,7 +81,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     maxSelectedCountMessage,
     debounceMs = DEFAULT_DEBOUNCE,
     overscan = DEFAULT_OVERSCAN,
-    placeholder = "Search by collection name or paste contract address…",
+    placeholder,
     className,
     hideSelectionSummaryWhenEmpty = false,
     renderTokenExtra,
@@ -109,14 +108,15 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     setIsOpen,
     activeIndex,
     setActiveIndex,
-    hideSpam,
     suggestionList,
-    hiddenCount,
-    handleToggleSpam,
     resetSearch,
     primeContractCache,
     isLoading,
-  } = useNftSearch({ chain, debounceMs, hideSpamProp });
+    isError,
+    isNotFound,
+    isInvalidAddress,
+    retry,
+  } = useNftSearch({ chain, debounceMs });
 
   const {
     ranges,
@@ -248,6 +248,9 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
   }, [ranges, setTextValue]);
 
   const handleSelectSuggestion = (suggestion: Suggestion) => {
+    if (suggestion.tokenType !== "ERC721") {
+      return;
+    }
     primeContractCache(suggestion, chain);
     const overview = mapSuggestionToOverview(suggestion);
     setSelectedContract(overview);
@@ -367,7 +370,9 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     if (event.key === "ArrowDown") {
       event.preventDefault();
       setIsOpen(true);
-      setActiveIndex((prev) => Math.min(prev + 1, suggestionList.length - 1));
+      setActiveIndex((prev) =>
+        Math.max(0, Math.min(prev + 1, suggestionList.length - 1))
+      );
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setActiveIndex((prev) => Math.max(prev - 1, 0));
@@ -411,8 +416,6 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
           isOpen={isOpen}
           activeIndex={activeIndex}
           suggestionList={suggestionList}
-          hiddenCount={hiddenCount}
-          hideSpam={hideSpam}
           placeholder={placeholder}
           variant={variant}
           inputRef={inputRef}
@@ -425,10 +428,15 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
           }}
           onInputKeyDown={handleInputKeyDown}
           onInputFocus={() => setIsOpen(true)}
-          onToggleSpam={handleToggleSpam}
           onHoverSuggestion={setActiveIndex}
           onSelectSuggestion={handleSelectSuggestion}
           loading={isLoading}
+          isError={isError}
+          isNotFound={isNotFound}
+          isInvalidAddress={isInvalidAddress}
+          onRetry={() => {
+            void retry();
+          }}
         />
       )}
 

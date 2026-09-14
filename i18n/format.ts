@@ -47,6 +47,66 @@ export function formatNumber(
   return new Intl.NumberFormat(locale, options).format(numberValue);
 }
 
+export function formatDecimalString(
+  locale: SupportedLocale,
+  value: string | null | undefined
+): string {
+  if (value === null || value === undefined || value.trim().length === 0) {
+    return "—";
+  }
+
+  const normalized = value.trim();
+  const firstCharacter = normalized[0];
+  const sign =
+    firstCharacter === "+" || firstCharacter === "-" ? firstCharacter : "";
+  const unsigned = sign ? normalized.slice(1) : normalized;
+  const decimalIndex = unsigned.indexOf(".");
+  const hasOneDecimalPoint =
+    decimalIndex === unsigned.lastIndexOf(".") && decimalIndex >= 0;
+  const integerPart = hasOneDecimalPoint
+    ? unsigned.slice(0, decimalIndex)
+    : unsigned;
+  const fractionPart = hasOneDecimalPoint
+    ? unsigned.slice(decimalIndex + 1)
+    : undefined;
+  const isDigits = (part: string): boolean =>
+    part.length > 0 &&
+    [...part].every((character) => character >= "0" && character <= "9");
+  if (
+    !isDigits(integerPart) ||
+    (fractionPart !== undefined && !isDigits(fractionPart))
+  ) {
+    return normalized;
+  }
+
+  const integerFormatter = new Intl.NumberFormat(locale, {
+    maximumFractionDigits: 0,
+    useGrouping: true,
+  });
+  const groupedInteger = integerFormatter.format(BigInt(integerPart));
+  const decimalSeparator =
+    new Intl.NumberFormat(locale)
+      .formatToParts(1.1)
+      .find((part) => part.type === "decimal")?.value ?? ".";
+  const signedFormatter = new Intl.NumberFormat(locale, {
+    signDisplay: "always",
+    useGrouping: false,
+  });
+  let signValue = "";
+  if (sign) {
+    const signNumber = sign === "-" ? -1 : 1;
+    const signPartType = sign === "-" ? "minusSign" : "plusSign";
+    signValue =
+      signedFormatter
+        .formatToParts(signNumber)
+        .find((part) => part.type === signPartType)?.value ?? sign;
+  }
+  const fractionSuffix =
+    fractionPart === undefined ? "" : `${decimalSeparator}${fractionPart}`;
+
+  return `${signValue}${groupedInteger}${fractionSuffix}`;
+}
+
 export function formatInteger(
   locale: SupportedLocale,
   value: number | null | undefined

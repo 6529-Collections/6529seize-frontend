@@ -19,6 +19,10 @@ export class ApiArtworkDocumentationCapabilities {
     'read_rights_evidence': boolean;
     'read_source_receipts': boolean;
     'read_contact': boolean;
+    /**
+    * Read restricted answers beyond individually permissioned contact and locked rights evidence. Defaults to false when absent; does not grant originals, source receipts, editing or artist confirmation.
+    */
+    'read_restricted_fields'?: boolean;
     'confirm_as_artist': boolean;
     'manage_assignments': boolean;
     'manage_context': boolean;
@@ -57,6 +61,12 @@ export class ApiArtworkDocumentationCapabilities {
         {
             "name": "read_contact",
             "baseName": "read_contact",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "read_restricted_fields",
+            "baseName": "read_restricted_fields",
             "type": "boolean",
             "format": ""
         },

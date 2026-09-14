@@ -17,12 +17,14 @@ import {
 import {
   buildWalletGalleryCmsPackage,
   createDefaultWalletGalleryBuilderState,
+  isWalletGalleryGeneratedPackage,
+  restoreWalletGalleryStateFromPackage,
   type WalletGalleryBuilderState,
 } from "./gallery";
 
 export type CmsBuilderTemplate = "homepage" | "wallet_gallery";
 
-export type CmsBuilderBlockKind =
+type CmsBuilderBlockKind =
   | "heading"
   | "rich_text"
   | "button_link"
@@ -45,6 +47,7 @@ export type CmsBuilderBlock = {
 };
 
 export type CmsBuilderState = {
+  readonly sourcePackage?: CmsPackageV1 | undefined;
   readonly template: CmsBuilderTemplate;
   readonly handle: string;
   readonly siteTitle: string;
@@ -123,6 +126,7 @@ export function buildCmsPackageCandidate(
   state: CmsBuilderState,
   now = new Date()
 ): CmsPackageV1 {
+  if (state.sourcePackage) return withComputedCmsHashes(state.sourcePackage);
   const handle = normalizeHandle(state.handle);
   if (state.template === "wallet_gallery") {
     return buildWalletGalleryCmsPackage({
@@ -132,6 +136,7 @@ export function buildCmsPackageCandidate(
         state.siteDescription.trim() ||
         "Generated gallery from reviewed wallet snapshot.",
       themeAccent: state.themeAccent,
+      walletInput: state.gallery.walletInput,
       snapshot: state.gallery.snapshot,
       hiddenAssetIds: state.gallery.hiddenAssetIds,
       featuredAssetIds: state.gallery.featuredAssetIds,
@@ -300,10 +305,19 @@ export function parseCmsPackageCandidateJson(input: string): CmsPackageV1 {
 export function createBuilderStateFromPackage(
   cmsPackage: CmsPackageV1
 ): CmsBuilderState {
-  const page = cmsPackage.payload.pages[0];
   const handle = normalizeHandle(cmsPackage.profile.handle);
+
+  if (isWalletGalleryGeneratedPackage(cmsPackage)) {
+    return {
+      ...createGalleryBuilderStateFromPackage(cmsPackage, handle),
+      sourcePackage: cmsPackage,
+    };
+  }
+
+  const page = cmsPackage.payload.pages[0];
   return {
     template: "homepage",
+    sourcePackage: cmsPackage,
     handle,
     siteTitle: cmsPackage.site.title,
     siteDescription: cmsPackage.site.description ?? "",
@@ -319,6 +333,32 @@ export function createBuilderStateFromPackage(
       createBuilderBlockFromCmsBlock(block, cmsPackage, index)
     ),
     gallery: createDefaultWalletGalleryBuilderState(handle),
+  };
+}
+
+// A saved wallet-gallery draft is a generated package (home page, collection
+// pages, per-NFT detail pages) rather than the author-editable block list the
+// homepage template produces. Loading it must restore the gallery tab and its
+// curation state instead of re-importing the generated pages as homepage
+// blocks (the known WS-B round-trip gap).
+function createGalleryBuilderStateFromPackage(
+  cmsPackage: CmsPackageV1,
+  handle: string
+): CmsBuilderState {
+  return {
+    template: "wallet_gallery",
+    handle,
+    siteTitle: cmsPackage.site.title,
+    siteDescription: cmsPackage.site.description ?? "",
+    pageTitle: cmsPackage.site.title,
+    pageDescription: cmsPackage.site.description ?? "",
+    navigationLabel:
+      cmsPackage.payload.navigation[0]?.items[0]?.label ?? "Gallery",
+    themeAccent: cmsPackage.site.theme.accent,
+    socialImageAssetId:
+      cmsPackage.payload.pages[0]?.metadata.social_image_asset_id ?? "",
+    blocks: [],
+    gallery: restoreWalletGalleryStateFromPackage(cmsPackage),
   };
 }
 

@@ -331,7 +331,7 @@ describe("separate post-deploy E2E", () => {
       writeExecutable(
         root,
         "6529",
-        `#!${process.execPath}
+        `#!/usr/bin/env node
 require('node:fs').writeFileSync(process.env.RESULT_PATH, JSON.stringify({
   args: process.argv.slice(2),
   publication: process.env.MUSEUM_PUBLICATION_EXPECTED_COMMIT

@@ -32,7 +32,6 @@ import {
   syncConnectedWalletProfile,
   WALLET_ACCOUNTS_UPDATED_EVENT,
 } from "@/services/auth/auth.utils";
-import { getRole } from "@/services/auth/jwt-validation.utils";
 import {
   getSessionClientType,
   verifyActiveSessionV2WebSession,
@@ -45,6 +44,11 @@ import {
 import { AuthSignModal } from "./AuthSignModal";
 import { createAuthRequestActions } from "./authActions";
 import { AuthContext } from "./authContext";
+import {
+  getAuthSessionRole,
+  isDirectProfileAuthSession,
+  resolveActiveProfileProxy,
+} from "./auth-session-scope";
 import { useAuthImpactTracking } from "./auth-impact-tracking";
 import { navigateAfterProfileSwitch } from "./authProfileNavigation";
 import { isProfileForAddress } from "./authProfileUtils";
@@ -136,7 +140,6 @@ export default function Auth({
   });
   const connectedProfile =
     !isSigningOutAll && isConnectedProfileForAddress ? loadedProfile : null;
-  useContentModerationStateScope(connectedProfile?.id);
   const isConnectedProfileSettling = Boolean(
     !isSigningOutAll &&
     address &&
@@ -244,31 +247,24 @@ export default function Auth({
 
   const [activeProfileProxy, setActiveProfileProxy] =
     useState<ApiProfileProxy | null>(null);
-  const authRole = (() => {
-    try {
-      const authJwt = getAuthJwt();
-      return getRole(authJwt);
-    } catch (error) {
-      logErrorSecurely("derive_auth_role", error);
-      return null;
-    }
-  })();
+  const authRole = getAuthSessionRole();
+  const isDirectProfileSession = isDirectProfileAuthSession({
+    authRole,
+    profileId: connectedProfile?.id,
+    hasActiveProxy: activeProfileProxy !== null,
+  });
+  useContentModerationStateScope(
+    connectedProfile?.id,
+    activeProfileProxy?.id,
+    isDirectProfileSession
+  );
 
   useEffect(() => {
-    if (!address) {
-      setActiveProfileProxy(null);
-      return;
-    }
-
-    if (!authRole) {
-      setActiveProfileProxy(null);
-      return;
-    }
-
-    const activeProxy = receivedProfileProxies?.find(
-      (proxy) => proxy.created_by.id === authRole
-    );
-
+    const activeProxy = resolveActiveProfileProxy({
+      address,
+      authRole,
+      receivedProfileProxies,
+    });
     setActiveProfileProxy(activeProxy ?? null);
   }, [address, authRole, receivedProfileProxies]);
 
@@ -749,6 +745,7 @@ export default function Auth({
       receivedProfileProxies,
       activeProfileProxy,
       showWaves,
+      isDirectProfileSession,
       sessionUpgradeRequired,
       connectionStatus: getProfileConnectedStatus({
         profile: connectedProfile ?? null,
@@ -765,6 +762,7 @@ export default function Auth({
       ensureActiveSessionV2WebSessionForActiveWallet,
       isAddressAuthorized,
       isFetchingConnectedProfile,
+      isDirectProfileSession,
       onActiveProfileProxy,
       receivedProfileProxies,
       requestAuth,

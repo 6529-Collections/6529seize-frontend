@@ -3,6 +3,23 @@ import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-document
 export function confirmationCopyMatches(
   profile: ApiArtworkDocumentationProfile
 ): boolean {
+  if (
+    profile.confirmation_copy_version === "stream-museum-record-confirmation-v3"
+  )
+    return (
+      profile.confirmation_copy ===
+      ARTWORK_DOCUMENTATION_MESSAGES["artworkDocumentation.museum.confirmCopy"]
+    );
+  if (
+    profile.confirmation_copy_version ===
+    "artwork-documentation-confirmation-v2"
+  )
+    return (
+      profile.confirmation_copy ===
+      ARTWORK_DOCUMENTATION_MESSAGES[
+        "artworkDocumentation.publication.confirmCopy"
+      ]
+    );
   return (
     profile.confirmation_copy_version ===
       "artwork-documentation-confirmation-v1" &&

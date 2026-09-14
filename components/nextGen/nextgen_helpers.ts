@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatNameForUrl, normalizeNextgenTokenID } from "@/helpers/nextgen-utils";
+import {
+  formatNameForUrl,
+  normalizeNextgenTokenID,
+} from "@/helpers/nextgen-utils";
 import { goerli, mainnet, sepolia } from "viem/chains";
 import type { Abi } from "viem";
 import { useReadContract, useReadContracts, useWriteContract } from "wagmi";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import type {
-  NextGenContract} from "./nextgen_contracts";
+import type { NextGenContract } from "./nextgen_contracts";
 import {
   NEXTGEN_ADMIN,
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
-  NEXTGEN_MINTER
+  NEXTGEN_MINTER,
 } from "./nextgen_contracts";
 import type {
   AdditionalData,
@@ -23,10 +25,9 @@ import type {
   PhaseTimes,
   ProofResponse,
   ProofResponseBurn,
-  TokensPerAddress} from "./nextgen_entities";
-import {
-  Status
+  TokensPerAddress,
 } from "./nextgen_entities";
+import { Status } from "./nextgen_entities";
 
 interface Crumb {
   display: string;
@@ -551,14 +552,23 @@ export function useMintSharedState() {
 
 export function useCollectionMintCount(
   collectionId: number,
-  enableRefresh: boolean
+  enableRefresh: boolean,
+  totalSupply?: number
 ) {
   const { data, error, isLoading, isFetching, refetch } = useReadContract({
     address: NEXTGEN_CORE[NEXTGEN_CHAIN_ID] as `0x${string}`,
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     query: {
-      refetchInterval: enableRefresh ? 10000 : false,
+      refetchInterval: (query) => {
+        if (!enableRefresh) return false;
+        const mintCount = Number(query.state.data);
+        const isSoldOut =
+          totalSupply !== undefined &&
+          Number.isSafeInteger(mintCount) &&
+          mintCount >= totalSupply;
+        return isSoldOut ? false : 10000;
+      },
     },
     functionName: "viewCirSupply",
     args: [collectionId],

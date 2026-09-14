@@ -1,0 +1,552 @@
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import sharp from "sharp";
+import {
+  canonicalizeJson,
+  cmsPackageSchema,
+  computeCmsPackageHash,
+  computeCmsPayloadHash,
+  validateCmsPackageV1,
+} from "@/lib/profile-cms/protocol/v1";
+import { isValidCmsPageSlug } from "@/lib/profile-cms/runtime/page-slugs";
+import { resolveCmsRoute } from "@/lib/profile-cms/runtime/routes";
+import { DEMO_ART_ASSETS } from "@/lib/profile-cms/studio/demo-assets";
+import {
+  CMS_APPROVED_ART_ASSETS,
+  getCmsApprovedDisplayAssetPath,
+  isCmsApprovedPixelArtAsset,
+} from "@/lib/profile-cms/studio/approved-assets";
+import approvedManifest from "@/lib/profile-cms/studio/approved-assets.json";
+import { CMS_STUDIO_MEME_WORKS } from "@/lib/profile-cms/studio/meme-assets";
+import { defineTemplate } from "@/lib/profile-cms/studio/template-recipes";
+import {
+  CMS_STUDIO_CORE_TEMPLATES,
+  CMS_STUDIO_MEME_TEMPLATES,
+  CMS_STUDIO_DEMO_ASSET_BINDINGS,
+  CMS_STUDIO_SAMPLE_CONTENT_NOTE,
+  CMS_STUDIO_TEMPLATES,
+  instantiateCmsStudioTemplate,
+} from "@/lib/profile-cms/studio/templates";
+
+const NOW = new Date("2026-09-10T12:00:00.000Z");
+const fields = (value: object): Readonly<Record<string, unknown>> => ({
+  ...value,
+});
+const EDITABLE_BLOCKS = new Set([
+  "heading",
+  "rich_text",
+  "image",
+  "gallery",
+  "button_link",
+  "quote",
+  "callout",
+]);
+
+describe("CMS studio template library", () => {
+  it("provides 23 distinct core concepts across all five families", () => {
+    expect(CMS_STUDIO_CORE_TEMPLATES).toHaveLength(23);
+    expect(new Set(CMS_STUDIO_CORE_TEMPLATES.map((item) => item.id)).size).toBe(
+      23
+    );
+    expect(
+      new Set(CMS_STUDIO_CORE_TEMPLATES.map((item) => item.family))
+    ).toEqual(
+      new Set(["personal", "collector", "artist", "organization", "fund"])
+    );
+    expect(
+      new Set(
+        CMS_STUDIO_CORE_TEMPLATES.map((item) => canonicalizeJson(item.pages))
+      ).size
+    ).toBe(23);
+  });
+
+  it("offers only the six approved designs and retains explicit legacy Meme lookup", () => {
+    expect(CMS_STUDIO_TEMPLATES.map((item) => item.id)).toEqual([
+      "personal-v2",
+      "artist-v2",
+      "collector-v2",
+      "meme-v2",
+      "organization-v2",
+      "fund-v2",
+    ]);
+    expect(
+      CMS_STUDIO_MEME_TEMPLATES.map((item) => item.inspiration?.cardId)
+    ).toEqual([1, 2, 4, 5, 8, 9, 37, 47, 48, 52, 59, 103, 118, 375, 537, 540]);
+    expect(
+      new Set(
+        CMS_STUDIO_MEME_TEMPLATES.map((item) => canonicalizeJson(item.pages))
+      ).size
+    ).toBe(16);
+    for (const template of CMS_STUDIO_MEME_TEMPLATES) {
+      const work = CMS_STUDIO_MEME_WORKS.find(
+        (item) => item.cardId === template.inspiration?.cardId
+      );
+      expect(work).toBeDefined();
+      expect(template.inspiration).toEqual({
+        kind: "meme",
+        cardId: work!.cardId,
+        title: work!.title,
+        artist: work!.artist,
+        url: work!.url,
+      });
+      const result = instantiateCmsStudioTemplate(
+        template.id,
+        "ExampleProfile",
+        NOW
+      );
+      expect(result.site.theme.accent).toBe(template.accent);
+      expect(result.payload.assets).toContainEqual(work!.asset);
+      expect(result.payload.source_packets?.[0]).toHaveProperty(
+        "inspiration",
+        template.inspiration
+      );
+      const blocks = result.payload.pages.flatMap((item) => item.blocks);
+      expect(blocks).toContainEqual(
+        expect.objectContaining({ block_type: "button_link", href: work!.url })
+      );
+      expect(blocks).toContainEqual(
+        expect.objectContaining({
+          block_type: "image",
+          asset_id: work!.asset.id,
+          caption: expect.stringContaining(work!.artist),
+        })
+      );
+      expect(work!.asset.rights).toContain("CC0");
+      expect(work!.asset.rights).toContain(work!.url);
+      expect(work!.asset.uri).toMatch(
+        /^https:\/\/arweave.net\/[A-Za-z0-9_-]{43}$/
+      );
+      expect(work!.asset.content_hash).toMatch(/^sha256:[a-f0-9]{64}$/);
+    }
+  });
+
+  it("rejects a non-hex accent rather than inserting arbitrary theme content", () => {
+    expect(() =>
+      defineTemplate({
+        ...CMS_STUDIO_CORE_TEMPLATES[0]!,
+        accent: "url(https://example.com)",
+      })
+    ).toThrow("Invalid CMS template accent");
+  });
+
+  it("keeps concise site branding separate from the homepage headline", () => {
+    for (const template of CMS_STUDIO_TEMPLATES) {
+      expect(template.siteTitle?.length).toBeGreaterThan(0);
+      expect(template.siteTitle?.length).toBeLessThanOrEqual(40);
+      const result = instantiateCmsStudioTemplate(
+        template.id,
+        "ExampleProfile",
+        NOW
+      );
+      expect(result.site.title).toBe(template.siteTitle);
+      expect(result.payload.pages[0]?.metadata.title).toBe(
+        template.pages[0]?.title
+      );
+    }
+    expect(
+      instantiateCmsStudioTemplate("signature", "ExampleProfile", NOW).site
+        .title
+    ).toBe("Mira");
+    expect(
+      instantiateCmsStudioTemplate("meme-production", "ExampleProfile", NOW)
+        .site.title
+    ).toBe("Common Press");
+  });
+
+  it("populates The Memes Collection with credited actual cards", () => {
+    const result = instantiateCmsStudioTemplate(
+      "memes-collection",
+      "ExampleProfile",
+      NOW
+    );
+    expect(result.payload.assets.map((asset) => asset.id)).toEqual([
+      "meme-8",
+      "meme-4",
+      "meme-37",
+      "meme-2",
+    ]);
+    for (const asset of result.payload.assets) {
+      expect(asset.rights).toContain("CC0 artwork");
+      expect(asset.rights).toContain("does not claim NFT ownership");
+    }
+  });
+
+  it.each(CMS_STUDIO_TEMPLATES.map((item) => [item.id] as const))(
+    "instantiates %s as a complete, valid, editable V1 document",
+    (id) => {
+      const result = instantiateCmsStudioTemplate(id, "ExampleProfile", NOW);
+      const validation = validateCmsPackageV1(result, {
+        allowFixtureSignatures: true,
+        allowFixtureStorage: true,
+        enforceHashes: true,
+      });
+      expect(
+        validation.issues.filter((issue) => issue.severity === "error")
+      ).toEqual([]);
+      expect(validation.valid).toBe(true);
+      expect(result.profile).toEqual({ handle: "ExampleProfile" });
+      const counts: Readonly<Record<string, number>> = {
+        "personal-v2": 1,
+        "artist-v2": 17,
+        "collector-v2": 28,
+        "meme-v2": 1,
+        "organization-v2": 1,
+        "fund-v2": 23,
+      };
+      expect(result.payload.pages).toHaveLength(counts[id]!);
+      expect(result.site.base_path).toBe("/ExampleProfile/index.html");
+      expect(result.payload.routes[0]).toEqual({
+        path: result.site.base_path,
+        kind: "alias",
+        target: result.payload.pages[0]?.path,
+      });
+      expect(resolveCmsRoute(result, result.site.base_path)).toEqual(
+        expect.objectContaining({ kind: "page", page: result.payload.pages[0] })
+      );
+      expect(result.site.theme.tokens?.["studio_revision"]).toBe(1);
+      expect(result.site.theme.tokens?.["studio_design"]).toBe(id);
+      expect(result.provenance.notes).toBe(CMS_STUDIO_SAMPLE_CONTENT_NOTE);
+      expect(result.payload.source_packets?.[0]).toHaveProperty(
+        "content_status",
+        "fictional_example"
+      );
+      const pageIds = new Set(result.payload.pages.map((item) => item.id));
+      const blockIds = result.payload.pages.flatMap((item) =>
+        item.blocks.map((block) => block.id)
+      );
+      expect(new Set(blockIds).size).toBe(blockIds.length);
+      expect(pageIds.size).toBe(result.payload.pages.length);
+      expect(new Set(result.payload.routes.map((item) => item.path)).size).toBe(
+        result.payload.routes.length
+      );
+      for (const page of result.payload.pages) {
+        const slug = page.path.split("/")[2] ?? "";
+        expect(isValidCmsPageSlug(slug)).toBe(true);
+        expect(page.metadata.canonical_url).toBe(
+          `https://6529.io/ExampleProfile/${slug}`
+        );
+        expect(
+          page.blocks.some((block) => block.block_type !== "heading")
+        ).toBe(true);
+        expect(
+          page.blocks.filter(
+            (block) =>
+              block.block_type === "heading" && fields(block)["level"] === 1
+          )
+        ).toHaveLength(1);
+        for (const block of page.blocks) {
+          const data = fields(block);
+          expect(EDITABLE_BLOCKS.has(block.block_type)).toBe(true);
+          if (typeof data["page_id"] === "string")
+            expect(pageIds.has(data["page_id"])).toBe(true);
+          if (typeof data["href"] === "string")
+            expect(new URL(data["href"]).protocol).toBe("https:");
+        }
+      }
+      for (const item of result.payload.navigation[0]?.items ?? []) {
+        if (item.page_id) expect(pageIds.has(item.page_id)).toBe(true);
+        else {
+          const [route, fragment] = (item.url ?? "").split("#");
+          const page = result.payload.pages.find((item) => item.path === route);
+          expect(page?.blocks.some((block) => block.id === fragment)).toBe(
+            true
+          );
+        }
+      }
+      const roundTrip = cmsPackageSchema.parse(
+        JSON.parse(canonicalizeJson(result))
+      );
+      expect(computeCmsPayloadHash(roundTrip.payload)).toBe(
+        result.integrity.payload_hash
+      );
+      expect(computeCmsPackageHash(roundTrip)).toBe(
+        result.integrity.package_hash
+      );
+      expect(Buffer.byteLength(canonicalizeJson(result))).toBeLessThan(
+        2 * 1024 * 1024
+      );
+    }
+  );
+
+  it("binds original example assets to actual checked-in bytes", () => {
+    expect(DEMO_ART_ASSETS.map((item) => item.id)).toEqual(
+      CMS_STUDIO_DEMO_ASSET_BINDINGS.map((item) => item.id)
+    );
+    for (const asset of DEMO_ART_ASSETS) {
+      const uri = new URL(asset.uri);
+      expect(uri.origin).toBe("https://6529.io");
+      const bytes = readFileSync(
+        path.join(process.cwd(), "public", uri.pathname)
+      );
+      expect(asset.content_hash).toBe(
+        `sha256:${createHash("sha256").update(bytes).digest("hex")}`
+      );
+      expect(asset.file_size_bytes).toBe(bytes.length);
+      expect(asset.width).toBeGreaterThan(0);
+      expect(asset.height).toBeGreaterThan(0);
+      expect(asset.rights).toContain("example artwork");
+    }
+  });
+
+  it("binds all approved display files and original Blitmap sources to actual bytes", async () => {
+    expect(CMS_APPROVED_ART_ASSETS).toHaveLength(14);
+    for (const asset of CMS_APPROVED_ART_ASSETS) {
+      const localPath = getCmsApprovedDisplayAssetPath(asset);
+      expect(localPath).toMatch(/^\/profile-cms\/templates\/approved\//);
+      const bytes = readFileSync(
+        path.join(process.cwd(), "public", localPath!)
+      );
+      expect(asset.content_hash).toBe(
+        `sha256:${createHash("sha256").update(bytes).digest("hex")}`
+      );
+      expect(asset.file_size_bytes).toBe(bytes.length);
+      expect(await sharp(bytes).metadata()).toMatchObject({
+        width: asset.width,
+        height: asset.height,
+        format: "webp",
+      });
+      expect(
+        getCmsApprovedDisplayAssetPath({
+          ...asset,
+          content_hash: `sha256:${"0".repeat(64)}`,
+        })
+      ).toBeNull();
+      expect(isCmsApprovedPixelArtAsset(asset)).toBe(
+        asset.id.startsWith("blitmap-")
+      );
+      expect(
+        isCmsApprovedPixelArtAsset({
+          ...asset,
+          content_hash: `sha256:${"0".repeat(64)}`,
+        })
+      ).toBe(false);
+      expect(
+        getCmsApprovedDisplayAssetPath({
+          ...asset,
+          uri: "https://example.org/changed.webp",
+        })
+      ).toBeNull();
+    }
+    const blitmaps = approvedManifest.assets.filter(
+      (item) => item.provenance.kind === "onchain_svg_raster"
+    );
+    expect(blitmaps.map((item) => item.title)).toEqual([
+      "Rose",
+      "Psychic",
+      "Jupiter",
+    ]);
+    for (const item of blitmaps) {
+      const source = item.provenance;
+      expect(source).toMatchObject({
+        chain_id: 1,
+        contract: "0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63",
+        source_block: 25963459,
+      });
+      const bytes = readFileSync(
+        path.join(
+          process.cwd(),
+          "public",
+          new URL(source.original_uri!).pathname
+        )
+      );
+      expect(source.original_hash).toBe(
+        `sha256:${createHash("sha256").update(bytes).digest("hex")}`
+      );
+      expect(bytes.length).toBe(source.original_bytes);
+      expect(bytes.toString()).not.toMatch(
+        /<script|<foreignObject|(?:href|src)\s*=/i
+      );
+    }
+  });
+
+  it("keeps detail pages out of primary navigation and preserves each artwork destination", () => {
+    for (const id of ["artist-v2", "collector-v2", "fund-v2"]) {
+      const result = instantiateCmsStudioTemplate(id, "ExampleProfile", NOW);
+      expect(result.payload.navigation[0]?.items.length).toBeLessThanOrEqual(6);
+      expect(
+        result.payload.navigation[0]?.items.every(
+          (item) => !item.page_id?.startsWith("page-work-")
+        )
+      ).toBe(true);
+      const pages = new Set(result.payload.pages.map((page) => page.id));
+      for (const block of result.payload.pages.flatMap((page) => page.blocks)) {
+        const entries = fields(block)["items"];
+        if (!Array.isArray(entries)) continue;
+        for (const entry of entries as { page_id?: string }[]) {
+          if (entry.page_id) expect(pages.has(entry.page_id)).toBe(true);
+        }
+      }
+    }
+  });
+
+  it("names detail pages after their works and limits display controls to the archive", () => {
+    const artist = instantiateCmsStudioTemplate(
+      "artist-v2",
+      "ExampleProfile",
+      NOW
+    );
+    expect(
+      artist.payload.pages.find((page) => page.id === "page-work-harbour-1")
+        ?.metadata.navigation_label
+    ).toBe("South Pier");
+    const collector = instantiateCmsStudioTemplate(
+      "collector-v2",
+      "ExampleProfile",
+      NOW
+    );
+    expect(
+      collector.payload.pages.find((page) => page.id === "page-work-48")
+        ?.metadata.navigation_label
+    ).toBe("Freedom to Explore");
+    expect(
+      collector.payload.pages.find((page) => page.id === "page-set-posters")
+        ?.metadata.navigation_label
+    ).toBe("The poster shelf");
+    for (const site of [artist, collector]) {
+      for (const page of site.payload.pages) {
+        for (const block of page.blocks) {
+          if (block.block_type !== "gallery") continue;
+          expect(fields(block)["display_modes"]).toEqual(
+            ["page-works", "page-collection"].includes(page.id)
+              ? ["grid", "list"]
+              : ["grid"]
+          );
+        }
+      }
+    }
+  });
+
+  it("retains one ordinary editable fictional-example disclosure per site", () => {
+    for (const template of CMS_STUDIO_TEMPLATES) {
+      const document = instantiateCmsStudioTemplate(
+        template.id,
+        "ExampleProfile",
+        NOW
+      );
+      const disclosures = document.payload.pages
+        .flatMap((page) => page.blocks)
+        .filter(
+          (block) =>
+            block.block_type === "rich_text" &&
+            /fictional/i.test(String(fields(block)["content"]))
+        );
+      expect(disclosures).toHaveLength(1);
+      expect(typeof fields(disclosures[0]!)["content"]).toBe("string");
+    }
+  });
+
+  it.each([
+    [
+      "artist-v2",
+      "artist-v2-studio-012",
+      ["2026", "2025", "2024", "2023", "2022"],
+    ],
+    [
+      "organization-v2",
+      "organization-v2-home-039",
+      ["Ali Turner", "Jo Mercer", "Nia Ellis"],
+    ],
+  ] as const)(
+    "keeps %s row labels out of their values and matches the archive fallback",
+    (templateId, blockId, labels) => {
+      const document = instantiateCmsStudioTemplate(
+        templateId,
+        "ExampleProfile",
+        NOW
+      );
+      const block = document.payload.pages
+        .flatMap((page) => page.blocks)
+        .find((item) => item.id === blockId);
+      expect(block).toBeDefined();
+      const data = fields(block!);
+      const rows = data["rows"] as { label: string; value: string }[];
+      expect(rows.map((row) => row.label)).toEqual(labels);
+      for (const row of rows) {
+        expect(row.value).not.toContain(row.label);
+        expect(row.value.length).toBeGreaterThan(0);
+      }
+      expect(data["content"]).toBe(
+        rows.map((row) => `${row.label}: ${row.value}`).join("\n")
+      );
+    }
+  );
+
+  it("keeps organization poster titles and contact decorations out of body copy", () => {
+    const document = instantiateCmsStudioTemplate(
+      "organization-v2",
+      "ExampleProfile",
+      NOW
+    );
+    const blocks = document.payload.pages.flatMap((page) => page.blocks);
+    for (const id of ["organization-v2-home-029", "organization-v2-home-033"]) {
+      const block = fields(blocks.find((item) => item.id === id)!);
+      expect(block["title"]).toBeTruthy();
+      expect(block["content"]).toBeTruthy();
+      expect(String(block["content"])).not.toContain(block["title"]);
+    }
+    expect(blocks).toContainEqual(
+      expect.objectContaining({
+        id: "organization-v2-home-046",
+        title: "hello@assemblyhouse.example.org",
+        email: "hello@assemblyhouse.example.org",
+      })
+    );
+    expect(canonicalizeJson(document.payload)).not.toContain("↗");
+  });
+
+  it("keeps separate instantiations independent from the registry and each other", () => {
+    const first = instantiateCmsStudioTemplate("signature", "OneProfile", NOW);
+    const original = canonicalizeJson(CMS_STUDIO_TEMPLATES);
+    Object.assign(first.payload.pages[0]!.blocks[0]!, {
+      text: "An edited heading",
+    });
+    first.payload.assets[0]!.alt_text = "A changed description";
+    const second = instantiateCmsStudioTemplate("signature", "TwoProfile", NOW);
+    expect(second.payload.pages[0]?.blocks[0]).not.toHaveProperty(
+      "text",
+      "An edited heading"
+    );
+    expect(second.payload.assets[0]?.alt_text).not.toBe(
+      "A changed description"
+    );
+    expect(canonicalizeJson(CMS_STUDIO_TEMPLATES)).toBe(original);
+  });
+
+  it.each(["../profile", "a", "name/path", " profile "])(
+    "rejects invalid profile handle %s instead of silently personalizing another route",
+    (handle) => {
+      expect(() =>
+        instantiateCmsStudioTemplate("signature", handle, NOW)
+      ).toThrow("Invalid CMS profile handle");
+    }
+  );
+
+  it("uses edited navigation copy without renaming existing archive routes", () => {
+    const result = instantiateCmsStudioTemplate(
+      "process-journal",
+      "ExampleProfile",
+      NOW
+    );
+    const entry = result.payload.pages.find(
+      (page) => page.id === "page-a-rule-with-room"
+    );
+    expect(entry?.path).toBe("/ExampleProfile/a-rule-with-room/index.html");
+    expect(entry?.metadata.navigation_label).toBe("First entry");
+    expect(result.payload.navigation[0]?.items).toContainEqual({
+      page_id: "page-a-rule-with-room",
+      label: "First entry",
+    });
+    expect(result.payload.routes).toContainEqual({
+      path: "/ExampleProfile/a-rule-with-room/index.html",
+      kind: "page",
+      page_id: "page-a-rule-with-room",
+    });
+  });
+
+  it("rejects an unknown template", () => {
+    expect(() =>
+      instantiateCmsStudioTemplate("missing", "ExampleProfile", NOW)
+    ).toThrow("Unknown CMS studio template");
+  });
+});

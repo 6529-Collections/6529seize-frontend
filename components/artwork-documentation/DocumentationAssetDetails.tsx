@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import type { ApiArtworkDocumentationAssetLink } from "@/generated/models/ApiArtworkDocumentationAssetLink";
 import type { ApiArtworkDocumentationAssetLinkRequest } from "@/generated/models/ApiArtworkDocumentationAssetLinkRequest";
+import { ApiArtworkDocumentationAssetTermsKindEnum } from "@/generated/models/ApiArtworkDocumentationAssetTerms";
 import type { DocumentationDraftController } from "@/lib/artwork-documentation/draft-controller";
 import type {
   FieldValue,
@@ -14,15 +15,25 @@ import {
   patchDocumentationAssetLink,
 } from "@/services/api/artwork-documentation-assets-api";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
-import { DOCUMENTATION_ASSET_ROLES } from "@/lib/artwork-documentation/asset-roles";
+import {
+  canPublishDocumentationAsset,
+  documentationAssetRoles,
+} from "@/lib/artwork-documentation/asset-roles";
+import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
+import {
+  canEditDocumentationAsset,
+  canReferenceDocumentationAssetLink,
+  canWriteDocumentationAssetRole,
+} from "@/lib/artwork-documentation/capabilities";
 import DocumentationValueEditor from "./DocumentationValueEditor";
 import {
   DocumentationButton,
+  DocumentationNotice,
   inputClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 
-const detailsEditor: ValueEditor = {
+const detailsEditor = (publicationOnly: boolean): ValueEditor => ({
   kind: "object",
   fields: {
     label: { kind: "text", max: 160 },
@@ -33,24 +44,55 @@ const detailsEditor: ValueEditor = {
     },
     source_credit: { kind: "text", max: 500 },
     deposit_note: { kind: "text", max: 1000, multiline: true },
+    derived_from_asset_ids: { kind: "asset", multiple: true },
     intended_terms: {
       kind: "object",
       fields: {
         kind: {
           kind: "choice",
-          options: [
-            "unspecified",
-            "private_deposit",
-            "proposed_license",
-            "already_licensed",
-          ],
+          options: publicationOnly
+            ? ["unspecified", "proposed_license", "already_licensed"]
+            : [
+                "unspecified",
+                "private_deposit",
+                "proposed_license",
+                "already_licensed",
+              ],
         },
         license_uri: { kind: "text", max: 2048 },
         note: { kind: "text", max: 2000, multiline: true },
       },
     },
   },
-};
+});
+
+function canEditAssetDetails(
+  context: ApiArtworkDocumentationContext,
+  assetId: string
+): boolean {
+  if (!canEditDocumentationAsset(context, assetId)) return false;
+  if (!isPublicationOnly(context.profile)) return true;
+  const allowed = (asset: {
+    readonly role: string;
+    readonly intended_visibility: string;
+  }) =>
+    asset.intended_visibility === "public_record" &&
+    canPublishDocumentationAsset(context, asset.role);
+  const asset = context.assets.find((item) => item.id === assetId);
+  return (
+    asset !== undefined &&
+    allowed(asset) &&
+    context.asset_links
+      .filter((link) => link.asset_id === assetId)
+      .every(
+        (link) =>
+          allowed(link) &&
+          allowed(link.manifest) &&
+          link.intended_terms.kind !==
+            ApiArtworkDocumentationAssetTermsKindEnum.PrivateDeposit
+      )
+  );
+}
 
 export default function DocumentationAssetDetails({
   context,
@@ -62,30 +104,65 @@ export default function DocumentationAssetDetails({
   readonly controller: DocumentationDraftController;
 }) {
   const { msg } = useDocumentationMessages();
+  const publicationOnly = isPublicationOnly(context.profile);
   const [role, setRole] = useState("preservation_master");
+  const roles = documentationAssetRoles(context);
+  const rolePermitted =
+    canPublishDocumentationAsset(context, role) &&
+    canWriteDocumentationAssetRole(context, role);
   const links = context.asset_links.filter((link) => link.asset_id === assetId);
-  const asset = context.assets.find((item) => item.id === assetId);
   const addRole = () =>
-    controller.mutate((current, signal) =>
-      linkDocumentationAsset(
+    controller.mutate((current, signal) => {
+      if (
+        !canEditAssetDetails(current, assetId) ||
+        !canPublishDocumentationAsset(current, role) ||
+        !canWriteDocumentationAssetRole(current, role)
+      )
+        throw new Error("PUBLICATION_ASSET_ROLE_REQUIRED");
+      const asset = current.assets.find((item) => item.id === assetId);
+      return linkDocumentationAsset(
         current,
         {
           asset_id: assetId,
           role,
           intended_visibility: asset?.intended_visibility ?? "restricted",
-          intended_terms: { kind: "private_deposit" },
+          intended_terms: {
+            kind: isPublicationOnly(current.profile)
+              ? "unspecified"
+              : "private_deposit",
+          },
         } as ApiArtworkDocumentationAssetLinkRequest,
         signal
-      )
+      );
+    });
+  const roleLabel = (value: string) => {
+    if (publicationOnly && value === "preservation_master")
+      return msg("publicationMasterRole");
+    if (publicationOnly && value === "process_evidence")
+      return msg("publicationProcessRole");
+    return documentationOptionLabel(value);
+  };
+  if (!canEditAssetDetails(context, assetId))
+    return (
+      <DocumentationNotice error>
+        {msg("publicationAssetUnavailable")}
+      </DocumentationNotice>
     );
   return (
     <details className="tw-mt-3">
-      <summary className="tw-cursor-pointer tw-py-2 tw-text-xs tw-text-iron-300">
-        {msg("fileDetails")}
+      <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+        {msg("chapters.editFileDetails")}
       </summary>
       <div className="tw-space-y-4">
         {links.map((link) => (
-          <ManifestEditor key={link.id} link={link} controller={controller} />
+          <ManifestEditor
+            key={link.id}
+            link={link}
+            controller={controller}
+            publicationOnly={publicationOnly}
+            roleLabel={roleLabel(link.role)}
+            context={context}
+          />
         ))}
         <label className="tw-block tw-text-xs tw-text-iron-400">
           {msg("uploadRole")}
@@ -94,16 +171,25 @@ export default function DocumentationAssetDetails({
             value={role}
             onChange={(event) => setRole(event.target.value)}
           >
-            {DOCUMENTATION_ASSET_ROLES.map((option) => (
-              <option key={option} value={option}>
-                {documentationOptionLabel(option)}
+            {roles.map((option) => (
+              <option
+                key={option}
+                value={option}
+                disabled={!canWriteDocumentationAssetRole(context, option)}
+              >
+                {roleLabel(option)}
               </option>
             ))}
           </select>
         </label>
+        {!rolePermitted && (
+          <p className="tw-text-sm tw-text-iron-300">
+            {msg("publicationInterviewPermission")}
+          </p>
+        )}
         <DocumentationButton
           secondary
-          disabled={links.some((link) => link.role === role)}
+          disabled={!rolePermitted || links.some((link) => link.role === role)}
           onClick={() => {
             void addRole();
           }}
@@ -118,9 +204,15 @@ export default function DocumentationAssetDetails({
 function ManifestEditor({
   link,
   controller,
+  publicationOnly,
+  roleLabel,
+  context,
 }: {
   readonly link: ApiArtworkDocumentationAssetLink;
   readonly controller: DocumentationDraftController;
+  readonly publicationOnly: boolean;
+  readonly roleLabel: string;
+  readonly context: ApiArtworkDocumentationContext;
 }) {
   const { msg } = useDocumentationMessages();
   const pending = controller
@@ -132,6 +224,7 @@ function ManifestEditor({
     source_of_asset: link.source_of_asset,
     source_credit: link.source_credit,
     deposit_note: link.deposit_note,
+    derived_from_asset_ids: [...link.derived_from_asset_ids],
     intended_terms: { ...link.intended_terms },
     intended_visibility: link.intended_visibility,
   }) as Record<string, FieldValue>;
@@ -139,18 +232,26 @@ function ManifestEditor({
     link.role
   );
   const change = (next: FieldValue) => {
+    let nextVisibility =
+      (next as Record<string, FieldValue>)["intended_visibility"] ??
+      link.intended_visibility;
+    if (restricted) nextVisibility = "restricted";
     const body = {
       ...(next as Record<string, FieldValue>),
-      intended_visibility: restricted
-        ? "restricted"
-        : ((next as Record<string, FieldValue>)["intended_visibility"] ??
-          link.intended_visibility),
+      intended_visibility: nextVisibility,
     };
     controller.queueContent(
       `asset-link:${link.id}`,
       body,
-      (current, key, signal) =>
-        patchDocumentationAssetLink(current, link.id, body, signal, key)
+      (current, key, signal) => {
+        if (
+          !canEditAssetDetails(current, link.asset_id) ||
+          (isPublicationOnly(current.profile) &&
+            body.intended_visibility !== "public_record")
+        )
+          throw new Error("PUBLICATION_ASSET_ROLE_REQUIRED");
+        return patchDocumentationAssetLink(current, link.id, body, signal, key);
+      }
     );
   };
   const intendedVisibility =
@@ -158,31 +259,44 @@ function ManifestEditor({
       ? "public_record"
       : "restricted";
   return (
-    <div className="tw-space-y-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-p-3">
-      <p className="tw-text-sm tw-font-medium">
-        {documentationOptionLabel(link.role)}
-      </p>
+    <div className="tw-space-y-4 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-5">
+      <p className="tw-text-sm tw-font-medium">{roleLabel}</p>
       <DocumentationValueEditor
         id={`manifest-${link.id}`}
-        label={msg("fileDetails")}
-        editor={detailsEditor}
+        label={msg("chapters.editFileDetails")}
+        hideLabel
+        editor={detailsEditor(publicationOnly)}
         value={value}
         onChange={change}
+        assets={context.assets
+          .filter(
+            (asset) =>
+              asset.id !== link.asset_id &&
+              asset.state === "ready" &&
+              context.asset_links.some(
+                (candidate) =>
+                  candidate.asset_id === asset.id &&
+                  canReferenceDocumentationAssetLink(context, candidate)
+              )
+          )
+          .map((asset) => ({ id: asset.id, label: asset.filename }))}
       />
-      <label className="tw-block tw-text-xs tw-text-iron-400">
-        {msg("visibility")}
-        <select
-          className={`${inputClass} tw-mt-2`}
-          value={intendedVisibility}
-          disabled={restricted}
-          onChange={(event) =>
-            change({ ...value, intended_visibility: event.target.value })
-          }
-        >
-          <option value="restricted">{msg("restricted")}</option>
-          <option value="public_record">{msg("publicIntent")}</option>
-        </select>
-      </label>
+      {!publicationOnly && (
+        <label className="tw-block tw-text-xs tw-text-iron-400">
+          {msg("visibility")}
+          <select
+            className={`${inputClass} tw-mt-2`}
+            value={intendedVisibility}
+            disabled={restricted}
+            onChange={(event) =>
+              change({ ...value, intended_visibility: event.target.value })
+            }
+          >
+            <option value="restricted">{msg("restricted")}</option>
+            <option value="public_record">{msg("publicIntent")}</option>
+          </select>
+        </label>
+      )}
       <DocumentationButton
         secondary
         onClick={() => {

@@ -10,10 +10,6 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 jest.mock("@/hooks/useAlchemyNftQueries", () => ({
-  useCollectionSearch: jest.fn(() => ({
-    data: { items: [], hiddenCount: 0 },
-    isFetching: false,
-  })),
   useContractOverviewQuery: jest.fn(() => ({
     data: null,
     isFetching: false,

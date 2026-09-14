@@ -27,6 +27,7 @@ import {
   PublicReviewEditorialContentError,
 } from "@/lib/public-review/editorialContent";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
+import { getCurrentStreamEditorialMarkdown } from "@/lib/public-review/streamReviewEditorialCorrections";
 import type {
   PublicReviewPageDefinition,
   PublicReviewSectionDefinition,
@@ -100,6 +101,7 @@ function getStreamReviewMetadata({
   };
 }
 
+/** Loads the selected published editorial version and its validated source context. */
 async function loadAvailableStreamEditorialContent({
   contentVersion,
   route,
@@ -156,6 +158,7 @@ type StreamReviewSource = {
   readonly tree: string;
 };
 
+/** Identifies current-route reading features without enabling them on saved versions. */
 function getCurrentStreamReviewPages(
   route: StreamReviewRouteModel
 ): CurrentStreamReviewPages {
@@ -186,6 +189,7 @@ function getCurrentStreamReviewPages(
   };
 }
 
+/** Selects current corrections and entry guides while preserving saved review text. */
 function getDisplayedEditorialMarkdown({
   contentVersion,
   currentPages,
@@ -269,11 +273,15 @@ function getDisplayedEditorialMarkdown({
   return editorialMarkdown;
 }
 
+/** Selects current-route summaries while preserving saved page definitions. */
 function getDisplayedPage(
   page: PublicReviewPageDefinition,
   currentPages: CurrentStreamReviewPages
 ): PublicReviewPageDefinition {
   if (page.summaryKey.startsWith("publicReview.pages.currentSnapshot.")) {
+    if (currentPages.revenueSplits) {
+      return { ...page, summaryKey: "publicReview.corrections.revenueSummary" };
+    }
     return page;
   }
   if (currentPages.artworkLifecycle) {
@@ -338,6 +346,7 @@ function getDisplayedPageTitle(
   return page;
 }
 
+/** Derives feedback anchors from visible editorial or the current roles guide. */
 function getDisplayedSections({
   currentPages,
   editorialMarkdown,
@@ -351,6 +360,7 @@ function getDisplayedSections({
   return extractPublicReviewSections(editorialMarkdown);
 }
 
+/** Aligns feedback targets with visible sections and retains historical targets when needed. */
 function getDisplayedFeedbackConfig({
   feedbackConfig,
   pageId,
@@ -382,6 +392,7 @@ function getDisplayedFeedbackConfig({
   };
 }
 
+/** Explains the review status and source boundary above the reading content. */
 function StreamReviewIntroNotice({
   currentPages,
   isVersioned,
@@ -404,6 +415,10 @@ function StreamReviewIntroNotice({
   );
 }
 
+/**
+ * Loads a review's pinned content and evidence, then renders its reading view.
+ * Current routes receive checked corrections; saved routes retain their content.
+ */
 async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   const contentVersion =
     route.version ?? STREAM_REVIEW_DEFINITION.activeVersion;
@@ -420,6 +435,13 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   if (editorialMarkdown === undefined) {
     notFound();
   }
+  const currentEditorialMarkdown = getCurrentStreamEditorialMarkdown({
+    pageId: route.page.id,
+    markdown: editorialMarkdown,
+    version: contentVersion,
+    routeVersion: route.version,
+    source: manifest.source,
+  });
   const feedbackConfig = await createStreamReviewFeedbackConfig({ manifest });
   const currentPages = getCurrentStreamReviewPages(route);
   const displayedReviewVersion = {
@@ -442,7 +464,7 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
     getDisplayedEditorialMarkdown({
       contentVersion,
       currentPages,
-      editorialMarkdown,
+      editorialMarkdown: currentEditorialMarkdown,
       source: manifest.source,
     });
   const diagramPresentation = getStreamReviewDiagramPresentation({
@@ -533,7 +555,7 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
                   )}
                 </summary>
                 <PublicReviewMarkdown
-                  markdown={editorialMarkdown}
+                  markdown={currentEditorialMarkdown}
                   internalLinkBasePath="/reviews/6529-stream"
                 />
               </details>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useContext } from "react";
-import { useSignMessage } from "wagmi";
+import { useSignMessage, useSignTypedData } from "wagmi";
 import { UserRejectedRequestError } from "viem";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
@@ -11,6 +11,11 @@ import {
   buildDropSignatureMessage,
   isStructuredSignaturesEnabled,
 } from "@/services/wallet-signatures/structured-wallet-signatures";
+import {
+  buildMemesSubmissionTypedData,
+  type MemesSigningWave,
+  type MemesSubmissionTypedData,
+} from "@/services/wallet-signatures/memes-submission-signature";
 
 const DROP_SIGNATURE_FAILED_MESSAGE =
   "Signature failed. Make sure your wallet is connected and unlocked, and that you are using the wallet linked to your 6529 account. If it still fails, log out of 6529 and log back in, then try again.";
@@ -43,6 +48,7 @@ const isUserRejectedSigningError = (error: unknown): boolean => {
 export const useDropSignature = () => {
   const [isLoading, setIsLoading] = useState(false);
   const signMessage = useSignMessage();
+  const signTypedData = useSignTypedData();
   const { setToast } = useContext(AuthContext);
 
   /**
@@ -53,9 +59,11 @@ export const useDropSignature = () => {
   const signDrop = async ({
     drop,
     termsOfService,
+    memesWave,
   }: {
     drop: ApiCreateDropRequest;
     termsOfService: string | null;
+    memesWave?: MemesSigningWave;
   }): Promise<{
     success: boolean;
     signature?: string | undefined;
@@ -76,17 +84,27 @@ export const useDropSignature = () => {
         });
         return { success: false };
       }
-      const structuredMessage =
-        isStructuredSignaturesEnabled() && drop.signer_address
-          ? buildDropSignatureMessage({
-              address: drop.signer_address,
-              drop,
-              termsOfService,
-            }).message
-          : null;
+      const typedData = memesWave
+        ? buildMemesSubmissionTypedData({
+            drop,
+            termsOfService,
+            wave: memesWave,
+          })
+        : null;
+      let structuredMessage: string | null = null;
+      if (typedData) {
+        structuredMessage = JSON.stringify(typedData);
+      } else if (isStructuredSignaturesEnabled() && drop.signer_address) {
+        structuredMessage = buildDropSignatureMessage({
+          address: drop.signer_address,
+          drop,
+          termsOfService,
+        }).message;
+      }
 
       const clientSignature = await getSignature({
         message: structuredMessage ?? hash,
+        typedData,
       });
 
       if (clientSignature.userRejected) {
@@ -130,16 +148,28 @@ export const useDropSignature = () => {
    */
   const getSignature = async ({
     message,
+    typedData,
   }: {
     message: string;
+    typedData: MemesSubmissionTypedData | null;
   }): Promise<{
     signature: string | null;
     userRejected: boolean;
   }> => {
     try {
-      const signedMessage = await signMessage.signMessageAsync({
-        message,
-      });
+      // Preserve the connector's account object so App Wallets sign locally.
+      // The API checks the signed Wallet field against the request's signer.
+      const signedMessage = typedData
+        ? await signTypedData.signTypedDataAsync({
+            ...typedData,
+            // viem supplies EIP712Domain from the domain; the API envelope
+            // retains its explicit schema for strict server verification.
+            types: {
+              MemeCardSubmission: typedData.types.MemeCardSubmission,
+              SubmissionVerification: typedData.types.SubmissionVerification,
+            },
+          })
+        : await signMessage.signMessageAsync({ message });
       return {
         signature: signedMessage,
         userRejected: false,

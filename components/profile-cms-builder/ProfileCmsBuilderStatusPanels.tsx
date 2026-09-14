@@ -4,7 +4,6 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT,
-  PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT,
   PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT,
   type ProfileCmsBuilderAction,
   type ProfileCmsBuilderActionCode,
@@ -67,7 +66,7 @@ function ValidationIssueItem({
         {t(locale, getValidationSeverityKey(issue.severity))} · {issue.code}
       </p>
       <p className="tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(locale, "profileCms.builder.validation.issueDetail")}
+        {issue.message}
       </p>
       <p className="tw-mt-1 tw-font-mono tw-text-xs tw-text-iron-500">
         {issue.path}
@@ -153,7 +152,7 @@ export function PublishStatePanel({
   );
 }
 
-function getActionResultMessage(
+export function getActionResultMessage(
   locale: SupportedLocale,
   code: ProfileCmsBuilderActionCode
 ): string {
@@ -166,8 +165,8 @@ function getActionResultMessage(
       return t(locale, "profileCms.builder.api.missingProfileId");
     case "profile_not_authorized":
       return t(locale, "profileCms.builder.api.profileNotAuthorized");
-    case "publish_requires_signed_storage":
-      return t(locale, "profileCms.builder.api.publishRequiresSignedStorage");
+    case "server_validation_invalid":
+      return t(locale, "profileCms.builder.api.serverValidationInvalid");
     case "request_failed":
       return t(locale, "profileCms.builder.api.failed");
     case "server_validation_completed":
@@ -179,18 +178,13 @@ function getActionResultMessage(
 
 export function getExpectedBuilderEndpoint(
   action: ProfileCmsBuilderAction,
-  draftId: string | undefined
+  _draftId: string | undefined
 ): string {
   switch (action) {
     case "save_draft":
       return PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT;
     case "validate":
       return PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT;
-    case "publish":
-      return PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT.replace(
-        "{id}",
-        draftId ? encodeURIComponent(draftId) : ":id"
-      );
   }
 }
 

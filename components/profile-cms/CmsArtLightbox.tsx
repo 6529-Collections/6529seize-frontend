@@ -19,6 +19,8 @@ import {
   type CmsArtGridMode,
 } from "@/components/profile-cms/cmsArtGalleryClasses";
 
+const INHERITED_TEXT_CLASS = "tw-text-inherit";
+
 export type CmsArtInspectionMetadata = {
   readonly label: string;
   readonly value: string;
@@ -58,6 +60,7 @@ export function CmsInspectableArtwork({
   frameClassName = "",
   imageClassName = "",
   item,
+  previewSrc,
   labels,
   loading = "lazy",
 }: {
@@ -66,6 +69,7 @@ export function CmsInspectableArtwork({
   readonly frameClassName?: string | undefined;
   readonly imageClassName?: string | undefined;
   readonly item: CmsArtInspectionItem;
+  readonly previewSrc?: string | undefined;
   readonly labels: CmsArtInspectorLabels;
   readonly loading?: "eager" | "lazy" | undefined;
 }) {
@@ -78,7 +82,7 @@ export function CmsInspectableArtwork({
         <ArtworkButton
           frameClassName={frameClassName}
           imageClassName={imageClassName}
-          item={item}
+          item={previewSrc ? { ...item, src: previewSrc } : item}
           labels={labels}
           loading={loading}
           onOpen={() => setOpenIndex(0)}
@@ -111,14 +115,19 @@ export function CmsArtGalleryGrid({
   items,
   labels,
   mode = "clean",
+  appearance = "dark",
+  previewSources,
 }: {
   readonly description?: string | undefined;
   readonly heading?: string | undefined;
   readonly items: readonly CmsArtInspectionItem[];
   readonly labels: CmsArtInspectorLabels;
   readonly mode?: CmsArtGridMode | undefined;
+  readonly appearance?: "dark" | "studio" | undefined;
+  readonly previewSources?: Readonly<Record<string, string>> | undefined;
 }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const studio = appearance === "studio";
 
   if (!items.length) {
     return null;
@@ -129,42 +138,68 @@ export function CmsArtGalleryGrid({
       {heading || description ? (
         <div>
           {heading ? (
-            <h3 className="tw-text-xl tw-font-semibold tw-text-white">
+            <h3
+              className={`tw-m-0 tw-text-xl tw-font-semibold ${studio ? INHERITED_TEXT_CLASS : "tw-text-white"}`}
+            >
               {heading}
             </h3>
           ) : null}
           {description ? (
-            <p className="tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-400">
+            <p
+              className={`tw-mt-2 tw-text-sm tw-leading-6 ${studio ? INHERITED_TEXT_CLASS : "tw-text-iron-400"}`}
+            >
               {description}
             </p>
           ) : null}
         </div>
       ) : null}
-      <div className={getCmsArtGalleryGridClassName(mode)}>
+      <div
+        className={
+          studio
+            ? STUDIO_GALLERY_GRIDS[mode]
+            : getCmsArtGalleryGridClassName(mode)
+        }
+      >
         {items.map((item, index) => (
           <figure
-            className={getCmsArtGalleryCardClassName(mode, index)}
+            className={
+              studio
+                ? getStudioGalleryCardClassName(mode, index)
+                : getCmsArtGalleryCardClassName(mode, index)
+            }
             key={item.id}
           >
             <ArtworkButton
-              frameClassName={getCmsArtGalleryFrameClassName(mode)}
-              imageClassName={getCmsArtGalleryImageClassName(mode)}
-              item={item}
+              frameClassName={`${getCmsArtGalleryFrameClassName(mode)} ${studio ? getStudioGalleryFrameClassName(mode) : ""}`}
+              imageClassName={`${getCmsArtGalleryImageClassName(mode)} ${studio ? "tw-max-h-[70vh] !tw-object-contain" : ""}`}
+              item={getArtworkPreviewItem(item, previewSources?.[item.id])}
               labels={labels}
               loading={index === 0 ? "eager" : "lazy"}
               onOpen={() => setOpenIndex(index)}
             />
-            <figcaption className={getCmsArtGalleryCaptionClassName(mode)}>
-              <span className="tw-block tw-font-semibold tw-text-iron-100">
+            <figcaption
+              className={
+                studio
+                  ? "tw-mt-3 tw-text-xs tw-leading-6"
+                  : getCmsArtGalleryCaptionClassName(mode)
+              }
+            >
+              <span
+                className={`tw-block tw-font-semibold ${studio ? INHERITED_TEXT_CLASS : "tw-text-iron-100"}`}
+              >
                 {item.title}
               </span>
               {item.caption ? (
-                <span className="tw-mt-1 tw-block tw-text-iron-400">
+                <span
+                  className={`tw-mt-1 tw-block ${studio ? INHERITED_TEXT_CLASS : "tw-text-iron-400"}`}
+                >
                   {item.caption}
                 </span>
               ) : null}
               {item.roleLabel ? (
-                <span className="tw-mt-2 tw-inline-flex tw-border tw-border-solid tw-border-iron-700 tw-px-2 tw-py-0.5 tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
+                <span
+                  className={`tw-mt-2 tw-inline-flex tw-border tw-border-solid tw-px-2 tw-py-0.5 tw-text-xs tw-font-semibold tw-uppercase ${studio ? "tw-border-[color:var(--cms-line)] tw-text-inherit" : "tw-border-iron-700 tw-text-primary-300"}`}
+                >
                   {item.roleLabel}
                 </span>
               ) : null}
@@ -182,6 +217,36 @@ export function CmsArtGalleryGrid({
     </section>
   );
 }
+
+function getStudioGalleryCardClassName(
+  mode: CmsArtGridMode,
+  index: number
+): string {
+  const wide = mode === "editorial" && index === 0;
+  return `tw-m-0 tw-min-w-0 ${wide ? "@[48rem]/cms-studio:tw-col-span-2" : ""}`;
+}
+
+function getStudioGalleryFrameClassName(mode: CmsArtGridMode): string {
+  const square = mode === "contact_sheet" || mode === "dense";
+  return `!tw-bg-transparent ${square ? "!tw-aspect-square" : "!tw-aspect-auto"}`;
+}
+
+function getArtworkPreviewItem(
+  item: CmsArtInspectionItem,
+  previewSrc: string | undefined
+): CmsArtInspectionItem {
+  return previewSrc ? { ...item, src: previewSrc } : item;
+}
+
+const STUDIO_GALLERY_GRIDS: Record<CmsArtGridMode, string> = {
+  clean:
+    "tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-12 @[40rem]/cms-studio:tw-grid-cols-2 @[64rem]/cms-studio:tw-grid-cols-3",
+  editorial:
+    "tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-12 @[48rem]/cms-studio:tw-grid-cols-2",
+  dense: "tw-grid tw-grid-cols-2 tw-gap-4 @[48rem]/cms-studio:tw-grid-cols-4",
+  contact_sheet:
+    "tw-grid tw-grid-cols-2 tw-gap-4 @[40rem]/cms-studio:tw-grid-cols-3 @[64rem]/cms-studio:tw-grid-cols-5",
+};
 
 function ArtworkButton({
   frameClassName,
@@ -215,7 +280,10 @@ function ArtworkButton({
         src={item.src}
         width={item.width}
       />
-      <span className="tw-absolute tw-bottom-3 tw-right-3 tw-border tw-border-solid tw-border-white/25 tw-bg-black/75 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-text-white tw-opacity-0 tw-transition group-hover:tw-opacity-100 group-focus-visible:tw-opacity-100">
+      <span
+        data-cms-art-badge
+        className="tw-absolute tw-bottom-3 tw-right-3 tw-border tw-border-solid tw-border-white/25 tw-bg-black/75 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-text-white tw-opacity-0 tw-transition group-hover:tw-opacity-100 group-focus-visible:tw-opacity-100"
+      >
         {labels.inspect}
       </span>
     </button>
@@ -333,6 +401,7 @@ function ArtworkDialog({
 
   return (
     <dialog
+      data-cms-art-dialog
       aria-labelledby={titleId}
       aria-modal="true"
       className="tw-fixed tw-inset-0 tw-z-[1100] tw-m-0 tw-flex tw-h-auto tw-max-h-none tw-w-auto tw-max-w-none tw-border-0 tw-bg-black/95 tw-p-0 tw-text-iron-100"
@@ -342,9 +411,15 @@ function ArtworkDialog({
       tabIndex={-1}
     >
       <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-col">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-black tw-p-3">
+        <div
+          data-cms-art-toolbar
+          className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-black tw-p-3"
+        >
           <div className="tw-min-w-0">
-            <p className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
+            <p
+              data-cms-art-count
+              className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300"
+            >
               {activeIndex + 1} / {items.length}
             </p>
             <h2
@@ -415,6 +490,7 @@ function ArtworkDialog({
               type="button"
             />
             <div
+              data-cms-art-canvas
               className="tw-pointer-events-none tw-relative tw-flex tw-min-h-full tw-items-center tw-justify-center"
               style={getArtworkFrameStyle(activeItem)}
             >
@@ -433,7 +509,10 @@ function ArtworkDialog({
           </div>
 
           {showMetadata ? (
-            <aside className="tw-max-h-[45dvh] tw-overflow-auto tw-border-x-0 tw-border-b-0 tw-border-l-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 lg:tw-max-h-none lg:tw-border-l lg:tw-border-t-0">
+            <aside
+              data-cms-art-metadata
+              className="tw-max-h-[45dvh] tw-overflow-auto tw-border-x-0 tw-border-b-0 tw-border-l-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 lg:tw-max-h-none lg:tw-border-l lg:tw-border-t-0"
+            >
               <h3 className="tw-text-base tw-font-semibold tw-text-white">
                 {labels.metadataTitle}
               </h3>
@@ -481,6 +560,7 @@ const LightboxButton = ({
   readonly onClick: () => void;
 }) => (
   <button
+    data-cms-art-control
     className="tw-min-h-10 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-border-primary-400 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
     onClick={onClick}
     ref={buttonRef}

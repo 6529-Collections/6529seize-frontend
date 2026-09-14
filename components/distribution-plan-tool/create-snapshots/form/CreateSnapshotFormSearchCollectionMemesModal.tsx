@@ -1,8 +1,11 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { useEffect, useState } from "react";
+import { MEMES_SNAPSHOT_COLLECTION_NAME } from "./snapshot-collections";
 
 type MemesSeason = `SZN${number}`;
 
@@ -22,6 +25,7 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
     tokenIds: string | null;
   }) => void;
 }) {
+  const locale = useBrowserLocale();
   const [options, setOptions] = useState<
     { value: MemesSeason; tokenIds: string }[]
   >([]);
@@ -44,9 +48,7 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
     getSeasons();
   }, []);
 
-  const [selected, setSelected] = useState<MemesSeason[]>(
-    options.map((o) => o.value)
-  );
+  const [selected, setSelected] = useState<MemesSeason[]>([]);
 
   const handleSelect = (szn: MemesSeason) => {
     if (selected.includes(szn)) {
@@ -57,10 +59,11 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
   };
 
   const onDone = () => {
+    // All or no seasons intentionally means the full Memes collection.
     if (selected.length === options.length || !selected.length) {
       onMemesCollection({
         address: MEMES_CONTRACT.toLowerCase(),
-        name: "The Memes by 6529",
+        name: MEMES_SNAPSHOT_COLLECTION_NAME,
         tokenIds: null,
       });
       return;
@@ -84,40 +87,34 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
   };
 
   return (
-    <div className="tw-p-8">
-      <p className="tw-m-0 tw-text-white">
-        Select &quot;The Memes by 6529&quot; Seasons
-      </p>
-      <div className="tw-mt-6">
+    <div className="tw-p-6">
+      <div>
         {!!options.length && (
-          <fieldset>
+          <fieldset className="tw-m-0 tw-border-0 tw-p-0">
             <legend className="tw-text-base tw-font-semibold tw-leading-6 tw-text-white">
-              Seasons
+              {t(locale, "emma.snapshots.seasons")}
             </legend>
             <div className="tw-mt-4 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-border-x-0 tw-border-b tw-border-t tw-border-solid tw-border-iron-800">
               {options.map((option) => (
-                <div
-                  onClick={() => handleSelect(option.value)}
+                <label
+                  htmlFor={`option-${option.value}`}
                   key={option.value}
                   className="tw-relative tw-flex tw-cursor-pointer tw-items-start tw-py-4"
                 >
-                  <div className="tw-min-w-0 tw-flex-1 tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
+                  <span className="tw-min-w-0 tw-flex-1 tw-text-sm tw-font-medium tw-leading-6 tw-text-white">
                     {option.value} ({option.tokenIds})
-                  </div>
-                  <div className="tw-ml-3 tw-flex tw-h-6 tw-w-auto tw-items-center">
+                  </span>
+                  <span className="tw-ml-3 tw-flex tw-h-6 tw-w-auto tw-items-center">
                     <input
                       id={`option-${option.value}`}
                       name={`person-${option.value}`}
                       type="checkbox"
                       checked={selected.includes(option.value)}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        handleSelect(option.value);
-                      }}
+                      onChange={() => handleSelect(option.value)}
                       className="tw-form-checkbox tw-h-4 tw-w-4 tw-cursor-pointer tw-rounded tw-border-solid tw-border-gray-600 tw-bg-iron-800 tw-text-primary-500 focus:tw-ring-primary-500"
                     />
-                  </div>
-                </div>
+                  </span>
+                </label>
               ))}
             </div>
           </fieldset>
@@ -149,9 +146,9 @@ export default function CreateSnapshotFormSearchCollectionMemesModal({
         <button
           type="button"
           onClick={onDone}
-          className="tw-relative tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-600 hover:tw-bg-primary-600"
+          className="tw-relative tw-rounded-lg tw-border tw-border-solid tw-border-primary-600 tw-bg-primary-600 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-primary-300"
         >
-          Select
+          {t(locale, "emma.snapshots.select")}
         </button>
       </div>
     </div>

@@ -1,4 +1,20 @@
-import { detectEnsTarget } from "@/lib/ens/detect";
+import {
+  createDefaultWalletGalleryBuilderState,
+  createMockWalletGallerySnapshot,
+} from "./gallery-source";
+import type {
+  WalletGallerySource,
+  WalletGallerySnapshotAsset,
+  WalletGallerySnapshotCollection,
+  WalletGallerySnapshot,
+  WalletGalleryBuilderState,
+} from "./gallery-source";
+import { slugifyBuilderId } from "@/lib/profile-cms/builder/normalize";
+import { parseWalletGalleryEditorState } from "./gallery-state";
+import {
+  buildGalleryHomeBlocks,
+  buildGalleryPageMetadata,
+} from "./gallery-page-content";
 import {
   CMS_CANONICALIZATION,
   CMS_HASH_ALGORITHM,
@@ -9,83 +25,27 @@ import {
 } from "@/lib/profile-cms/protocol/v1";
 import { withComputedCmsHashes } from "@/lib/profile-cms/protocol/v1/hash";
 
-export type WalletGallerySource =
-  | {
-      readonly kind: "address";
-      readonly input: string;
-      readonly normalized: string;
-    }
-  | {
-      readonly kind: "ens";
-      readonly input: string;
-      readonly normalized: string;
-    };
-
-type WalletGalleryInputResult =
-  | {
-      readonly ok: true;
-      readonly sources: readonly WalletGallerySource[];
-    }
-  | {
-      readonly ok: false;
-      readonly sources: readonly WalletGallerySource[];
-      readonly errors: readonly string[];
-    };
-
-export type WalletGallerySnapshotAsset = {
-  readonly id: string;
-  readonly title: string;
-  readonly collectionId: string;
-  readonly collectionName: string;
-  readonly contract: string;
-  readonly tokenId: string;
-  readonly chainId: number;
-  readonly owner: string;
-  readonly imageUri?: string | undefined;
-  readonly mimeType?: string | undefined;
-  readonly width?: number | undefined;
-  readonly height?: number | undefined;
-  readonly metadataUri?: string | undefined;
-  readonly mediaState: "ready" | "partial" | "missing";
-  readonly altText: string;
-};
-
-export type WalletGallerySnapshotCollection = {
-  readonly id: string;
-  readonly name: string;
-  readonly slug: string;
-  readonly contract: string;
-  readonly chainId: number;
-  readonly assetIds: readonly string[];
-};
-
-export type WalletGallerySnapshotSource = "backend" | "fixture";
-
-export type WalletGallerySnapshot = {
-  readonly snapshotId: string;
-  readonly source: WalletGallerySnapshotSource;
-  readonly wallets: readonly WalletGallerySource[];
-  readonly capturedAt: string;
-  readonly blockNumber?: number | undefined;
-  readonly assets: readonly WalletGallerySnapshotAsset[];
-  readonly collections: readonly WalletGallerySnapshotCollection[];
-  readonly warnings: readonly string[];
-};
-
-export type WalletGalleryBuilderState = {
-  readonly walletInput: string;
-  readonly snapshot?: WalletGallerySnapshot | undefined;
-  readonly hiddenAssetIds: readonly string[];
-  readonly featuredAssetIds: readonly string[];
-  readonly featuredCollectionIds: readonly string[];
-  readonly orderedAssetIds: readonly string[];
-};
-
+export {
+  WALLET_GALLERY_BACKEND_WARNING_CODES,
+  createDefaultWalletGalleryBuilderState,
+  parseWalletGallerySources,
+  createMockWalletGallerySnapshot,
+} from "./gallery-source";
+export type {
+  WalletGallerySource,
+  WalletGallerySnapshotAsset,
+  WalletGallerySnapshotCollection,
+  WalletGallerySnapshotExcludedAsset,
+  WalletGallerySnapshotTotals,
+  WalletGallerySnapshot,
+  WalletGalleryBuilderState,
+} from "./gallery-source";
 type WalletGalleryPackageOptions = {
   readonly handle: string;
   readonly siteTitle: string;
   readonly siteDescription: string;
   readonly themeAccent: string;
+  readonly walletInput: string;
   readonly snapshot: WalletGallerySnapshot | undefined;
   readonly hiddenAssetIds: readonly string[];
   readonly featuredAssetIds: readonly string[];
@@ -94,174 +54,42 @@ type WalletGalleryPackageOptions = {
   readonly now?: Date | undefined;
 };
 
-export const WALLET_GALLERY_FIXTURE_WARNING_CODES = {
-  backendDisabled: "fixture_snapshot_backend_disabled",
-  partialMedia: "fixture_snapshot_partial_media",
-} as const;
+// Renderer identity recorded in `build_manifest.renderer` for every package
+// this module generates. isWalletGalleryGeneratedPackage() (exported below)
+// checks this value so createBuilderStateFromPackage (lib/profile-cms
+// /builder/package.ts) can detect a gallery-generated package on load and
+// restore wallet-gallery editor state instead of re-importing it as a
+// homepage template. Kept module-private -- callers use the exported
+// detector/restorer functions instead of comparing this value themselves.
+const WALLET_GALLERY_GENERATOR_NAME = "6529-cms-gallery-builder-mvp";
+const WALLET_GALLERY_GENERATOR_VERSION = "0.2.0";
+// Namespaced key on the wallet source packet that carries the full reviewed
+// snapshot plus curation choices, so a saved gallery draft can be reloaded
+// without re-querying the (possibly since-changed) wallet snapshot endpoint.
+const WALLET_GALLERY_SOURCE_PACKET_STATE_KEY = "6529_gallery_builder_state_v1";
 
 const FIXTURE_ZERO_HASH =
   "sha256:0000000000000000000000000000000000000000000000000000000000000000";
-const DEFAULT_COLLECTION_CONTRACT =
-  "0x33fd426905f149f8376e227d0c9d3340aad17af1";
-const DEFAULT_PRIMARY_OWNER = "0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0";
-const DEFAULT_SECONDARY_OWNER = "0xfDF8bcf56aF0584026f9DB963381db72C5cc8e3b";
-
-export function createDefaultWalletGalleryBuilderState(
-  handle: string
-): WalletGalleryBuilderState {
-  return {
-    walletInput: `${handle}.eth`,
-    hiddenAssetIds: [],
-    featuredAssetIds: [],
-    featuredCollectionIds: [],
-    orderedAssetIds: [],
-  };
-}
-
-export function parseWalletGallerySources(
-  input: string
-): WalletGalleryInputResult {
-  const tokens = input
-    .split(/[\s,;]+/)
-    .map((token) => token.trim())
-    .filter(Boolean);
-  const seen = new Set<string>();
-  const sources: WalletGallerySource[] = [];
-  const errors: string[] = [];
-
-  tokens.forEach((token) => {
-    const detected = detectEnsTarget(token);
-    if (!detected) {
-      errors.push(token);
-      return;
-    }
-
-    const normalized = detected.input.trim();
-    const dedupeKey = `${detected.kind}:${normalized.toLowerCase()}`;
-    if (seen.has(dedupeKey)) {
-      return;
-    }
-    seen.add(dedupeKey);
-    sources.push({
-      kind: detected.kind === "name" ? "ens" : "address",
-      input: token,
-      normalized,
-    });
-  });
-
-  if (!tokens.length) {
-    errors.push("missing_wallet");
-  }
-
-  return errors.length ? { ok: false, sources, errors } : { ok: true, sources };
-}
-
-export function createMockWalletGallerySnapshot({
-  handle,
-  sources,
-  now = new Date("2026-06-17T00:00:00.000Z"),
-}: {
-  readonly handle: string;
-  readonly sources: readonly WalletGallerySource[];
-  readonly now?: Date | undefined;
-}): WalletGallerySnapshot {
-  const fallbackSources =
-    sources.length > 0
-      ? sources
-      : parseWalletGallerySources(`${handle}.eth`).sources;
-  const primaryOwner =
-    fallbackSources.find((source) => source.kind === "address")?.normalized ??
-    DEFAULT_PRIMARY_OWNER;
-  const secondaryOwner =
-    fallbackSources.filter((source) => source.kind === "address")[1]
-      ?.normalized ??
-    fallbackSources.find((source) => source.kind === "address")?.normalized ??
-    DEFAULT_SECONDARY_OWNER;
-  const capturedAt = now.toISOString();
-  const assets: WalletGallerySnapshotAsset[] = [
-    {
-      id: "work-memes-1",
-      title: "The Memes #1",
-      collectionId: "collection-the-memes",
-      collectionName: "The Memes by 6529",
-      contract: DEFAULT_COLLECTION_CONTRACT,
-      tokenId: "1",
-      chainId: 1,
-      owner: primaryOwner,
-      imageUri: "ipfs://bafyfixturegallery/memes-1.png",
-      mimeType: "image/png",
-      width: 2400,
-      height: 2400,
-      metadataUri: "ipfs://bafyfixturegallery/metadata/1.json",
-      mediaState: "ready",
-      altText: "The Memes by 6529 card number 1",
-    },
-    {
-      id: "work-memes-2",
-      title: "The Memes #2",
-      collectionId: "collection-the-memes",
-      collectionName: "The Memes by 6529",
-      contract: DEFAULT_COLLECTION_CONTRACT,
-      tokenId: "2",
-      chainId: 1,
-      owner: secondaryOwner,
-      imageUri: "ipfs://bafyfixturegallery/memes-2.png",
-      mimeType: "image/png",
-      width: 1800,
-      height: 2400,
-      metadataUri: "ipfs://bafyfixturegallery/metadata/2.json",
-      mediaState: "ready",
-      altText: "The Memes by 6529 card number 2",
-    },
-    {
-      id: "work-memes-partial",
-      title: "Unresolved media work",
-      collectionId: "collection-the-memes",
-      collectionName: "The Memes by 6529",
-      contract: DEFAULT_COLLECTION_CONTRACT,
-      tokenId: "404",
-      chainId: 1,
-      owner: primaryOwner,
-      metadataUri: "ipfs://bafyfixturegallery/metadata/404.json",
-      mediaState: "partial",
-      altText: "NFT metadata was found but preview media is pending",
-    },
-  ];
-
-  return {
-    snapshotId: `fixture-${slugify(handle)}-${slugify(
-      fallbackSources.map((source) => source.normalized).join("-")
-    )}`,
-    source: "fixture",
-    wallets: fallbackSources,
-    capturedAt,
-    blockNumber: 22000000,
-    assets,
-    collections: [
-      {
-        id: "collection-the-memes",
-        name: "The Memes by 6529",
-        slug: "the-memes",
-        contract: DEFAULT_COLLECTION_CONTRACT,
-        chainId: 1,
-        assetIds: assets.map((asset) => asset.id),
-      },
-    ],
-    warnings: [
-      WALLET_GALLERY_FIXTURE_WARNING_CODES.backendDisabled,
-      WALLET_GALLERY_FIXTURE_WARNING_CODES.partialMedia,
-    ],
-  };
-}
-
-// Temporary frontend preview fallback. The durable Phase 5 source of truth is
-// the backend wallet-snapshot -> CMS V1 generator; keep this adapter aligned to
-// the expected snapshot fields and replace it with BE package output when ready.
+// Frontend mirror of the backend deterministic generator
+// (6529seize-backend
+// src/profile-cms/profile-cms-gallery-package-generator.ts). That module is
+// the durable source of truth for page/block structure, asset naming, and
+// collection grouping/ordering, but it is not exposed through any backend API
+// route yet (only invoked from its own unit test) -- see
+// builder-mvp-integration-assumptions.md "Wallet Gallery Snapshot And
+// Generator Contract". Until it is wired behind an endpoint, this function
+// reproduces its deterministic shape from the existing frontend snapshot
+// review model: group-then-sort collections, one collections-index page, one
+// lightbox page per collection, one detail page per NFT. Curation and the
+// full reviewed snapshot are embedded in the source packet so a saved draft
+// can round-trip back into gallery editor state (see
+// restoreWalletGalleryStateFromPackage below).
 export function buildWalletGalleryCmsPackage({
   handle,
   siteTitle,
   siteDescription,
   themeAccent,
+  walletInput,
   snapshot,
   hiddenAssetIds,
   featuredAssetIds,
@@ -279,22 +107,49 @@ export function buildWalletGalleryCmsPackage({
     });
   const hidden = new Set(hiddenAssetIds);
   const orderedAssets = orderAssets(resolvedSnapshot.assets, orderedAssetIds);
-  const visibleAssets = orderedAssets.filter((asset) => !hidden.has(asset.id));
-  const pagePath = `/${normalizedHandle}/index.html`;
+  const visibleAssets = uniqueNftAssets(
+    orderedAssets.filter((asset) => !hidden.has(asset.id))
+  );
   const createdAt = now.toISOString();
-  const mediaAssets = visibleAssets.filter((asset) => !!asset.imageUri);
+  const homePagePath = `/${normalizedHandle}/index.html`;
+  const mediaAssets = visibleAssets.filter(hasGalleryImage);
   const galleryAssetIds = mediaAssets.map((asset) => getAssetId(asset));
-  const collectionPages = resolvedSnapshot.collections
-    .map((collection) =>
-      buildCollectionPage({
-        collection,
-        handle: normalizedHandle,
-        visibleAssets,
-        now: createdAt,
-      })
-    )
-    .filter((page): page is CmsPackageV1["payload"]["pages"][number] => !!page);
-  const nftPages = visibleAssets.map((asset, index) =>
+  const groupedCollections = groupCollectionsForPackage({
+    collections: resolvedSnapshot.collections,
+    featuredCollectionIds,
+    visibleAssets,
+  });
+  const collectionPages = groupedCollections.map((collection) =>
+    buildCollectionPage({
+      collection,
+      handle: normalizedHandle,
+      now: createdAt,
+    })
+  );
+  const collectionsIndexPage = buildCollectionsIndexPage({
+    collections: groupedCollections,
+    handle: normalizedHandle,
+    now: createdAt,
+    socialImageAssetId: galleryAssetIds[0],
+  });
+  // NFT detail pages follow grouped-collection order (mirrors the backend
+  // generator's `prepareGallery`, which flattens `sortedCollections` back
+  // into `sortedNfts`) rather than raw snapshot order, so featured/alphabetic
+  // collection precedence is reflected in route and page ordering too. Assets
+  // whose collection id has no matching snapshot collection entry keep their
+  // original relative order at the end instead of silently dropping out.
+  const groupedAssetAndCollectionOrder = groupedCollections.flatMap(
+    (collection) => collection.assets
+  );
+  const ungroupedAssets = visibleAssets.filter(
+    (asset) =>
+      !groupedAssetAndCollectionOrder.some((grouped) => grouped.id === asset.id)
+  );
+  const nftOrderedAssets = [
+    ...groupedAssetAndCollectionOrder,
+    ...ungroupedAssets,
+  ];
+  const nftPages = nftOrderedAssets.map((asset, index) =>
     buildNftPage({
       asset,
       handle: normalizedHandle,
@@ -304,41 +159,44 @@ export function buildWalletGalleryCmsPackage({
   );
   const featuredPageIds = getFeaturedPageIds({
     collectionPages,
-    featuredAssetIds,
+    featuredAssetIds: featuredVisibleAssetIds(
+      visibleAssets,
+      resolvedSnapshot.assets,
+      featuredAssetIds
+    ),
     featuredCollectionIds,
     nftPages,
-    visibleAssets,
+    visibleAssets: nftOrderedAssets,
   });
+  const allNftPageIds = nftPages.map((page) => page.id);
   const pages: CmsPackageV1["payload"]["pages"] = [
     {
       id: "page-gallery",
       type: "gallery",
-      path: pagePath,
-      metadata: {
+      path: homePagePath,
+      metadata: buildGalleryPageMetadata({
         title: siteTitle.trim() || `${normalizedHandle} Gallery`,
         description:
           siteDescription.trim() ||
           "Generated gallery from reviewed wallet snapshot.",
-        locale: "en",
-        canonical_url: `https://6529.io${pagePath}`,
-        ...(galleryAssetIds[0]
-          ? { social_image_asset_id: galleryAssetIds[0] }
-          : {}),
-        navigation_label: "Gallery",
-        search: "include",
-        robots: "index",
-        last_updated: createdAt,
-      },
+        path: homePagePath,
+        navigationLabel: "Gallery",
+        socialImageAssetId: galleryAssetIds[0],
+        now: createdAt,
+      }),
       source: {
         source_packet_id: "source-wallets",
       },
       blocks: buildGalleryHomeBlocks({
+        allNftPageIds,
         galleryAssetIds,
         featuredPageIds,
+        groupedCollectionCount: groupedCollections.length,
         snapshot: resolvedSnapshot,
         visibleAssets,
       }),
     },
+    collectionsIndexPage,
     ...collectionPages,
     ...nftPages,
   ];
@@ -359,7 +217,7 @@ export function buildWalletGalleryCmsPackage({
     alt_text: asset.altText,
   }));
   const nftMediaProfiles = visibleAssets.map((asset) => {
-    const assetId = asset.imageUri ? getAssetId(asset) : undefined;
+    const assetId = hasGalleryImage(asset) ? getAssetId(asset) : undefined;
     return {
       id: getNftMediaProfileId(asset),
       chain_id: asset.chainId,
@@ -401,7 +259,7 @@ export function buildWalletGalleryCmsPackage({
       description:
         siteDescription.trim() ||
         "Generated gallery from reviewed wallet snapshot.",
-      base_path: pagePath,
+      base_path: homePagePath,
       default_locale: "en",
       direction: "ltr",
       theme: {
@@ -426,31 +284,23 @@ export function buildWalletGalleryCmsPackage({
           id: "nav-main",
           items: [
             { label: "Gallery", page_id: "page-gallery" },
-            ...collectionPages.map((page) => ({
-              label: page.metadata.navigation_label ?? page.metadata.title,
-              page_id: page.id,
-            })),
+            { label: "Collections", page_id: collectionsIndexPage.id },
           ],
         },
       ],
       source_packets: [
-        {
-          id: "source-wallets",
-          source_type: "wallet",
-          captured_at: resolvedSnapshot.capturedAt,
-          content_hash: FIXTURE_ZERO_HASH,
-          wallets: resolvedSnapshot.wallets.map((wallet) => wallet.normalized),
-          snapshot_id: resolvedSnapshot.snapshotId,
-          snapshot_source: resolvedSnapshot.source,
-          hidden_asset_ids: hiddenAssetIds,
-          featured_asset_ids: featuredAssetIds,
-          featured_collection_ids: featuredCollectionIds,
-          warnings: resolvedSnapshot.warnings,
-        } as NonNullable<CmsPackageV1["payload"]["source_packets"]>[number],
+        buildWalletSourcePacket({
+          featuredAssetIds,
+          featuredCollectionIds,
+          hiddenAssetIds,
+          orderedAssetIds,
+          snapshot: resolvedSnapshot,
+          walletInput,
+        }),
       ],
       build_manifest: {
-        renderer: "6529-cms-gallery-builder-mvp",
-        renderer_version: "0.1.0",
+        renderer: WALLET_GALLERY_GENERATOR_NAME,
+        renderer_version: WALLET_GALLERY_GENERATOR_VERSION,
         route_count: routes.length,
         asset_count: assets.length,
         warnings: [...resolvedSnapshot.warnings],
@@ -493,114 +343,127 @@ export function buildWalletGalleryCmsPackage({
   return withComputedCmsHashes(packageWithoutHashes);
 }
 
-function buildGalleryHomeBlocks({
-  galleryAssetIds,
-  featuredPageIds,
-  snapshot,
+type GroupedGalleryCollection = WalletGallerySnapshotCollection & {
+  readonly assets: readonly WalletGallerySnapshotAsset[];
+};
+
+// Mirrors the backend generator's `prepareGallery`: group visible assets by
+// collection id, drop empty collections, and sort deterministically
+// (featured collections first, then alphabetically by id) so FE and BE agree
+// on collection page order for equivalent input.
+function groupCollectionsForPackage({
+  collections,
+  featuredCollectionIds,
   visibleAssets,
 }: {
-  readonly galleryAssetIds: readonly string[];
-  readonly featuredPageIds: readonly string[];
-  readonly snapshot: WalletGallerySnapshot;
+  readonly collections: readonly WalletGallerySnapshotCollection[];
+  readonly featuredCollectionIds: readonly string[];
   readonly visibleAssets: readonly WalletGallerySnapshotAsset[];
-}): CmsBlockV1[] {
-  const blocks: CmsBlockV1[] = [
-    {
-      id: "block-gallery-heading",
-      block_type: "heading",
-      level: 1,
-      text: "Gallery",
-    } as CmsBlockV1,
-    {
-      id: "block-wallet-gallery",
-      block_type: "generated_wallet_gallery",
-      wallets: snapshot.wallets.map((wallet) => wallet.normalized),
-      snapshot: {
-        ...(snapshot.blockNumber ? { block_number: snapshot.blockNumber } : {}),
-        captured_at: snapshot.capturedAt,
-      },
-      featured_page_ids: featuredPageIds,
-    } as CmsBlockV1,
-  ];
+}): readonly GroupedGalleryCollection[] {
+  const featured = new Set(featuredCollectionIds);
+  const grouped = collections
+    .map((collection) => ({
+      ...collection,
+      assets: visibleAssets.filter(
+        (asset) => asset.collectionId === collection.id
+      ),
+    }))
+    .filter((collection) => collection.assets.length > 0);
 
-  if (galleryAssetIds.length) {
-    blocks.push({
-      id: "block-gallery-grid",
-      block_type: "gallery",
-      asset_ids: galleryAssetIds,
-    } as CmsBlockV1);
-  } else {
-    blocks.push({
-      id: "block-gallery-empty",
-      block_type: "callout",
-      tone: "Review",
-      title: "No visible media",
-      content:
-        visibleAssets.length > 0
-          ? "Visible works are missing media previews."
-          : "No visible works are selected for this gallery.",
-    } as CmsBlockV1);
-  }
+  return [...grouped].sort((left, right) => {
+    const featuredCompare =
+      Number(featured.has(right.id)) - Number(featured.has(left.id));
+    if (featuredCompare !== 0) {
+      return featuredCompare;
+    }
+    return left.id.localeCompare(right.id);
+  });
+}
 
-  return blocks;
+function buildCollectionsIndexPage({
+  collections,
+  handle,
+  now,
+  socialImageAssetId,
+}: {
+  readonly collections: readonly GroupedGalleryCollection[];
+  readonly handle: string;
+  readonly now: string;
+  readonly socialImageAssetId: string | undefined;
+}): CmsPackageV1["payload"]["pages"][number] {
+  const pagePath = `/${handle}/collections/index.html`;
+  return {
+    id: "page-collections",
+    type: "collection",
+    path: pagePath,
+    metadata: buildGalleryPageMetadata({
+      title: "Collections",
+      description: "Collections in this wallet gallery.",
+      path: pagePath,
+      navigationLabel: "Collections",
+      socialImageAssetId,
+      now,
+    }),
+    blocks: [
+      {
+        id: "block-collections-heading",
+        block_type: "heading",
+        level: 1,
+        text: "Collections",
+      } as CmsBlockV1,
+      {
+        id: "block-collections-list",
+        block_type: "collection_reference",
+        collection_count: collections.length,
+        page_ids: collections.map((collection) =>
+          getCollectionPageId(collection.id)
+        ),
+      } as CmsBlockV1,
+    ],
+  };
 }
 
 function buildCollectionPage({
   collection,
   handle,
-  visibleAssets,
   now,
 }: {
-  readonly collection: WalletGallerySnapshotCollection;
+  readonly collection: GroupedGalleryCollection;
   readonly handle: string;
-  readonly visibleAssets: readonly WalletGallerySnapshotAsset[];
   readonly now: string;
-}): CmsPackageV1["payload"]["pages"][number] | null {
-  const collectionAssets = visibleAssets.filter(
-    (asset) => asset.collectionId === collection.id
-  );
-  if (!collectionAssets.length) {
-    return null;
-  }
-
+}): CmsPackageV1["payload"]["pages"][number] {
   const pagePath = `/${handle}/collections/${collection.slug}/index.html`;
-  const mediaAssetIds = collectionAssets
-    .filter((asset) => !!asset.imageUri)
+  const mediaAssetIds = collection.assets
+    .filter(hasGalleryImage)
     .map((asset) => getAssetId(asset));
-  const blocks: CmsBlockV1[] = [
-    {
-      id: `block-${collection.slug}-reference`,
-      block_type: "collection_reference",
-      chain_id: collection.chainId,
-      contract: collection.contract,
-      title: collection.name,
-    } as CmsBlockV1,
-  ];
-
-  if (mediaAssetIds.length) {
-    blocks.push({
-      id: `block-${collection.slug}-gallery`,
-      block_type: "gallery",
-      asset_ids: mediaAssetIds,
-    } as CmsBlockV1);
-  }
 
   return {
     id: getCollectionPageId(collection.id),
     type: "collection",
     path: pagePath,
-    metadata: {
+    metadata: buildGalleryPageMetadata({
       title: collection.name,
       description: "Collection page generated from a wallet gallery snapshot.",
-      locale: "en",
-      canonical_url: `https://6529.io${pagePath}`,
-      ...(mediaAssetIds[0] ? { social_image_asset_id: mediaAssetIds[0] } : {}),
-      navigation_label: collection.name,
-      search: "include",
-      robots: "index",
-      last_updated: now,
-    },
-    blocks,
+      path: pagePath,
+      navigationLabel: collection.name,
+      socialImageAssetId: mediaAssetIds[0],
+      now,
+    }),
+    blocks: [
+      {
+        id: `block-${collection.slug}-reference`,
+        block_type: "collection_reference",
+        chain_id: collection.chainId,
+        contract: collection.contract,
+        title: collection.name,
+      } as CmsBlockV1,
+      {
+        id: `block-${collection.slug}-gallery`,
+        block_type: "lightbox_gallery",
+        asset_ids: mediaAssetIds,
+        collection_key: collection.id,
+      } as CmsBlockV1,
+    ],
   };
 }
 
@@ -619,22 +482,19 @@ function buildNftPage({
   const pagePath = `/${handle}/nfts/ethereum/${contractSlug}/${slugify(
     asset.tokenId
   )}/index.html`;
-  const assetId = asset.imageUri ? getAssetId(asset) : undefined;
+  const assetId = hasGalleryImage(asset) ? getAssetId(asset) : undefined;
   return {
     id: getNftPageId(asset.id, index),
     type: "nft_detail",
     path: pagePath,
-    metadata: {
+    metadata: buildGalleryPageMetadata({
       title: asset.title,
       description: "NFT detail page generated from a wallet gallery snapshot.",
-      locale: "en",
-      canonical_url: `https://6529.io${pagePath}`,
-      ...(assetId ? { social_image_asset_id: assetId } : {}),
-      navigation_label: asset.title,
-      search: "include",
-      robots: "index",
-      last_updated: now,
-    },
+      path: pagePath,
+      navigationLabel: asset.title,
+      socialImageAssetId: assetId,
+      now,
+    }),
     blocks: [
       {
         id: `block-${slugify(asset.id)}-nft-reference`,
@@ -690,6 +550,114 @@ function getFeaturedPageIds({
   );
 }
 
+// Curation choices embedded alongside the reviewed snapshot in the wallet
+// source packet, keyed under WALLET_GALLERY_SOURCE_PACKET_STATE_KEY. This is
+// the frontend's own recoverable-state contract (not a backend field); it
+// only has to round-trip through this module's own JSON serialization.
+type WalletGallerySourcePacketState = {
+  readonly walletInput: string;
+  readonly snapshot: WalletGallerySnapshot;
+  readonly hiddenAssetIds: readonly string[];
+  readonly featuredAssetIds: readonly string[];
+  readonly featuredCollectionIds: readonly string[];
+  readonly orderedAssetIds: readonly string[];
+};
+
+function buildWalletSourcePacket({
+  featuredAssetIds,
+  featuredCollectionIds,
+  hiddenAssetIds,
+  orderedAssetIds,
+  snapshot,
+  walletInput,
+}: {
+  readonly featuredAssetIds: readonly string[];
+  readonly featuredCollectionIds: readonly string[];
+  readonly hiddenAssetIds: readonly string[];
+  readonly orderedAssetIds: readonly string[];
+  readonly snapshot: WalletGallerySnapshot;
+  readonly walletInput: string;
+}): NonNullable<CmsPackageV1["payload"]["source_packets"]>[number] {
+  const roundTripState: WalletGallerySourcePacketState = {
+    walletInput,
+    snapshot,
+    hiddenAssetIds,
+    featuredAssetIds,
+    featuredCollectionIds,
+    orderedAssetIds,
+  };
+  // The canonical JSON hasher rejects literal `undefined` values, which the
+  // WalletGallerySnapshot* types allow on optional fields. Round-tripping
+  // through JSON drops those keys the same way `JSON.stringify` does anywhere
+  // else this package is serialized (e.g. JSON export/import), keeping the
+  // embedded state hashable and identical to what a reload would parse back.
+  const jsonSafeRoundTripState = JSON.parse(
+    JSON.stringify(roundTripState)
+  ) as Record<string, unknown>;
+
+  return {
+    id: "source-wallets",
+    source_type: "wallet",
+    captured_at: snapshot.capturedAt,
+    content_hash: FIXTURE_ZERO_HASH,
+    wallets: snapshot.wallets.map((wallet) => wallet.normalized),
+    snapshot_id: snapshot.snapshotId,
+    snapshot_source: snapshot.source,
+    hidden_asset_ids: hiddenAssetIds,
+    featured_asset_ids: featuredAssetIds,
+    featured_collection_ids: featuredCollectionIds,
+    warnings: snapshot.warnings,
+    [WALLET_GALLERY_SOURCE_PACKET_STATE_KEY]: jsonSafeRoundTripState,
+  } as NonNullable<CmsPackageV1["payload"]["source_packets"]>[number];
+}
+
+/**
+ * Detects a wallet-gallery package generated by this module (or the future
+ * backend generator sharing the same `build_manifest.renderer` identity) so
+ * the builder can load a saved draft back into the gallery editor instead of
+ * re-importing it as a homepage template.
+ */
+export function isWalletGalleryGeneratedPackage(
+  cmsPackage: CmsPackageV1
+): boolean {
+  return (
+    cmsPackage.payload.build_manifest?.renderer ===
+    WALLET_GALLERY_GENERATOR_NAME
+  );
+}
+
+/**
+ * Recovers wallet-gallery editor state (wallet input, reviewed snapshot, and
+ * hidden/featured/order curation) from a package this module generated. Falls
+ * back to a fresh gallery state keyed off the profile handle when the source
+ * packet is missing the embedded round-trip payload (e.g. a hand-authored or
+ * older package that only matches on renderer name).
+ */
+export function restoreWalletGalleryStateFromPackage(
+  cmsPackage: CmsPackageV1
+): WalletGalleryBuilderState {
+  const handle = cmsPackage.profile.handle;
+  const packet = cmsPackage.payload.source_packets?.find(
+    (candidate) => candidate.source_type === "wallet"
+  ) as Record<string, unknown> | undefined;
+  const roundTripState = parseWalletGalleryEditorState(
+    packet?.[WALLET_GALLERY_SOURCE_PACKET_STATE_KEY]
+  );
+
+  if (!roundTripState) {
+    return createDefaultWalletGalleryBuilderState(handle);
+  }
+
+  return {
+    walletInput: roundTripState.walletInput || `${handle}.eth`,
+    snapshot: roundTripState.snapshot,
+    hiddenAssetIds: roundTripState.hiddenAssetIds,
+    featuredAssetIds: roundTripState.featuredAssetIds,
+    featuredCollectionIds: roundTripState.featuredCollectionIds,
+    orderedAssetIds: roundTripState.orderedAssetIds,
+  };
+}
+
 function orderAssets(
   assets: readonly WalletGallerySnapshotAsset[],
   orderedAssetIds: readonly string[]
@@ -705,10 +673,46 @@ function orderAssets(
   });
 }
 
+// Consolidated wallets can own the same ERC-1155 token. Keep the complete
+// reviewed holdings in the source packet, but emit its public NFT route once.
+function uniqueNftAssets(
+  assets: readonly WalletGallerySnapshotAsset[]
+): WalletGallerySnapshotAsset[] {
+  const seen = new Set<string>();
+  return assets.filter((asset) => {
+    const key = nftIdentity(asset);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function nftIdentity(asset: WalletGallerySnapshotAsset): string {
+  return `${asset.chainId}:${asset.contract.toLowerCase()}:${asset.tokenId}`;
+}
+
+function featuredVisibleAssetIds(
+  visible: readonly WalletGallerySnapshotAsset[],
+  all: readonly WalletGallerySnapshotAsset[],
+  featuredIds: readonly string[]
+): string[] {
+  const selected = new Set(featuredIds);
+  const tokens = new Set(
+    all.filter((asset) => selected.has(asset.id)).map(nftIdentity)
+  );
+  return visible
+    .filter((asset) => tokens.has(nftIdentity(asset)))
+    .map((asset) => asset.id);
+}
+
 function getPrimaryAddress(
   wallets: readonly WalletGallerySource[]
 ): string | undefined {
   return wallets.find((wallet) => wallet.kind === "address")?.normalized;
+}
+
+function hasGalleryImage(asset: WalletGallerySnapshotAsset): boolean {
+  return !!asset.imageUri && (asset.width ?? 0) > 0 && (asset.height ?? 0) > 0;
 }
 
 function getAssetId(asset: WalletGallerySnapshotAsset): string {
@@ -727,28 +731,7 @@ function getNftPageId(assetId: string, index: number): string {
   return `page-nft-${slugify(assetId) || index + 1}`;
 }
 
-function slugify(value: string): string {
-  const normalized = value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-");
-  return trimHyphenEdges(normalized).slice(0, 80) || "item";
-}
-
-function trimHyphenEdges(value: string): string {
-  let start = 0;
-  let end = value.length;
-
-  while (start < end && value[start] === "-") {
-    start += 1;
-  }
-
-  while (end > start && value[end - 1] === "-") {
-    end -= 1;
-  }
-
-  return value.slice(start, end);
-}
+const slugify = slugifyBuilderId;
 
 function normalizeHandle(value: string): string {
   const normalized = value

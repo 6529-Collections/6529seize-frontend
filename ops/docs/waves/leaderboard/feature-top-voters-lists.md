@@ -69,6 +69,9 @@ either list. Grid cards omit that highlight.
   the voter rows below the summary expand; the graph does not toggle them.
   Narrow screens use one `Largest votes` label with the signed highlights on
   one row; names shorten as needed while amounts stay visible.
+- The current-vote summary reserves a compact placeholder during its first
+  request. If it cannot load, the same space shows a `Retry` action. A failed
+  background refresh keeps the last valid summary visible.
 - `Download All` stays visible in the single-drop header, including
   when collapsed. It uses an icon-only button on narrow screens and downloads
   all voters as CSV without toggling the list.
@@ -94,6 +97,9 @@ either list. Grid cards omit that highlight.
 - Card highlights are optional and omitted for winners, chat and approve
   waves, and when no summary is available. A missing highlight does not prove
   that the drop has no votes or no negative votes.
+- A single-drop distribution can still show an authoritative side total when
+  only some or none of that side's highlighted voter profiles are available;
+  the unenriched amount appears as `Others`.
 - Reactions and content updates preserve the latest available card highlight.
   Your own or incoming real-time vote changes clear it until the leaderboard's
   next normal refresh. Voting does not force the leaderboard to reload or reorder.
@@ -104,6 +110,8 @@ either list. Grid cards omit that highlight.
 - If a later page fails, already loaded rows stay visible.
 - If initial requests do not return rows, the surface resolves to empty-state
   guidance instead of showing a dedicated error banner.
+- If the separate current-vote summary request fails or returns unusable data,
+  it shows a compact retry state without hiding the rest of `Top voters`.
 - Reloading the wave route starts a fresh fetch attempt.
 
 ## Limitations / Notes

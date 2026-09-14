@@ -20,7 +20,9 @@ export function NavigationItem({
   return (
     <li>
       {href ? (
-        <CmsLink href={href}>{label}</CmsLink>
+        <CmsLink context={context} href={href}>
+          {label}
+        </CmsLink>
       ) : (
         <span aria-disabled="true">{label}</span>
       )}

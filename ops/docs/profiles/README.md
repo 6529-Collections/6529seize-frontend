@@ -8,7 +8,8 @@ Coverage includes:
 
 - profile routes at `/{user}` and tab routes under `/{user}/*`
 - legacy profile aliases that redirect to `/{user}`
-- profile header summary and profile header edit entry points
+- profile header summary, profile header edit entry points, and published website links
+- the visual website studio and optional agent file exchange
 - `About -> Primary Address` at `/about/primary-address`
 
 ## Features
@@ -18,9 +19,10 @@ Coverage includes:
   (including integrated stats/details), xTDH, Subscriptions, and Proxy tab
   behavior.
 - [About](about/README.md): public `/about/primary-address` route behavior, table states, and row-link expectations.
-- [Profile CMS Builder AI-Agent Affordances](feature-profile-cms-builder-ai-agent-affordances.md):
-  hidden builder route exports, source packet boundaries, patch review, and
-  draft-only ownership rules.
+- [Profile Website Studio](feature-profile-cms-builder.md): 39 complete templates,
+  visual page editing, image uploads, wallet galleries, publishing, and recovery.
+- [Use Your Own Agent with the Website Studio](feature-profile-cms-builder-ai-agent-affordances.md):
+  optional file exports, patch review, and owner-controlled publication.
 
 ## Flows
 

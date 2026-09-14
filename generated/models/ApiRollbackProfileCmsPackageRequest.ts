@@ -14,7 +14,7 @@
 import { HttpFile } from '../http/http';
 
 export class ApiRollbackProfileCmsPackageRequest {
-    'expected_current_package_id': string;
+    'expected_current_package_id': string | null;
     'expected_current_package_hash'?: string;
 
     static readonly discriminator: string | undefined = undefined;

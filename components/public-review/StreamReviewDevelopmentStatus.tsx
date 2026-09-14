@@ -8,6 +8,7 @@ import { getStreamReviewPageHref } from "@/lib/public-review/streamReviewDefinit
 import type { PublicReviewPageDefinition } from "@/lib/public-review/publicReviewTypes";
 
 const BEFORE_LAUNCH_ITEMS = [
+  "publicReview.development.beforeLaunch.connections",
   "publicReview.development.beforeLaunch.audit",
   "publicReview.development.beforeLaunch.liveTesting",
   "publicReview.development.beforeLaunch.launchSetup",

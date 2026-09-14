@@ -1,4 +1,5 @@
 import GradientPageComponent from "@/components/6529Gradient/GradientPage";
+import { getUsableText } from "@/app/api/og-metadata/_lib/imageUtils";
 import {
   getAppMetadata,
   getLargeSocialCardMetadata,
@@ -7,6 +8,7 @@ import {
 import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { PROFILE_COLLECTED_RETURN_PARAM } from "@/helpers/profile-collected-navigation";
 import JsonLdScript from "@/lib/structured-data/json-ld";
+import { canonicalUrl } from "@/lib/structured-data/utils";
 import {
   buildNftPageJsonLd,
   fetchNftForStructuredData,
@@ -78,22 +80,33 @@ export async function generateMetadata({
 
   const title = `6529 Gradient #${id}`;
   const nft = await loadGradientNft(id);
-  const image = nft?.thumbnail ?? nft?.image ?? null;
+  const artist = getUsableText(nft?.artist);
+  const image =
+    getUsableText(nft?.scaled) ??
+    getUsableText(nft?.image) ??
+    getUsableText(nft?.thumbnail);
+  const description = [title, artist].filter(Boolean).join(" · ");
+  const canonical = canonicalUrl(`/6529-gradient/${encodeURIComponent(id)}`);
 
-  return getAppMetadata(
+  const metadata = getAppMetadata(
     getLargeSocialCardMetadata({
       title,
-      description: "Collections",
+      description,
       ogImage: getNftSocialCardImagePath({
+        artist,
         badge: "6529 Gradient",
         collection: "6529 Gradient",
         contract: GRADIENT_CONTRACT,
         id,
         image,
-        subtitle: "Collections",
         title,
       }),
       ogImageAlt: `${title} social card`,
     })
   );
+  return {
+    ...metadata,
+    alternates: { canonical },
+    openGraph: { ...metadata.openGraph, url: canonical },
+  };
 }

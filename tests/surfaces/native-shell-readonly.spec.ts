@@ -571,6 +571,104 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect.poll(() => readNotificationHistoryPushCount(page)).toBe(1);
   });
 
+  test("Capacitor primary tabs stay usable across phone and tablet orientations", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Primary-tab responsive behavior is covered on Capacitor simulations"
+    );
+
+    const viewports = [
+      { name: "phone portrait", width: 390, height: 844 },
+      { name: "phone landscape", width: 844, height: 390 },
+      { name: "tablet portrait", width: 834, height: 1194 },
+      { name: "tablet landscape", width: 1194, height: 834 },
+    ] as const;
+
+    await page.setViewportSize(viewports[0]);
+    await gotoReady(page, "/about");
+
+    for (const viewport of viewports) {
+      await test.step(viewport.name, async () => {
+        await page.setViewportSize(viewport);
+
+        const dock = page.locator('[data-mobile-bottom-nav-dock="true"]');
+        await expect(dock).toBeVisible();
+        await expectUsableNotificationTarget(dock);
+      });
+    }
+  });
+
+  test("Capacitor primary tabs keep the latest delayed destination without restyling icons", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Primary-tab transition feedback is covered on Capacitor simulations"
+    );
+
+    let notificationRequests = 0;
+    let collectionRequests = 0;
+    let releaseNotifications!: () => void;
+    let releaseCollections!: () => void;
+    const notificationsReleased = new Promise<void>((resolve) => {
+      releaseNotifications = resolve;
+    });
+    const collectionsReleased = new Promise<void>((resolve) => {
+      releaseCollections = resolve;
+    });
+
+    await page.route("**/*", async (route) => {
+      const url = new URL(route.request().url());
+      if (url.searchParams.has("_rsc")) {
+        if (url.pathname === "/notifications") {
+          notificationRequests += 1;
+          await notificationsReleased;
+        } else if (url.pathname === "/the-memes") {
+          collectionRequests += 1;
+          await collectionsReleased;
+        }
+      }
+
+      await route.continue();
+    });
+
+    await gotoReady(page, "/about");
+    const dock = page.locator('[data-mobile-bottom-nav-dock="true"]');
+    const notifications = dock.getByRole("link", {
+      name: "Notifications",
+      exact: true,
+    });
+    const collections = dock.getByRole("link", {
+      name: "Collections",
+      exact: true,
+    });
+
+    try {
+      await notifications.tap({ noWaitAfter: true });
+      await expect.poll(() => notificationRequests).toBeGreaterThan(0);
+      await expect(
+        notifications.getByTestId("nav-item-pending-indicator")
+      ).toHaveCount(0);
+
+      await collections.tap({ noWaitAfter: true });
+      await expect.poll(() => collectionRequests).toBeGreaterThan(0);
+      await expect(
+        collections.getByTestId("nav-item-pending-indicator")
+      ).toHaveCount(0);
+
+      releaseCollections();
+      await expect(page).toHaveURL(/\/the-memes$/, { timeout: 20_000 });
+      await expect(collections).toHaveAttribute("aria-current", "page", {
+        timeout: 20_000,
+      });
+    } finally {
+      releaseCollections();
+      releaseNotifications();
+    }
+  });
+
   test("Capacitor app-wallet shell renders the simulated empty wallet state", async ({
     page,
   }, testInfo) => {

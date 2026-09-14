@@ -85,6 +85,7 @@ export function InlineMediaActions({
   labels,
   className,
   style,
+  children,
 }: {
   readonly onDownload?: (() => void) | undefined;
   readonly onOpen?: (() => void) | undefined;
@@ -98,6 +99,7 @@ export function InlineMediaActions({
   readonly labels?: MediaActionLabels | undefined;
   readonly className?: string | undefined;
   readonly style?: React.CSSProperties | undefined;
+  readonly children?: React.ReactNode;
 }) {
   const actionLabels = getMediaActionLabels(labels);
   const canFullscreen =
@@ -146,6 +148,7 @@ export function InlineMediaActions({
           <ArrowDownTrayIcon className="tw-size-4" aria-hidden="true" />
         </ToolbarButton>
       )}
+      {children}
     </div>
   );
 }

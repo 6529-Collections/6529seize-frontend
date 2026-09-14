@@ -80,7 +80,7 @@ describe("GradientsComponent", () => {
       "https://api.test.6529.io/api/nfts/gradients?page_size=101"
     );
 
-    let links = await screen.findAllByRole("link");
+    let links = await screen.findAllByRole("link", { name: /NFT[12]/ });
     expect(links[0]).toHaveAttribute("href", "/6529-gradient/1");
     expect(links[1]).toHaveAttribute("href", "/6529-gradient/2");
     expect(links[0]).toHaveClass("tw-text-iron-100");
@@ -104,7 +104,7 @@ describe("GradientsComponent", () => {
       );
     });
 
-    links = screen.getAllByRole("link");
+    links = screen.getAllByRole("link", { name: /NFT[12]/ });
     expect(links[0]).toHaveAttribute("href", "/6529-gradient/2");
     expect(links[1]).toHaveAttribute("href", "/6529-gradient/1");
   });
@@ -123,7 +123,7 @@ describe("GradientsComponent", () => {
       );
     });
 
-    const links = screen.getAllByRole("link");
+    const links = screen.getAllByRole("link", { name: /NFT[12]/ });
     expect(links[0]).toHaveAttribute("href", "/6529-gradient/2");
     expect(links[1]).toHaveAttribute("href", "/6529-gradient/1");
   });
@@ -138,5 +138,15 @@ describe("GradientsComponent", () => {
     renderComponent();
     await screen.findByTestId("dropdown");
     expect(screen.getByTestId("dropdown")).toBeInTheDocument();
+  });
+
+  it("opens the full Gradients set from the native collection page", async () => {
+    renderComponent();
+    expect(
+      await screen.findByRole("link", { name: "Complete my set" })
+    ).toHaveAttribute(
+      "href",
+      "/collect?collection=gradients&intent=full_set&definition=gradients"
+    );
   });
 });

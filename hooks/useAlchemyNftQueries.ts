@@ -1,28 +1,20 @@
 "use client";
 
-import {
-  keepPreviousData,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { publicEnv } from "@/config/env";
-import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import type {
   AlchemyContractMetadataResponse,
   AlchemyGetNftsForOwnerResponse,
-  AlchemySearchResponse,
   AlchemyTokenMetadataResponse,
   OwnerNft,
-  SearchContractsResult,
 } from "@/services/alchemy/types";
 import {
   normaliseAddress,
   processContractMetadataResponse,
   processOwnerNftsResponse,
-  processSearchResponse,
   processTokenMetadataResponse,
 } from "@/services/alchemy/utils";
 import type {
@@ -32,7 +24,6 @@ import type {
   TokenMetadata,
 } from "@/types/nft";
 
-const SUGGESTION_TTL = 60_000;
 const CONTRACT_TTL = 5 * 60_000;
 const TOKEN_TTL = 60_000;
 
@@ -41,7 +32,6 @@ type CacheEntry<T> = {
   expires: number;
 };
 
-const suggestionCache = new Map<string, CacheEntry<SearchContractsResult>>();
 const contractCache = new Map<string, CacheEntry<ContractOverview | null>>();
 const tokenCache = new Map<string, CacheEntry<TokenMetadata[]>>();
 
@@ -124,26 +114,6 @@ type ContractOverviewBatchResult = {
   readonly contractsByKey: ReadonlyMap<string, ContractOverview | null>;
   readonly errorsByKey: ReadonlyMap<string, string>;
 };
-
-async function fetchCollectionsFromApi(
-  params: UseCollectionSearchParams & {
-    readonly signal?: AbortSignal | undefined;
-  }
-): Promise<SearchContractsResult> {
-  const { query, chain = "ethereum", hideSpam = true, signal } = params;
-  const search = new URLSearchParams();
-  search.set("query", query);
-  search.set("chain", chain);
-  const queryString = search.toString();
-
-  const payload = await fetchJsonWithFailover<AlchemySearchResponse>(
-    `/api/alchemy/collections?${queryString}`,
-    `/collections?${queryString}`,
-    { ...(signal !== undefined ? { signal: signal } : {}) }
-  );
-
-  return processSearchResponse(payload, hideSpam);
-}
 
 async function fetchContractOverviewFromApi(
   params: UseContractOverviewParams & {
@@ -286,14 +256,6 @@ function gcExpired<T>(map: Map<string, CacheEntry<T>>, now = Date.now()): void {
   });
 }
 
-function getSuggestionCacheKey(
-  query: string,
-  chain: SupportedChain,
-  hideSpam: boolean
-): string {
-  return `${chain}:${hideSpam ? "1" : "0"}:${query.toLowerCase()}`;
-}
-
 function getContractCacheKey(
   address: `0x${string}`,
   chain: SupportedChain
@@ -349,14 +311,6 @@ function getTokenCacheKey(params: TokenMetadataParams): string {
   )}`;
 }
 
-type UseCollectionSearchParams = {
-  readonly query: string;
-  readonly chain?: SupportedChain | undefined;
-  readonly hideSpam?: boolean | undefined;
-  readonly debounceMs?: number | undefined;
-  readonly enabled?: boolean | undefined;
-};
-
 type UseContractOverviewParams = {
   readonly address?: `0x${string}` | undefined;
   readonly chain?: SupportedChain | undefined;
@@ -372,61 +326,6 @@ type UseTokenMetadataParams = {
   readonly chain?: SupportedChain | undefined;
   readonly enabled?: boolean | undefined;
 };
-
-export function useCollectionSearch({
-  query,
-  chain = "ethereum",
-  hideSpam = true,
-  debounceMs = 250,
-  enabled = true,
-}: UseCollectionSearchParams) {
-  const debouncedQuery = useDebouncedValue(query, debounceMs);
-  const queryClient = useQueryClient();
-  const result = useQuery({
-    queryKey: [QueryKey.NFT_COLLECTION_SEARCH, chain, debouncedQuery, hideSpam],
-    enabled: enabled && Boolean(debouncedQuery),
-    staleTime: SUGGESTION_TTL,
-    gcTime: SUGGESTION_TTL,
-    queryFn: async ({ signal }) => {
-      const cacheKey = getSuggestionCacheKey(debouncedQuery, chain, hideSpam);
-      const now = Date.now();
-      gcExpired(suggestionCache, now);
-      const cached = suggestionCache.get(cacheKey);
-      if (cached && cached.expires > now) {
-        return cached.data;
-      }
-      const data = await fetchCollectionsFromApi({
-        query: debouncedQuery,
-        chain,
-        hideSpam,
-        signal,
-      });
-      suggestionCache.set(cacheKey, { data, expires: now + SUGGESTION_TTL });
-      return data;
-    },
-  });
-
-  useEffect(() => {
-    if (!debouncedQuery) {
-      return;
-    }
-    const cacheKey = getSuggestionCacheKey(debouncedQuery, chain, hideSpam);
-    const now = Date.now();
-    gcExpired(suggestionCache, now);
-    const cached = suggestionCache.get(cacheKey);
-    if (cached && cached.expires > now) {
-      queryClient.setQueryData(
-        [QueryKey.NFT_COLLECTION_SEARCH, chain, debouncedQuery, hideSpam],
-        cached.data
-      );
-    }
-  }, [chain, debouncedQuery, hideSpam, queryClient]);
-
-  return {
-    ...result,
-    debouncedQuery,
-  };
-}
 
 export function useContractOverviewQuery({
   address,

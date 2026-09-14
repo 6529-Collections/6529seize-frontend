@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { getDocumentationProfiles } from "@/services/api/artwork-documentation-api";
+import { latestDocumentationProfiles } from "@/lib/artwork-documentation/intake";
 
 export const documentationQueryKey = (
   profileId: string | null | undefined,
@@ -28,7 +29,7 @@ export function useArtworkDocumentationAccess() {
   return {
     ...query,
     enabled: query.data?.enabled === true,
-    profiles: query.data?.profiles ?? [],
+    profiles: latestDocumentationProfiles(query.data?.profiles ?? []),
     selfServiceEnabled: query.data?.self_service_enabled === true,
   };
 }

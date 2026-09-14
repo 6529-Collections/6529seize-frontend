@@ -35,7 +35,7 @@ export const PUBLIC_REVIEW_STREAM_DIAGRAM_MESSAGES = {
     "Own and transfer a token; burn only when Core permits.",
   "publicReview.diagram.roles.manager.title": "Mint manager",
   "publicReview.diagram.roles.manager.detail":
-    "Check mint policy and ledger claims; ask Core to mint.",
+    "Mint policy and ledger logic exist; installation into Core is blocked.",
   "publicReview.diagram.roles.governance.title": "Governance executor",
   "publicReview.diagram.roles.governance.detail":
     "Supply the matching action, scope and state for governed changes.",
@@ -53,7 +53,7 @@ export const PUBLIC_REVIEW_STREAM_DIAGRAM_MESSAGES = {
   "publicReview.diagram.roles.details": "Read the full role table",
   "publicReview.diagram.code.caption": "Two different mint paths",
   "publicReview.diagram.code.permanent":
-    "Built · permanent Core · execution order",
+    "Implemented parts · connection to Core blocked",
   "publicReview.diagram.code.policy.title": "Check mint policy",
   "publicReview.diagram.code.policy.detail": "Mint manager",
   "publicReview.diagram.code.ledger.title": "Record used claims",
@@ -62,7 +62,7 @@ export const PUBLIC_REVIEW_STREAM_DIAGRAM_MESSAGES = {
   "publicReview.diagram.code.core.detail":
     "Permanent Core, via the manager’s executor library",
   "publicReview.diagram.code.orderNote":
-    "The manager coordinates these steps in one transaction. The ledger does not call Core.",
+    "This is the execution order in the implemented logic. The real manager and ledger cannot yet pass Core's installation checks. The ledger does not call Core.",
   "publicReview.diagram.code.legacy": "Built · older sale rehearsal",
   "publicReview.diagram.code.drops.title": "Drops",
   "publicReview.diagram.code.drops.detail": "Sale permissions",
@@ -72,7 +72,7 @@ export const PUBLIC_REVIEW_STREAM_DIAGRAM_MESSAGES = {
   "publicReview.diagram.code.helper.detail": "Test helper in the rehearsal",
   "publicReview.diagram.code.unfinished": "Agreed but unfinished",
   "publicReview.diagram.code.unfinishedDetail":
-    "Complete artist consent and the launch sale and payment connections to permanent Core.",
+    "Real module installation, artist consent, royalty activation, and the launch sale and payment connections to permanent Core.",
   "publicReview.diagram.code.proposed": "Still proposed",
   "publicReview.diagram.code.proposedDetail":
     "ADR 0019 payment orchestration and ADR 0023 artist architecture.",
@@ -85,7 +85,7 @@ export const PUBLIC_REVIEW_STREAM_DIAGRAM_MESSAGES = {
     "Poster, protocol and curator reserve",
   "publicReview.diagram.payment.withdraw.title": "Recipients withdraw",
   "publicReview.diagram.payment.withdraw.detail":
-    "Each claims the credit owed to them",
+    "Withdrawal and recovery limits are explained below",
   "publicReview.diagram.payment.separate":
     "Built separately · settlement and split wallets",
   "publicReview.diagram.payment.separateDetail":
@@ -99,11 +99,11 @@ export const PUBLIC_REVIEW_STREAM_DIAGRAM_MESSAGES = {
     "Stop token destruction permanently.",
   "publicReview.diagram.finality.freeze.title": "Freeze Core",
   "publicReview.diagram.finality.freeze.detail":
-    "Lock Core collection state, in a later block.",
+    "After burns are blocked; the same transaction is allowed once governance conditions are met.",
   "publicReview.diagram.finality.wider":
     "Wider artwork finality · separate checks",
   "publicReview.diagram.finality.widerDetail":
-    "The registry exists. Complete component coverage and artist approval are agreed but unfinished.",
+    "Registry logic exists, but its Core installation is blocked. Complete component coverage and artist approval remain unfinished.",
   "publicReview.diagram.finality.preserve": "Preservation · ongoing work",
   "publicReview.diagram.finality.preserveDetail":
     "Keep usable copies, software and recovery instructions. Freezing Core does not keep files online.",

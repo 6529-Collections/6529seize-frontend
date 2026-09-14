@@ -1,0 +1,49 @@
+{
+  "target": "capital",
+  "generated_at": "2026-09-10T00:00:00.000Z",
+  "source_fingerprint": "sha256:dd20531b1b76ff762165b692026543d78d9acb4689f427c469dc9d4d1189b28c",
+  "scope": "app/capital/**/content.tsx exports of MigratedWordPressStaticPageContent",
+  "publish_ready": false,
+  "discovered_files": 3,
+  "converted_pages": 3,
+  "blocks": {
+    "rich_text": 39,
+    "heading": 7,
+    "button_link": 14
+  },
+  "asset_records": 0,
+  "distinct_asset_urls": 0,
+  "asset_hosts": {},
+  "asset_byte_hashes_verified": false,
+  "visual_parity_verified": false,
+  "fixture_validation": {
+    "valid": true,
+    "issues": []
+  },
+  "errors": [],
+  "diagnostics": [
+    {
+      "file": "app/capital/fund/content.tsx",
+      "block": 2,
+      "code": "link.unsafe_url",
+      "uri": "mailto:jeff@6529.io"
+    }
+  ],
+  "pages": [
+    {
+      "path": "/6529capital/index.html",
+      "blocks": 27,
+      "source": "app/capital/content.tsx"
+    },
+    {
+      "path": "/6529capital/company-portfolio/index.html",
+      "blocks": 18,
+      "source": "app/capital/company-portfolio/content.tsx"
+    },
+    {
+      "path": "/6529capital/fund/index.html",
+      "blocks": 15,
+      "source": "app/capital/fund/content.tsx"
+    }
+  ]
+}

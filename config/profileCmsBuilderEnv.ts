@@ -15,11 +15,10 @@ export function isProfileCmsBuilderApiEnabledEnv(): boolean {
 }
 
 function getBooleanEnv(values: ReadonlyArray<string | undefined>): boolean {
-  return values.some((value) => {
-    if (value === undefined) {
-      return false;
-    }
-
-    return ["1", "true", "yes", "on"].includes(value.trim().toLowerCase());
-  });
+  // Direct URL rollout; navigation remains unchanged. Flags are baked during build.
+  // Any explicit non-true value disables the surface, even if its alias is enabled.
+  const configured = values.filter((value) => value !== undefined);
+  return configured.every((value) =>
+    ["1", "true", "yes", "on"].includes(value.trim().toLowerCase())
+  );
 }

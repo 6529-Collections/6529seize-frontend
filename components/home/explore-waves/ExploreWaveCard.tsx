@@ -13,6 +13,7 @@ import { formatInteger, formatNumber } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
+  ClockIcon,
   FireIcon,
   ScaleIcon,
   ShieldCheckIcon,
@@ -26,6 +27,7 @@ interface ExploreWaveCardProps {
 }
 
 interface ExploreWaveMetric {
+  readonly label: string;
   readonly ariaLabel: string;
   readonly iconToneClasses: string;
   readonly icon: ReactNode;
@@ -34,21 +36,26 @@ interface ExploreWaveMetric {
 
 const EXPLORE_WAVE_CARD_LOCALE = DEFAULT_LOCALE;
 const METRIC_CHIP_CLASSES =
-  "tw-inline-flex tw-cursor-help tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-leading-none";
+  "tw-inline-flex tw-cursor-help tw-items-center tw-whitespace-nowrap tw-font-medium tw-leading-none";
 const METRIC_ICON_CLASSES = "tw-size-3 tw-flex-shrink-0";
-const METRIC_VALUE_CLASSES =
-  "tw-text-[11px] tw-font-medium tw-text-iron-500";
-const METRIC_SEPARATOR_CLASSES =
-  "tw-text-[11px] tw-leading-none tw-text-iron-600";
 
 const getDropsCountMessageKey = (
-  count: number
+  count: number,
+  includeAgo: boolean
 ):
   | "waves.explore.card.dropsCount.one"
-  | "waves.explore.card.dropsCount.other" => {
+  | "waves.explore.card.dropsCount.other"
+  | "waves.explore.card.dropsCountAgo.one"
+  | "waves.explore.card.dropsCountAgo.other" => {
   const pluralCategory = new Intl.PluralRules(EXPLORE_WAVE_CARD_LOCALE).select(
     count
   );
+
+  if (includeAgo) {
+    return pluralCategory === "one"
+      ? "waves.explore.card.dropsCountAgo.one"
+      : "waves.explore.card.dropsCountAgo.other";
+  }
 
   return pluralCategory === "one"
     ? "waves.explore.card.dropsCount.one"
@@ -157,6 +164,7 @@ const getExploreWaveMetrics = (wave: SidebarWave): ExploreWaveMetric[] => {
 
   if (visibilityScore !== null) {
     metrics.push({
+      label: t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.scoreLabel"),
       ariaLabel: t(
         EXPLORE_WAVE_CARD_LOCALE,
         "waves.score.details.visibilityAria",
@@ -178,6 +186,7 @@ const getExploreWaveMetrics = (wave: SidebarWave): ExploreWaveMetric[] => {
 
   if (hotnessScore !== null) {
     metrics.push({
+      label: t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.hotLabel"),
       ariaLabel: t(
         EXPLORE_WAVE_CARD_LOCALE,
         "waves.score.details.hotnessAria",
@@ -197,6 +206,7 @@ const getExploreWaveMetrics = (wave: SidebarWave): ExploreWaveMetric[] => {
 
   if (repScore !== null) {
     metrics.push({
+      label: t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repLabel"),
       ariaLabel: getRepAriaLabel(wave, repScore),
       icon: (
         <ScaleIcon
@@ -245,13 +255,15 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
     EXPLORE_WAVE_CARD_LOCALE,
     wave.totalDropsCount
   );
+  const timeAgoLabel = hasDrops ? getTimeAgoShort(lastMessageTime) : "";
+  const shouldAppendAgo = /^\d+[hm]$/.test(timeAgoLabel);
   const dropsCountLabel = hasDrops
     ? t(
         EXPLORE_WAVE_CARD_LOCALE,
-        getDropsCountMessageKey(wave.totalDropsCount),
+        getDropsCountMessageKey(wave.totalDropsCount, shouldAppendAgo),
         {
           count: formattedDropsCount,
-          timeAgo: getTimeAgoShort(lastMessageTime),
+          timeAgo: timeAgoLabel,
         }
       )
     : null;
@@ -275,11 +287,11 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
     <Link
       href={waveHref}
       prefetch={false}
-      className="tw-group tw-relative tw-flex tw-h-full tw-transform-gpu tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-950 tw-p-2 tw-text-left tw-no-underline tw-transition-[transform,border-color,background-color] tw-duration-500 tw-ease-out desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900/70 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+      className="tw-group tw-relative tw-flex tw-h-full tw-transform-gpu tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-950 tw-text-left tw-no-underline tw-shadow-[inset_0_0_0_1px_rgba(255,255,255,0.025),0_10px_28px_rgba(0,0,0,0.28)] tw-transition-[transform,border-color,background-color,box-shadow] tw-duration-500 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04),0_14px_34px_rgba(0,0,0,0.45)] motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
       aria-label={cardAriaLabel}
     >
       <div
-        className="tw-relative tw-h-32 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 sm:tw-h-36 lg:tw-h-32 xl:tw-h-36"
+        className="tw-relative tw-h-48 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-t-xl tw-bg-iron-900 sm:tw-h-52 lg:tw-h-48 xl:tw-h-52"
         style={imageAreaStyle}
       >
         {wave.picture && (
@@ -290,30 +302,37 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
             })}
             fill
             sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
-            className="tw-transform-gpu tw-object-cover tw-transition-transform tw-duration-700 tw-ease-out desktop-hover:group-hover:tw-scale-105 motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+            className="tw-transform-gpu tw-object-cover tw-saturate-[.9] tw-transition-[transform,filter] tw-duration-700 tw-ease-out group-focus-visible:tw-saturate-100 desktop-hover:group-hover:tw-scale-105 desktop-hover:group-hover:tw-saturate-100 touch-only:tw-saturate-100 motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
           />
         )}
+        <div
+          aria-hidden="true"
+          className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-2/3 tw-bg-gradient-to-t tw-from-iron-950 tw-via-iron-950/50 tw-to-transparent"
+        />
       </div>
 
-      <div className="tw-relative tw-z-10 tw-flex tw-flex-1 tw-flex-col tw-px-3 tw-pb-3 tw-pt-4 sm:tw-px-4 sm:tw-pb-4">
-        <span className="tw-m-0 tw-line-clamp-1 tw-break-words tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-100 tw-transition-colors tw-duration-300 desktop-hover:group-hover:tw-text-white sm:tw-text-lg">
+      <div className="tw-relative tw-z-10 tw-flex tw-flex-1 tw-flex-col tw-px-5 tw-pb-5 tw-pt-1">
+        <span className="tw-m-0 tw-line-clamp-1 tw-min-w-0 tw-break-words tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-300 group-focus-visible:tw-text-primary-300 desktop-hover:group-hover:tw-text-primary-300">
           {wave.name}
         </span>
+
+        <MessagePreviewContent previewContent={descriptionPreview} />
+
         <ExploreWaveCompactMetrics metrics={metrics} />
 
-        {descriptionPreview && (
-          <MessagePreviewContent previewContent={descriptionPreview} />
-        )}
-
         {hasDrops && (
-          <div className="tw-mt-auto tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-pt-4 tw-text-[11px] tw-text-iron-600">
-            <span className="tw-size-1.5 tw-flex-shrink-0 tw-rounded-full tw-bg-success/80" />
+          <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-iron-500">
+            <ClockIcon
+              aria-hidden="true"
+              className="tw-size-3 tw-flex-shrink-0"
+              strokeWidth={1.75}
+            />
             <span>{dropsCountLabel}</span>
           </div>
         )}
 
         {!hasDrops && (
-          <div className="tw-mt-auto tw-pt-4 tw-text-[11px] tw-text-iron-600">
+          <div className="tw-mt-3 tw-text-xs tw-text-iron-500">
             {t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.noDropsYet")}
           </div>
         )}
@@ -327,28 +346,22 @@ function ExploreWaveCompactMetrics({
 }: {
   readonly metrics: readonly ExploreWaveMetric[];
 }) {
-  if (metrics.length === 0) {
-    return null;
-  }
-
   return (
-    <span className="explore-wave-card-metrics tw-mt-2.5 tw-flex tw-flex-nowrap tw-items-center tw-gap-2 tw-overflow-hidden">
-      {metrics.map((metric, index) => (
+    <span className="explore-wave-card-metrics tw-mt-4 tw-flex tw-min-h-6 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
+      {metrics.map((metric) => (
         <span
           key={`${metric.ariaLabel}-${metric.value}`}
           className="tw-contents"
         >
-          {index > 0 && (
-            <span className={METRIC_SEPARATOR_CLASSES} aria-hidden="true">
-              &bull;
-            </span>
-          )}
           <span
-            className={METRIC_CHIP_CLASSES}
+            className={`${METRIC_CHIP_CLASSES} tw-gap-1 tw-text-[11px]`}
             aria-label={metric.ariaLabel}
           >
             <span className={metric.iconToneClasses}>{metric.icon}</span>
-            <span className={METRIC_VALUE_CLASSES}>{metric.value}</span>
+            <span className="tw-text-iron-400">{metric.label}</span>
+            <span className="tw-font-semibold tw-tabular-nums tw-text-iron-200">
+              {metric.value}
+            </span>
           </span>
         </span>
       ))}
@@ -362,15 +375,15 @@ function MessagePreviewContent({
   readonly previewContent: ProcessedContent | null;
 }) {
   if (!previewContent) {
-    return null;
+    return <div aria-hidden="true" className="tw-mt-2 tw-min-h-10" />;
   }
 
   return (
     <ContentDisplay
       content={previewContent}
       shouldClamp={false}
-      className="tw-mt-3 tw-flex tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden tw-text-iron-500"
-      textClassName="tw-line-clamp-2 tw-break-words tw-text-xs tw-font-normal tw-leading-relaxed"
+      className="tw-mt-2 tw-flex tw-min-h-10 tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden"
+      textClassName="tw-line-clamp-2 tw-break-words tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400"
       linkify={false}
     />
   );

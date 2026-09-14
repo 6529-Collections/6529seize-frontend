@@ -20,6 +20,7 @@ import { ExploreWaveCardSkeleton } from "./ExploreWaveCardSkeleton";
 const DEFAULT_WAVES_LIMIT = 6;
 
 interface ExploreWavesSectionProps {
+  readonly headingVariant?: "default" | "page" | undefined;
   readonly title?: string | undefined;
   readonly subtitle?: string | null | undefined;
   readonly limit?: number | undefined;
@@ -41,6 +42,7 @@ interface ExploreWavesSectionProps {
 }
 
 export function ExploreWavesSection({
+  headingVariant = "default",
   title = "Tired of bot replies? Join the most interesting chats in crypto",
   subtitle = "Most active waves",
   limit = DEFAULT_WAVES_LIMIT,
@@ -139,16 +141,24 @@ export function ExploreWavesSection({
     ? "tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-5"
     : "tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 md:tw-items-end";
   const titleClassName =
-    "tw-w-full tw-max-w-sm md:tw-mx-auto md:tw-max-w-xl md:tw-text-center lg:tw-max-w-full";
+    headingVariant === "page"
+      ? "tw-w-full tw-max-w-4xl tw-text-left"
+      : "tw-w-full tw-max-w-sm md:tw-mx-auto md:tw-max-w-xl md:tw-text-center lg:tw-max-w-full";
 
   return (
     <section className="tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
       <div>
         <div className={headerClassName}>
           <div className={titleClassName}>
-            <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-200 md:tw-text-2xl">
-              {title}
-            </span>
+            {headingVariant === "page" ? (
+              <h1 className="tw-m-0 tw-mb-5 tw-text-balance tw-text-3xl tw-font-semibold tw-leading-[1.05] tw-tracking-[-0.035em] tw-text-iron-50 md:tw-text-4xl">
+                {title}
+              </h1>
+            ) : (
+              <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-200 md:tw-text-2xl">
+                {title}
+              </span>
+            )}
             {subtitle && (
               <p className="tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500">
                 {subtitle}
@@ -172,7 +182,10 @@ export function ExploreWavesSection({
           <div className="tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-4 sm:tw-grid-cols-2 sm:tw-gap-6 lg:tw-grid-cols-3">
             {isLoading
               ? Array.from({ length: limit }).map((_, index) => (
-                  <div key={`skeleton-${index}`} className="tw-h-full tw-w-full">
+                  <div
+                    key={`skeleton-${index}`}
+                    className="tw-h-full tw-w-full"
+                  >
                     <ExploreWaveCardSkeleton />
                   </div>
                 ))

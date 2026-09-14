@@ -68,7 +68,6 @@ export type NftPickerProps = {
     | undefined;
   readonly chain?: SupportedChain | undefined;
   readonly outputMode?: OutputMode | undefined;
-  readonly hideSpam?: boolean | undefined;
   readonly allowAll?: boolean | undefined;
   readonly allowRanges?: boolean | undefined;
   readonly fixedContract?: ContractOverview | undefined;

@@ -272,7 +272,7 @@ describe("useActivityFilters", () => {
         expect(mockResetPage).toHaveBeenCalledTimes(1);
         // resetPage is called while state is still at old value
         expect(executionOrder).toEqual([
-          "resetPage called, typeFilter: All Transactions",
+          "resetPage called, typeFilter: All Activity",
         ]);
         // But after the act() block, state should be updated
         expect(result.current.typeFilter).toBe(TypeFilter.SALES);
@@ -556,7 +556,7 @@ describe("useActivityFilters", () => {
       expect(result.current.selectedContract).toBe(ContractFilter.ALL);
 
       // The enum values should be equal to their string representations
-      expect(TypeFilter.ALL).toBe("All Transactions");
+      expect(TypeFilter.ALL).toBe("All Activity");
       expect(ContractFilter.ALL).toBe("All Collections");
 
       // But when we set them, we should use the enum, not strings

@@ -1,116 +1,530 @@
 import { publicEnv } from "@/config/env";
-import {
-  PROFILE_CMS_GALLERY_SNAPSHOT_ENDPOINT,
-  requestProfileCmsGallerySnapshot,
-} from "@/lib/profile-cms/builder/api";
-import { parseWalletGallerySources } from "@/lib/profile-cms/builder/gallery";
-import { commonApiPost } from "@/services/api/common-api";
-
 jest.mock("@/config/env", () => {
   const actual = jest.requireActual("@/config/env");
   return { ...actual, publicEnv: { ...actual.publicEnv } };
 });
+import {
+  getProfileCmsPackageById,
+  listProfileCmsPackagesForProfile,
+  PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT,
+  PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT,
+  PROFILE_CMS_GALLERY_SNAPSHOT_ENDPOINT,
+  requestProfileCmsGallerySnapshot,
+  runProfileCmsBuilderAction,
+} from "@/lib/profile-cms/builder/api";
+import { parseWalletGallerySources } from "@/lib/profile-cms/builder/gallery";
+import { createDefaultCmsBuilderState } from "@/lib/profile-cms/builder/package";
+import { validateCmsBuilderState } from "@/lib/profile-cms/builder/package";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
+  commonApiFetch: jest.fn(),
+}));
+jest.mock("@/lib/profile-cms/builder/gallery-media", () => ({
+  enrichWalletGalleryImageDimensions: jest.fn(async (snapshot) => snapshot),
 }));
 
 const commonApiPostMock = commonApiPost as jest.Mock;
+const commonApiFetchMock = commonApiFetch as jest.Mock;
 
 describe("profile CMS builder API adapter", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    delete publicEnv.PROFILE_CMS_BUILDER_API_ENABLED;
+    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "false";
     delete publicEnv.NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED;
   });
 
-  it("uses the fixture snapshot fallback while backend gallery API is disabled", async () => {
-    const sources = parseWalletGallerySources("punk6529.eth").sources;
-
-    const snapshot = await requestProfileCmsGallerySnapshot({
-      handle: "punk6529",
-      profileId: "profile-punk6529",
-      sources,
+  it("submits the owned profile wallet and fresh signing envelope for a new homepage", async () => {
+    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
+    const { cmsPackage } = validateCmsBuilderState(
+      createDefaultCmsBuilderState("punk6529")
+    );
+    commonApiPostMock.mockResolvedValue({ id: "new-draft", version: 1 });
+    await runProfileCmsBuilderAction({
+      action: "save_draft",
+      cmsPackage,
+      profileId: "profile-id",
+      primaryWallet: "0x0000000000000000000000000000000000000001",
     });
+    const submitted = commonApiPostMock.mock.calls[0][0].body.cms_package;
+    expect(submitted.profile).toEqual({
+      handle: "punk6529",
+      profile_id: "profile-id",
+      primary_wallet: "0x0000000000000000000000000000000000000001",
+    });
+    expect(submitted.signatures[0].type).toBe("fixture");
+    expect(submitted.integrity.package_hash).not.toBe(
+      cmsPackage.integrity.package_hash
+    );
+    expect(submitted.payload).toEqual(cmsPackage.payload);
+  });
 
-    expect(commonApiPostMock).not.toHaveBeenCalled();
-    expect(snapshot.source).toBe("fixture");
-    expect(snapshot.assets).toEqual(
-      expect.arrayContaining([expect.objectContaining({ id: "work-memes-1" })])
+  it("preserves warnings returned by successful server validation", async () => {
+    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
+    const { cmsPackage } = validateCmsBuilderState(
+      createDefaultCmsBuilderState("punk6529")
+    );
+    const issue = {
+      severity: "warning",
+      code: "content.review",
+      message: "Review this content.",
+      path: "/payload",
+    };
+    commonApiPostMock.mockResolvedValue({ valid: true, issues: [issue] });
+    const result = await runProfileCmsBuilderAction({
+      action: "validate",
+      cmsPackage,
+      profileId: "profile-id",
+    });
+    expect(result).toEqual(
+      expect.objectContaining({ ok: true, serverIssues: [issue] })
     );
   });
 
-  it("posts the expected backend snapshot contract when the API is enabled", async () => {
-    publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
-    const sources = parseWalletGallerySources("punk6529.eth").sources;
-    commonApiPostMock.mockResolvedValue({
-      snapshot_id: "snapshot-1",
-      source: "backend",
-      wallets: [
-        {
-          kind: "ens",
-          input: "punk6529.eth",
-          normalized: "punk6529.eth",
-        },
-      ],
-      captured_at: "2026-06-18T00:00:00.000Z",
-      block_number: 23000000,
-      assets: [
-        {
-          id: "asset-1",
-          title: "Backend Work",
-          collection_id: "collection-1",
-          collection_name: "Backend Collection",
-          contract: "0x33fd426905f149f8376e227d0c9d3340aad17af1",
-          token_id: "1",
-          chain_id: 1,
-          owner: "0xf58fE66AF1A8C792Cd64D8d706edDabAdFCB2FD0",
-          image_uri: "ipfs://backend/work.png",
-          media_state: "ready",
-        },
-      ],
+  describe("wallet gallery snapshot", () => {
+    it("uses the fixture snapshot fallback while the backend gallery API is disabled", async () => {
+      const sources = parseWalletGallerySources("punk6529.eth").sources;
+
+      const snapshot = await requestProfileCmsGallerySnapshot({
+        handle: "punk6529",
+        sources,
+      });
+
+      expect(commonApiPostMock).not.toHaveBeenCalled();
+      expect(snapshot.source).toBe("fixture");
+      expect(snapshot.assets).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: "work-memes-1" }),
+        ])
+      );
     });
 
-    const snapshot = await requestProfileCmsGallerySnapshot({
-      handle: "punk6529",
-      profileId: "profile-punk6529",
-      sources,
-    });
+    it("posts to the real backend endpoint and normalizes the snake_case response", async () => {
+      publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
+      const sources = parseWalletGallerySources("punk6529.eth").sources;
 
-    expect(commonApiPostMock).toHaveBeenCalledWith({
-      endpoint: PROFILE_CMS_GALLERY_SNAPSHOT_ENDPOINT,
-      body: {
-        profile_id: "profile-punk6529",
+      // Realistic backend-shaped fixture: matches
+      // ApiProfileCmsWalletGallerySnapshot from
+      // 6529seize-backend/src/api-serverless/src/generated/models, produced
+      // by ProfileCmsWalletGalleryApiService#createSnapshot.
+      commonApiPostMock.mockResolvedValue({
+        generated_at: 1750204800000,
+        source: "indexed_ownership",
+        block_reference: 23000000,
         wallets: [
           {
-            kind: "ens",
             input: "punk6529.eth",
-            normalized: "punk6529.eth",
+            address: "0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0",
+            ens: "punk6529.eth",
+            display: "punk6529.eth",
+            status: "resolved",
+            reason: null,
           },
         ],
-      },
-      errorMode: "structured",
+        assets: [
+          {
+            contract: "0x33FD426905F149f8376e227d0C9D3340AaD17af1",
+            token_id: 12,
+            balance: 1,
+            owner_wallet: "0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0",
+            owner_display: "punk6529.eth",
+            collection: "The Memes by 6529",
+            collection_key: "MEMES",
+            name: "The Memes #12",
+            description: "A meme card.",
+            artist: "An Artist",
+            artist_seize_handle: "anartist",
+            token_type: "ERC1155",
+            media: {
+              image: "https://media.6529.io/memes/12.png",
+              image_preview: null,
+              thumbnail: null,
+              animation: null,
+              animation_preview: null,
+              mime_type: "image/png",
+            },
+            metadata: { name: "The Memes #12" },
+            flags: { spam: false, excluded: false, exclusion_reason: null },
+          },
+          {
+            contract: "0x33FD426905F149f8376e227d0C9D3340AaD17af1",
+            token_id: 13,
+            balance: 1,
+            owner_wallet: "0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0",
+            owner_display: null,
+            collection: "The Memes by 6529",
+            collection_key: "MEMES",
+            name: "The Memes #13",
+            description: null,
+            artist: null,
+            artist_seize_handle: null,
+            token_type: "ERC1155",
+            media: {
+              image: null,
+              image_preview: null,
+              thumbnail: null,
+              animation: null,
+              animation_preview: null,
+              mime_type: null,
+            },
+            metadata: null,
+            flags: { spam: false, excluded: false, exclusion_reason: null },
+          },
+        ],
+        excluded_assets: [
+          {
+            contract: "0x0000000000000000000000000000000000dead",
+            token_id: 1,
+            owner_wallet: "0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0",
+            reason: "contract_excluded",
+          },
+        ],
+        totals: {
+          requested_wallets: 1,
+          resolved_wallets: 1,
+          unresolved_wallets: 0,
+          indexed_assets: 2,
+          visible_assets: 2,
+          excluded_assets: 1,
+          spam_assets: 0,
+          truncated: false,
+        },
+      });
+
+      const snapshot = await requestProfileCmsGallerySnapshot({
+        handle: "punk6529",
+        sources,
+      });
+
+      expect(commonApiPostMock).toHaveBeenCalledWith({
+        endpoint: PROFILE_CMS_GALLERY_SNAPSHOT_ENDPOINT,
+        body: { wallets: ["punk6529.eth"] },
+        errorMode: "structured",
+      });
+      expect(PROFILE_CMS_GALLERY_SNAPSHOT_ENDPOINT).toBe(
+        "profile-cms/wallet-gallery/snapshot"
+      );
+
+      expect(snapshot.source).toBe("backend");
+      expect(snapshot.blockNumber).toBe(23000000);
+      expect(snapshot.capturedAt).toBe(new Date(1750204800000).toISOString());
+      expect(snapshot.assets).toHaveLength(2);
+      expect(snapshot.assets[0]).toEqual(
+        expect.objectContaining({
+          id: "0x33fd426905f149f8376e227d0c9d3340aad17af1:12:0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0",
+          title: "The Memes #12",
+          collectionId: "MEMES",
+          collectionName: "The Memes by 6529",
+          tokenId: "12",
+          owner: "0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0",
+          imageUri: "https://media.6529.io/memes/12.png",
+          mediaState: "ready",
+          altText: "The Memes #12",
+          flags: { spam: false, excluded: false },
+        })
+      );
+      expect(snapshot.assets[1]).toEqual(
+        expect.objectContaining({
+          mediaState: "missing",
+          altText: "The Memes #13",
+        })
+      );
+      expect(snapshot.assets[1]?.imageUri).toBeUndefined();
+
+      expect(snapshot.collections).toHaveLength(1);
+      expect(snapshot.collections[0]).toEqual(
+        expect.objectContaining({
+          id: "MEMES",
+          name: "The Memes by 6529",
+          assetIds: [
+            "0x33fd426905f149f8376e227d0c9d3340aad17af1:12:0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0",
+            "0x33fd426905f149f8376e227d0c9d3340aad17af1:13:0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0",
+          ],
+        })
+      );
+
+      expect(snapshot.excludedAssets).toEqual([
+        {
+          contract: "0x0000000000000000000000000000000000dead",
+          tokenId: "1",
+          owner: "0xf58fe66af1a8c792cd64d8d706eddabadfcb2fd0",
+          reason: "contract_excluded",
+        },
+      ]);
+      expect(snapshot.totals).toEqual({
+        requestedWallets: 1,
+        resolvedWallets: 1,
+        unresolvedWallets: 0,
+        indexedAssets: 2,
+        visibleAssets: 2,
+        excludedAssets: 1,
+        spamAssets: 0,
+        truncated: false,
+      });
     });
-    expect(snapshot).toEqual(
-      expect.objectContaining({
-        snapshotId: "snapshot-1",
-        source: "backend",
-        blockNumber: 23000000,
-      })
-    );
-    expect(snapshot.assets[0]).toEqual(
-      expect.objectContaining({
-        id: "asset-1",
-        imageUri: "ipfs://backend/work.png",
-      })
-    );
-    expect(snapshot.collections[0]).toEqual(
-      expect.objectContaining({
-        id: "collection-1",
-        name: "Backend Collection",
-        slug: "collection-1",
-        assetIds: ["asset-1"],
-      })
-    );
+  });
+
+  describe("draft lifecycle", () => {
+    it("saves a draft against the real packages endpoint and returns the backend id/hash", async () => {
+      publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
+      const state = createDefaultCmsBuilderState("punk6529");
+      const { cmsPackage } = validateCmsBuilderState(state);
+      commonApiPostMock.mockResolvedValue({
+        id: "draft-123",
+        profile_id: "profile-punk6529",
+        profile_handle: "punk6529",
+        package_id: "pkg-punk6529-builder-mvp",
+        version: 1,
+        status: "draft",
+        package_hash: cmsPackage.integrity.package_hash,
+        payload_hash: cmsPackage.integrity.payload_hash,
+        updated_at: 1750204800000,
+        created_at: 1750204800000,
+      });
+
+      const result = await runProfileCmsBuilderAction({
+        action: "save_draft",
+        cmsPackage,
+        profileId: "profile-punk6529",
+      });
+
+      expect(PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT).toBe(
+        "profile-cms/packages"
+      );
+      expect(commonApiPostMock).toHaveBeenCalledWith({
+        endpoint: "profile-cms/packages",
+        body: { profile_id: "profile-punk6529", cms_package: cmsPackage },
+        errorMode: "structured",
+      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          ok: true,
+          code: "draft_saved",
+          draftId: "draft-123",
+          packageHash: cmsPackage.integrity.package_hash,
+        })
+      );
+    });
+
+    it("posts server validation against the real validate endpoint", async () => {
+      publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
+      const state = createDefaultCmsBuilderState("punk6529");
+      const { cmsPackage } = validateCmsBuilderState(state);
+      commonApiPostMock.mockResolvedValue({
+        schema: "6529.cms.validation_result.v1",
+        valid: true,
+        checked_at: "2026-06-18T00:00:00.000Z",
+        issues: [],
+        target: {
+          package_hash: cmsPackage.integrity.package_hash,
+        },
+      });
+
+      const result = await runProfileCmsBuilderAction({
+        action: "validate",
+        cmsPackage,
+        profileId: "profile-punk6529",
+      });
+
+      expect(PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT).toBe(
+        "profile-cms/packages/validate"
+      );
+      expect(commonApiPostMock).toHaveBeenCalledWith({
+        endpoint: "profile-cms/packages/validate",
+        body: {
+          cms_package: cmsPackage,
+          allow_fixture_signatures: true,
+          allow_fixture_storage: true,
+          enforce_hashes: true,
+        },
+        errorMode: "structured",
+      });
+      expect(result).toEqual(
+        expect.objectContaining({
+          ok: true,
+          code: "server_validation_completed",
+          packageHash: cmsPackage.integrity.package_hash,
+        })
+      );
+    });
+
+    it("surfaces the server-assigned version and payload hash from a saved draft", async () => {
+      publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
+      const state = createDefaultCmsBuilderState("punk6529");
+      const { cmsPackage } = validateCmsBuilderState(state);
+      commonApiPostMock.mockResolvedValue({
+        id: "draft-123",
+        profile_id: "profile-punk6529",
+        profile_handle: "punk6529",
+        package_id: "pkg-punk6529-builder-mvp",
+        version: 4,
+        status: "draft",
+        package_hash: cmsPackage.integrity.package_hash,
+        payload_hash: cmsPackage.integrity.payload_hash,
+        updated_at: 1750204800000,
+        created_at: 1750204800000,
+      });
+
+      const result = await runProfileCmsBuilderAction({
+        action: "save_draft",
+        cmsPackage,
+        profileId: "profile-punk6529",
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          ok: true,
+          code: "draft_saved",
+          draftId: "draft-123",
+          version: 4,
+          payloadHash: cmsPackage.integrity.payload_hash,
+        })
+      );
+    });
+
+    it("models a rejected server validation as a failure that still carries the target", async () => {
+      publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
+      const state = createDefaultCmsBuilderState("punk6529");
+      const { cmsPackage } = validateCmsBuilderState(state);
+      const issue = {
+        severity: "error",
+        code: "package.hash_mismatch",
+        message: "Package hash mismatch.",
+        path: "/integrity/package_hash",
+      };
+      commonApiPostMock.mockResolvedValue({
+        schema: "6529.cms.validation_result.v1",
+        valid: false,
+        checked_at: "2026-06-18T00:00:00.000Z",
+        issues: [issue],
+        target: {
+          package_hash: cmsPackage.integrity.package_hash,
+          draft_id: "draft-from-validate",
+        },
+      });
+
+      const result = await runProfileCmsBuilderAction({
+        action: "validate",
+        cmsPackage,
+        profileId: "profile-punk6529",
+      });
+
+      expect(result).toEqual({
+        ok: false,
+        action: "validate",
+        code: "server_validation_invalid",
+        expectedEndpoint: "profile-cms/packages/validate",
+        draftId: "draft-from-validate",
+        packageHash: cmsPackage.integrity.package_hash,
+        serverIssues: [issue],
+      });
+    });
+
+    it("lists saved packages for a profile from the real profile packages endpoint", async () => {
+      publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
+      commonApiFetchMock.mockResolvedValue([
+        {
+          id: "draft-123",
+          package: { schema: "6529.cms.package.v1" },
+          profile_id: "profile-punk6529",
+          profile_handle: "punk6529",
+          package_id: "pkg-punk6529-builder-mvp",
+          version: 2,
+          status: "draft",
+          package_hash: "sha256:abc",
+          payload_hash: "sha256:def",
+          updated_at: 1750204800000,
+          created_at: 1750204700000,
+        },
+      ]);
+
+      const records =
+        await listProfileCmsPackagesForProfile("profile-punk6529");
+
+      expect(commonApiFetchMock).toHaveBeenCalledWith({
+        endpoint: "profile-cms/profiles/profile-punk6529/packages",
+      });
+      expect(records).toEqual([
+        {
+          isPrimary: false,
+          id: "draft-123",
+          profileId: "profile-punk6529",
+          profileHandle: "punk6529",
+          packageId: "pkg-punk6529-builder-mvp",
+          version: 2,
+          status: "draft",
+          packageHash: "sha256:abc",
+          payloadHash: "sha256:def",
+          updatedAt: new Date(1750204800000).toISOString(),
+          createdAt: new Date(1750204700000).toISOString(),
+        },
+      ]);
+    });
+
+    it("gets a single package by id and validates its stored V1 payload", async () => {
+      publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
+      const state = createDefaultCmsBuilderState("punk6529");
+      const { cmsPackage } = validateCmsBuilderState(state);
+      commonApiFetchMock.mockResolvedValue({
+        id: "draft-123",
+        package: cmsPackage,
+        profile_id: "profile-punk6529",
+        profile_handle: "punk6529",
+        package_id: "pkg-punk6529-builder-mvp",
+        version: 1,
+        status: "published",
+        package_hash: cmsPackage.integrity.package_hash,
+        payload_hash: cmsPackage.integrity.payload_hash,
+        updated_at: 1750204800000,
+        created_at: 1750204700000,
+        published_at: 1750204900000,
+      });
+
+      const record = await getProfileCmsPackageById("draft-123");
+
+      expect(commonApiFetchMock).toHaveBeenCalledWith({
+        endpoint: "profile-cms/packages/draft-123",
+      });
+      expect(record).toEqual(
+        expect.objectContaining({
+          id: "draft-123",
+          status: "published",
+          publishedAt: new Date(1750204900000).toISOString(),
+          cmsPackage,
+        })
+      );
+    });
+
+    it("rejects stored packages that fail local V1 validation on load", async () => {
+      publicEnv.PROFILE_CMS_BUILDER_API_ENABLED = "true";
+      commonApiFetchMock.mockResolvedValue({
+        id: "draft-123",
+        package: { schema: "not-a-cms-package" },
+        profile_id: "profile-punk6529",
+        profile_handle: "punk6529",
+        package_id: "pkg-punk6529-builder-mvp",
+        version: 1,
+        status: "draft",
+        package_hash: "sha256:abc",
+        payload_hash: "sha256:def",
+        updated_at: 1750204800000,
+        created_at: 1750204700000,
+      });
+
+      await expect(getProfileCmsPackageById("draft-123")).rejects.toThrow(
+        "invalid_profile_cms_package"
+      );
+    });
+
+    it("refuses draft list/load reads while the builder API flag is disabled", async () => {
+      await expect(
+        listProfileCmsPackagesForProfile("profile-punk6529")
+      ).rejects.toThrow("profile_cms_builder_api_disabled");
+      await expect(getProfileCmsPackageById("draft-123")).rejects.toThrow(
+        "profile_cms_builder_api_disabled"
+      );
+      expect(commonApiFetchMock).not.toHaveBeenCalled();
+    });
   });
 });

@@ -34,7 +34,7 @@ export async function getUserPageStatsInitialData({
 }): Promise<UserPageStatsInitialData> {
   const normalizedAddress = normalizeAddress(activeAddress ?? undefined);
   const headers = await getAppCommonHeaders();
-  const identityKey = getCollectedStatsIdentityKey(profile, normalizedAddress);
+  const identityKey = getCollectedStatsIdentityKey(profile);
   const collectedStats = await fetchCollectedStats(headers, identityKey).catch(
     () => undefined
   );

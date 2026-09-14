@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
+import type { SetStateAction } from "react";
 import { Tooltip } from "react-tooltip";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type {
@@ -29,7 +30,9 @@ import {
   normalizeNextgenTokenID,
 } from "@/components/nextGen/nextgen_helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import CollectEntryLink from "@/components/collect/CollectEntryLink";
 import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import {
   getNextGenIconUrl,
   getNextGenImageUrl,
@@ -45,6 +48,43 @@ const TRAITS: Record<number, string[]> = {
 
 const ULTIMATE = "Ultimate";
 
+const fetchTraitValues = (endpoint: string) =>
+  commonApiFetch<TraitValues[]>({ endpoint });
+const fetchTraitSets = (endpoint: string) =>
+  commonApiFetch<DBResponse<NextgenTraitSet>>({ endpoint });
+
+function useTraitSetRequest<T>(
+  endpoint: string | null,
+  reload: number,
+  fetchRequest: (endpoint: string) => Promise<T>
+): { data: T | null; error: boolean; loaded: boolean } {
+  const requestKey = `${endpoint ?? ""}:${reload}`;
+  const [result, setResult] = useState<{
+    key: string;
+    data: T | null;
+    error: boolean;
+  } | null>(null);
+  useEffect(() => {
+    if (endpoint === null) return;
+    let current = true;
+    void fetchRequest(endpoint)
+      .then((data) => {
+        if (current) setResult({ key: requestKey, data, error: false });
+      })
+      .catch(() => {
+        if (current) setResult({ key: requestKey, data: null, error: true });
+      });
+    return () => {
+      current = false;
+    };
+  }, [endpoint, requestKey, fetchRequest]);
+  return {
+    data: result?.key === requestKey ? result.data : null,
+    error: result?.key === requestKey && result.error,
+    loaded: result?.key === requestKey,
+  };
+}
+
 export default function NextGenTraitSets(
   props: Readonly<{
     collection: NextGenCollection;
@@ -59,74 +99,48 @@ export default function NextGenTraitSets(
   const availableTraits: string[] = TRAITS[props.collection.id] ?? [];
   const hasAvailableTraits = availableTraits.length > 0;
 
-  const [selectedTrait, setSelectedTrait] = useState<string | null>(
+  const [requestedTrait, setRequestedTrait] = useState<string | null>(
     availableTraits[0] ?? null
   );
-
-  const [selectedTraitValues, setSelectedTraitValues] = useState<string[]>([]);
-
-  const [sets, setSets] = useState<NextgenTraitSet[]>([]);
-  const [setsLoaded, setSetsLoaded] = useState(false);
-  const [totalResults, setTotalResults] = useState(0);
-
-  const [traits, setTraits] = useState<TraitValues[]>([]);
-  const [traitsLoaded, setTraitsLoaded] = useState(false);
-
+  const selectedTrait =
+    requestedTrait === ULTIMATE ||
+    availableTraits.includes(requestedTrait ?? "")
+      ? requestedTrait
+      : (availableTraits[0] ?? null);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
+  const [reload, setReload] = useState(0);
+  const traitRequest = useTraitSetRequest<TraitValues[]>(
+    `nextgen/collections/${props.collection.id}/traits`,
+    reload,
+    fetchTraitValues
+  );
+  const traitsLoaded = traitRequest.loaded && !traitRequest.error;
+  const selectedTraitValues =
+    traitRequest.data?.find((trait) => trait.trait === selectedTrait)?.values ??
+    [];
+  const search =
+    searchWallets.length > 0
+      ? `&search=${encodeURIComponent(searchWallets.join(","))}`
+      : "";
+  const resultPath =
+    selectedTrait === ULTIMATE
+      ? `nextgen/collections/${props.collection.id}/ultimate_trait_set?trait=${availableTraits.join(",")}&page_size=${PAGE_SIZE}&page=${page}${search}`
+      : `nextgen/collections/${props.collection.id}/trait_sets/${encodeURIComponent(selectedTrait ?? "")}?page_size=${PAGE_SIZE}&page=${page}${search}`;
+  const setsRequest = useTraitSetRequest<DBResponse<NextgenTraitSet>>(
+    traitsLoaded && selectedTrait !== null ? resultPath : null,
+    reload,
+    fetchTraitSets
+  );
+  const sets = setsRequest.data?.data ?? [];
+  const totalResults = setsRequest.data?.count ?? 0;
+  const setsLoaded = setsRequest.loaded;
+  const loadError = traitRequest.error || setsRequest.error;
 
-  useEffect(() => {
-    commonApiFetch<TraitValues[]>({
-      endpoint: `nextgen/collections/${props.collection.id}/traits`,
-    }).then((response) => {
-      setTraits(response.filter((t) => t.trait !== "Collection Name"));
-      setTraitsLoaded(true);
-    });
-  }, [props.collection.id]);
-
-  function fetchResults(mypage: number, mytrait: string) {
-    setSetsLoaded(false);
-    let path;
-    if (selectedTrait === ULTIMATE) {
-      path = `nextgen/collections/${
-        props.collection.id
-      }/ultimate_trait_set?trait=${availableTraits.join(
-        ","
-      )}&page_size=${PAGE_SIZE}&page=${mypage}`;
-    } else {
-      let filters = "";
-      if (searchWallets.length > 0) {
-        filters += `&search=${searchWallets.join(",")}`;
-      }
-      path = `nextgen/collections/${props.collection.id}/trait_sets/${mytrait}?&page_size=${PAGE_SIZE}&page=${mypage}${filters}`;
-    }
-    commonApiFetch<DBResponse>({
-      endpoint: path,
-    }).then((response) => {
-      setTotalResults(response.count ?? 0);
-      setSets(response.data ?? []);
-      setSetsLoaded(true);
-    });
+  function updateSearchWallets(wallets: SetStateAction<string[]>) {
+    setSearchWallets(wallets);
+    setPage(1);
   }
-
-  useEffect(() => {
-    if (selectedTrait && traitsLoaded) {
-      setSelectedTraitValues(
-        traits.find((t) => t.trait === selectedTrait)?.values ?? []
-      );
-      if (page === 1) {
-        fetchResults(page, selectedTrait);
-      } else {
-        setPage(1);
-      }
-    }
-  }, [selectedTrait, traitsLoaded, searchWallets]);
-
-  useEffect(() => {
-    if (selectedTrait && traitsLoaded) {
-      fetchResults(page, selectedTrait);
-    }
-  }, [page]);
 
   function printTraitPill(t: string) {
     const isSelected = t === selectedTrait;
@@ -142,11 +156,8 @@ export default function NextGenTraitSets(
             : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-200 hover:tw-border-white/20 hover:tw-bg-iron-800 hover:tw-text-white"
         }`}
         onClick={() => {
-          if (selectedTrait === ULTIMATE || t === ULTIMATE) {
-            setSets([]);
-            setTotalResults(0);
-          }
-          setSelectedTrait(t);
+          setRequestedTrait(t);
+          setPage(1);
         }}
       >
         {t}
@@ -155,6 +166,7 @@ export default function NextGenTraitSets(
   }
 
   function printUltimate() {
+    if (loadError) return null;
     let content;
     if (!setsLoaded) {
       content = (
@@ -187,7 +199,10 @@ export default function NextGenTraitSets(
       content = (
         <div className="tw-min-h-[50vh] tw-space-y-2">
           {sets.map((s) => (
-            <UltimateOwner key={`ultimate-owner-${s.owner}`} set={s} />
+            <UltimateOwner
+              key={`ultimate-owner-${s.account_key ?? s.owner}`}
+              set={s}
+            />
           ))}
         </div>
       );
@@ -196,6 +211,7 @@ export default function NextGenTraitSets(
   }
 
   function printTraitSetResults(selected: string) {
+    if (loadError) return null;
     if (!setsLoaded) {
       return (
         <output
@@ -215,7 +231,7 @@ export default function NextGenTraitSets(
     }
     return sets.map((set) => (
       <TraitSetAccordion
-        key={`collector-sets-${set.owner}`}
+        key={`collector-sets-${set.account_key ?? set.owner}`}
         collection={props.collection}
         trait={selected}
         set={set}
@@ -267,15 +283,44 @@ export default function NextGenTraitSets(
         {!props.preview && (
           <SearchWalletsDisplay
             searchWallets={searchWallets}
-            setSearchWallets={setSearchWallets}
+            setSearchWallets={updateSearchWallets}
             setShowSearchModal={setShowSearchModal}
           />
         )}
       </div>
+      <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-400">
+        {t(locale, "collect.sets.profileScope")}
+      </p>
+      {loadError && (
+        <div
+          role="alert"
+          className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-text-sm tw-text-iron-200"
+        >
+          {t(locale, "collect.error.analysis")}
+          <button
+            type="button"
+            onClick={() => setReload((value) => value + 1)}
+            className="tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-4 tw-py-2 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            {t(locale, "collect.retry")}
+          </button>
+        </div>
+      )}
       <div className="tw-mt-5 tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-grid-cols-4">
         {availableTraits.map((trait) => printTraitPill(trait))}
         {hasAvailableTraits && printTraitPill(ULTIMATE)}
       </div>
+      {props.collection.id === 1 && selectedTrait !== null && (
+        <div className="tw-mt-4">
+          <CollectEntryLink
+            collection="pebbles"
+            intent="pebbles_set"
+            definitionId={selectedTrait}
+            locale={locale}
+            complete
+          />
+        </div>
+      )}
       {!hasAvailableTraits && (
         <div className="tw-mt-5 tw-rounded-xl tw-border tw-border-dashed tw-border-iron-700 tw-bg-iron-900/50 tw-px-6 tw-py-12 tw-text-center">
           <p className="tw-m-0 tw-text-sm tw-text-iron-300">
@@ -283,7 +328,7 @@ export default function NextGenTraitSets(
           </p>
         </div>
       )}
-      {selectedTrait !== null && selectedTrait !== ULTIMATE && (
+      {!loadError && selectedTrait !== null && selectedTrait !== ULTIMATE && (
         <div className="tw-mt-5 tw-flex tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
           <span className="tw-text-sm tw-text-iron-300">
             {traitsLoaded ? (
@@ -299,7 +344,11 @@ export default function NextGenTraitSets(
             {!setsLoaded ? (
               <DotLoader />
             ) : (
-              <>Collectors Count: {formatInteger(locale, totalResults)}</>
+              <>
+                {t(locale, "collect.sets.profiles", {
+                  count: formatInteger(locale, totalResults),
+                })}
+              </>
             )}
           </span>
         </div>
@@ -338,7 +387,7 @@ export default function NextGenTraitSets(
           show={showSearchModal}
           setShow={setShowSearchModal}
           searchWallets={searchWallets}
-          setSearchWallets={setSearchWallets}
+          setSearchWallets={updateSearchWallets}
         />
       ) : (
         setsLoaded && (
@@ -364,24 +413,33 @@ export default function NextGenTraitSets(
 }
 
 function UltimateOwner(props: Readonly<{ set: NextgenTraitSet }>) {
+  const locale = useBrowserLocale();
   const set = props.set;
-  const keys = Object.entries(set)
-    .filter(([key]) => key.endsWith("_sets"))
-    .map(([key, value]) => {
-      return {
-        key: capitalizeEveryWord(key.replace("_sets", "")),
-        count: value,
-      };
-    });
+  const traitCounts: Record<string, number> = { ...set.trait_sets };
+  if (!set.trait_sets) {
+    for (const [key, value] of Object.entries(set)) {
+      if (key.endsWith("_sets") && typeof value === "number") {
+        traitCounts[key.replace("_sets", "")] = value;
+      }
+    }
+  }
+  const keys = Object.entries(traitCounts).map(([key, value]) => {
+    return {
+      key: capitalizeEveryWord(key.replace("_sets", "")),
+      count: value,
+    };
+  });
 
   return (
     <article className="tw-flex tw-flex-col tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
       <Owner set={set} />
       <div className="tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-2 tw-text-sm tw-text-iron-300">
         {keys.map((k) => (
-          <span key={`ultimate-owner-${set.owner}-${k.key}`}>
-            <b className="tw-font-semibold tw-text-white">{k.key}</b> Sets:{" "}
-            {String(k.count)}
+          <span key={`ultimate-owner-${set.account_key ?? set.owner}-${k.key}`}>
+            {t(locale, "collect.sets.values", {
+              trait: k.key,
+              count: formatInteger(locale, Number(k.count)),
+            })}
           </span>
         ))}
       </div>
@@ -422,6 +480,7 @@ function TraitSetAccordion(
     values: string[];
   }>
 ) {
+  const locale = useBrowserLocale();
   const set = props.set;
 
   const missingValues = props.values.filter(
@@ -433,7 +492,7 @@ function TraitSetAccordion(
       <summary className="tw-cursor-pointer tw-rounded-xl tw-p-4 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
         <span className="tw-ml-2 tw-inline-flex tw-flex-wrap tw-items-center tw-gap-3">
           <b className="tw-text-base tw-font-semibold tw-text-white">
-            {set.distinct_values_count}
+            {formatInteger(locale, set.distinct_values_count)}
           </b>
           <span className="tw-text-iron-500">—</span>
           <Owner set={set} />
@@ -482,39 +541,59 @@ function TraitSetAccordion(
                 </b>
               </span>
               <span className="tw-flex tw-flex-wrap tw-gap-2">
-                {tv.tokens.map((t) => (
-                  <Link
-                    key={`accordion-${props.trait}-${tv.value}-${t}`}
-                    href={`/nextgen/token/${t}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="tw-block tw-rounded-md focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                  >
-                    <>
-                      <Image
-                        unoptimized
-                        width={50}
-                        height={50}
-                        className="tw-h-[50px] tw-w-auto tw-rounded-md tw-object-cover"
-                        src={getNextGenIconUrl(t)}
-                        alt={`#${t.toString()}`}
-                        data-tooltip-id={`token-${t}`}
-                        onError={({ currentTarget }) => {
-                          if (currentTarget.src === getNextGenIconUrl(t)) {
-                            currentTarget.src = getNextGenImageUrl(t);
-                          }
-                        }}
-                      />
-                      <Tooltip
-                        id={`token-${t}`}
-                        className="!tw-bg-iron-800 !tw-px-2 !tw-py-1 !tw-text-white"
-                      >
-                        {props.collection.name} #
-                        {normalizeNextgenTokenID(t).token_id}
-                      </Tooltip>
-                    </>
-                  </Link>
-                ))}
+                {tv.tokens.map((tokenId) => {
+                  const custody = tv.token_owners?.find(
+                    (owner) => owner.token_id === tokenId
+                  )?.wallet;
+                  const artwork = `${props.collection.name} #${normalizeNextgenTokenID(tokenId).token_id}`;
+                  return (
+                    <Link
+                      key={`accordion-${props.trait}-${tv.value}-${tokenId}`}
+                      href={`/nextgen/token/${tokenId}`}
+                      aria-label={
+                        custody
+                          ? t(locale, "collect.sets.custody", {
+                              artwork,
+                              wallet: custody,
+                            })
+                          : artwork
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="tw-block tw-rounded-md focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                    >
+                      <>
+                        <Image
+                          unoptimized
+                          width={50}
+                          height={50}
+                          className="tw-h-[50px] tw-w-auto tw-rounded-md tw-object-cover"
+                          src={getNextGenIconUrl(tokenId)}
+                          alt={`#${tokenId.toString()}`}
+                          data-tooltip-id={`token-${tokenId}`}
+                          onError={({ currentTarget }) => {
+                            if (
+                              currentTarget.src === getNextGenIconUrl(tokenId)
+                            ) {
+                              currentTarget.src = getNextGenImageUrl(tokenId);
+                            }
+                          }}
+                        />
+                        <Tooltip
+                          id={`token-${tokenId}`}
+                          className="!tw-bg-iron-800 !tw-px-2 !tw-py-1 !tw-text-white"
+                        >
+                          {custody
+                            ? t(locale, "collect.sets.custody", {
+                                artwork,
+                                wallet: formatAddress(custody),
+                              })
+                            : artwork}
+                        </Tooltip>
+                      </>
+                    </Link>
+                  );
+                })}
               </span>
             </div>
           ))}

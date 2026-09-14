@@ -1093,6 +1093,25 @@ describe("instrumentation-client", () => {
     ...overrides,
   });
 
+  it("keeps bounded failed-submission events outside transport-noise sampling", () => {
+    const beforeSend = loadBeforeSend();
+    for (let index = 0; index < 20; index += 1) {
+      const originalException = new Error("Drop submission failed (transport)");
+      originalException.name = "DropSubmissionError";
+      const event = {
+        event_id: `submission-${index}`,
+        exception: {
+          values: [
+            { type: originalException.name, value: originalException.message },
+          ],
+        },
+        tags: { feature: "drop-submission", failure_kind: "transport" },
+        fingerprint: ["drop-submission", "transport"],
+      };
+      expect(beforeSend(event, { originalException })).not.toBeNull();
+    }
+  });
+
   beforeEach(() => {
     jest.resetModules();
     mockInit.mockReset();

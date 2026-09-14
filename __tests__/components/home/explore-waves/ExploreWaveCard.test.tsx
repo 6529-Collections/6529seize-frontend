@@ -65,7 +65,7 @@ describe("ExploreWaveCard", () => {
     );
 
     expect(getTimeAgoShort).toHaveBeenCalledWith(2_000);
-    expect(screen.getByText(/2m · 7/i)).toBeInTheDocument();
+    expect(screen.getByText(/2m ago · 7/i)).toBeInTheDocument();
     expect(screen.getByTestId("content-display")).toBeInTheDocument();
 
     const lastContentDisplayProps =
@@ -97,7 +97,7 @@ describe("ExploreWaveCard", () => {
     expect(screen.getByText("No drops yet")).toBeInTheDocument();
   });
 
-  it("shows compact score, hotness, and REP values in one icon row", () => {
+  it("shows labelled score, hotness, and REP values in one icon row", () => {
     render(
       <ExploreWaveCard
         wave={createWave({
@@ -114,9 +114,9 @@ describe("ExploreWaveCard", () => {
       />
     );
 
-    expect(screen.queryByText("Score")).not.toBeInTheDocument();
-    expect(screen.queryByText("Hot")).not.toBeInTheDocument();
-    expect(screen.queryByText("REP")).not.toBeInTheDocument();
+    expect(screen.getByText("Score")).toBeInTheDocument();
+    expect(screen.getByText("Hot")).toBeInTheDocument();
+    expect(screen.getByText("REP")).toBeInTheDocument();
     expect(screen.getByText("96")).toBeInTheDocument();
     expect(screen.getByText("98")).toBeInTheDocument();
     expect(screen.getByText("+1.3K")).toBeInTheDocument();
@@ -125,7 +125,7 @@ describe("ExploreWaveCard", () => {
       .getByText("96")
       .closest(".explore-wave-card-metrics");
     expect(metricsRow).toBeInTheDocument();
-    expect(metricsRow).toHaveClass("tw-flex-nowrap");
+    expect(metricsRow).toHaveClass("tw-flex-wrap");
 
     const scoreBadge = screen.getByText("96").closest("[aria-label]");
     expect(scoreBadge).toHaveAttribute(
@@ -169,7 +169,7 @@ describe("ExploreWaveCard", () => {
 
     expect(screen.getByText("72")).toBeInTheDocument();
     expect(screen.getByText("76")).toBeInTheDocument();
-    expect(screen.queryByText("REP")).not.toBeInTheDocument();
+    expect(screen.getByText("REP")).toBeInTheDocument();
     expect(screen.getByText("76").closest("[aria-label]")).toHaveAttribute(
       "aria-label",
       "Wave REP score 76 out of 100"

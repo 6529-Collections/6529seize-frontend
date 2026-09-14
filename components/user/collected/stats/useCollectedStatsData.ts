@@ -55,27 +55,20 @@ const fetchStatsQuery = async <T>({
 };
 
 const getCollectedStatsFetchState = ({
-  activeAddress,
   collectedStatsIdentityKey,
   initialStatsData,
   isDetailsOpen,
   statsPath,
 }: {
-  readonly activeAddress: string | null;
   readonly collectedStatsIdentityKey: string | null;
   readonly initialStatsData: UseCollectedStatsDataArgs["initialStatsData"];
   readonly isDetailsOpen: boolean;
   readonly statsPath: string | null;
 }): CollectedStatsFetchState => {
-  const isInitialAddress =
-    activeAddress === initialStatsData.initialActiveAddress;
-
   return {
     shouldFetchCollectedStats:
       collectedStatsIdentityKey !== null &&
-      !(
-        isInitialAddress && initialStatsData.initialCollectedStats !== undefined
-      ),
+      initialStatsData.initialCollectedStats === undefined,
     shouldFetchSeasons:
       isDetailsOpen &&
       statsPath !== null &&
@@ -83,15 +76,15 @@ const getCollectedStatsFetchState = ({
     shouldFetchTdh:
       isDetailsOpen &&
       statsPath !== null &&
-      !(isInitialAddress && initialStatsData.initialTdh !== undefined),
+      initialStatsData.initialTdh === undefined,
     shouldFetchOwnerBalance:
       isDetailsOpen &&
       statsPath !== null &&
-      !(isInitialAddress && initialStatsData.initialOwnerBalance !== undefined),
+      initialStatsData.initialOwnerBalance === undefined,
     shouldFetchBalanceMemes:
       isDetailsOpen &&
       statsPath !== null &&
-      !(isInitialAddress && initialStatsData.initialBalanceMemes.length > 0),
+      initialStatsData.initialBalanceMemes.length === 0,
   };
 };
 
@@ -140,15 +133,13 @@ const buildCollectedStatsDataResult = ({
 
 export function useCollectedStatsData({
   profile,
-  activeAddress,
   initialStatsData,
   isDetailsOpen,
 }: Readonly<UseCollectedStatsDataArgs>): UseCollectedStatsDataResult {
-  const statsPath = getSafeStatsPath(profile, activeAddress);
-  const collectedStatsIdentityKey = getSafeCollectedStatsIdentityKey(
-    profile,
-    activeAddress
-  );
+  // The wallet selector filters custody and activity; collection progress and
+  // set details always use the confirmed profile consolidation.
+  const statsPath = getSafeStatsPath(profile);
+  const collectedStatsIdentityKey = getSafeCollectedStatsIdentityKey(profile);
   const {
     shouldFetchCollectedStats,
     shouldFetchSeasons,
@@ -156,7 +147,6 @@ export function useCollectedStatsData({
     shouldFetchOwnerBalance,
     shouldFetchBalanceMemes,
   } = getCollectedStatsFetchState({
-    activeAddress,
     collectedStatsIdentityKey,
     initialStatsData,
     isDetailsOpen,

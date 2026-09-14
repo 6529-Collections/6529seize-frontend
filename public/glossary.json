@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-11T15:43:52.000Z",
+  "generated_at": "2026-09-13T00:57:50Z",
   "base_url": "https://6529.io",
   "description": "Glossary of 6529 terms projected from the site's curated help corpus. Each term links back to its help-index.json record via id.",
   "source": "/help-index.json",
@@ -134,7 +134,11 @@
         "EMMA is the Editor for Managing Multiphase Allowlists and the first reference implementation of Janus.",
         "The EMMA landing route lives at /emma and the plans route lives at /emma/plans.",
         "The distribution plan tool helps build mint plans with airdrops, allowlists, and public minting in one or more phases.",
-        "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation."
+        "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation.",
+        "In Create Snapshots at /emma/plans/{planId}, Use a 6529 collection presents five image rows: The Memes by 6529 (ERC1155), Meme Lab (ERC1155), 6529 Gradient (ERC721), 6529 RAW (ERC721), and 6529 Intern JPGs (ERC1155). Tab reaches each shortcut; Enter or Space selects it.",
+        "The Memes shortcut opens a season picker; choosing all or no seasons uses the full collection. Intern JPGs loads its subcollection token IDs. The other shortcuts fill name and contract address and clear old token IDs. Switching shortcuts preserves block numbers.",
+        "Or enter another collection keeps manual name and full contract address entry available, together with block number, optional token IDs, and optional consolidation block number. A full address can autofill an empty name. If metadata lookup fails, enter the name yourself. Collection-name search is unavailable.",
+        "The five shortcuts remain available without metadata lookup. If Intern JPG token IDs fail to load or are empty, the form stays unchanged and shows an error. Select the shortcut to retry, or enter its name, contract address, and token IDs manually; leaving token IDs empty selects all tokens in the shared contract."
       ],
       "canonical_path": "/emma",
       "related_paths": [
@@ -816,7 +820,8 @@
         "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
         "A Wave opened from a direct link remains visible and highlighted in the left sidebar even when it is not followed, pinned, or present in the loaded overview; this temporary route context does not join or pin it.",
         "When a direct link opens a subwave, the sidebar surfaces its visible parent, loads and expands the subwave list, reveals the selected child row, and keeps that parent tree ahead of paginated activity rows so every sibling remains reachable.",
-        "An active subwave header shows an up-left arrow and a linked parent wave name; selecting that name opens the parent wave."
+        "An active subwave header shows an up-left arrow and a linked parent wave name; selecting that name opens the parent wave.",
+        "Pin and unpin check the selected profile session before changing the list. If the session cannot renew, reconnect that wallet and retry; a failed session check leaves the pin state unchanged. Public waves can remain readable after session expiry but are not added to saved pins. Failed server pin changes roll back and show an error."
       ],
       "canonical_path": "/waves",
       "related_paths": [
@@ -853,6 +858,8 @@
         "Daily xTDH rate is xtdh_rate = produced_today - granted_out_today + received_today.",
         "Total xTDH accumulates as xtdh_total = xtdh_total_previous + xtdh_rate.",
         "The key idea is grants: a profile that produces xTDH can grant future xTDH flow to all tokens in an external ERC-721 collection or to a selected subset of tokens.",
+        "To select a collection in Create New Grant, paste its Ethereum contract address (0x followed by 40 hexadecimal characters), select the ERC-721 result, then choose all tokens, individual IDs, or ranges. Collection-name search, ENS names, and marketplace URLs are not supported for this lookup.",
+        "If collection metadata fails to load, use Try again. A missing or non-ERC-721 result cannot be selected. Contract metadata lookup is not a spam or authenticity check.",
         "If you own a token with an active grant, you receive your share of that grant while you own the token.",
         "Per-token grant flow is grant_amount_per_token = rate / denominator, where the denominator is either the collection total supply for full-collection grants or the number of selected tokens for partial grants.",
         "Transfers inside the same consolidation group do not reset the ownership window; sales or transfers across groups do reset it.",

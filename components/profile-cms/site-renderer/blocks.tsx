@@ -5,7 +5,10 @@ import {
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { CmsAssetV1, CmsBlockV1 } from "@/lib/profile-cms/protocol/v1";
-import { getCmsPagePath } from "@/lib/profile-cms/runtime/routes";
+import {
+  getCmsPublicPagePath,
+  getCmsPublicPath,
+} from "@/lib/profile-cms/runtime/routes";
 import { resolveCmsUri } from "@/lib/profile-cms/runtime/uri";
 import {
   formatCmsDate,
@@ -378,7 +381,7 @@ function ButtonLinkBlock({
   const directHref =
     getString(block, "url") ?? getString(block, "href") ?? undefined;
   const href = pageId
-    ? getCmsPagePath(context.cmsPackage, pageId)
+    ? getCmsPublicPagePath(context.cmsPackage, pageId)
     : resolveCmsUri(directHref, { allowRelative: true });
 
   if (!href) {
@@ -392,8 +395,9 @@ function ButtonLinkBlock({
   return (
     <p>
       <CmsLink
+        context={context}
         className="tw-inline-flex tw-min-h-11 tw-items-center tw-border tw-border-solid tw-border-primary-400 tw-bg-primary-500/10 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition hover:tw-bg-primary-500/20"
-        href={href}
+        href={getCmsPublicPath(context.cmsPackage, href)}
       >
         {label}
       </CmsLink>
@@ -424,11 +428,12 @@ function NftReferenceBlock({
     getAsset(context, nftProfile.display_variants[0]?.asset_id);
   const detailPage = findNftDetailPage(context, nftProfile.id);
   const detailHref = detailPage
-    ? getCmsPagePath(context.cmsPackage, detailPage.id)
+    ? getCmsPublicPagePath(context.cmsPackage, detailPage.id)
     : null;
 
   return (
     <ReferencePanel
+      context={context}
       detail={nftProfile.contract}
       href={detailHref}
       media={<AssetImage asset={displayAsset} context={context} />}
@@ -469,6 +474,7 @@ function CollectionReferenceBlock({
   const contract = getString(block, "contract");
   return (
     <ReferencePanel
+      context={context}
       title={title}
       subtitle={
         chainId
@@ -494,6 +500,7 @@ function TransactionReferenceBlock({
   const txHash = getString(block, "tx_hash") ?? getString(block, "hash");
   return (
     <ReferencePanel
+      context={context}
       title={title}
       subtitle={
         chainId

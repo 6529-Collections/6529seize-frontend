@@ -1,5 +1,7 @@
 "use client";
 
+import { mutationCapabilities } from "@/lib/artwork-documentation/capabilities";
+
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import Image from "next/image";
@@ -15,12 +17,12 @@ import {
 } from "@/services/api/artwork-documentation-api";
 import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-fields";
 import { MODULE_IDS } from "@/lib/artwork-documentation/registry";
+import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
 import { useDocumentationActor } from "./DocumentationAuthGate";
 import {
   DocumentationButton,
   DocumentationNotice,
   inputClass,
-  panelClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 
@@ -35,6 +37,7 @@ export default function DocumentationAccess({
     null
   );
   const artist = context.owner_profile_id === connectedProfile?.id;
+  const publicationOnly = isPublicationOnly(context.profile);
   const [modules, setModules] = useState<string[]>([]);
   const [evidence, setEvidence] = useState<string[]>([]);
   const [role, setRole] = useState("curatorial");
@@ -48,12 +51,12 @@ export default function DocumentationAccess({
       actorKey
     ),
     queryFn: ({ signal }) => getDocumentationGrants(context.id, signal),
-    enabled: context.capabilities.manage_assignments,
+    enabled: mutationCapabilities(context).manage_assignments,
     retry: false,
     gcTime: 0,
     meta: { persist: false },
   });
-  if (!context.capabilities.manage_assignments) return null;
+  if (!mutationCapabilities(context).manage_assignments) return null;
   const run = async (operation: () => Promise<unknown>) => {
     setBusy(true);
     setError(false);
@@ -76,11 +79,13 @@ export default function DocumentationAccess({
         read_archival_files: artist
           ? evidence.includes("archival")
           : role === "technical",
-        read_rights_evidence: artist
-          ? evidence.includes("rights")
-          : role === "rights",
-        read_source_receipts: artist && evidence.includes("sources"),
-        read_contact: artist && evidence.includes("contact"),
+        read_rights_evidence:
+          !publicationOnly &&
+          (artist ? evidence.includes("rights") : role === "rights"),
+        read_source_receipts:
+          !publicationOnly && artist && evidence.includes("sources"),
+        read_contact:
+          !publicationOnly && artist && evidence.includes("contact"),
         confirm_as_artist: false,
         review_lanes: artist ? [] : [role],
         manage_assignments: false,
@@ -88,8 +93,10 @@ export default function DocumentationAccess({
       },
     });
   return (
-    <section className={`${panelClass} tw-space-y-4`}>
-      <h3 className="tw-text-lg tw-font-semibold">{msg("assign")}</h3>
+    <section className="tw-min-w-0 tw-space-y-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8">
+      <h3 className="tw-m-0 tw-font-serif tw-text-2xl tw-font-normal">
+        {msg("assign")}
+      </h3>
       {error && <DocumentationNotice error>{msg("error")}</DocumentationNotice>}
       {query.data?.data
         .filter((grant) => grant.revoked_at === null)
@@ -121,7 +128,7 @@ export default function DocumentationAccess({
         disabled={busy}
       />
       {artist ? (
-        <fieldset className="tw-space-y-3">
+        <fieldset className="tw-m-0 tw-min-w-0 tw-space-y-3 tw-border-0 tw-p-0">
           <legend className="tw-mb-3 tw-text-sm tw-font-medium">
             {msg("editorPermissions")}
           </legend>
@@ -129,11 +136,11 @@ export default function DocumentationAccess({
             {MODULE_IDS.map((id) => (
               <label
                 key={id}
-                className="tw-flex tw-items-center tw-gap-3 tw-text-sm tw-text-iron-300"
+                className="tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-text-iron-300"
               >
                 <input
                   type="checkbox"
-                  className="tw-h-5 tw-w-5 tw-accent-primary-400"
+                  className="tw-h-5 tw-w-5 tw-shrink-0 tw-accent-primary-400"
                   checked={modules.includes(id)}
                   onChange={(event) =>
                     setModules(
@@ -148,16 +155,21 @@ export default function DocumentationAccess({
             ))}
           </div>
           <p className="tw-text-xs tw-text-iron-400">
-            {msg("evidencePermissions")}
+            {msg(
+              publicationOnly ? "publication.fileAccess" : "evidencePermissions"
+            )}
           </p>
-          {["archival", "rights", "sources", "contact"].map((id) => (
+          {(publicationOnly
+            ? ["archival"]
+            : ["archival", "rights", "sources", "contact"]
+          ).map((id) => (
             <label
               key={id}
-              className="tw-flex tw-items-center tw-gap-3 tw-text-sm tw-text-iron-300"
+              className="tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-text-iron-300"
             >
               <input
                 type="checkbox"
-                className="tw-h-5 tw-w-5 tw-accent-primary-400"
+                className="tw-h-5 tw-w-5 tw-shrink-0 tw-accent-primary-400"
                 checked={evidence.includes(id)}
                 onChange={(event) =>
                   setEvidence(
@@ -167,7 +179,11 @@ export default function DocumentationAccess({
                   )
                 }
               />
-              {msg(`evidence.${id}`)}
+              {msg(
+                publicationOnly
+                  ? "publication.originalAccess"
+                  : `evidence.${id}`
+              )}
             </label>
           ))}
         </fieldset>

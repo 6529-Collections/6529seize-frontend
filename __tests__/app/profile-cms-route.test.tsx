@@ -9,6 +9,7 @@ import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
 import { getProfileCmsPrimarySite } from "@/lib/profile-cms/runtime/fetcher";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { getUserProfile } from "@/helpers/server.helpers";
+import { publicEnv } from "@/config/env";
 
 jest.mock("@/components/profile-cms/CmsSiteRenderer", () => ({
   __esModule: true,
@@ -119,6 +120,46 @@ describe("profile CMS App Router catch-all", () => {
     );
   });
 
+  it("serves a readable page and emits its trusted canonical address", async () => {
+    const studioPackage: CmsPackageV1 = {
+      ...cmsPackage,
+      payload: {
+        ...cmsPackage.payload,
+        pages: cmsPackage.payload.pages.map((page) => ({
+          ...page,
+          path: "/punk6529/studio/index.html",
+          metadata: {
+            ...page.metadata,
+            canonical_url: "https://untrusted.example/",
+          },
+        })),
+        routes: [
+          {
+            path: "/punk6529/index.html",
+            kind: "alias",
+            target: "/punk6529/studio/index.html",
+          },
+          {
+            path: "/punk6529/studio/index.html",
+            kind: "page",
+            page_id: "page-home",
+          },
+        ],
+      },
+    };
+    getProfileCmsPrimarySiteMock.mockResolvedValue({
+      cmsPackage: studioPackage,
+      source: "fixture",
+    });
+    const params = Promise.resolve({ user: "punk6529", cmsPath: ["studio"] });
+    render(await ProfileCmsPage({ params }));
+    expect(screen.getByTestId("cms-renderer")).toBeInTheDocument();
+    const metadata = await generateMetadata({ params });
+    const canonical = new URL("/punk6529/studio", publicEnv.BASE_ENDPOINT).href;
+    expect(metadata.alternates?.canonical).toBe(canonical);
+    expect(metadata.openGraph).toMatchObject({ url: canonical });
+  });
+
   it("returns a safe empty state when no primary CMS site exists", async () => {
     getProfileCmsPrimarySiteMock.mockResolvedValueOnce(null);
 
@@ -133,6 +174,47 @@ describe("profile CMS App Router catch-all", () => {
 
     expect(screen.getByText("Website page not found")).toBeInTheDocument();
   });
+
+  it("respects an author's noindex choice while keeping the published page reachable", async () => {
+    const hiddenFromSearch = {
+      ...cmsPackage,
+      payload: {
+        ...cmsPackage.payload,
+        pages: cmsPackage.payload.pages.map((page) => ({
+          ...page,
+          metadata: { ...page.metadata },
+        })),
+      },
+    };
+    hiddenFromSearch.payload.pages[0]!.metadata.robots = "noindex";
+    getProfileCmsPrimarySiteMock.mockResolvedValue({
+      cmsPackage: hiddenFromSearch,
+      source: "fixture",
+    });
+    const params = Promise.resolve({
+      user: "punk6529",
+      cmsPath: ["index.html"],
+    });
+    const metadata = await generateMetadata({ params });
+    expect(metadata.robots).toEqual({ index: false, follow: true });
+    render(await ProfileCmsPage({ params }));
+    expect(screen.getByTestId("cms-renderer")).toBeInTheDocument();
+  });
+
+  it.each([null, { cmsPackage, source: "fixture" }])(
+    "does not claim an unpublished readable address",
+    async (site) => {
+      getProfileCmsPrimarySiteMock.mockResolvedValue(site);
+      await expect(
+        ProfileCmsPage({
+          params: Promise.resolve({
+            user: "punk6529",
+            cmsPath: ["missing-page"],
+          }),
+        })
+      ).rejects.toThrow("NEXT_NOT_FOUND");
+    }
+  );
 
   it("does not throw from metadata when no primary CMS site exists", async () => {
     getProfileCmsPrimarySiteMock.mockResolvedValueOnce(null);

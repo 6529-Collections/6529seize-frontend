@@ -1,0 +1,689 @@
+{
+  "schema": "6529.cms.package.v1",
+  "package_id": "pkg-6529capital-migration",
+  "profile": {
+    "handle": "6529capital"
+  },
+  "site": {
+    "title": "6529 CAPITAL",
+    "description": "Our goal is to help investors make wise investments, while also supporting NFT native and decentralization oriented values. While the current funds are currently traditional fund structure, we hope, in time, to reach a decentralized, tokenized end-state.",
+    "base_path": "/6529capital/index.html",
+    "default_locale": "en",
+    "direction": "ltr",
+    "theme": {
+      "mode": "dark",
+      "accent": "#2f7df6"
+    },
+    "navigation_id": "nav-main",
+    "required_renderer_capabilities": [
+      "static_blocks",
+      "profile_cms_v1"
+    ]
+  },
+  "payload": {
+    "schema": "6529.cms.payload.v1",
+    "pages": [
+      {
+        "id": "page-974bf8aef895e115",
+        "type": "page",
+        "path": "/6529capital/index.html",
+        "metadata": {
+          "title": "6529 CAPITAL",
+          "description": "Our goal is to help investors make wise investments, while also supporting NFT native and decentralization oriented values. While the current funds are currently traditional fund structure, we hope, in time, to reach a decentralized, tokenized end-state.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/6529capital/index.html",
+          "navigation_label": "6529 CAPITAL",
+          "search": "include",
+          "robots": "noindex",
+          "last_updated": "2026-09-10T00:00:00.000Z"
+        },
+        "source": {
+          "source_packet_id": "source-974bf8aef895e115"
+        },
+        "blocks": [
+          {
+            "block_type": "rich_text",
+            "content": "Capital",
+            "id": "block-da64a7dfe5411451"
+          },
+          {
+            "block_type": "heading",
+            "level": 1,
+            "text": "6529 CAPITAL",
+            "id": "block-e4226a425c85c2d3"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "Our goal is to help investors make wise investments, while also supporting NFT native and decentralization oriented values. While the current funds are currently traditional fund structure, we hope, in time, to reach a decentralized, tokenized end-state.",
+            "id": "block-893f7970df8e6c49"
+          },
+          {
+            "block_type": "heading",
+            "level": 2,
+            "text": "6529 CAPITAL HELPS LARGER, MORE TRADITIONAL INVESTORS INVEST IN NFTS, IN AN NFT-NATIVE MANNER",
+            "id": "block-eb6c68ce46411ab7"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "NFT investing is difficult specifically due to its non-fungibility, with the market value fragmented across and within collections. We believe there is no substitute for individual expertise in order to succeed in this field.",
+            "id": "block-eaf94980665a2452"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "The 6529 Capital collecting team includes who we believe are some of the best regarded NFT collectors in the world.",
+            "id": "block-0c421dfbd6028f60"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "A full list of companies in our portfolio can be found here.",
+            "id": "block-a4c463e6626cf9cf"
+          },
+          {
+            "block_type": "button_link",
+            "url": "/6529capital/company-portfolio/index.html",
+            "label": "here",
+            "id": "block-6978ce9c47464761"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "@punk6529",
+            "id": "block-bf66e7638b7e8930"
+          },
+          {
+            "block_type": "button_link",
+            "url": "https://twitter.com/punk6529",
+            "label": "@punk6529",
+            "id": "block-47d20ff35fd6d7f0"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "@krybharat",
+            "id": "block-e2295bf8b3b967ef"
+          },
+          {
+            "block_type": "button_link",
+            "url": "https://twitter.com/krybharat",
+            "label": "@krybharat",
+            "id": "block-f79ac1d6e3f65a28"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "@batsoupyum",
+            "id": "block-a5dd461ad50e609f"
+          },
+          {
+            "block_type": "button_link",
+            "url": "https://twitter.com/batsoupyum",
+            "label": "@batsoupyum",
+            "id": "block-ebcfbb0da3ac60da"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "@ACthecollector",
+            "id": "block-0bb6b34373ec11fc"
+          },
+          {
+            "block_type": "button_link",
+            "url": "https://twitter.com/ACthecollector",
+            "label": "@ACthecollector",
+            "id": "block-5ea305261a06cdf5"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "@phon_ro",
+            "id": "block-a4b094d790c0b645"
+          },
+          {
+            "block_type": "button_link",
+            "url": "https://twitter.com/phon_ro",
+            "label": "@phon_ro",
+            "id": "block-8ab2c651c84ddc00"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "@bonafidehan",
+            "id": "block-57e62766877da907"
+          },
+          {
+            "block_type": "button_link",
+            "url": "https://twitter.com/bonafidehan",
+            "label": "@bonafidehan",
+            "id": "block-1405207484c49991"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "The collecting team is complemented by a top tier administrative team handling financial, operational, investor relations, legal and regulatory matters.",
+            "id": "block-63ee129bac42d76e"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "@6529Guardian",
+            "id": "block-b758d456bee4f9de"
+          },
+          {
+            "block_type": "button_link",
+            "url": "https://twitter.com/6529Guardian",
+            "label": "@6529Guardian",
+            "id": "block-7c42c4b4d092667a"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "@itsjpower",
+            "id": "block-d122b74017b5aaf1"
+          },
+          {
+            "block_type": "button_link",
+            "url": "https://twitter.com/itsjpower",
+            "label": "@itsjpower",
+            "id": "block-9c1c684c65c4ac63"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "6529 Capital is currently investing through the 6529 NFT Fund.",
+            "id": "block-36f4d380a8e2be9f"
+          },
+          {
+            "block_type": "button_link",
+            "url": "/6529capital/fund/index.html",
+            "label": "6529 NFT Fund",
+            "id": "block-9e58ee1b9c699473"
+          }
+        ]
+      },
+      {
+        "id": "page-e4407206c1da44ff",
+        "type": "page",
+        "path": "/6529capital/company-portfolio/index.html",
+        "metadata": {
+          "title": "COMPANY PORTFOLIO",
+          "description": "6529 HAS MADE SEED INVESTMENTS FROM ITS OWN CAPITAL (ON BALANCE SHEET) IN THE FOLLOWING FIRMS Arbitrum Blur Deca Doppel farcaster OnCyber Ready Player Me tokenproof Transient Labs",
+          "locale": "en",
+          "canonical_url": "https://6529.io/6529capital/company-portfolio/index.html",
+          "navigation_label": "COMPANY PORTFOLIO",
+          "search": "include",
+          "robots": "noindex",
+          "last_updated": "2026-09-10T00:00:00.000Z"
+        },
+        "source": {
+          "source_packet_id": "source-e4407206c1da44ff"
+        },
+        "blocks": [
+          {
+            "block_type": "rich_text",
+            "content": "Capital",
+            "id": "block-63ed2bf3bf707cea"
+          },
+          {
+            "block_type": "heading",
+            "level": 1,
+            "text": "COMPANY PORTFOLIO",
+            "id": "block-edd06db02a92cbe9"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "6529 HAS MADE SEED INVESTMENTS FROM ITS OWN CAPITAL (ON BALANCE SHEET) IN THE FOLLOWING FIRMS Arbitrum Blur Deca Doppel farcaster OnCyber Ready Player Me tokenproof Transient Labs",
+            "id": "block-dd7d4c6e4dfa51d8"
+          },
+          {
+            "block_type": "heading",
+            "level": 2,
+            "text": "6529 HAS MADE SEED INVESTMENTS FROM ITS OWN CAPITAL (ON BALANCE SHEET) IN THE FOLLOWING FIRMS",
+            "id": "block-b1cab05aa9bb41d5"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "Arbitrum",
+            "id": "block-988237dba86f1be2"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "Blur",
+            "id": "block-f9a1035c39a5ff16"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "Deca",
+            "id": "block-121197a7dc57d3b7"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "Doppel",
+            "id": "block-488a7797a85745e0"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "farcaster",
+            "id": "block-dca7bdf8afe060b8"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "OnCyber",
+            "id": "block-00dab4ea75fdded0"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "Ready Player Me",
+            "id": "block-136c2814ed3856fb"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "tokenproof",
+            "id": "block-69b922f5a4d2a9a7"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "Transient Labs",
+            "id": "block-d2af9b9700674e85"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "UNXD",
+            "id": "block-ac5a6eeb8bbf8d19"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "Safe",
+            "id": "block-5586ffce6d50a963"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "Monad",
+            "id": "block-164a7a9cf31a052c"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "mmERCH",
+            "id": "block-4189142f476f226d"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "Sound",
+            "id": "block-a208209ae3fed97e"
+          }
+        ]
+      },
+      {
+        "id": "page-e82d8f554dcc67be",
+        "type": "page",
+        "path": "/6529capital/fund/index.html",
+        "metadata": {
+          "title": "6529 NFT FUND",
+          "description": "It is targeting approximately $25M to $50M of capital deployed each quarter in a diversified set of NFTs across the PFP, generative art, 1of1 and photography categories. Secondarily, it may make early stage investments in project teams and NFT infrastructure.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/6529capital/fund/index.html",
+          "navigation_label": "6529 NFT FUND",
+          "search": "include",
+          "robots": "noindex",
+          "last_updated": "2026-09-10T00:00:00.000Z"
+        },
+        "source": {
+          "source_packet_id": "source-e82d8f554dcc67be"
+        },
+        "blocks": [
+          {
+            "block_type": "rich_text",
+            "content": "Capital",
+            "id": "block-0c23fc63105aeccc"
+          },
+          {
+            "block_type": "heading",
+            "level": 1,
+            "text": "6529 NFT FUND",
+            "id": "block-485c13f09a510846"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "It is targeting approximately $25M to $50M of capital deployed each quarter in a diversified set of NFTs across the PFP, generative art, 1of1 and photography categories. Secondarily, it may make early stage investments in project teams and NFT infrastructure.",
+            "id": "block-7c2eb3ec253f9980"
+          },
+          {
+            "block_type": "heading",
+            "level": 2,
+            "text": "THE 6529 NFT FUND IS A SERIES OF CLOSED-END QUARTERLY FUNDS OPEN TO ACCREDITED INVESTORS AND QUALIFIED PURCHASERS",
+            "id": "block-613097a1d6321733"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "It is targeting approximately $25M to $50M of capital deployed each quarter in a diversified set of NFTs across the PFP, generative art, 1of1 and photography categories. Secondarily, it may make early stage investments in project teams and NFT infrastructure.",
+            "id": "block-088a4d981345af91"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "If you are an accredited investor or qualified purchaser and would like to learn more about the 6529 NFT Fund, please contact us at jeff@6529.io.",
+            "id": "block-e15ea2d52805f5b0"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "Alternatively, you can access the fund information on Angellist here.",
+            "id": "block-5bdce432790b02da"
+          },
+          {
+            "block_type": "button_link",
+            "url": "https://angel.co/v/back/6529-nft-fund",
+            "label": "here",
+            "id": "block-0c9617649e7d5235"
+          },
+          {
+            "block_type": "heading",
+            "level": 2,
+            "text": "6529 NFT FUND GALLERIES",
+            "id": "block-5c69a15b0fd75395"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "6529 NFT FUND SEASON 1",
+            "id": "block-6f3360383ea23613"
+          },
+          {
+            "block_type": "button_link",
+            "url": "https://deca.art/punk6529/fundszn1",
+            "label": "6529 NFT FUND SEASON 1",
+            "id": "block-7bc75f61a09f1dc1"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "6529 NFT FUND SEASON 2",
+            "id": "block-8362fa9bdaa5fdf1"
+          },
+          {
+            "block_type": "button_link",
+            "url": "https://deca.art/punk6529/fundszn2",
+            "label": "6529 NFT FUND SEASON 2",
+            "id": "block-ec170f93e0ab2534"
+          },
+          {
+            "block_type": "rich_text",
+            "content": "LIVING ARCHITECTURE – CASA BATLLO",
+            "id": "block-34e3ccd53d3cb467"
+          },
+          {
+            "block_type": "button_link",
+            "url": "https://videos.files.wordpress.com/oXa5lrrh/casa-batllo.mp4",
+            "label": "LIVING ARCHITECTURE – CASA BATLLO",
+            "id": "block-2773b674d2996581"
+          }
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "path": "/6529capital/index.html",
+        "kind": "page",
+        "page_id": "page-974bf8aef895e115"
+      },
+      {
+        "path": "/6529capital/company-portfolio/index.html",
+        "kind": "page",
+        "page_id": "page-e4407206c1da44ff"
+      },
+      {
+        "path": "/6529capital/fund/index.html",
+        "kind": "page",
+        "page_id": "page-e82d8f554dcc67be"
+      }
+    ],
+    "assets": [],
+    "navigation": [
+      {
+        "id": "nav-main",
+        "items": [
+          {
+            "label": "6529 CAPITAL",
+            "page_id": "page-974bf8aef895e115"
+          },
+          {
+            "label": "COMPANY PORTFOLIO",
+            "page_id": "page-e4407206c1da44ff"
+          },
+          {
+            "label": "6529 NFT FUND",
+            "page_id": "page-e82d8f554dcc67be"
+          }
+        ]
+      }
+    ],
+    "source_packets": [
+      {
+        "id": "source-974bf8aef895e115",
+        "source_type": "import",
+        "captured_at": "2026-09-10T00:00:00.000Z",
+        "content_hash": "sha256:7598bae16779699bdc0b36ddd15d1c5556fea4797283c6d9e526c5b81b9279a4",
+        "source_file": "app/capital/content.tsx",
+        "source_path": "/capital",
+        "original_content": {
+          "source": "migrated-wordpress",
+          "path": "/capital",
+          "title": "6529 CAPITAL",
+          "description": "Our goal is to help investors make wise investments, while also supporting NFT native and decentralization oriented values. While the current funds are currently traditional fund structure, we hope, in time, to reach a decentralized, tokenized end-state.",
+          "section": "Capital",
+          "blocks": [
+            {
+              "type": "heading",
+              "content": "6529 CAPITAL HELPS LARGER, MORE TRADITIONAL INVESTORS INVEST IN NFTS, IN AN NFT-NATIVE MANNER"
+            },
+            {
+              "type": "html",
+              "html": "<p>NFT investing is difficult specifically due to its non-fungibility, with the market value fragmented across and within collections.&nbsp; We believe there is no substitute for individual expertise in order to succeed in this field.</p>"
+            },
+            {
+              "type": "html",
+              "html": "<p>The 6529 Capital collecting team includes who we believe are some of the best regarded NFT collectors in the world.</p>"
+            },
+            {
+              "type": "html",
+              "html": "<p>A full list of companies in our portfolio can be found <a href=\"/capital/company-portfolio\">here</a>.</p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><a href=\"https://twitter.com/punk6529\" rel=\"noopener noreferrer\" target=\"_blank\"><strong>@punk6529</strong></a></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><a href=\"https://twitter.com/krybharat\" rel=\"noopener noreferrer\" target=\"_blank\"><strong>@krybharat</strong></a></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><a href=\"https://twitter.com/batsoupyum\" rel=\"noopener noreferrer\" target=\"_blank\"><strong>@batsoupyum</strong></a></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><a href=\"https://twitter.com/ACthecollector\" rel=\"noopener noreferrer\" target=\"_blank\"><strong>@ACthecollector</strong></a></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><a href=\"https://twitter.com/phon_ro\" rel=\"noopener noreferrer\" target=\"_blank\"><strong>@phon_ro</strong></a></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><a href=\"https://twitter.com/bonafidehan\" rel=\"noopener noreferrer\" target=\"_blank\"><strong>@bonafidehan</strong></a></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p>The collecting team is complemented by a top tier administrative team handling financial, operational, investor relations, legal and regulatory matters.</p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><a href=\"https://twitter.com/6529Guardian\" rel=\"noopener noreferrer\" target=\"_blank\"><strong>@6529Guardian</strong></a></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><a href=\"https://twitter.com/itsjpower\" rel=\"noopener noreferrer\" target=\"_blank\"><strong>@itsjpower</strong></a></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p>6529 Capital is currently investing through the <a href=\"/capital/fund\"><u>6529 NFT Fund</u></a>.</p>"
+            }
+          ]
+        }
+      },
+      {
+        "id": "source-e4407206c1da44ff",
+        "source_type": "import",
+        "captured_at": "2026-09-10T00:00:00.000Z",
+        "content_hash": "sha256:1f2b6833c85f9739a3ba05e4a083b07ca966a1b6fe161c74af4bf6731d82ac7a",
+        "source_file": "app/capital/company-portfolio/content.tsx",
+        "source_path": "/capital/company-portfolio",
+        "original_content": {
+          "source": "migrated-wordpress",
+          "path": "/capital/company-portfolio",
+          "title": "COMPANY PORTFOLIO",
+          "description": "6529 HAS MADE SEED INVESTMENTS FROM ITS OWN CAPITAL (ON BALANCE SHEET) IN THE FOLLOWING FIRMS Arbitrum Blur Deca Doppel farcaster OnCyber Ready Player Me tokenproof Transient Labs",
+          "section": "Capital",
+          "blocks": [
+            {
+              "type": "heading",
+              "content": "6529 HAS MADE SEED INVESTMENTS FROM ITS OWN CAPITAL (ON BALANCE SHEET) IN THE FOLLOWING FIRMS"
+            },
+            {
+              "type": "html",
+              "html": "<p><strong>Arbitrum<br></strong></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><strong>Blur<br></strong></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><strong>Deca<br></strong></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><strong>Doppel<br></strong></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><strong>farcaster<br></strong></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><strong>OnCyber<br></strong></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><strong>Ready Player Me<br></strong></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><strong>tokenproof<br></strong></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><strong>Transient Labs<br></strong></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><strong>UNXD<br></strong></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><strong>Safe<br></strong></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><strong>Monad<br></strong></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><strong>mmERCH<br></strong></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><strong>Sound<br></strong></p>"
+            }
+          ]
+        }
+      },
+      {
+        "id": "source-e82d8f554dcc67be",
+        "source_type": "import",
+        "captured_at": "2026-09-10T00:00:00.000Z",
+        "content_hash": "sha256:da9ec533254660f77c5ca7bdbebe179b3f1c5f89adbd55d5987feb71c0cd5d15",
+        "source_file": "app/capital/fund/content.tsx",
+        "source_path": "/capital/fund",
+        "original_content": {
+          "source": "migrated-wordpress",
+          "path": "/capital/fund",
+          "title": "6529 NFT FUND",
+          "description": "It is targeting approximately $25M to $50M of capital deployed each quarter in a diversified set of NFTs across the PFP, generative art, 1of1 and photography categories. Secondarily, it may make early stage investments in project teams and NFT infrastructure.",
+          "section": "Capital",
+          "blocks": [
+            {
+              "type": "heading",
+              "content": "THE 6529 NFT FUND IS A SERIES OF CLOSED-END QUARTERLY FUNDS OPEN TO ACCREDITED INVESTORS AND QUALIFIED PURCHASERS"
+            },
+            {
+              "type": "html",
+              "html": "<p>It is targeting approximately $25M to $50M of capital deployed each quarter in a diversified set of NFTs across the PFP, generative art, 1of1 and photography categories. Secondarily, it may make early stage investments in project teams and NFT infrastructure.</p>"
+            },
+            {
+              "type": "html",
+              "html": "<p>If you are an accredited investor or qualified purchaser and would like to learn more about the 6529 NFT Fund, please contact us at <a href=\"mailto:jeff@6529.io\"><u>jeff@6529.io</u></a>.</p>"
+            },
+            {
+              "type": "html",
+              "html": "<p>Alternatively, you can access the fund information on Angellist <a href=\"https://angel.co/v/back/6529-nft-fund\" rel=\"noopener noreferrer\" target=\"_blank\"><u>here</u></a>.</p>"
+            },
+            {
+              "type": "heading",
+              "content": "6529 NFT FUND GALLERIES"
+            },
+            {
+              "type": "html",
+              "html": "<p><a href=\"https://deca.art/punk6529/fundszn1\" rel=\"noopener noreferrer\" target=\"_blank\">6529 NFT FUND SEASON 1</a></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><a href=\"https://deca.art/punk6529/fundszn2\" rel=\"noopener noreferrer\" target=\"_blank\">6529 NFT FUND SEASON 2</a></p>"
+            },
+            {
+              "type": "html",
+              "html": "<p><a href=\"https://videos.files.wordpress.com/oXa5lrrh/casa-batllo.mp4\" rel=\"noopener noreferrer\" target=\"_blank\">LIVING ARCHITECTURE – CASA BATLLO</a></p>"
+            }
+          ]
+        }
+      }
+    ],
+    "build_manifest": {
+      "renderer": "6529-typed-content-migration",
+      "renderer_version": "1.0.0",
+      "route_count": 3,
+      "asset_count": 0,
+      "warnings": [
+        "link.unsafe_url",
+        "fixture.asset_byte_hashes_unverified",
+        "fixture.visual_parity_unverified"
+      ]
+    }
+  },
+  "integrity": {
+    "canonicalization": "jcs-rfc8785",
+    "hash_algorithm": "sha256",
+    "payload_hash": "sha256:ac0da02b4bbbd69862225116f1f7827b00c5a09b9d88d00afd6f5cf2ee979a26",
+    "package_hash": "sha256:2999131ed38a18430eb5b4880f7683910c28b88adea74052652181f0e123b5e4",
+    "note": "Migration fixture only. Asset content hashes are zero placeholders, not verified byte hashes. Source hashes fingerprint LF-normalized source files."
+  },
+  "signatures": [
+    {
+      "type": "fixture",
+      "signer": "fixture:6529capital",
+      "signature": "migration-fixture-not-a-wallet-signature",
+      "signed_at": "2026-09-10T00:00:00.000Z"
+    }
+  ],
+  "storage": [
+    {
+      "provider": "fixture",
+      "uri": "ipfs://fixture-6529capital-migration",
+      "content_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "canonical": false,
+      "pinned": false,
+      "recorded_at": "2026-09-10T00:00:00.000Z"
+    }
+  ],
+  "provenance": {
+    "builder": "6529-typed-content-migration",
+    "builder_version": "1.0.0",
+    "created_at": "2026-09-10T00:00:00.000Z",
+    "notes": "Converted from repository typed content. Original content is retained in source packets. No publication, asset fetch, route replacement, or visual-equivalence claim."
+  }
+}

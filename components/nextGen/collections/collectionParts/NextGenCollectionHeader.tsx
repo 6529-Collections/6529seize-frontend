@@ -19,6 +19,8 @@ import { publicEnv } from "@/config/env";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { fetchUrl } from "@/services/6529api";
 import { faArrowCircleLeft } from "@fortawesome/free-solid-svg-icons";
@@ -217,7 +219,16 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
 export default function NextGenCollectionHeader(props: Readonly<Props>) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
-  const [available, setAvailable] = useState<number>(0);
+  const collectionMintCount = useCollectionMintCount(
+    props.collection.id,
+    true,
+    props.collection.total_supply
+  );
+  const mintCount = Number(collectionMintCount.data);
+  const available =
+    Number.isSafeInteger(mintCount) && mintCount >= 0
+      ? Math.max(0, props.collection.total_supply - mintCount)
+      : 0;
 
   function showMint() {
     if (props.collection.mint_count == props.collection.total_supply) {
@@ -260,9 +271,9 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
           <NextGenPhases collection={props.collection} available={available} />
           {props.compact && (
             <span className="tw-whitespace-nowrap tw-text-sm tw-text-iron-300">
-              <NextGenMintCounts
+              <NextGenMintCountDisplay
                 collection={props.collection}
-                setAvailable={setAvailable}
+                collectionMintCount={collectionMintCount}
               />
             </span>
           )}
@@ -360,9 +371,9 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               </b>
             </span>
             <span className="tw-inline-flex tw-items-center tw-pt-2 tw-text-lg">
-              <NextGenMintCounts
+              <NextGenMintCountDisplay
                 collection={props.collection}
-                setAvailable={setAvailable}
+                collectionMintCount={collectionMintCount}
               />
             </span>
           </div>
@@ -378,54 +389,52 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
 }
 
 export function NextGenMintCounts(
-  props: Readonly<{
-    collection: NextGenCollection;
-    setAvailable?(available: number): void;
-    shouldRefetchMintCounts?: boolean | undefined;
-    setShouldRefetchMintCounts?(shouldRefetchMintCounts: boolean): void;
-  }>
+  props: Readonly<{ collection: NextGenCollection }>
 ) {
-  const [enableRefresh, setEnableRefresh] = useState<boolean>(true);
-  const [available, setAvailable] = useState<number>(0);
-
   const collectionMintCount = useCollectionMintCount(
     props.collection.id,
-    enableRefresh
+    true,
+    props.collection.total_supply
   );
-  const [mintCount, setMintCount] = useState<number>(0);
+  return (
+    <NextGenMintCountDisplay
+      collection={props.collection}
+      collectionMintCount={collectionMintCount}
+    />
+  );
+}
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+function NextGenMintCountDisplay({
+  collection,
+  collectionMintCount,
+}: Readonly<{
+  collection: NextGenCollection;
+  collectionMintCount: ReturnType<typeof useCollectionMintCount>;
+}>) {
+  const locale = useBrowserLocale();
+  const mintCount = Number(collectionMintCount.data);
+  const hasMintCount = Number.isSafeInteger(mintCount) && mintCount >= 0;
+  const available = hasMintCount
+    ? Math.max(0, collection.total_supply - mintCount)
+    : null;
+  const isLoading = collectionMintCount.isFetching;
 
-  useEffect(() => {
-    if (props.shouldRefetchMintCounts) {
-      collectionMintCount.refetch().then(() => {
-        if (props.setShouldRefetchMintCounts) {
-          props.setShouldRefetchMintCounts(false);
-        }
-      });
-    }
-  }, [props.shouldRefetchMintCounts]);
-
-  useEffect(() => {
-    setIsLoading(collectionMintCount.isFetching);
-  }, [collectionMintCount.isFetching]);
-
-  useEffect(() => {
-    const mintC = parseInt(String(collectionMintCount.data));
-    setMintCount(mintC);
-    const avail = props.collection.total_supply - mintC;
-    setAvailable(avail);
-    setEnableRefresh(avail > 0);
-    if (props.setAvailable) {
-      props.setAvailable(avail);
-    }
-  }, [collectionMintCount.data]);
+  if (!hasMintCount) {
+    return (
+      <span aria-live="polite">
+        {t(locale, "collect.sets.mintUnavailable")}
+        {isLoading && <DotLoader />}
+      </span>
+    );
+  }
 
   return (
     <span>
       {mintCount > 0 ? numberWithCommas(mintCount) : mintCount} /{" "}
-      {numberWithCommas(props.collection.total_supply)} minted
-      {available > 0 && ` | ${numberWithCommas(available)} remaining`}
+      {numberWithCommas(collection.total_supply)} minted
+      {available !== null &&
+        available > 0 &&
+        ` | ${numberWithCommas(available)} remaining`}
       {isLoading && (
         <>
           &nbsp;

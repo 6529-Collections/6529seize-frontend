@@ -9,6 +9,7 @@ import userEvent from "@testing-library/user-event";
 import { getAccount } from "@wagmi/core";
 import React from "react";
 import Auth, { AuthContext, useAuth } from "@/components/auth/Auth";
+import type { RequestAuthOptions } from "@/components/auth/authTypes";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { mockTitleContextModule } from "@/__tests__/utils/titleTestUtils";
 import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
@@ -20,6 +21,9 @@ import { publicEnv } from "@/config/env";
 
 const mockQueryClient = {
   getQueryData: jest.fn(),
+  removeQueries: jest.fn(),
+  getMutationCache: () => ({ getAll: () => [] }),
+  getQueryCache: () => ({ subscribe: () => jest.fn() }),
 };
 const mockRouterReplace = jest.fn();
 const mockRouterPush = jest.fn();
@@ -350,7 +354,11 @@ function RequestAuthButton() {
   );
 }
 
-function RequestAuthResultButton() {
+function RequestAuthResultButton({
+  options,
+}: {
+  readonly options?: RequestAuthOptions;
+}) {
   const { requestAuth } = useAuth();
   const [result, setResult] = React.useState("pending");
 
@@ -359,7 +367,7 @@ function RequestAuthResultButton() {
       <button
         type="button"
         onClick={() =>
-          void requestAuth().then(({ success }) => {
+          void requestAuth(options).then(({ success }) => {
             setResult(String(success));
           })
         }
@@ -671,6 +679,9 @@ describe("Auth component", () => {
         const mockValidateJwt =
           require("@/services/auth/jwt-validation.utils").validateJwt;
         authUtils.getAuthJwt.mockReturnValue("valid-jwt");
+        if (!canSign) {
+          sessionV2.getSessionClientType.mockReturnValue("native");
+        }
 
         render(
           <ReactQueryWrapperContext.Provider
@@ -700,8 +711,65 @@ describe("Auth component", () => {
         expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
         expect(mockSeizeDisconnect).not.toHaveBeenCalled();
         expect(mockSeizeDisconnectAndLogout).not.toHaveBeenCalled();
+        expect(require("react-toastify").toast).not.toHaveBeenCalled();
       }
     );
+
+    it("accepts a refreshed native session for composer preflight without a signer or active chain", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      canSignActiveWallet = false;
+      mockActiveChainId = undefined;
+      mockWagmiIsConnected = false;
+      const authUtils = jest.requireMock<typeof AuthUtilsModule>(
+        "@/services/auth/auth.utils"
+      );
+      const sessionV2 = jest.requireMock<typeof SessionV2Module>(
+        "@/services/auth/session-v2.utils"
+      );
+      const { validateJwt } = jest.requireMock<
+        typeof import("@/services/auth/jwt-validation.utils")
+      >("@/services/auth/jwt-validation.utils");
+      jest.mocked(authUtils.getWalletAddress).mockReturnValue(validAddress);
+      jest
+        .mocked(authUtils.getAuthJwt)
+        .mockReturnValue(TEST_REJECTED_SESSION_VALUE);
+      jest.mocked(sessionV2.getSessionClientType).mockReturnValue("native");
+      jest.mocked(validateJwt).mockImplementationOnce(async (params) => {
+        expect(params.shouldPersistRefreshedSession?.()).toBe(true);
+        jest
+          .mocked(authUtils.getAuthJwt)
+          .mockReturnValue(TEST_REPLACEMENT_SESSION_VALUE);
+        return {
+          isValid: true,
+          wasCancelled: false,
+          refreshOutcome: "success",
+        };
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={createReactQueryWrapperContextValue()}
+        >
+          <Auth>
+            <RequestAuthResultButton />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+      await userEvent.click(screen.getByTestId("request-auth-result"));
+
+      await waitFor(() =>
+        expect(screen.getByTestId("request-auth-success")).toHaveTextContent(
+          "true"
+        )
+      );
+      expect(authUtils.getAuthJwt()).toBe(TEST_REPLACEMENT_SESSION_VALUE);
+      expect(authUtils.invalidateAuthSessionForAddress).not.toHaveBeenCalled();
+      expect(sessionV2.getSessionNonce).not.toHaveBeenCalled();
+      expect(mockSignMessage).not.toHaveBeenCalled();
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+      expect(require("react-toastify").toast).not.toHaveBeenCalled();
+    });
 
     it.each([
       { chainId: undefined, chainState: "unknown" },
@@ -811,92 +879,107 @@ describe("Auth component", () => {
       });
     });
 
-    it("cancels deferred server-rejected recovery after the token changes", async () => {
-      const validAddress = "0x1111111111111111111111111111111111111111";
-      walletAddress = validAddress;
-      const authUtils =
-        require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
-      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
-        typeof authUtils.getAuthJwt
-      >;
-      const mockGetWalletAddress =
-        authUtils.getWalletAddress as jest.MockedFunction<
-          typeof authUtils.getWalletAddress
+    it.each([
+      { profileState: "connected", hasSigner: true },
+      { profileState: "saved native", hasSigner: false },
+    ])(
+      "cancels deferred server-rejected recovery for a $profileState profile after the token changes",
+      async ({ hasSigner }) => {
+        const validAddress = "0x1111111111111111111111111111111111111111";
+        walletAddress = validAddress;
+        canSignActiveWallet = hasSigner;
+        mockActiveChainId = hasSigner ? 1 : undefined;
+        mockWagmiIsConnected = hasSigner;
+        const authUtils =
+          require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+        const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
+          typeof authUtils.getAuthJwt
         >;
-      const mockRemoveAuthJwt = authUtils.removeAuthJwt as jest.MockedFunction<
-        typeof authUtils.removeAuthJwt
-      >;
-      const mockValidateJwt =
-        require("@/services/auth/jwt-validation.utils").validateJwt;
-      const sessionV2 = require("@/services/auth/session-v2.utils");
-      const validation = createDeferredPromise<{
-        readonly isValid: boolean;
-        readonly wasCancelled: boolean;
-        readonly refreshOutcome: "cancelled";
-      }>();
-      let shouldPersistRefreshedSession: (() => boolean) | undefined;
-      let requestResult: Promise<{ success: boolean }> | undefined;
-
-      mockGetAuthJwt.mockReturnValue(TEST_REJECTED_SESSION_VALUE);
-      mockGetWalletAddress.mockReturnValue(validAddress);
-      const rejectedAuthStateFingerprint = getAuthStateFingerprint({
-        walletAddress: validAddress,
-        jwt: TEST_REJECTED_SESSION_VALUE,
-      });
-      mockValidateJwt.mockImplementationOnce(
-        (params: { shouldPersistRefreshedSession?: () => boolean }) => {
-          shouldPersistRefreshedSession = params.shouldPersistRefreshedSession;
-          return validation.promise;
+        const mockGetWalletAddress =
+          authUtils.getWalletAddress as jest.MockedFunction<
+            typeof authUtils.getWalletAddress
+          >;
+        const mockRemoveAuthJwt =
+          authUtils.removeAuthJwt as jest.MockedFunction<
+            typeof authUtils.removeAuthJwt
+          >;
+        const mockValidateJwt =
+          require("@/services/auth/jwt-validation.utils").validateJwt;
+        const sessionV2 = require("@/services/auth/session-v2.utils");
+        if (!hasSigner) {
+          sessionV2.getSessionClientType.mockReturnValue("native");
         }
-      );
+        const validation = createDeferredPromise<{
+          readonly isValid: boolean;
+          readonly wasCancelled: boolean;
+          readonly refreshOutcome: "empty";
+        }>();
+        let shouldPersistRefreshedSession: (() => boolean) | undefined;
+        let requestResult: Promise<{ success: boolean }> | undefined;
 
-      const Child = () => {
-        const { requestAuth } = React.useContext(AuthContext);
-        return (
-          <button
-            type="button"
-            onClick={() => {
-              requestResult = requestAuth({
-                serverRejected: true,
-                expectedAuthStateFingerprint: rejectedAuthStateFingerprint,
-              });
-            }}
-          >
-            recover auth
-          </button>
+        mockGetAuthJwt.mockReturnValue(TEST_REJECTED_SESSION_VALUE);
+        mockGetWalletAddress.mockReturnValue(validAddress);
+        const rejectedAuthStateFingerprint = getAuthStateFingerprint({
+          walletAddress: validAddress,
+          jwt: TEST_REJECTED_SESSION_VALUE,
+        });
+        mockValidateJwt.mockImplementationOnce(
+          (params: { shouldPersistRefreshedSession?: () => boolean }) => {
+            shouldPersistRefreshedSession =
+              params.shouldPersistRefreshedSession;
+            return validation.promise;
+          }
         );
-      };
 
-      render(
-        <ReactQueryWrapperContext.Provider
-          value={{ invalidateAll: jest.fn() } as any}
-        >
-          <Auth>
-            <Child />
-          </Auth>
-        </ReactQueryWrapperContext.Provider>
-      );
+        const Child = () => {
+          const { requestAuth } = React.useContext(AuthContext);
+          return (
+            <button
+              type="button"
+              onClick={() => {
+                requestResult = requestAuth({
+                  serverRejected: true,
+                  expectedAuthStateFingerprint: rejectedAuthStateFingerprint,
+                });
+              }}
+            >
+              recover auth
+            </button>
+          );
+        };
 
-      fireEvent.click(screen.getByRole("button", { name: "recover auth" }));
-      await waitFor(() => expect(mockValidateJwt).toHaveBeenCalled());
-      expect(shouldPersistRefreshedSession?.()).toBe(true);
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={{ invalidateAll: jest.fn() } as any}
+          >
+            <Auth>
+              <Child />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
 
-      mockGetAuthJwt.mockReturnValue(TEST_REPLACEMENT_SESSION_VALUE);
-      expect(shouldPersistRefreshedSession?.()).toBe(false);
+        fireEvent.click(screen.getByRole("button", { name: "recover auth" }));
+        await waitFor(() => expect(mockValidateJwt).toHaveBeenCalled());
+        expect(shouldPersistRefreshedSession?.()).toBe(true);
 
-      validation.resolve({
-        isValid: false,
-        wasCancelled: true,
-        refreshOutcome: "cancelled",
-      });
-      await act(async () => {
-        await requestResult;
-      });
+        mockGetAuthJwt.mockReturnValue(TEST_REPLACEMENT_SESSION_VALUE);
+        expect(shouldPersistRefreshedSession?.()).toBe(false);
 
-      expect(mockRemoveAuthJwt).not.toHaveBeenCalled();
-      expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
-      expect(sessionV2.persistSessionResponse).not.toHaveBeenCalled();
-    });
+        validation.resolve({
+          isValid: false,
+          wasCancelled: false,
+          refreshOutcome: "empty",
+        });
+        await act(async () => {
+          await requestResult;
+        });
+
+        expect(mockRemoveAuthJwt).not.toHaveBeenCalled();
+        expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
+        expect(sessionV2.persistSessionResponse).not.toHaveBeenCalled();
+        expect(require("react-toastify").toast).not.toHaveBeenCalled();
+      }
+    );
 
     it("cancels server-rejected sign-in if auth changes during persistence", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
@@ -1194,6 +1277,12 @@ describe("Auth component", () => {
         expect(sessionV2.getSessionNonce).not.toHaveBeenCalled();
         expect(mockSignMessage).not.toHaveBeenCalled();
         expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+        if (!canSign) {
+          expect(require("react-toastify").toast).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({ type: "error" })
+          );
+        }
       }
     );
 
@@ -1387,6 +1476,90 @@ describe("Auth component", () => {
       expect(mockInvalidateAuthSession).not.toHaveBeenCalled();
       expect(mockSignMessage).not.toHaveBeenCalled();
     });
+
+    it.each([
+      { action: "composer preflight", serverRejected: false },
+      { action: "reaction recovery", serverRejected: true },
+    ])(
+      "asks to reconnect a saved native profile without a signer or chain during $action",
+      async ({ serverRejected }) => {
+        const validAddress = "0x1111111111111111111111111111111111111111";
+        walletAddress = validAddress;
+        canSignActiveWallet = false;
+        mockActiveChainId = undefined;
+        mockWagmiIsConnected = false;
+        const authUtils = jest.requireMock<typeof AuthUtilsModule>(
+          "@/services/auth/auth.utils"
+        );
+        const sessionV2 = jest.requireMock<typeof SessionV2Module>(
+          "@/services/auth/session-v2.utils"
+        );
+        const { validateJwt } = jest.requireMock<
+          typeof import("@/services/auth/jwt-validation.utils")
+        >("@/services/auth/jwt-validation.utils");
+        const { toast } =
+          jest.requireMock<typeof import("react-toastify")>("react-toastify");
+        jest.mocked(authUtils.getAuthJwt).mockReturnValue("expired-native-jwt");
+        jest.mocked(authUtils.getWalletAddress).mockReturnValue(validAddress);
+        jest.mocked(sessionV2.getSessionClientType).mockReturnValue("native");
+        jest.mocked(validateJwt).mockResolvedValue({
+          isValid: false,
+          wasCancelled: false,
+          refreshOutcome: "empty",
+        });
+        const expectedAuthStateFingerprint = getAuthStateFingerprint({
+          walletAddress: validAddress,
+          jwt: "expired-native-jwt",
+        });
+
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={createReactQueryWrapperContextValue()}
+          >
+            <Auth>
+              <RequestAuthResultButton
+                options={{ serverRejected, expectedAuthStateFingerprint }}
+              />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+        await userEvent.click(screen.getByTestId("request-auth-result"));
+
+        await waitFor(() =>
+          expect(screen.getByTestId("request-auth-success")).toHaveTextContent(
+            "false"
+          )
+        );
+        expect(validateJwt).toHaveBeenCalledWith(
+          expect.objectContaining({
+            jwt: "expired-native-jwt",
+            wallet: validAddress,
+            serverRejected,
+          })
+        );
+        expect(toast).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ type: "error" })
+        );
+        const renderedToast = jest.mocked(toast).mock.calls.at(-1)?.[0];
+        if (!React.isValidElement(renderedToast)) {
+          throw new Error("Expected a rendered reconnect toast");
+        }
+        render(renderedToast);
+        expect(
+          screen.getByText(
+            "Reconnect the wallet for this profile and try again."
+          )
+        ).toBeVisible();
+        expect(
+          authUtils.invalidateAuthSessionForAddress
+        ).not.toHaveBeenCalled();
+        expect(authUtils.removeAuthJwt).not.toHaveBeenCalled();
+        expect(sessionV2.getSessionNonce).not.toHaveBeenCalled();
+        expect(mockSignMessage).not.toHaveBeenCalled();
+        expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+      }
+    );
 
     it("uses session nonce signable_message for web sign-in", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
@@ -1916,9 +2089,7 @@ describe("Auth component", () => {
       );
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Sign Authentication Request")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Sign in to 6529")).toBeInTheDocument();
       });
     });
 
@@ -2244,6 +2415,154 @@ describe("Auth component", () => {
     const mockValidateAuthImmediate =
       require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
 
+    it.each([null, "developer"])(
+      "exposes a direct session for a loaded own profile with role %s",
+      (role) => {
+        const authUtils = jest.mocked(
+          require("@/services/auth/auth.utils") as typeof AuthUtilsModule
+        );
+        const roleModule = jest.mocked(
+          require("@/services/auth/jwt-validation.utils") as typeof import("@/services/auth/jwt-validation.utils")
+        );
+        authUtils.getAuthJwt.mockReturnValue("direct-session");
+        roleModule.getRole.mockReturnValue(role);
+        mockUseIdentity.mockReturnValue({
+          profile: {
+            id: "developer",
+            handle: "developer",
+            query: "developer",
+            primary_wallet: walletAddress,
+            wallets: [],
+          },
+          isLoading: false,
+        });
+        const observed: Array<boolean | undefined> = [];
+        const Child = () => {
+          observed.push(useAuth().isDirectProfileSession);
+          return null;
+        };
+
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={createReactQueryWrapperContextValue()}
+          >
+            <Auth>
+              <Child />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+
+        expect(observed.length).toBeGreaterThan(0);
+        expect(observed.every((direct) => direct === true)).toBe(true);
+      }
+    );
+
+    it("exposes proxy-token scope before the proxy lookup completes", () => {
+      const authUtils = jest.mocked(
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule
+      );
+      const roleModule = jest.mocked(
+        require("@/services/auth/jwt-validation.utils") as typeof import("@/services/auth/jwt-validation.utils")
+      );
+      authUtils.getAuthJwt.mockReturnValue("proxy-session");
+      roleModule.getRole.mockReturnValue("delegating-profile");
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "developer",
+          handle: "developer",
+          query: "developer",
+          primary_wallet: walletAddress,
+          wallets: [],
+        },
+        isLoading: false,
+      });
+      const observed: Array<{ direct: boolean | undefined; proxy: unknown }> =
+        [];
+      const Child = () => {
+        const auth = React.useContext(AuthContext);
+        observed.push({
+          direct: auth.isDirectProfileSession,
+          proxy: auth.activeProfileProxy,
+        });
+        return null;
+      };
+      try {
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={createReactQueryWrapperContextValue()}
+          >
+            <Auth>
+              <Child />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+        expect(observed.length).toBeGreaterThan(0);
+        expect(observed[0]).toEqual({ direct: false, proxy: null });
+        expect(observed.every((value) => value.direct === false)).toBe(true);
+      } finally {
+        roleModule.getRole.mockReturnValue(null);
+        authUtils.getAuthJwt.mockReturnValue(null);
+      }
+    });
+
+    it("closes direct scope until the switched wallet, loaded profile and token role agree", () => {
+      const authUtils = jest.mocked(
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule
+      );
+      const roleModule = jest.mocked(
+        require("@/services/auth/jwt-validation.utils") as typeof import("@/services/auth/jwt-validation.utils")
+      );
+      authUtils.getAuthJwt.mockReturnValue("direct-session");
+      roleModule.getRole.mockReturnValue("profile-1");
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "profile-1",
+          handle: "first",
+          query: "first",
+          primary_wallet: walletAddress,
+          wallets: [],
+        },
+        isLoading: false,
+      });
+      const Child = () => (
+        <div data-testid="direct-scope">
+          {String(useAuth().isDirectProfileSession)}
+        </div>
+      );
+      const view = () => (
+        <ReactQueryWrapperContext.Provider
+          value={createReactQueryWrapperContextValue()}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+      const { rerender } = render(view());
+      expect(screen.getByTestId("direct-scope")).toHaveTextContent("true");
+
+      walletAddress = "0x2";
+      rerender(view());
+      expect(screen.getByTestId("direct-scope")).toHaveTextContent("false");
+
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "profile-2",
+          handle: "second",
+          query: "second",
+          primary_wallet: walletAddress,
+          wallets: [],
+        },
+        isLoading: false,
+      });
+      rerender(view());
+      expect(screen.getByTestId("direct-scope")).toHaveTextContent("false");
+
+      roleModule.getRole.mockReturnValue("profile-2");
+      rerender(view());
+      expect(screen.getByTestId("direct-scope")).toHaveTextContent("true");
+    });
+
     it("should fetch and set connected profile when address is provided", async () => {
       mockValidateAuthImmediate.mockResolvedValue({
         validationCompleted: true,
@@ -2533,21 +2852,17 @@ describe("Auth component", () => {
       renderAuthModalHarness();
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Sign Authentication Request")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Sign in to 6529")).toBeInTheDocument();
       });
 
       // Check that modal content is present
       expect(
-        screen.getByText(
-          "To connect your wallet, you will need to sign a message to confirm your identity."
-        )
+        screen.getByText("Sign a message to confirm this address is yours.")
       ).toBeInTheDocument();
       expect(screen.getByText("Cancel")).toBeInTheDocument();
-      expect(screen.getByText("Sign")).toBeInTheDocument();
+      expect(screen.getByText("Sign message")).toBeInTheDocument();
 
-      await userEvent.click(screen.getByText("Sign"));
+      await userEvent.click(screen.getByText("Sign message"));
       await waitFor(() => {
         expect(mockSignMessage).toHaveBeenCalledWith(
           "sign this message exactly"
@@ -2568,9 +2883,7 @@ describe("Auth component", () => {
         await waitFor(() => {
           expect(mockValidateAuthImmediate).toHaveBeenCalled();
         });
-        expect(
-          screen.queryByText("Sign Authentication Request")
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText("Sign in to 6529")).not.toBeInTheDocument();
         expect(mockSignMessage).not.toHaveBeenCalled();
         expect(
           require("@/services/auth/session-v2.utils").getSessionNonce
@@ -2586,17 +2899,13 @@ describe("Auth component", () => {
       await waitFor(() => {
         expect(mockValidateAuthImmediate).toHaveBeenCalled();
       });
-      expect(
-        screen.queryByText("Sign Authentication Request")
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Sign in to 6529")).not.toBeInTheDocument();
 
       mockActiveChainId = 1;
       view.rerender(getAuthModalHarnessElement());
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Sign Authentication Request")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Sign in to 6529")).toBeInTheDocument();
       });
     });
 
@@ -2605,18 +2914,14 @@ describe("Auth component", () => {
       const view = renderAuthModalHarness();
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Sign Authentication Request")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Sign in to 6529")).toBeInTheDocument();
       });
 
       mockActiveChainId = 137;
       view.rerender(getAuthModalHarnessElement());
 
       await waitFor(() => {
-        expect(
-          screen.queryByText("Sign Authentication Request")
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText("Sign in to 6529")).not.toBeInTheDocument();
       });
       expect(mockSeizeDisconnect).not.toHaveBeenCalled();
       expect(mockSeizeDisconnectAndLogout).not.toHaveBeenCalled();
@@ -2828,9 +3133,7 @@ describe("Auth component", () => {
       );
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Sign Authentication Request")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Sign in to 6529")).toBeInTheDocument();
       });
 
       const reauthPromptCalls = mockTrackAuthImpactEvent.mock.calls.filter(
@@ -3644,7 +3947,7 @@ describe("Auth component", () => {
       });
 
       const user = userEvent.setup();
-      await user.click(screen.getByText("Sign"));
+      await user.click(screen.getByText("Sign message"));
 
       await waitFor(() => {
         expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
@@ -3690,7 +3993,9 @@ describe("Auth component", () => {
       });
 
       expect(screen.queryByText("Remind me later")).not.toBeInTheDocument();
-      expect(screen.getByText(/Confirm in your wallet/i)).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /Check your wallet/i })
+      ).toBeInTheDocument();
     });
 
     it("keeps the session upgrade modal visible while validation reruns", async () => {
@@ -3789,7 +4094,7 @@ describe("Auth component", () => {
       expect(
         screen.getByText(/Reshare the connection from a device/i)
       ).toBeInTheDocument();
-      expect(screen.queryByText("Sign")).not.toBeInTheDocument();
+      expect(screen.queryByText("Sign message")).not.toBeInTheDocument();
       expect(screen.getByText("Remind me later")).toBeInTheDocument();
     });
 
@@ -3830,7 +4135,7 @@ describe("Auth component", () => {
         screen.getByText(/If this is a shared connection, reshare/i)
       ).toBeInTheDocument();
       expect(screen.getByText("Remind me later")).toBeInTheDocument();
-      expect(screen.queryByText("Sign")).not.toBeInTheDocument();
+      expect(screen.queryByText("Sign message")).not.toBeInTheDocument();
 
       mockSeizeConnect.mockImplementationOnce(() => {
         expect(
@@ -4240,9 +4545,7 @@ describe("Auth component", () => {
 
       expect(mockCommonApiPost).not.toHaveBeenCalled();
       expect(mockSignMessage).not.toHaveBeenCalled();
-      expect(
-        screen.queryByText("Sign Authentication Request")
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Sign in to 6529")).not.toBeInTheDocument();
     });
   });
 

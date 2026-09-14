@@ -4,7 +4,6 @@ import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton
 import VotingModal from "@/components/voting/VotingModal";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import type { ApiDropVoteDistribution } from "@/generated/models/ApiDropVoteDistribution";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { SingleWaveDropContent } from "./SingleWaveDropContent";
@@ -12,10 +11,14 @@ import { SingleWaveDropInfoContainer } from "./SingleWaveDropInfoContainer";
 import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
 import { WaveDropMetaRow } from "./WaveDropMetaRow";
 import { WaveDropVoteSummary } from "./WaveDropVoteSummary";
+import {
+  DISABLED_DROP_VOTE_SUMMARY_STATE,
+  type DropVoteSummaryState,
+} from "./useDropVoteSummary";
 
 interface SingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
-  readonly voteDistribution?: ApiDropVoteDistribution | undefined;
+  readonly voteSummary?: DropVoteSummaryState | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
@@ -23,7 +26,7 @@ interface SingleWaveDropInfoPanelProps {
 
 export const SingleWaveDropInfoPanel = ({
   drop,
-  voteDistribution,
+  voteSummary = DISABLED_DROP_VOTE_SUMMARY_STATE,
   isVotingClosed = false,
   isVotingControlsLocked = false,
   winningThreshold,
@@ -68,7 +71,7 @@ export const SingleWaveDropInfoPanel = ({
               <div className="tw-mt-6">
                 <SingleWaveDropInfoDetails
                   drop={drop}
-                  voteDistribution={voteDistribution}
+                  voteSummary={voteSummary}
                 />
               </div>
             )}

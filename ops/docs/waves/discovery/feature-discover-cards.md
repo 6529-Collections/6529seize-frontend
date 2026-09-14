@@ -4,7 +4,9 @@
 
 `/discover` renders a dedicated grid of active-wave cards.
 
-- It uses the same card component as home `Most active waves`.
+- Cards share the same artwork-led design and wave information as home
+  `Most active waves`, with artwork that fills rounded cards and fades into a
+  dark background behind the text.
 - The dedicated route expands the list to 20 cards.
 - The route requests discovery data with `exclude_followed=true`.
 - There is no `View all` footer because `/discover` is already the expanded
@@ -40,6 +42,19 @@ from home discovery.
 - Open a DM-targeting card to jump into `/messages/{waveId}`.
 - Review the compact preview row when a wave description drop has usable text
   or media content.
+- Read the available labelled metrics: `Score` is the visibility
+  score, `Hot` is the hotness score, and `REP` is Wave REP. Visibility and hotness
+  are scores out of 100. REP shows a signed, compact raw total when available;
+  otherwise it shows the Wave REP score out of 100. Screen-reader labels
+  distinguish the raw total from the score.
+- Description text is limited to two lines. Cards keep space for the preview
+  when it is absent, with drop count and relative activity time aligned below.
+- Loading cards reuse the shared solid iron wave-card skeleton pattern while
+  reserving the Discover card height.
+- Artwork is subtly desaturated at rest and returns to full color on hover or
+  keyboard focus. Touch cards retain full color.
+- Sort and score-filter groups share a row when space allows and wrap when
+  needed. On narrow screens, each group keeps its horizontal scrolling.
 - Use `/discover` as the larger browse surface when home six-card discovery is
   not enough.
 
@@ -49,6 +64,8 @@ from home discovery.
   `Most active waves` cards.
 - Preview content comes from the wave description drop rather than the latest
   chat message.
+- Description previews retain their existing text and media handling; markdown
+  markers can remain visible, and preview links are not separately clickable.
 - If a wave description drop is empty, whitespace-only, or media-free, the card
   still opens the target wave route without rendering the compact preview row.
 - Auth/profile requirements still apply after entering `/waves` or `/messages`
@@ -66,6 +83,19 @@ from home discovery.
 
 - `/discover` intentionally omits the home subtitle and footer link.
 - Home still caps its `Most active waves` section to six cards.
+
+### Localization follow-up
+
+- Affected surface: `DiscoverWaveExplorer` headings, sort/filter labels, empty
+  state, and the `ExploreWavesSection` loading/result announcements on `/discover`.
+- Current fallback: this existing copy remains English (`en-US`); card metric
+  labels and number formatting use the existing default-locale helpers.
+- User impact: visitors using other languages continue to receive English
+  controls and status announcements. Wave-authored titles and descriptions stay
+  in their original language.
+- Follow-up owner: frontend wave-discovery maintainers. Move the remaining copy
+  to message keys with complete count-aware status messages, then verify locale
+  fallback and longer translated labels across supported locales.
 
 ## Related Pages
 

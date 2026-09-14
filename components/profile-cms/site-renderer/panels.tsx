@@ -1,3 +1,5 @@
+import { getCmsDetailClasses } from "./detailPresentation";
+import { CmsStudioPageGrid } from "../CmsStudioWalletContent";
 import type { ReactNode } from "react";
 
 import { CmsInspectableArtwork } from "@/components/profile-cms/CmsArtLightbox";
@@ -32,6 +34,13 @@ export function FeaturedPageGrid({
   readonly context: RendererContext;
   readonly mode: CmsArtGridMode;
 }) {
+  if (context.appearance === "studio")
+    return (
+      <CmsStudioPageGrid
+        pageIds={cards.map((card) => card.page.id)}
+        context={context}
+      />
+    );
   if (!cards.length) {
     return null;
   }
@@ -60,7 +69,11 @@ export function FeaturedPageGrid({
               {getPageTypeLabel(context.locale, card.page.type)}
             </p>
             <h4 className="tw-mt-1 tw-text-base tw-font-semibold tw-text-white">
-              <CmsLink className="hover:tw-text-primary-200" href={card.href}>
+              <CmsLink
+                context={context}
+                className="hover:tw-text-primary-200"
+                href={card.href}
+              >
                 {card.page.metadata.navigation_label ??
                   card.page.metadata.title}
               </CmsLink>
@@ -78,9 +91,11 @@ export function FeaturedPageGrid({
 }
 
 export function DefinitionGrid({
+  studio = false,
   className = "",
   items,
 }: {
+  readonly studio?: boolean | undefined;
   readonly className?: string | undefined;
   readonly items: readonly {
     readonly label: string;
@@ -101,16 +116,28 @@ export function DefinitionGrid({
     >
       {visibleItems.map((item) => (
         <div
-          className="tw-min-w-0 tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-p-3"
+          className={
+            studio
+              ? "tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-[color:var(--cms-line)] tw-pt-3"
+              : "tw-min-w-0 tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-p-3"
+          }
           key={item.key}
         >
-          <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+          <dt
+            className={`tw-text-xs tw-font-semibold tw-uppercase ${studio ? "tw-text-inherit" : "tw-text-iron-500"}`}
+          >
             {item.label}
           </dt>
-          <dd className="tw-mt-1 tw-break-all tw-text-iron-100">
+          <dd
+            className={`tw-mb-0 tw-ml-0 tw-mt-2 tw-break-all ${studio ? "tw-text-inherit" : "tw-text-iron-100"}`}
+          >
             {item.href ? (
               <a
-                className="hover:tw-text-primary-200 tw-text-primary-300"
+                className={
+                  studio
+                    ? "tw-text-inherit tw-underline tw-underline-offset-4"
+                    : "hover:tw-text-primary-200 tw-text-primary-300"
+                }
                 href={item.href}
                 rel="noreferrer"
                 target="_blank"
@@ -128,6 +155,7 @@ export function DefinitionGrid({
 }
 
 export function ReferencePanel({
+  context,
   detail,
   href,
   media,
@@ -135,6 +163,7 @@ export function ReferencePanel({
   subtitle,
   title,
 }: {
+  readonly context?: RendererContext | undefined;
   readonly detail?: string | undefined;
   readonly href?: string | null | undefined;
   readonly media?: ReactNode | undefined;
@@ -142,19 +171,22 @@ export function ReferencePanel({
   readonly subtitle?: string | undefined;
   readonly title: string;
 }) {
+  const theme = getCmsDetailClasses(context);
   const metadataRows = getUniqueLabelValueRows(metadata);
 
   return (
-    <section className="tw-grid tw-gap-4 tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5 md:tw-grid-cols-[minmax(0,1fr)_14rem]">
+    <section
+      className={`tw-grid tw-gap-4 md:tw-grid-cols-[minmax(0,1fr)_14rem] ${theme.panel}`}
+    >
       <div>
         {subtitle ? (
-          <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-primary-300">
+          <p className={`tw-mb-2 tw-text-sm tw-font-medium ${theme.accent}`}>
             {subtitle}
           </p>
         ) : null}
-        <h3 className="tw-text-xl tw-font-semibold tw-text-white">
+        <h3 className={`tw-text-xl tw-font-semibold ${theme.title}`}>
           {href ? (
-            <CmsLink className="hover:tw-text-primary-200" href={href}>
+            <CmsLink context={context} className={theme.link} href={href}>
               {title}
             </CmsLink>
           ) : (
@@ -162,7 +194,9 @@ export function ReferencePanel({
           )}
         </h3>
         {detail ? (
-          <p className="tw-mt-3 tw-break-all tw-text-sm tw-leading-6 tw-text-iron-300">
+          <p
+            className={`tw-mt-3 tw-break-all tw-text-sm tw-leading-6 ${theme.text}`}
+          >
             {detail}
           </p>
         ) : null}
@@ -170,8 +204,8 @@ export function ReferencePanel({
           <dl className="tw-mt-4 tw-grid tw-gap-2 tw-text-sm sm:tw-grid-cols-2">
             {metadataRows.map((item) => (
               <div key={item.key}>
-                <dt className="tw-text-iron-500">{item.label}</dt>
-                <dd className="tw-break-all tw-text-iron-100">{item.value}</dd>
+                <dt className={`${theme.label}`}>{item.label}</dt>
+                <dd className={`tw-break-all ${theme.value}`}>{item.value}</dd>
               </div>
             ))}
           </dl>
@@ -206,6 +240,7 @@ export function InteractiveFallback({
           </p>
           {href ? (
             <CmsLink
+              context={context}
               className="tw-mt-4 tw-inline-flex tw-min-h-10 tw-items-center tw-border tw-border-solid tw-border-iron-700 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-border-primary-400 hover:tw-text-white"
               href={href}
             >

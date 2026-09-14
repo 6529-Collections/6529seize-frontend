@@ -20,7 +20,7 @@ Use this page when:
 - Collection art route: `/nextgen/collection/{collection}/art`
 - Token media routes:
   `/nextgen/token/{token}` and
-  `/nextgen/token/{token}/{provenance|display-center|rarity}`
+  `/nextgen/token/{token}/{listings-and-offers|provenance|display-center|rarity}`
 
 ## Quick Checks (Do in Order)
 

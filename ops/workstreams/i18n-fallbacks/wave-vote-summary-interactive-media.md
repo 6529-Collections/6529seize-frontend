@@ -2,9 +2,10 @@
 
 - Routes/components: `/waves/{waveId}` leaderboard vote summaries and shared
   `SandboxedExternalIframe` media banners.
-- Untranslated surface: `waves.leaderboard.voteSummary.*` labels and
-  `media.interactive.untrustedContent`. Source hostnames, URLs, profile handles,
-  and artwork titles remain authored or technical data.
+- Untranslated surface: `waves.leaderboard.voteSummary.*` and
+  `waves.voteInsights.*` labels, including current-vote loading, error, and
+  retry states, plus `media.interactive.untrustedContent`. Source hostnames,
+  URLs, profile handles, and artwork titles remain authored or technical data.
 - Current fallback: these messages resolve through `t()` or `tRich()` with the
   browser locale. `en-GB`, `fr-FR`, `es-ES`, and `de-DE` fall back to the reviewed
   `en-US` source messages. Summary vote values use locale-aware formatting;

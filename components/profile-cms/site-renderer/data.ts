@@ -7,7 +7,10 @@ import type {
   CmsNavigationItemV1,
   CmsPackageV1,
 } from "@/lib/profile-cms/protocol/v1";
-import { getCmsPagePath } from "@/lib/profile-cms/runtime/routes";
+import {
+  getCmsPublicPagePath,
+  getCmsPublicPath,
+} from "@/lib/profile-cms/runtime/routes";
 import { resolveCmsUri } from "@/lib/profile-cms/runtime/uri";
 import type {
   CmsPackageSignatureV1,
@@ -77,11 +80,13 @@ export function formatSourceSnapshot(
 
 export function createRendererContext(
   cmsPackage: CmsPackageV1,
-  locale: SupportedLocale
+  locale: SupportedLocale,
+  onNavigatePage?: (pageId: string) => void
 ): RendererContext {
   return {
     cmsPackage,
     locale,
+    onNavigatePage,
     assetMap: new Map(
       cmsPackage.payload.assets.map((asset) => [asset.id, asset])
     ),
@@ -115,10 +120,11 @@ export function getNavigationHref(
   context: RendererContext
 ): string | null {
   if (item.page_id) {
-    return getCmsPagePath(context.cmsPackage, item.page_id);
+    return getCmsPublicPagePath(context.cmsPackage, item.page_id);
   }
 
-  return resolveCmsUri(item.url, { allowRelative: true });
+  const href = resolveCmsUri(item.url, { allowRelative: true });
+  return href ? getCmsPublicPath(context.cmsPackage, href) : null;
 }
 
 export function getAsset(

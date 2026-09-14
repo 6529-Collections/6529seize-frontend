@@ -58,8 +58,8 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
   return (
     <LazyMotion features={domAnimation}>
       <div>
-        {/* Only a rendered vote ribbon uses the compact header spacing. */}
-        <div className="tw-group tw-relative tw-isolate tw-flex tw-min-h-[3.25rem] tw-items-center tw-gap-3 tw-bg-iron-950 tw-px-4 tw-py-2.5 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-900 motion-reduce:tw-transition-none [&:has(+figure)]:tw-min-h-11 [&:has(+figure)]:tw-pb-1">
+        {/* Only a rendered vote summary uses the compact header spacing. */}
+        <div className="tw-group tw-relative tw-isolate tw-flex tw-min-h-[3.25rem] tw-items-center tw-gap-3 tw-bg-iron-950 tw-px-4 tw-py-2.5 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-900 motion-reduce:tw-transition-none [&:has(+[data-vote-summary])]:tw-min-h-11 [&:has(+[data-vote-summary])]:tw-pb-1">
           {/* The full-row toggle and download remain separate native buttons. */}
           <button
             type="button"

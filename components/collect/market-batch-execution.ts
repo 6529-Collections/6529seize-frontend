@@ -1,0 +1,266 @@
+import type { ApiMarketBatchOperation } from "@/generated/models/ApiMarketBatchOperation";
+import type { ApiMarketBatchPrepareRequest } from "@/generated/models/ApiMarketBatchPrepareRequest";
+import {
+  fetchMarketBatchCapabilities,
+  fetchMarketBatch,
+  continueMarketBatch,
+  submitMarketBatchTransaction,
+} from "@/services/api/market-batch-api";
+import {
+  getAddress,
+  type Hex,
+  type PublicClient,
+  type WalletClient,
+} from "viem";
+import { mainnet } from "viem/chains";
+import {
+  validateMarketBatchOperation,
+  validateMarketBatchOperationForRefresh,
+  marketBatchReviewChange,
+  marketBatchLiteral,
+} from "./market-batch-validation";
+import {
+  batchSendAttempt,
+  clearResolvedBatchSend,
+  sendReviewedMarketBatch,
+} from "./market-batch-send";
+import { readMarketBatch, saveMarketBatch } from "./market-batch-storage";
+import { verifyRecoveredMarketTransaction } from "./market-send-recovery";
+import { withMarketOperationLock } from "./market-operation-lock";
+import {
+  findResumableMarketBatch,
+  marketBatchProfileLock,
+} from "./market-batch-resume";
+import type { CollectTradeStage } from "./collect.types";
+import { acknowledgeMarketSubmission } from "./market-known-submission";
+import { knownMarketTransactionHash } from "./market-known-transaction";
+import { reviewedMarketGasLimits } from "./market-review-caps";
+
+interface Execution {
+  readonly client: PublicClient;
+  readonly wallet: WalletClient;
+  readonly operation: ApiMarketBatchOperation;
+  readonly expected: ApiMarketBatchPrepareRequest;
+  readonly profileWallets: readonly string[];
+  readonly assertConnection: () => void;
+  readonly onOperation: (operation: ApiMarketBatchOperation) => void;
+  readonly onStage?: (stage: CollectTradeStage) => void;
+  readonly onKnownHash?: (hash: Hex) => void;
+  readonly onReviewChange?: (
+    change: "terms" | "gas",
+    shown: ApiMarketBatchOperation,
+    fresh: ApiMarketBatchOperation
+  ) => void;
+}
+function assertIdentity(
+  operation: ApiMarketBatchOperation,
+  prior: ApiMarketBatchOperation
+) {
+  if (
+    operation.id !== prior.id ||
+    operation.profile_id !== prior.profile_id ||
+    operation.wallet.toLowerCase() !== prior.wallet.toLowerCase()
+  )
+    throw new Error("MARKET_REVIEW_MISMATCH");
+}
+export async function recoverMarketBatch(options: {
+  readonly client: PublicClient;
+  readonly operation: ApiMarketBatchOperation;
+  readonly hash: string;
+  readonly assertConnection: () => void;
+  readonly onOperation: (operation: ApiMarketBatchOperation) => void;
+}) {
+  const { client, operation, hash, assertConnection, onOperation } = options;
+  assertConnection();
+  const current = await fetchMarketBatch(operation.id);
+  assertIdentity(current, operation);
+  assertConnection();
+  const attempt = batchSendAttempt(current);
+  if (!attempt) {
+    onOperation(current);
+    return;
+  }
+  const verified = await verifyRecoveredMarketTransaction(
+    client,
+    current,
+    attempt,
+    hash
+  );
+  assertConnection();
+  const saved = readMarketBatch(current.profile_id, current.id);
+  if (saved)
+    saveMarketBatch(current.profile_id, current.id, {
+      request: saved.request,
+      sendAttempt: attempt,
+      transactionHash: verified,
+    });
+  const resolved = await submitMarketBatchTransaction(current.id, {
+    transaction_hash: verified,
+  });
+  assertIdentity(resolved, operation);
+  assertConnection();
+  clearResolvedBatchSend(resolved);
+  onOperation(resolved);
+}
+
+async function send(options: Execution) {
+  const {
+    client,
+    wallet,
+    operation,
+    expected,
+    profileWallets,
+    assertConnection,
+    onOperation,
+  } = options;
+  if ((await client.getChainId()) !== 1 || (await wallet.getChainId()) !== 1)
+    throw new Error("MARKET_WRONG_CHAIN");
+  const accounts = await wallet.getAddresses();
+  if (
+    !accounts.some(
+      (account) => account.toLowerCase() === expected.wallet.toLowerCase()
+    )
+  )
+    throw new Error("MARKET_CONNECTION_CHANGED");
+  const account = getAddress(expected.wallet);
+  const code = await client.getCode({ address: account });
+  if (code && code !== "0x") throw new Error("MARKET_UNSUPPORTED_WALLET");
+  validateMarketBatchOperation(operation, expected, profileWallets);
+  const transaction = operation.transaction;
+  if (!transaction) throw new Error("MARKET_REVIEW_MISMATCH");
+  const request = {
+    account,
+    to: getAddress(transaction.to),
+    value: BigInt(transaction.value),
+    data: transaction.data as Hex,
+    chain: mainnet,
+  };
+  await client.call(request);
+  const estimated = await client.estimateGas(request);
+  const fees = await reviewedMarketGasLimits(client, transaction, estimated);
+  assertConnection();
+  validateMarketBatchOperation(operation, expected, profileWallets);
+  const result = await sendReviewedMarketBatch({
+    operation,
+    expected,
+    profileWallets,
+    assertConnection,
+    onOperation,
+    send: () => {
+      options.onStage?.("wallet");
+      return wallet.sendTransaction({
+        ...request,
+        ...fees,
+      });
+    },
+  });
+  options.onKnownHash?.(result.hash);
+  options.onStage?.("submitted");
+  const submitted = await acknowledgeMarketSubmission(
+    () =>
+      submitMarketBatchTransaction(operation.id, {
+        transaction_hash: result.hash,
+      }),
+    () => {
+      options.onStage?.("reconciling");
+      assertConnection();
+    }
+  );
+  assertIdentity(submitted, operation);
+  assertConnection();
+  onOperation(submitted);
+}
+
+/** Explicit review confirmation is the only entry point that can request a wallet transaction. */
+export async function confirmMarketBatch(
+  options: Execution
+): Promise<"UPDATED_REVIEW" | "COMPLETE"> {
+  return withMarketOperationLock(
+    marketBatchProfileLock(options.expected.profile_id),
+    () =>
+      withMarketOperationLock(options.operation.id, async () => {
+        const { operation, expected, assertConnection, onOperation, client } =
+          options;
+        assertConnection();
+        if (
+          await findResumableMarketBatch(expected.profile_id, expected.items, {
+            excludeId: operation.id,
+            includeReview: false,
+          })
+        )
+          throw new Error("MARKET_BROADCAST_UNKNOWN");
+        assertConnection();
+        const capability = await fetchMarketBatchCapabilities();
+        assertConnection();
+        if (
+          capability.available !== true ||
+          !marketBatchLiteral(capability.execution_policy, "ALL_OR_REVERT") ||
+          !marketBatchLiteral(capability.currency, expected.currency) ||
+          capability.requires_complete_simulation !== true
+        )
+          throw new Error("MARKET_ACTION_DISABLED");
+        let current = await fetchMarketBatch(operation.id);
+        assertConnection();
+        assertIdentity(current, operation);
+        clearResolvedBatchSend(current);
+        const prior = readMarketBatch(expected.profile_id, current.id);
+        const attempt = batchSendAttempt(current);
+        const knownHash = knownMarketTransactionHash(current, attempt, prior);
+        if (knownHash) {
+          options.onKnownHash?.(knownHash);
+          options.onStage?.("reconciling");
+          await recoverMarketBatch({
+            client,
+            operation: current,
+            hash: knownHash,
+            assertConnection,
+            onOperation,
+          });
+          return "COMPLETE";
+        }
+        if (attempt) throw new Error("MARKET_BROADCAST_UNKNOWN");
+        if (!marketBatchLiteral(current.state, "REVIEW")) {
+          onOperation(current);
+          return "COMPLETE";
+        }
+        validateMarketBatchOperationForRefresh(
+          operation,
+          expected,
+          options.profileWallets
+        );
+        validateMarketBatchOperationForRefresh(
+          current,
+          expected,
+          options.profileWallets
+        );
+        assertConnection();
+        const refreshed = await continueMarketBatch(current.id);
+        assertConnection();
+        assertIdentity(refreshed, operation);
+        if (batchSendAttempt(refreshed))
+          throw new Error("MARKET_BROADCAST_UNKNOWN");
+        validateMarketBatchOperation(
+          refreshed,
+          expected,
+          options.profileWallets
+        );
+        const change = marketBatchReviewChange(operation, refreshed);
+        if (change) {
+          onOperation(refreshed);
+          options.onReviewChange?.(change, operation, refreshed);
+          return "UPDATED_REVIEW";
+        }
+        current = refreshed;
+        onOperation(current);
+        if (!marketBatchLiteral(current.state, "REVIEW")) return "COMPLETE";
+        if (
+          !saveMarketBatch(expected.profile_id, current.id, {
+            request: expected,
+          })
+        )
+          throw new Error("MARKET_RECOVERY_STORAGE_UNAVAILABLE");
+        await send({ ...options, operation: current });
+        return "COMPLETE";
+      })
+  );
+}

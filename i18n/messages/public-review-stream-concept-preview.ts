@@ -5,7 +5,7 @@ export const PUBLIC_REVIEW_STREAM_CONCEPT_PREVIEW_MESSAGES = {
   "publicReview.conceptPreview.description":
     "Explore an intended release flow, from the artist's plan to a lasting record. The complete workflow is not built yet.",
   "publicReview.conceptPreview.disclaimer":
-    "Nothing here buys, signs, uploads, or saves anything.",
+    "This preview does not collect, sign, upload, or save anything.",
   "publicReview.conceptPreview.navigationLabel":
     "Choose a view in the Stream artwork concept preview",
   "publicReview.conceptPreview.stepStatus":
@@ -39,7 +39,7 @@ export const PUBLIC_REVIEW_STREAM_CONCEPT_PREVIEW_MESSAGES = {
   "publicReview.conceptPreview.collector.heading":
     "The collector sees the same plan",
   "publicReview.conceptPreview.collector.description":
-    "Before buying, the collector sees what they receive, the price, and where the money goes.",
+    "Before collecting, the collector sees what they receive, the price, and where the money goes.",
   "publicReview.conceptPreview.collector.takeaway":
     "Signal / No. 1 · {current} of {total} · {price} ETH",
   "publicReview.conceptPreview.history.heading": "The history stays clear",

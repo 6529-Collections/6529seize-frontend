@@ -56,7 +56,8 @@ describe("profile CMS builder route", () => {
     });
   });
 
-  it("is hidden behind a feature flag", async () => {
+  it("returns not found when explicitly disabled", async () => {
+    publicEnv.PROFILE_CMS_BUILDER_ENABLED = "false";
     await expect(
       ProfileCmsBuilderPage({
         params: Promise.resolve({ user: "punk6529" }),
@@ -64,9 +65,7 @@ describe("profile CMS builder route", () => {
     ).rejects.toThrow("NEXT_NOT_FOUND");
   });
 
-  it("renders the builder for a profile handle when enabled", async () => {
-    publicEnv.PROFILE_CMS_BUILDER_ENABLED = "true";
-
+  it("renders the direct builder route by default", async () => {
     const page = await ProfileCmsBuilderPage({
       params: Promise.resolve({ user: "punk6529" }),
     });

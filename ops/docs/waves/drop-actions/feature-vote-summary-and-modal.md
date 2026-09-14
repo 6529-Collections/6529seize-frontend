@@ -69,7 +69,9 @@ The ribbon's negative and positive widths reflect the amounts on each side,
 before they offset each other. Individual segments show the highlighted
 voters (up to three per direction), with a striped `Others` segment when there
 is a remainder. `Others` represents the remaining allocation amount on that
-side, not a voter count.
+side, not a voter count. When voter profiles are only partly available, the
+authoritative side total still renders and the unenriched amount is included in
+`Others`.
 
 These figures describe current allocations, not vote-edit history. In a wave
 with time weighting, their raw net can differ from the calculated score and
@@ -114,8 +116,11 @@ ranking, and voting rules retain their usual meaning.
 - If only one direction has votes, only that direction has a largest-voter
   highlight and a sign beside the ribbon. No opposing voter or sign is shown
   for an empty side.
-- Missing or unavailable distribution data hides this optional section. Its
-  absence does not mean all votes are zero or that no negative votes exist.
+- The first distribution request shows a compact loading placeholder that keeps
+  the `Top voters` section stable.
+- Missing, invalid, or unavailable distribution data shows a compact recovery
+  message with `Retry`. It does not mean all votes are zero or that no negative
+  votes exist.
 
 ## Failure and Recovery
 
@@ -124,7 +129,8 @@ ranking, and voting rules retain their usual meaning.
 - If vote submit request fails, voting stays open and an error toast is shown.
 - Closing voting only closes the voting surface; single-drop view stays open.
 - If the optional distribution cannot be loaded, the drop and its normal
-  voting controls remain usable. Refresh the page to request current data.
+  voting controls remain usable. Select `Retry` to request current data again.
+- If a background refresh fails, the last valid distribution remains visible.
 
 ## Limitations / Notes
 

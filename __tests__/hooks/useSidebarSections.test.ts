@@ -17,6 +17,7 @@ describe("useSidebarSections", () => {
     );
     expect(nftsSection?.name).toBe("NFTs");
     expect(nftsSection?.items.map((item) => item.name)).toEqual([
+      "Collect",
       "The Memes",
       "6529 Gradient",
       "NextGen",
@@ -59,6 +60,7 @@ describe("useSidebarSections", () => {
       (section) => section.key === "nfts"
     );
     expect(nftsSection?.items.map((item) => item.name)).toEqual([
+      "Collect",
       "The Memes",
       "6529 Gradient",
       "NextGen",
@@ -68,7 +70,7 @@ describe("useSidebarSections", () => {
       "NFT Activity",
       "Memes Calendar",
     ]);
-    expect(nftsSection?.items[5]).toEqual({
+    expect(nftsSection?.items[6]).toEqual({
       name: "6529 Stream — Review",
       href: "/reviews/6529-stream",
       activePathPrefixes: ["/reviews/6529-stream/"],

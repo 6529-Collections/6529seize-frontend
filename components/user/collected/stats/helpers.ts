@@ -1,6 +1,6 @@
 import {
   getCollectedStatsIdentityKey,
-  getStatsPath,
+  getProfileStatsPath,
 } from "@/components/user/stats/userPageStats.helpers";
 import { CollectedCollectionType } from "@/entities/IProfile";
 import type { ApiCollectedStats } from "@/generated/models/ApiCollectedStats";
@@ -18,23 +18,19 @@ import type {
 export const isAbortError = (error: unknown): boolean =>
   error instanceof Error && error.name === "AbortError";
 
-export const getSafeStatsPath = (
-  profile: ApiIdentity,
-  activeAddress: string | null
-): string | null => {
+export const getSafeStatsPath = (profile: ApiIdentity): string | null => {
   try {
-    return getStatsPath(profile, activeAddress);
+    return getProfileStatsPath(profile);
   } catch {
     return null;
   }
 };
 
 export const getSafeCollectedStatsIdentityKey = (
-  profile: ApiIdentity,
-  activeAddress: string | null
+  profile: ApiIdentity
 ): string | null => {
   try {
-    return getCollectedStatsIdentityKey(profile, activeAddress);
+    return getCollectedStatsIdentityKey(profile);
   } catch {
     return null;
   }

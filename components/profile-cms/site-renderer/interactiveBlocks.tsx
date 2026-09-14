@@ -6,7 +6,7 @@ import type {
 } from "@/components/profile-cms/CmsThreeDTypes";
 import { t } from "@/i18n/messages";
 import type { CmsAssetV1, CmsBlockV1 } from "@/lib/profile-cms/protocol/v1";
-import { getCmsPagePath } from "@/lib/profile-cms/runtime/routes";
+import { getCmsPublicPagePath } from "@/lib/profile-cms/runtime/routes";
 import { getCmsPerformanceBudgetBytes } from "@/lib/profile-cms/runtime/threeD";
 import {
   getAsset,
@@ -154,7 +154,7 @@ export function RoomViewerBlock({
   const room = context.roomMap.get(getString(block, "room_id") ?? "");
   const poster = getAsset(context, room?.poster_asset_id);
   const fallbackHref = room?.fallback_page_id
-    ? getCmsPagePath(context.cmsPackage, room.fallback_page_id)
+    ? getCmsPublicPagePath(context.cmsPackage, room.fallback_page_id)
     : null;
   const placements =
     room?.placements
@@ -199,7 +199,7 @@ function toThreeDPlacement(
   context: RendererContext
 ): CmsThreeDPlacement | null {
   const asset = toThreeDAsset(getAsset(context, placement.asset_id));
-  const detailHref = getCmsPagePath(
+  const detailHref = getCmsPublicPagePath(
     context.cmsPackage,
     placement.detail_page_id
   );

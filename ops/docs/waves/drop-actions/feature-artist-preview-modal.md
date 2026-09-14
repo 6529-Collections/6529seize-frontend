@@ -66,6 +66,9 @@ Badge state decides which section opens first.
 - In compact + small-screen thread layouts, opening a winner card through drop
   context also closes the chat column.
 
+After opening a submission or winning drop, use `Share` in the single-drop
+header to share or copy its link. See [Wave Drop Open and Copy Links](feature-open-and-copy-links.md).
+
 ## Edge Cases
 
 - Tabs are hidden when only one dataset exists.

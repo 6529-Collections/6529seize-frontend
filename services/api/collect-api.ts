@@ -1,0 +1,93 @@
+import type { ApiCollectAssetsPage } from "@/generated/models/ApiCollectAssetsPage";
+import type { ApiCollectAnalysis } from "@/generated/models/ApiCollectAnalysis";
+import type { ApiCollectAnalysisRequest } from "@/generated/models/ApiCollectAnalysisRequest";
+import { ApiCollectKind } from "@/generated/models/ApiCollectKind";
+import type { ApiCollectCapabilities } from "@/generated/models/ApiCollectCapabilities";
+import type { ApiCollectCatalog } from "@/generated/models/ApiCollectCatalog";
+import type { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import type { ApiCollectPlanningFamily } from "@/generated/models/ApiCollectPlanningFamily";
+import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
+import type { ApiCollectPlanRequest } from "@/generated/models/ApiCollectPlanRequest";
+import type { ApiCollectTdhRequest } from "@/generated/models/ApiCollectTdhRequest";
+import type { ApiCollectTdhProjection } from "@/generated/models/ApiCollectTdhProjection";
+import type { ApiCollectTdhListings } from "@/generated/models/ApiCollectTdhListings";
+import { commonApiFetch, commonApiPost } from "./common-api";
+
+export const fetchCollectAssetOwnership = (
+  profileId: string,
+  assetKey: string,
+  signal?: AbortSignal
+) =>
+  commonApiPost<ApiCollectAnalysisRequest, ApiCollectAnalysis>({
+    endpoint: "collect/analyses",
+    body: {
+      profile_id: profileId,
+      kind: ApiCollectKind.Exact,
+      assets: [{ asset_key: assetKey, quantity: "1" }],
+    },
+    signal,
+    errorMode: "structured",
+  });
+
+export const fetchCollectTdhListings = (
+  family: ApiCollectPlanningFamily,
+  cursor: string | null,
+  signal?: AbortSignal
+) =>
+  commonApiFetch<ApiCollectTdhListings>({
+    endpoint: "collect/tdh-listings",
+    params: { family, limit: "48", ...(cursor ? { cursor } : {}) },
+    signal,
+    cache: "no-store",
+    errorMode: "structured",
+  });
+
+export const fetchCollectCatalog = (signal?: AbortSignal) =>
+  commonApiFetch<ApiCollectCatalog>({
+    endpoint: "collect/catalog",
+    signal,
+    errorMode: "structured",
+  });
+export const fetchCollectCapabilities = (signal?: AbortSignal) =>
+  commonApiFetch<ApiCollectCapabilities>({
+    endpoint: "collect/capabilities",
+    signal,
+    cache: "no-store",
+    errorMode: "structured",
+  });
+export const fetchCollectAssets = (options: {
+  readonly family?: ApiCollectFamily;
+  readonly query: string;
+  readonly page: number;
+  readonly signal?: AbortSignal;
+}) =>
+  commonApiFetch<ApiCollectAssetsPage>({
+    endpoint: "collect/assets",
+    signal: options.signal,
+    errorMode: "structured",
+    params: {
+      ...(options.family !== undefined ? { family: options.family } : {}),
+      query: options.query,
+      page: String(options.page),
+      page_size: "24",
+    },
+  });
+export const createCollectPlan = (body: ApiCollectPlanRequest) =>
+  commonApiPost<ApiCollectPlanRequest, ApiCollectPlan>({
+    endpoint: "collect/plans",
+    body,
+    errorMode: "structured",
+  });
+export const advanceCollectPlan = (id: string, signal?: AbortSignal) =>
+  commonApiPost<Record<string, never>, ApiCollectPlan>({
+    endpoint: `collect/plans/${encodeURIComponent(id)}/advance`,
+    body: {},
+    signal,
+    errorMode: "structured",
+  });
+export const projectCollectTdh = (body: ApiCollectTdhRequest) =>
+  commonApiPost<ApiCollectTdhRequest, ApiCollectTdhProjection>({
+    endpoint: "collect/tdh-scenarios",
+    body,
+    errorMode: "structured",
+  });

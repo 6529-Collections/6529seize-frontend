@@ -447,7 +447,11 @@ export const getReactionErrorMessage = (
         return safeMessage;
       }
 
-      if (!hasNoStructuredReactionBody(structuredBody)) {
+      // Gateway 401 responses can contain plain text instead of JSON.
+      if (
+        !hasNoStructuredReactionBody(structuredBody) &&
+        structuredStatus !== 401
+      ) {
         return fallback;
       }
     }

@@ -2,12 +2,14 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { ActivityTypeItems } from "@/components/latest-activity/ActivityFilters";
+import { getActivityTypeItems } from "@/components/latest-activity/ActivityFilters";
 import { getMemeLabRouteHrefWithLocale } from "@/components/memelab/memeLabRouteParams";
 import { MemeLabCardVolumes } from "@/components/memelab/MemeLabCardHeader";
 import { MemeLabYourTransactionsTable } from "@/components/memelab/MemeLabYourCards";
 import NftNavigation from "@/components/nft-navigation/NftNavigation";
-import Pagination from "@/components/pagination/Pagination";
+import NftDetailTabSection from "@/components/nft-navigation/NftDetailTabSection";
+import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
+import NftMarketActivity from "@/components/nft-market-activity/NftMarketActivity";
 import {
   MemePageNavigationSkeleton,
   MemePageSkeleton,
@@ -28,7 +30,7 @@ import {
   getProfileCollectedReturnContext,
   PROFILE_COLLECTED_RETURN_PARAM,
 } from "@/helpers/profile-collected-navigation";
-import { TypeFilter } from "@/hooks/useActivityData";
+import { getNftActivityFilter, TypeFilter } from "@/hooks/useActivityData";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -49,9 +51,9 @@ import {
   parseMemeLabFocus,
   runAfterCriticalWork,
 } from "./MemeLabPage.utils";
+import { MemeLabAdditionalDetailsContent } from "./MemeLabAdditionalDetails";
 import { MemeLabPageTabs } from "./MemeLabPageTabs";
 import {
-  MemeLabActivityContent,
   MemeLabCollectors,
   MemeLabOverview,
   MemeLabReferences,
@@ -79,14 +81,11 @@ export default function MemeLabPageComponent({
   const { setTitle } = useTitle();
 
   const focusParam = searchParams.get("focus");
-  const defaultAdditionalDetailsOpen = focusParam === MEME_FOCUS.THE_ART;
   const searchParamsString = useMemo(
     () => searchParams.toString(),
     [searchParams]
   );
   const routeTab = parseMemeLabFocus(focusParam) ?? MEME_FOCUS.LIVE;
-  const activitySectionRef = useRef<HTMLElement | null>(null);
-  const loadedActivityKeyRef = useRef<string | null>(null);
   const loadedHistoryNftIdRef = useRef<string | null>(null);
 
   const [nft, setNft] = useState<LabNFT>();
@@ -95,20 +94,16 @@ export default function MemeLabPageComponent({
   const [nftLoading, setNftLoading] = useState(true);
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [activity, setActivity] = useState<Transaction[]>([]);
+  const [marketRefreshVersion, setMarketRefreshVersion] = useState(0);
 
   const [userLoaded, setUserLoaded] = useState(false);
   const [originalMemesLoaded, setOriginalMemesLoaded] = useState(false);
-
-  const [activityPage, setActivityPage] = useState(1);
-  const [activityTotalResults, setActivityTotalResults] = useState(0);
 
   const [nftHistory, setNftHistory] = useState<NFTHistory[]>([]);
 
   const [activityTypeFilter, setActivityTypeFilter] = useState<TypeFilter>(
     TypeFilter.ALL
   );
-  const [activityLoading, setActivityLoading] = useState(false);
   const hasUserCards = userLoaded && nftBalance > 0;
   const hasOwnershipContext = hasUserCards;
   const hasUserTransactions =
@@ -375,93 +370,6 @@ export default function MemeLabPageComponent({
   }, [nftId, connectedProfile]);
 
   useEffect(() => {
-    if (!nftId) {
-      return;
-    }
-
-    const activityKey = `${nftId}:${activityPage}:${activityTypeFilter}`;
-    if (loadedActivityKeyRef.current === activityKey) {
-      return;
-    }
-
-    let cancelled = false;
-    const abortController = new AbortController();
-    const { signal } = abortController;
-
-    const loadActivity = () => {
-      if (cancelled) {
-        return;
-      }
-
-      setActivity([]);
-      setActivityTotalResults(0);
-      setActivityLoading(true);
-
-      let url = `${publicEnv.API_ENDPOINT}/api/transactions_memelab?id=${nftId}&page_size=${ACTIVITY_PAGE_SIZE}&page=${activityPage}`;
-      switch (activityTypeFilter) {
-        case TypeFilter.SALES:
-          url += `&filter=sales`;
-          break;
-        case TypeFilter.TRANSFERS:
-          url += `&filter=transfers`;
-          break;
-        case TypeFilter.AIRDROPS:
-          url += `&filter=airdrops`;
-          break;
-        case TypeFilter.MINTS:
-          url += `&filter=mints`;
-          break;
-        case TypeFilter.BURNS:
-          url += `&filter=burns`;
-          break;
-      }
-
-      fetchUrl(url, { signal })
-        .then((response: DBResponse<Transaction>) => {
-          if (cancelled) {
-            return;
-          }
-          setActivityTotalResults(response.count);
-          setActivity(response.data);
-          loadedActivityKeyRef.current = activityKey;
-        })
-        .catch((error) => {
-          if (cancelled || isAbortError(error)) {
-            return;
-          }
-          console.error(
-            `Failed to fetch Meme Lab activity for ${nftId}`,
-            error
-          );
-          setActivityTotalResults(0);
-          setActivity([]);
-          loadedActivityKeyRef.current = activityKey;
-        })
-        .finally(() => {
-          if (!cancelled) {
-            setActivityLoading(false);
-          }
-        });
-    };
-
-    const activityIsVisible =
-      activeTab === MEME_FOCUS.HISTORY &&
-      activeHistoryTab === MEME_LAB_HISTORY_TAB.ACTIVITY;
-    let cancelScheduledLoad: () => void = () => undefined;
-    if (activityIsVisible) {
-      loadActivity();
-    } else {
-      cancelScheduledLoad = runAfterCriticalWork(loadActivity);
-    }
-
-    return () => {
-      cancelled = true;
-      cancelScheduledLoad();
-      abortController.abort();
-    };
-  }, [activeHistoryTab, activeTab, nftId, activityPage, activityTypeFilter]);
-
-  useEffect(() => {
     if (!nftId || loadedHistoryNftIdRef.current === nftId) {
       return;
     }
@@ -516,25 +424,6 @@ export default function MemeLabPageComponent({
     };
   }, [activeHistoryTab, activeTab, nftId]);
 
-  const activityContent = useMemo(
-    () => (
-      <MemeLabActivityContent
-        activity={activity}
-        activityLoading={activityLoading}
-        nft={nft}
-      />
-    ),
-    [activity, activityLoading, nft]
-  );
-
-  function handleActivityPageChange(newPage: number) {
-    setActivityPage(newPage);
-    activitySectionRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }
-
   function printHistoryTabs() {
     if (!nft || activeTab !== MEME_FOCUS.HISTORY) {
       return null;
@@ -582,10 +471,10 @@ export default function MemeLabPageComponent({
 
     if (activeTab === MEME_FOCUS.LIVE) {
       return (
-        <MemeLabOverview
-          nft={nft}
-          defaultAdditionalDetailsOpen={defaultAdditionalDetailsOpen}
-        />
+        <>
+          <MemeLabOverview nft={nft} />
+          {nft && <MemeLabAdditionalDetailsContent nft={nft} />}
+        </>
       );
     }
 
@@ -614,7 +503,6 @@ export default function MemeLabPageComponent({
       >
         {nft && <MemeLabCardVolumes nft={nft} />}
         <section
-          ref={activitySectionRef}
           aria-labelledby="meme-lab-card-activity-heading"
           className="tw-scroll-mt-24"
         >
@@ -627,31 +515,27 @@ export default function MemeLabPageComponent({
             </h3>
             <div className="tw-w-full tw-shrink-0 md:tw-w-72">
               <CommonDropdown
-                items={ActivityTypeItems}
+                items={getActivityTypeItems(locale)}
                 activeItem={activityTypeFilter}
                 filterLabel={t(
                   locale,
                   "memeLab.detail.activity.transactionType"
                 )}
                 setSelected={(filter) => {
-                  setActivityPage(1);
                   setActivityTypeFilter(filter);
                 }}
               />
             </div>
           </div>
-          {activityContent}
+          <NftMarketActivity
+            contract={MEMELAB_CONTRACT}
+            tokenId={nftId}
+            filter={getNftActivityFilter(activityTypeFilter)}
+            pageSize={ACTIVITY_PAGE_SIZE}
+            compact
+            locale={locale}
+          />
         </section>
-        {activity.length > 0 && !activityLoading && (
-          <div className="tw-flex tw-justify-center tw-pb-3 tw-pt-4">
-            <Pagination
-              page={activityPage}
-              pageSize={ACTIVITY_PAGE_SIZE}
-              totalResults={activityTotalResults}
-              setPage={handleActivityPageChange}
-            />
-          </div>
-        )}
       </section>
     );
   }
@@ -753,15 +637,38 @@ export default function MemeLabPageComponent({
               locale={locale}
               hasOwnershipContext={hasOwnershipContext}
               nftBalance={nftBalance}
+              onMarketChange={() =>
+                setMarketRefreshVersion((version) => version + 1)
+              }
             />
-            <MemeLabPageTabs
-              nft={nft}
-              activeTab={activeTab}
+            <NftDetailTabSection
+              activeFocus={routeFocus}
               locale={locale}
-              onSelectTab={setActiveMemeLabTab}
-            />
-            {printHistoryTabs()}
-            {printContent()}
+              persistentContent={
+                <MarketDepthPanel
+                  contract={MEMELAB_CONTRACT}
+                  tokenId={nft.id}
+                  locale={locale}
+                  embedded
+                  refreshKey={marketRefreshVersion}
+                  active={activeTab === MEME_FOCUS.MARKET}
+                  onReveal={() => setActiveMemeLabTab(MEME_FOCUS.MARKET)}
+                />
+              }
+              navigation={
+                <>
+                  <MemeLabPageTabs
+                    nft={nft}
+                    activeTab={activeTab}
+                    locale={locale}
+                    onSelectTab={setActiveMemeLabTab}
+                  />
+                  {printHistoryTabs()}
+                </>
+              }
+            >
+              {printContent()}
+            </NftDetailTabSection>
           </>
         )}
       </div>

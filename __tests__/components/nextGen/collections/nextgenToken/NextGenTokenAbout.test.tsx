@@ -31,4 +31,10 @@ describe('NextGenTokenAbout', () => {
     await waitFor(() => screen.getByText('5'));
     expect(screen.getByText('5')).toBeInTheDocument();
   });
+
+  it("keeps collecting actions in the parent market section", async () => {
+    render(<NextgenTokenAbout token={token} collection={{ ...collection, id: 1 }} />);
+    expect(screen.queryByRole("link", { name: "Collect this artwork" })).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("5")).toBeInTheDocument());
+  });
 });

@@ -33,6 +33,12 @@ describe("public review editorial sections", () => {
   });
 
   it("keeps renamed review headings on their existing feedback anchors", () => {
+    expect(
+      getPublicReviewHeadingId("Minting logic and its blocked connection")
+    ).toBe("the-built-manager-path");
+    expect(
+      getPublicReviewHeadingId("How marketplaces learn about changes")
+    ).toBe("refresh-events-are-now-built");
     expect(getPublicReviewHeadingId("What the signed details contain")).toBe(
       "the-exact-authorization"
     );

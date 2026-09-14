@@ -1,11 +1,3 @@
-import type { Suggestion } from "@/types/nft";
-
-export type SearchContractsResult = {
-  items: Suggestion[];
-  hiddenCount: number;
-  nextPageKey?: string | undefined;
-};
-
 export type AlchemyContractMetadata = {
   address?: string | null | undefined;
   name?: string | null | undefined;
@@ -55,11 +47,6 @@ export type AlchemyContractResult = {
   openSeaMetadata?: AlchemyOpenSeaMetadata | undefined;
   openseaMetadata?: AlchemyOpenSeaMetadata | undefined;
 } & AlchemyContractMetadata;
-
-export type AlchemySearchResponse = {
-  contracts?: AlchemyContractResult[] | undefined;
-  pageKey?: string | undefined;
-};
 
 export type AlchemyContractMetadataResponse = AlchemyContractMetadata & {
   contractMetadata?: AlchemyContractMetadata | null | undefined;

@@ -7,6 +7,8 @@ import {
 const MARKDOWN_DECORATION = new Set(["`", "*", "_", "~"]);
 const LETTER_OR_NUMBER = /[\p{Letter}\p{Number}]/u;
 const PUBLIC_REVIEW_HEADING_ID_ALIASES: Readonly<Record<string, string>> = {
+  "Minting logic and its blocked connection": "the-built-manager-path",
+  "How marketplaces learn about changes": "refresh-events-are-now-built",
   "What the signed details contain": "the-exact-authorization",
   "Who can approve mints and auctions": "eoa-and-contract-wallet-signers",
   "How a fixed-price mint works": "fixed-price-execution",

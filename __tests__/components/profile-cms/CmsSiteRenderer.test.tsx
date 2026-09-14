@@ -245,11 +245,11 @@ describe("CmsSiteRenderer", () => {
     expect(screen.getByText("Editorial grid")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "The Memes #1" })).toHaveAttribute(
       "href",
-      "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html"
+      "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1"
     );
     expect(screen.getByRole("link", { name: "The Memes #2" })).toHaveAttribute(
       "href",
-      "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/2/index.html"
+      "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/2"
     );
     expect(
       screen.getByRole("button", {
@@ -417,7 +417,7 @@ describe("CmsSiteRenderer", () => {
       screen.getByRole("link", { name: "Room Work Detail" })
     ).toHaveAttribute(
       "href",
-      "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html"
+      "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1"
     );
     expect(
       screen.getByAltText("Poster for a simple 3D exhibition room")

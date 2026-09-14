@@ -356,13 +356,6 @@ export function createAuthRequestActions({
     if (!validationResult.requiresSessionUpgrade) {
       setSignModalReason("auth");
       setSessionUpgradeRequired(false);
-      if (!canSignActiveWallet) {
-        setToast({
-          message: "Reconnect the wallet for this profile and try again.",
-          type: "error",
-        });
-        return false;
-      }
       if (!serverRejected) {
         const didInvalidate =
           await invalidateAuthSessionForAddress(walletAddress);
@@ -421,9 +414,7 @@ export function createAuthRequestActions({
     readonly role: string | null;
     readonly walletAddress: string;
   }): Promise<boolean> => {
-    const signingAuthRequestGuard =
-      createSigningAuthRequestGuard(authRequestGuard);
-    if (!signingAuthRequestGuard.isCurrent()) {
+    if (!authRequestGuard.isCurrent()) {
       return false;
     }
     if (!canSignActiveWallet) {
@@ -431,6 +422,11 @@ export function createAuthRequestActions({
         message: "Reconnect the wallet for this profile and try again.",
         type: "error",
       });
+      return false;
+    }
+    const signingAuthRequestGuard =
+      createSigningAuthRequestGuard(authRequestGuard);
+    if (!signingAuthRequestGuard.isCurrent()) {
       return false;
     }
 
@@ -471,6 +467,17 @@ export function createAuthRequestActions({
     readonly validationResult: AuthorizedWalletValidationResult;
     readonly walletAddress: string;
   }): Promise<boolean> => {
+    if (!authRequestGuard.isCurrent()) {
+      return false;
+    }
+    // A saved profile can need reconnection without an active signing chain.
+    if (!canSignActiveWallet && !validationResult.requiresSessionUpgrade) {
+      setToast({
+        message: "Reconnect the wallet for this profile and try again.",
+        type: "error",
+      });
+      return false;
+    }
     const signingAuthRequestGuard =
       createSigningAuthRequestGuard(authRequestGuard);
     if (!signingAuthRequestGuard.isCurrent()) {

@@ -139,7 +139,7 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
       name: triggerButtonName,
     });
 
-    expect(trigger).toHaveTextContent("21voters");
+    expect(trigger).toHaveTextContent("21 voters");
     expect(trigger).toHaveClass(
       "tw-rounded-md",
       "tw-border",
@@ -203,9 +203,7 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
       </div>
     );
 
-    await user.click(
-      screen.getByRole("button", { name: triggerButtonName })
-    );
+    await user.click(screen.getByRole("button", { name: triggerButtonName }));
 
     expect(parentClick).not.toHaveBeenCalled();
     expect(
@@ -243,18 +241,14 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
 
     render(<ParticipationDropVoteDetailsTrigger drop={drop} />);
 
-    await user.click(
-      screen.getByRole("button", { name: triggerButtonName })
-    );
+    await user.click(screen.getByRole("button", { name: triggerButtonName }));
     const dialog = await screen.findByRole("dialog", { name: "Votes" });
     await waitFor(() => expect(dialog).toHaveFocus());
 
     screen.getByRole("link", { name: "alice" }).focus();
     await user.tab();
 
-    expect(
-      screen.getByRole("button", { name: "Close votes" })
-    ).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Close votes" })).toHaveFocus();
   });
 
   it("closes with Escape and returns focus to the trigger", async () => {
@@ -331,9 +325,7 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
 
     render(<ParticipationDropVoteDetailsTrigger drop={drop} />);
 
-    await user.click(
-      screen.getByRole("button", { name: triggerButtonName })
-    );
+    await user.click(screen.getByRole("button", { name: triggerButtonName }));
 
     expect(screen.getByTestId("mobile-sheet")).toBeInTheDocument();
     expect(resizeObserver.observe).not.toHaveBeenCalled();
@@ -344,9 +336,7 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
 
     render(<ParticipationDropVoteDetailsTrigger drop={drop} />);
 
-    await user.click(
-      screen.getByRole("button", { name: triggerButtonName })
-    );
+    await user.click(screen.getByRole("button", { name: triggerButtonName }));
     expect(mockUseDropVoteLogs).toHaveBeenLastCalledWith({
       dropId: "drop-1",
       enabled: false,
@@ -375,9 +365,7 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
 
     render(<ParticipationDropVoteDetailsTrigger drop={drop} />);
 
-    await user.click(
-      screen.getByRole("button", { name: triggerButtonName })
-    );
+    await user.click(screen.getByRole("button", { name: triggerButtonName }));
 
     expect(screen.getByText("Could not load voters.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Try again" }));

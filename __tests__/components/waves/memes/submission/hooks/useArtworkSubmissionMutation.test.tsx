@@ -43,6 +43,7 @@ const submissionData = {
   } as TraitsData,
   isAdditionalActionPromised: false,
   waveId: "wave-1",
+  waveName: "The Memes Main Stage",
   termsOfService: "Terms",
 };
 
@@ -163,5 +164,11 @@ describe("useArtworkSubmissionMutation", () => {
       );
     });
     expect(signDrop).toHaveBeenCalledTimes(2);
+    expect(signDrop).toHaveBeenLastCalledWith({
+      drop: expect.objectContaining({ title: "Artwork", wave_id: "wave-1" }),
+      termsOfService: "Terms",
+      memesWave: { id: "wave-1", name: "The Memes Main Stage" },
+    });
+    expect(mockCommonApiPost).not.toHaveBeenCalled();
   });
 });

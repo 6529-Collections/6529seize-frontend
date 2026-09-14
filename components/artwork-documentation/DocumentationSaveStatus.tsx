@@ -6,6 +6,7 @@ import type {
   DocumentationDraftController,
 } from "@/lib/artwork-documentation/draft-controller";
 import { readAnswer } from "@/lib/artwork-documentation/answers";
+import { documentationErrorMessageKey } from "@/lib/artwork-documentation/errors";
 import { documentationFieldLabel } from "@/i18n/messages/artwork-documentation-fields";
 import { useAuth } from "@/components/auth/Auth";
 import { DocumentationValueSummary } from "./DocumentationSummary";
@@ -26,6 +27,7 @@ export default function DocumentationSaveStatus({
   const { requestAuth } = useAuth();
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(false);
+  const explanation = documentationErrorMessageKey(snapshot.errorCode);
   const recover = async (mine: boolean) => {
     setError(false);
     try {
@@ -54,14 +56,24 @@ export default function DocumentationSaveStatus({
     }
   };
   return (
-    <div className="tw-space-y-3">
+    <div
+      className={`tw-min-w-0 tw-max-w-full tw-space-y-3 ${["conflict", "offline", "invalid", "auth_expired"].includes(snapshot.state) ? "tw-basis-full" : ""}`}
+    >
       <p
         role="status"
         aria-live="polite"
-        className="tw-m-0 tw-text-sm tw-text-iron-300"
+        className="tw-m-0 tw-text-xs tw-leading-6 tw-text-iron-400"
       >
         {msg(`save.${snapshot.state}`)}
       </p>
+      {explanation && snapshot.state === "invalid" && (
+        <p
+          role="status"
+          className="tw-m-0 tw-text-sm tw-leading-7 tw-text-amber-200"
+        >
+          {msg(explanation)}
+        </p>
+      )}
       {snapshot.state === "conflict" && (
         <DocumentationNotice>
           <div className="tw-space-y-4">

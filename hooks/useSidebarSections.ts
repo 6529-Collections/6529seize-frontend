@@ -97,6 +97,11 @@ function getNftsSection(publicReviewsEnabled: boolean): SidebarSection {
     icon: CollectionsMenuIcon,
     items: [
       {
+        name: t(DEFAULT_LOCALE, "collect.menuLabel"),
+        href: "/collect",
+        activePathPrefixes: ["/collect/"],
+      },
+      {
         name: t(DEFAULT_LOCALE, "navigation.nfts.theMemes"),
         href: "/the-memes",
         activePathPrefixes: ["/the-memes/"],

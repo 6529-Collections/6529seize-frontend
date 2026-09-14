@@ -164,7 +164,6 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         <DetailRow label="Collector TDH">
           {numberWithCommas(Math.round((profile?.tdh ?? 0) * 100) / 100)}
         </DetailRow>
-
         {(!capacitor.isIos || country === "US") && (
           <DetailRow label="Listed" stacked>
             <div className="tw-mt-2 tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-3">

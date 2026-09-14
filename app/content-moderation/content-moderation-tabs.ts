@@ -1,5 +1,6 @@
 export const MODERATION_TAB_SLUGS = {
   OPEN: "open-reports",
+  CHECKS: "checks",
   RESOLVED: "resolved-reports",
   SUSPENDED: "suspended-profiles",
   BLOCK_ACTIVITY: "block-activity",

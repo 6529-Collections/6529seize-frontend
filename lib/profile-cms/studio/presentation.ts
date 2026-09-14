@@ -1,0 +1,139 @@
+import { z } from "zod";
+
+import type { CmsBlockV1, CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
+import { CMS_STUDIO_COLORWAYS, type CmsColorwayId } from "./palettes";
+
+export const CMS_STUDIO_LAYOUTS = [
+  "signature",
+  "editorial",
+  "gallery",
+  "journal",
+  "organization",
+  "fund",
+  "dao",
+] as const;
+export const CMS_STUDIO_PALETTES = ["ink", "paper", "stone", "night"] as const;
+export const CMS_STUDIO_TYPES = ["sans", "serif", "mono"] as const;
+export const CMS_STUDIO_DENSITIES = ["airy", "balanced", "compact"] as const;
+export const CMS_STUDIO_SPANS = [
+  "full",
+  "half",
+  "third",
+  "two_thirds",
+] as const;
+export const CMS_STUDIO_ROLES = ["body", "hero", "kicker", "card"] as const;
+export const CMS_STUDIO_DESIGNS = [
+  "personal-v2",
+  "artist-v2",
+  "collector-v2",
+  "meme-v2",
+  "organization-v2",
+  "fund-v2",
+] as const;
+export type CmsStudioDesign = (typeof CMS_STUDIO_DESIGNS)[number];
+export const CMS_APPROVED_VARIANTS = [
+  "hero",
+  "intro",
+  "feature",
+  "artwork",
+  "gallery",
+  "cards",
+  "stats",
+  "schedule",
+  "timeline",
+  "people",
+  "contact",
+  "ledger",
+  "note",
+  "project",
+  "poster",
+  "biography",
+  "list",
+] as const;
+
+export const cmsStudioThemeTokenPatchSchema = z
+  .object({
+    studio_revision: z.literal(1).optional(),
+    studio_layout: z.enum(CMS_STUDIO_LAYOUTS).optional(),
+    studio_palette: z.enum(CMS_STUDIO_PALETTES).optional(),
+    studio_type: z.enum(CMS_STUDIO_TYPES).optional(),
+    studio_density: z.enum(CMS_STUDIO_DENSITIES).optional(),
+    studio_design: z.enum(CMS_STUDIO_DESIGNS).optional(),
+    studio_colorway: z.enum(CMS_STUDIO_COLORWAYS).optional(),
+  })
+  .strict();
+
+export interface CmsStudioPresentation {
+  readonly studio_revision: 1;
+  readonly studio_layout: (typeof CMS_STUDIO_LAYOUTS)[number];
+  readonly studio_palette: (typeof CMS_STUDIO_PALETTES)[number];
+  readonly studio_type: (typeof CMS_STUDIO_TYPES)[number];
+  readonly studio_density: (typeof CMS_STUDIO_DENSITIES)[number];
+  readonly studio_design?: CmsStudioDesign;
+  readonly studio_colorway?: CmsColorwayId;
+}
+
+export const DEFAULT_CMS_STUDIO_PRESENTATION: CmsStudioPresentation = {
+  studio_revision: 1,
+  studio_layout: "editorial",
+  studio_palette: "ink",
+  studio_type: "sans",
+  studio_density: "balanced",
+};
+
+/** Only an explicit revision opts a publication into the studio presentation. */
+export function getCmsStudioPresentation(
+  cmsPackage: CmsPackageV1
+): CmsStudioPresentation | null {
+  const tokens = cmsPackage.site.theme.tokens;
+  if (tokens?.["studio_revision"] !== 1) return null;
+  const design = CMS_STUDIO_DESIGNS.find(
+    (value) => value === tokens["studio_design"]
+  );
+  const colorway = CMS_STUDIO_COLORWAYS.find(
+    (value) => value === tokens["studio_colorway"]
+  );
+  return {
+    studio_revision: 1,
+    studio_layout: readChoice(
+      CMS_STUDIO_LAYOUTS,
+      tokens["studio_layout"],
+      "editorial"
+    ),
+    studio_palette: readChoice(
+      CMS_STUDIO_PALETTES,
+      tokens["studio_palette"],
+      "ink"
+    ),
+    studio_type: readChoice(CMS_STUDIO_TYPES, tokens["studio_type"], "sans"),
+    studio_density: readChoice(
+      CMS_STUDIO_DENSITIES,
+      tokens["studio_density"],
+      "balanced"
+    ),
+    ...(design ? { studio_design: design } : {}),
+    ...(colorway ? { studio_colorway: colorway } : {}),
+  };
+}
+
+export function getCmsStudioBlockPresentation(block: CmsBlockV1) {
+  const value: unknown = (block as CmsBlockV1 & Record<string, unknown>)[
+    "presentation"
+  ];
+  const presentation: Record<string, unknown> =
+    value !== null && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+  return {
+    span: readChoice(CMS_STUDIO_SPANS, presentation["span"], "full"),
+    role: readChoice(CMS_STUDIO_ROLES, presentation["role"], "body"),
+  };
+}
+
+function readChoice<T extends string>(
+  choices: readonly T[],
+  value: unknown,
+  fallback: T
+): T {
+  return choices.find((choice) => choice === value) ?? fallback;
+}

@@ -1,0 +1,441 @@
+{
+  "revision": 1,
+  "assets": [
+    {
+      "title": "South Pier",
+      "asset": {
+        "id": "ada-harbour-1",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/approved/ada-harbour-1.webp",
+        "content_hash": "sha256:4a51bebe7f7e26d7f8e20404e4e552ac52ba7fc24cf472961fe2e3413032cfc5",
+        "mime_type": "image/webp",
+        "width": 1440,
+        "height": 1080,
+        "file_size_bytes": 362620,
+        "alt_text": "South Pier, from Harbour Studies",
+        "rights": "Original example artwork generated for the 6529 template library. Ada Mercer, her biography, works, exhibitions and edition offers are fictional.",
+        "roles": ["original", "grid", "detail", "fullscreen"]
+      },
+      "provenance": {
+        "kind": "generated_example",
+        "original_hash": "sha256:a6c18ea2fef12ba900bc1a353cc985bf101f07c343915925926e8a0422b162c2",
+        "original_mime_type": "image/png",
+        "original_bytes": 3028495,
+        "transform": {
+          "format": "webp",
+          "max_width": 1440,
+          "quality": 86,
+          "without_enlargement": true,
+          "composition": "preserved"
+        }
+      }
+    },
+    {
+      "title": "Turning Basin",
+      "asset": {
+        "id": "ada-harbour-2",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/approved/ada-harbour-2.webp",
+        "content_hash": "sha256:2ffd298411bd39709b5c1e750a2150cfe6d4c8705b59b8e868edcd1a20866b37",
+        "mime_type": "image/webp",
+        "width": 1440,
+        "height": 1080,
+        "file_size_bytes": 311646,
+        "alt_text": "Turning Basin by Ada Mercer",
+        "rights": "Original example artwork generated for the 6529 template library. Ada Mercer, her biography, works, exhibitions and edition offers are fictional.",
+        "roles": ["original", "grid", "detail", "fullscreen"]
+      },
+      "provenance": {
+        "kind": "generated_example",
+        "original_hash": "sha256:fbbdfd2d605918d7f5b5e92fe0e5edadfdb6d928ca4b45e8a12d7ab65a46e826",
+        "original_mime_type": "image/png",
+        "original_bytes": 2924620,
+        "transform": {
+          "format": "webp",
+          "max_width": 1440,
+          "quality": 86,
+          "without_enlargement": true,
+          "composition": "preserved"
+        }
+      }
+    },
+    {
+      "title": "Tide Table",
+      "asset": {
+        "id": "ada-harbour-3",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/approved/ada-harbour-3.webp",
+        "content_hash": "sha256:7c6d6e9551adbc7b981eeddf7fdffc84c17a4877fc82e8f3f3b0c1c973454858",
+        "mime_type": "image/webp",
+        "width": 1440,
+        "height": 1080,
+        "file_size_bytes": 459030,
+        "alt_text": "Tide Table by Ada Mercer",
+        "rights": "Original example artwork generated for the 6529 template library. Ada Mercer, her biography, works, exhibitions and edition offers are fictional.",
+        "roles": ["original", "grid", "detail", "fullscreen"]
+      },
+      "provenance": {
+        "kind": "generated_example",
+        "original_hash": "sha256:0b5f102ba661a60a00b01f373d6178a8313b240755b86cf29a0d2b0625ab1179",
+        "original_mime_type": "image/png",
+        "original_bytes": 3309879,
+        "transform": {
+          "format": "webp",
+          "max_width": 1440,
+          "quality": 86,
+          "without_enlargement": true,
+          "composition": "preserved"
+        }
+      }
+    },
+    {
+      "title": "Register 04",
+      "asset": {
+        "id": "ada-colour-1",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/approved/ada-colour-1.webp",
+        "content_hash": "sha256:7a37c9d8bfe9e59e7d2f59142383329d12ce65afddc6a483d7d901b30c75b7bc",
+        "mime_type": "image/webp",
+        "width": 1440,
+        "height": 1080,
+        "file_size_bytes": 266770,
+        "alt_text": "Colour Register by Ada Mercer",
+        "rights": "Original example artwork generated for the 6529 template library. Ada Mercer, her biography, works, exhibitions and edition offers are fictional.",
+        "roles": ["original", "grid", "detail", "fullscreen"]
+      },
+      "provenance": {
+        "kind": "generated_example",
+        "original_hash": "sha256:396d1b43b69e4f6c9d6a0da81c96d6878557d0d2d305f1076199469ee016dbd3",
+        "original_mime_type": "image/png",
+        "original_bytes": 2628177,
+        "transform": {
+          "format": "webp",
+          "max_width": 1440,
+          "quality": 86,
+          "without_enlargement": true,
+          "composition": "preserved"
+        }
+      }
+    },
+    {
+      "title": "Second Pass",
+      "asset": {
+        "id": "ada-colour-2",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/approved/ada-colour-2.webp",
+        "content_hash": "sha256:87b6f70bdb089d909d8253cdf8a5c2c5bacfdf9f3d957a29d895a9d894fc32e0",
+        "mime_type": "image/webp",
+        "width": 1440,
+        "height": 1080,
+        "file_size_bytes": 247816,
+        "alt_text": "Second Pass by Ada Mercer",
+        "rights": "Original example artwork generated for the 6529 template library. Ada Mercer, her biography, works, exhibitions and edition offers are fictional.",
+        "roles": ["original", "grid", "detail", "fullscreen"]
+      },
+      "provenance": {
+        "kind": "generated_example",
+        "original_hash": "sha256:37dbda2facb35c6bdbd037d35ce131973474c11d03ae5a78a49e8cbd9abfd130",
+        "original_mime_type": "image/png",
+        "original_bytes": 2581590,
+        "transform": {
+          "format": "webp",
+          "max_width": 1440,
+          "quality": 86,
+          "without_enlargement": true,
+          "composition": "preserved"
+        }
+      }
+    },
+    {
+      "title": "Overprint No. 7",
+      "asset": {
+        "id": "ada-colour-3",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/approved/ada-colour-3.webp",
+        "content_hash": "sha256:b9b622c31e16683086d1dfeecfbec134a51583ea288202b1e9912cc2a48e6d0f",
+        "mime_type": "image/webp",
+        "width": 1440,
+        "height": 1080,
+        "file_size_bytes": 198640,
+        "alt_text": "Overprint No. 7 by Ada Mercer",
+        "rights": "Original example artwork generated for the 6529 template library. Ada Mercer, her biography, works, exhibitions and edition offers are fictional.",
+        "roles": ["original", "grid", "detail", "fullscreen"]
+      },
+      "provenance": {
+        "kind": "generated_example",
+        "original_hash": "sha256:bc45008b992e0b6cfc3a962ac5984dd496c0e922d241f4a20968ad81a83fc6c0",
+        "original_mime_type": "image/png",
+        "original_bytes": 2479665,
+        "transform": {
+          "format": "webp",
+          "max_width": 1440,
+          "quality": 86,
+          "without_enlargement": true,
+          "composition": "preserved"
+        }
+      }
+    },
+    {
+      "title": "Landing, 23:10",
+      "asset": {
+        "id": "ada-night-1",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/approved/ada-night-1.webp",
+        "content_hash": "sha256:9c6b0187df608fd652d26a75ff50ba68dba65cfecbecce4074711ac8152522da",
+        "mime_type": "image/webp",
+        "width": 1440,
+        "height": 1080,
+        "file_size_bytes": 61668,
+        "alt_text": "Night Windows by Ada Mercer",
+        "rights": "Original example artwork generated for the 6529 template library. Ada Mercer, her biography, works, exhibitions and edition offers are fictional.",
+        "roles": ["original", "grid", "detail", "fullscreen"]
+      },
+      "provenance": {
+        "kind": "generated_example",
+        "original_hash": "sha256:7704bae42e5023edf1f5220fca18c3cd69e753d5655fbc60a360c0556a9874d7",
+        "original_mime_type": "image/png",
+        "original_bytes": 1805956,
+        "transform": {
+          "format": "webp",
+          "max_width": 1440,
+          "quality": 86,
+          "without_enlargement": true,
+          "composition": "preserved"
+        }
+      }
+    },
+    {
+      "title": "North Block",
+      "asset": {
+        "id": "ada-night-2",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/approved/ada-night-2.webp",
+        "content_hash": "sha256:cbbb1f7b8ce61bc0007cdc705de965c67c5abc232137468794e43d513eb94b71",
+        "mime_type": "image/webp",
+        "width": 1440,
+        "height": 1080,
+        "file_size_bytes": 127126,
+        "alt_text": "North Block by Ada Mercer",
+        "rights": "Original example artwork generated for the 6529 template library. Ada Mercer, her biography, works, exhibitions and edition offers are fictional.",
+        "roles": ["original", "grid", "detail", "fullscreen"]
+      },
+      "provenance": {
+        "kind": "generated_example",
+        "original_hash": "sha256:30676b77d5d619b029bacacd8ec49e43712ebd1d989d69dcaf46c6c093f919aa",
+        "original_mime_type": "image/png",
+        "original_bytes": 2206238,
+        "transform": {
+          "format": "webp",
+          "max_width": 1440,
+          "quality": 86,
+          "without_enlargement": true,
+          "composition": "preserved"
+        }
+      }
+    },
+    {
+      "title": "Window Sequence",
+      "asset": {
+        "id": "ada-night-3",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/approved/ada-night-3.webp",
+        "content_hash": "sha256:4347436161a530c9637b86ceb6f657918c31deb40075fff945c7ceed981dadb5",
+        "mime_type": "image/webp",
+        "width": 1440,
+        "height": 1080,
+        "file_size_bytes": 107460,
+        "alt_text": "Window Sequence by Ada Mercer",
+        "rights": "Original example artwork generated for the 6529 template library. Ada Mercer, her biography, works, exhibitions and edition offers are fictional.",
+        "roles": ["original", "grid", "detail", "fullscreen"]
+      },
+      "provenance": {
+        "kind": "generated_example",
+        "original_hash": "sha256:e2fef8821634553aca81b5749e135960615e84efb785884887e752ad37f8dd0c",
+        "original_mime_type": "image/png",
+        "original_bytes": 2087554,
+        "transform": {
+          "format": "webp",
+          "max_width": 1440,
+          "quality": 86,
+          "without_enlargement": true,
+          "composition": "preserved"
+        }
+      }
+    },
+    {
+      "title": "Ada Mercer in the studio",
+      "asset": {
+        "id": "ada-studio",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/approved/ada-studio.webp",
+        "content_hash": "sha256:ece9e178584c7d14e60c7fbdb6ca4641556364230aed2ffc8771d37ddd043f83",
+        "mime_type": "image/webp",
+        "width": 1440,
+        "height": 1080,
+        "file_size_bytes": 220348,
+        "alt_text": "Ada Mercer’s studio, with drawing and print work in progress",
+        "rights": "Original example artwork generated for the 6529 template library. Ada Mercer, her biography, works, exhibitions and edition offers are fictional.",
+        "roles": ["original", "grid", "detail", "fullscreen"]
+      },
+      "provenance": {
+        "kind": "generated_example",
+        "original_hash": "sha256:2b77eb724afd32e12654042c679829e1615160cfefc8e7eb35f1d241fa3302af",
+        "original_mime_type": "image/png",
+        "original_bytes": 2318992,
+        "transform": {
+          "format": "webp",
+          "max_width": 1440,
+          "quality": 86,
+          "without_enlargement": true,
+          "composition": "preserved"
+        }
+      }
+    },
+    {
+      "title": "Harbour Studies installation view",
+      "asset": {
+        "id": "ada-installation",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/approved/ada-installation.webp",
+        "content_hash": "sha256:d0e77c88302ad082d03f3d9ee5031bff0b92ba0482a2bec633d6d28fd5d54096",
+        "mime_type": "image/webp",
+        "width": 1440,
+        "height": 1080,
+        "file_size_bytes": 113566,
+        "alt_text": "Installation view of work by Ada Mercer",
+        "rights": "Original example artwork generated for the 6529 template library. Ada Mercer, her biography, works, exhibitions and edition offers are fictional.",
+        "roles": ["original", "grid", "detail", "fullscreen"]
+      },
+      "provenance": {
+        "kind": "generated_example",
+        "original_hash": "sha256:299d0951e2ed30d991648a8e7008ac89e28102b76d6c6a0fb4df8845d856b619",
+        "original_mime_type": "image/png",
+        "original_bytes": 1876173,
+        "transform": {
+          "format": "webp",
+          "max_width": 1440,
+          "quality": 86,
+          "without_enlargement": true,
+          "composition": "preserved"
+        }
+      }
+    },
+    {
+      "title": "Rose",
+      "asset": {
+        "id": "blitmap-1",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/approved/blitmap-1.webp",
+        "content_hash": "sha256:6ea80ab71d7f436b1c61e13b87e82c4307015e29dff9469f821c597169c85ac0",
+        "mime_type": "image/webp",
+        "width": 512,
+        "height": 512,
+        "file_size_bytes": 192,
+        "alt_text": "Rose by dom — Blitmap #1. Red pixel rose with a green stem on black.",
+        "rights": "CC0 artwork: Rose by dom; Blitmap #1. Source: https://etherscan.io/token/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63?a=1. Public-domain declaration: https://paragraph.com/@blitmap/blitmap-is-public-domain. Displayed as an example; no claim of token ownership or endorsement.",
+        "roles": ["original", "grid", "detail", "fullscreen"]
+      },
+      "provenance": {
+        "kind": "onchain_svg_raster",
+        "collection": "Blitmap",
+        "chain_id": 1,
+        "contract": "0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63",
+        "token_id": 1,
+        "creator": "dom",
+        "creator_address": "0xF296178d553C8Ec21A2fBD2c5dDa8CA9ac905A00",
+        "source_block": 25963459,
+        "source_method": "tokenSvgDataOf(uint256)",
+        "source_record": "https://etherscan.io/token/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63?a=1",
+        "rights_source": "https://paragraph.com/@blitmap/blitmap-is-public-domain",
+        "original_uri": "https://6529.io/profile-cms/templates/approved/blitmap-1.svg",
+        "original_hash": "sha256:f4f15b07747e3ed75dd4afdd787972b8f1e76060b3dfd605e927640c90e06672",
+        "original_bytes": 62982,
+        "transform": {
+          "format": "webp",
+          "width": 512,
+          "height": 512,
+          "kernel": "nearest",
+          "lossless": true
+        }
+      }
+    },
+    {
+      "title": "Psychic",
+      "asset": {
+        "id": "blitmap-4",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/approved/blitmap-4.webp",
+        "content_hash": "sha256:c9e484d49ff4651ab2be7e4201e4b6254749289199b0ccfd0787c3162442b840",
+        "mime_type": "image/webp",
+        "width": 512,
+        "height": 512,
+        "file_size_bytes": 338,
+        "alt_text": "Psychic by Veenus — Blitmap #4. Pale crystal ball on a stand against lavender and deep purple.",
+        "rights": "CC0 artwork: Psychic by Veenus; Blitmap #4. Source: https://etherscan.io/token/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63?a=4. Public-domain declaration: https://paragraph.com/@blitmap/blitmap-is-public-domain. Displayed as an example; no claim of token ownership or endorsement.",
+        "roles": ["original", "grid", "detail", "fullscreen"]
+      },
+      "provenance": {
+        "kind": "onchain_svg_raster",
+        "collection": "Blitmap",
+        "chain_id": 1,
+        "contract": "0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63",
+        "token_id": 4,
+        "creator": "Veenus",
+        "creator_address": "0x9Bf043a72ca1cD3DC4BCa66c9F6c1d040CfF7772",
+        "source_block": 25963459,
+        "source_method": "tokenSvgDataOf(uint256)",
+        "source_record": "https://etherscan.io/token/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63?a=4",
+        "rights_source": "https://paragraph.com/@blitmap/blitmap-is-public-domain",
+        "original_uri": "https://6529.io/profile-cms/templates/approved/blitmap-4.svg",
+        "original_hash": "sha256:6bf28b2e755c546f8948f21a868000de5d6567a19779ee90300bb154ef3393a0",
+        "original_bytes": 62982,
+        "transform": {
+          "format": "webp",
+          "width": 512,
+          "height": 512,
+          "kernel": "nearest",
+          "lossless": true
+        }
+      }
+    },
+    {
+      "title": "Jupiter",
+      "asset": {
+        "id": "blitmap-13",
+        "kind": "image",
+        "uri": "https://6529.io/profile-cms/templates/approved/blitmap-13.webp",
+        "content_hash": "sha256:b9ac3e229f35460bb1d3f380e6d77f6e52d4b7d29c6d31917493d0d52746ef97",
+        "mime_type": "image/webp",
+        "width": 512,
+        "height": 512,
+        "file_size_bytes": 294,
+        "alt_text": "Jupiter by BigPapap — Blitmap #13. Orange banded planet on a bright pink ground.",
+        "rights": "CC0 artwork: Jupiter by BigPapap; Blitmap #13. Source: https://etherscan.io/token/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63?a=13. Public-domain declaration: https://paragraph.com/@blitmap/blitmap-is-public-domain. Displayed as an example; no claim of token ownership or endorsement.",
+        "roles": ["original", "grid", "detail", "fullscreen"]
+      },
+      "provenance": {
+        "kind": "onchain_svg_raster",
+        "collection": "Blitmap",
+        "chain_id": 1,
+        "contract": "0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63",
+        "token_id": 13,
+        "creator": "BigPapap",
+        "creator_address": "0x8e29B3F71a8c7276d122C88d9bf317e857ABb376",
+        "source_block": 25963459,
+        "source_method": "tokenSvgDataOf(uint256)",
+        "source_record": "https://etherscan.io/token/0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63?a=13",
+        "rights_source": "https://paragraph.com/@blitmap/blitmap-is-public-domain",
+        "original_uri": "https://6529.io/profile-cms/templates/approved/blitmap-13.svg",
+        "original_hash": "sha256:be9a36d21f7bfa7280611ac1b6b0d516ed17cf99598f9bda85902a49d43a0021",
+        "original_bytes": 62982,
+        "transform": {
+          "format": "webp",
+          "width": 512,
+          "height": 512,
+          "kernel": "nearest",
+          "lossless": true
+        }
+      }
+    }
+  ]
+}

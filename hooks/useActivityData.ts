@@ -12,14 +12,43 @@ import type { DBResponse } from "@/entities/IDBResponse";
 import type { Transaction } from "@/entities/ITransaction";
 import { fetchUrl } from "@/services/6529api";
 import { useEffect, useState } from "react";
+import type { NftActivityFilter } from "@/components/nft-market-activity/NftMarketActivity";
 
 export enum TypeFilter {
-  ALL = "All Transactions",
+  ALL = "All Activity",
   AIRDROPS = "Airdrops",
   MINTS = "Mints",
   SALES = "Sales",
+  PURCHASES = "Purchases",
   TRANSFERS = "Transfers",
   BURNS = "Burns",
+  LISTINGS = "Listings",
+  OFFERS = "Offers",
+  CANCELLATIONS = "Cancellations",
+  EXPIRATIONS = "Expirations",
+  INVALIDATIONS = "Invalidations",
+  REVALIDATIONS = "Revalidations",
+}
+
+export function getNftActivityFilter(
+  typeFilter: TypeFilter
+): NftActivityFilter {
+  const filters: Record<TypeFilter, NftActivityFilter> = {
+    [TypeFilter.ALL]: "all",
+    [TypeFilter.AIRDROPS]: "airdrops",
+    [TypeFilter.MINTS]: "mints",
+    [TypeFilter.SALES]: "sales",
+    [TypeFilter.PURCHASES]: "purchases",
+    [TypeFilter.TRANSFERS]: "transfers",
+    [TypeFilter.BURNS]: "burns",
+    [TypeFilter.LISTINGS]: "listings",
+    [TypeFilter.OFFERS]: "offers",
+    [TypeFilter.CANCELLATIONS]: "cancellations",
+    [TypeFilter.EXPIRATIONS]: "expirations",
+    [TypeFilter.INVALIDATIONS]: "invalidations",
+    [TypeFilter.REVALIDATIONS]: "revalidations",
+  };
+  return filters[typeFilter];
 }
 
 enum ContractFilter {

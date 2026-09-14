@@ -1,3 +1,4 @@
+import { getCmsDetailClasses } from "./detailPresentation";
 import { CmsInspectableArtwork } from "@/components/profile-cms/CmsArtLightbox";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -51,6 +52,7 @@ export function NftDetailPage({
   readonly context: RendererContext;
   readonly page: CmsPageV1;
 }) {
+  const theme = getCmsDetailClasses(context);
   const nftProfile = getPrimaryNftProfileForPage(page, context);
   if (!nftProfile) {
     return (
@@ -105,31 +107,47 @@ export function NftDetailPage({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-8">
-      <section className="tw-grid tw-gap-6 lg:tw-grid-cols-[minmax(0,1.45fr)_minmax(20rem,0.55fr)]">
+      <section
+        className={
+          context.appearance === "studio"
+            ? "tw-grid tw-gap-8 @[56rem]/cms-studio:tw-grid-cols-[minmax(0,1.45fr)_minmax(16rem,0.55fr)]"
+            : "tw-grid tw-gap-6 lg:tw-grid-cols-[minmax(0,1.45fr)_minmax(20rem,0.55fr)]"
+        }
+      >
         <div className="tw-min-w-0">
           {displayItem ? (
             <CmsInspectableArtwork
-              className="tw-border tw-border-solid tw-border-iron-800"
-              frameClassName="tw-min-h-[min(72dvh,48rem)] tw-bg-black"
-              imageClassName="tw-object-contain"
-              item={displayItem}
+              className={theme.figure}
+              frameClassName={theme.frame}
+              imageClassName={theme.image}
+              item={
+                context.appearance === "studio"
+                  ? { ...displayItem, caption: undefined, roleLabel: undefined }
+                  : displayItem
+              }
               labels={getArtInspectorLabels(context.locale)}
               loading="eager"
             />
           ) : (
             <UnsupportedBlock
+              className={theme.unavailable}
               label={t(context.locale, "profileCms.block.imageUnavailable")}
             />
           )}
         </div>
 
-        <aside className="tw-flex tw-min-w-0 tw-flex-col tw-gap-5 tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5">
+        <aside
+          className={`tw-flex tw-min-w-0 tw-flex-col tw-gap-5 ${theme.panel}`}
+        >
           <div>
             {collectionContext ? (
-              <p className="tw-mb-2 tw-text-sm tw-font-semibold tw-uppercase tw-text-primary-300">
+              <p
+                className={`tw-mb-2 tw-text-sm tw-font-semibold tw-uppercase ${theme.accent}`}
+              >
                 {collectionContext.href ? (
                   <CmsLink
-                    className="hover:tw-text-primary-200"
+                    context={context}
+                    className={`${theme.link}`}
                     href={collectionContext.href}
                   >
                     {collectionContext.title}
@@ -139,17 +157,20 @@ export function NftDetailPage({
                 )}
               </p>
             ) : null}
-            <h3 className="tw-text-2xl tw-font-semibold tw-leading-tight tw-text-white">
+            <h3
+              className={`tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight ${theme.title}`}
+            >
               {page.metadata.title}
             </h3>
             {page.metadata.description ? (
-              <p className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+              <p className={`tw-mt-3 tw-text-sm tw-leading-6 ${theme.text}`}>
                 {page.metadata.description}
               </p>
             ) : null}
           </div>
 
           <DefinitionGrid
+            studio={context.appearance === "studio"}
             items={[
               {
                 label: t(context.locale, "profileCms.provenance.chain"),
@@ -192,21 +213,22 @@ export function NftDetailPage({
           {traits.length ? (
             <section aria-labelledby="cms-nft-traits-title">
               <h4
-                className="tw-text-sm tw-font-semibold tw-uppercase tw-text-iron-300"
+                className={`tw-text-sm tw-font-semibold tw-uppercase ${theme.text}`}
                 id="cms-nft-traits-title"
               >
                 {t(context.locale, "profileCms.nft.traits")}
               </h4>
               <dl className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-2 lg:tw-grid-cols-1 xl:tw-grid-cols-2">
                 {traitRows.map((trait) => (
-                  <div
-                    className="tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-p-3"
-                    key={trait.key}
-                  >
-                    <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+                  <div className={`${theme.tile}`} key={trait.key}>
+                    <dt
+                      className={`tw-text-xs tw-font-semibold tw-uppercase ${theme.label}`}
+                    >
                       {trait.label}
                     </dt>
-                    <dd className="tw-mt-1 tw-break-words tw-text-sm tw-text-iron-100">
+                    <dd
+                      className={`tw-mt-1 tw-break-words tw-text-sm ${theme.value}`}
+                    >
                       {trait.value}
                     </dd>
                   </div>
@@ -217,7 +239,7 @@ export function NftDetailPage({
         </aside>
       </section>
 
-      <NftProvenancePanel
+      <NftProvenanceDetails
         context={context}
         nftProfile={nftProfile}
         originalAsset={originalAsset}
@@ -242,19 +264,37 @@ export function NftDetailPage({
   );
 }
 
+type NftProvenanceProps = {
+  readonly context: RendererContext;
+  readonly nftProfile: CmsNftMediaProfileV1;
+  readonly originalAsset: CmsAssetV1 | undefined;
+  readonly page: CmsPageV1;
+  readonly sourcePacket: CmsSourcePacketV1 | undefined;
+};
+
+function NftProvenanceDetails(props: NftProvenanceProps) {
+  if (props.context.appearance !== "studio")
+    return <NftProvenancePanel {...props} />;
+  return (
+    <details className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-[color:var(--cms-line)] tw-pt-5">
+      <summary className="tw-cursor-pointer tw-text-sm tw-font-medium">
+        {t(props.context.locale, "profileCms.provenance.title")}
+      </summary>
+      <div className="tw-mt-5">
+        <NftProvenancePanel {...props} />
+      </div>
+    </details>
+  );
+}
+
 function NftProvenancePanel({
   context,
   nftProfile,
   originalAsset,
   page,
   sourcePacket,
-}: {
-  readonly context: RendererContext;
-  readonly nftProfile: CmsNftMediaProfileV1;
-  readonly originalAsset: CmsAssetV1 | undefined;
-  readonly page: CmsPageV1;
-  readonly sourcePacket: CmsSourcePacketV1 | undefined;
-}) {
+}: NftProvenanceProps) {
+  const theme = getCmsDetailClasses(context);
   const originalUrl = resolveAssetUrl(originalAsset);
   const metadataHref = resolveCmsUri(nftProfile.metadata_uri);
   const storage =
@@ -264,26 +304,27 @@ function NftProvenancePanel({
   return (
     <section
       aria-labelledby="cms-nft-provenance-title"
-      className="tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5"
+      className={`${theme.panel}`}
     >
       <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
         <div>
           <h3
-            className="tw-text-xl tw-font-semibold tw-text-white"
+            className={`tw-m-0 tw-text-xl tw-font-semibold ${theme.title}`}
             id="cms-nft-provenance-title"
           >
             {t(context.locale, "profileCms.provenance.title")}
           </h3>
-          <p className="tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className={`tw-mt-1 tw-text-sm tw-leading-6 ${theme.muted}`}>
             {t(context.locale, "profileCms.provenance.description")}
           </p>
         </div>
-        <p className="tw-break-all tw-font-mono tw-text-xs tw-text-primary-300">
+        <p className={`tw-break-all tw-font-mono tw-text-xs ${theme.accent}`}>
           {context.cmsPackage.integrity.package_hash}
         </p>
       </div>
 
       <DefinitionGrid
+        studio={context.appearance === "studio"}
         className="tw-mt-5"
         items={[
           {
@@ -327,11 +368,14 @@ function NftProvenancePanel({
         ]}
       />
 
-      <details className="tw-mt-5 tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-p-4">
-        <summary className="tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-iron-100">
+      <details className={`tw-mt-5 ${theme.panel}`}>
+        <summary
+          className={`tw-cursor-pointer tw-text-sm tw-font-semibold ${theme.value}`}
+        >
           {t(context.locale, "profileCms.provenance.packageDetails")}
         </summary>
         <DefinitionGrid
+          studio={context.appearance === "studio"}
           className="tw-mt-4"
           items={[
             {
@@ -387,14 +431,14 @@ function RelatedWorks({
   readonly currentPage: CmsPageV1;
   readonly nftProfile: CmsNftMediaProfileV1;
 }) {
+  const theme = getCmsDetailClasses(context);
+  const relatedTypes =
+    context.appearance === "studio"
+      ? ["nft_detail", "card_detail"]
+      : ["collection", "gallery", "nft_detail", "card_detail"];
   const cards = context.cmsPackage.payload.pages
     .filter(
-      (page) =>
-        page.id !== currentPage.id &&
-        (page.type === "collection" ||
-          page.type === "gallery" ||
-          page.type === "nft_detail" ||
-          page.type === "card_detail")
+      (page) => page.id !== currentPage.id && relatedTypes.includes(page.type)
     )
     .map((page) => createPagePreviewCard(context, page.id))
     .filter((card): card is PagePreviewCard => !!card)
@@ -409,12 +453,12 @@ function RelatedWorks({
       <div className="tw-mb-4 tw-flex tw-flex-col tw-gap-1 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
         <div>
           <h3
-            className="tw-text-xl tw-font-semibold tw-text-white"
+            className={`tw-m-0 tw-text-xl tw-font-semibold ${theme.title}`}
             id="cms-related-works-title"
           >
             {t(context.locale, "profileCms.related.title")}
           </h3>
-          <p className="tw-text-sm tw-text-iron-400">
+          <p className={`tw-text-sm ${theme.muted}`}>
             {t(context.locale, "profileCms.related.description", {
               tokenId: nftProfile.token_id,
             })}
