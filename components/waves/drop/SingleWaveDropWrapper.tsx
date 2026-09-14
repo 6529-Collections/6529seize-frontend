@@ -181,7 +181,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
         <Transition show={isChatOpen && isCompactLayout} as={Fragment}>
           <Dialog
             as="div"
-            className="tw-relative tw-z-[90] lg:tw-hidden"
+            className="tw-relative tw-z-[1020] lg:tw-hidden"
             onClose={closeChat}
             aria-label={t(locale, "singleDrop.chatLabel")}
           >
