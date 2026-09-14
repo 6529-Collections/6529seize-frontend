@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import CreateDropGifPicker from "@/components/waves/CreateDropGifPicker";
+import { WaveDropLayerProvider } from "@/components/waves/drops/WaveDropLayerContext";
 
 jest.mock("@giphy/react-components", () => {
   const React = require("react");
@@ -110,12 +111,18 @@ type DialogProps = {
   onClose: () => void;
   title?: string;
   closeLabel?: string;
+  zIndexClassName?: string;
   children: React.ReactNode;
 };
 jest.mock(
   "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
   () => (props: DialogProps) => (
-    <div data-testid="dialog" role="dialog" aria-label={props.title}>
+    <div
+      data-testid="dialog"
+      data-z-index-class={props.zIndexClassName}
+      role="dialog"
+      aria-label={props.title}
+    >
       <button
         aria-label={props.closeLabel ?? "Close"}
         onClick={props.onClose}
@@ -141,6 +148,10 @@ describe("CreateDropGifPicker", () => {
     render(<CreateDropGifPicker {...defaultProps} />);
 
     expect(screen.getByRole("dialog", { name: "GIF search" })).toBeVisible();
+    expect(screen.getByTestId("dialog")).toHaveAttribute(
+      "data-z-index-class",
+      "tw-z-[1010]"
+    );
     expect(screen.getByTestId("giphy-search-context")).toHaveAttribute(
       "data-api-key",
       "test-giphy-api-key"
@@ -156,6 +167,21 @@ describe("CreateDropGifPicker", () => {
     expect(screen.getByText("No GIFs found.")).toBeVisible();
     expect(screen.getByRole("status")).toHaveTextContent(
       "GIF search is ready."
+    );
+  });
+
+  it("uses the surrounding wave drop dialog layer", () => {
+    render(
+      <WaveDropLayerProvider
+        value={{ mobileDialogZIndexClassName: "tw-z-[1030]" }}
+      >
+        <CreateDropGifPicker {...defaultProps} />
+      </WaveDropLayerProvider>
+    );
+
+    expect(screen.getByTestId("dialog")).toHaveAttribute(
+      "data-z-index-class",
+      "tw-z-[1030]"
     );
   });
 
