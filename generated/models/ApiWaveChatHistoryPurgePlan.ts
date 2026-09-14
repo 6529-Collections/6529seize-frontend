@@ -13,16 +13,11 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiDeleteMyWaveChatHistoryResponse {
+export class ApiWaveChatHistoryPurgePlan {
     /**
-    * True when another bounded request with the same token is required
+    * Opaque signed cutoff bound to the authenticated author and wave
     */
-    'has_more': boolean;
-    'deleted_drop_ids': Array<string>;
-    /**
-    * ID of the caller-authored pinned CHAT drop that was preserved, or null when the pinned drop was not authored by the caller.
-    */
-    'preserved_pinned_drop_id': string | null;
+    'purge_token': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -30,26 +25,14 @@ export class ApiDeleteMyWaveChatHistoryResponse {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "has_more",
-            "baseName": "has_more",
-            "type": "boolean",
-            "format": ""
-        },
-        {
-            "name": "deleted_drop_ids",
-            "baseName": "deleted_drop_ids",
-            "type": "Array<string>",
-            "format": ""
-        },
-        {
-            "name": "preserved_pinned_drop_id",
-            "baseName": "preserved_pinned_drop_id",
+            "name": "purge_token",
+            "baseName": "purge_token",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiDeleteMyWaveChatHistoryResponse.attributeTypeMap;
+        return ApiWaveChatHistoryPurgePlan.attributeTypeMap;
     }
 
     public constructor() {
