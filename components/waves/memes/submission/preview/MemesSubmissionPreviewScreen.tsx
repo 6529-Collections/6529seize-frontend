@@ -9,6 +9,7 @@ import { useCallback } from "react";
 import type { MemesSubmissionIdentity } from "../hooks/useMemesSubmissionIdentity";
 import { SubmissionActionButton } from "../ui/SubmissionActionButton";
 import { SubmissionIdentityPanel } from "../ui/SubmissionIdentityPanel";
+import { SubmissionSigningNote } from "../ui/SubmissionSigningNote";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
 import { PreviewLeaderboardGalleryCase } from "./components/PreviewLeaderboardGalleryCase";
 import { PreviewLeaderboardListCase } from "./components/PreviewLeaderboardListCase";
@@ -66,27 +67,32 @@ export function MemesSubmissionPreviewScreen({
         />
       </div>
 
-      <div className="tw-mt-auto tw-flex tw-flex-col tw-gap-2 tw-border-t tw-border-iron-800 tw-px-4 tw-pt-3 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-3">
-        <SubmissionIdentityPanel identity={identity} />
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 md:tw-shrink-0">
-          <Button
-            variant="secondary"
-            onClick={onBackToEdit}
-            disabled={isSubmitting}
-            className="tw-flex-1 !tw-border-transparent !tw-bg-transparent !tw-shadow-none md:tw-flex-none"
-          >
-            {t(locale, "memes.submission.action.backToEdit")}
-          </Button>
-          <SubmissionActionButton
-            identity={identity}
-            isFormValid={true}
-            isSubmitting={isSubmitting}
-            submissionPhase={submissionPhase}
-            uploadProgress={uploadProgress}
-            submitLabel={resolvedSubmitLabel}
-            onSubmit={onSubmit}
-            className="tw-flex-1 md:tw-flex-none"
-          />
+      <div className="tw-mt-auto tw-space-y-2 tw-border-t tw-border-iron-800 tw-px-4 tw-pt-3">
+        {identity.canSubmit && submissionPhase !== "success" && (
+          <SubmissionSigningNote />
+        )}
+        <div className="tw-flex tw-flex-col tw-gap-2 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-3">
+          <SubmissionIdentityPanel identity={identity} />
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 md:tw-shrink-0">
+            <Button
+              variant="secondary"
+              onClick={onBackToEdit}
+              disabled={isSubmitting}
+              className="tw-flex-1 !tw-border-transparent !tw-bg-transparent !tw-shadow-none md:tw-flex-none"
+            >
+              {t(locale, "memes.submission.action.backToEdit")}
+            </Button>
+            <SubmissionActionButton
+              identity={identity}
+              isFormValid={true}
+              isSubmitting={isSubmitting}
+              submissionPhase={submissionPhase}
+              uploadProgress={uploadProgress}
+              submitLabel={resolvedSubmitLabel}
+              onSubmit={onSubmit}
+              className="tw-flex-1 md:tw-flex-none"
+            />
+          </div>
         </div>
       </div>
     </motion.div>
