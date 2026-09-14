@@ -18,10 +18,14 @@ const shouldForceShowNewVersionToast = () =>
     SHOW_NEW_VERSION_TOAST_PARAM
   ) === "true";
 
-export function useIsVersionStale(interval = 120_000) {
+export function useIsVersionStale(interval = 120_000, enabled = true) {
   const [stale, setStale] = useState(shouldForceShowNewVersionToast);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     if (shouldForceShowNewVersionToast()) {
       setStale(true);
       return;
@@ -58,7 +62,7 @@ export function useIsVersionStale(interval = 120_000) {
       clearInterval(id);
       globalThis.removeEventListener("focus", onFocus);
     };
-  }, [interval]);
+  }, [interval, enabled]);
 
-  return stale;
+  return enabled && stale;
 }

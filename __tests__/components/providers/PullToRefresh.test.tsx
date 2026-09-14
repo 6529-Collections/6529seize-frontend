@@ -1,3 +1,13 @@
+import { useVersionStatus } from "@/contexts/VersionStatusContext";
+import { refreshAppVersion } from "@/helpers/version-refresh.helpers";
+
+jest.mock("@/contexts/VersionStatusContext", () => ({
+  useVersionStatus: jest.fn(() => false),
+}));
+jest.mock("@/helpers/version-refresh.helpers", () => ({
+  refreshAppVersion: jest.fn(),
+}));
+
 import PullToRefresh from "@/components/providers/PullToRefresh";
 import { RefreshProvider } from "@/contexts/RefreshContext";
 import {
@@ -115,6 +125,8 @@ describe("PullToRefresh", () => {
   let originalScrollYDescriptor: PropertyDescriptor | undefined;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    (useVersionStatus as jest.Mock).mockReturnValue(false);
     originalScrollYDescriptor = Object.getOwnPropertyDescriptor(
       globalThis,
       "scrollY"
@@ -143,6 +155,39 @@ describe("PullToRefresh", () => {
     } else {
       Object.defineProperty(globalThis, "scrollY", originalScrollYDescriptor);
     }
+  });
+
+  it.each([true, false])(
+    "fully reloads only when a confirmed update is available (%s)",
+    (stale) => {
+      jest.useFakeTimers();
+      (useVersionStatus as jest.Mock).mockReturnValue(stale);
+      const pull = renderPullToRefresh();
+      startPull(pull.triggerZone, 200);
+      act(() =>
+        dispatchTouchEvent({ target: pull.triggerZone, type: "touchend" })
+      );
+      expect(refreshAppVersion).toHaveBeenCalledTimes(stale ? 1 : 0);
+      // A second completed gesture is ignored while this refresh is underway.
+      startPull(pull.triggerZone, 200);
+      act(() =>
+        dispatchTouchEvent({ target: pull.triggerZone, type: "touchend" })
+      );
+      expect(refreshAppVersion).toHaveBeenCalledTimes(stale ? 1 : 0);
+      act(() => jest.runOnlyPendingTimers());
+      pull.unmount();
+    }
+  );
+
+  it("does not reload for a short pull even when an update is available", () => {
+    (useVersionStatus as jest.Mock).mockReturnValue(true);
+    const pull = renderPullToRefresh();
+    startPull(pull.triggerZone, 80);
+    act(() =>
+      dispatchTouchEvent({ target: pull.triggerZone, type: "touchend" })
+    );
+    expect(refreshAppVersion).not.toHaveBeenCalled();
+    pull.unmount();
   });
 
   it("publishes pull offset while using document body as the fallback target", () => {

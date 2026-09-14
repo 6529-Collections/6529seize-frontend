@@ -413,6 +413,8 @@ const USER_STATS_ROW_MESSAGES = objectMessages("user.statsRow", {
 
 const NEW_VERSION_TOAST_MESSAGES = objectMessages("newVersionToast", {
   refreshAction: "Refresh page",
+  update: "Update",
+  updateAction: "Update to the new version",
   title: "A new version is available",
   eyebrow: "Yes, again!",
 } as const);
