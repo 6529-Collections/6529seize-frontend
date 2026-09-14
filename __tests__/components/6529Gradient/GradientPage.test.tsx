@@ -237,7 +237,10 @@ describe("GradientPage", () => {
     ).toHaveLength(1);
     expect(
       collecting.compareDocumentPosition(screen.getByTestId("art-viewer"))
-    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    ).toBe(Node.DOCUMENT_POSITION_PRECEDING);
+    expect(collecting.compareDocumentPosition(marketDepth)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
     expect(marketDepth).toHaveAttribute("data-refresh-key", "0");
     fireEvent.click(collecting);
     expect(marketDepth).toHaveAttribute("data-refresh-key", "1");

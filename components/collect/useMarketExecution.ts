@@ -1,12 +1,10 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import { Capacitor } from "@capacitor/core";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import { ApiMarketOperationStateEnum } from "@/generated/models/ApiMarketOperation";
 import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
-import type { ApiMarketTransaction } from "@/generated/models/ApiMarketTransaction";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
 import { fetchCollectCapabilities } from "@/services/api/collect-api";
 import {
@@ -17,7 +15,7 @@ import {
 } from "@/services/api/market-api";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   getAddress,
   type Hex,
@@ -35,7 +33,15 @@ import {
 } from "./market-validation";
 import { readMarketIntent, saveMarketIntent } from "./market-operation-storage";
 import { withMarketOperationLock } from "./market-operation-lock";
-import { marketReviewTerms } from "./market-review-terms";
+import { marketReviewChange } from "./market-review-terms";
+import { reviewedMarketGasLimits } from "./market-review-caps";
+import {
+  marketReviewChangeNotice,
+  type MarketReviewChangeNotice,
+} from "./market-review-change-description";
+import { useMarketWalletScope } from "./useMarketWalletScope";
+import { acknowledgeMarketSubmission } from "./market-known-submission";
+import { knownMarketTransactionHash } from "./market-known-transaction";
 import { isFreshMarketReviewExpiry } from "./market-review-expiry";
 import { marketExecutionError } from "./market-execution-errors";
 import {
@@ -50,7 +56,8 @@ async function checkMarketWallet(
   client: PublicClient,
   expected: ApiMarketPrepareRequest
 ) {
-  if ((await wallet.getChainId()) !== 1) throw new Error("MARKET_WRONG_CHAIN");
+  if ((await wallet.getChainId()) !== 1 || (await client.getChainId()) !== 1)
+    throw new Error("MARKET_WRONG_CHAIN");
   const accounts = await wallet.getAddresses();
   if (
     !accounts.some(
@@ -62,32 +69,6 @@ async function checkMarketWallet(
   const code = await client.getCode({ address: account });
   if (code && code !== "0x") throw new Error("MARKET_UNSUPPORTED_WALLET");
   return account;
-}
-
-async function reviewedGasLimits(
-  client: PublicClient,
-  transaction: ApiMarketTransaction,
-  estimatedGas: bigint
-) {
-  if (
-    !transaction.gas_limit ||
-    !transaction.max_fee_per_gas ||
-    !transaction.gas_reserve_wei
-  )
-    throw new Error("MARKET_GAS_CAP_MISSING");
-  const gas = BigInt(transaction.gas_limit);
-  const maxFeePerGas = BigInt(transaction.max_fee_per_gas);
-  if (
-    estimatedGas > gas ||
-    gas <= 0n ||
-    maxFeePerGas <= 0n ||
-    gas * maxFeePerGas > BigInt(transaction.gas_reserve_wei)
-  )
-    throw new Error("MARKET_GAS_CAP_CHANGED");
-  const fees = await client.estimateFeesPerGas();
-  if (fees.maxPriorityFeePerGas > maxFeePerGas)
-    throw new Error("MARKET_GAS_CAP_CHANGED");
-  return { gas, maxFeePerGas, maxPriorityFeePerGas: fees.maxPriorityFeePerGas };
 }
 
 async function executeReviewedMarketOperation(options: {
@@ -104,6 +85,7 @@ async function executeReviewedMarketOperation(options: {
     | undefined;
   setStage: (stage: CollectTradeStage) => void;
   onOperation: (operation: ApiMarketOperation) => void;
+  onKnownHash: (hash: Hex) => void;
 }) {
   const {
     wallet,
@@ -114,6 +96,7 @@ async function executeReviewedMarketOperation(options: {
     onCommitment,
     setStage,
     onOperation,
+    onKnownHash,
   } = options;
   const account = await checkMarketWallet(wallet, client, expected);
   const approval = operation.approval_transactions[0];
@@ -129,23 +112,37 @@ async function executeReviewedMarketOperation(options: {
     };
     await client.call(request);
     const estimatedGas = await client.estimateGas(request);
-    const fees = await reviewedGasLimits(client, transaction, estimatedGas);
+    const fees = await reviewedMarketGasLimits(
+      client,
+      transaction,
+      estimatedGas
+    );
     assertConnection();
     validateMarketOperation(operation, expected);
-    setStage(approval ? "approval" : "wallet");
     const { hash } = await sendReviewedMarketTransaction({
       operation,
       expected,
       transaction,
       assertConnection,
-      send: () => wallet.sendTransaction({ ...request, ...fees }),
+      send: () => {
+        setStage(approval ? "approval" : "wallet");
+        return wallet.sendTransaction({ ...request, ...fees });
+      },
       onOperation,
     });
     // The server journals approval hashes too, so reload/device changes cannot reopen a send.
     setStage("submitted");
-    onOperation(
-      await submitMarketTransaction(operation.id, { transaction_hash: hash })
+    onKnownHash(hash);
+    const submitted = await acknowledgeMarketSubmission(
+      () => submitMarketTransaction(operation.id, { transaction_hash: hash }),
+      () => {
+        setStage("reconciling");
+        assertConnection();
+      }
     );
+    assertMarketOperationIdentity(submitted, operation);
+    assertConnection();
+    onOperation(submitted);
   } else {
     if (
       !operation.order ||
@@ -169,44 +166,6 @@ async function executeReviewedMarketOperation(options: {
   }
 }
 
-function assertMarketExecutionConnection(
-  current: {
-    readonly auth: ReturnType<typeof useAuth>;
-    readonly connection: ReturnType<typeof useSeizeConnectContext>;
-    readonly wallet: WalletClient | undefined;
-  },
-  expected: ApiMarketPrepareRequest,
-  wallet: WalletClient
-) {
-  if (
-    Capacitor.isNativePlatform() ||
-    !current.auth.isAuthenticated ||
-    current.auth.activeProfileProxy ||
-    current.auth.connectedProfile?.id !== expected.profile_id ||
-    !current.connection.canSignActiveWallet ||
-    current.connection.isSafeWallet ||
-    current.connection.address?.toLowerCase() !==
-      expected.wallet.toLowerCase() ||
-    current.wallet !== wallet
-  )
-    throw new Error("MARKET_CONNECTION_CHANGED");
-}
-
-function assertMarketRecoveryActor(
-  current: {
-    readonly auth: ReturnType<typeof useAuth>;
-    readonly connection: ReturnType<typeof useSeizeConnectContext>;
-  },
-  operation: ApiMarketOperation
-) {
-  if (
-    !current.auth.isAuthenticated ||
-    current.auth.activeProfileProxy ||
-    current.connection.address?.toLowerCase() !== operation.wallet.toLowerCase()
-  )
-    throw new Error("MARKET_CONNECTION_CHANGED");
-}
-
 async function recoverRecordedMarketTransaction(options: {
   readonly client: PublicClient;
   readonly operation: ApiMarketOperation;
@@ -217,11 +176,8 @@ async function recoverRecordedMarketTransaction(options: {
   const { client, operation, hash, assertRecoveryActor, onOperation } = options;
   assertRecoveryActor();
   const current = await fetchMarketOperation(operation.id);
-  if (
-    current.id !== operation.id ||
-    current.wallet.toLowerCase() !== operation.wallet.toLowerCase()
-  )
-    throw new Error("MARKET_REVIEW_MISMATCH");
+  assertMarketOperationIdentity(current, operation);
+  assertRecoveryActor();
   const attempt = marketOperationSendAttempt(current);
   if (!attempt) {
     onOperation(current);
@@ -246,6 +202,8 @@ async function recoverRecordedMarketTransaction(options: {
   const resolved = await submitMarketTransaction(current.id, {
     transaction_hash: verified,
   });
+  assertMarketOperationIdentity(resolved, operation);
+  assertRecoveryActor();
   clearResolvedMarketSend(resolved);
   onOperation(resolved);
 }
@@ -282,12 +240,34 @@ export function useMarketExecution(
   const { data: wallet } = useWalletClient();
   const client = usePublicClient({ chainId: 1 });
   const [stage, setStage] = useState<CollectTradeStage | null>(null);
+  const executionStage = useRef<CollectTradeStage>("preparing");
+  const updateStage = (next: CollectTradeStage | null) => {
+    if (next !== null) executionStage.current = next;
+    setStage(next);
+  };
   const [message, setMessage] = useState<string | undefined>();
+  const [reviewChangeNotice, setReviewChangeNotice] =
+    useState<MarketReviewChangeNotice>();
+  const showReviewChange = (
+    shown: ApiMarketOperation,
+    fresh: ApiMarketOperation,
+    change: "terms" | "gas"
+  ) => {
+    const notice = marketReviewChangeNotice(shown, fresh, locale, change);
+    setReviewChangeNotice(notice);
+    setMessage(notice.summary);
+  };
   const busy = useRef(false);
-  const live = useRef({ auth, connection, wallet });
-  useEffect(() => {
-    live.current = { auth, connection, wallet };
-  }, [auth, connection, wallet]);
+  const walletScope = useMarketWalletScope({
+    auth,
+    connection,
+    wallet,
+    client,
+  });
+  const [knownTransaction, setKnownTransaction] = useState<{
+    operationId: string;
+    hash: string;
+  }>();
   const confirm = async (
     operation: ApiMarketOperation,
     expected: ApiMarketPrepareRequest,
@@ -297,14 +277,20 @@ export function useMarketExecution(
       expected: ApiMarketPrepareRequest
     ) => void
   ) => {
-    if (busy.current || !client || !wallet) return;
+    if (busy.current) return;
+    setReviewChangeNotice(undefined);
+    if (!client || !wallet) {
+      setMessage(t(locale, "collect.trade.walletNotReady"));
+      return;
+    }
     busy.current = true;
     setMessage(undefined);
-    setStage("preparing");
+    updateStage("preparing");
     try {
+      const assertScope = walletScope.capture(expected);
       await withMarketOperationLock(operation.id, async () => {
         const assertConnection = () => {
-          assertMarketExecutionConnection(live.current, expected, wallet);
+          assertScope();
           assertIntent?.();
         };
         assertConnection();
@@ -312,12 +298,29 @@ export function useMarketExecution(
         let current = await fetchMarketOperation(operation.id);
         assertMarketOperationIdentity(current, operation);
         clearResolvedMarketSend(current);
-        if (marketOperationSendAttempt(current))
-          throw new Error("MARKET_BROADCAST_UNKNOWN");
         // Revisions can change with quote metadata; reviewed terms are compared below.
         const prior = readMarketIntent(expected.profile_id, current.id);
+        const attempt = marketOperationSendAttempt(current);
+        const knownHash = knownMarketTransactionHash(current, attempt, prior);
+        if (knownHash && attempt) {
+          updateStage("reconciling");
+          setKnownTransaction({ operationId: current.id, hash: knownHash });
+          await recoverRecordedMarketTransaction({
+            client,
+            operation: current,
+            hash: knownHash,
+            assertRecoveryActor: walletScope.capture(operation, true, true),
+            onOperation,
+          });
+          return;
+        }
+        if (attempt) throw new Error("MARKET_BROADCAST_UNKNOWN");
         if (prior?.transactionHash) {
-          setStage("reconciling");
+          updateStage("reconciling");
+          setKnownTransaction({
+            operationId: current.id,
+            hash: prior.transactionHash,
+          });
           onOperation(
             await submitMarketTransaction(current.id, {
               transaction_hash: prior.transactionHash,
@@ -326,7 +329,7 @@ export function useMarketExecution(
           return;
         }
         if (prior?.approvalHash) {
-          setStage("approval");
+          updateStage("reconciling");
           const receipt = await client.waitForTransactionReceipt({
             hash: prior.approvalHash,
             confirmations: 1,
@@ -371,10 +374,11 @@ export function useMarketExecution(
           if (marketOperationSendAttempt(refreshed))
             throw new Error("MARKET_BROADCAST_UNKNOWN");
           validateMarketOperation(refreshed, expected);
-          if (marketReviewTerms(refreshed) !== marketReviewTerms(operation)) {
+          const change = marketReviewChange(operation, refreshed);
+          if (change) {
             onOperation(refreshed);
             setStage(null);
-            setMessage(t(locale, "collect.trade.refreshReview"));
+            showReviewChange(operation, refreshed, change);
             return;
           }
           current = refreshed;
@@ -394,17 +398,19 @@ export function useMarketExecution(
             throw new Error("MARKET_BROADCAST_UNKNOWN");
           validateMarketOperation(continued, expected);
           onOperation(continued);
-          if (marketReviewTerms(continued) !== marketReviewTerms(current)) {
+          const change = marketReviewChange(current, continued);
+          if (change) {
             setStage(null);
-            setMessage(t(locale, "collect.trade.refreshReview"));
+            showReviewChange(current, continued, change);
             return;
           }
           current = continued;
         }
-        if (marketReviewTerms(current) !== marketReviewTerms(operation)) {
+        const change = marketReviewChange(operation, current);
+        if (change) {
           onOperation(current);
           setStage(null);
-          setMessage(t(locale, "collect.trade.refreshReview"));
+          showReviewChange(operation, current, change);
           return;
         }
         if (
@@ -413,6 +419,8 @@ export function useMarketExecution(
           })
         )
           throw new Error("MARKET_RECOVERY_STORAGE_UNAVAILABLE");
+        // A completed approval's hash must not conceal a later unknown fulfillment.
+        setKnownTransaction(undefined);
         await executeReviewedMarketOperation({
           wallet,
           client,
@@ -420,13 +428,16 @@ export function useMarketExecution(
           expected,
           assertConnection,
           onCommitment,
-          setStage,
+          setStage: updateStage,
           onOperation,
+          onKnownHash: (hash) =>
+            setKnownTransaction({ operationId: current.id, hash }),
         });
         setStage(null);
       });
     } catch (error) {
-      setMessage(marketExecutionError(error, locale));
+      setReviewChangeNotice(undefined);
+      setMessage(marketExecutionError(error, locale, executionStage.current));
       setStage(null);
     } finally {
       setStage(null);
@@ -437,14 +448,18 @@ export function useMarketExecution(
     operation: ApiMarketOperation,
     hash: string
   ) => {
-    if (busy.current || !client) return;
+    if (busy.current) return;
+    setReviewChangeNotice(undefined);
+    if (!client) {
+      setMessage(t(locale, "collect.trade.walletNotReady"));
+      return;
+    }
     busy.current = true;
     setMessage(undefined);
-    setStage("reconciling");
+    updateStage("reconciling");
     try {
       await withMarketOperationLock(operation.id, async () => {
-        const assertRecoveryActor = () =>
-          assertMarketRecoveryActor(live.current, operation);
+        const assertRecoveryActor = walletScope.capture(operation, true, true);
         await recoverRecordedMarketTransaction({
           client,
           operation,
@@ -454,12 +469,27 @@ export function useMarketExecution(
         });
       });
     } catch (error) {
-      setMessage(marketExecutionError(error, locale));
+      setReviewChangeNotice(undefined);
+      setMessage(marketExecutionError(error, locale, executionStage.current));
     } finally {
       setStage(null);
       busy.current = false;
     }
   };
-  const clearMessage = () => setMessage(undefined);
-  return { confirm, recoverTransaction, stage, message, clearMessage };
+  const clearMessage = () => {
+    setMessage(undefined);
+    setReviewChangeNotice(undefined);
+  };
+  return {
+    confirm,
+    recoverTransaction,
+    stage,
+    busy: stage !== null,
+    message,
+    reviewChangeNotice,
+    clearMessage,
+    knownTransaction,
+    ready: walletScope.ready,
+    readinessReason: walletScope.readinessReason,
+  };
 }

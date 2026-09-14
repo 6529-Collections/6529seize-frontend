@@ -24,6 +24,7 @@ interface MemesArtSubmissionStepContentProps {
   readonly submitLabel: string;
   readonly identity: MemesSubmissionIdentity;
   readonly onClose: () => void;
+  readonly onContinueFromTerms: () => void;
   readonly onBackToEdit: () => void;
   readonly onBackFromAdditionalInfo: () => void;
   readonly onOpenPreview: () => void;
@@ -45,6 +46,7 @@ export function MemesArtSubmissionStepContent({
   submitLabel,
   identity,
   onClose,
+  onContinueFromTerms,
   onBackToEdit,
   onBackFromAdditionalInfo,
   onOpenPreview,
@@ -92,8 +94,9 @@ export function MemesArtSubmissionStepContent({
         <AgreementStep
           wave={wave}
           agreements={form.agreements}
+          reviewRequired={form.agreementReviewRequired}
           setAgreements={form.setAgreements}
-          onContinue={form.handleContinueFromTerms}
+          onContinue={onContinueFromTerms}
         />
       );
 

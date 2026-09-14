@@ -6,7 +6,6 @@ import type { ApiMarketBatchOperation } from "@/generated/models/ApiMarketBatchO
 import type { ApiMarketBatchPrepareRequest } from "@/generated/models/ApiMarketBatchPrepareRequest";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { Capacitor } from "@capacitor/core";
 import { useEffect, useRef, useState } from "react";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { collectProfileWallets } from "./collect-recipient.helpers";
@@ -17,6 +16,12 @@ import {
 } from "./market-batch-execution";
 import { validateMarketBatchRequest } from "./market-batch-validation";
 import { withMarketOperationLock } from "./market-operation-lock";
+import { useMarketWalletScope } from "./useMarketWalletScope";
+import type { CollectTradeStage } from "./collect.types";
+import {
+  marketReviewChangeNotice,
+  type MarketReviewChangeNotice,
+} from "./market-review-change-description";
 
 export function useMarketBatchExecution(
   onOperation: (operation: ApiMarketBatchOperation) => void
@@ -28,44 +33,56 @@ export function useMarketBatchExecution(
     locale = useBrowserLocale();
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState<string>();
+  const [stage, setStage] = useState<CollectTradeStage | null>(null);
+  const [reviewChangeNotice, setReviewChangeNotice] =
+    useState<MarketReviewChangeNotice>();
+  const executionStage = useRef<CollectTradeStage>("preparing");
   const pending = useRef(false),
     mounted = useRef(false);
-  const live = useRef({ auth, connection, wallet });
-  useEffect(() => {
-    live.current = { auth, connection, wallet };
-  }, [auth, connection, wallet]);
+  const updateStage = (next: CollectTradeStage) => {
+    executionStage.current = next;
+    if (mounted.current) setStage(next);
+  };
+  const [knownTransaction, setKnownTransaction] = useState<{
+    operationId: string;
+    hash: string;
+  }>();
+  const walletScope = useMarketWalletScope({
+    auth,
+    connection,
+    wallet,
+    client,
+  });
   useEffect(() => {
     mounted.current = true;
     return () => {
       mounted.current = false;
     };
   }, []);
-  const assertActor = (
-    operation: Pick<ApiMarketBatchOperation, "profile_id" | "wallet">
-  ) => {
-    const current = live.current;
-    if (
-      !mounted.current ||
-      !current.auth.isAuthenticated ||
-      current.auth.activeProfileProxy ||
-      current.auth.connectedProfile?.id !== operation.profile_id ||
-      current.connection.address?.toLowerCase() !==
-        operation.wallet.toLowerCase()
-    )
-      throw new Error("MARKET_CONNECTION_CHANGED");
-  };
   const run = async (work: () => Promise<void>) => {
-    if (pending.current || !client) return;
+    if (pending.current) return;
+    setReviewChangeNotice(undefined);
+    if (!client) {
+      setMessage(t(locale, "collect.trade.walletNotReady"));
+      return;
+    }
     pending.current = true;
     setBusy(true);
     setMessage(undefined);
+    updateStage("preparing");
     try {
       await work();
     } catch (error) {
-      if (mounted.current) setMessage(marketExecutionError(error, locale));
+      if (mounted.current) {
+        setReviewChangeNotice(undefined);
+        setMessage(marketExecutionError(error, locale, executionStage.current));
+      }
     } finally {
       pending.current = false;
-      if (mounted.current) setBusy(false);
+      if (mounted.current) {
+        setBusy(false);
+        setStage(null);
+      }
     }
   };
   const confirm = (
@@ -74,26 +91,19 @@ export function useMarketBatchExecution(
     guard?: () => void
   ) =>
     run(async () => {
-      if (!wallet || !client) throw new Error("MARKET_CONNECTION_CHANGED");
+      if (!wallet || !client) throw new Error("MARKET_WALLET_NOT_READY");
+      const assertScope = walletScope.capture(expected);
       const assertConnection = () => {
         guard?.();
-        assertActor(operation);
-        const current = live.current;
-        if (
-          Capacitor.isNativePlatform() ||
-          !current.connection.canSignActiveWallet ||
-          current.connection.isSafeWallet ||
-          current.wallet !== wallet
-        )
-          throw new Error("MARKET_CONNECTION_CHANGED");
+        assertScope();
         validateMarketBatchRequest(
           expected,
-          collectProfileWallets(current.auth.connectedProfile).map(
+          collectProfileWallets(auth.connectedProfile).map(
             (item) => item.wallet
           )
         );
       };
-      const result = await confirmMarketBatch({
+      await confirmMarketBatch({
         client,
         wallet,
         operation,
@@ -102,12 +112,27 @@ export function useMarketBatchExecution(
           (item) => item.wallet
         ),
         assertConnection,
+        onStage: updateStage,
+        onKnownHash: (hash) => {
+          if (mounted.current)
+            setKnownTransaction({ operationId: operation.id, hash });
+        },
+        onReviewChange: (change, shown, fresh) => {
+          if (mounted.current) {
+            const notice = marketReviewChangeNotice(
+              shown,
+              fresh,
+              locale,
+              change
+            );
+            setReviewChangeNotice(notice);
+            setMessage(notice.summary);
+          }
+        },
         onOperation: (value) => {
           if (mounted.current) onOperation(value);
         },
       });
-      if (result === "UPDATED_REVIEW" && mounted.current)
-        setMessage(t(locale, "collect.trade.refreshReview"));
     });
   const recoverTransaction = (
     operation: ApiMarketBatchOperation,
@@ -115,12 +140,14 @@ export function useMarketBatchExecution(
   ) =>
     run(async () => {
       if (!client) return;
+      const assertConnection = walletScope.capture(operation, true);
+      updateStage("reconciling");
       await withMarketOperationLock(operation.id, () =>
         recoverMarketBatch({
           client,
           operation,
           hash,
-          assertConnection: () => assertActor(operation),
+          assertConnection,
           onOperation: (value) => {
             if (mounted.current) onOperation(value);
           },
@@ -131,7 +158,15 @@ export function useMarketBatchExecution(
     confirm,
     recoverTransaction,
     busy,
+    stage,
+    knownTransaction,
+    ready: walletScope.ready,
+    readinessReason: walletScope.readinessReason,
     message,
-    clearMessage: () => setMessage(undefined),
+    reviewChangeNotice,
+    clearMessage: () => {
+      setMessage(undefined);
+      setReviewChangeNotice(undefined);
+    },
   };
 }

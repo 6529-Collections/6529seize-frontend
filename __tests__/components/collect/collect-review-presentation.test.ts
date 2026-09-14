@@ -1,5 +1,43 @@
-import { formatCollectReviewCap } from "@/components/collect/collect-review-presentation";
+import {
+  compactCollectReviewAmount,
+  formatCollectReviewCap,
+} from "@/components/collect/collect-review-presentation";
 import type { SupportedLocale } from "@/i18n/locales";
+
+describe("compactCollectReviewAmount", () => {
+  it.each([
+    ["0", "0", false],
+    ["17840000000000000", "0.01784", false],
+    ["24217345000000000", "0.02422", true],
+    ["24214999000000000", "0.02421", true],
+    ["999999999999999999", "1", true],
+    ["1834512345678", "0.00000183", true],
+    ["1", "0.000000000000000001", false],
+    [
+      "900719925474099312345678901234567890",
+      "900,719,925,474,099,312.34568",
+      true,
+    ],
+  ])(
+    "formats %s wei without losing integer precision",
+    (wei, text, approximate) => {
+      expect(compactCollectReviewAmount("en-US", wei)).toEqual({
+        text,
+        approximate,
+      });
+    }
+  );
+
+  it("retains localized separators and rejects negative values", () => {
+    expect(compactCollectReviewAmount("de-DE", "24217345000000000")).toEqual({
+      text: "0,02422",
+      approximate: true,
+    });
+    expect(() => compactCollectReviewAmount("en-US", "-1")).toThrow(
+      "INVALID_DISPLAY_AMOUNT"
+    );
+  });
+});
 
 describe("formatCollectReviewCap", () => {
   it.each([

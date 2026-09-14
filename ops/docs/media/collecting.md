@@ -25,11 +25,18 @@ Sets also link to relevant collecting goals.
 
 Supported artwork pages place a priced **Collect** action near the artwork summary,
 before artwork details and [**Listings & offers**](feature-card-market-depth.md).
+Gradients and Pebbles show the title and artwork before these actions; the full
+market remains in the lower **Listings & offers** tab.
 The actions appear in the order **Collect**, **Make an offer**, then **List**.
 The lowest supported listing is selected automatically. **Deliver to · Change**
 appears below Collect and lets you choose the receiving wallet; additional listings
 remain available under **Other listings**. Collect checks the selected order again before showing exact
 terms for wallet approval. A changed order requires another review.
+When no listing is returned, the page says **This artwork is not currently listed**
+and keeps **Make an offer** and applicable owner actions available. It omits empty
+Collect, quantity and delivery controls. An unsupported or own-wallet listing has
+a separate no-matching-listing message. Loading and retrieval failures remain
+distinct from an unlisted artwork.
 **View listings & offers** selects the card's **Listings & offers** tab and moves
 focus to the market. The price summary and order levels appear immediately,
 without a second accordion. Switching tabs retains selections and active reviews.
@@ -68,14 +75,18 @@ card page.
 ## User Journey
 
 1. Start in **Complete a set**, or choose **Lowest listings** or **TDH**.
-   In the set planner, choose **Collection** first. The Memes offers **Full
-   set**, **Season** and **Artist** under **Build toward**. Gradients opens its
+   The shared **Collection** selector keeps The Memes, Gradients or Pebbles selected
+   as you move between tools, including daily and future TDH. An incompatible goal
+   switches to that collection's full-set or Pebbles-set options. The Memes offers
+   **Full set**, **Season** and **Artist** under **Build toward**. Gradients opens its
    full set directly; Pebbles offers its named sets.
 2. Connect your profile to inspect its holdings. Wallet controls describe where
    NFTs are held, which wallet pays or signs, and where a purchase is delivered.
 3. Choose the season, artist or Pebbles set when applicable. Type a name in
    the selector to filter its options; artist names can be searched directly.
-   Set **Copies per NFT** and, optionally, a **Budget cap (ETH, optional)**.
+   Set an optional **Budget cap (ETH, optional)**. For The Memes, also set
+   **Copies per NFT**.
+   Unique Gradients and Pebbles use one copy and have no copies input.
    Options show a loading state while the catalog arrives. If it cannot be
    loaded, choose **Try again**; a failed request does not mean the set is empty.
    Copies per NFT is the total you want to hold of each required NFT, including
@@ -83,7 +94,9 @@ card page.
    Leave the budget cap blank to estimate the full goal. An entered cap includes
    estimated gas. This is an analysis constraint; collecting still requires a fresh
    price review and wallet approval.
-   Results appear below the controls. Missing requirements with available
+   A usable result collapses setup to leave room for the plan; **Edit goal**
+   restores the saved inputs and **Hide setup** closes them. Loading and failed
+   plans keep setup visible. Missing requirements with available
    purchases come first, followed by requirements without priced availability, with
    the quantity priced for your goal, the proposed purchase quantity and its
    price. Artwork thumbnails and names link to their card pages. Compact estimates
@@ -147,15 +160,24 @@ The review explains that copies sent outside your profile do not count toward
 its collecting goals or TDH. After a confirmed purchase, calculate a new TDH
 projection using the updated holdings.
 
+In a selection review, **Deliver all to** applies one destination to every item.
+Use **Change delivery for this artwork** for an exception or to inspect existing
+split deliveries. Applying a common destination combines that item's copies at
+the chosen address. A failed change keeps the previous review and allocations.
+
 **Purchase price** includes the signed order fees. **Network fee cap** covers
 the quoted purchase transaction and any required approvals. For an ETH purchase
 with complete fee caps, **Maximum total** adds the price and those caps. Summary
 caps round upward without changing the amounts submitted for approval.
+Rounded item prices are marked **≈** (**Approximately**). Exact amounts remain
+available in the breakdown; neither rounded prices nor rounded caps change the
+transaction amounts.
 If a cap is unavailable, the summary says **Not available yet** and does not show
 a complete maximum. WETH prices and ETH network fees stay separate.
 
 Open **Price breakdown** for seller proceeds and the fees already included in
-the purchase price. Its nested **Exact amounts** shows the unrounded network fee
+the purchase price, plus how network fees are charged. Unused gas is not charged;
+a transaction that fails on-chain can still use gas. Its nested **Exact amounts** shows the unrounded network fee
 cap, approval fee caps and maximum where available. **Contract details** keeps
 the NFT contract, exchange, fee recipients, approval scope and order identifiers
 available separately. Known Ethereum addresses have names such as **The Memes**,
@@ -167,11 +189,18 @@ checking the exact address or grant permission to spend.
 The review stays available while you read. **Continue in wallet** checks current
 terms and refreshes the execution quote when needed. If the reviewed terms still
 match, it proceeds to the wallet without a separate quote-refresh step. Changed
-prices, fees, quantities, destinations, approval scopes or network fee caps require
+prices, fees, quantities, destinations or approval scopes require
 you to review and continue again. The same checks apply to listings, offers,
 accepting an offer, cancellation and supported multiple-item purchases. Checking
 terms never signs or sends a transaction by itself. Quote freshness is separate
 from the signed order's expiry; refreshing does not extend that order.
+The network fee limits you reviewed stay in place while the current transaction
+can execute within them. A changing fee estimate does not by itself require
+another review or raise those limits. If the transaction needs a higher limit,
+the review pauses and shows the updated maximum before any wallet request.
+**View exact changes** expands the previous and updated fee limits. A fee-only
+change identifies that the purchase price is unchanged; changes to the purchase
+itself require a separate review of those terms.
 
 ### Complete a profile set
 
@@ -190,12 +219,16 @@ includes. Cards in Lowest listings and TDH use compact ETH prices with up to fou
 decimal places, rounded upward. Positive amounts below 0.0001 ETH show
 **<0.0001 ETH**. Expand a shortened price to read **Exact amounts**; the listing
 price and purchase quantity remain unchanged.
-Open an artwork for its card page, or select its **+** to add it to
-your purchase selection. The control becomes a checkmark; select it again to
-remove that NFT. The selection stays available while switching between Lowest
+Open an artwork for its card page, or select **Add** to add it to
+your purchase selection. The control becomes **Selected** with a checkmark;
+select it again to remove that NFT. The selection stays available while switching between Lowest
 listings and TDH, with its actions kept in view while you scroll.
 **Review purchase** lets you collect some or all selected items;
 **Plan offers** opens a price plan for those NFTs.
+Lowest listings and TDH request up to 48 source entries at a time. Filtering and
+combining duplicate artworks can leave fewer cards; the count above the grid
+reports artworks actually shown. Choose **Load more artwork** when another page
+is available.
 No listing results does not mean that no orders exist elsewhere. If the listing
 source cannot be loaded, use **Try again** or return to the collection page.
 
@@ -222,6 +255,19 @@ Select NFTs from Lowest listings, TDH or a completion plan, then open
 **Review purchase**. Select all or keep only the items you want, and check the
 delivery addresses. The first total is an estimate; **Review live total**
 requests current executable terms for every selected order.
+The selection review fills the screen with artwork rows and a purchase summary.
+On desktop the summary stays beside the artwork; on mobile the maximum total and
+**Continue in wallet** remain visible while the artwork and details scroll.
+Shortened draft and review amounts are marked as approximate, with exact prices
+available in disclosures. Only display values are rounded.
+**Back to collecting** remains at the top; closing is unavailable while a wallet
+step or updated review is preparing.
+
+Before sending, **Remove** beside an artwork checks the existing review and
+prepares a new quote for the remaining items. Their quantities, exact orders and
+delivery splits remain intact. A failed update keeps the original review.
+Removing the last item closes the review after checking that no purchase is
+pending. Removal is unavailable during delivery editing or transaction recovery.
 
 Supported selections are purchased in one Ethereum transaction. Every selected
 purchase and delivery succeeds together, or the transaction reverts. A revert
@@ -233,7 +279,8 @@ The review shows each artwork's quantity and delivery allocations, the paying
 wallet, purchase price, network fee cap and maximum where available. Price and
 contract breakdowns preserve each order's exact fees and identity. **Continue in
 wallet** rechecks every selected order together. A quote that aged while you read
-is refreshed automatically; changed terms require another review. Changing the
+is refreshed automatically. When available, the review identifies the old and new
+price, quantity, fees or maximum cost that require another decision. Changing the
 selection, quantity, payer or delivery addresses also requires another review.
 Orders retains the purchase until its receipt confirms all selected deliveries.
 
@@ -360,7 +407,8 @@ also releases them; closing alone does not.
 
 ### Compare TDH
 
-Choose **TDH** to see listings immediately, starting with The Memes. You do not
+Choose **TDH** to see listings immediately for the selected collection, defaulting
+to The Memes. You do not
 need a profile, budget or time horizon to browse. The grid compares each NFT's
 best supported indexed ETH ask by **base TDH/day per ETH**. A higher value means
 more base TDH accrual for the listed price. Signed listing fees are included;
@@ -404,8 +452,10 @@ total on a particular date rather than a daily earning rate.
 ### Reach target TDH
 
 From **TDH**, choose **Reach target TDH**. Enter the TDH you want to hold and a
-timeframe of 1, 30, 90 or 365 days, then choose The Memes, Gradients or Pebbles.
-The default is a total future TDH target, 30 days and The Memes.
+timeframe of 1, 30, 90 or 365 days. The shared **Collection** selector keeps
+The Memes, Gradients or Pebbles selected from the other tools.
+The default is a total future TDH target and 30 days; an unqualified visit uses
+The Memes.
 **Back to TDH listings** returns to the immediate price comparison.
 
 The projection uses your profile's confirmed consolidated holdings and a verified
@@ -480,6 +530,15 @@ If current terms differ when you continue, the review shows the changed terms
 before requesting wallet approval. Review them and continue again if you accept
 them. The site does not substitute a different NFT into an exact-item purchase.
 
+**Continue in wallet** waits until the connected wallet is ready on Ethereum.
+If the wallet is still connecting, the review explains that state. A declined
+request keeps your choices for another attempt.
+
+If an initial check cannot finish, the review says **Checks could not finish**.
+Retry those checks with your choices retained. The message does not establish
+the outcome of an earlier wallet request. If a signed
+order could not be published, check order activity before retrying publication.
+
 Preparation errors distinguish an unreachable service, expired authentication,
 changed profile or delivery wallets, unsupported terms and invalid trade details.
 Follow the displayed recovery step; retrying preparation does not sign or send
@@ -490,11 +549,16 @@ exposure until confirmed cancellation, expiry or fill. If broadcast is uncertain
 retain the transaction hash and retry reconciliation of that same transaction.
 Do not send another purchase merely because a page timed out.
 
+Once a transaction hash is saved, the site checks that same transaction
+automatically. **Your transaction hash is saved** means it is checking the outcome,
+not asking you to send again. Normal wallet requests and checks of a known hash
+do not ask you to paste a transaction hash.
+
 If the wallet may have submitted a transaction without returning its hash, the
 review changes to **Checking the outcome**. That operation cannot send another
 transaction, including from another browser, while the attempt is unresolved.
-Open your wallet's activity, copy the hash into **Transaction hash from your
-wallet**, and select **Check this transaction**. The site verifies the exact
+After the active wallet step ends, open your wallet's activity, copy the hash into
+**Transaction hash from your wallet**, and select **Check this transaction**. The site verifies the exact
 sender, NFT action and transaction details before accepting it. This also works
 for an approval and when local browser recovery data is unavailable. A hash
 that cannot yet be verified remains available for another check; checking it

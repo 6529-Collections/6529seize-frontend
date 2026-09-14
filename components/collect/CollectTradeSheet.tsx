@@ -9,6 +9,8 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import CollectPurchaseSummary from "./CollectPurchaseSummary";
 import CollectOrderSummary from "./CollectOrderSummary";
 import CollectReviewRecipient from "./CollectReviewRecipient";
+import CollectReviewChangeDetails from "./CollectReviewChangeDetails";
+import type { MarketReviewChangeNotice } from "./market-review-change-description";
 import styles from "./marketplace-font.module.css";
 import type {
   CollectReviewFact,
@@ -25,6 +27,7 @@ interface CollectTradeSheetProps {
   readonly form?: ReactNode;
   readonly recoveryAction?: ReactNode;
   readonly message?: string | undefined;
+  readonly reviewChangeNotice?: MarketReviewChangeNotice | undefined;
   readonly onClose: () => void;
   readonly onRefresh: () => void | Promise<void>;
   readonly onConfirm: (reviewId: string, revision: string) => Promise<void>;
@@ -61,6 +64,7 @@ export function CollectTradeDialog({
       enableDragToClose={false}
       maxWidthClass="md:tw-max-w-xl"
       focusTitleOnOpen
+      showScrollbar
     >
       <div className={styles["surface"]}>{children}</div>
     </MobileWrapperDialog>
@@ -173,6 +177,9 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
         >
           {message}
         </p>
+      )}
+      {showMessage && props.reviewChangeNotice && (
+        <CollectReviewChangeDetails notice={props.reviewChangeNotice} />
       )}
       {review && props.stage === "review" && (
         <Button

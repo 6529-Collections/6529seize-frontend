@@ -510,6 +510,21 @@ const MEMES_QUICK_VOTE_MESSAGES = objectMessages("memes.quickVote", {
 } as const);
 
 const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
+  "agreement.changed":
+    "The submission destination or terms changed. Review and agree again to continue. Your artwork draft has been kept.",
+  "agreement.reviewRequired":
+    "Review and agree to the current submission terms before submitting. Your artwork draft has been kept.",
+  "signing.notice": "Wallet signature · No gas fee",
+  "signing.explain": "What to expect",
+  "signing.title": "What will my wallet show?",
+  "signing.review":
+    "Look for “Submit a Meme Card to The Memes” and check your artwork title and submission terms.",
+  "signing.metamask": "MetaMask",
+  "signing.metamaskDescription": "Shows the message as labeled fields.",
+  "signing.rabby": "Rabby",
+  "signing.rabbyDescription":
+    "May show the message as raw data with “Unknown Signature Type”. Review the message details before signing.",
+  "signing.mismatch": "Cancel if the details do not match your submission.",
   "media.missingUpload": "Select artwork or choose Interactive HTML.",
   "media.missingInteractive": "Enter a valid hash or choose Upload File.",
   "identity.connectPrompt":
@@ -2781,6 +2796,15 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "singleDrop.share": "Share",
+  "singleDrop.shareLabel": "Share drop",
+  "singleDrop.shared": "Link shared",
+  "singleDrop.close": "Close",
+  "singleDrop.closeLabel": "Close panel",
+  "singleDrop.showChat": "Show chat",
+  "singleDrop.hideChat": "Hide chat",
+  "singleDrop.chatLabel": "Drop chat",
+  "singleDrop.closeChat": "Close chat",
   ...artworkShareMessages,
   ...COLLECT_MESSAGES,
   ...COLLECT_TDH_TARGET_MESSAGES,

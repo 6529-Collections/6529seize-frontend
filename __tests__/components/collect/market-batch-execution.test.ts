@@ -14,6 +14,10 @@ import { ApiMarketBatchOperationStateEnum } from "@/generated/models/ApiMarketBa
 import type { PublicClient, WalletClient } from "viem";
 import * as BatchCapabilities from "@/generated/models/ApiMarketBatchCapabilities";
 import { findResumableMarketBatch } from "@/components/collect/market-batch-resume";
+import { marketExecutionError } from "@/components/collect/market-execution-errors";
+import { t } from "@/i18n/messages";
+import { decodeFunctionData } from "viem";
+import { MARKET_BATCH_ABI } from "@/components/collect/market-batch-validation";
 
 const enabledCapability: BatchCapabilities.ApiMarketBatchCapabilities = {
   available: true,
@@ -78,6 +82,7 @@ function setup() {
   const client = {
     getChainId: jest.fn().mockResolvedValue(1),
     getCode: jest.fn().mockResolvedValue("0x"),
+    getBlock: jest.fn().mockResolvedValue({ baseFeePerGas: 8n }),
     call: jest.fn().mockResolvedValue({}),
     estimateGas: jest.fn().mockResolvedValue(400000n),
     estimateFeesPerGas: jest
@@ -92,7 +97,7 @@ function setup() {
     ...f.operation,
     state: ApiMarketBatchOperationStateEnum.Submitted,
   });
-  send.mockResolvedValue({
+  send.mockReset().mockResolvedValue({
     hash: `0x${"a".repeat(64)}`,
     attempt: createMarketSendAttempt(f.operation.transaction!, 12, "1"),
   });
@@ -210,7 +215,11 @@ it.each([
     case "changed fee":
       refresh.mockResolvedValue({
         ...f.operation,
-        transaction: { ...f.operation.transaction!, max_fee_per_gas: "9" },
+        transaction: {
+          ...f.operation.transaction!,
+          gas_limit: "500000",
+          max_fee_per_gas: "11",
+        },
       });
       break;
     case "wrong chain":
@@ -229,10 +238,7 @@ it.each([
       f.client.estimateGas.mockResolvedValue(600001n);
       break;
     case "fee cap":
-      f.client.estimateFeesPerGas.mockResolvedValue({
-        maxFeePerGas: 11n,
-        maxPriorityFeePerGas: 1n,
-      });
+      f.client.getBlock.mockResolvedValue({ baseFeePerGas: 10n });
       break;
     case "connection changed":
       f.client.estimateGas.mockImplementation(async () => {
@@ -248,17 +254,191 @@ it.each([
   expect(f.wallet.sendTransaction).not.toHaveBeenCalled();
   expect(submit).not.toHaveBeenCalled();
 });
-it("requires a new visible confirmation when a refreshed gas cap changes", async () => {
+it("continues when refreshed gas caps decrease", async () => {
   const f = setup(),
     changed = {
       ...f.operation,
       transaction: { ...f.operation.transaction!, max_fee_per_gas: "9" },
     };
   refresh.mockResolvedValue(changed);
-  expect(await confirmMarketBatch(f.options)).toBe("UPDATED_REVIEW");
+  expect(await confirmMarketBatch(f.options)).toBe("COMPLETE");
   expect(f.options.onOperation).toHaveBeenCalledWith(changed);
-  expect(send).not.toHaveBeenCalled();
+  expect(send).toHaveBeenCalledTimes(1);
 });
+
+it("opens the wallet once with retained caps despite a higher padded RPC fee suggestion", async () => {
+  const f = setup();
+  const hash = `0x${"b".repeat(64)}` as const;
+  const onReviewChange = jest.fn();
+  f.wallet.sendTransaction.mockResolvedValue(hash);
+  f.client.estimateFeesPerGas.mockResolvedValue({
+    maxFeePerGas: 20n,
+    maxPriorityFeePerGas: 1n,
+  });
+  refresh.mockResolvedValue({ ...f.operation, revision: "fresh-revision" });
+  send.mockImplementationOnce(async (options) => ({
+    hash: await options.send(),
+    attempt: createMarketSendAttempt(
+      options.operation.transaction!,
+      12,
+      "fresh-revision"
+    ),
+  }));
+  await expect(
+    confirmMarketBatch({ ...f.options, onReviewChange })
+  ).resolves.toBe("COMPLETE");
+  expect(onReviewChange).not.toHaveBeenCalled();
+  expect(f.wallet.sendTransaction).toHaveBeenCalledTimes(1);
+  expect(f.wallet.sendTransaction).toHaveBeenCalledWith(
+    expect.objectContaining({
+      gas: 600000n,
+      maxFeePerGas: 10n,
+      maxPriorityFeePerGas: 1n,
+      data: f.operation.transaction!.data,
+    })
+  );
+});
+
+it.each([false, true])(
+  "checks the exact buyer order against a lagging RPC block (start within seller window=%s)",
+  async (backdated) => {
+    const f = setup();
+    const browserBlockTime = BigInt(NOW / 1000 - 12);
+    if (backdated) {
+      f.operation.mirror_terms!.start_time = String(NOW / 1000 - 60);
+      f.orders[2]!.parameters.startTime = BigInt(
+        f.operation.mirror_terms!.start_time
+      );
+      f.reencode();
+    }
+    f.client.call.mockImplementation(
+      async (request: { data: `0x${string}` }) => {
+        const { args } = decodeFunctionData({
+          abi: MARKET_BATCH_ABI,
+          data: request.data,
+        });
+        if (args[0][2]!.parameters.startTime > browserBlockTime)
+          throw new Error("InvalidTime");
+        return {};
+      }
+    );
+    f.wallet.sendTransaction.mockResolvedValue(`0x${"d".repeat(64)}`);
+    send.mockImplementationOnce(async (options) => ({
+      hash: await options.send(),
+      attempt: createMarketSendAttempt(options.operation.transaction!, 12, "1"),
+    }));
+    if (backdated) {
+      await expect(confirmMarketBatch(f.options)).resolves.toBe("COMPLETE");
+      expect(f.wallet.sendTransaction).toHaveBeenCalledTimes(1);
+      expect(f.wallet.sendTransaction).toHaveBeenCalledWith(
+        expect.objectContaining({ data: f.operation.transaction!.data })
+      );
+    } else {
+      await expect(confirmMarketBatch(f.options)).rejects.toThrow(
+        "InvalidTime"
+      );
+      expect(send).not.toHaveBeenCalled();
+      expect(f.wallet.sendTransaction).not.toHaveBeenCalled();
+    }
+  }
+);
+
+it.each([
+  "getCode",
+  "call",
+  "estimateGas",
+  "getBlock",
+  "estimateFeesPerGas",
+] as const)(
+  "reports a %s RPC failure as a preflight error without requesting any transaction",
+  async (method) => {
+    const f = setup();
+    f.client[method].mockRejectedValueOnce(new Error("private RPC failure"));
+    let failure: unknown;
+    try {
+      await confirmMarketBatch(f.options);
+    } catch (error) {
+      failure = error;
+    }
+    expect(failure).toBeInstanceOf(Error);
+    expect(marketExecutionError(failure, "en-US")).toBe(
+      t("en-US", "collect.trade.preflightFailed")
+    );
+    expect(send).not.toHaveBeenCalled();
+    expect(f.wallet.sendTransaction).not.toHaveBeenCalled();
+    expect(submit).not.toHaveBeenCalled();
+  }
+);
+
+it("retries only the known transaction acknowledgement after an earlier submission failed", async () => {
+  const f = setup();
+  const hash = `0x${"c".repeat(64)}` as const;
+  f.wallet.sendTransaction.mockResolvedValue(hash);
+  send.mockImplementationOnce(async (options) => {
+    const attempt = {
+      ...createMarketSendAttempt(options.operation.transaction!, 12, "1"),
+      walletRequested: true,
+    };
+    const sentHash = await options.send();
+    saveMarketBatch(f.request.profile_id, f.operation.id, {
+      request: f.request,
+      sendAttempt: attempt,
+      transactionHash: sentHash,
+    });
+    return { hash: sentHash, attempt };
+  });
+  submit
+    .mockRejectedValueOnce(new Error("unavailable"))
+    .mockRejectedValueOnce(new Error("unavailable"));
+  await expect(confirmMarketBatch(f.options)).rejects.toThrow(
+    "MARKET_SUBMISSION_PENDING"
+  );
+  f.client.getTransaction.mockResolvedValue({
+    hash,
+    chainId: 1,
+    from: PAYER,
+    to: f.operation.transaction!.to,
+    input: f.operation.transaction!.data,
+    value: 140n,
+    blockNumber: 13n,
+  });
+  await expect(confirmMarketBatch(f.options)).resolves.toBe("COMPLETE");
+  expect(f.wallet.sendTransaction).toHaveBeenCalledTimes(1);
+  expect(send).toHaveBeenCalledTimes(1);
+  expect(refresh).toHaveBeenCalledTimes(1);
+  expect(submit).toHaveBeenCalledTimes(3);
+  expect(
+    submit.mock.calls.every(([, body]) => body.transaction_hash === hash)
+  ).toBe(true);
+});
+
+it.each([false, true])(
+  "never sends again when a known hash acknowledgement fails (persistent=%s)",
+  async (persistent) => {
+    const f = setup();
+    const onStage = jest.fn(),
+      onKnownHash = jest.fn();
+    if (persistent)
+      submit.mockRejectedValue(new Error("acknowledgement unavailable"));
+    else submit.mockRejectedValueOnce(new Error("acknowledgement unavailable"));
+    const confirming = confirmMarketBatch({
+      ...f.options,
+      onStage,
+      onKnownHash,
+    });
+    if (persistent)
+      await expect(confirming).rejects.toThrow("MARKET_SUBMISSION_PENDING");
+    else await expect(confirming).resolves.toBe("COMPLETE");
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(submit).toHaveBeenCalledTimes(2);
+    expect(submit.mock.calls[0]).toEqual(submit.mock.calls[1]);
+    expect(onKnownHash).toHaveBeenCalledWith(`0x${"a".repeat(64)}`);
+    expect(onStage.mock.calls.map(([stage]) => stage)).toEqual([
+      "submitted",
+      "reconciling",
+    ]);
+  }
+);
 it.each([0, NOW - 1])(
   "refreshes the stored review deadline %s before one exact wallet request",
   async (deadline) => {
@@ -304,7 +484,11 @@ it("compares refreshed economics against the shown review even when the GET has 
   const f = setup();
   const changed = {
     ...f.operation,
-    transaction: { ...f.operation.transaction!, max_fee_per_gas: "9" },
+    transaction: {
+      ...f.operation.transaction!,
+      gas_limit: "500000",
+      max_fee_per_gas: "11",
+    },
   };
   fetch.mockResolvedValue(changed);
   refresh.mockResolvedValue(changed);

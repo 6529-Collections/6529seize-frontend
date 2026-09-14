@@ -1,4 +1,70 @@
 export const COLLECT_MESSAGES = {
+  "collect.trade.preflightFailed": "Checks could not finish. Try again.",
+  "collect.trade.recoveryFailed":
+    "The transaction status could not be checked. Keep the transaction hash and retry the status check.",
+  "collect.trade.publishFailed":
+    "The signed order could not be published. Check order activity before retrying.",
+  "collect.trade.networkFeeUpdated":
+    "Network fee updated. Your purchase price is unchanged. Review the new maximum before continuing.",
+  "collect.trade.networkLimitsUpdated":
+    "Network fee limits updated. Review the new limits before continuing.",
+  "collect.review.exactChanges": "View exact changes",
+  "collect.review.previousValue": "Previous: {value}",
+  "collect.review.updatedValue": "Updated: {value}",
+  "collect.review.gasLimit": "Gas limit",
+  "collect.review.gasPriceLimit": "Gas price limit",
+  "collect.review.approvalLimit": "Approval {number} · {limit}",
+  "collect.trade.changedPrice":
+    "Trade total changed from {before} to {after} {currency}.",
+  "collect.trade.changedFees":
+    "Included fees changed from {before} to {after} {currency}.",
+  "collect.trade.changedNetworkFee":
+    "Network fee cap changed from {before} to {after} {currency}.",
+  "collect.trade.changedMaximum":
+    "Maximum total changed from {before} to {after} {currency}.",
+  "collect.trade.changedQuantity":
+    "Quantity for {artwork} changed from {before} to {after}.",
+  "collect.trade.changedGasLimit":
+    "Gas limit changed from {before} to {after}.",
+  "collect.trade.changedGasPrice":
+    "Gas price limit changed from {before} to {after} Gwei.",
+  "collect.trade.reviewUpdatedTerms":
+    "Review the updated terms before continuing.",
+  "collect.trade.changedDelivery":
+    "Delivery destinations or their quantities changed.",
+  "collect.trade.changedCurrency": "The payment currency changed.",
+  "collect.selection.add": "Add",
+  "collect.selection.selected": "Selected",
+  "collect.listings.shown": "{count} artworks shown",
+  "collect.goal.editSetup": "Edit goal",
+  "collect.goal.hideSetup": "Hide setup",
+  "collect.buy.notListed": "This artwork is not currently listed.",
+  "collect.buy.noMatchingListing":
+    "No matching listing is available to collect here.",
+  "collect.trade.walletNotReady":
+    "Connecting to your wallet. Continue when it is ready.",
+  "collect.trade.walletRejected":
+    "You declined the wallet request. Your choices are kept.",
+  "collect.trade.wrongChain": "Switch your wallet to Ethereum to continue.",
+  "collect.trade.gasChanged":
+    "The network fee limit changed. Review the updated maximum before continuing.",
+  "collect.trade.submissionPending":
+    "Your transaction hash is saved. We are checking its status; do not send again.",
+  "collect.trade.approvalReverted":
+    "The token approval failed on-chain. Review its status before trying again.",
+  "collect.checkout.back": "Back to collecting",
+  "collect.checkout.title": "Review your purchase",
+  "collect.checkout.remove": "Remove",
+  "collect.checkout.removeArtwork": "Remove {title} from this purchase",
+  "collect.checkout.deliverAll": "Deliver all to",
+  "collect.checkout.changeAll": "Change all to",
+  "collect.checkout.deliveryExceptions":
+    "Some artworks have different destinations. Changing the shared destination applies to every artwork.",
+  "collect.checkout.deliveryDetails": "Change delivery for this artwork",
+  "collect.checkout.summary": "Purchase summary",
+  "collect.checkout.approximate": "Approximately",
+  "collect.checkout.exactNote":
+    "Displayed prices are rounded. Exact amounts are available below.",
   "collect.tdhDaily.recalculate": "Recalculate",
   "collect.tdhDaily.resultTitle": "Daily TDH purchase plan",
   "collect.tdhDaily.shortfall":
@@ -478,8 +544,6 @@ export const COLLECT_MESSAGES = {
     "Switch out of profile proxy mode to trade.",
   "collect.trade.safeUnavailable":
     "This wallet type is not supported for trading yet.",
-  "collect.trade.wrongChain":
-    "Switch your wallet to Ethereum mainnet to continue.",
   "collect.trade.nativeUnavailable":
     "Trading is not available in the mobile app yet. Open 6529.io in your browser to review this trade.",
   "collect.trade.selectOrder": "Choose an order",
@@ -516,7 +580,7 @@ export const COLLECT_MESSAGES = {
   "collect.trade.approvalTarget": "Approval contract",
   "collect.trade.approvalScope": "Approval scope",
   "collect.trade.checkFailed":
-    "This payload did not match your reviewed trade. Nothing was sent to your wallet.",
+    "The transaction details did not match your reviewed trade.",
   "collect.trade.refreshReview":
     "Terms changed. Review the updated details before continuing.",
   "collect.trade.walletFailed":
@@ -608,7 +672,7 @@ export const COLLECT_MESSAGES = {
   "collect.collection.memes": "The Memes",
   "collect.collection.memelab": "Meme Lab",
   "collect.collection.gradients": "Gradients",
-  "collect.collection.pebbles": "Pebbles",
+  "collect.collection.pebbles": "Pebbles · NextGen",
   "collect.intent.explore": "Explore the art",
   "collect.intent.lowest": "Find the lowest price",
   "collect.intent.specific": "Find something specific",

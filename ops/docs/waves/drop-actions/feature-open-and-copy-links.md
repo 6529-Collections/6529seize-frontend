@@ -7,11 +7,15 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
 
 - `Open` / `Open drop` uses `drop={dropId}` to open single-drop view in the
   current thread.
+- The single-drop header has a visible `Share` button on desktop, mobile web,
+  and the native app. It shares a `drop={dropId}` URL that reopens the same
+  single-drop view, using the system share sheet when available and copying the
+  link otherwise.
 - Preview cards and quote cards expose a `Link actions` button with
   `Copy link` and `Open link`.
 - `Copy link` copies an absolute share URL that targets the drop with:
   - `serialNo={serialNo}` for most drops
-  - `drop={dropId}` for memes submission drops
+  - `drop={dropId}` for Main Stage and Quorum participatory drops
 - Link-card `Copy link` copies the original referenced URL shown by that card.
 
 ## Location in the Site
@@ -32,6 +36,8 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
 - Open a wave or DM thread.
 - Use `Open` / `Open drop` from thread actions, or from leaderboard/winners
   cards where shown.
+- From the artist badge preview, open a submission or winning drop, then use
+  `Share` in the single-drop header.
 - Use `Copy link` from thread desktop `More` or thread mobile action sheet.
 - Hover or focus a preview card on desktop, or use the always-visible touch
   trigger, then open `Link actions`.
@@ -50,6 +56,24 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
    - external targets open in a new tab
 8. Close single-drop view or dismiss the card menu to continue thread browsing.
 
+## Sharing an Opened Drop
+
+1. Open the submission or drop.
+2. Select `Share` beside the chat control.
+3. Choose a destination in the system share sheet. A successful share shows
+   `Link shared`. Cancelling leaves the drop open without copying or an error.
+4. If system sharing is unavailable or fails, the app copies the 6529.io link
+   that reopens the same single-drop view. `Copied!` appears only after the
+   clipboard confirms success.
+5. If clipboard access fails, the button briefly shows `Copy failed`. Allow
+   clipboard access and try again.
+
+Shared links use `drop={dropId}` so they reopen the same single-drop view. Wave
+links use `/waves/{waveId}`; direct-message links use `/messages/{waveId}` and
+still require access to that conversation. The share action includes only the
+URL, without private drop text or wave names. Temporary drops that are still
+being created do not show the Share action.
+
 ## Common Scenarios
 
 - `Open` keeps the current route and keeps existing query params.
@@ -62,7 +86,7 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
 - Dismissing the link-card menu does not activate the underlying card.
 - Desktop copy can still infer DM routes from stream context when DM scope data
   on the drop is incomplete.
-- Mobile copy uses Clipboard API when available and falls back to textarea copy.
+- Drop copy actions confirm Clipboard API success before showing `Copied!`.
 - Memes submission drop copy links use canonical wave drop URLs and open the
   single-drop overlay when opened.
 - In the native mobile app on a touchscreen, a short tap on a Memes leaderboard
@@ -102,10 +126,11 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
 
 ## Limitations / Notes
 
-- `Open` (`drop` query), most copied drop links (`serialNo` query), memes
-  submission copied links (`drop` query), and link-card `Open link` are
-  different navigation mechanisms.
-- Opening a copied link does not force single-drop overlay mode.
+- `Open` and single-drop `Share` use the `drop` query. Most copied drop links
+  use the `serialNo` query, Main Stage and Quorum participatory copied links use
+  the `drop` query, and link-card `Open link` follows its referenced URL.
+- Main Stage and Quorum participatory links open single-drop view. Other copied
+  drop links jump to the drop in chat.
 - `Copy link` is unavailable for temporary drops.
 - Link-card actions depend on the preview or quote card being rendered. Once a
   drop hides previews, plain links remain but card action menus do not.

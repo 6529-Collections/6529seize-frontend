@@ -1,3 +1,4 @@
+import CollectGoalForm from "@/components/collect/CollectGoalForm";
 import CollectGoalsController from "@/components/collect/CollectGoalsController";
 import type { ApiCollectCatalog } from "@/generated/models/ApiCollectCatalog";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -139,4 +140,35 @@ it("keeps usable cached targets available after a background refetch fails", () 
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   expect(screen.getByRole("combobox", { name: "Season" })).toBeEnabled();
   expect(screen.getByRole("button", { name: "Build my plan" })).toBeEnabled();
+});
+
+it("hides edition counts for a Gradient full set and submits one of each while preserving budget", () => {
+  const onSubmit = jest.fn();
+  render(
+    <CollectGoalForm
+      draft={{
+        ...props.draft,
+        intent: "full_set",
+        definitionId: "gradients",
+        targetCount: "7",
+      }}
+      definitions={[{ id: "gradients", label: "Gradients" }]}
+      profile={{ id: "profile", displayName: "collector" }}
+      loading={false}
+      budgetOptional
+      onChange={jest.fn()}
+      onSubmit={onSubmit}
+      onConnect={jest.fn()}
+      completion={{ collection: "gradients", onIntentChange: jest.fn() }}
+    />
+  );
+  expect(screen.queryByLabelText("Copies per NFT")).not.toBeInTheDocument();
+  fireEvent.submit(screen.getByRole("form"));
+  expect(onSubmit).toHaveBeenCalledWith(
+    expect.objectContaining({
+      definitionId: "gradients",
+      targetCount: "1",
+      budgetEth: "1.25",
+    })
+  );
 });

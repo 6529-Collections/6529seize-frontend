@@ -104,6 +104,7 @@ jest.mock("@/services/api/collect-api", () => ({
 }));
 jest.mock("@/components/collect/useMarketExecution", () => ({
   useMarketExecution: () => ({
+    ready: true,
     confirm: mockConfirm,
     recoverTransaction: jest.fn(),
     stage: null,

@@ -46,7 +46,43 @@ On `success`, the modal auto-closes after a short delay.
    `Submit Artwork`.
 7. The primary action reports upload progress, asks the user to check the
    wallet while signing, and stays disabled through API processing.
-8. On `success`, the modal closes after a short delay.
+8. In the wallet, review `Submit a Meme Card to The Memes`, the artwork title,
+   destination wave, and agreement before signing.
+9. On `success`, the modal closes after a short delay.
+
+### Review the Submission Signature
+
+Before success, eligible submitters see `Wallet signature · No gas fee` and
+`What to expect` above the actions in `Additional Information` and `Preview`.
+Click or tap `What to expect` to open `What will my wallet show?`;
+press `Escape` to dismiss it.
+
+The note explains that MetaMask shows labeled fields, while Rabby may show raw
+data with `Unknown Signature Type`. Review the message details: look for
+`Submit a Meme Card to The Memes`, check your artwork title and submission terms,
+and cancel if the details do not match your submission.
+
+The Memes Main Stage uses an EIP-712 typed-data signature. It authorizes the
+artwork submission and confirms agreement to the submission terms reviewed in
+`Agreement`. This submission signature does not mint an NFT, approve token
+spending, or transfer wallet assets. Signing requires no gas fee.
+
+The signed details include:
+
+| Field          | What to review                                                                                       |
+| -------------- | ---------------------------------------------------------------------------------------------------- |
+| `Action`       | `Submit a Meme Card to The Memes`                                                                    |
+| `Artwork`      | Your artwork title                                                                                   |
+| `Destination`  | The Main Stage wave you intend to submit to                                                          |
+| `Agreement`    | Your agreement to The Memes submission terms you reviewed                                            |
+| `Notice`       | Submission only, with no mint, token approval, asset transfer, or gas fee                            |
+| `ExpiresAt`    | The deadline for using this signature to submit                                                      |
+| `Verification` | Signing wallet, wave and site identifiers, timestamps, and hashes that bind the submission and terms |
+
+The authorization lasts five minutes from creation of the signing request.
+Its expiry does not expire a completed submission or the agreement to the terms.
+The wallet controls the layout, field expansion, and signature classification;
+these can differ between wallets.
 
 ## Common Scenarios
 
@@ -110,6 +146,16 @@ On `success`, the modal auto-closes after a short delay.
   submitting.
 - If upload, auth, signing, or API submission fails, the modal keeps current
   draft state and supports retry from the current screen.
+- If the destination wave or submission terms change while drafting, the form
+  returns to `Agreement` and asks you to review and agree again. Your artwork
+  and additional information stay in the draft.
+- Canceling the signature in your wallet stops the submission and shows
+  `Signature request was canceled in your wallet.` The draft stays available
+  while the submission modal remains open. Closing the modal discards it.
+- If the authorization expires before submission completes, retry from the
+  same draft and review a new signature request.
+- A failed or unsupported typed-data signing request stops the attempt. The
+  app does not automatically switch The Memes submission to a text signature.
 - If submission is attempted with an over-limit metadata payload, the app stops
   before upload/signing and can show a toast naming the offending metadata
   sections.

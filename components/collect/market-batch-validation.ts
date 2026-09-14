@@ -20,6 +20,31 @@ import {
   marketTypedData,
 } from "./market-validation";
 import { validateBatchFlow } from "./market-batch-flow";
+import {
+  marketGasCapsWithinReview,
+  withReviewedGasCaps,
+} from "./market-review-caps";
+
+export function marketBatchReviewChange(
+  shown: ApiMarketBatchOperation,
+  fresh: ApiMarketBatchOperation
+): "terms" | "gas" | null {
+  const masked =
+    fresh.transaction && shown.transaction
+      ? {
+          ...fresh,
+          transaction: withReviewedGasCaps(
+            fresh.transaction,
+            shown.transaction
+          ),
+        }
+      : fresh;
+  if (marketBatchReviewTerms(masked) !== marketBatchReviewTerms(shown))
+    return "terms";
+  return marketGasCapsWithinReview(shown.transaction, fresh.transaction)
+    ? null
+    : "gas";
+}
 
 // Independent browser limits and contract allowlist, never supplied by an API response.
 export const MARKET_BATCH_LIMITS = {
@@ -501,7 +526,7 @@ function validateMirror(
   });
 }
 
-/** Authorization bytes may refresh; every price, recipient, order and gas cap must be reviewed again if changed. */
+/** Authorization bytes may refresh; send-fence acknowledgements bind every cap exactly. */
 export function marketBatchReviewTerms(
   operation: ApiMarketBatchOperation
 ): string {

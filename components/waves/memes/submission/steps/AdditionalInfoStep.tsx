@@ -27,6 +27,7 @@ import { validateTokenIdFormat } from "../utils/tokenParsing";
 import type { MemesSubmissionIdentity } from "../hooks/useMemesSubmissionIdentity";
 import { SubmissionActionButton } from "../ui/SubmissionActionButton";
 import { SubmissionIdentityPanel } from "../ui/SubmissionIdentityPanel";
+import { SubmissionSigningNote } from "../ui/SubmissionSigningNote";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
 
 interface AdditionalInfoStepProps {
@@ -294,6 +295,11 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
       </div>
 
       <div className="tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-py-3">
+        {identity.canSubmit && submissionPhase !== "success" && (
+          <div className="tw-mx-auto tw-mb-2 tw-w-full tw-max-w-4xl tw-px-4 md:tw-px-8">
+            <SubmissionSigningNote />
+          </div>
+        )}
         <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-4xl tw-flex-col tw-gap-2 tw-px-4 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-3 md:tw-px-8">
           <SubmissionIdentityPanel identity={identity} />
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 md:tw-shrink-0">

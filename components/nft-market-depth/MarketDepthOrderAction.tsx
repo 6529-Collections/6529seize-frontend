@@ -1,6 +1,7 @@
 "use client";
 
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
+import Button from "@/components/utils/button/Button";
 import { collectOrderAvailableQuantity } from "@/components/collect/collect-buy.helpers";
 import {
   ApiMarketOrderApplicabilityEnum,
@@ -25,10 +26,10 @@ import {
   type MarketDepthListingSelection,
 } from "./market-depth-trade.helpers";
 
-export const ACTION_CLASS =
-  "tw-font-inherit tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-meta tw-font-medium tw-leading-5 tw-text-iron-200 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:enabled:hover:tw-border-white/20 desktop-hover:enabled:hover:tw-bg-white/5 desktop-hover:enabled:hover:tw-text-white";
+const ACTION_CLASS =
+  "tw-font-inherit tw-min-h-11 tw-max-w-full !tw-whitespace-normal tw-px-3 tw-py-2 tw-text-meta tw-leading-5";
 const COMPACT_ACTION_CLASS =
-  "tw-font-inherit tw-my-0.5 tw-inline-flex tw-min-h-11 tw-min-w-16 tw-max-w-full tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-2 tw-py-2 tw-text-meta tw-font-medium tw-leading-5 tw-text-iron-200 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:enabled:hover:tw-border-white/20 desktop-hover:enabled:hover:tw-bg-white/5 desktop-hover:enabled:hover:tw-text-white";
+  "tw-font-inherit tw-my-0.5 tw-min-h-11 tw-min-w-16 tw-max-w-full !tw-whitespace-normal tw-px-2 tw-py-2 tw-text-meta tw-leading-5 focus-visible:tw-outline-offset-[-2px]";
 
 export interface RowState {
   readonly busy: boolean;
@@ -115,9 +116,11 @@ export function MarketDepthLevelAction({
     );
   return (
     <NftPurchasingGate>
-      <button
+      <Button
         ref={actionRef}
         type="button"
+        variant="action"
+        size={null}
         className={COMPACT_ACTION_CLASS}
         aria-expanded={open}
         aria-controls={panelId}
@@ -133,7 +136,7 @@ export function MarketDepthLevelAction({
           aria-hidden="true"
           className="tw-h-3 tw-w-3 tw-shrink-0"
         />
-      </button>
+      </Button>
     </NftPurchasingGate>
   );
 }
@@ -172,14 +175,24 @@ export function MarketDepthOrderAction({
             {t(locale, "marketDepth.trade.criteriaUnavailable")}
           </p>
         ) : (
-          <button
+          <Button
             ref={actionRef}
             type="button"
-            className={`${compact ? COMPACT_ACTION_CLASS : ACTION_CLASS} ${selected ? "tw-border-white/20 tw-bg-white/5" : ""}`}
+            variant={selected ? "secondary" : "action"}
+            size={null}
+            className={compact ? COMPACT_ACTION_CLASS : ACTION_CLASS}
+            aria-label={t(
+              locale,
+              order.side === ApiMarketOrderSideEnum.Ask
+                ? listingActionKey
+                : offerActionKey
+            )}
             aria-pressed={
               order.side === ApiMarketOrderSideEnum.Ask ? selected : undefined
             }
-            disabled={Boolean(state?.busy) || context.selectionBusy}
+            loading={state?.busy}
+            hideChildrenWhenLoading={compact}
+            disabled={context.selectionBusy}
             onClick={(event) =>
               order.side === ApiMarketOrderSideEnum.Ask
                 ? context.toggleListing(order)
@@ -189,7 +202,7 @@ export function MarketDepthOrderAction({
             {order.side === ApiMarketOrderSideEnum.Ask
               ? t(locale, listingActionKey)
               : t(locale, offerActionKey)}
-          </button>
+          </Button>
         )}
         {!compact && <MarketDepthOrderFeedback order={order} locale={locale} />}
       </div>
@@ -267,13 +280,15 @@ export function MarketDepthOrderFeedback({
         </p>
       )}
       {state?.connectAction && (
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size={null}
           className={ACTION_CLASS}
           onClick={context.connectOwnerWallet}
         >
           {t(locale, "marketDepth.trade.connectOwner")}
-        </button>
+        </Button>
       )}
     </div>
   );

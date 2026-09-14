@@ -10,17 +10,27 @@ import type { ApiMarketSendAttemptRequest } from "@/generated/models/ApiMarketSe
 import { createMarketSendAttempt } from "@/components/collect/market-send-attempt";
 
 const walletAddress = "0x1111111111111111111111111111111111111111";
-const hash = `0x${"a".repeat(64)}`;
+const hash = `0x${"a".repeat(64)}` as const;
 const mockWallet = {
+  account: { address: walletAddress },
+  chain: { id: 1 },
   getChainId: jest.fn(),
   getAddresses: jest.fn(),
   signTypedData: jest.fn(),
   sendTransaction: jest.fn(),
 };
+let mockWalletValue: typeof mockWallet | undefined = mockWallet;
+let mockClientReady = true;
+const mockAccount = {
+  address: walletAddress,
+  chainId: 1,
+  connector: { uid: "wallet-one" },
+};
 const mockClient = {
   getChainId: jest.fn(),
   getTransaction: jest.fn(),
   getCode: jest.fn(),
+  getBlock: jest.fn(),
   call: jest.fn(),
   estimateGas: jest.fn(),
   estimateFeesPerGas: jest.fn(),
@@ -56,8 +66,9 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
 jest.mock("wagmi", () => ({
-  useWalletClient: () => ({ data: mockWallet }),
-  usePublicClient: () => mockClient,
+  useWalletClient: () => ({ data: mockWalletValue }),
+  usePublicClient: () => (mockClientReady ? mockClient : undefined),
+  useAccount: () => mockAccount,
 }));
 jest.mock("@/services/api/collect-api", () => ({
   fetchCollectCapabilities: (...args: unknown[]) => mockCapabilities(...args),
@@ -165,6 +176,11 @@ function deferred<T>() {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockWalletValue = mockWallet;
+  mockClientReady = true;
+  mockAccount.address = walletAddress;
+  mockAccount.chainId = 1;
+  mockAccount.connector = { uid: "wallet-one" };
   mockAuth.isAuthenticated = true;
   mockAuth.activeProfileProxy = null;
   mockAuth.connectedProfile.id = "profile-one";
@@ -192,6 +208,7 @@ beforeEach(() => {
   mockWallet.getAddresses.mockResolvedValue([walletAddress]);
   mockWallet.signTypedData.mockResolvedValue("0x1234");
   mockClient.getCode.mockResolvedValue("0x");
+  mockClient.getBlock.mockResolvedValue({ baseFeePerGas: 1n });
   mockClient.getChainId.mockResolvedValue(1);
   mockSignature.mockResolvedValue({ ...operation, state: "LIVE" });
   mockClient.call.mockResolvedValue({});
@@ -759,6 +776,115 @@ function buyReview() {
   return { buyExpected, buyOperation };
 }
 
+it("reports missing wallet readiness without replaying a click when the client arrives", async () => {
+  mockWalletValue = undefined;
+  const { result, rerender } = renderHook(() => useMarketExecution(jest.fn()));
+  expect(result.current.ready).toBe(false);
+  await act(() => result.current.confirm(operation, expected));
+  expect(result.current.message).toBeTruthy();
+  expect(mockFetch).not.toHaveBeenCalled();
+  mockWalletValue = mockWallet;
+  rerender();
+  expect(result.current.ready).toBe(true);
+  expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+  await act(() => result.current.confirm(operation, expected));
+  expect(mockWallet.signTypedData).toHaveBeenCalledTimes(1);
+});
+
+it("accepts an equivalent wallet-client object refreshed during quote checking", async () => {
+  const pending = deferred<ApiMarketOperation>();
+  mockFetch.mockReturnValue(pending.promise);
+  const { result, rerender } = renderHook(() => useMarketExecution(jest.fn()));
+  let confirming!: Promise<void>;
+  act(() => {
+    confirming = result.current.confirm(operation, expected);
+  });
+  await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+  mockWalletValue = { ...mockWallet };
+  rerender();
+  await act(async () => {
+    pending.resolve(operation);
+    await confirming;
+  });
+  expect(mockWallet.signTypedData).toHaveBeenCalledTimes(1);
+});
+
+it.each(["connector", "account", "chain", "profile"])(
+  "fences an actor ABA during checking: %s",
+  async (field) => {
+    const pending = deferred<ApiMarketOperation>();
+    mockFetch.mockReturnValue(pending.promise);
+    const { result, rerender } = renderHook(() =>
+      useMarketExecution(jest.fn())
+    );
+    let confirming!: Promise<void>;
+    act(() => {
+      confirming = result.current.confirm(operation, expected);
+    });
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+    if (field === "connector") mockAccount.connector = { uid: "different" };
+    if (field === "account") mockAccount.address = `0x${"2".repeat(40)}`;
+    if (field === "chain") mockAccount.chainId = 10;
+    if (field === "profile") mockAuth.connectedProfile.id = "different";
+    rerender();
+    mockAccount.connector = { uid: "wallet-one" };
+    mockAccount.address = walletAddress;
+    mockAccount.chainId = 1;
+    mockAuth.connectedProfile.id = "profile-one";
+    rerender();
+    await act(async () => {
+      pending.resolve(operation);
+      await confirming;
+    });
+    expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+  }
+);
+
+it("keeps the wallet phase while its promise is pending and retries only known-hash acknowledgement", async () => {
+  const { buyExpected, buyOperation } = buyReview();
+  const signing = deferred<`0x${string}`>();
+  mockWallet.sendTransaction.mockReturnValue(signing.promise);
+  mockSubmission.mockRejectedValueOnce(new Error("acknowledgement lost"));
+  const { result } = renderHook(() => useMarketExecution(jest.fn()));
+  let confirming!: Promise<void>;
+  act(() => {
+    confirming = result.current.confirm(buyOperation, buyExpected);
+  });
+  await waitFor(() =>
+    expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(1)
+  );
+  expect(result.current.stage).toBe("wallet");
+  expect(result.current.knownTransaction).toBeUndefined();
+  await act(async () => {
+    signing.resolve(hash);
+    await confirming;
+  });
+  expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(1);
+  expect(mockSubmission).toHaveBeenCalledTimes(2);
+  expect(mockSubmission).toHaveBeenNthCalledWith(2, buyOperation.id, {
+    transaction_hash: hash,
+  });
+  expect(result.current.knownTransaction).toEqual({
+    operationId: buyOperation.id,
+    hash,
+  });
+});
+
+it("keeps a known hash after acknowledgement remains unavailable", async () => {
+  const { buyExpected, buyOperation } = buyReview();
+  mockSubmission.mockRejectedValue(new Error("offline"));
+  const { result } = renderHook(() => useMarketExecution(jest.fn()));
+  await act(() => result.current.confirm(buyOperation, buyExpected));
+  expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(1);
+  expect(mockSubmission).toHaveBeenCalledTimes(2);
+  expect(result.current.knownTransaction).toEqual({
+    operationId: buyOperation.id,
+    hash,
+  });
+  expect(persisted).toHaveProperty("transactionHash", hash);
+  expect(result.current.message).toMatch(/hash.*saved/i);
+});
+
 describe("refreshing purchase intent before execution", () => {
   let now: number;
   let clock: jest.SpyInstance;
@@ -910,8 +1036,20 @@ describe("refreshing purchase intent before execution", () => {
     await act(() => result.current.confirm(buyOperation, buyExpected));
     expect(onOperation).toHaveBeenCalledWith(changed);
     expect(result.current.message).toBe(
-      "Terms changed. Review the updated details before continuing."
+      "Network fee updated. Your purchase price is unchanged. Review the new maximum before continuing."
     );
+    expect(result.current.reviewChangeNotice?.details).toEqual([
+      {
+        label: "Exact network fee cap",
+        before: "0.0000000000000002 ETH",
+        after: "0.000000000000000201 ETH",
+      },
+      {
+        label: "Exact maximum total",
+        before: "0.0000000000000012 ETH",
+        after: "0.000000000000001201 ETH",
+      },
+    ]);
     expect(mockBegin).not.toHaveBeenCalled();
     expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
   });
@@ -1061,6 +1199,80 @@ it("sends the reviewed gas ceilings without silently increasing them", async () 
   );
   expect(onCommitment).not.toHaveBeenCalled();
 });
+it("ignores a higher padded fee recommendation when actual base plus priority still fit the review", async () => {
+  const { buyExpected, buyOperation } = buyReview();
+  mockClient.estimateFeesPerGas.mockResolvedValue({
+    maxFeePerGas: 5n,
+    maxPriorityFeePerGas: 1n,
+  });
+  const { result } = renderHook(() => useMarketExecution(jest.fn()));
+  await act(() => result.current.confirm(buyOperation, buyExpected));
+  expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(1);
+  expect(mockWallet.sendTransaction).toHaveBeenCalledWith(
+    expect.objectContaining({
+      gas: 100n,
+      maxFeePerGas: 2n,
+      maxPriorityFeePerGas: 1n,
+    })
+  );
+});
+it.each(["getCode", "call", "getBlock", "estimateFeesPerGas"] as const)(
+  "reports %s failures before sending as checks that did not finish",
+  async (method) => {
+    const { buyExpected, buyOperation } = buyReview();
+    mockClient[method].mockRejectedValueOnce(new Error("private RPC failure"));
+    const { result } = renderHook(() => useMarketExecution(jest.fn()));
+    await act(() => result.current.confirm(buyOperation, buyExpected));
+    expect(result.current.message).toMatch(/checks could not finish/i);
+    expect(result.current.message).not.toMatch(/wallet action did not finish/i);
+    expect(mockBegin).not.toHaveBeenCalled();
+    expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+    expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+  }
+);
+it("refuses a purchase when base plus priority exceeds the reviewed fee cap", async () => {
+  const { buyExpected, buyOperation } = buyReview();
+  mockClient.getBlock.mockResolvedValueOnce({ baseFeePerGas: 2n });
+  const { result } = renderHook(() => useMarketExecution(jest.fn()));
+  await act(() => result.current.confirm(buyOperation, buyExpected));
+  expect(result.current.message).toMatch(/network fee/i);
+  expect(mockBegin).not.toHaveBeenCalled();
+  expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+});
+it("preserves an earlier transaction journal when capabilities cannot be checked", async () => {
+  const { buyExpected, buyOperation } = buyReview();
+  const saved = { request: buyExpected, transactionHash: hash };
+  persisted = saved;
+  mockCapabilities.mockRejectedValueOnce(new Error("network unavailable"));
+  const { result } = renderHook(() => useMarketExecution(jest.fn()));
+  await act(() => result.current.confirm(buyOperation, buyExpected));
+  expect(result.current.message).toMatch(/checks could not finish/i);
+  expect(result.current.message).not.toMatch(
+    /no transaction or signature was requested/i
+  );
+  expect(persisted).toBe(saved);
+  expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+  expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+});
+it("retains the known hash and recovery guidance after a submitted identity mismatch", async () => {
+  const { buyExpected, buyOperation } = buyReview();
+  mockSubmission.mockResolvedValueOnce({
+    ...buyOperation,
+    id: "another-operation",
+    state: "SUBMITTED",
+  });
+  const { result } = renderHook(() => useMarketExecution(jest.fn()));
+  await act(() => result.current.confirm(buyOperation, buyExpected));
+  expect(result.current.message).toMatch(
+    /transaction status could not be checked/i
+  );
+  expect(result.current.knownTransaction).toEqual({
+    operationId: buyOperation.id,
+    hash,
+  });
+  expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(1);
+  expect(persisted).toEqual(expect.objectContaining({ transactionHash: hash }));
+});
 it("never sends when simulation exceeds the reviewed gas limit", async () => {
   const { buyExpected, buyOperation } = buyReview();
   mockClient.estimateGas.mockResolvedValue(101n);
@@ -1188,6 +1400,32 @@ it("retains an ambiguous approval send and never requests its approval again", a
   expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(1);
   expect(mockReject).not.toHaveBeenCalled();
   expect(persisted).toHaveProperty("sendAttempt.purpose", "APPROVAL");
+});
+
+it("does not use a completed approval hash to hide a later unknown fulfillment", async () => {
+  const { buyExpected, buyOperation } = buyReview();
+  buyOperation.approval_transactions = [
+    { ...buyOperation.transaction!, value: "0", purpose: "APPROVE_CURRENCY" },
+  ] as ApiMarketOperation["approval_transactions"];
+  const { result } = renderHook(() => useMarketExecution(jest.fn()));
+  await act(() => result.current.confirm(buyOperation, buyExpected));
+  expect(result.current.knownTransaction).toEqual({
+    operationId: buyOperation.id,
+    hash,
+  });
+
+  // The settled approval has been retired and the fresh review can fulfill.
+  persisted = { request: buyExpected };
+  buyOperation.approval_transactions = [];
+  mockWallet.sendTransaction.mockRejectedValueOnce(
+    new Error("RPC response lost")
+  );
+  await act(() => result.current.confirm(buyOperation, buyExpected));
+  expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(2);
+  expect(result.current.knownTransaction).toBeUndefined();
+  expect(persisted).toHaveProperty("sendAttempt.purpose", "TRANSACTION");
+  expect(persisted).not.toHaveProperty("approvalHash");
+  expect(result.current.message).toMatch(/hash/i);
 });
 
 it("blocks a fresh browser from an active server attempt even with no local intent", async () => {
@@ -1365,6 +1603,35 @@ function recoveryFixture() {
   });
   return active;
 }
+
+it("reconciles a saved exact hash before the active-send fence and never reopens the wallet", async () => {
+  const active = recoveryFixture();
+  const request = { ...expected, kind: ApiMarketKind.Buy };
+  mockRead.mockReturnValue({
+    request,
+    transactionHash: hash,
+    sendAttempt: {
+      id: active.send_attempt!.attempt_id,
+      purpose: active.send_attempt!.purpose,
+      digest: active.send_attempt!.transaction_digest,
+      snapshotBlock: active.send_attempt!.snapshot_block,
+      walletRequested: true,
+      expectedRevision: active.revision,
+    },
+  });
+  const { result } = renderHook(() => useMarketExecution(jest.fn()));
+  await act(() => result.current.confirm(active, request));
+  expect(mockSubmission).toHaveBeenCalledWith(active.id, {
+    transaction_hash: hash,
+  });
+  expect(mockContinue).not.toHaveBeenCalled();
+  expect(mockBegin).not.toHaveBeenCalled();
+  expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+  expect(result.current.knownTransaction).toEqual({
+    operationId: active.id,
+    hash,
+  });
+});
 
 it("recovers the exact transaction without a local request or active trading capability", async () => {
   const active = recoveryFixture();

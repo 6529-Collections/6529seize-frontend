@@ -296,7 +296,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
   function printToken() {
     return (
       <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-pb-12 md:tw-px-6 lg:tw-px-8">
-        <section className="tw-py-6 sm:tw-py-8">
+        <section className="tw-py-4">
           <NextGenTokenCollectionLinks
             collection={props.collection}
             token={props.token}
@@ -304,7 +304,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
           />
           <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-gap-4">
             <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
-              <h1 className="tw-m-0 tw-truncate tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-3xl">
+              <h1 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-white sm:tw-text-2xl">
                 {props.token.name}
               </h1>
               {(props.token.burnt || isNullAddress(props.token.owner)) && (
@@ -333,8 +333,12 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
           </div>
         </section>
 
+        <section aria-label={`${props.token.name} artwork`}>
+          <NextGenTokenArt token={props.token} collection={props.collection} />
+        </section>
+
         {props.collection.id === 1 && (
-          <div className="tw-mb-4">
+          <div className="tw-mt-4">
             <CollectDetailActions
               collection="pebbles"
               tokenId={String(props.token.id)}
@@ -344,10 +348,6 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
             />
           </div>
         )}
-
-        <section aria-label={`${props.token.name} artwork`}>
-          <NextGenTokenArt token={props.token} collection={props.collection} />
-        </section>
 
         {printDetails()}
       </div>

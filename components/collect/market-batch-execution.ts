@@ -16,7 +16,7 @@ import { mainnet } from "viem/chains";
 import {
   validateMarketBatchOperation,
   validateMarketBatchOperationForRefresh,
-  marketBatchReviewTerms,
+  marketBatchReviewChange,
   marketBatchLiteral,
 } from "./market-batch-validation";
 import {
@@ -31,6 +31,10 @@ import {
   findResumableMarketBatch,
   marketBatchProfileLock,
 } from "./market-batch-resume";
+import type { CollectTradeStage } from "./collect.types";
+import { acknowledgeMarketSubmission } from "./market-known-submission";
+import { knownMarketTransactionHash } from "./market-known-transaction";
+import { reviewedMarketGasLimits } from "./market-review-caps";
 
 interface Execution {
   readonly client: PublicClient;
@@ -40,6 +44,13 @@ interface Execution {
   readonly profileWallets: readonly string[];
   readonly assertConnection: () => void;
   readonly onOperation: (operation: ApiMarketBatchOperation) => void;
+  readonly onStage?: (stage: CollectTradeStage) => void;
+  readonly onKnownHash?: (hash: Hex) => void;
+  readonly onReviewChange?: (
+    change: "terms" | "gas",
+    shown: ApiMarketBatchOperation,
+    fresh: ApiMarketBatchOperation
+  ) => void;
 }
 function assertIdentity(
   operation: ApiMarketBatchOperation,
@@ -63,6 +74,7 @@ export async function recoverMarketBatch(options: {
   assertConnection();
   const current = await fetchMarketBatch(operation.id);
   assertIdentity(current, operation);
+  assertConnection();
   const attempt = batchSendAttempt(current);
   if (!attempt) {
     onOperation(current);
@@ -86,6 +98,7 @@ export async function recoverMarketBatch(options: {
     transaction_hash: verified,
   });
   assertIdentity(resolved, operation);
+  assertConnection();
   clearResolvedBatchSend(resolved);
   onOperation(resolved);
 }
@@ -124,16 +137,7 @@ async function send(options: Execution) {
   };
   await client.call(request);
   const estimated = await client.estimateGas(request);
-  const gas = BigInt(transaction.gas_limit!),
-    maxFeePerGas = BigInt(transaction.max_fee_per_gas!);
-  if (estimated > gas || gas > 16_777_216n)
-    throw new Error("MARKET_GAS_CAP_CHANGED");
-  const fees = await client.estimateFeesPerGas();
-  if (
-    fees.maxFeePerGas > maxFeePerGas ||
-    fees.maxPriorityFeePerGas > maxFeePerGas
-  )
-    throw new Error("MARKET_GAS_CAP_CHANGED");
+  const fees = await reviewedMarketGasLimits(client, transaction, estimated);
   assertConnection();
   validateMarketBatchOperation(operation, expected, profileWallets);
   const result = await sendReviewedMarketBatch({
@@ -142,18 +146,28 @@ async function send(options: Execution) {
     profileWallets,
     assertConnection,
     onOperation,
-    send: () =>
-      wallet.sendTransaction({
+    send: () => {
+      options.onStage?.("wallet");
+      return wallet.sendTransaction({
         ...request,
-        gas,
-        maxFeePerGas,
-        maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
+        ...fees,
+      });
+    },
+  });
+  options.onKnownHash?.(result.hash);
+  options.onStage?.("submitted");
+  const submitted = await acknowledgeMarketSubmission(
+    () =>
+      submitMarketBatchTransaction(operation.id, {
+        transaction_hash: result.hash,
       }),
-  });
-  const submitted = await submitMarketBatchTransaction(operation.id, {
-    transaction_hash: result.hash,
-  });
+    () => {
+      options.onStage?.("reconciling");
+      assertConnection();
+    }
+  );
   assertIdentity(submitted, operation);
+  assertConnection();
   onOperation(submitted);
 }
 
@@ -190,18 +204,21 @@ export async function confirmMarketBatch(
         assertIdentity(current, operation);
         clearResolvedBatchSend(current);
         const prior = readMarketBatch(expected.profile_id, current.id);
-        if (prior?.transactionHash) {
+        const attempt = batchSendAttempt(current);
+        const knownHash = knownMarketTransactionHash(current, attempt, prior);
+        if (knownHash) {
+          options.onKnownHash?.(knownHash);
+          options.onStage?.("reconciling");
           await recoverMarketBatch({
             client,
             operation: current,
-            hash: prior.transactionHash,
+            hash: knownHash,
             assertConnection,
             onOperation,
           });
           return "COMPLETE";
         }
-        if (batchSendAttempt(current))
-          throw new Error("MARKET_BROADCAST_UNKNOWN");
+        if (attempt) throw new Error("MARKET_BROADCAST_UNKNOWN");
         if (!marketBatchLiteral(current.state, "REVIEW")) {
           onOperation(current);
           return "COMPLETE";
@@ -227,11 +244,10 @@ export async function confirmMarketBatch(
           expected,
           options.profileWallets
         );
-        if (
-          marketBatchReviewTerms(refreshed) !==
-          marketBatchReviewTerms(operation)
-        ) {
+        const change = marketBatchReviewChange(operation, refreshed);
+        if (change) {
           onOperation(refreshed);
+          options.onReviewChange?.(change, operation, refreshed);
           return "UPDATED_REVIEW";
         }
         current = refreshed;

@@ -22,6 +22,9 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import SingleWaveDropShare from "./SingleWaveDropShare";
 import { SingleWaveDropChat } from "./SingleWaveDropChat";
 
 interface SingleWaveDropWrapperProps {
@@ -51,6 +54,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
   isVotingClosed = false,
   isVotingControlsLocked = false,
 }) => {
+  const locale = useBrowserLocale();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const isCompactLayout = useIsMobileLayoutViewport();
   const readyKeyRef = useRef<string | null>(null);
@@ -96,33 +100,42 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
             <div className="tw-flex tw-items-center tw-gap-6">
               <button
                 type="button"
-                aria-label="Close panel"
+                aria-label={t(locale, "singleDrop.closeLabel")}
                 onClick={onClose}
-                className="tw-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-text-iron-300 tw-transition-colors desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none sm:tw-h-auto sm:tw-w-auto sm:tw-rounded-lg sm:tw-border-0 sm:tw-bg-transparent sm:tw-px-3 sm:tw-py-2"
+                className="tw-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-text-iron-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none sm:tw-h-auto sm:tw-w-auto sm:tw-rounded-lg sm:tw-border-0 sm:tw-bg-transparent sm:tw-px-3 sm:tw-py-2"
               >
                 <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 sm:tw-h-4 sm:tw-w-4" />
                 <span className="tw-hidden tw-text-sm tw-font-semibold sm:tw-inline">
-                  Close
+                  {t(locale, "singleDrop.close")}
                 </span>
               </button>
             </div>
 
-            <button
-              type="button"
-              onClick={toggleChat}
-              aria-label={isChatOpen ? "Hide chat" : "Show chat"}
-              aria-expanded={isChatOpen}
-              className={`tw-flex tw-h-11 tw-w-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-px-3 tw-text-sm tw-font-medium tw-backdrop-blur-md tw-transition-colors motion-reduce:tw-transition-none sm:tw-h-auto sm:tw-w-auto sm:tw-rounded-lg sm:tw-py-2 ${
-                isChatOpen
-                  ? "tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 desktop-hover:hover:tw-bg-iron-700"
-                  : "tw-border-iron-700 tw-bg-iron-950 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
-              }`}
-            >
-              <ChatBubbleLeftRightIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 sm:tw-h-4 sm:tw-w-4" />
-              <span className="tw-hidden sm:tw-inline">
-                {isChatOpen ? "Hide" : "Show"} Chat
-              </span>
-            </button>
+            <div className="tw-flex tw-items-center tw-gap-2">
+              <SingleWaveDropShare key={drop.id} drop={drop} wave={wave} />
+              <button
+                type="button"
+                onClick={toggleChat}
+                aria-label={t(
+                  locale,
+                  isChatOpen ? "singleDrop.hideChat" : "singleDrop.showChat"
+                )}
+                aria-expanded={isChatOpen}
+                className={`tw-flex tw-h-11 tw-w-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-px-3 tw-text-sm tw-font-medium tw-backdrop-blur-md tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none sm:tw-h-auto sm:tw-w-auto sm:tw-rounded-lg sm:tw-py-2 ${
+                  isChatOpen
+                    ? "tw-border-iron-700 tw-bg-iron-800 tw-text-iron-100 desktop-hover:hover:tw-bg-iron-700"
+                    : "tw-border-iron-700 tw-bg-iron-950 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
+                }`}
+              >
+                <ChatBubbleLeftRightIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 sm:tw-h-4 sm:tw-w-4" />
+                <span className="tw-hidden sm:tw-inline">
+                  {t(
+                    locale,
+                    isChatOpen ? "singleDrop.hideChat" : "singleDrop.showChat"
+                  )}
+                </span>
+              </button>
+            </div>
           </div>
         </header>
 
@@ -168,9 +181,9 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
         <Transition show={isChatOpen && isCompactLayout} as={Fragment}>
           <Dialog
             as="div"
-            className="tw-relative tw-z-[90] lg:tw-hidden"
+            className="tw-relative tw-z-[1020] lg:tw-hidden"
             onClose={closeChat}
-            aria-label="Drop chat"
+            aria-label={t(locale, "singleDrop.chatLabel")}
           >
             <div
               className="tw-fixed tw-left-[var(--left-rail,0px)] tw-right-0 tw-top-0 tw-max-h-[100dvh] tw-overflow-hidden tw-overscroll-none"
@@ -181,7 +194,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
                 enter="tw-transition-opacity tw-duration-150 tw-ease-out motion-reduce:tw-transition-none"
                 enterFrom="tw-opacity-0"
                 enterTo="tw-opacity-100"
-                leave="tw-duration-[120ms] tw-transition-opacity tw-ease-in motion-reduce:tw-transition-none"
+                leave="tw-transition-opacity tw-duration-[120ms] tw-ease-in motion-reduce:tw-transition-none"
                 leaveFrom="tw-opacity-100"
                 leaveTo="tw-opacity-0"
               >
@@ -189,10 +202,10 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
               </TransitionChild>
               <TransitionChild
                 as={Fragment}
-                enter="tw-duration-[220ms] tw-transform tw-transition-transform tw-ease-out motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+                enter="tw-transform tw-transition-transform tw-duration-[220ms] tw-ease-out motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
                 enterFrom="tw-translate-x-full motion-reduce:tw-translate-x-0"
                 enterTo="tw-translate-x-0"
-                leave="tw-duration-[180ms] tw-transform tw-transition-transform tw-ease-in motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+                leave="tw-transform tw-transition-transform tw-duration-[180ms] tw-ease-in motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
                 leaveFrom="tw-translate-x-0"
                 leaveTo="tw-translate-x-full motion-reduce:tw-translate-x-0"
               >
@@ -201,8 +214,8 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
                     <button
                       type="button"
                       onClick={closeChat}
-                      aria-label="Close chat"
-                      className="tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-text-iron-300 tw-transition-colors desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none"
+                      aria-label={t(locale, "singleDrop.closeChat")}
+                      className="tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-text-iron-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none"
                     >
                       <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
                     </button>

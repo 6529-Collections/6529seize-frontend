@@ -15,6 +15,32 @@ const artwork: CollectArtworkView = {
   actions: [{ action: "offer" }],
 };
 
+it("shows explicit Add and Selected labels without changing artwork navigation or selection callbacks", () => {
+  const onToggle = jest.fn();
+  const props = {
+    artwork: { ...artwork, priceLabel: "0.01 ETH" },
+    locale: "en-US" as const,
+    onTrade: jest.fn(),
+  };
+  const { rerender } = render(
+    <CollectArtworkCard {...props} selection={{ selected: false, onToggle }} />
+  );
+  const add = screen.getByRole("button", {
+    name: "Add Test artwork to selection",
+  });
+  expect(add).toHaveTextContent("Add");
+  fireEvent.click(add);
+  expect(onToggle).toHaveBeenCalledTimes(1);
+  rerender(
+    <CollectArtworkCard {...props} selection={{ selected: true, onToggle }} />
+  );
+  const selected = screen.getByRole("button", {
+    name: "Remove Test artwork from selection",
+  });
+  expect(selected).toHaveTextContent("Selected");
+  expect(selected).toHaveAttribute("aria-pressed", "true");
+});
+
 it("shows daily TDH value with a compact price and a separate exact-price disclosure", async () => {
   const user = userEvent.setup();
   const onToggle = jest.fn();

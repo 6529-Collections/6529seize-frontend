@@ -102,10 +102,11 @@ jest.mock("@/components/collect/CollectTdhTargetController", () => ({
   __esModule: true,
   default: function MockTarget({
     onReviewPurchase,
+    collection,
   }: ComponentProps<typeof CollectTdhTargetController>) {
     const [calculated, setCalculated] = useState(false);
     return (
-      <div data-testid="profile-tdh-projection">
+      <div data-testid="profile-tdh-projection" data-collection={collection}>
         <button onClick={() => setCalculated(true)}>
           Calculate projection
         </button>
@@ -249,6 +250,145 @@ it("opens a Gradient full set from listing comparison with no leftover search", 
   ).not.toBeInTheDocument();
 });
 
+it("preserves a requested set goal when collection changes before navigation commits", () => {
+  mockSearchParams = new URLSearchParams(
+    "collection=gradients&intent=tdh&view=projection"
+  );
+  const { rerender } = render(<CollectPageClient />);
+  fireEvent.click(screen.getByRole("button", { name: "Complete a set" }));
+  // The router has not committed the first click when the next control is used.
+  fireEvent.keyDown(screen.getByRole("button", { name: /^Collection\b/ }), {
+    key: "Enter",
+  });
+  fireEvent.click(screen.getByRole("option", { name: "The Memes" }));
+  expect(mockReplace).toHaveBeenLastCalledWith(
+    "/collect?collection=memes&intent=full_set",
+    { scroll: false }
+  );
+
+  mockSearchParams = new URLSearchParams("collection=memes&intent=full_set");
+  rerender(<CollectPageClient />);
+  expect(screen.getByLabelText("Goal definition")).toHaveTextContent("memes");
+  expect(
+    screen.queryByTestId("profile-tdh-projection")
+  ).not.toBeInTheDocument();
+});
+
+it("keeps the latest requested collection across an intermediate navigation commit", () => {
+  mockSearchParams = new URLSearchParams(
+    "collection=gradients&intent=tdh&view=projection"
+  );
+  const { rerender } = render(<CollectPageClient />);
+  fireEvent.click(screen.getByRole("button", { name: "Complete a set" }));
+  fireEvent.keyDown(screen.getByRole("button", { name: /^Collection\b/ }), {
+    key: "Enter",
+  });
+  fireEvent.click(screen.getByRole("option", { name: "The Memes" }));
+
+  // Commit the first request while the Memes request is still pending.
+  mockSearchParams = new URLSearchParams(
+    "collection=gradients&intent=full_set"
+  );
+  rerender(<CollectPageClient />);
+  fireEvent.click(screen.getByRole("button", { name: "Lowest listings" }));
+  expect(mockReplace).toHaveBeenLastCalledWith(
+    "/collect?collection=memes&intent=lowest",
+    { scroll: false }
+  );
+});
+
+it("uses an external URL change instead of a superseded local navigation", () => {
+  mockSearchParams = new URLSearchParams("collection=gradients&intent=tdh");
+  const { rerender } = render(<CollectPageClient />);
+  fireEvent.click(screen.getByRole("button", { name: "Complete a set" }));
+
+  mockSearchParams = new URLSearchParams("collection=pebbles&intent=tdh");
+  rerender(<CollectPageClient />);
+  fireEvent.click(screen.getByRole("button", { name: "Complete a set" }));
+  expect(mockReplace).toHaveBeenLastCalledWith(
+    "/collect?collection=pebbles&intent=pebbles_set",
+    { scroll: false }
+  );
+});
+
+it("lets browser history supersede even a URL matching an earlier pending request", () => {
+  const originalUrl = window.location.href;
+  mockSearchParams = new URLSearchParams(
+    "collection=gradients&intent=tdh&view=projection"
+  );
+  const { rerender } = render(<CollectPageClient />);
+  fireEvent.click(screen.getByRole("button", { name: "Complete a set" }));
+  fireEvent.keyDown(screen.getByRole("button", { name: /^Collection\b/ }), {
+    key: "Enter",
+  });
+  fireEvent.click(screen.getByRole("option", { name: "The Memes" }));
+  try {
+    window.history.replaceState(
+      null,
+      "",
+      "/collect?collection=gradients&intent=full_set"
+    );
+    fireEvent.popState(window);
+    mockSearchParams = new URLSearchParams(window.location.search);
+    rerender(<CollectPageClient />);
+    fireEvent.click(screen.getByRole("button", { name: "Lowest listings" }));
+    expect(mockReplace).toHaveBeenLastCalledWith(
+      "/collect?collection=gradients&intent=lowest",
+      { scroll: false }
+    );
+  } finally {
+    window.history.replaceState(null, "", originalUrl);
+  }
+});
+
+it("does not let URL canonicalization replace a newer requested goal", () => {
+  mockSearchParams = new URLSearchParams(
+    "collection=gradients&intent=full_set&definition=memes"
+  );
+  const { rerender } = render(<CollectPageClient />);
+  expect(mockReplace).toHaveBeenLastCalledWith(
+    "/collect?collection=memes&intent=full_set&definition=memes",
+    { scroll: false }
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Lowest listings" }));
+  rerender(<CollectPageClient />);
+  expect(mockReplace).toHaveBeenCalledTimes(2);
+  expect(mockReplace).toHaveBeenLastCalledWith(
+    "/collect?collection=memes&intent=lowest",
+    { scroll: false }
+  );
+
+  mockSearchParams = new URLSearchParams(
+    "collection=memes&intent=full_set&definition=memes"
+  );
+  rerender(<CollectPageClient />);
+  fireEvent.click(screen.getByRole("button", { name: "TDH" }));
+  expect(mockReplace).toHaveBeenLastCalledWith(
+    "/collect?collection=memes&intent=tdh",
+    { scroll: false }
+  );
+});
+
+it("toggles the latest requested TDH view while retaining a pending collection", () => {
+  mockSearchParams = new URLSearchParams("collection=memes&intent=tdh");
+  render(<CollectPageClient />);
+  fireEvent.click(screen.getByRole("button", { name: "Reach target TDH" }));
+  fireEvent.keyDown(screen.getByRole("button", { name: /^Collection\b/ }), {
+    key: "Enter",
+  });
+  fireEvent.click(screen.getByRole("option", { name: "Gradients" }));
+  expect(mockReplace).toHaveBeenLastCalledWith(
+    "/collect?collection=gradients&intent=tdh&view=projection",
+    { scroll: false }
+  );
+  // A second toggle arrives before either request has committed.
+  fireEvent.click(screen.getByRole("button", { name: "Reach target TDH" }));
+  expect(mockReplace).toHaveBeenLastCalledWith(
+    "/collect?collection=gradients&intent=tdh",
+    { scroll: false }
+  );
+});
+
 it("honors an explicit full-set definition and retains edited drafts on rerender", () => {
   const query = "collection=gradients&intent=full_set&definition=memes";
   mockSearchParams = new URLSearchParams(query);
@@ -262,7 +402,14 @@ it("honors an explicit full-set definition and retains edited drafts on rerender
   rerender(<CollectPageClient />);
   expect(screen.getByLabelText("Goal budget")).toHaveValue("1.25");
   expect(screen.getByLabelText("Goal definition")).toHaveTextContent("memes");
-  expect(mockReplace).not.toHaveBeenCalled();
+  expect(mockReplace).toHaveBeenCalledWith(
+    "/collect?collection=memes&intent=full_set&definition=memes",
+    { scroll: false }
+  );
+  expect(screen.getByRole("link", { name: "View The Memes" })).toHaveAttribute(
+    "href",
+    "/the-memes"
+  );
 });
 
 it("preserves the focused goal controls and budget across URL filters and goal changes", () => {
@@ -320,7 +467,7 @@ it.each([
     const labels: Readonly<Record<string, string>> = {
       memes: "The Memes",
       gradients: "Gradients",
-      pebbles: "Pebbles",
+      pebbles: "Pebbles · NextGen",
     };
     fireEvent.click(
       screen.getByRole("option", { name: labels[after] ?? after })
@@ -382,7 +529,7 @@ it("shows collection choice and recoverable listing errors only in lowest mode",
   });
   render(<CollectPageClient />);
   expect(screen.getByRole("region", { name: "Lowest listings" })).toBeVisible();
-  expect(screen.getByRole("group", { name: "Collections" })).toBeVisible();
+  expect(screen.getByRole("button", { name: /^Collection\b/ })).toBeVisible();
   fireEvent.click(screen.getByRole("button", { name: "Try again" }));
   expect(retry).toHaveBeenCalledTimes(1);
   expect(screen.queryByLabelText("Goal definition")).not.toBeInTheDocument();
@@ -391,9 +538,7 @@ it("shows collection choice and recoverable listing errors only in lowest mode",
 it("starts a fresh TDH visit with The Memes", () => {
   mockSearchParams = new URLSearchParams("intent=tdh");
   render(<CollectPageClient />);
-  expect(
-    screen.getByRole("button", { name: "The Memes", pressed: true })
-  ).toBeVisible();
+  expect(screen.getByRole("button", { name: /^Collection\b/ })).toBeVisible();
   expect(screen.getByRole("region", { name: "Lowest cost TDH" })).toBeVisible();
   expect(
     screen.queryByTestId("profile-tdh-projection")
@@ -401,14 +546,14 @@ it("starts a fresh TDH visit with The Memes", () => {
   expect(mockReplace).not.toHaveBeenCalled();
 });
 
-it("starts TDH with The Memes when switching from Pebbles listings", () => {
+it("preserves Pebbles when switching from listings to TDH", () => {
   mockSearchParams = new URLSearchParams(
     "collection=pebbles&intent=lowest&token=8&q=old&definition=old"
   );
   render(<CollectPageClient />);
   fireEvent.click(screen.getByRole("button", { name: "TDH" }));
   expect(mockReplace).toHaveBeenCalledWith(
-    "/collect?collection=memes&intent=tdh",
+    "/collect?collection=pebbles&intent=tdh",
     { scroll: false }
   );
 });
@@ -420,10 +565,11 @@ it("preserves explicit TDH collection links and subsequent user selections", () 
     screen.queryByRole("region", { name: "Lowest listings" })
   ).not.toBeInTheDocument();
   expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
-  expect(
-    screen.getByRole("button", { name: "Gradients", pressed: true })
-  ).toBeVisible();
-  fireEvent.click(screen.getByRole("button", { name: "Pebbles" }));
+  expect(screen.getByRole("button", { name: /^Collection\b/ })).toBeVisible();
+  fireEvent.keyDown(screen.getByRole("button", { name: /^Collection\b/ }), {
+    key: "Enter",
+  });
+  fireEvent.click(screen.getByRole("option", { name: "Pebbles · NextGen" }));
   expect(mockReplace).toHaveBeenCalledWith(
     "/collect?intent=tdh&collection=pebbles",
     { scroll: false }
@@ -432,13 +578,10 @@ it("preserves explicit TDH collection links and subsequent user selections", () 
   mockReplace.mockClear();
   mockSearchParams = new URLSearchParams("intent=tdh&collection=pebbles");
   rerender(<CollectPageClient />);
+  expect(screen.getByRole("button", { name: /^Collection\b/ })).toBeVisible();
   expect(
-    screen.getByRole("button", { name: "Pebbles", pressed: true })
-  ).toBeVisible();
-  expect(screen.getByRole("link", { name: "View Pebbles" })).toHaveAttribute(
-    "href",
-    "/nextgen/collection/pebbles"
-  );
+    screen.getByRole("link", { name: "View Pebbles · NextGen" })
+  ).toHaveAttribute("href", "/nextgen/collection/pebbles");
   expect(mockReplace).not.toHaveBeenCalled();
 });
 
@@ -502,3 +645,31 @@ it.each(["", "&view=projection"])(
     expect(screen.getByText("Calculated TDH benefit")).not.toBe(calculation);
   }
 );
+
+it("keeps the same collection control through goal, listings and future TDH, and binds the calculator to it", () => {
+  mockSearchParams = new URLSearchParams(
+    "collection=gradients&intent=full_set"
+  );
+  const { rerender } = render(<CollectPageClient />);
+  const selector = screen.getByRole("button", { name: /^Collection\b/ });
+  for (const query of [
+    "collection=gradients&intent=lowest",
+    "collection=gradients&intent=tdh",
+    "collection=gradients&intent=tdh&view=projection",
+  ]) {
+    mockSearchParams = new URLSearchParams(query);
+    rerender(<CollectPageClient />);
+    expect(screen.getByRole("button", { name: /^Collection\b/ })).toBe(
+      selector
+    );
+    expect(selector).toHaveTextContent("Gradients");
+  }
+  expect(screen.getByTestId("profile-tdh-projection")).toHaveAttribute(
+    "data-collection",
+    "gradients"
+  );
+  fireEvent.keyDown(selector, { key: "Enter" });
+  expect(
+    screen.queryByRole("option", { name: "Meme Lab" })
+  ).not.toBeInTheDocument();
+});

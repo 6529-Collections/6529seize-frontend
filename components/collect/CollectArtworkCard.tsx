@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import Link from "next/link";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -31,7 +32,7 @@ export default function CollectArtworkCard({
 }) {
   const selectionReasonId = useId();
   return (
-    <article className="tw-flex tw-min-w-0 tw-flex-col">
+    <article className="tw-flex tw-min-w-0 tw-flex-col tw-@container/artwork">
       <Link
         href={artwork.href}
         aria-label={t(locale, "collect.artworkLink", { title: artwork.title })}
@@ -40,11 +41,11 @@ export default function CollectArtworkCard({
         <div className="tw-relative tw-flex tw-aspect-square tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-900 [&_img]:tw-max-h-full [&_img]:tw-object-contain">
           {artwork.media}
         </div>
-        <div className="tw-space-y-1 tw-pb-2 tw-pt-4">
+        <div className="tw-space-y-1 tw-pb-2 tw-pt-3">
           <p className="tw-m-0 tw-text-xs tw-text-iron-400">
             {artwork.tokenLabel}
           </p>
-          <h2 className="tw-m-0 tw-break-words tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100 group-hover:tw-text-white">
+          <h2 className="tw-m-0 tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100 group-hover:tw-text-white">
             {artwork.title}
           </h2>
           {artwork.artist && (
@@ -71,12 +72,12 @@ export default function CollectArtworkCard({
           </p>
         )}
         {artwork.priceLabel && (
-          <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-2">
-            <div className="tw-min-w-0 tw-max-w-full [overflow-wrap:anywhere] max-[360px]:tw-w-full">
+          <div className="tw-flex tw-flex-col tw-flex-wrap tw-items-start tw-gap-2 @[16rem]/artwork:tw-flex-row @[16rem]/artwork:tw-justify-between">
+            <div className="tw-min-w-0 tw-max-w-full [overflow-wrap:anywhere]">
               {artwork.priceExactLabel &&
               artwork.priceExactLabel !== artwork.priceLabel ? (
                 <details className="tw-group/price">
-                  <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-gap-1 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+                  <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-gap-1 tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
                     <span>{artwork.priceLabel}</span>
                     <ChevronDownIcon
                       aria-hidden="true"
@@ -91,7 +92,7 @@ export default function CollectArtworkCard({
                   </p>
                 </details>
               ) : (
-                <p className="tw-m-0 tw-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-100">
+                <p className="tw-m-0 tw-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100">
                   {artwork.priceLabel}
                 </p>
               )}
@@ -107,8 +108,9 @@ export default function CollectArtworkCard({
               )}
             </div>
             {selection && (
-              <button
-                type="button"
+              <Button
+                variant={selection.selected ? "secondary" : "action"}
+                size="sm"
                 aria-pressed={selection.selected}
                 aria-label={t(
                   locale,
@@ -125,14 +127,22 @@ export default function CollectArtworkCard({
                 }
                 title={selection.disabledReason}
                 onClick={selection.onToggle}
-                className="tw-ml-auto tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-transparent tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/40 desktop-hover:hover:tw-text-white"
+                className="tw-ml-auto tw-min-h-11 tw-max-w-full tw-shrink-0 tw-font-medium"
               >
                 {selection.selected ? (
                   <CheckIcon aria-hidden="true" className="tw-size-4" />
                 ) : (
                   <PlusIcon aria-hidden="true" className="tw-size-4" />
                 )}
-              </button>
+                <span>
+                  {t(
+                    locale,
+                    selection.selected
+                      ? "collect.selection.selected"
+                      : "collect.selection.add"
+                  )}
+                </span>
+              </Button>
             )}
             {selection?.disabledReason && (
               <span id={selectionReasonId} className="tw-sr-only">
