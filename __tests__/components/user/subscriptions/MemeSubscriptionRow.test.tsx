@@ -178,3 +178,55 @@ describe("MemeSubscriptionRow", () => {
     expect(screen.queryByText(/Phase:/)).not.toBeInTheDocument();
   });
 });
+
+describe("Upcoming Drops allocation message", () => {
+  it.each([
+    { subscribed: true, published: true, phase: null, show: true },
+    { subscribed: false, published: true, phase: null, show: false },
+    { subscribed: true, published: false, phase: null, show: false },
+    { subscribed: true, published: true, phase: "Phase 1", show: false },
+  ])(
+    "renders the agreed state for %j",
+    ({ subscribed, published, phase, show }) => {
+      useQueryMock.mockImplementation(({ queryKey }) => ({
+        isSuccess: true,
+        data:
+          queryKey[0] === "consolidation-final-subscription"
+            ? {
+                phase,
+                phase_position: 1,
+                phase_subscriptions: 10,
+                airdrop_address: "0xabc123",
+                subscribed_count: 1,
+              }
+            : { has_distribution: published, allocations: [] },
+      }));
+      renderWithAuth(
+        <MemeSubscriptionRow
+          profileKey="0xabc123"
+          title="The Memes"
+          subscription={{
+            token_id: 548,
+            contract: "0x123",
+            consolidation_key: "0xabc123",
+            subscribed,
+            subscribed_count: 1,
+          }}
+          eligibilityCount={1}
+          readonly
+          refresh={jest.fn()}
+          minting_today
+          first
+          date={null}
+        />
+      );
+      expect(!!screen.queryByText("No subscription allocation")).toBe(show);
+      if (!subscribed)
+        expect(screen.queryByText(/Phase:/)).not.toBeInTheDocument();
+      if (phase && subscribed)
+        expect(
+          screen.getByText(/Subscription Position: 1 \/ 10/)
+        ).toBeInTheDocument();
+    }
+  );
+});

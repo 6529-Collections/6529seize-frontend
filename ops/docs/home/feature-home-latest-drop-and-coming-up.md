@@ -142,6 +142,9 @@ Use this page for visibility rules, state switches, and route targets.
 - With a connected profile, the subscription row can link to
   `/{user}/subscriptions`; profile-specific subscription status/count only
   render when the related read-only APIs return data.
+- After the 00:00 UTC mint-day cutoff, enabling Automatic mode or making a first
+  top-up does not mark today's card as subscribed. Its saved subscription choice
+  is retained, and its total subscription count comes from the finalized list.
 - On `/about/subscriptions`, users who can continue directly see a primary
   `Manage` action. Users who still need the wallet/profile handoff see
   `Connect to Subscribe`; it opens wallet connection and
