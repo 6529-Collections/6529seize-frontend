@@ -14,9 +14,11 @@ import type { CompactMenuItem } from "@/components/compact-menu";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
+import { AnnouncementWaveIcon } from "@/components/brain/left-sidebar/waves/SidebarIconTile";
 import type { SetActiveContentTab } from "@/components/brain/ContentTabContext";
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
+import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
@@ -138,6 +140,8 @@ function MyStreamWaveHeaderIdentity({
   waveScoreLearnMoreHref,
   showWaveRepAction,
 }: MyStreamWaveHeaderIdentityProps) {
+  const seizeSettings = useSeizeSettingsOptional();
+  const isAnnouncement = seizeSettings?.isAnnouncementsWave(wave.id) ?? false;
   const scoreActions = !isCompact ? (
     <span className="tw-mt-1.5 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-1.5 tw-self-start">
       <WaveTrustSignals
@@ -174,12 +178,22 @@ function MyStreamWaveHeaderIdentity({
 
   return (
     <>
-      <div className="tw-size-9 tw-flex-shrink-0 tw-self-start tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950">
-        <WavePicture
-          name={wave.name}
-          picture={wave.picture}
-          contributors={wavePictureContributors}
-        />
+      <div
+        className={`tw-size-9 tw-flex-shrink-0 tw-self-start ${
+          isAnnouncement
+            ? "tw-rounded-lg"
+            : "tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950"
+        }`}
+      >
+        {isAnnouncement ? (
+          <AnnouncementWaveIcon className="tw-size-5" />
+        ) : (
+          <WavePicture
+            name={wave.name}
+            picture={wave.picture}
+            contributors={wavePictureContributors}
+          />
+        )}
       </div>
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
         <WaveParentNavigation
