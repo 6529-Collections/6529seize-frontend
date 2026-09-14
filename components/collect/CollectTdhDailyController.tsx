@@ -19,6 +19,8 @@ import type {
 } from "./collect-tdh-daily.types";
 
 interface Props<T> {
+  /** Recheck an active estimate without resetting its driving input. */
+  readonly revision?: number;
   /** Include profile membership, recipient, collection and all analysis-context changes. */
   readonly contextKey: string;
   readonly calculate:
@@ -36,6 +38,7 @@ interface Props<T> {
 
 type Outcome<T> = {
   readonly input: CollectTdhDailyInput;
+  readonly revision: number;
 } & (
   | { readonly status: "ready"; readonly estimate: CollectTdhDailyEstimate<T> }
   | { readonly status: "error" }
@@ -53,6 +56,7 @@ function DailyController<T>({
   calculate,
   onConnect,
   renderResult,
+  revision = 0,
 }: Omit<Props<T>, "contextKey">) {
   const locale = useBrowserLocale();
   const [input, setInput] = useState<CollectTdhDailyInput>({
@@ -63,6 +67,10 @@ function DailyController<T>({
   const [attempt, setAttempt] = useState(0);
   const generation = useRef(0);
   const currentOutcome = useRef<Outcome<T> | null>(null);
+  useLayoutEffect(() => {
+    generation.current++;
+    currentOutcome.current = null;
+  }, [revision]);
   useLayoutEffect(
     () => () => {
       generation.current++;
@@ -91,7 +99,12 @@ function DailyController<T>({
             !estimate
           )
             return;
-          const resolved: Outcome<T> = { input, status: "ready", estimate };
+          const resolved: Outcome<T> = {
+            input,
+            revision,
+            status: "ready",
+            estimate,
+          };
           currentOutcome.current = resolved;
           setOutcome(resolved);
         })
@@ -100,16 +113,17 @@ function DailyController<T>({
             !controller.signal.aborted &&
             generation.current === requestGeneration
           )
-            setOutcome({ input, status: "error" });
+            setOutcome({ input, revision, status: "error" });
         });
     }, 350);
     return () => {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [active, valid, available, input, attempt]);
+  }, [active, valid, available, input, attempt, revision]);
 
-  const current = outcome?.input === input ? outcome : null;
+  const current =
+    outcome?.input === input && outcome.revision === revision ? outcome : null;
   const estimate = current?.status === "ready" ? current.estimate : null;
   const status =
     current?.status ?? (active && valid && available ? "calculating" : "idle");
