@@ -3,10 +3,9 @@
 import ShareArrowIcon from "@/components/common/icons/ShareArrowIcon";
 import { canUseSystemShare } from "@/components/header/share/header-share/shareUtils";
 import { showAppToast } from "@/components/utils/toast/AppToast";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getCopiedDropLink } from "@/helpers/waves/drop-copy-link.helpers";
+import { getOpenedDropLink } from "@/helpers/waves/drop-copy-link.helpers";
 import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import { useDropClipboardCopyFeedback } from "@/hooks/drops/useDropClipboardCopyFeedback";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -24,7 +23,6 @@ export default function SingleWaveDropShare({
   readonly wave: ApiWave;
 }) {
   const locale = useBrowserLocale();
-  const { isMemesWave, isQuorumWave, isLoaded } = useSeizeSettings();
   const { statusMessage, copyToClipboard } = useDropClipboardCopyFeedback();
   const [isSharing, setIsSharing] = useState(false);
 
@@ -33,13 +31,11 @@ export default function SingleWaveDropShare({
   }
 
   const shareDrop = async () => {
-    if (isSharing || !isLoaded) return;
+    if (isSharing) return;
 
-    const url = getCopiedDropLink({
+    const url = getOpenedDropLink({
       drop,
       isDirectMessage: isWaveDirectMessage(wave.id, wave),
-      isMemesWave,
-      isQuorumWave,
     });
     const shareData = { url };
     const copyLink = () => copyToClipboard(() => url);
@@ -74,7 +70,7 @@ export default function SingleWaveDropShare({
       <button
         type="button"
         aria-label={t(locale, "singleDrop.shareLabel")}
-        disabled={isSharing || !isLoaded}
+        disabled={isSharing}
         aria-busy={isSharing}
         onClick={() => void shareDrop()}
         className="tw-flex tw-min-h-11 tw-min-w-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-70 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200 motion-reduce:tw-transition-none sm:tw-min-h-0 sm:tw-rounded-lg"

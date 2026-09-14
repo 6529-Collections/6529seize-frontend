@@ -32,15 +32,6 @@ jest.mock("@/components/header/share/header-share/shareUtils", () => ({
 jest.mock("@/components/utils/toast/AppToast", () => ({
   showAppToast: jest.fn(),
 }));
-let mockSettingsLoaded = true;
-
-jest.mock("@/contexts/SeizeSettingsContext", () => ({
-  useSeizeSettings: () => ({
-    isLoaded: mockSettingsLoaded,
-    isMemesWave: (id: string) => id === "memes",
-    isQuorumWave: (id: string) => id === "quorum",
-  }),
-}));
 
 const writeText = jest.fn<Promise<void>, [string]>();
 const webShare = jest.fn<Promise<void>, [ShareData]>();
@@ -58,7 +49,6 @@ function clickShare() {
 
 beforeEach(() => {
   jest.resetAllMocks();
-  mockSettingsLoaded = true;
   writeText.mockResolvedValue(undefined);
   webShare.mockResolvedValue(undefined);
   jest.mocked(Share.canShare).mockResolvedValue({ value: true });
@@ -78,14 +68,14 @@ beforeEach(() => {
 });
 
 it.each([
-  ["memes", ApiDropType.Participatory, "drop=drop-1"],
-  ["quorum", ApiDropType.Participatory, "drop=drop-1"],
-  ["wave-1", ApiDropType.Participatory, "serialNo=42"],
-  ["memes", ApiDropType.Chat, "serialNo=42"],
-  ["quorum", ApiDropType.Winner, "serialNo=42"],
+  ["memes", ApiDropType.Participatory],
+  ["quorum", ApiDropType.Participatory],
+  ["wave-1", ApiDropType.Participatory],
+  ["memes", ApiDropType.Chat],
+  ["quorum", ApiDropType.Winner],
 ])(
-  "copies the existing canonical link rule for %s %s",
-  async (waveId, dropType, query) => {
+  "copies a link that reopens the detail for %s %s",
+  async (waveId, dropType) => {
     render(
       <SingleWaveDropShare
         drop={{
@@ -101,7 +91,7 @@ it.each([
       expect(screen.getByRole("status")).toHaveTextContent("Copied!")
     );
     expect(writeText).toHaveBeenCalledWith(
-      `https://6529.io/waves/${waveId}?${query}`
+      `https://6529.io/waves/${waveId}?drop=drop-1`
     );
     expect(webShare).not.toHaveBeenCalled();
   }
@@ -117,7 +107,7 @@ it("keeps direct-message links on the messages route and shares only the URL", a
   clickShare();
   await waitFor(() =>
     expect(webShare).toHaveBeenCalledWith({
-      url: "https://6529.io/messages/wave-1?serialNo=42",
+      url: "https://6529.io/messages/wave-1?drop=drop-1",
     })
   );
   expect(writeText).not.toHaveBeenCalled();
@@ -128,7 +118,7 @@ it("shares through the browser and reports success", async () => {
   render(<SingleWaveDropShare drop={drop} wave={wave} />);
   clickShare();
   expect(canUseSystemShare).toHaveBeenCalledWith({
-    url: "https://6529.io/waves/wave-1?serialNo=42",
+    url: "https://6529.io/waves/wave-1?drop=drop-1",
   });
   await waitFor(() =>
     expect(showAppToast).toHaveBeenCalledWith({
@@ -304,18 +294,3 @@ it.each<[SupportedLocale, string]>([
     );
   }
 );
-
-it("waits for wave settings before enabling canonical sharing", () => {
-  mockSettingsLoaded = false;
-  const { rerender } = render(<SingleWaveDropShare drop={drop} wave={wave} />);
-  expect(screen.getByRole("button", { name: "Share drop" })).toBeDisabled();
-  expect(screen.getByRole("button", { name: "Share drop" })).toHaveAttribute(
-    "aria-busy",
-    "false"
-  );
-  clickShare();
-  expect(writeText).not.toHaveBeenCalled();
-  mockSettingsLoaded = true;
-  rerender(<SingleWaveDropShare drop={drop} wave={wave} />);
-  expect(screen.getByRole("button", { name: "Share drop" })).toBeEnabled();
-});
