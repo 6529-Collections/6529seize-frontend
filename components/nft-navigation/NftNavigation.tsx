@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useMemo } from "react";
+import { nftNavigationQuery } from "./nft-navigation-query";
 
 interface SearchParamsSource {
   toString(): string;
@@ -23,7 +24,7 @@ export default function NftNavigation(
   const isLast = props.nftId === props.endIndex;
 
   const query = useMemo(() => {
-    const paramsStr = props.params?.toString();
+    const paramsStr = nftNavigationQuery(props.params);
     return paramsStr ? `?${paramsStr}` : "";
   }, [props.params]);
 

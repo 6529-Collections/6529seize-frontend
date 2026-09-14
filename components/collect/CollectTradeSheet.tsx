@@ -1,5 +1,8 @@
 "use client";
 
+import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
+import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
+
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -10,6 +13,13 @@ import CollectPurchaseSummary from "./CollectPurchaseSummary";
 import CollectOrderSummary from "./CollectOrderSummary";
 import CollectReviewRecipient from "./CollectReviewRecipient";
 import CollectReviewChangeDetails from "./CollectReviewChangeDetails";
+import CollectTransactionReceipt from "./CollectTransactionReceipt";
+import CollectSubmittedNotice from "./CollectSubmittedNotice";
+import {
+  hasCollectKnownApproval,
+  isCollectReceiptOperation,
+  type CollectKnownTransactionPurpose,
+} from "./collect-receipt.helpers";
 import type { MarketReviewChangeNotice } from "./market-review-change-description";
 import styles from "./marketplace-font.module.css";
 import type {
@@ -27,6 +37,8 @@ interface CollectTradeSheetProps {
   readonly form?: ReactNode;
   readonly recoveryAction?: ReactNode;
   readonly message?: string | undefined;
+  readonly knownTransactionHash?: string | undefined;
+  readonly knownTransactionPurpose?: CollectKnownTransactionPurpose | undefined;
   readonly reviewChangeNotice?: MarketReviewChangeNotice | undefined;
   readonly onClose: () => void;
   readonly onRefresh: () => void | Promise<void>;
@@ -87,6 +99,67 @@ function Facts({ facts }: { readonly facts: readonly CollectReviewFact[] }) {
         </div>
       ))}
     </dl>
+  );
+}
+function TradeReceipt({
+  operation,
+  review,
+  knownTransactionHash,
+  onClose,
+}: {
+  readonly operation: ApiMarketOperation;
+  readonly review: CollectTradeReview;
+  readonly knownTransactionHash: string | undefined;
+  readonly onClose: () => void;
+}) {
+  const nftRecipient =
+    operation.kind === ApiMarketKind.Buy
+      ? (operation.nft_recipient ?? operation.recipient)
+      : operation.nft_recipient;
+  const names: Record<string, string> = {};
+  if (review.purchase?.payerName)
+    names[operation.wallet.toLowerCase()] = review.purchase.payerName;
+  if (review.purchase?.recipientName)
+    names[review.purchase.recipientAddress.toLowerCase()] =
+      review.purchase.recipientName;
+  if (review.orderReview?.walletName)
+    names[operation.wallet.toLowerCase()] = review.orderReview.walletName;
+  return (
+    <CollectTransactionReceipt
+      operation={operation}
+      knownTransactionHash={knownTransactionHash}
+      onClose={onClose}
+      walletNames={names}
+      artworks={[
+        {
+          assetKey: operation.asset_key,
+          title: review.title,
+          media: review.media,
+          quantity: operation.quantity,
+          orderHash: operation.order_hash ?? operation.order?.order_hash,
+          recipients:
+            nftRecipient &&
+            (operation.kind === ApiMarketKind.Buy ||
+              operation.kind === ApiMarketKind.Accept ||
+              (operation.kind === ApiMarketKind.Offer &&
+                operation.state.toString() === "CONFIRMED"))
+              ? [{ address: nftRecipient, quantity: operation.quantity }]
+              : [],
+        },
+      ]}
+    />
+  );
+}
+function pendingReceipt(
+  operation: ApiMarketOperation,
+  knownTransactionHash: string | undefined
+) {
+  return (
+    ["SUBMITTED", "MINED"].includes(operation.state) ||
+    Boolean(
+      knownTransactionHash &&
+      !["CONFIRMED", "LIVE", "CANCELLED"].includes(operation.state)
+    )
   );
 }
 /** Execution refreshes and compares terms before any wallet request. */
@@ -170,6 +243,12 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
           {t(locale, `collect.trade.stage.${props.stage}`)}
         </div>
       )}
+      {review?.operation &&
+        hasCollectKnownApproval(
+          review.operation,
+          props.knownTransactionHash,
+          props.knownTransactionPurpose
+        ) && <CollectSubmittedNotice approval />}
       {showMessage && (
         <p
           role="alert"
@@ -225,6 +304,23 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
           {actionSlot}
         </>
       );
+    if (
+      review.operation &&
+      isCollectReceiptOperation(
+        review.operation,
+        props.knownTransactionHash,
+        props.knownTransactionPurpose
+      )
+    ) {
+      return (
+        <TradeReceipt
+          operation={review.operation}
+          review={review}
+          knownTransactionHash={props.knownTransactionHash}
+          onClose={props.onClose}
+        />
+      );
+    }
     if (review.purchase)
       return (
         <CollectPurchaseSummary
@@ -337,10 +433,26 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
     </div>
   );
   if (props.presentation === "contents") return content;
+  let dialogTitle = props.title;
+  if (
+    review?.operation &&
+    isCollectReceiptOperation(
+      review.operation,
+      props.knownTransactionHash,
+      props.knownTransactionPurpose
+    )
+  ) {
+    dialogTitle = t(
+      locale,
+      pendingReceipt(review.operation, props.knownTransactionHash)
+        ? "collect.receipt.dialogProgress"
+        : "collect.receipt.dialogReceipt"
+    );
+  }
   return (
     <CollectTradeDialog
       open={props.open}
-      title={props.title}
+      title={dialogTitle}
       onClose={props.onClose}
     >
       {content}

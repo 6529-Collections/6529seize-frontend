@@ -7,6 +7,23 @@ jest.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({ invalidateQueries: mockInvalidate }),
 }));
 beforeEach(() => jest.clearAllMocks());
+it("refreshes supplementary settlement evidence without clearing a purchase a second time", () => {
+  const settled = jest.fn();
+  const changed = jest.fn();
+  const operation = { id: "receipt", state: "CONFIRMED" } as ApiMarketOperation;
+  const { rerender } = renderHook(
+    ({ value }) => useMarketSettlement(value, settled, changed),
+    { initialProps: { value: operation } }
+  );
+  rerender({
+    value: {
+      ...operation,
+      settlement: { order_remaining_quantity: "0" },
+    } as ApiMarketOperation,
+  });
+  expect(settled).toHaveBeenCalledTimes(1);
+  expect(changed).toHaveBeenCalledTimes(2);
+});
 it("refreshes holdings and clears the old plan once a polled receipt confirms", () => {
   const settled = jest.fn();
   const submitted = {
@@ -50,17 +67,21 @@ it.each(["LIVE", "CONFIRMED", "CANCELLED"])(
   }
 );
 
-it.each(["REVIEW", "SUBMITTED", "MINED", "FAILED", "UNKNOWN", "CANCEL_PENDING"])(
-  "does not invent a market update from %s",
-  (state) => {
-    const marketChanged = jest.fn();
-    renderHook(() =>
-      useMarketSettlement(
-        { id: "operation", state } as ApiMarketOperation,
-        undefined,
-        marketChanged
-      )
-    );
-    expect(marketChanged).not.toHaveBeenCalled();
-  }
-);
+it.each([
+  "REVIEW",
+  "SUBMITTED",
+  "MINED",
+  "FAILED",
+  "UNKNOWN",
+  "CANCEL_PENDING",
+])("does not invent a market update from %s", (state) => {
+  const marketChanged = jest.fn();
+  renderHook(() =>
+    useMarketSettlement(
+      { id: "operation", state } as ApiMarketOperation,
+      undefined,
+      marketChanged
+    )
+  );
+  expect(marketChanged).not.toHaveBeenCalled();
+});
