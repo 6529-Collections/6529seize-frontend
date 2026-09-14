@@ -1796,7 +1796,7 @@
         "The tab also shows exact ETH balance, raw mint capacity, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
         "Owners can update settings, including airdrop address and mode, and top up; read-only viewers can inspect visible subscription information.",
         "The owner profile header and connected Home subscription row show a compact coverage status with a contextual setup, manage, choose-drops, or top-up action.",
-        "On mint day, enabling Automatic mode or making a first top-up does not subscribe you to that day's card after the 00:00 UTC cutoff. Today's saved subscription choice is retained; Automatic mode applies to later cards.",
+        "Subscription changes and top-ups must be received by 00:00 UTC on the day before a Meme Card mint. Once a card is closed, enabling Automatic mode or making a first top-up does not subscribe you to that card. Its saved subscription choice is retained; Automatic mode applies to later cards.",
         "Upcoming Drops shows No subscription allocation only for a subscribed first card whose distribution is published but has no assigned subscription phase. It stays silent for unsubscribed cards, unpublished distribution, or failed lookups.",
         "The tab keeps loading and empty states distinct, and its subscription controls, upcoming rows, and history panels adapt to narrow screens."
       ],
