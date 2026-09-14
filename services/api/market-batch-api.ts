@@ -1,6 +1,8 @@
 import type { ApiMarketBatchCapabilities } from "@/generated/models/ApiMarketBatchCapabilities";
 import type { ApiMarketBatchOperation } from "@/generated/models/ApiMarketBatchOperation";
 import type { ApiMarketBatchPrepareRequest } from "@/generated/models/ApiMarketBatchPrepareRequest";
+import type { ApiMarketBatchPreflight } from "@/generated/models/ApiMarketBatchPreflight";
+import type { ApiMarketBatchPreflightRequest } from "@/generated/models/ApiMarketBatchPreflightRequest";
 import type { ApiMarketSendAttemptRequest } from "@/generated/models/ApiMarketSendAttemptRequest";
 import type { ApiMarketSendAttemptRejection } from "@/generated/models/ApiMarketSendAttemptRejection";
 import type { ApiMarketSubmission } from "@/generated/models/ApiMarketSubmission";
@@ -48,6 +50,15 @@ export const fetchMarketBatch = async (id: string, signal?: AbortSignal) =>
   );
 export const continueMarketBatch = (id: string) =>
   post(`${path(id)}/continue`, {});
+export const preflightMarketBatch = (
+  id: string,
+  body: ApiMarketBatchPreflightRequest
+) =>
+  commonApiPost<ApiMarketBatchPreflightRequest, ApiMarketBatchPreflight>({
+    endpoint: `${path(id)}/preflight`,
+    body,
+    errorMode: "structured",
+  });
 export const beginMarketBatchAttempt = (
   id: string,
   body: ApiMarketSendAttemptRequest
