@@ -115,7 +115,8 @@ export function requiredRightsDetailField(
   const item = value as Record<string, unknown>;
   if (
     fieldId === "rights_basis" &&
-    item["kind"] &&
+    typeof item["kind"] === "string" &&
+    item["kind"].length > 0 &&
     item["kind"] !== "artist_owned"
   )
     return "detail";

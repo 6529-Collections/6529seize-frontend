@@ -81,8 +81,7 @@ export function useDropClipboardCopyFeedback(): UseDropClipboardCopyFeedbackResu
         // action sheet) only reveal it during the close animation; it stays
         // fully visible for any consumer that keeps its surface open.
         showTransientStatus("copied");
-        onCopied?.();
-        return;
+        return onCopied?.();
       })
       .catch(() => {
         if (isMountedRef.current) {
