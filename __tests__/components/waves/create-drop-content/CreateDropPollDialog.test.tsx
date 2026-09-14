@@ -1,4 +1,5 @@
 import CreateDropPollDialog from "@/components/waves/create-drop-content/CreateDropPollDialog";
+import { WaveDropLayerProvider } from "@/components/waves/drops/WaveDropLayerContext";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -12,11 +13,13 @@ jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
     readonly onAfterLeave?: () => void;
     readonly onBack?: () => void;
     readonly onClose: () => void;
+    readonly zIndexClassName?: string;
   }) => (
     <div
       data-testid="mobile-poll-dialog"
       data-open={props.isOpen ? "true" : "false"}
       data-dismissible={props.dismissible ? "true" : "false"}
+      data-z-index-class={props.zIndexClassName}
     >
       <button type="button" onClick={props.onClose}>
         Dismiss poll
@@ -124,9 +127,7 @@ describe("CreateDropPollDialog", () => {
   });
 
   it("disables dismissal while a Poll is submitting", () => {
-    render(
-      <CreateDropPollDialog {...defaultProps} canSubmit submitting />
-    );
+    render(<CreateDropPollDialog {...defaultProps} canSubmit submitting />);
 
     expect(screen.getByTestId("mobile-poll-dialog")).toHaveAttribute(
       "data-dismissible",
@@ -134,5 +135,29 @@ describe("CreateDropPollDialog", () => {
     );
     expect(screen.queryByText("Back from poll")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Posting" })).toBeDisabled();
+  });
+
+  it("keeps the default mobile dialog layer without an override", () => {
+    render(<CreateDropPollDialog {...defaultProps} />);
+
+    expect(screen.getByTestId("mobile-poll-dialog")).toHaveAttribute(
+      "data-z-index-class",
+      "tw-z-[1010]"
+    );
+  });
+
+  it("uses the configured mobile dialog layer", () => {
+    render(
+      <WaveDropLayerProvider
+        value={{ mobileDialogZIndexClassName: "tw-z-[1030]" }}
+      >
+        <CreateDropPollDialog {...defaultProps} />
+      </WaveDropLayerProvider>
+    );
+
+    expect(screen.getByTestId("mobile-poll-dialog")).toHaveAttribute(
+      "data-z-index-class",
+      "tw-z-[1030]"
+    );
   });
 });
