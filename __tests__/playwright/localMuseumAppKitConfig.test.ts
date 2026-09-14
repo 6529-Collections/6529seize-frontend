@@ -8,9 +8,15 @@ import {
 
 describe("local Museum AppKit configuration fixture", () => {
   const originalEnvironment = process.env["PLAYWRIGHT_ENV"];
-  const registerRoute = jest
-    .fn<Promise<void>, Parameters<Page["route"]>>()
+  const disposeRoute = jest
+    .fn<Promise<void>, []>()
     .mockResolvedValue(undefined);
+  const registerRoute = jest
+    .fn<ReturnType<Page["route"]>, Parameters<Page["route"]>>()
+    .mockResolvedValue({
+      dispose: disposeRoute,
+      [Symbol.asyncDispose]: disposeRoute,
+    });
 
   beforeEach(() => {
     delete process.env["PLAYWRIGHT_ENV"];
