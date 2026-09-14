@@ -634,7 +634,7 @@ export const DE_DE_MESSAGES = {
     "GIF-Suche ist voruebergehend nicht verfuegbar.",
   "waves.gifPicker.unavailable.hint":
     "Du kannst stattdessen eine GIF-Datei hochladen.",
-  "common.close": "Schliessen",
+  "common.close": "Schließen",
   "waves.create.dialog.subwaveOfTitle":
     "Subwave von „{parentWaveName}“ erstellen",
   "waves.create.overview.subwaveName": "Subwave-Name",
@@ -682,7 +682,7 @@ export const DE_DE_MESSAGES = {
   "waves.create.dialog.subwaveTitle": "Subwave erstellen",
   "waves.create.dialog.waveTitle": "Wave erstellen",
   "waves.create.dialog.closeHint":
-    "Zum Verlassen Schliessen wählen. Dabei kann deine Arbeit verloren gehen.",
+    "Zum Verlassen Schließen wählen. Dabei kann deine Arbeit verloren gehen.",
   "waves.create.actions.cancel": "Abbrechen",
   "waves.create.actions.backToCriteria": "Zurück zu den Kriterien",
   "waves.create.actions.complete": "Abschließen",
