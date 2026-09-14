@@ -127,6 +127,7 @@ async function typeText(editor: LexicalEditor, text: string) {
   for (const character of text) {
     // Flush parent rerenders and plugin effects between actual text updates.
     await act(async () => {
+      fireEvent.keyDown(screen.getByRole("textbox"), { key: character });
       editor.update(
         () => {
           const selection = $getSelection();

@@ -7,6 +7,7 @@ import {
 } from "@lexical/markdown";
 import {
   $createParagraphNode,
+  $createTextNode,
   $getRoot,
   $getSelection,
   $isRangeSelection,
@@ -20,6 +21,7 @@ import {
   type LexicalEditor,
 } from "lexical";
 import { registerInlineFormatEditing } from "@/components/drops/create/lexical/utils/inlineFormatEditing";
+import { MAX_DROP_PART_UTF16_UNITS } from "@/helpers/waves/drop-content-limits";
 import { mergeRegister } from "@lexical/utils";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { render } from "@testing-library/react";
@@ -196,6 +198,34 @@ describe("editor inline formatting", () => {
       ).toBe(0);
     }
   );
+
+  it("does not serialize a near-limit drop while typing or deleting a suffix", async () => {
+    const prefix = "a".repeat(MAX_DROP_PART_UTF16_UNITS - 100) + " ";
+    await update(() => {
+      $getRoot()
+        .clear()
+        .append($createParagraphNode().append($createTextNode(prefix)))
+        .selectEnd();
+    });
+    await typeText("~test~");
+    const serialize = jest.spyOn(
+      Object.getPrototypeOf(editor.getEditorState()),
+      "toJSON"
+    );
+    try {
+      await typeText(" suffix");
+      for (let index = 0; index < 6; index++) await normalBackspace();
+      expect(root.textContent).toBe(prefix + "test ");
+      expect(serialize).not.toHaveBeenCalled();
+      await normalBackspace();
+      expect(serialize).toHaveBeenCalledTimes(1);
+      await backspace();
+      expect(root.textContent).toBe(prefix + "~test");
+      expect(serialize).toHaveBeenCalledTimes(1);
+    } finally {
+      serialize.mockRestore();
+    }
+  });
 
   it.each(["", "no strikethrough, "])(
     "clears strike after deleting the entire word following %j",

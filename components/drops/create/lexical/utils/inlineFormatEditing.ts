@@ -99,6 +99,8 @@ type Shortcut = {
   before: EditorState;
   converted: EditorState;
   signature: string;
+  size: number;
+  point: number;
   detour: boolean;
   exitFormats: readonly TextFormatType[];
 };
@@ -138,15 +140,16 @@ function isShortcutBoundary(
 ): boolean {
   if (
     !current.selection.isCollapsed() ||
-    contentSignature(editorState) !== shortcut.signature
+    current.size !== shortcut.size ||
+    current.point !== shortcut.point
   ) {
     return false;
   }
-  const converted = readCursor(shortcut.converted);
+  // Ordinary suffix typing/deletion fails the cheap guards above. Serialize
+  // only when a changed document actually returns to the saved boundary.
   return (
-    converted !== null &&
-    converted.selection.isCollapsed() &&
-    current.point === converted.point
+    editorState === shortcut.converted ||
+    contentSignature(editorState) === shortcut.signature
   );
 }
 
@@ -181,12 +184,8 @@ function normalizeInsertedSuffix(
         if (suffix.hasFormat(format)) suffix.toggleFormat(format);
       }
       const nextSelection = suffix.selectEnd();
-      for (const format of formats) {
-        const original = nextSelection.format;
-        nextSelection.toggleFormat(format);
-        const formatFlag = original ^ nextSelection.format;
-        nextSelection.format = original & ~formatFlag;
-      }
+      nextSelection.format = suffix.getFormat();
+      nextSelection.dirty = true;
     },
     { tag: PLAIN_SUFFIX_TAG }
   );
@@ -329,6 +328,9 @@ function updateTrackedShortcut(
   state: InlineFormatEditingState,
   update: CursorUpdate
 ) {
+  // Re-arm at the original content/caret boundary; a new closing marker starts
+  // its own pending shortcut. Otherwise retain a suffix detour only across
+  // text edits. Navigation, format changes and unrelated updates invalidate it.
   const { previous, current, prevEditorState, editorState } = update;
   const shortcut = state.shortcut;
   if (shortcut && isShortcutBoundary(shortcut, current, editorState)) {
@@ -416,18 +418,22 @@ function handleEditorUpdate(
       before: candidate.before,
       converted: editorState,
       signature: contentSignature(editorState),
+      size: current.size,
+      point: current.point,
       detour: false,
+      // Strike ends at its closing marker. Preserve existing bold/italic/code
+      // continuation, including their use inside an outer Markdown shortcut.
       exitFormats: convertedBy.format.includes("strikethrough")
         ? convertedBy.format
         : [],
     };
   } else {
-    updateTrackedShortcut(
-      editor,
-      textFormats,
-      state,
-      { previous, current, prevEditorState, editorState }
-    );
+    updateTrackedShortcut(editor, textFormats, state, {
+      previous,
+      current,
+      prevEditorState,
+      editorState,
+    });
   }
   resetDeletedFormats(editor, previous, current);
 }
@@ -488,12 +494,16 @@ export function registerInlineFormatEditing(
     editor.registerCommand(
       KEY_DOWN_COMMAND,
       (event) => {
+        // Printable keys (including Shift-produced markers) must reach the
+        // update listener without losing the saved conversion boundary.
         if (
-          event.key !== "Backspace" ||
+          (event.key.length !== 1 &&
+            event.key !== "Backspace" &&
+            event.key !== "Shift") ||
           event.altKey ||
           event.ctrlKey ||
           event.metaKey ||
-          event.shiftKey
+          (event.key === "Backspace" && event.shiftKey)
         ) {
           clear();
         }
