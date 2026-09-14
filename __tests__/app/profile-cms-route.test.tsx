@@ -69,6 +69,21 @@ describe("profile CMS App Router catch-all", () => {
     ).rejects.toThrow("NEXT_NOT_FOUND");
   });
 
+  it("turns a structured missing-profile response into a route 404", async () => {
+    getUserProfileMock.mockRejectedValueOnce(
+      Object.assign(new Error("missing identity"), { status: 404 })
+    );
+
+    await expect(
+      ProfileCmsPage({
+        params: Promise.resolve({
+          user: "missing",
+          cmsPath: ["index.html"],
+        }),
+      })
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+  });
+
   it("does not fetch profile data for non-CMS nested profile paths", async () => {
     await expect(
       ProfileCmsPage({

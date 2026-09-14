@@ -223,6 +223,34 @@ describe("The Memes detail generateMetadata", () => {
     expect(mockShared).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ["non-array payloads", {}, {}],
+    [
+      "duplicate NFT records",
+      [prefetchedNft, prefetchedNft],
+      [prefetchedMetadata],
+    ],
+    [
+      "mismatched record IDs",
+      [{ ...prefetchedNft, id: 124 }],
+      [{ ...prefetchedMetadata, id: 124 }],
+    ],
+  ])("noindexes %s as unavailable", async (_case, nfts, metadata) => {
+    mockFetchUrl.mockImplementation((url: string) =>
+      Promise.resolve({
+        data: url.includes("/api/nfts?") ? nfts : metadata,
+      })
+    );
+
+    const result = await generateMetadata({
+      params: Promise.resolve({ id: "123" }),
+      searchParams: Promise.resolve({}),
+    });
+
+    expect(result.robots).toEqual({ index: false, follow: true });
+    expect(mockShared).not.toHaveBeenCalled();
+  });
+
   it("rejects arbitrary absent card IDs", async () => {
     mockFetchUrl.mockResolvedValue({ data: [] });
 

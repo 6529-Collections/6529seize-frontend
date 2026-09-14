@@ -14,6 +14,7 @@ export const getUserProfile = async ({
   return await commonApiFetch<ApiIdentity>({
     endpoint: `identities/${user}`,
     headers: headers,
+    errorMode: "structured",
   });
 };
 

@@ -22,6 +22,30 @@ type MemePageFetchResult<T> =
   | { readonly ok: true; readonly value: T }
   | { readonly ok: false };
 
+function isRequestedMemeNft(value: unknown, id: number): value is NFT {
+  if (typeof value !== "object" || value === null) return false;
+  const candidate = value as {
+    readonly id?: unknown;
+    readonly contract?: unknown;
+  };
+  return (
+    candidate.id === id &&
+    typeof candidate.contract === "string" &&
+    candidate.contract.toLowerCase() === MEMES_CONTRACT.toLowerCase()
+  );
+}
+
+function isRequestedMemeMetadata(
+  value: unknown,
+  id: number
+): value is ApiMemesExtendedData {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    (value as { readonly id?: unknown }).id === id
+  );
+}
+
 const fetchMemeNft = cache(
   async (id: string): Promise<MemePageFetchResult<NFT | undefined>> => {
     try {
@@ -30,7 +54,12 @@ const fetchMemeNft = cache(
         `${publicEnv.API_ENDPOINT}/api/nfts?${params.toString()}`,
         { cache: "no-store" }
       );
-      return { ok: true, value: response.data[0] };
+      const data: unknown = response.data;
+      if (!Array.isArray(data) || data.length > 1) return { ok: false };
+      if (data.length === 0) return { ok: true, value: undefined };
+      return isRequestedMemeNft(data[0], Number(id))
+        ? { ok: true, value: data[0] }
+        : { ok: false };
     } catch (error) {
       console.warn("Failed to fetch The Memes card data", { id, error });
       return { ok: false };
@@ -45,10 +74,12 @@ const fetchMemeMetadata = cache(
         `${publicEnv.API_ENDPOINT}/api/memes_extended_data?id=${encodeURIComponent(id)}`,
         { cache: "no-store" }
       );
-      return {
-        ok: true,
-        value: Array.isArray(response.data) ? response.data : [],
-      };
+      const data: unknown = response.data;
+      if (!Array.isArray(data) || data.length > 1) return { ok: false };
+      if (data.length === 0) return { ok: true, value: [] };
+      return isRequestedMemeMetadata(data[0], Number(id))
+        ? { ok: true, value: [data[0]] }
+        : { ok: false };
     } catch (error) {
       console.warn("Failed to fetch The Memes card metadata", { id, error });
       return { ok: false };

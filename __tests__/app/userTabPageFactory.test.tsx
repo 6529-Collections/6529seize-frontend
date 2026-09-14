@@ -97,6 +97,17 @@ describe("user tab page via createUserTabPage", () => {
     expect(redirectMock).not.toHaveBeenCalled();
   });
 
+  it("turns a structured missing-profile response into a route 404", async () => {
+    (getUserProfile as jest.Mock).mockRejectedValueOnce(
+      Object.assign(new Error("missing identity"), { status: 404 })
+    );
+    const { Page } = buildFactory();
+
+    await expect(
+      Page({ params: Promise.resolve({ user: "missing" }) } as any)
+    ).rejects.toThrow("NEXT_HTTP_ERROR_FALLBACK;404");
+  });
+
   it("does not invoke the tab component while composing the page", async () => {
     const clientTab = jest.fn(
       ({ profile }: { readonly profile: { handle: string } }) => (
