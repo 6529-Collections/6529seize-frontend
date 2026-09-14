@@ -214,13 +214,15 @@ function validate(kind, input) {
   const dates = records
     .map((record) => (kind === "performance" ? record.date : record.checked_on))
     .filter(Boolean)
-    .sort();
+    .sort((left, right) => left.localeCompare(right));
   return {
     kind,
     valid: true,
     rows: records.length,
     dateRange: { start: dates[0], end: dates.at(-1) },
-    pageTypes: [...new Set(records.map((record) => record.page_type))].sort(),
+    pageTypes: [...new Set(records.map((record) => record.page_type))].sort(
+      (left, right) => left.localeCompare(right)
+    ),
   };
 }
 
