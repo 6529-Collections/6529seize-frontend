@@ -82,6 +82,7 @@ export function useDropClipboardCopyFeedback(): UseDropClipboardCopyFeedbackResu
         // fully visible for any consumer that keeps its surface open.
         showTransientStatus("copied");
         onCopied?.();
+        return;
       })
       .catch(() => {
         if (isMountedRef.current) {
