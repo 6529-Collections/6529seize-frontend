@@ -52,6 +52,38 @@ function props() {
 const continueButton = () =>
   screen.getByRole("button", { name: "Continue in wallet" });
 
+it("keeps gas charging explanations in price details and exact changes collapsed beside the summary", () => {
+  const notice = {
+    summary: "Network fee updated. Your purchase price is unchanged.",
+    details: [
+      {
+        label: "Gas price limit",
+        before: "0.083087612 Gwei",
+        after: "0.095614148 Gwei",
+      },
+    ],
+  };
+  render(
+    <CollectBatchQuoteReview
+      {...props()}
+      message={notice.summary}
+      reviewChangeNotice={notice}
+    />
+  );
+  const summary = within(
+    screen.getByRole("complementary", { name: "Purchase summary" })
+  );
+  expect(summary.getByText(notice.summary)).toBeVisible();
+  expect(summary.queryByText(/A failed transaction/)).not.toBeInTheDocument();
+  expect(screen.getByText(/A failed transaction/)).not.toBeVisible();
+  expect(summary.getByText("Updated: 0.095614148 Gwei")).not.toBeVisible();
+  fireEvent.click(summary.getByText("View exact changes"));
+  expect(summary.getByText("Previous: 0.083087612 Gwei")).toBeVisible();
+  expect(summary.getByText("Updated: 0.095614148 Gwei")).toBeVisible();
+  fireEvent.click(screen.getByText("Price breakdown"));
+  expect(screen.getByText(/A failed transaction/)).toBeVisible();
+});
+
 it("keeps every exact allocation reachable with separate payer, one maximum and action above disclosures", () => {
   const p = props();
   render(
@@ -91,7 +123,7 @@ it("keeps every exact allocation reachable with separate payer, one maximum and 
     screen.getByText(
       "Unused gas is not charged. A failed transaction can still use gas."
     )
-  ).toBeVisible();
+  ).not.toBeVisible();
   expect(screen.getByText("Exact maximum total")).not.toBeVisible();
   expect(
     continueButton().compareDocumentPosition(

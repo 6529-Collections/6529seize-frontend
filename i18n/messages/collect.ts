@@ -1,4 +1,19 @@
 export const COLLECT_MESSAGES = {
+  "collect.trade.preflightFailed": "Checks could not finish. Try again.",
+  "collect.trade.recoveryFailed":
+    "The transaction status could not be checked. Keep the transaction hash and retry the status check.",
+  "collect.trade.publishFailed":
+    "The signed order could not be published. Check order activity before retrying.",
+  "collect.trade.networkFeeUpdated":
+    "Network fee updated. Your purchase price is unchanged. Review the new maximum before continuing.",
+  "collect.trade.networkLimitsUpdated":
+    "Network fee limits updated. Review the new limits before continuing.",
+  "collect.review.exactChanges": "View exact changes",
+  "collect.review.previousValue": "Previous: {value}",
+  "collect.review.updatedValue": "Updated: {value}",
+  "collect.review.gasLimit": "Gas limit",
+  "collect.review.gasPriceLimit": "Gas price limit",
+  "collect.review.approvalLimit": "Approval {number} · {limit}",
   "collect.trade.changedPrice":
     "Trade total changed from {before} to {after} {currency}.",
   "collect.trade.changedFees":
@@ -565,7 +580,7 @@ export const COLLECT_MESSAGES = {
   "collect.trade.approvalTarget": "Approval contract",
   "collect.trade.approvalScope": "Approval scope",
   "collect.trade.checkFailed":
-    "This payload did not match your reviewed trade. Nothing was sent to your wallet.",
+    "The transaction details did not match your reviewed trade.",
   "collect.trade.refreshReview":
     "Terms changed. Review the updated details before continuing.",
   "collect.trade.walletFailed":

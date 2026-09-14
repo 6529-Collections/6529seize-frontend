@@ -34,6 +34,7 @@ import {
 import type { CollectTradeStage } from "./collect.types";
 import { acknowledgeMarketSubmission } from "./market-known-submission";
 import { knownMarketTransactionHash } from "./market-known-transaction";
+import { reviewedMarketGasLimits } from "./market-review-caps";
 
 interface Execution {
   readonly client: PublicClient;
@@ -136,16 +137,7 @@ async function send(options: Execution) {
   };
   await client.call(request);
   const estimated = await client.estimateGas(request);
-  const gas = BigInt(transaction.gas_limit!),
-    maxFeePerGas = BigInt(transaction.max_fee_per_gas!);
-  if (estimated > gas || gas > 16_777_216n)
-    throw new Error("MARKET_GAS_CAP_CHANGED");
-  const fees = await client.estimateFeesPerGas();
-  if (
-    fees.maxFeePerGas > maxFeePerGas ||
-    fees.maxPriorityFeePerGas > maxFeePerGas
-  )
-    throw new Error("MARKET_GAS_CAP_CHANGED");
+  const fees = await reviewedMarketGasLimits(client, transaction, estimated);
   assertConnection();
   validateMarketBatchOperation(operation, expected, profileWallets);
   const result = await sendReviewedMarketBatch({
@@ -158,9 +150,7 @@ async function send(options: Execution) {
       options.onStage?.("wallet");
       return wallet.sendTransaction({
         ...request,
-        gas,
-        maxFeePerGas,
-        maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
+        ...fees,
       });
     },
   });

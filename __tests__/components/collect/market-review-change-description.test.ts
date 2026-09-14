@@ -1,7 +1,129 @@
-import { marketReviewChangeDescription } from "@/components/collect/market-review-change-description";
+import {
+  marketReviewChangeDescription,
+  marketReviewChangeNotice,
+} from "@/components/collect/market-review-change-description";
 import { marketBatchReviewChange } from "@/components/collect/market-batch-validation";
 import { MARKET_WETH } from "@/components/collect/market-validation";
 import { batchFixture } from "./market-batch.fixture";
+import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
+import {
+  ApiMarketOperationStateEnum,
+  type ApiMarketOperation,
+} from "@/generated/models/ApiMarketOperation";
+import { ApiMarketTransactionPurposeEnum } from "@/generated/models/ApiMarketTransaction";
+
+it("exposes an approval-only ceiling change when the total reserve is unchanged and fulfillment is not ready", () => {
+  const { operation } = batchFixture();
+  const before: ApiMarketOperation = {
+    id: operation.id,
+    revision: operation.revision,
+    profile_id: operation.profile_id,
+    wallet: operation.wallet,
+    currency: operation.currency,
+    total_wei: operation.total_wei,
+    expires_at: operation.expires_at,
+    updated_at: operation.updated_at,
+    kind: ApiMarketKind.List,
+    state: ApiMarketOperationStateEnum.Approval,
+    recipient: operation.wallet,
+    recipient_in_profile: true,
+    asset_key: operation.items[0]!.asset_key,
+    quantity: "1",
+    net_wei: operation.total_wei,
+    fees: [],
+    potential_liability_wei: "0",
+    approval_transactions: [
+      {
+        chain_id: operation.transaction!.chain_id,
+        sender: operation.transaction!.sender,
+        to: operation.transaction!.to,
+        data: operation.transaction!.data,
+        purpose: ApiMarketTransactionPurposeEnum.ApproveNft,
+        value: "0",
+        gas_limit: "100000",
+        max_fee_per_gas: "10",
+        gas_reserve_wei: "1000000",
+      },
+    ],
+  };
+  const after = {
+    ...before,
+    approval_transactions: [
+      {
+        ...before.approval_transactions[0]!,
+        gas_limit: "50000",
+        max_fee_per_gas: "20",
+      },
+    ],
+  };
+  const notice = marketReviewChangeNotice(before, after, "en-US", "gas");
+  expect(notice.details).toEqual([
+    { label: "Approval 1 · Gas limit", before: "100,000", after: "50,000" },
+    {
+      label: "Approval 1 · Gas price limit",
+      before: "0.00000001 Gwei",
+      after: "0.00000002 Gwei",
+    },
+  ]);
+  expect(notice.summary).not.toContain("purchase price");
+});
+
+it("keeps exact one-wei cap changes in disclosure data and purchase reassurance in the summary", () => {
+  const { operation: before } = batchFixture();
+  const after = {
+    ...before,
+    transaction: { ...before.transaction!, gas_reserve_wei: "6000001" },
+  };
+  const notice = marketReviewChangeNotice(before, after, "en-US", "gas");
+  expect(notice.summary).toBe(
+    "Network fee updated. Your purchase price is unchanged. Review the new maximum before continuing."
+  );
+  expect(notice.summary).not.toMatch(/0\.\d/);
+  expect(notice.details).toEqual([
+    {
+      label: "Exact network fee cap",
+      before: "0.000000000006 ETH",
+      after: "0.000000000006000001 ETH",
+    },
+    {
+      label: "Exact maximum total",
+      before: "0.00000000000600014 ETH",
+      after: "0.000000000006000141 ETH",
+    },
+  ]);
+});
+
+it("does not reassure about an unchanged purchase when economic terms changed", () => {
+  const { operation: before } = batchFixture();
+  const after = { ...before, total_wei: "141" };
+  const notice = marketReviewChangeNotice(before, after, "en-US", "terms");
+  expect(notice.summary).toContain("Trade total changed");
+  expect(notice.summary).not.toContain("unchanged");
+  expect(notice.details).toEqual([]);
+});
+
+it("discloses a component increase even when the total fee cap decreases", () => {
+  const { operation: before } = batchFixture();
+  const after = {
+    ...before,
+    transaction: {
+      ...before.transaction!,
+      gas_limit: "100000",
+      max_fee_per_gas: "11",
+      gas_reserve_wei: "1100000",
+    },
+  };
+  const notice = marketReviewChangeNotice(before, after, "fr-FR", "gas");
+  expect(notice.details).toEqual(
+    expect.arrayContaining([
+      {
+        label: "Gas price limit",
+        before: "0,00000001 Gwei",
+        after: "0,000000011 Gwei",
+      },
+    ])
+  );
+});
 
 it("reports exact old/new network and maximum amounts without changing either snapshot", () => {
   const { operation: before } = batchFixture();
