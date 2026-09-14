@@ -6,6 +6,8 @@ import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepar
 import { parseEther } from "viem";
 import type { CollectTradeAction, CollectTradeDraft } from "./collect.types";
 import { MARKET_WETH, MARKET_ZERO } from "./market-validation";
+import { isCollectProfileWallet } from "./collect-recipient.helpers";
+import { resolveCollectOrderExpiry } from "./collect-order-expiry";
 
 export function marketConnectionReason(options: {
   readonly capabilityEnabled: boolean;
@@ -16,7 +18,7 @@ export function marketConnectionReason(options: {
   readonly canSign: boolean;
   readonly address: string | undefined;
   readonly profile: ApiIdentity | null;
-  readonly operation: ApiMarketOperation | null;
+  readonly operation: Pick<ApiMarketOperation, "wallet" | "profile_id"> | null;
   readonly hasExpected: boolean;
   readonly cancelTarget: ApiMarketOperation | undefined;
 }) {
@@ -25,9 +27,7 @@ export function marketConnectionReason(options: {
   if (options.isProxy) return "collect.trade.proxyUnavailable";
   if (options.isSafe) return "collect.trade.safeUnavailable";
   const address = options.address?.toLowerCase();
-  const inProfile = options.profile?.wallets?.some(
-    (wallet) => wallet.wallet.toLowerCase() === address
-  );
+  const inProfile = isCollectProfileWallet(options.profile, address ?? "");
   if (!options.isAuthenticated || !options.canSign || !inProfile)
     return "collect.trade.connectSigner";
   const requiredWallet =
@@ -70,9 +70,7 @@ export function buildMarketRequest(options: {
   );
   if (kind === undefined || !profile.id) throw new Error("UNSUPPORTED_ACTION");
   const recipient = action === "buy" ? draft.recipient : wallet;
-  const inProfile = profile.wallets?.some(
-    (entry) => entry.wallet.toLowerCase() === recipient.toLowerCase()
-  );
+  const inProfile = isCollectProfileWallet(profile, recipient);
   if (!inProfile && !draft.acknowledgeExternalRecipient)
     throw new Error("RECIPIENT_NOT_ACKNOWLEDGED");
   const request: ApiMarketPrepareRequest = {
@@ -92,9 +90,11 @@ export function buildMarketRequest(options: {
       !inProfile && draft.acknowledgeExternalRecipient === true,
   };
   if (selectedOrder) request.order = selectedOrder.identity;
-  if (action === "list" || action === "offer")
-    request.expires_at =
-      Math.floor(Date.now() / 1000) + Number(draft.expiryHours) * 3600;
+  if (action === "list" || action === "offer") {
+    const expiry = resolveCollectOrderExpiry(draft);
+    if (expiry === null) throw new Error("MARKET_ORDER_EXPIRY_INVALID");
+    request.expires_at = expiry;
+  }
   if (cancelTarget?.order)
     request.order = {
       protocol_address: cancelTarget.order.protocol_address,

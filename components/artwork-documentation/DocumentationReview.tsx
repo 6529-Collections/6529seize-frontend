@@ -1,5 +1,7 @@
 "use client";
 
+import { mutationCapabilities } from "@/lib/artwork-documentation/capabilities";
+
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
@@ -11,9 +13,11 @@ import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtwo
 import type {
   DocumentationDraftController,
   SaveState,
+  PendingEdit,
 } from "@/lib/artwork-documentation/draft-controller";
+import { documentationDraftRecord } from "@/lib/artwork-documentation/record";
 import { confirmationCopyMatches } from "@/lib/artwork-documentation/confirmation";
-import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
+import type { DocumentationSection } from "@/lib/artwork-documentation/registry";
 import { documentationQueryKey } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
 import {
   confirmDocumentation,
@@ -27,26 +31,31 @@ import { formatDate } from "@/i18n/format";
 import { documentationFieldLabel } from "@/i18n/messages/artwork-documentation-fields";
 import { useDocumentationActor } from "./DocumentationAuthGate";
 import DocumentationSummary from "./DocumentationSummary";
+import DocumentationArtworkPreview from "./DocumentationArtworkPreview";
 import {
   DocumentationButton,
   DocumentationNotice,
   inputClass,
-  panelClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
+
+const EMPTY_EDITS: readonly PendingEdit[] = [];
 
 export default function DocumentationReview({
   context,
   controller,
   saveState,
+  edits = EMPTY_EDITS,
+  onNavigateSection,
 }: {
   readonly context: ApiArtworkDocumentationContext;
   readonly controller: DocumentationDraftController;
   readonly saveState: SaveState;
+  readonly edits?: readonly PendingEdit[];
+  readonly onNavigateSection: (section: DocumentationSection) => void;
 }) {
   const { msg, locale } = useDocumentationMessages();
-  const publicationOnly = isPublicationOnly(context.profile);
-  const reviewAllKey = publicationOnly ? "publication.reviewAll" : "reviewAll";
+  const draftRecord = documentationDraftRecord(context, edits);
   const { connectedProfile, actorKey } = useDocumentationActor();
   const [acknowledged, setAcknowledged] = useState(false);
   const [preview, setPreview] = useState(false);
@@ -85,12 +94,23 @@ export default function DocumentationReview({
   const missing = Object.values(context.modules).flatMap(
     (module) => module.completeness.missing
   );
+  const needsInterviewPermission = context.issues.some(
+    (issue) => issue.code === "INTERVIEW_PUBLICATION_PERMISSION_REQUIRED"
+  );
   const canConfirm =
-    context.capabilities.confirm_as_artist &&
+    mutationCapabilities(context).confirm_as_artist &&
     !missing.length &&
+    !needsInterviewPermission &&
     saveState === "clean" &&
     context.lifecycle === ApiArtworkDocumentationContextLifecycleEnum.Active &&
     confirmationCopyMatches(context.profile);
+  const draftPreviewMessage =
+    saveState === "clean"
+      ? "editorial.savedRecordPreview"
+      : "editorial.unsavedRecordPreview";
+  const previewMessage = preview
+    ? "editorial.savedPublicationPreview"
+    : draftPreviewMessage;
   const confirm = async () => {
     if (key.current.version !== context.draft_version)
       key.current = {
@@ -108,21 +128,32 @@ export default function DocumentationReview({
     }
   };
   return (
-    <div className="tw-space-y-5">
+    <div className="tw-space-y-8">
       <DocumentationButton secondary onClick={() => setPreview(!preview)}>
-        {msg(preview ? reviewAllKey : "preview")}
+        {msg(
+          preview
+            ? "editorial.returnToDraft"
+            : "editorial.publicationPreviewAction"
+        )}
       </DocumentationButton>
-      {preview && (
-        <DocumentationNotice>
-          {msg(publicationOnly ? "publication.previewNotice" : "previewNotice")}
-        </DocumentationNotice>
-      )}
+      <p
+        role="status"
+        className="tw-max-w-prose tw-text-sm tw-leading-7 tw-text-iron-400"
+      >
+        {msg(previewMessage)}
+      </p>
       {preview ? (
         <>
           {previewQuery.data ? (
             <DocumentationSummary
-              context={previewQuery.data}
+              context={{ ...previewQuery.data, assets: context.assets }}
               profile={context.profile}
+              media={
+                <DocumentationArtworkPreview
+                  context={context}
+                  publication={previewQuery.data}
+                />
+              }
             />
           ) : (
             <DocumentationNotice error={previewQuery.isError}>
@@ -131,18 +162,42 @@ export default function DocumentationReview({
           )}
         </>
       ) : (
-        <DocumentationSummary context={context} />
+        <DocumentationSummary
+          context={draftRecord}
+          media={<DocumentationArtworkPreview context={draftRecord} />}
+        />
       )}
       {!preview && (
         <>
-          <section className={`${panelClass} tw-space-y-4`}>
-            <h3 className="tw-m-0 tw-text-lg tw-font-semibold">
+          <section className="tw-space-y-5 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-10">
+            <h3 className="tw-m-0 tw-font-serif tw-text-3xl tw-font-normal">
               {msg("confirm")}
             </h3>
             {confirmed && (
               <DocumentationNotice>
                 {msg("confirmed")} · {msg("reviewPending")}
               </DocumentationNotice>
+            )}
+            {needsInterviewPermission && (
+              <div className="tw-max-w-prose tw-space-y-3">
+                <p className="tw-text-sm tw-leading-7 tw-text-iron-300">
+                  {msg("museum.interviewPermissionRequired")}
+                </p>
+                <div className="tw-flex tw-flex-wrap tw-gap-3">
+                  <DocumentationButton
+                    secondary
+                    onClick={() => onNavigateSection("conversation")}
+                  >
+                    {msg("museum.chapter.conversation")}
+                  </DocumentationButton>
+                  <DocumentationButton
+                    secondary
+                    onClick={() => onNavigateSection("rights")}
+                  >
+                    {msg("museum.chapter.rights")}
+                  </DocumentationButton>
+                </div>
+              </div>
             )}
             {missing.length > 0 && (
               <div>
@@ -158,7 +213,7 @@ export default function DocumentationReview({
                 </ul>
               </div>
             )}
-            {!context.capabilities.confirm_as_artist && (
+            {!mutationCapabilities(context).confirm_as_artist && (
               <p className="tw-text-sm tw-text-iron-400">
                 {msg("confirmArtist")}
               </p>
@@ -171,24 +226,28 @@ export default function DocumentationReview({
             <p className="tw-text-sm tw-leading-relaxed tw-text-iron-400">
               {msg("confirmHelp")}
             </p>
-            <label className="tw-flex tw-items-start tw-gap-3 tw-text-sm tw-text-iron-200">
-              <input
-                type="checkbox"
-                className="tw-mt-1 tw-h-5 tw-w-5 tw-shrink-0 tw-accent-primary-400"
-                checked={acknowledged}
-                disabled={!canConfirm}
-                onChange={(event) => setAcknowledged(event.target.checked)}
-              />
-              {msg("acknowledge")}
-            </label>
-            <DocumentationButton
-              disabled={!canConfirm || !acknowledged}
-              onClick={() => {
-                void confirm();
-              }}
-            >
-              {msg("confirm")}
-            </DocumentationButton>
+            {mutationCapabilities(context).confirm_as_artist && (
+              <>
+                <label className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-start tw-gap-3 tw-text-base tw-leading-7 tw-text-iron-200">
+                  <input
+                    type="checkbox"
+                    className="tw-mt-1 tw-h-5 tw-w-5 tw-shrink-0 tw-accent-primary-400"
+                    checked={acknowledged}
+                    disabled={!canConfirm}
+                    onChange={(event) => setAcknowledged(event.target.checked)}
+                  />
+                  {msg("acknowledge")}
+                </label>
+                <DocumentationButton
+                  disabled={!canConfirm || !acknowledged}
+                  onClick={() => {
+                    void confirm();
+                  }}
+                >
+                  {msg("confirm")}
+                </DocumentationButton>
+              </>
+            )}
           </section>
           {context.latest_revision_id && (
             <DocumentationLaneReviews
@@ -196,8 +255,8 @@ export default function DocumentationReview({
               controller={controller}
             />
           )}
-          <section className={panelClass}>
-            <h3 className="tw-mb-4 tw-text-lg tw-font-semibold">
+          <section className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-10">
+            <h3 className="tw-mb-4 tw-font-serif tw-text-3xl tw-font-normal">
               {msg("history")}
             </h3>
             {(revisions.data?.data.length ?? 0) === 0 && (
@@ -260,7 +319,7 @@ function DocumentationLaneReviews({
     }
   };
   return (
-    <section className={`${panelClass} tw-space-y-4`}>
+    <section className="tw-space-y-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-10">
       <p className="tw-text-sm tw-text-iron-400">{msg("reviewScope")}</p>
       {error && <DocumentationNotice error>{msg("error")}</DocumentationNotice>}
       {context.profile.review_lanes.map((lane) => {
@@ -269,11 +328,8 @@ function DocumentationLaneReviews({
           (item) => String(item.lane) === String(lane)
         );
         return (
-          <div
-            key={lane}
-            className="tw-border-b tw-border-solid tw-border-iron-800 tw-pb-4"
-          >
-            <h3 className="tw-text-base tw-font-semibold">
+          <div key={lane} className="tw-space-y-3 tw-pb-4">
+            <h3 className="tw-m-0 tw-text-base tw-font-medium">
               {msg(`lane.${lane}`)}
             </h3>
             <p className="tw-text-sm tw-text-iron-300">
@@ -284,7 +340,7 @@ function DocumentationLaneReviews({
                 {review.reason}
               </p>
             )}
-            {context.capabilities.review_lanes.some(
+            {mutationCapabilities(context).review_lanes.some(
               (allowed) => String(allowed) === String(lane)
             ) && (
               <div className="tw-space-y-3">

@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
 import { getDistributionDetailHref } from "@/components/distribution/distributionRouteParams";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
@@ -8,7 +9,7 @@ import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 
 import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDropNextMintSubscribe";
@@ -37,9 +38,13 @@ import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import NftNavigation from "../nft-navigation/NftNavigation";
+import NftDetailTabSection from "../nft-navigation/NftDetailTabSection";
 import MemeCalendarPeriods from "./MemeCalendarPeriods";
 import { MemePageArtViewer } from "./MemePageArtViewer";
+import { MemePageTabButton } from "./MemePageTabButton";
+import NftArtworkShareButton from "@/components/artwork-share/NftArtworkShareButton";
 import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";
+import MemePageRelatedWorks from "./MemePageRelatedWorks";
 import {
   MemePageNavigationSkeleton,
   MemePageSkeleton,
@@ -64,6 +69,10 @@ import {
   useMemePageFallbackData,
 } from "./useMemePageFallbackData";
 
+const MemePageArt = dynamic(() =>
+  import("./MemePageArt").then((mod) => mod.MemePageArt)
+);
+
 const MemePageActivity = dynamic(() =>
   import("./MemePageActivity").then((mod) => mod.MemePageActivity)
 );
@@ -76,16 +85,12 @@ const MemePageCollectorsSubMenu = dynamic(() =>
   import("./MemePageCollectors").then((mod) => mod.MemePageCollectorsSubMenu)
 );
 
-const MemePageReferencesSubMenu = dynamic(() =>
-  import("./MemePageReferences").then((mod) => mod.MemePageReferencesSubMenu)
-);
-
 const ACTIVITY_PAGE_SIZE = 25;
 const VISIBLE_MEME_TABS = [
   MEME_FOCUS.LIVE,
+  MEME_FOCUS.MARKET,
   MEME_FOCUS.COLLECTORS,
   MEME_FOCUS.HISTORY,
-  MEME_FOCUS.REFERENCES,
 ]
   .map((focus) => MEME_TABS.find((tab) => tab.focus === focus))
   .filter((tab): tab is (typeof MEME_TABS)[number] => tab !== undefined);
@@ -102,9 +107,6 @@ const MEME_HISTORY_TABS: {
   { focus: MEME_HISTORY_TAB.YOUR_TRANSACTIONS },
   { focus: MEME_HISTORY_TAB.TIMELINE },
 ];
-
-const MEME_TAB_BUTTON_BASE_CLASS_NAME =
-  "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
 interface MemeOwnerState {
   readonly consolidationKey: string;
@@ -127,35 +129,6 @@ function getMemeHistoryTabLabel(
       throw new Error(`Unhandled MEME_HISTORY_TAB: ${String(unhandled)}`);
     }
   }
-}
-
-function getMemePageTabButtonClassName(isActive: boolean) {
-  return `${MEME_TAB_BUTTON_BASE_CLASS_NAME} ${
-    isActive
-      ? "tw-cursor-default tw-border-primary-400 tw-text-iron-100"
-      : "tw-cursor-pointer tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100"
-  }`;
-}
-
-function MemePageTabButton({
-  title,
-  isActive,
-  onClick,
-}: {
-  readonly title: string;
-  readonly isActive: boolean;
-  readonly onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      className={getMemePageTabButtonClassName(isActive)}
-      aria-current={isActive ? "page" : undefined}
-      onClick={onClick}
-    >
-      {title}
-    </button>
-  );
 }
 
 function UpcomingMemeDistributionHeaderLink({
@@ -255,9 +228,6 @@ export default function MemePage({
     if (focusParam === undefined) {
       return undefined;
     }
-    if (focusParam === MEME_FOCUS.THE_ART) {
-      return MEME_FOCUS.LIVE;
-    }
     if (
       focusParam === MEME_FOCUS.YOUR_CARDS ||
       focusParam === MEME_FOCUS.ACTIVITY ||
@@ -266,7 +236,10 @@ export default function MemePage({
     ) {
       return MEME_FOCUS.HISTORY;
     }
-    return focusParam;
+    return focusParam === MEME_FOCUS.THE_ART ||
+      focusParam === MEME_FOCUS.REFERENCES
+      ? MEME_FOCUS.LIVE
+      : focusParam;
   }, [focusParam]);
 
   const activeTab = resolvedRouterFocus ?? MEME_FOCUS.LIVE;
@@ -292,6 +265,10 @@ export default function MemePage({
   const nftNotFound = pageData?.nftNotFound ?? false;
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [marketRefreshVersion, setMarketRefreshVersion] = useState(0);
+  const refreshMarket = useCallback(() => {
+    setMarketRefreshVersion((version) => version + 1);
+  }, []);
 
   const [ownerState, setOwnerState] = useState<MemeOwnerState>();
   const consolidationKey = connectedProfile?.consolidation_key;
@@ -497,12 +474,17 @@ export default function MemePage({
     return (
       <div className={cardHeaderClassName}>
         <div className={artworkColumnClassName}>
-          <div className={`${styles["nftImageWrapper"] ?? ""} lg:tw-flex-1`}>
+          <div
+            className={`${styles["nftImageWrapper"] ?? ""} tw-relative lg:tw-flex-1`}
+          >
             <MemePageArtViewer
               key={`${nft.contract}-${nft.id}`}
               nft={nft}
               showBalance={true}
               locale={locale}
+              actions={
+                <NftArtworkShareButton nft={nft} kind="memes" locale={locale} />
+              }
             />
           </div>
           {userLoaded && (
@@ -538,6 +520,7 @@ export default function MemePage({
             nft={nft}
             nftMeta={nftMeta}
             locale={locale}
+            onMarketChange={refreshMarket}
           />
         </div>
       </div>
@@ -602,16 +585,20 @@ export default function MemePage({
             nft={nft}
             nftMeta={nftMeta}
             nftBalance={nftBalance}
-            defaultAdditionalDetailsOpen={focusParam === MEME_FOCUS.THE_ART}
             locale={locale}
+            marketRefreshVersion={marketRefreshVersion}
           />
-          {(activeTab === MEME_FOCUS.REFERENCES ||
-            loadedPrimaryTabs.has(MEME_FOCUS.REFERENCES)) && (
-            <MemePageReferencesSubMenu
-              show={activeTab === MEME_FOCUS.REFERENCES}
+          {activeTab === MEME_FOCUS.LIVE && nft && (
+            <MemePageRelatedWorks
+              key={nft.id}
               nft={nft}
               locale={locale}
+              focus={focusParam}
+              onFocusChange={replaceRouteFocus}
             />
+          )}
+          {activeTab === MEME_FOCUS.LIVE && nft && nftMeta && (
+            <MemePageArt show nft={nft} nftMeta={nftMeta} locale={locale} />
           )}
           {userLoaded && (
             <MemePageYourCardsSubMenu
@@ -781,9 +768,29 @@ export default function MemePage({
         {nftMeta && nft && (
           <>
             {printStaticCardHeader()}
-            {printTabs()}
-            {printHistoryTabs()}
-            {printContent()}
+            <NftDetailTabSection
+              activeFocus={routeFocus}
+              locale={locale}
+              persistentContent={
+                <MarketDepthPanel
+                  contract={MEMES_CONTRACT}
+                  tokenId={nft.id}
+                  locale={locale}
+                  refreshKey={marketRefreshVersion}
+                  embedded
+                  active={activeTab === MEME_FOCUS.MARKET}
+                  onReveal={() => setActiveMemeTab(MEME_FOCUS.MARKET)}
+                />
+              }
+              navigation={
+                <>
+                  {printTabs()}
+                  {printHistoryTabs()}
+                </>
+              }
+            >
+              {printContent()}
+            </NftDetailTabSection>
           </>
         )}
         {nftNotFound && <UpcomingMemePage id={nftId} locale={locale} />}

@@ -20,78 +20,82 @@ export const MEME_ORGANIZATION_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Common Press",
     family: "organization",
     description:
-      "A poster-led creative organization with a public manifesto and a strong project index.",
+      "A creative organization site for publications, workshops and current projects.",
     presentation: style("organization", "paper", "sans", "compact"),
     accent: "#bd3826",
     pages: [
       page(
         "studio",
-        "Make the public thing.",
-        "Common Press is an independent practice for visual ideas, shared tools, and cultural projects.",
-        kicker("Ideas become useful when they leave the notebook."),
+        "Common Press",
+        "A publishing collective making zines, running workshops and sharing source files.",
+        kicker("Publications / Workshops / Downloads"),
         memeImage(2, "third"),
         text(
-          "We turn research into things people can encounter: a publication, an exhibition, a tool, a conversation. The work begins with a clear question and ends with something others can use.",
+          "We work on small publications about digital art and the people making it. Some projects become printed zines; others stay online as interviews, guides or workshop notes.",
           "two_thirds"
         ),
-        card("01 / Publish", "Give a good idea a legible form.", "third"),
         card(
-          "02 / Gather",
-          "Make room for different kinds of knowledge.",
+          "01 / Publish",
+          "Artist interviews, short essays and illustrated guides.",
           "third"
         ),
         card(
-          "03 / Release",
-          "Leave a clear route for the work to travel.",
+          "02 / Meet",
+          "Workshops where people can try making something together.",
           "third"
         ),
-        pageLink("Read the manifesto", "manifesto"),
-        pageLink("See the projects", "projects"),
+        card(
+          "03 / Share",
+          "Downloads of the files and notes used in each project.",
+          "third"
+        ),
+        pageLink("How we work", "manifesto"),
+        pageLink("Browse the projects", "projects"),
         memeCredit(2)
       ),
       page(
         "manifesto",
-        "An open brief.",
-        "Five working commitments for making culture together.",
-        heading("Begin with a real question"),
+        "How we work",
+        "Our guidelines for contributors, editing and sharing work.",
+        heading("Start with the reader"),
         text(
-          "A strong project can explain who it is for, what it wants to discover, and what would make it useful."
+          "Before we commission a piece, we decide who it is for and what they should get from reading it."
         ),
-        heading("Make the process legible"),
+        heading("Work with the contributors"),
         text(
-          "Share the sources and the decisions. Give collaborators the context to disagree well."
+          "Contributors check the edited text and image choices before publication. We agree on payment and permissions at the start."
         ),
-        heading("Credit the work"),
+        heading("Give clear credit"),
         text(
-          "Keep names, sources, and permissions attached. Open materials still deserve careful description."
+          "Every piece includes the writer, artist and relevant source links. Reused material carries its credit too."
         ),
         card(
-          "Leave something usable",
-          "A project should leave more than a launch image: an archive, a method, or a tool that remains understandable."
+          "Keep downloads available",
+          "Each project page holds the final publication and any files we have permission to share."
         ),
-        pageLink("The manifesto in practice", "projects")
+        pageLink("See the projects", "projects")
       ),
       page(
         "projects",
-        "A working index.",
-        "Three projects at different scales, joined by an interest in the public life of ideas.",
+        "Projects",
+        "A zine in development, a workshop plan and a set of printing resources.",
         card(
           "The Common Reader",
-          "A short publication pairing a cultural question with annotated primary sources."
+          "A zine in development, built around three artist interviews. We’re drafting the questions and testing an eight-page layout."
         ),
         card(
           "Open Table",
-          "A workshop format built around one object, several perspectives, and a shared set of notes."
+          "A workshop we’re preparing: bring a sketchbook, make a one-page zine and swap copies at the end. We’re testing the folding instructions before setting a date."
         ),
         card(
-          "A Useful Archive",
-          "A collection of reusable documentation patterns for small cultural organizations."
+          "The Zine Folder",
+          "A resource pack in progress with page sizes, folding instructions and a print checklist. The first task is checking the folds on an ordinary home printer."
         ),
         externalLink(
-          "Explore the Creative Commons licenses",
+          "Read about Creative Commons licenses",
           SOURCE_LINKS.licenses
         ),
-        pageLink("Our working commitments", "manifesto")
+        pageLink("Back to how we work", "manifesto")
       ),
     ],
   }),
@@ -101,79 +105,79 @@ export const MEME_ORGANIZATION_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Meridian Studies",
     family: "fund",
     description:
-      "A restrained editorial collecting vehicle with a mandate, a selection, and published research.",
+      "A collecting organization site with a mandate, featured artwork and research notes.",
     presentation: style("fund", "paper", "serif", "airy"),
     accent: "#a63d35",
     pages: [
       page(
         "studio",
-        "Conviction, with a record.",
-        "Meridian Studies is a fictional collecting practice focused on digital culture and the context around it.",
+        "Meridian Studies",
+        "Research and collection planning for digital art.",
         kicker("Mandate / Collection / Research"),
         text(
-          "A durable collection needs a clear purpose, a patient method, and records that remain useful after the first decision. This site brings those elements into one public reading room.",
+          "We’re developing a collection around digital artwork and online communities. The first stage is research: setting the scope, recording sources and writing proposals before making any acquisitions.",
           "two_thirds"
         ),
         memeImage(9, "third"),
         card(
-          "The mandate",
-          "Support a coherent long-term collection through research, documentation, and deliberate selection."
+          "Collection focus",
+          "Digital artwork, with an emphasis on artist-led projects and work made for online audiences."
         ),
         pageLink("Read the mandate", "mandate"),
-        pageLink("Browse the research", "research"),
+        pageLink("Read the research notes", "research"),
         memeCredit(9)
       ),
       page(
         "mandate",
-        "A purpose before a portfolio.",
-        "The mandate defines the questions the collection should be able to explore.",
-        heading("Cultural relevance"),
+        "Collection mandate",
+        "Our collection focus and the information required for a proposal.",
+        heading("What we look at"),
         text(
-          "We look for work that makes a particular moment legible while continuing to reward attention outside that moment."
+          "We begin with the artist’s wider body of work, then look at how the proposed piece fits the collection."
         ),
-        heading("Documentation"),
+        heading("What we record"),
         text(
-          "A selection begins with primary sources, reliable attribution, and a clear account of what is known and what remains uncertain."
+          "Each review includes the title, artist, source files, edition information and a written reason for the proposed addition."
         ),
         card(
-          "Scope of this example",
-          "This is a content template, with no live fund, performance record, assets under management, or investment offer."
+          "About this example",
+          "Meridian Studies is fictional. These pages show a site format, with no actual holdings, fund performance or investment offer."
         ),
-        pageLink("A reference selection", "collection")
+        pageLink("View the research selection", "collection")
       ),
       page(
         "collection",
-        "A reference, carefully labeled.",
-        "The collection view keeps a work, its creator, and its context together.",
+        "Research selection",
+        "The Institutions Are Coming by 6529er.",
         memeImage(9, "half"),
         text(
-          "The Institutions Are Coming by 6529er is presented here as a CC0 cultural reference. Its inclusion demonstrates a collection record; it does not assert that the example practice owns a token.",
+          "The Institutions Are Coming by 6529er is on our research list. It is shown as a credited CC0 reference, not a holding of Meridian Studies.",
           "half"
         ),
         card(
-          "Research questions",
-          "What does the image say about institutions? How does its visual language carry the joke? What changes when a work moves from a community into a collection?"
+          "Review notes",
+          "Our first note asks how this card fits alongside the earlier works by 6529er in The Memes. Next we’ll compare those cards and read the collection’s own introduction."
         ),
         memeCredit(9),
-        pageLink("A note on method", "research")
+        pageLink("How we research a work", "research")
       ),
       page(
         "research",
-        "Separate the claim from the evidence.",
-        "A short method note for cultural due diligence.",
+        "Research notes",
+        "The first research record, with follow-up tasks still open.",
         card(
-          "Primary record",
-          "Begin with the artist's work, the collection's source page, and the original media."
+          "Artwork details",
+          "The Institutions Are Coming. Artist: 6529er. Collection: The Memes, card #9. The credited collection link is kept with the image."
         ),
         card(
-          "Interpretation",
-          "Record the argument in plain language and make room for competing readings."
+          "Artist background",
+          "Next task: compare card #9 with 6529er’s earlier Memes and look for the artist’s own notes about the work."
         ),
         card(
-          "Decision history",
-          "Keep the date, rationale, and any later revision. An updated view should not erase the earlier one."
+          "Decision record",
+          "Status: research in progress. No acquisition proposed. The review stays open until the source notes are complete."
         ),
-        pageLink("Return to the mandate", "mandate")
+        pageLink("Back to the mandate", "mandate")
       ),
     ],
   }),
@@ -183,70 +187,70 @@ export const MEME_ORGANIZATION_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Field Unit",
     family: "organization",
     description:
-      "A community project with a mission board, a crew directory, and dispatches from the field.",
+      "A community project site with a team page, current tasks and progress updates.",
     presentation: style("organization", "stone", "mono", "compact"),
     accent: "#78662a",
     pages: [
       page(
         "studio",
-        "A small crew. A shared direction.",
-        "Field Unit brings researchers, makers, and collectors together around practical cultural projects.",
-        kicker("Mission board / Open notebook"),
+        "Field Unit",
+        "A volunteer group working on a guide to digital art.",
+        kicker("Current project / Team / Updates"),
         memeImage(37, "half"),
         text(
-          "We work in short expeditions: agree on a question, gather the sources, make something clear, and share what we learned. The crew changes with the project; the record stays open.",
+          "We’re putting together a short guide for people who are new to collecting digital art. The first version will cover artist credits, collection pages and the information attached to a token.",
           "half"
         ),
         card(
-          "Current mission",
-          "Build a concise field guide to documenting a digital artwork from its original source."
+          "This month’s task",
+          "Write three example artwork records and check whether a new reader can follow the source links."
         ),
-        pageLink("Meet the example crew", "crew"),
-        pageLink("Read the dispatches", "field-notes"),
+        pageLink("Meet the team", "crew"),
+        pageLink("Read project updates", "field-notes"),
         memeCredit(37)
       ),
       page(
         "crew",
-        "Different skills. A common brief.",
-        "A sample team structure that makes responsibilities visible.",
+        "The team",
+        "Who is working on the first edition of the guide.",
         card(
-          "Research lead / Rowan",
-          "Frames the question, checks primary sources, and records uncertainty.",
+          "Rowan / Research",
+          "Finds the source material and checks artwork details.",
           "third"
         ),
         card(
-          "Design lead / Mira",
-          "Turns the findings into diagrams, pages, and useful reading sequences.",
+          "Mira / Design",
+          "Lays out the guide and tests whether the pages are easy to read.",
           "third"
         ),
         card(
-          "Archive lead / Ellis",
-          "Keeps source files, credits, decisions, and release notes together.",
+          "Ellis / Editing",
+          "Edits the text and keeps track of corrections.",
           "third"
         ),
         quote(
-          "Leave the next crew a map, not a mystery.",
-          "Field Unit working note"
+          "Please put the source link beside the note so I can check it.",
+          "Ellis, on the draft guide"
         ),
-        pageLink("Follow the current mission", "field-notes")
+        pageLink("Read the latest update", "field-notes")
       ),
       page(
         "field-notes",
-        "Dispatch 01: start with the original.",
-        "A record of the first research expedition.",
-        kicker("Question / Evidence / Next step"),
+        "Update 01: the first draft",
+        "What is drafted, what needs checking and what we’re doing next.",
+        kicker("Drafted / To check / Next"),
         text(
-          "We began with a simple question: what information helps a future reader identify a digital work? The answer quickly expanded from a title and image to source links, artist credit, media details, and the history of changes."
+          "The first artwork record is drafted. We have the title, artist and collection link. Next, someone who hasn’t worked on the guide will try to follow it and tell us what is missing."
         ),
         card(
-          "Finding",
-          "The most useful record separates observable facts from the writer's interpretation."
+          "To check",
+          "Does the guide explain the difference between an artwork image and the token record?"
         ),
         card(
-          "Next step",
-          "Test the record against a work with several versions and write down where the format becomes ambiguous."
+          "Next task",
+          "Add a second example from a different collection and compare the information available."
         ),
-        externalLink("Explore the collection source pages", SOURCE_LINKS.memes)
+        externalLink("Browse The Memes collection pages", SOURCE_LINKS.memes)
       ),
     ],
   }),
@@ -256,66 +260,66 @@ export const MEME_ORGANIZATION_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Northline Workshop",
     family: "organization",
     description:
-      "A precise professional-practice site with a monumental image, service columns, and project studies.",
+      "A professional studio site for services, working methods and project case studies.",
     presentation: style("organization", "paper", "sans", "airy"),
     accent: "#a33c32",
     pages: [
       page(
         "studio",
-        "Structures for everyday culture.",
-        "Northline Workshop is a fictional practice working across spaces, publications, and digital experiences.",
-        kicker("Research / Design / Delivery"),
+        "Northline Workshop",
+        "Websites, publications and exhibition materials for small teams.",
+        kicker("Websites / Publications / Exhibitions"),
         memeImage(52, "two_thirds"),
         text(
-          "We begin with the way a place or tool will be used. Then we work toward a form that feels inevitable: clear, proportionate, and generous with attention.",
+          "We help small teams put their work online and in print. A project might be a new website, an exhibition guide or a set of materials that need to work together.",
           "third"
         ),
-        pageLink("How the practice works", "practice"),
-        pageLink("Selected project studies", "projects"),
+        pageLink("How we work", "practice"),
+        pageLink("View current projects", "projects"),
         memeCredit(52)
       ),
       page(
         "practice",
-        "A clear brief makes room for invention.",
-        "Research and delivery belong to the same conversation.",
+        "Working with us",
+        "What a project looks like from the first conversation to handover.",
         card(
-          "01 / Understand",
-          "Map the people, constraints, and decisions that shape the project.",
+          "01 / Agree the brief",
+          "We discuss the audience, required content, budget and schedule.",
           "third"
         ),
         card(
-          "02 / Make",
-          "Prototype the smallest useful version and test it in context.",
+          "02 / Design and test",
+          "We make a first version, review it with you and check it with the people who will use it.",
           "third"
         ),
         card(
           "03 / Hand over",
-          "Deliver the work with the documentation needed to maintain it.",
+          "You receive the finished files and a guide to updating them.",
           "third"
         ),
         heading("Services"),
         text(
-          "Research and strategy; editorial and visual systems; digital experience design; project documentation. Each engagement begins with a scoped brief and a named point of contact."
+          "Website design, publication layout, exhibition graphics and project documentation. We agree the scope and a point of contact before work starts."
         ),
-        pageLink("See the method in a project", "projects")
+        pageLink("View current projects", "projects")
       ),
       page(
         "projects",
-        "Two studies in useful form.",
-        "Sample project records that keep the challenge, approach, and result distinct.",
-        heading("The reading room"),
+        "Projects in development",
+        "An exhibition guide and a handbook, both at the first-draft stage.",
+        heading("Exhibition guide"),
         text(
-          "Challenge: a small collection needed a way to welcome first-time visitors. Approach: build a short thematic route through the archive. Result: a sequence of object records, captions, and a portable guide."
+          "We’re developing a folded guide for a small exhibition: an introduction on the front, artwork captions inside and a map on the back. The first paper mockup is ready for a print test."
         ),
-        heading("The working handbook"),
+        heading("Team handbook"),
         text(
-          "Challenge: a growing team needed a common reference. Approach: turn recurring decisions into concise, illustrated patterns. Result: a handbook designed to be revised by its readers."
+          "The handbook starts with the questions a new team member asks in their first week. We’ve drafted the team directory and file guide; the next section covers common production tasks."
         ),
         card(
-          "A complete project record",
-          "Keep the date, scope, collaborators, images, and source material beside the narrative. Replace these sample studies with your own work."
+          "This week in the studio",
+          "Print the exhibition guide at its final size, check the captions and shorten the map labels. Then finish the handbook’s first-week checklist."
         ),
-        pageLink("Return to the practice", "practice")
+        pageLink("Back to our services", "practice")
       ),
     ],
   }),
@@ -325,85 +329,97 @@ export const MEME_ORGANIZATION_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Proof Circle",
     family: "fund",
     description:
-      "A precise research and collecting-DAO site with an explicit thesis, an evidence register, and member roles.",
+      "A collecting DAO site for its collection policy, research records and member responsibilities.",
     presentation: style("dao", "paper", "mono", "compact"),
     accent: "#444444",
     pages: [
       page(
         "studio",
-        "Show the working.",
-        "Proof Circle is a fictional collecting collective with a public thesis and a habit of keeping evidence close.",
-        kicker("Question 001 / What makes a collection coherent?"),
+        "Proof Circle",
+        "A collecting group developing its policy and first research list.",
+        kicker("Collection policy / Research / Members"),
         text(
-          "A shared wallet is not a shared understanding. We use written theses, source records, and review notes to make collective judgment legible.",
+          "Members bring artwork suggestions to a shared research list. We’re starting with the collection policy and source records; acquisition decisions will come after that work is complete.",
           "two_thirds"
         ),
         memeImage(103, "third"),
-        card("Thesis", "What we are trying to understand.", "third"),
-        card("Evidence", "What supports the current view.", "third"),
-        card("Review", "What could change our minds.", "third"),
-        pageLink("Read the thesis", "thesis"),
-        pageLink("Inspect the evidence", "evidence"),
+        card(
+          "Collection policy",
+          "What the group is interested in collecting.",
+          "third"
+        ),
+        card(
+          "Research",
+          "The artwork details and sources behind a proposal.",
+          "third"
+        ),
+        card(
+          "Member review",
+          "Who checks the proposal and records the decision.",
+          "third"
+        ),
+        pageLink("Read the collection policy", "thesis"),
+        pageLink("Read the research notes", "evidence"),
         memeCredit(103)
       ),
       page(
         "thesis",
-        "Coherence is a relationship.",
-        "A collection becomes useful when the connections between its works can be explained.",
-        heading("Working view"),
+        "Collection policy",
+        "What we want to collect and how a suggestion becomes a proposal.",
+        heading("Areas of interest"),
         text(
-          "We are interested in works that reveal how digital systems shape culture: their rules, interfaces, shared symbols, and unexpected outcomes."
+          "Digital artwork, generative projects and images associated with online communities."
         ),
-        heading("Selection questions"),
+        heading("Before a proposal"),
         text(
-          "What does this work add to the conversation? Which existing work does it complicate? Are we documenting a cultural argument or merely repeating a preference?"
+          "The proposing member checks the artist, token and edition details, then writes a short account of what the work would add to the collection."
         ),
         card(
-          "Review condition",
-          "Revisit the thesis when a new work exposes a blind spot. Record the change and keep the previous version available."
+          "Changing the policy",
+          "Members can propose a change in writing. The group keeps each agreed version with its effective date and the reason for the change."
         ),
-        pageLink("The evidence register", "evidence")
+        pageLink("Read the research notes", "evidence")
       ),
       page(
         "evidence",
-        "A claim needs a trail.",
-        "A simple source register for research that other people can inspect.",
+        "Research records",
+        "First reading note: Don’t Trust, Check. by Jack Butcher.",
         card(
-          "Artwork record",
-          "Artist, title, collection page, original media, and a distinction between display permission and token ownership."
+          "Artwork details",
+          "Don’t Trust, Check. by Jack Butcher. The Memes, card #103. A credited reference for this reading note; the group does not claim to own a token."
         ),
         memeCredit(103),
         card(
-          "Technical context",
-          "Protocol documentation gives a more reliable foundation than a repeated explanation without a source."
+          "Technical details",
+          "The next task is to read the token record alongside the collection page. We’re keeping technical questions in a separate note, with the Ethereum documentation linked below."
         ),
-        externalLink("Read Ethereum's documentation", SOURCE_LINKS.ethereum),
+        externalLink("Read Ethereum documentation", SOURCE_LINKS.ethereum),
         card(
-          "Interpretive note",
-          "Our reading of a work is an argument. It remains separate from the artist's stated intention unless a primary source supports that connection."
+          "Next discussion",
+          "We’ll discuss how members should check the information in a proposal before making a decision. This is a reading session, with no acquisition vote scheduled."
         ),
-        pageLink("Who maintains the record?", "members")
+        pageLink("See member responsibilities", "members")
       ),
       page(
         "members",
-        "Responsibility should be visible.",
-        "A sample operating structure for a collecting group.",
+        "Member responsibilities",
+        "Who prepares the research, keeps the records and organizes discussions.",
         card(
-          "Research stewards",
-          "Maintain source records, prepare the reading notes, and record dissent."
+          "Research",
+          "Prepares artwork records and checks the source links before a proposal is discussed."
         ),
         card(
-          "Collection stewards",
-          "Maintain the inventory and document the rationale for proposed changes."
+          "Collection records",
+          "Keeps the inventory and adds the group’s decisions to each record."
         ),
         card(
-          "Community stewards",
-          "Keep meetings, discussions, and published decisions accessible to members."
+          "Member coordination",
+          "Schedules discussions, shares meeting notes and keeps members informed about decisions."
         ),
         text(
-          "This example publishes information only. It contains no live governance, voting, trading, or investment functionality."
+          "Proof Circle is fictional. This example has no treasury, live voting or investment activity."
         ),
-        pageLink("Return to the shared thesis", "thesis")
+        pageLink("Back to the collection policy", "thesis")
       ),
     ],
   }),
@@ -413,65 +429,65 @@ export const MEME_ORGANIZATION_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Common Room",
     family: "organization",
     description:
-      "An essay-led cultural organization with a considered programme and room for several voices.",
+      "A cultural organization site for events, reading groups and short articles.",
     presentation: style("editorial", "stone", "serif", "airy"),
     accent: "#735841",
     pages: [
       page(
         "studio",
-        "Culture is a conversation in progress.",
-        "Common Room is a fictional cultural programme bringing images, ideas, and people into the same space.",
+        "Common Room",
+        "Small talks, reading sessions and workshops about art.",
         memeImage(118, "half"),
         text(
-          "We build programmes around questions with more than one useful answer. An artwork becomes a starting point for reading, discussion, and the careful work of seeing differently.",
+          "Our programme brings people together to look at art and discuss it. Sessions start with a work or a short text, so you can join without doing a week of preparation.",
           "half"
         ),
         quote(
-          "Begin with attention. Make room for another account.",
-          "Common Room programme note"
+          "You don’t need to have read everything to take part.",
+          "The Common Room welcome"
         ),
-        pageLink("Explore the programme", "programme"),
-        pageLink("Read the essays", "essays"),
+        pageLink("View the programme", "programme"),
+        pageLink("Read the articles", "essays"),
         memeCredit(118)
       ),
       page(
         "programme",
-        "Three ways to gather.",
-        "A sample programme that moves from a work to a wider conversation.",
+        "The programme",
+        "Three sessions we’re preparing for the opening programme.",
         card(
-          "Close Looking",
-          "A facilitated encounter with one work. Participants begin by describing what they can see before moving to interpretation."
+          "One Artwork",
+          "A short session about one work. The host introduces it, then opens the discussion to the group."
         ),
         card(
-          "The Reading Table",
-          "A short text, a primary source, and a conversation shaped by the questions readers bring."
+          "Reading Group",
+          "One article shared in advance, with a few questions to get the discussion started."
         ),
         card(
-          "Open Notes",
-          "A public record of unfinished research, including the sources and disagreements that make it useful."
+          "Open Studio",
+          "An artist shows work in progress and talks through the materials and decisions involved."
         ),
-        heading("Access and context"),
+        heading("Planning a visit"),
         text(
-          "A finished event page should include dates, location or access link, cost, access information, and the people responsible. These sample formats have no scheduled events."
+          "We’re still arranging dates and a venue for these sessions. Booking is not open yet. We’ll post the schedule and access information here once those details are confirmed."
         ),
-        pageLink("A programme essay", "essays")
+        pageLink("Read about our discussion format", "essays")
       ),
       page(
         "essays",
-        "An image is not a single account.",
-        "A note on looking together without insisting on the same conclusion.",
-        heading("Description before interpretation"),
+        "Talking about a work together",
+        "How we plan to run the One Artwork sessions.",
+        heading("Start with the image"),
         text(
-          "The first task is modest: describe the work closely enough that another person can recognize what you mean. This gives disagreement a useful starting place."
+          "We put the artwork where everyone can see it and give people a few minutes before the discussion starts. The first question is simply what they noticed."
         ),
-        heading("Context without closure"),
+        heading("Bring in the background"),
         text(
-          "An artist's process, the work's source, and its wider history can deepen a reading. They need not settle every question the image raises."
+          "The host then shares the artist’s name, the work’s title and any project notes. These give the group more to discuss."
         ),
         text(
-          "A good public conversation leaves its sources available and its uncertainties visible. The record should help the next reader begin."
+          "After the session, we share the artwork link and anything the group wanted to read next."
         ),
-        pageLink("Return to the programme", "programme")
+        pageLink("Back to the programme", "programme")
       ),
     ],
   }),

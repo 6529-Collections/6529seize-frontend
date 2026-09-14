@@ -31,6 +31,8 @@ March 19, 2026.
   [Profile Troubleshooting](profiles/troubleshooting/README.md)
 - Browse artwork, trade and complete profile sets: [Collect](media/collecting.md),
   [Media](media/README.md)
+- Prepare, read or review an artwork's record:
+  [Artwork Documentation](artwork-documentation.md)
 - Review a proposed permanent contract before deployment:
   [Public Contract Reviews](public-reviews/README.md)
 - Run Drop Forge craft and launch claim operations: [Drop Forge](drop-forge/README.md)

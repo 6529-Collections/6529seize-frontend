@@ -17,7 +17,10 @@ export const SECTIONS = [
   "preservation",
   "review",
 ] as const;
-export type DocumentationSection = (typeof SECTIONS)[number];
+export type DocumentationSection =
+  | (typeof SECTIONS)[number]
+  | "materials"
+  | "conversation";
 export type FieldValue =
   | string
   | number
@@ -25,19 +28,41 @@ export type FieldValue =
   | null
   | FieldValue[]
   | { [key: string]: FieldValue };
-export type ValueEditor =
-  | { kind: "text"; multiline?: boolean; max?: number }
-  | { kind: "number" }
-  | { kind: "boolean" }
-  | { kind: "choice"; options: readonly string[] }
-  | { kind: "object"; fields: Readonly<Record<string, ValueEditor>> }
-  | { kind: "list"; item: ValueEditor; max: number }
-  | { kind: "localized"; max: number }
-  | { kind: "date" }
-  | { kind: "asset"; multiple?: boolean };
+interface EditorMetadata {
+  readonly label?: string;
+  readonly guidance?: string;
+}
+export type ValueEditor = EditorMetadata &
+  (
+    | { kind: "text"; multiline?: boolean; max?: number }
+    | { kind: "number"; min?: number; max?: number; integer?: boolean }
+    | { kind: "boolean"; explicit?: boolean }
+    | { kind: "choice"; options: readonly string[] }
+    | {
+        kind: "object";
+        fields: Readonly<Record<string, ValueEditor>>;
+        required?: readonly string[];
+      }
+    | { kind: "list"; item: ValueEditor; max: number }
+    | { kind: "localized"; max: number }
+    | { kind: "date"; note?: boolean }
+    | { kind: "asset"; multiple?: boolean }
+    | { kind: "reference"; multiple?: boolean; target: string }
+    | { kind: "identity" }
+    | { kind: "language" }
+    | {
+        kind: "multi_choice";
+        options: readonly { id: string; label: string; description?: string }[];
+      }
+  );
 export interface DocumentationField {
   readonly id: string;
   readonly editor: ValueEditor;
+  readonly label?: string;
+  readonly guidance?: string;
+  readonly mediaProfiles?: readonly string[];
+  readonly readOnly?: boolean;
+  readonly legacy?: boolean;
   readonly section?: DocumentationSection;
   readonly help?:
     | "captionHelp"
@@ -379,6 +404,7 @@ const MODULE_SECTIONS: Readonly<Record<ModuleId, DocumentationSection>> = {
 export function parseSection(
   section: string | undefined
 ): DocumentationSection {
+  if (section === "materials" || section === "conversation") return section;
   return SECTIONS.find((candidate) => candidate === section) ?? "artwork";
 }
 
@@ -405,8 +431,16 @@ export function initialValue(editor: ValueEditor): FieldValue {
     case "object":
       return Object.fromEntries(
         Object.entries(editor.fields)
-          .filter(([, nestedEditor]) => nestedEditor.kind === "boolean")
-          .map(([key]) => [key, false])
+          .filter(
+            ([, nestedEditor]) =>
+              (nestedEditor.kind === "boolean" &&
+                nestedEditor.explicit !== true) ||
+              nestedEditor.kind === "identity"
+          )
+          .map(([key, nestedEditor]) => [
+            key,
+            nestedEditor.kind === "identity" ? crypto.randomUUID() : false,
+          ])
       );
     case "localized":
       return {
@@ -427,8 +461,14 @@ export function initialValue(editor: ValueEditor): FieldValue {
     case "number":
       return 0;
     case "asset":
+    case "reference":
       return editor.multiple ? [] : "";
+    case "identity":
+      return crypto.randomUUID();
+    case "multi_choice":
+      return [];
     case "text":
+    case "language":
     case "choice":
       return "";
   }

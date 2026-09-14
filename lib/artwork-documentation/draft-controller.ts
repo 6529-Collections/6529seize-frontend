@@ -1,6 +1,7 @@
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import type { ApiArtworkDocumentationOperation } from "@/generated/models/ApiArtworkDocumentationOperation";
 import { documentationErrorStatus } from "@/services/api/artwork-documentation-api";
+import { getStructuredApiErrorCode } from "@/services/api/common-api";
 import { validDocumentationOperation } from "./validation";
 
 export type SaveState =
@@ -34,6 +35,7 @@ interface QueuedContent {
   ) => Promise<ApiArtworkDocumentationContext>;
 }
 export interface DraftSnapshot {
+  readonly errorCode?: string | undefined;
   readonly context: ApiArtworkDocumentationContext;
   readonly state: SaveState;
   readonly edits: readonly PendingEdit[];
@@ -60,6 +62,7 @@ export class DocumentationDraftController {
   private context: ApiArtworkDocumentationContext;
   private latest: ApiArtworkDocumentationContext | null = null;
   private state: SaveState = "clean";
+  private errorCode: string | undefined;
   private readonly edits = new Map<string, PendingEdit>();
   private readonly queuedContent = new Map<string, QueuedContent>();
   private pendingContent: {
@@ -86,6 +89,7 @@ export class DocumentationDraftController {
   snapshot(): DraftSnapshot {
     return {
       context: this.context,
+      errorCode: this.errorCode,
       state: this.state,
       edits: [...this.edits.values()],
       latest: this.latest,
@@ -128,6 +132,7 @@ export class DocumentationDraftController {
     this.scheduleSave();
   }
   private scheduleSave() {
+    this.errorCode = undefined;
     if (!["conflict", "auth_expired"].includes(this.state))
       this.state = this.running ? "saving" : "dirty";
     this.emit();
@@ -279,6 +284,7 @@ export class DocumentationDraftController {
     const generation = this.generation;
     const signal = this.abort.signal;
     const status = documentationErrorStatus(error);
+    this.errorCode = getStructuredApiErrorCode(error);
     if (status === 409) {
       this.state = "conflict";
       try {

@@ -15,6 +15,7 @@ import {
   MARKET_CONDUIT,
   MARKET_ZERO_HASH,
 } from "./market-validation";
+import { isValidMarketReviewExpiry } from "./market-review-expiry";
 
 export function marketAmount(amount: string, currency: string): string {
   return `${formatEther(BigInt(amount))} ${currency.toLowerCase() === MARKET_ZERO ? "ETH" : "WETH"}`;
@@ -75,7 +76,15 @@ export function marketOperationReview(
         value: marketAssetLabel(operation.asset_key, locale),
       },
       { label: t(locale, "collect.trade.quantity"), value: operation.quantity },
-      { label: t(locale, "collect.trade.payer"), value: operation.wallet },
+      {
+        label: t(
+          locale,
+          action === "buy"
+            ? "collect.trade.payingWallet"
+            : "collect.trade.payer"
+        ),
+        value: operation.wallet,
+      },
       {
         label: t(locale, "collect.trade.destination"),
         value: operation.nft_recipient ?? operation.recipient,
@@ -141,8 +150,12 @@ export function marketOperationReview(
                 locale,
                 Number(operation.order.components.end_time) * 1000,
                 {
-                  dateStyle: "medium",
-                  timeStyle: "short",
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  timeZoneName: "shortOffset",
                 }
               ),
             },
@@ -184,7 +197,9 @@ export function marketOperationReview(
         ? [t(locale, "collect.trade.approval")]
         : []),
     ],
-    expiresAt: operation.expires_at,
+    expiresAt: isValidMarketReviewExpiry(operation.expires_at)
+      ? operation.expires_at
+      : null,
     disabledReason,
   };
 }

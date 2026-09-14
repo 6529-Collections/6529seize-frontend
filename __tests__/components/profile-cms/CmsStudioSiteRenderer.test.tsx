@@ -11,6 +11,7 @@ import { getCmsStudioPresentation } from "@/lib/profile-cms/studio/presentation"
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 const fixture = (id = "signature") =>

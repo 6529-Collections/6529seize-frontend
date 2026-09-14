@@ -5,7 +5,10 @@ import {
 } from "@/generated/models/ApiMarketTransaction";
 import type { ApiMarketComponents } from "@/generated/models/ApiMarketComponents";
 import type { ApiMarketOfferItem } from "@/generated/models/ApiMarketOfferItem";
-import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
+import {
+  ApiMarketOperationStateEnum,
+  type ApiMarketOperation,
+} from "@/generated/models/ApiMarketOperation";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
 import type { ApiMarketTransaction } from "@/generated/models/ApiMarketTransaction";
 import {
@@ -18,6 +21,11 @@ import {
   parseAbi,
   type Hex,
 } from "viem";
+import {
+  isFreshMarketReviewExpiry,
+  isValidMarketReviewExpiry,
+} from "./market-review-expiry";
+import { validateMarketCriteriaResolution } from "./market-criteria-validation";
 
 // Independent browser allowlist. Never obtain signing contracts or EIP-712 types from a response.
 export const MARKET_SEAPORT = "0x0000000000000068f116a894984e2db1123eb395";
@@ -30,6 +38,7 @@ export const MARKET_CONDUIT_KEY =
 const MARKET_ZONE = "0x000056f7000000ece9003ca63978907a00ffd100";
 const NFT_TYPES: Readonly<Record<string, number>> = {
   "0x33fd426905f149f8376e227d0c9d3340aad17af1": 3,
+  "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb": 3,
   "0x0c58ef43ff3032005e472cb5709f8908acb00205": 2,
   "0x45882f9bc325e14fbb298a1df930c43a874b83ae": 2,
 };
@@ -134,7 +143,8 @@ export function marketTypedData(input: ApiMarketComponents) {
 function validateMarketIntent(
   operation: ApiMarketOperation,
   expected: ApiMarketPrepareRequest,
-  now = Date.now()
+  now: number,
+  requireFreshReview: boolean
 ) {
   assert(
     operation.profile_id === expected.profile_id &&
@@ -147,9 +157,17 @@ function validateMarketIntent(
       operation.quantity === expected.quantity &&
       same(operation.currency, expected.currency)
   );
-  assert(
-    operation.expires_at > now && Number.isSafeInteger(operation.expires_at)
-  );
+  if (requireFreshReview) {
+    if (!isFreshMarketReviewExpiry(operation.expires_at, now)) {
+      throw new Error("MARKET_REVIEW_REFRESH_REQUIRED");
+    }
+  } else {
+    // Recovery/publication can retain the server's invalidated-review sentinel.
+    assert(
+      operation.expires_at === 0 ||
+        isValidMarketReviewExpiry(operation.expires_at)
+    );
+  }
   assert(uint(operation.total_wei) === uint(expected.amount_wei));
   const [chain, contract, tokenId] = expected.asset_key.split(":");
   assert(
@@ -223,7 +241,8 @@ type Components = ReturnType<typeof canonicalMarketComponents>;
 function validateOrderStructure(
   c: Components,
   expected: ApiMarketPrepareRequest,
-  now: number
+  now: number,
+  requireActiveOrder: boolean
 ) {
   assert(
     c.offer.length === 1 &&
@@ -238,11 +257,9 @@ function validateOrderStructure(
   assert(
     [MARKET_ZERO_HASH, MARKET_CONDUIT_KEY].includes(c.conduitKey.toLowerCase())
   );
-  assert(
-    c.startTime < c.endTime &&
-      c.startTime <= BigInt(Math.floor(now / 1000)) &&
-      c.endTime > BigInt(Math.floor(now / 1000))
-  );
+  const nowSeconds = BigInt(Math.floor(now / 1000));
+  assert(c.startTime < c.endTime && c.startTime <= nowSeconds);
+  if (requireActiveOrder) assert(c.endTime > nowSeconds);
   const creating =
     expected.kind === ApiMarketKind.List ||
     expected.kind === ApiMarketKind.Offer;
@@ -270,9 +287,11 @@ function validateTokenFlow(
   const nft = listing ? c.offer[0] : c.consideration[0];
   assert(
     nft &&
-      nft.itemType === NFT_TYPES[contract.toLowerCase()] &&
       same(nft.token, contract) &&
-      nft.identifierOrCriteria === uint(tokenId)
+      ((nft.itemType === NFT_TYPES[contract.toLowerCase()] &&
+        nft.identifierOrCriteria === uint(tokenId)) ||
+        (expected.kind === ApiMarketKind.Accept &&
+          nft.itemType === NFT_TYPES[contract.toLowerCase()]! + 2))
   );
   const quantity = uint(expected.quantity);
   assert(
@@ -336,23 +355,146 @@ function validatePaymentFlow(
   });
 }
 
-export function validateMarketOperation(
+function validateMarketOperationBindings(
   operation: ApiMarketOperation,
   expected: ApiMarketPrepareRequest,
-  now = Date.now()
-): void {
-  const { contract, tokenId } = validateMarketIntent(operation, expected, now);
+  now: number,
+  options: {
+    readonly requireFreshReview: boolean;
+    readonly requireActiveOrder: boolean;
+  }
+) {
+  const { contract, tokenId } = validateMarketIntent(
+    operation,
+    expected,
+    now,
+    options.requireFreshReview
+  );
   const c = validateOrderHash(operation, expected);
   if (expected.kind === ApiMarketKind.Cancel) {
     assert(same(c.offerer, expected.wallet));
-    return;
+    return c;
   }
-  const { creating, listing } = validateOrderStructure(c, expected, now);
+  const { creating, listing } = validateOrderStructure(
+    c,
+    expected,
+    now,
+    options.requireActiveOrder
+  );
   const scale = validateTokenFlow(c, expected, contract, tokenId, {
     creating,
     listing,
   });
   validatePaymentFlow(c, operation, expected, listing, scale);
+  // Verify criteria before even offering an NFT approval, not only at fulfillment.
+  if (
+    expected.kind === ApiMarketKind.Accept &&
+    c.consideration[0]!.itemType >= 4
+  ) {
+    assert(operation.transaction);
+    validateMarketTransaction(operation.transaction, operation, expected);
+  }
+  return c;
+}
+
+export function validateMarketOperation(
+  operation: ApiMarketOperation,
+  expected: ApiMarketPrepareRequest,
+  now = Date.now()
+): void {
+  validateMarketOperationBindings(operation, expected, now, {
+    requireFreshReview: true,
+    requireActiveOrder: true,
+  });
+}
+
+/** Bind previous intent before mandatory fresh continuation; this never authorizes a send or signature. */
+export function validateMarketOperationForRefresh(
+  operation: ApiMarketOperation,
+  expected: ApiMarketPrepareRequest,
+  now = Date.now()
+): void {
+  assert(
+    [
+      ApiMarketKind.Buy,
+      ApiMarketKind.Accept,
+      ApiMarketKind.Cancel,
+      ApiMarketKind.List,
+      ApiMarketKind.Offer,
+    ].includes(expected.kind)
+  );
+  validateMarketOperationBindings(operation, expected, now, {
+    requireFreshReview: false,
+    requireActiveOrder: true,
+  });
+}
+
+function validateOfferOrderHash(operation: ApiMarketOperation): void {
+  assert(
+    operation.order &&
+      operation.order_hash &&
+      same(operation.order_hash, operation.order.order_hash)
+  );
+}
+
+/** Validate a published offer without treating its old review deadline as order expiry. */
+export function validatePublishedMarketOffer(
+  operation: ApiMarketOperation,
+  expected: ApiMarketPrepareRequest,
+  now = Date.now()
+): void {
+  assert(
+    expected.kind === ApiMarketKind.Offer &&
+      operation.kind === ApiMarketKind.Offer &&
+      (operation.state === ApiMarketOperationStateEnum.Live ||
+        operation.state === ApiMarketOperationStateEnum.Confirmed)
+  );
+  validateMarketOperationBindings(operation, expected, now, {
+    requireFreshReview: false,
+    requireActiveOrder: operation.state === ApiMarketOperationStateEnum.Live,
+  });
+  validateOfferOrderHash(operation);
+  if (operation.state === ApiMarketOperationStateEnum.Confirmed) {
+    const settlement = operation.settlement;
+    assert(
+      settlement &&
+        uint(settlement.filled_quantity) === uint(expected.quantity) &&
+        uint(settlement.remaining_quantity) === 0n &&
+        Number.isSafeInteger(settlement.safe_block_number) &&
+        settlement.safe_block_number !== undefined &&
+        settlement.safe_block_number > 0 &&
+        uint(operation.potential_liability_wei) === 0n
+    );
+  }
+}
+
+/** Validate an offer whose signature may already have been sent for publication. */
+export function validateCommittedMarketOffer(
+  operation: ApiMarketOperation,
+  expected: ApiMarketPrepareRequest,
+  now = Date.now()
+): void {
+  if (
+    operation.state === ApiMarketOperationStateEnum.Live ||
+    operation.state === ApiMarketOperationStateEnum.Confirmed
+  ) {
+    validatePublishedMarketOffer(operation, expected, now);
+    return;
+  }
+  const awaitingSignature =
+    operation.state === ApiMarketOperationStateEnum.AwaitingSignature;
+  assert(
+    expected.kind === ApiMarketKind.Offer &&
+      operation.kind === ApiMarketKind.Offer &&
+      (awaitingSignature ||
+        operation.state === ApiMarketOperationStateEnum.Publishing ||
+        operation.state === ApiMarketOperationStateEnum.Unknown)
+  );
+  validateMarketOperationBindings(operation, expected, now, {
+    requireFreshReview: awaitingSignature,
+    requireActiveOrder: awaitingSignature,
+  });
+  validateOfferOrderHash(operation);
 }
 
 function validateApprovalTransaction(
@@ -480,10 +622,19 @@ export function validateMarketTransaction(
   );
   const [advanced, criteria, conduit, recipient] = decoded.args;
   assert(
-    criteria.length === 0 &&
-      same(conduit, MARKET_CONDUIT_KEY) &&
-      same(recipient, expected.recipient)
+    same(conduit, MARKET_CONDUIT_KEY) && same(recipient, expected.recipient)
   );
+  const nft =
+    expected.kind === ApiMarketKind.Buy ? c.offer[0] : c.consideration[0];
+  assert(nft);
+  validateMarketCriteriaResolution({
+    accepting: expected.kind === ApiMarketKind.Accept,
+    itemType: nft.itemType,
+    expectedType: NFT_TYPES[contract.toLowerCase()]!,
+    root: nft.identifierOrCriteria,
+    tokenId: uint(tokenId),
+    resolvers: criteria,
+  });
   assert(
     advanced.parameters.totalOriginalConsiderationItems ===
       BigInt(c.consideration.length)

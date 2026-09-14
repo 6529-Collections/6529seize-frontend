@@ -6,13 +6,13 @@ import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext
 import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { fetchUrl } from "@/services/6529api";
-import { render, screen, waitFor } from "@testing-library/react";
-import { useRouter } from "next/navigation";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   usePathname: () => "/6529-gradient",
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: jest.fn(() => new URLSearchParams()),
 }));
 
 jest.mock("@/services/6529api", () => ({
@@ -56,7 +56,46 @@ jest.mock("@/components/nft-market-activity/NftMarketActivity", () => ({
 }));
 jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
   __esModule: true,
-  default: () => <div data-testid="market-depth" />,
+  default: ({
+    refreshKey,
+    active,
+    embedded,
+    onReveal,
+  }: {
+    refreshKey?: number;
+    active?: boolean;
+    embedded?: boolean;
+    onReveal?: () => void;
+  }) => (
+    <div
+      data-refresh-key={refreshKey}
+      data-testid="market-depth"
+      hidden={!active}
+      data-embedded={embedded}
+    >
+      <button onClick={onReveal}>Reveal market</button>
+    </div>
+  ),
+}));
+jest.mock("@/components/collect/CollectDetailActions", () => ({
+  __esModule: true,
+  default: ({
+    collection,
+    tokenId,
+    onMarketChange,
+  }: {
+    collection: string;
+    tokenId: string;
+    onMarketChange?: () => void;
+  }) => (
+    <button
+      data-family={collection}
+      data-token={tokenId}
+      onClick={onMarketChange}
+    >
+      Collect artwork
+    </button>
+  ),
 }));
 jest.mock("@/components/nft-transfer/TransferSingle", () => ({
   __esModule: true,
@@ -105,6 +144,7 @@ function mockGradientFetches({
 
 beforeEach(() => {
   jest.clearAllMocks();
+  (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
   mockConnectedAddress = undefined;
   const collection = mockGradientCollection(3);
   if (collection[0]) {
@@ -145,6 +185,39 @@ function renderPage({
 }
 
 describe("GradientPage", () => {
+  it("opens the market as a dedicated tab and preserves query context", async () => {
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams("focus=listings-and-offers&locale=de-DE")
+    );
+    const replace = jest
+      .spyOn(globalThis.history, "replaceState")
+      .mockImplementation(() => undefined);
+    renderPage();
+    expect(await screen.findByTestId("market-depth")).toBeVisible();
+    expect(screen.getByTestId("market-depth")).toHaveAttribute(
+      "data-embedded",
+      "true"
+    );
+    expect(
+      screen.getByRole("button", { name: "Listings & offers" })
+    ).toHaveAttribute("aria-current", "page");
+    expect(
+      screen.queryByRole("heading", { name: "Card Activity" })
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Overview" }));
+    expect(replace).toHaveBeenLastCalledWith(
+      null,
+      "",
+      "/6529-gradient?focus=live&locale=de-DE"
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Reveal market" }));
+    expect(replace).toHaveBeenLastCalledWith(
+      null,
+      "",
+      "/6529-gradient?focus=listings-and-offers&locale=de-DE"
+    );
+    replace.mockRestore();
+  });
   it("shows NFT data and owner badge", async () => {
     renderPage();
     await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
@@ -155,6 +228,22 @@ describe("GradientPage", () => {
       expect(screen.getByTestId("owner-badge")).toBeInTheDocument()
     );
     expect(screen.getByTestId("transfer-action")).toBeInTheDocument();
+    const collecting = screen.getByRole("button", { name: "Collect artwork" });
+    const marketDepth = screen.getByTestId("market-depth");
+    expect(collecting).toHaveAttribute("data-family", "gradients");
+    expect(collecting).toHaveAttribute("data-token", "1");
+    expect(
+      screen.getAllByRole("button", { name: "Collect artwork" })
+    ).toHaveLength(1);
+    expect(
+      collecting.compareDocumentPosition(screen.getByTestId("art-viewer"))
+    ).toBe(Node.DOCUMENT_POSITION_PRECEDING);
+    expect(collecting.compareDocumentPosition(marketDepth)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(marketDepth).toHaveAttribute("data-refresh-key", "0");
+    fireEvent.click(collecting);
+    expect(marketDepth).toHaveAttribute("data-refresh-key", "1");
   });
 
   it("returns to the originating profile collected card", async () => {
@@ -262,9 +351,9 @@ describe("GradientPage", () => {
     expect(screen.getByText("Artist")).toBeInTheDocument();
     expect(screen.getByTestId("artist")).toBeInTheDocument();
     expect(screen.queryByText("Market Overview")).not.toBeInTheDocument();
-    expect(screen.getByText("Floor Price")).toBeInTheDocument();
-    expect(screen.getByText("Market Cap")).toBeInTheDocument();
-    expect(screen.getByText("Highest Offer")).toBeInTheDocument();
+    expect(screen.queryByText("Floor Price")).not.toBeInTheDocument();
+    expect(screen.queryByText("Market Cap")).not.toBeInTheDocument();
+    expect(screen.queryByText("Highest Offer")).not.toBeInTheDocument();
   });
 
   it("displays TDH information", async () => {

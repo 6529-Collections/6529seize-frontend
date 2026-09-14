@@ -261,7 +261,7 @@ export default function AboutFAQ() {
                 </li>
                 <li>Mint price is 0.06529 ETH per edition.</li>
                 <li>
-                  You can mint during the drop or buy on secondary markets.
+                  You can mint during the drop or collect on secondary markets.
                 </li>
               </ul>
             </FAQQuestion>
@@ -281,7 +281,7 @@ export default function AboutFAQ() {
             </FAQQuestion>
 
             <FAQQuestion title="How do I participate beyond collecting?">
-              <p>You don&apos;t need to buy anything to participate.</p>
+              <p>You don&apos;t need to collect anything to participate.</p>
               <p>You can:</p>
               <ul>
                 <li>Join conversations in Waves.</li>

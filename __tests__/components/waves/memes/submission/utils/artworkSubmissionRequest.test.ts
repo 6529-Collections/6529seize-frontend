@@ -7,7 +7,7 @@ describe("transformToApiRequest", () => {
     const request = transformToApiRequest({
       waveId: "main-stage",
       traits: {
-        title: "Artwork",
+        title: "  Artwork  ",
         description: "Description",
       } as TraitsData,
       media: {
@@ -26,5 +26,6 @@ describe("transformToApiRequest", () => {
       mime_type: "image/png",
       media_upload_id: "upload-123",
     });
+    expect(request.title).toBe("Artwork");
   });
 });

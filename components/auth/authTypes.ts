@@ -10,6 +10,8 @@ export type AuthContextType = {
   readonly connectionStatus: ProfileConnectedStatus;
   readonly receivedProfileProxies: ApiProfileProxy[];
   readonly activeProfileProxy: ApiProfileProxy | null;
+  /** True only after the current token identifies a direct, non-proxy session. */
+  readonly isDirectProfileSession?: boolean;
   readonly showWaves: boolean;
   readonly sessionUpgradeRequired: boolean;
   readonly requestAuth: (

@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import { getUsableText } from "@/app/api/og-metadata/_lib/imageUtils";
 import { MEMELAB_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { BaseNFT } from "@/entities/INFT";
@@ -22,6 +23,7 @@ export enum MEME_FOCUS {
   LIVE = "live",
   YOUR_CARDS = "your-cards",
   THE_ART = "the-art",
+  MARKET = "listings-and-offers",
   REFERENCES = "references",
   COLLECTORS = "collectors",
   HISTORY = "history",
@@ -50,7 +52,9 @@ export function getMemeFocusLabel(
     case MEME_FOCUS.YOUR_CARDS:
       return t(locale, "theMemes.detail.tabs.yourCards");
     case MEME_FOCUS.THE_ART:
-      return t(locale, "theMemes.detail.tabs.theArt");
+      return t(locale, "theMemes.detail.tabs.overview");
+    case MEME_FOCUS.MARKET:
+      return t(locale, "marketDepth.disclosure");
     case MEME_FOCUS.REFERENCES:
       return t(locale, "theMemes.detail.tabs.references");
     case MEME_FOCUS.COLLECTORS:
@@ -71,7 +75,7 @@ export function getMemeFocusLabel(
 export const MEME_TABS: MemeTab[] = [
   { focus: MEME_FOCUS.LIVE },
   { focus: MEME_FOCUS.YOUR_CARDS },
-  { focus: MEME_FOCUS.THE_ART },
+  { focus: MEME_FOCUS.MARKET },
   { focus: MEME_FOCUS.REFERENCES },
   { focus: MEME_FOCUS.COLLECTORS },
   { focus: MEME_FOCUS.HISTORY },
@@ -95,12 +99,13 @@ async function getMetadataProps(
   const idDisplay = idStringToDisplay(id);
   let collection = "The Memes";
   let name = `The Memes #${idDisplay}`;
-  let description = "Collections";
   if (areEqualAddresses(contract, MEMELAB_CONTRACT)) {
     urlPath = "nfts_memelab";
     collection = "Meme Lab";
     name = `Meme Lab #${idDisplay}`;
   }
+  const collectionLabel = name;
+  let description = collectionLabel;
   const query = new URLSearchParams({ contract, id }).toString();
   let artist: string | null = null;
   let image: string | null = null;
@@ -113,14 +118,13 @@ async function getMetadataProps(
       nft = Array.isArray(response.data) ? response.data[0] : undefined;
     }
     if (nft && typeof nft.name === "string" && nft.name.trim().length > 0) {
-      description = `${name} | ${description}`;
       name = nft.name;
-      artist = nft.artist ?? null;
-      if (nft.thumbnail) {
-        image = nft.thumbnail;
-      } else if (nft.image) {
-        image = nft.image;
-      }
+      artist = getUsableText(nft.artist);
+      description = [name, artist, collectionLabel].filter(Boolean).join(" · ");
+      image =
+        getUsableText(nft.scaled) ??
+        getUsableText(nft.image) ??
+        getUsableText(nft.thumbnail);
     }
   } catch (error) {
     console.warn("Failed to fetch NFT metadata for social card", {
@@ -148,7 +152,6 @@ async function getMetadataProps(
       contract,
       id,
       image,
-      subtitle: description,
       title: name,
     }),
     ogImageAlt: `${name} social card`,

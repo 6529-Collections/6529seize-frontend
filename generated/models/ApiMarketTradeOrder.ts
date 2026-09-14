@@ -28,6 +28,18 @@ export class ApiMarketTradeOrder {
     'start_time': string;
     'end_time': string;
     'recipient': string;
+    /**
+    * Supported initial purchase quantity: one exact edition when every signed payment permits it, otherwise the complete available lot.
+    */
+    'purchase_quantity'?: string;
+    /**
+    * Supported UI quantity step: one when exact per-edition fills are supported, otherwise the complete available lot.
+    */
+    'quantity_step'?: string;
+    /**
+    * Available quantity independent of the quantity used to quote total_wei and fees.
+    */
+    'available_quantity'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -103,6 +115,24 @@ export class ApiMarketTradeOrder {
         {
             "name": "recipient",
             "baseName": "recipient",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "purchase_quantity",
+            "baseName": "purchase_quantity",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "quantity_step",
+            "baseName": "quantity_step",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "available_quantity",
+            "baseName": "available_quantity",
             "type": "string",
             "format": ""
         }    ];

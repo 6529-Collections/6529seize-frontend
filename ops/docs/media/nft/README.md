@@ -4,7 +4,7 @@
 
 - Use this subarea for shared NFT behavior used across media pages.
 - This subarea owns ownership indicators, marketplace shortcuts, media-source
-  fallback order, and transfer actions.
+  fallback order, artwork sharing, and transfer actions.
 - Route families covered here:
   - `/`, `/the-memes`, `/the-memes/{id}`, `/the-memes/mint`
   - `/meme-lab`, `/meme-lab/{id}`, `/meme-lab/collection/{collection}`
@@ -17,6 +17,9 @@
 
 ## Features
 
+- [Artwork Sharing](feature-artwork-sharing.md):
+  link posts, copied captions, and feed/Story image exports on individual Meme,
+  Gradient, and NextGen pages.
 - [NFT Balance Indicators](feature-balance-indicators.md):
   signed-in `SEIZED xN` / `UNSEIZED` states and ownership badge variants across
   supported list/detail surfaces.

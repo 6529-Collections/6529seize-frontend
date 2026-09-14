@@ -18,7 +18,7 @@ import {
   getImageMimeTypeFromMetadata,
 } from "@/helpers/nft.helpers";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import type { TouchEvent } from "react";
+import type { ReactNode, TouchEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import styles from "./TheMemes.module.css";
@@ -75,10 +75,12 @@ export function MemePageArtViewer({
   nft,
   showBalance = false,
   locale = DEFAULT_LOCALE,
+  actions,
 }: {
   readonly nft: BaseNFT;
   readonly showBalance?: boolean;
   readonly locale?: SupportedLocale;
+  readonly actions?: ReactNode;
 }) {
   const { connectedProfile } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -121,7 +123,8 @@ export function MemePageArtViewer({
       };
   const currentFormat = activeMedia.format ?? "";
   const activeMediaUrl = activeMedia.url ?? "";
-  const canUseBrowserMediaActions = activeMedia.variant !== "html";
+  const canUseBrowserMediaActions =
+    Boolean(activeMediaUrl) && activeMedia.variant !== "html";
   const mediaActionLabels = {
     close: t(locale, "theMemes.detail.art.media.close"),
     download: t(locale, "theMemes.detail.art.media.download"),
@@ -252,7 +255,7 @@ export function MemePageArtViewer({
   }
 
   function printMediaActions() {
-    if (!activeMediaUrl) {
+    if (!activeMediaUrl && !Boolean(actions)) {
       return null;
     }
 
@@ -266,7 +269,9 @@ export function MemePageArtViewer({
         onFullscreen={enterActiveMediaFullScreen}
         fullscreenTargetAvailable={Boolean(activeMedia.fullscreenElementId)}
         labels={mediaActionLabels}
-      />
+      >
+        {actions}
+      </InlineMediaActions>
     );
   }
 
@@ -333,6 +338,9 @@ export function MemePageArtViewer({
   return (
     <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-p-0">
       <div className="tw-flex tw-flex-1 tw-flex-col">
+        {!hasAnimation && !hasImage && Boolean(actions) && (
+          <div className="tw-relative tw-min-h-9">{printMediaActions()}</div>
+        )}
         {hasAnimation ? (
           <>
             <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-items-center tw-bg-iron-950 tw-p-0">

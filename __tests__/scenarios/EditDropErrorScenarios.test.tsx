@@ -14,6 +14,7 @@ import {
 
 // Mock the API
 jest.mock("@/services/api/common-api", () => ({
+  ...jest.requireActual("@/services/api/common-api"),
   commonApiPost: jest.fn(),
 }));
 

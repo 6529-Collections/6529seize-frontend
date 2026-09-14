@@ -6,12 +6,25 @@ import type { MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import Button from "@/components/utils/button/Button";
 import { t } from "@/i18n/messages";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { WalletIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import DotLoader from "../dotLoader/DotLoader";
-import {
-  AUTH_MODAL_LOCALE,
-  formatSessionUpgradeTimeLeft,
-} from "./authSessionUpgrade";
+import { formatSessionUpgradeTimeLeft } from "./authSessionUpgrade";
 import styles from "./Auth.module.css";
+import { useSeizeConnectContext } from "./SeizeConnectContext";
+
+const SIGN_IN_CLASSES = {
+  signModalSurface:
+    "tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-shadow-2xl",
+  signModalHeader:
+    "tw-flex tw-items-center tw-justify-between tw-gap-3 tw-px-5 tw-pb-0 tw-pt-5",
+  signModalTitle:
+    "tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-text-iron-50",
+  signModalBody: "tw-px-5 tw-pb-5 tw-pt-3",
+  signModalLead: "tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300",
+  signModalFooter:
+    "tw-flex tw-flex-wrap tw-justify-end tw-gap-3 tw-px-5 tw-pb-5",
+};
 
 function closeDialog(dialog: HTMLDialogElement) {
   if (typeof dialog.close === "function" && dialog.open) {
@@ -53,63 +66,67 @@ export function AuthSignModal({
   readonly sessionUpgradeTimeLeftMs: number;
   readonly shouldShowSignModal: boolean;
 }) {
+  const locale = useBrowserLocale();
+  const modalStyles = isSessionUpgradePrompt ? styles : SIGN_IN_CLASSES;
+  const { address } = useSeizeConnectContext();
   const sessionUpgradeTimeLeftText = useMemo(
-    () => formatSessionUpgradeTimeLeft(sessionUpgradeTimeLeftMs),
-    [sessionUpgradeTimeLeftMs]
+    () => formatSessionUpgradeTimeLeft(sessionUpgradeTimeLeftMs, locale),
+    [sessionUpgradeTimeLeftMs, locale]
   );
   const signModalTitleId = useId();
+  const signModalDescriptionId = useId();
   const signDialogRef = useRef<HTMLDialogElement>(null);
   const signModalPreviouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const signModalTitle = (() => {
     if (isConnectionShareUpgradePrompt) {
-      return t(AUTH_MODAL_LOCALE, "auth.signModal.connectionUpdateRequired");
+      return t(locale, "auth.signModal.connectionUpdateRequired");
     }
     if (isSessionUpgradePrompt) {
-      return t(AUTH_MODAL_LOCALE, "auth.signModal.upgradeAuthentication");
+      return t(locale, "auth.signModal.upgradeAuthentication");
     }
-    return t(AUTH_MODAL_LOCALE, "auth.signModal.authenticationRequest");
+    return t(locale, "auth.signModal.authenticationRequest");
   })();
   const signModalLead = (() => {
     if (isConnectionShareUpgradePrompt) {
-      return t(AUTH_MODAL_LOCALE, "auth.signModal.connectionShareLead");
+      return t(locale, "auth.signModal.connectionShareLead");
     }
     if (isSessionUpgradePrompt) {
-      return t(AUTH_MODAL_LOCALE, "auth.signModal.sessionUpgradeLead");
+      return t(locale, "auth.signModal.sessionUpgradeLead");
     }
-    return t(AUTH_MODAL_LOCALE, "auth.signModal.authLead");
+    return t(locale, "auth.signModal.authLead");
   })();
   const signModalPrimaryListItem = (() => {
     if (isConnectionShareUpgradePrompt) {
-      return t(AUTH_MODAL_LOCALE, "auth.signModal.connectionSharePrimary");
+      return t(locale, "auth.signModal.connectionSharePrimary");
     }
     if (isDisconnectedWebSessionUpgradePrompt) {
-      return t(AUTH_MODAL_LOCALE, "auth.signModal.disconnectedUpgradePrimary");
+      return t(locale, "auth.signModal.disconnectedUpgradePrimary");
     }
     if (isSessionUpgradePrompt) {
-      return t(AUTH_MODAL_LOCALE, "auth.signModal.sessionUpgradePrimary");
+      return t(locale, "auth.signModal.sessionUpgradePrimary");
     }
-    return t(AUTH_MODAL_LOCALE, "auth.signModal.authPrimary");
+    return t(locale, "auth.signModal.authPrimary");
   })();
   const signModalSharedConnectionListItem = t(
-    AUTH_MODAL_LOCALE,
+    locale,
     "auth.signModal.sharedConnection"
   );
   const signModalSecondaryListItem = (() => {
     if (!isSessionUpgradePrompt) {
-      return t(AUTH_MODAL_LOCALE, "auth.signModal.noGas");
+      return t(locale, "auth.signModal.noGas");
     }
 
     if (!sessionUpgradeHasDeadline) {
-      return t(AUTH_MODAL_LOCALE, "auth.signModal.manualUpgrade");
+      return t(locale, "auth.signModal.manualUpgrade");
     }
 
-    return t(AUTH_MODAL_LOCALE, "auth.signModal.timeLeft", {
+    return t(locale, "auth.signModal.timeLeft", {
       timeLeft: sessionUpgradeTimeLeftText,
     });
   })();
   const signModalConfirmText = isDisconnectedWebSessionUpgradePrompt
-    ? t(AUTH_MODAL_LOCALE, "auth.signModal.connect")
-    : t(AUTH_MODAL_LOCALE, "auth.signModal.sign");
+    ? t(locale, "auth.signModal.connect")
+    : t(locale, "auth.signModal.sign");
 
   useEffect(() => {
     if (!enableWalletAuthentication || typeof document === "undefined") {
@@ -138,11 +155,11 @@ export function AuthSignModal({
     } else {
       dialog.setAttribute("open", "");
     }
-    dialog
-      .querySelector<HTMLElement>(
-        "[data-auth-sign-primary]:not([disabled]), button:not([disabled]), a[href]"
-      )
-      ?.focus();
+    const initialFocus =
+      dialog.querySelector<HTMLElement>(
+        "[data-auth-sign-primary]:not([disabled])"
+      ) ?? dialog.querySelector<HTMLElement>("button:not([disabled]), a[href]");
+    initialFocus?.focus();
 
     return () => {
       closeDialog(dialog);
@@ -164,66 +181,125 @@ export function AuthSignModal({
       ref={signDialogRef}
       aria-modal="true"
       aria-labelledby={signModalTitleId}
+      aria-describedby={signModalDescriptionId}
       className="tailwind-scope tw-m-auto tw-max-h-[calc(100dvh-2rem)] tw-w-[min(32rem,calc(100vw-2rem))] tw-max-w-[min(32rem,calc(100vw-2rem))] tw-overflow-y-auto tw-border-none tw-bg-transparent tw-p-0 tw-text-left backdrop:tw-bg-black/50"
-      onCancel={(event) => event.preventDefault()}
+      onCancel={(event) => {
+        event.preventDefault();
+        if (
+          !isSignRequestInProgress &&
+          (!isSessionUpgradePrompt || sessionUpgradeCanDismiss)
+        ) {
+          onCancelSignRequest();
+        }
+      }}
       tabIndex={-1}
     >
-      <div className={styles["signModalSurface"]}>
-        <div className={styles["signModalHeader"]}>
-          <h2 id={signModalTitleId} className={styles["signModalTitle"]}>
+      <div className={modalStyles["signModalSurface"]}>
+        <div className={modalStyles["signModalHeader"]}>
+          <h2 id={signModalTitleId} className={modalStyles["signModalTitle"]}>
             {signModalTitle}
           </h2>
+          {!isSessionUpgradePrompt && !isSignRequestInProgress && (
+            <Button
+              variant="secondary"
+              size="lg"
+              className="tw-size-11 tw-min-w-11 tw-p-0"
+              aria-label={t(locale, "auth.signModal.cancelSignIn")}
+              onClick={onCancelSignRequest}
+            >
+              <XMarkIcon className="tw-size-5" aria-hidden="true" />
+            </Button>
+          )}
         </div>
-        <div className={styles["signModalBody"]}>
-          <p className={styles["signModalLead"]}>{signModalLead}</p>
+        <div className={modalStyles["signModalBody"]}>
+          <p
+            id={signModalDescriptionId}
+            className={modalStyles["signModalLead"]}
+          >
+            {signModalLead}
+          </p>
 
-          <ul className={styles["signModalList"]}>
-            <li>{signModalPrimaryListItem}</li>
-            {isDisconnectedWebSessionUpgradePrompt && (
-              <li>{signModalSharedConnectionListItem}</li>
-            )}
-            <li>{signModalSecondaryListItem}</li>
-          </ul>
+          {isSessionUpgradePrompt ? (
+            <ul className={styles["signModalList"]}>
+              <li>{signModalPrimaryListItem}</li>
+              {isDisconnectedWebSessionUpgradePrompt && (
+                <li>{signModalSharedConnectionListItem}</li>
+              )}
+              <li>{signModalSecondaryListItem}</li>
+            </ul>
+          ) : (
+            <>
+              {address && (
+                <div className="tw-mt-5 tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-p-3">
+                  <WalletIcon
+                    className="tw-size-5 tw-shrink-0 tw-text-iron-400"
+                    aria-hidden="true"
+                  />
+                  <div className="tw-min-w-0">
+                    <span className="tw-block tw-text-xs tw-text-iron-400">
+                      {t(locale, "auth.signModal.walletAddress")}
+                    </span>
+                    <span className="tw-break-all tw-font-mono tw-text-sm tw-text-iron-100">
+                      {address}
+                    </span>
+                  </div>
+                </div>
+              )}
+              <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+                {t(locale, "auth.signModal.noTransaction")}
+              </p>
+            </>
+          )}
           {isSessionUpgradePrompt && (
             <p className={styles["signModalLearnMore"]}>
               <Link
                 href="/about/tech/wallet-authentication"
                 onClick={onSessionUpgradeLearnMore}
               >
-                {t(AUTH_MODAL_LOCALE, "auth.signModal.learnMore")}
+                {t(locale, "auth.signModal.learnMore")}
               </Link>
             </p>
           )}
         </div>
-        <div className={styles["signModalFooter"]}>
+        <div className={modalStyles["signModalFooter"]}>
           {!isSignRequestInProgress &&
             (!isSessionUpgradePrompt || sessionUpgradeCanDismiss) && (
               <Button
                 type="button"
                 onClick={onCancelSignRequest}
                 variant="secondary"
-                size="md"
+                size="lg"
                 className="tw-min-w-32 max-[576px]:tw-min-w-0 max-[576px]:tw-flex-1"
               >
                 {isSessionUpgradePrompt && sessionUpgradeHasDeadline
-                  ? t(AUTH_MODAL_LOCALE, "auth.signModal.remindLater")
-                  : t(AUTH_MODAL_LOCALE, "auth.signModal.cancel")}
+                  ? t(locale, "auth.signModal.remindLater")
+                  : t(locale, "auth.signModal.cancel")}
               </Button>
             )}
+          <output className="tw-sr-only">
+            {isSigningPending
+              ? t(locale, "auth.signModal.confirmInWallet")
+              : ""}
+          </output>
           {!isConnectionShareUpgradePrompt && (
             <Button
               type="button"
               data-auth-sign-primary
               onClick={onConfirmSignRequest}
               disabled={isSignRequestInProgress}
+              aria-busy={isSignRequestInProgress}
+              aria-label={
+                isSigningPending
+                  ? t(locale, "auth.signModal.confirmInWallet")
+                  : signModalConfirmText
+              }
               variant="action"
-              size="md"
+              size="lg"
               className="tw-min-w-32 max-[576px]:tw-min-w-0 max-[576px]:tw-flex-1"
             >
               {isSigningPending ? (
                 <span className={styles["signModalButtonContent"]}>
-                  {t(AUTH_MODAL_LOCALE, "auth.signModal.confirmInWallet")}{" "}
-                  <DotLoader />
+                  {t(locale, "auth.signModal.confirmInWallet")} <DotLoader />
                 </span>
               ) : (
                 signModalConfirmText

@@ -67,6 +67,21 @@ describe('NextGenCollectionArt', () => {
     expect(screen.queryByText('Traits')).toBeNull();
   });
 
+  it('opens the Pebbles set planner from its native collection page', async () => {
+    render(<NextGenCollectionArt collection={collection} />);
+    await screen.findByTestId('token-list');
+    expect(screen.getByRole('link', { name: 'Complete my set' })).toHaveAttribute(
+      'href',
+      '/collect?collection=pebbles&intent=pebbles_set'
+    );
+  });
+
+  it('does not offer Pebbles completion for another NextGen collection', async () => {
+    render(<NextGenCollectionArt collection={{ ...collection, id: 2 }} />);
+    await screen.findByTestId('token-list');
+    expect(screen.queryByRole('link', { name: 'Complete my set' })).not.toBeInTheDocument();
+  });
+
   it('locale-formats trait and value counts', async () => {
     (commonApiFetch as jest.Mock).mockResolvedValue([
       {

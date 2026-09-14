@@ -22,6 +22,14 @@ export class ApiCollectPlan {
     'profile_id': string;
     'analysis': ApiCollectAnalysis;
     'result': ApiCollectAcquisitionPlan;
+    /**
+    * Best bounded plan without a budget cap over the same captured candidates and evaluation time as result. It does not represent complete live market depth or a global minimum. Includes estimated gas on the same basis as result; requires fresh purchase review.
+    */
+    'available_result'?: ApiCollectAcquisitionPlan;
+    /**
+    * The explicit analysis budget applied to result, including estimated gas. Absent when no budget was supplied; available_result never uses this cap. This does not authorize spending.
+    */
+    'budget_wei'?: string;
     'checked_asset_count': number;
     'total_asset_count': number;
     'unavailable_asset_count': number;
@@ -71,6 +79,18 @@ export class ApiCollectPlan {
             "name": "result",
             "baseName": "result",
             "type": "ApiCollectAcquisitionPlan",
+            "format": ""
+        },
+        {
+            "name": "available_result",
+            "baseName": "available_result",
+            "type": "ApiCollectAcquisitionPlan",
+            "format": ""
+        },
+        {
+            "name": "budget_wei",
+            "baseName": "budget_wei",
+            "type": "string",
             "format": ""
         },
         {

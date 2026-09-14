@@ -4,6 +4,7 @@ import {
 } from "@/components/collect/collect-trade.helpers";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
+import { formatCollectCustomExpiryInput } from "@/components/collect/collect-custom-expiry";
 import {
   MARKET_SEAPORT,
   MARKET_ZERO,
@@ -38,6 +39,91 @@ const connection = {
   hasExpected: true,
   cancelTarget: undefined,
 };
+
+it.each(["offer", "list"] as const)(
+  "preserves an exact custom %s expiry in Unix seconds",
+  (action) => {
+    const now = Date.UTC(2026, 8, 12, 12, 0);
+    const chosen = now + 86_400_000;
+    const clock = jest.spyOn(Date, "now").mockReturnValue(now);
+    try {
+      const options = {
+        profile,
+        wallet,
+        action,
+        assetKey: operation.asset_key,
+        selectedOrder: null,
+        cancelTarget: undefined,
+        draft: {
+          quantity: "1",
+          unitPriceEth: "0.1",
+          expiryHours: "custom",
+          expiryDateTime: formatCollectCustomExpiryInput(chosen),
+          recipient: wallet,
+        },
+      };
+      expect(buildMarketRequest(options).expires_at).toBe(chosen / 1000);
+      clock.mockReturnValue(now + 60_000);
+      expect(buildMarketRequest(options).expires_at).toBe(chosen / 1000);
+    } finally {
+      clock.mockRestore();
+    }
+  }
+);
+
+it("rejects an invalid absolute expiry before constructing a prepare request", () => {
+  expect(() =>
+    buildMarketRequest({
+      profile,
+      wallet,
+      action: "offer",
+      assetKey: operation.asset_key,
+      selectedOrder: null,
+      cancelTarget: undefined,
+      draft: {
+        quantity: "1",
+        unitPriceEth: "0.1",
+        expiryHours: "custom",
+        expiryDateTime: "not-a-date",
+        recipient: wallet,
+      },
+    })
+  ).toThrow("MARKET_ORDER_EXPIRY_INVALID");
+});
+it.each(["offer", "list"] as const)(
+  "keeps a 30-day %s inside the API duration cap when the fresh block lags",
+  (action) => {
+    const now = 1_900_000_000_000;
+    const clock = jest.spyOn(Date, "now").mockReturnValue(now);
+    try {
+      const request = buildMarketRequest({
+        profile,
+        wallet,
+        action,
+        assetKey: operation.asset_key,
+        selectedOrder: null,
+        cancelTarget: undefined,
+        draft: {
+          quantity: "1",
+          unitPriceEth: "1",
+          expiryHours: "720",
+          recipient: wallet,
+        },
+      });
+      for (const blockLagSeconds of [12, 60, 120]) {
+        const latestBlockTimestamp = now / 1000 - blockLagSeconds;
+        expect(request.expires_at).toBeLessThanOrEqual(
+          latestBlockTimestamp + 30 * 24 * 3600
+        );
+        expect(request.expires_at).toBeGreaterThan(
+          latestBlockTimestamp + 29 * 24 * 3600
+        );
+      }
+    } finally {
+      clock.mockRestore();
+    }
+  }
+);
 it("keeps historical operations inspectable but prevents resuming an old-profile intent", () => {
   expect(marketConnectionReason({ ...connection, operation })).toBe(
     "collect.trade.originalProfile"
@@ -81,4 +167,78 @@ it("requires the original execution wallet to cancel a historical order", () => 
       cancelTarget: operation,
     })
   ).toBe("collect.trade.reconnect");
+});
+
+it.each([undefined, []])(
+  "accepts the confirmed primary destination when the wallet array is absent or empty: %j",
+  (wallets) => {
+    expect(
+      buildMarketRequest({
+        profile: { ...profile, primary_wallet: wallet, wallets } as ApiIdentity,
+        wallet,
+        action: "buy",
+        assetKey: operation.asset_key,
+        selectedOrder: null,
+        cancelTarget: undefined,
+        draft: {
+          quantity: "1",
+          unitPriceEth: "1",
+          expiryHours: "168",
+          recipient: wallet,
+        },
+      })
+    ).toMatchObject({
+      recipient: wallet,
+      acknowledge_external_recipient: false,
+    });
+  }
+);
+
+it("does not infer primary membership when a supplied wallet list excludes it", () => {
+  const other = "0x2222222222222222222222222222222222222222";
+  expect(() =>
+    buildMarketRequest({
+      profile: {
+        ...profile,
+        primary_wallet: wallet,
+        wallets: [{ wallet: other }],
+      } as ApiIdentity,
+      wallet: other,
+      action: "buy",
+      assetKey: operation.asset_key,
+      selectedOrder: null,
+      cancelTarget: undefined,
+      draft: {
+        quantity: "1",
+        unitPriceEth: "1",
+        expiryHours: "168",
+        recipient: wallet,
+      },
+    })
+  ).toThrow("RECIPIENT_NOT_ACKNOWLEDGED");
+});
+
+it("retains authentication gates when the connected payer uses the primary fallback", () => {
+  const fallbackProfile = {
+    ...profile,
+    primary_wallet: wallet,
+  };
+  delete fallbackProfile.wallets;
+  expect(
+    marketConnectionReason({ ...connection, profile: fallbackProfile })
+  ).toBeUndefined();
+  expect(
+    marketConnectionReason({
+      ...connection,
+      profile: fallbackProfile,
+      isAuthenticated: false,
+    })
+  ).toBe("collect.trade.connectSigner");
+  expect(
+    marketConnectionReason({
+      ...connection,
+      profile: fallbackProfile,
+      isSafe: true,
+    })
+  ).toBe("collect.trade.safeUnavailable");
 });

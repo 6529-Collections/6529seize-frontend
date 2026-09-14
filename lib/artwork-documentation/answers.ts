@@ -28,7 +28,7 @@ export function readAnswer(
   const answer = context.modules[moduleId]?.answers[field];
   return !answer || isRedacted(answer) ? undefined : answer;
 }
-export function answerValue(
+function answerValue(
   context: ApiArtworkDocumentationContext,
   moduleId: string,
   field: string,

@@ -31,6 +31,33 @@ export class ApiMemesExtendedData {
     * Positive rank for TDH-recorded cards, or -1 when unranked.
     */
     'museum_holdings_rank': number;
+    /**
+    * Holdings of the configured 6529 Research address 0xc2Ce4CCeF11A8171f443745cEa3BceEAadD750C7 only. Null before the research-aware supply metrics have been computed.
+    */
+    'research_holdings'?: number | null;
+    /**
+    * Supply rank by research holdings, with shared values sharing a rank and the next rank skipped (1, 1, 3). -1 is unranked; null means not yet computed.
+    */
+    'research_holdings_rank'?: number | null;
+    /**
+    * Edition supply excluding burned tokens and holdings of the configured 6529 Research address. Null before computation.
+    */
+    'edition_size_ex_research'?: number | null;
+    /**
+    * Lower-supply rank for edition_size_ex_research, with shared values sharing a rank and the next rank skipped (1, 1, 3). -1 is unranked; null means not yet computed.
+    */
+    'edition_size_ex_research_rank'?: number | null;
+    /**
+    * Edition supply excluding burned tokens and the union of Museum and configured 6529 Research holdings. A token held by both predicates is excluded once. Null before computation.
+    */
+    'edition_size_ex_museum_and_research'?: number | null;
+    /**
+    * Lower-supply rank for edition_size_ex_museum_and_research, with shared values sharing a rank and the next rank skipped (1, 1, 3). -1 is unranked; null means not yet computed.
+    */
+    'edition_size_ex_museum_and_research_rank'?: number | null;
+    /**
+    * Existing Museum-only cleaned edition supply.
+    */
     'edition_size_cleaned': number;
     /**
     * Positive rank for TDH-recorded cards, or -1 when unranked.
@@ -141,6 +168,42 @@ export class ApiMemesExtendedData {
         {
             "name": "museum_holdings_rank",
             "baseName": "museum_holdings_rank",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "research_holdings",
+            "baseName": "research_holdings",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "research_holdings_rank",
+            "baseName": "research_holdings_rank",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "edition_size_ex_research",
+            "baseName": "edition_size_ex_research",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "edition_size_ex_research_rank",
+            "baseName": "edition_size_ex_research_rank",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "edition_size_ex_museum_and_research",
+            "baseName": "edition_size_ex_museum_and_research",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "edition_size_ex_museum_and_research_rank",
+            "baseName": "edition_size_ex_museum_and_research_rank",
             "type": "number",
             "format": "int64"
         },

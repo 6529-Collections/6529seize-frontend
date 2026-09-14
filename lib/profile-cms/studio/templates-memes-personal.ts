@@ -24,72 +24,72 @@ export const MEME_PERSONAL_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Mira",
     family: "personal",
     description:
-      "A compact personal identity, a wall of interests, and a reading room framed by pixel geometry.",
+      "A personal site for your work, interests and favorite links, with a compact pixel-art layout.",
     presentation: style("signature", "stone", "mono", "compact"),
     accent: "#147d80",
     pages: [
       page(
         "studio",
-        "A small place. A wide world.",
-        "Mira's home for independent projects, digital culture, and ideas worth keeping.",
-        kicker("Person / Practice / Curiosity"),
+        "Hi, I’m Mira.",
+        "I build small web tools, follow digital art and spend most weekends on my bike.",
+        kicker("Projects / Interests / Reading"),
         memeImage(1, "third"),
         text(
-          "I make notes, build small tools, and collect questions. This site gives each of those things a place to grow beyond the speed of a feed.",
+          "I’m putting my projects and notes here so they’re easier to find. Lately, I’ve been working on a reading list and learning more about The Memes.",
           "two_thirds"
         ),
         card(
-          "Currently making",
-          "A public notebook about how open networks change creative work.",
+          "On my desk",
+          "A browser tool that saves an article with its title, author and a short note.",
           "third"
         ),
         card(
-          "Currently noticing",
-          "The shapes, symbols, and rituals people use to find one another.",
+          "Outside work",
+          "Bike rides, old maps and finding a good place for lunch along the way.",
           "third"
         ),
         card(
           "Currently reading",
-          "Essays about cities, public space, and the early web.",
+          "Articles about the early web and how artists publish their work online.",
           "third"
         ),
-        pageLink("Follow my interests", "interests"),
+        pageLink("More about my interests", "interests"),
         memeCredit(1)
       ),
       page(
         "interests",
-        "Three circles of attention.",
-        "Some interests become projects. Others make the projects better.",
-        heading("Culture, tools, common space"),
+        "What I’m into",
+        "Digital art, useful software and getting outside.",
+        heading("Art and small projects"),
         text(
-          "A work of digital art is both an image and a meeting point. I follow the conversations around it as closely as the object itself.",
+          "I like seeing artists post sketches and unfinished work. On 6529, I follow those updates alongside the finished pieces.",
           "half"
         ),
         text(
-          "Useful software has a similar quality: it creates a little more room for people to act on their own terms.",
+          "My coding projects usually start with something I find annoying. At the moment, that’s losing track of articles I meant to read.",
           "half"
         ),
         card(
-          "A current experiment",
-          "Turn a month of reading notes into a small map of ideas, with a source for every connection."
+          "The reading-list project",
+          "I’m trying a version with just three fields: the link, why I saved it and whether I’ve read it."
         ),
-        pageLink("Enter the reading room", "reading-room")
+        pageLink("Browse my reading list", "reading-room")
       ),
       page(
         "reading-room",
-        "Keep the source close.",
-        "An annotated shelf of places to begin, with room for disagreement.",
+        "Links I keep using",
+        "A few starting points for the subjects on this site.",
         card(
-          "Open networks",
-          "A starting point for understanding Ethereum's architecture and the choices behind it."
+          "Ethereum",
+          "The developer documentation is where I start when I want to understand how an Ethereum feature works."
         ),
         externalLink("Read Ethereum documentation", SOURCE_LINKS.ethereum),
         card(
-          "Digital cultural commons",
-          "The Memes is one way to explore how a shared visual vocabulary travels between communities."
+          "The Memes",
+          "I use the collection pages to look up a card, find the artist and browse nearby releases."
         ),
-        externalLink("Explore The Memes", SOURCE_LINKS.memes),
-        pageLink("Back to the introduction", "studio")
+        externalLink("Browse The Memes", SOURCE_LINKS.memes),
+        pageLink("Back to my introduction", "studio")
       ),
     ],
   }),
@@ -99,122 +99,122 @@ export const MEME_PERSONAL_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Sovereign Notebook",
     family: "personal",
     description:
-      "A warm editorial home for personal principles, crypto interests, and considered essays.",
+      "A personal blog for crypto interests, software projects and longer posts on a light background.",
     presentation: style("editorial", "paper", "serif", "airy"),
     accent: "#b84a15",
     pages: [
       page(
         "studio",
-        "Room to choose.",
-        "Notes on open systems, patient work, and the tools that make independence practical.",
-        kicker("The Sovereign Notebook"),
+        "Tools I use. Things I’m learning.",
+        "Notes on open-source software, digital art and keeping a copy of my own work.",
+        kicker("Sovereign Notebook"),
         memeImage(4, "half"),
         text(
-          "Independence is easier to admire than to practice. I am interested in its ordinary details: knowing where a file lives, understanding a tool, and keeping a way to leave.",
+          "I like tools I can understand and files I can move between them. This notebook covers what I’ve tried, what worked and what I still need to figure out.",
           "half"
         ),
         quote(
-          "A useful principle should change a small decision today.",
-          "From the notebook"
+          "I tried opening last year’s export. Half the image links were broken.",
+          "From the backup notes"
         ),
-        pageLink("The working principles", "principles"),
-        pageLink("Read the essays", "essays"),
+        pageLink("How I choose tools", "principles"),
+        pageLink("Read the posts", "essays"),
         memeCredit(4)
       ),
       page(
         "principles",
-        "Principles with consequences.",
-        "A short framework for deciding what deserves time and trust.",
+        "How I choose tools",
+        "Three things I check before moving a project into a new app.",
         card(
-          "Keep an exit",
-          "Choose formats and systems that let the work travel. A good archive can be read without its original interface.",
+          "Can I export it?",
+          "I want the text, images and links in formats I can open elsewhere.",
           "third"
         ),
         card(
-          "Understand the dependency",
-          "Ask who controls a service, what can change, and what remains if it disappears.",
+          "What does it depend on?",
+          "I check which parts need an account, a paid service or an internet connection.",
           "third"
         ),
         card(
-          "Share the useful part",
-          "Write down the method, cite the source, and leave enough context for another person to continue.",
+          "Can someone else use it?",
+          "For my own projects, I include a short setup guide and the source files.",
           "third"
         ),
-        heading("In practice"),
+        heading("A quick trial"),
         text(
-          "The notebook keeps source links beside claims and separates a working hypothesis from a conclusion. It is allowed to change its mind."
+          "Before moving everything, I try one small project. I export it, open the files and check what is missing."
         ),
-        pageLink("A longer argument", "essays")
+        pageLink("Read my backup notes", "essays")
       ),
       page(
         "essays",
-        "The archive should outlive the interface.",
-        "A first essay about portability, memory, and the quiet value of ordinary files.",
-        heading("What survives a redesign?"),
+        "Testing an old website backup",
+        "What I found when I opened an export I hadn’t checked in a year.",
+        heading("The missing images"),
         text(
-          "An interface helps us enter the work. An archive helps us return. Titles, dates, captions, and source links are modest things, but they give a future reader a way through."
+          "The text was there, but some images still pointed to the old site. I had saved a list of links, not the files behind them."
         ),
         text(
-          "Portability starts with small habits: keep the original, describe what changed, and make the result legible outside the tool that produced it."
+          "My next backup includes the image files and a list of where they belong. I’m also keeping a copy of the published pages so I can check the result."
         ),
-        externalLink("A technical introduction to IPFS", SOURCE_LINKS.ipfs),
-        pageLink("Return to the principles", "principles")
+        externalLink("Read the IPFS documentation", SOURCE_LINKS.ipfs),
+        pageLink("Back to choosing tools", "principles")
       ),
     ],
   }),
   memeTemplate(8, {
     id: "meme-gm-journal",
     name: "GM Journal",
-    siteTitle: "Mira's Mornings",
+    siteTitle: "Mira’s Mornings",
     family: "personal",
     description:
-      "A deliberately quiet black journal: one greeting, a dated thought, and an archive.",
+      "A simple dark journal for short posts, daily updates and an archive of earlier entries.",
     presentation: style("journal", "ink", "sans", "airy"),
     accent: "#d0d0d0",
     pages: [
       page(
         "studio",
-        "Good morning, again.",
-        "A notebook for showing up, paying attention, and leaving a small trace.",
-        kicker("Notebook 001 / A beginning"),
+        "GM. Coffee’s on.",
+        "A few notes from Mira’s mornings: bike rides, small projects and whatever else happened.",
+        kicker("Entry 001 / The bakery route"),
         text(
-          "This morning I walked without headphones. There was a delivery bicycle, a window being painted, and a conversation I could not quite hear. None of it was remarkable. All of it was enough."
+          "I took the longer route to the bakery this morning. They’d sold out of the bread I wanted, so I came home with two cinnamon buns. I’m calling that a successful trip."
         ),
         pageLink("Earlier entries", "archive"),
-        heading("A reference from the commons"),
+        heading("FirstGM"),
         memeImage(8, "half"),
         memeCredit(8)
       ),
       page(
         "archive",
-        "A few mornings, kept.",
-        "Short entries, without the pressure to turn every observation into a lesson.",
+        "Earlier mornings",
+        "Short updates from the same notebook.",
         card(
-          "003 / The long way home",
-          "An extra street, a different view of the river, and a reminder that routines can have side doors."
+          "003 / A puncture",
+          "Ten minutes into the ride, the rear tire went flat. The spare tube was the wrong size. Walked home, made coffee."
         ),
         card(
-          "002 / A useful conversation",
-          "We spent an hour discussing the name of a project and discovered we had not agreed on what it should do."
+          "002 / A project name",
+          "We spent an hour naming the reading-list tool. It still doesn’t save links. The name can wait."
         ),
         card(
-          "001 / A beginning",
-          "A walk without headphones. An ordinary morning worth keeping."
+          "001 / The bakery route",
+          "No bread left, two cinnamon buns acquired. A good start."
         ),
-        pageLink("Why this notebook exists", "about")
+        pageLink("About this journal", "about")
       ),
       page(
         "about",
-        "A smaller publishing habit.",
-        "The journal belongs to Mira, a fictional sample voice with a preference for short notes and long walks.",
+        "About Mira’s Mornings",
+        "I’m Mira. I like bikes, coffee and posting a quick GM before work.",
         text(
-          "There is no schedule here. A note earns its place by being specific: a thing seen, a question asked, a link that opened another door."
+          "I wanted a place for the short updates I usually forget to keep. Some entries are about projects; others are just what happened before breakfast."
         ),
-        quote("Leave enough space for the next thought.", "A notebook rule"),
+        quote("I’ll write another entry when I have something to add.", "Mira"),
         text(
-          "The credited FirstGM card is a cultural reference, separate from the journal's author and entries."
+          "FirstGM is the card I chose for the site. You can find its artist credit and collection page beside the image."
         ),
-        pageLink("Read the latest note", "studio")
+        pageLink("Read the latest entry", "studio")
       ),
     ],
   }),
@@ -224,53 +224,53 @@ export const MEME_PERSONAL_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Exit Signal",
     family: "collector",
     description:
-      "A compact digital-art contact sheet with hard cuts, careful credits, and a collector's signal log.",
+      "A dark collector gallery with large artwork, a selection page and notes about each choice.",
     presentation: style("gallery", "night", "mono", "compact"),
     accent: "#eb7ca8",
     pages: [
       page(
         "studio",
-        "Stay with the signal.",
-        "A selection of digital works and the notes that make them matter.",
-        kicker("Selection / Context / Afterimage"),
+        "Digital art I keep coming back to",
+        "A few favorite works, with notes on why I chose them.",
+        kicker("Artwork / Artists / Collection notes"),
         memeImage(47, "two_thirds"),
         text(
-          "A collection can be a form of editing. Put two works beside one another and something happens in the gap: an echo, an argument, a change of pace.",
+          "I use this page to keep a few favorites together. The selection changes as I find new artists or return to a work I haven’t looked at for a while.",
           "third"
         ),
-        pageLink("Open the contact sheet", "selection"),
-        pageLink("Read the signal log", "signal-log"),
+        pageLink("View the selection", "selection"),
+        pageLink("Read the collection notes", "signal-log"),
         memeCredit(47)
       ),
       page(
         "selection",
-        "Three ways an image persists.",
-        "Original example works arranged as an exercise in rhythm, surface, and memory.",
+        "The selection",
+        "Night Grid, Afterimage and Quiet Signal.",
         image(ART.grid, ART_CAPTIONS.grid, "third"),
         image(ART.afterimage, ART_CAPTIONS.afterimage, "two_thirds"),
         image(ART.signal, ART_CAPTIONS.signal, "half"),
         card(
-          "The edit",
-          "Begin with the smallest marks, move toward the reflective surface, and finish with the slower line. These are example assets, not a claimed wallet inventory."
+          "Why these three",
+          "I started with the yellow lights in Night Grid, then added the orange backdrop of Afterimage. Quiet Signal gives me something lighter to look at after those two."
         ),
-        pageLink("Why this arrangement?", "signal-log")
+        pageLink("How I choose what goes here", "signal-log")
       ),
       page(
         "signal-log",
-        "An image after it leaves the screen.",
-        "A collector's note about what remains after the first impression.",
-        kicker("Entry 01 / Looking twice"),
+        "Collection notes",
+        "Why I saved a work, where I found it and what I want to see next.",
+        kicker("Entry 01 / Choosing a few favorites"),
         text(
-          "The first encounter is often loud. A later one can be more useful. At a distance I remember a color; returning to the work, I notice the interval between repeated shapes."
+          "I started with too many images for one page. I’ve cut the first selection down to three and moved the rest to a list to revisit."
         ),
         quote(
-          "The selection is a question, not a verdict.",
+          "I’d like to see more work by this artist before adding another piece.",
           "Collection notebook"
         ),
         text(
-          "Source pages and artist names stay with each work. A display reference is different from evidence of ownership."
+          "For each addition, I keep the title, artist and source link. If I include an NFT I own, I add its token details separately."
         ),
-        pageLink("Return to the selection", "selection")
+        pageLink("Back to the selection", "selection")
       ),
     ],
   }),
@@ -280,66 +280,62 @@ export const MEME_PERSONAL_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Morning Cabinet",
     family: "collector",
     description:
-      "A playful home for favorite works, daily rituals, and a small cabinet of curiosities.",
+      "A casual collector site for favorite artwork, Meme cards and short daily posts.",
     presentation: style("signature", "ink", "sans", "balanced"),
     accent: "#9bdb63",
     pages: [
       page(
         "studio",
-        "Curiosity before the inbox.",
-        "A morning ritual, a favorite image, and a little room for the unexpected.",
+        "GM from Morning Cabinet",
+        "A few favorite images and a notebook that usually gets updated over coffee.",
         memeImage(59, "half"),
         text(
-          "Coffee first. One work looked at carefully. Then a note about whatever caught my attention: an odd detail, a good joke, a color that followed me into the day.",
+          "I save art that makes me laugh, catches my eye or sends me looking for more by the same artist. This is a small selection, with notes alongside it.",
           "half"
         ),
         card(
-          "Today's question",
-          "What would you keep if your collection had room for only one mood?"
+          "On the list",
+          "Go back through the cards I bookmarked and pick three for the next update."
         ),
-        pageLink("A few favorites", "favorites"),
-        pageLink("The morning notebook", "mornings"),
+        pageLink("Browse my favorites", "favorites"),
+        pageLink("Read the morning posts", "mornings"),
         memeCredit(59)
       ),
       page(
         "favorites",
-        "A cabinet with no straight line.",
-        "The pleasure of collecting is sometimes the connection you did not plan.",
-        gallery("Color, reflection, rhythm", [
-          ART.afterimage,
-          ART.grid,
-          ART.signal,
-        ]),
+        "Current favorites",
+        "An orange backdrop, a map of lights and fine blue lines.",
+        gallery("Three favorites", [ART.afterimage, ART.grid, ART.signal]),
         card(
-          "Color",
-          "A warm surface makes the room around a work feel different.",
+          "Afterimage",
+          "The reflective loop against orange caught my eye immediately. I like following the bright edge around the bend.",
           "third"
         ),
         card(
-          "Reflection",
-          "A shape that appears to move even when the image is still.",
+          "Night Grid",
+          "Yellow and green lights cross a nearly black grid. I keep following the bright diagonal from one corner to the other.",
           "third"
         ),
         card(
-          "Rhythm",
-          "Little marks that invite another pass across the screen.",
+          "Quiet Signal",
+          "Fine blue curves on a cream background, with a little red at the lower right. I like how much detail there is in such a simple palette.",
           "third"
         ),
-        pageLink("How the habit started", "mornings")
+        pageLink("Read the latest posts", "mornings")
       ),
       page(
         "mornings",
-        "Look first. Explain later.",
-        "A short record of attention, before the day fills up.",
-        kicker("Monday / A single detail"),
+        "This week’s notes",
+        "A couple of updates from the morning notebook.",
+        kicker("Monday / Too many bookmarks"),
         text(
-          "I spent ten minutes with the corner of an image. It was enough to discover a second rhythm beneath the first one."
+          "I opened my saved links and found the same artwork three times. I’m going to put the artist’s name next to the link from now on."
         ),
-        kicker("Wednesday / A useful detour"),
+        kicker("Wednesday / Studio photos"),
         text(
-          "Following an artist's source link led to a process note, then another work. The route was more interesting than the recommendation."
+          "An artist I follow posted photos of their desk and sketchbook. I spent longer looking at those than I meant to."
         ),
-        pageLink("Back to the cabinet", "favorites")
+        pageLink("Back to my favorites", "favorites")
       ),
     ],
   }),
@@ -349,62 +345,62 @@ export const MEME_PERSONAL_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Quiet Growth Library",
     family: "collector",
     description:
-      "A warm stone reading room for a thoughtful collection, a personal library, and marginal notes.",
+      "A collector’s library for artwork, reading lists and personal notes, with a soft stone background.",
     presentation: style("editorial", "stone", "serif", "airy"),
     accent: "#626b45",
     pages: [
       page(
         "studio",
-        "A collection with room to grow.",
-        "Images, books, and questions arranged for a slower kind of attention.",
+        "Art and reading from my desk",
+        "Digital artwork, nature writing and notes from my reading list.",
         memeImage(375, "half"),
         text(
-          "This is a reading room rather than a ranking. Works enter into conversation with notes, and the notes are allowed to remain unfinished.",
+          "I keep artwork and reading lists here because I often find one through the other. At the moment, I’m interested in drawing, generative art and field guides.",
           "half"
         ),
         quote(
-          "A shelf becomes interesting when its neighbors begin to speak.",
-          "From the marginalia"
+          "I bought the field guide to identify one tree. Now it comes on every walk.",
+          "Library notebook"
         ),
         pageLink("Browse the library", "library"),
-        pageLink("Open the margins", "marginalia"),
+        pageLink("Read my notes", "marginalia"),
         memeCredit(375)
       ),
       page(
         "library",
-        "Arrange by the question.",
-        "A small library organized around memory, systems, and the natural world.",
+        "On the shelves",
+        "Three subjects I’m reading about at the moment.",
         card(
-          "Memory",
-          "How an object holds a time, and how a repeated encounter changes that time.",
+          "Drawing",
+          "Artist sketchbooks, drawing exercises and notes on materials.",
           "third"
         ),
         card(
-          "Systems",
-          "Rules that create surprising results, from a generative image to a public institution.",
+          "Generative art",
+          "Artist interviews and explanations of the code behind individual works.",
           "third"
         ),
         card(
-          "The living world",
-          "Growth, weather, attention, and the limits of a human point of view.",
+          "Plants and places",
+          "Field guides, walking maps and books about local habitats.",
           "third"
         ),
         image(ART.signal, ART_CAPTIONS.signal),
-        pageLink("Notes from the reading desk", "marginalia")
+        pageLink("Notes from the desk", "marginalia")
       ),
       page(
         "marginalia",
-        "The unfinished part belongs here.",
-        "A notebook for questions that need company before they need answers.",
-        heading("On keeping a record"),
+        "Library notes",
+        "Short updates about what I’m reading and adding.",
+        heading("The field guide"),
         text(
-          "A collection record tells a future reader what an object is. A personal note can tell them why it stopped someone in their tracks. Both deserve care; neither can replace the other."
+          "I’ve started writing down where I see each plant, rather than trying to remember it later. So far, the notebook is mostly corrections."
         ),
-        heading("On changing the arrangement"),
+        heading("An artist’s reading list"),
         text(
-          "Move a work from one sequence to another and its meaning shifts. The old arrangement is worth keeping as part of the collection's history."
+          "An interview led me to a book on drawing that I hadn’t heard of. I’ve added it to the list and will write more once I’ve read it."
         ),
-        pageLink("Return to the library", "library")
+        pageLink("Back to the library", "library")
       ),
     ],
   }),

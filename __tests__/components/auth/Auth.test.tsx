@@ -21,6 +21,9 @@ import { publicEnv } from "@/config/env";
 
 const mockQueryClient = {
   getQueryData: jest.fn(),
+  removeQueries: jest.fn(),
+  getMutationCache: () => ({ getAll: () => [] }),
+  getQueryCache: () => ({ subscribe: () => jest.fn() }),
 };
 const mockRouterReplace = jest.fn();
 const mockRouterPush = jest.fn();
@@ -2086,9 +2089,7 @@ describe("Auth component", () => {
       );
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Sign Authentication Request")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Sign in to 6529")).toBeInTheDocument();
       });
     });
 
@@ -2414,6 +2415,154 @@ describe("Auth component", () => {
     const mockValidateAuthImmediate =
       require("@/services/auth/immediate-validation.utils").validateAuthImmediate;
 
+    it.each([null, "developer"])(
+      "exposes a direct session for a loaded own profile with role %s",
+      (role) => {
+        const authUtils = jest.mocked(
+          require("@/services/auth/auth.utils") as typeof AuthUtilsModule
+        );
+        const roleModule = jest.mocked(
+          require("@/services/auth/jwt-validation.utils") as typeof import("@/services/auth/jwt-validation.utils")
+        );
+        authUtils.getAuthJwt.mockReturnValue("direct-session");
+        roleModule.getRole.mockReturnValue(role);
+        mockUseIdentity.mockReturnValue({
+          profile: {
+            id: "developer",
+            handle: "developer",
+            query: "developer",
+            primary_wallet: walletAddress,
+            wallets: [],
+          },
+          isLoading: false,
+        });
+        const observed: Array<boolean | undefined> = [];
+        const Child = () => {
+          observed.push(useAuth().isDirectProfileSession);
+          return null;
+        };
+
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={createReactQueryWrapperContextValue()}
+          >
+            <Auth>
+              <Child />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+
+        expect(observed.length).toBeGreaterThan(0);
+        expect(observed.every((direct) => direct === true)).toBe(true);
+      }
+    );
+
+    it("exposes proxy-token scope before the proxy lookup completes", () => {
+      const authUtils = jest.mocked(
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule
+      );
+      const roleModule = jest.mocked(
+        require("@/services/auth/jwt-validation.utils") as typeof import("@/services/auth/jwt-validation.utils")
+      );
+      authUtils.getAuthJwt.mockReturnValue("proxy-session");
+      roleModule.getRole.mockReturnValue("delegating-profile");
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "developer",
+          handle: "developer",
+          query: "developer",
+          primary_wallet: walletAddress,
+          wallets: [],
+        },
+        isLoading: false,
+      });
+      const observed: Array<{ direct: boolean | undefined; proxy: unknown }> =
+        [];
+      const Child = () => {
+        const auth = React.useContext(AuthContext);
+        observed.push({
+          direct: auth.isDirectProfileSession,
+          proxy: auth.activeProfileProxy,
+        });
+        return null;
+      };
+      try {
+        render(
+          <ReactQueryWrapperContext.Provider
+            value={createReactQueryWrapperContextValue()}
+          >
+            <Auth>
+              <Child />
+            </Auth>
+          </ReactQueryWrapperContext.Provider>
+        );
+        expect(observed.length).toBeGreaterThan(0);
+        expect(observed[0]).toEqual({ direct: false, proxy: null });
+        expect(observed.every((value) => value.direct === false)).toBe(true);
+      } finally {
+        roleModule.getRole.mockReturnValue(null);
+        authUtils.getAuthJwt.mockReturnValue(null);
+      }
+    });
+
+    it("closes direct scope until the switched wallet, loaded profile and token role agree", () => {
+      const authUtils = jest.mocked(
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule
+      );
+      const roleModule = jest.mocked(
+        require("@/services/auth/jwt-validation.utils") as typeof import("@/services/auth/jwt-validation.utils")
+      );
+      authUtils.getAuthJwt.mockReturnValue("direct-session");
+      roleModule.getRole.mockReturnValue("profile-1");
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "profile-1",
+          handle: "first",
+          query: "first",
+          primary_wallet: walletAddress,
+          wallets: [],
+        },
+        isLoading: false,
+      });
+      const Child = () => (
+        <div data-testid="direct-scope">
+          {String(useAuth().isDirectProfileSession)}
+        </div>
+      );
+      const view = () => (
+        <ReactQueryWrapperContext.Provider
+          value={createReactQueryWrapperContextValue()}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+      const { rerender } = render(view());
+      expect(screen.getByTestId("direct-scope")).toHaveTextContent("true");
+
+      walletAddress = "0x2";
+      rerender(view());
+      expect(screen.getByTestId("direct-scope")).toHaveTextContent("false");
+
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "profile-2",
+          handle: "second",
+          query: "second",
+          primary_wallet: walletAddress,
+          wallets: [],
+        },
+        isLoading: false,
+      });
+      rerender(view());
+      expect(screen.getByTestId("direct-scope")).toHaveTextContent("false");
+
+      roleModule.getRole.mockReturnValue("profile-2");
+      rerender(view());
+      expect(screen.getByTestId("direct-scope")).toHaveTextContent("true");
+    });
+
     it("should fetch and set connected profile when address is provided", async () => {
       mockValidateAuthImmediate.mockResolvedValue({
         validationCompleted: true,
@@ -2703,21 +2852,17 @@ describe("Auth component", () => {
       renderAuthModalHarness();
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Sign Authentication Request")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Sign in to 6529")).toBeInTheDocument();
       });
 
       // Check that modal content is present
       expect(
-        screen.getByText(
-          "To connect your wallet, you will need to sign a message to confirm your identity."
-        )
+        screen.getByText("Sign a message to confirm this address is yours.")
       ).toBeInTheDocument();
       expect(screen.getByText("Cancel")).toBeInTheDocument();
-      expect(screen.getByText("Sign")).toBeInTheDocument();
+      expect(screen.getByText("Sign message")).toBeInTheDocument();
 
-      await userEvent.click(screen.getByText("Sign"));
+      await userEvent.click(screen.getByText("Sign message"));
       await waitFor(() => {
         expect(mockSignMessage).toHaveBeenCalledWith(
           "sign this message exactly"
@@ -2738,9 +2883,7 @@ describe("Auth component", () => {
         await waitFor(() => {
           expect(mockValidateAuthImmediate).toHaveBeenCalled();
         });
-        expect(
-          screen.queryByText("Sign Authentication Request")
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText("Sign in to 6529")).not.toBeInTheDocument();
         expect(mockSignMessage).not.toHaveBeenCalled();
         expect(
           require("@/services/auth/session-v2.utils").getSessionNonce
@@ -2756,17 +2899,13 @@ describe("Auth component", () => {
       await waitFor(() => {
         expect(mockValidateAuthImmediate).toHaveBeenCalled();
       });
-      expect(
-        screen.queryByText("Sign Authentication Request")
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Sign in to 6529")).not.toBeInTheDocument();
 
       mockActiveChainId = 1;
       view.rerender(getAuthModalHarnessElement());
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Sign Authentication Request")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Sign in to 6529")).toBeInTheDocument();
       });
     });
 
@@ -2775,18 +2914,14 @@ describe("Auth component", () => {
       const view = renderAuthModalHarness();
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Sign Authentication Request")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Sign in to 6529")).toBeInTheDocument();
       });
 
       mockActiveChainId = 137;
       view.rerender(getAuthModalHarnessElement());
 
       await waitFor(() => {
-        expect(
-          screen.queryByText("Sign Authentication Request")
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText("Sign in to 6529")).not.toBeInTheDocument();
       });
       expect(mockSeizeDisconnect).not.toHaveBeenCalled();
       expect(mockSeizeDisconnectAndLogout).not.toHaveBeenCalled();
@@ -2998,9 +3133,7 @@ describe("Auth component", () => {
       );
 
       await waitFor(() => {
-        expect(
-          screen.getByText("Sign Authentication Request")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Sign in to 6529")).toBeInTheDocument();
       });
 
       const reauthPromptCalls = mockTrackAuthImpactEvent.mock.calls.filter(
@@ -3814,7 +3947,7 @@ describe("Auth component", () => {
       });
 
       const user = userEvent.setup();
-      await user.click(screen.getByText("Sign"));
+      await user.click(screen.getByText("Sign message"));
 
       await waitFor(() => {
         expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
@@ -3860,7 +3993,9 @@ describe("Auth component", () => {
       });
 
       expect(screen.queryByText("Remind me later")).not.toBeInTheDocument();
-      expect(screen.getByText(/Confirm in your wallet/i)).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /Check your wallet/i })
+      ).toBeInTheDocument();
     });
 
     it("keeps the session upgrade modal visible while validation reruns", async () => {
@@ -3959,7 +4094,7 @@ describe("Auth component", () => {
       expect(
         screen.getByText(/Reshare the connection from a device/i)
       ).toBeInTheDocument();
-      expect(screen.queryByText("Sign")).not.toBeInTheDocument();
+      expect(screen.queryByText("Sign message")).not.toBeInTheDocument();
       expect(screen.getByText("Remind me later")).toBeInTheDocument();
     });
 
@@ -4000,7 +4135,7 @@ describe("Auth component", () => {
         screen.getByText(/If this is a shared connection, reshare/i)
       ).toBeInTheDocument();
       expect(screen.getByText("Remind me later")).toBeInTheDocument();
-      expect(screen.queryByText("Sign")).not.toBeInTheDocument();
+      expect(screen.queryByText("Sign message")).not.toBeInTheDocument();
 
       mockSeizeConnect.mockImplementationOnce(() => {
         expect(
@@ -4410,9 +4545,7 @@ describe("Auth component", () => {
 
       expect(mockCommonApiPost).not.toHaveBeenCalled();
       expect(mockSignMessage).not.toHaveBeenCalled();
-      expect(
-        screen.queryByText("Sign Authentication Request")
-      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Sign in to 6529")).not.toBeInTheDocument();
     });
   });
 

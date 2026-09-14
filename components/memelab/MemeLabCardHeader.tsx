@@ -1,6 +1,7 @@
 "use client";
 
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import CollectDetailActions from "@/components/collect/CollectDetailActions";
 import { getDistributionDetailHref } from "@/components/distribution/distributionRouteParams";
 import { getMemeLabCollectionHref } from "@/components/memelab/memeLabRouteParams";
 import { MemePageArtViewer } from "@/components/the-memes/MemePageArtViewer";
@@ -26,8 +27,7 @@ const MEME_LAB_MARKET_GRID_CLASS =
   "tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 [&>*]:tw-min-w-0 sm:tw-gap-x-8 sm:[&>*]:tw-min-w-[8.5rem] xl:tw-grid-cols-3";
 const MEME_LAB_CARD_DETAILS_GRID_CLASS =
   "tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-8 xl:tw-grid-cols-3";
-const MEME_LAB_CARD_DETAILS_ITEM_CLASS =
-  "tw-min-w-0 sm:tw-min-w-[8.5rem]";
+const MEME_LAB_CARD_DETAILS_ITEM_CLASS = "tw-min-w-0 sm:tw-min-w-[8.5rem]";
 const MEME_LAB_SECTION_TITLE_CLASS =
   "tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400";
 export const MEME_LAB_STATS_ROW_CLASS =
@@ -183,12 +183,14 @@ export function MemeLabStaticCardHeader({
   nftMeta,
   showMarketplaceLinks,
   artworkFooter,
+  onMarketChange,
   locale = DEFAULT_LOCALE,
 }: {
   readonly nft: LabNFT;
   readonly nftMeta: LabExtendedData;
   readonly showMarketplaceLinks: boolean;
   readonly artworkFooter?: ReactNode | undefined;
+  readonly onMarketChange?: (() => void) | undefined;
   readonly locale?: SupportedLocale;
 }) {
   return (
@@ -208,6 +210,7 @@ export function MemeLabStaticCardHeader({
           nft={nft}
           nftMeta={nftMeta}
           showMarketplaceLinks={showMarketplaceLinks}
+          onMarketChange={onMarketChange}
           locale={locale}
         />
       </div>
@@ -219,16 +222,27 @@ function MemeLabLiveDetails({
   nft,
   nftMeta,
   showMarketplaceLinks,
+  onMarketChange,
   locale,
 }: {
   readonly nft: LabNFT;
   readonly nftMeta: LabExtendedData;
   readonly showMarketplaceLinks: boolean;
+  readonly onMarketChange?: (() => void) | undefined;
   readonly locale: SupportedLocale;
 }) {
   return (
     <div className="tw-w-full">
       <MemeArtworkDetails nft={nft} layout="aligned" locale={locale} />
+      <div className="tw-py-3">
+        <CollectDetailActions
+          collection="memelab"
+          tokenId={String(nft.id)}
+          title={nft.name}
+          locale={locale}
+          {...(onMarketChange ? { onMarketChange } : {})}
+        />
+      </div>
       <section
         aria-label="Card details"
         className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-6 md:tw-py-8"
@@ -244,22 +258,6 @@ function MemeLabLiveDetails({
             unit="ETH"
           />
           <MemeLabMetadataLink url={nft.uri} />
-          <MemeLabMarketMetric
-            label="Floor Price"
-            value={nft.floor_price}
-            unit="ETH"
-          />
-          <MemeLabMarketMetric
-            label="Market Cap"
-            value={nft.market_cap}
-            decimals={100}
-            unit="ETH"
-          />
-          <MemeLabMarketMetric
-            label="Highest Offer"
-            value={nft.highest_offer}
-            unit="ETH"
-          />
           {showMarketplaceLinks && (
             <div className="tw-flex tw-min-w-[8.5rem] tw-items-end">
               <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
