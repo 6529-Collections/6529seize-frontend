@@ -28,6 +28,7 @@ type ApiDropWithUnknownSerialNo = Omit<ApiDrop, "serial_no"> & {
 };
 
 export interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
+  readonly removeDrops: (waveId: string, dropIds: readonly string[]) => void;
   readonly activeWaveId: string | null;
   readonly hasServerFeedSeed: (waveId: string) => boolean;
   readonly registerWave: (waveId: string) => void;
