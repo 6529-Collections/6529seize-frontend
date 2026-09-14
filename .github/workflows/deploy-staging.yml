@@ -430,7 +430,7 @@ jobs:
 
           run_git fetch --no-tags origin "$BRANCH"
           remote_sha="$(run_git rev-parse FETCH_HEAD)"
-          if [[ "$remote_sha" != "$EXPECTED_SHA" ]]; then
+          if [ "$remote_sha" != "$EXPECTED_SHA" ]; then
             echo "origin $BRANCH is $remote_sha, expected $EXPECTED_SHA." >&2
             echo "A newer staging push superseded this run; refusing to deploy stale bytes." >&2
             exit 1
