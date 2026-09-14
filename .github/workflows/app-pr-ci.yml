@@ -575,6 +575,8 @@ jobs:
 
       - name: Typecheck Jest, Playwright, and test helpers
         if: matrix.lane == 'quality' && needs.plan.outputs.test_typecheck_required == 'true'
+        env:
+          NODE_OPTIONS: --max-old-space-size=7680
         run: ./bin/6529 run typecheck:tests
 
       # Filesystem reads are invisible to Jest's module dependency graph.

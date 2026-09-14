@@ -711,6 +711,7 @@ export * from '../models/ApiWalletDistributionAllocation';
 export * from '../models/ApiWalletDistributionAllocations';
 export * from '../models/ApiWave';
 export * from '../models/ApiWaveChatConfig';
+export * from '../models/ApiWaveChatHistoryPurgePlan';
 export * from '../models/ApiWaveConfig';
 export * from '../models/ApiWaveContributorOverview';
 export * from '../models/ApiWaveCreditNft';
@@ -1575,6 +1576,7 @@ import { ApiWalletDistributionAllocation, ApiWalletDistributionAllocationPhaseEn
 import { ApiWalletDistributionAllocations } from '../models/ApiWalletDistributionAllocations';
 import { ApiWave } from '../models/ApiWave';
 import { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
+import { ApiWaveChatHistoryPurgePlan } from '../models/ApiWaveChatHistoryPurgePlan';
 import { ApiWaveConfig               } from '../models/ApiWaveConfig';
 import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
 import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
@@ -2654,6 +2656,7 @@ let typeMap: {[index: string]: any} = {
     "ApiWalletDistributionAllocations": ApiWalletDistributionAllocations,
     "ApiWave": ApiWave,
     "ApiWaveChatConfig": ApiWaveChatConfig,
+    "ApiWaveChatHistoryPurgePlan": ApiWaveChatHistoryPurgePlan,
     "ApiWaveConfig": ApiWaveConfig,
     "ApiWaveContributorOverview": ApiWaveContributorOverview,
     "ApiWaveCreditNft": ApiWaveCreditNft,
