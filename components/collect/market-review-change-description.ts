@@ -10,6 +10,15 @@ import { MARKET_WETH } from "./market-validation";
 
 type Review = ApiMarketOperation | ApiMarketBatchOperation;
 
+export type MarketReviewChangeNotice = {
+  readonly summary: string;
+  readonly details: readonly {
+    readonly label: string;
+    readonly before: string;
+    readonly after: string;
+  }[];
+};
+
 function amount(value: string | undefined): bigint | null {
   return value !== undefined && /^(0|[1-9]\d{0,77})$/.test(value)
     ? BigInt(value)
@@ -216,4 +225,64 @@ export function marketReviewChangeDescription(
         : "collect.trade.refreshReview"
     );
   return `${changes.join(" ")} ${t(locale, "collect.trade.reviewUpdatedTerms")}`;
+}
+
+/** Keep exact cap changes available without turning the main review into a diagnostic log. */
+export function marketReviewChangeNotice(
+  shown: Review,
+  fresh: Review,
+  locale: SupportedLocale,
+  change: "terms" | "gas"
+): MarketReviewChangeNotice {
+  if (change === "terms") {
+    return {
+      summary: marketReviewChangeDescription(shown, fresh, locale, change),
+      details: [],
+    };
+  }
+  const details: { label: string; before: string; after: string }[] = [];
+  const add = (
+    label: MessageKey,
+    before: bigint | null,
+    after: bigint | null,
+    format: (value: bigint) => string
+  ) => {
+    if (before === null || after === null || before === after) return;
+    details.push({
+      label: t(locale, label),
+      before: format(before),
+      after: format(after),
+    });
+  };
+  const eth = (value: bigint) =>
+    `${formatCollectReviewWei(locale, value.toString())} ETH`;
+  add("collect.review.exactGas", gas(shown), gas(fresh), eth);
+  add("collect.review.exactMaximum", maximum(shown), maximum(fresh), eth);
+  add(
+    "collect.review.gasLimit",
+    amount(shown.transaction?.gas_limit),
+    amount(fresh.transaction?.gas_limit),
+    (value) => formatDecimalString(locale, value.toString())
+  );
+  add(
+    "collect.review.gasPriceLimit",
+    amount(shown.transaction?.max_fee_per_gas),
+    amount(fresh.transaction?.max_fee_per_gas),
+    (value) => `${formatDecimalString(locale, formatUnits(value, 9))} Gwei`
+  );
+  const unchangedPurchase =
+    ["BUY", "BUY_BATCH"].includes(shown.kind) &&
+    shown.kind === fresh.kind &&
+    amount(shown.total_wei) !== null &&
+    shown.total_wei === fresh.total_wei &&
+    shown.currency.toLowerCase() === fresh.currency.toLowerCase();
+  return {
+    summary: t(
+      locale,
+      unchangedPurchase
+        ? "collect.trade.networkFeeUpdated"
+        : "collect.trade.networkLimitsUpdated"
+    ),
+    details,
+  };
 }

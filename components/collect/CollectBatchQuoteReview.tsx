@@ -23,6 +23,8 @@ import {
 } from "./CollectReviewPrimitives";
 import CollectReviewWallet from "./CollectReviewWallet";
 import CollectReviewRecipient from "./CollectReviewRecipient";
+import CollectReviewChangeDetails from "./CollectReviewChangeDetails";
+import type { MarketReviewChangeNotice } from "./market-review-change-description";
 import { resolveCollectContractIdentity } from "./collect-contract-identity";
 import { collectProfileWallets } from "./collect-recipient.helpers";
 import type { CollectSelectedListing } from "./collect-selection.helpers";
@@ -102,6 +104,7 @@ interface CollectBatchQuoteReviewProps {
   readonly canEdit?: boolean;
   readonly disabledReason?: string | null | undefined;
   readonly message?: string | null | undefined;
+  readonly reviewChangeNotice?: MarketReviewChangeNotice | undefined;
   /** Names must come from the operation's current, confirmed profile wallets. */
   readonly walletNames?: Readonly<Record<string, string>> | undefined;
   readonly onConfirm: () => Promise<void>;
@@ -148,6 +151,7 @@ function BatchQuoteReview({
   canEdit = true,
   disabledReason,
   message,
+  reviewChangeNotice,
   walletNames,
   onConfirm,
   onEdit,
@@ -426,7 +430,7 @@ function BatchQuoteReview({
           name={walletNames?.[operation.wallet.toLowerCase()]}
         />
         <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-          {t(locale, "collect.batchReview.gasNote")}
+          {t(locale, "collect.review.maximumNote")}
         </p>
         {message && (
           <p
@@ -435,6 +439,9 @@ function BatchQuoteReview({
           >
             {message}
           </p>
+        )}
+        {message && reviewChangeNotice && (
+          <CollectReviewChangeDetails notice={reviewChangeNotice} />
         )}
         {disabledReason && (
           <p
@@ -537,6 +544,9 @@ function BatchQuoteReview({
           ))}
           <p className="tw-m-0 tw-text-xs tw-text-iron-400">
             {t(locale, "collect.review.feesIncluded")}
+          </p>
+          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+            {t(locale, "collect.batchReview.gasNote")}
           </p>
           <CollectReviewDisclosure
             label={t(locale, "collect.review.exactAmounts")}
