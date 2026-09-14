@@ -359,7 +359,8 @@ function DocumentationAnswerField(
       <section className={fieldClass} aria-labelledby={headingId}>
         <h3
           id={headingId}
-          className="tw-mb-3 tw-mt-0 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-400"
+          tabIndex={-1}
+          className="tw-mb-3 tw-mt-0 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
         >
           {label}
         </h3>
@@ -382,7 +383,8 @@ function DocumentationAnswerField(
       <div className="tw-mb-3 tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-2">
         <h3
           id={headingId}
-          className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100"
+          tabIndex={-1}
+          className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
         >
           {label}
         </h3>
