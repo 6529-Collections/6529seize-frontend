@@ -11,6 +11,9 @@ import { batchFixture, FREN, PAYER } from "./market-batch.fixture";
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
+jest.mock("@/components/collect/useCollectReceiptMetadata", () => ({
+  useCollectReceiptMetadata: (artworks: readonly unknown[]) => artworks,
+}));
 jest.mock("@/components/collect/CollectAssetMedia", () => ({
   __esModule: true,
   default: () => null,

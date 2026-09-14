@@ -85,7 +85,7 @@ async function executeReviewedMarketOperation(options: {
     | undefined;
   setStage: (stage: CollectTradeStage) => void;
   onOperation: (operation: ApiMarketOperation) => void;
-  onKnownHash: (hash: Hex) => void;
+  onKnownHash: (hash: Hex, purpose: "APPROVAL" | "TRANSACTION") => void;
 }) {
   const {
     wallet,
@@ -132,7 +132,7 @@ async function executeReviewedMarketOperation(options: {
     });
     // The server journals approval hashes too, so reload/device changes cannot reopen a send.
     setStage("submitted");
-    onKnownHash(hash);
+    onKnownHash(hash, approval ? "APPROVAL" : "TRANSACTION");
     const submitted = await acknowledgeMarketSubmission(
       () => submitMarketTransaction(operation.id, { transaction_hash: hash }),
       () => {
@@ -267,6 +267,7 @@ export function useMarketExecution(
   const [knownTransaction, setKnownTransaction] = useState<{
     operationId: string;
     hash: string;
+    purpose: "APPROVAL" | "TRANSACTION";
   }>();
   const confirm = async (
     operation: ApiMarketOperation,
@@ -304,7 +305,11 @@ export function useMarketExecution(
         const knownHash = knownMarketTransactionHash(current, attempt, prior);
         if (knownHash && attempt) {
           updateStage("reconciling");
-          setKnownTransaction({ operationId: current.id, hash: knownHash });
+          setKnownTransaction({
+            operationId: current.id,
+            hash: knownHash,
+            purpose: attempt.purpose,
+          });
           await recoverRecordedMarketTransaction({
             client,
             operation: current,
@@ -320,6 +325,7 @@ export function useMarketExecution(
           setKnownTransaction({
             operationId: current.id,
             hash: prior.transactionHash,
+            purpose: "TRANSACTION",
           });
           onOperation(
             await submitMarketTransaction(current.id, {
@@ -430,8 +436,8 @@ export function useMarketExecution(
           onCommitment,
           setStage: updateStage,
           onOperation,
-          onKnownHash: (hash) =>
-            setKnownTransaction({ operationId: current.id, hash }),
+          onKnownHash: (hash, purpose) =>
+            setKnownTransaction({ operationId: current.id, hash, purpose }),
         });
         setStage(null);
       });

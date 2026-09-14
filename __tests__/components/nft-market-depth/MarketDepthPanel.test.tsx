@@ -10,6 +10,13 @@ import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
 import NftDetailTabSection from "@/components/nft-navigation/NftDetailTabSection";
 import { commonApiFetch } from "@/services/api/common-api";
 import { revealMarketDepth } from "@/components/nft-market-depth/market-depth-disclosure";
+const mockNoPurchases: readonly never[] = [];
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({ connectedProfile: null }),
+}));
+jest.mock("@/components/collect/market-activity-store", () => ({
+  useConfirmedMarketPurchases: () => mockNoPurchases,
+}));
 
 function renderOpenDepth(ui: ReactElement) {
   const result = render(ui);
@@ -167,6 +174,127 @@ describe("MarketDepthPanel", () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it("loads a receipt's exact order across pages, opens its level and preserves later manual browsing", async () => {
+    const hash = `0x${"a".repeat(64)}`;
+    const book = depth();
+    const target = { ...book.orders[0]!, order_id: hash };
+    const complete = { ...book, orders: [target, ...book.orders.slice(1)] };
+    fetchMock
+      .mockResolvedValueOnce({
+        ...complete,
+        orders: complete.orders.slice(1),
+        next: "target-page",
+      })
+      .mockResolvedValueOnce({ ...complete, orders: [target] })
+      .mockResolvedValue(complete);
+    const { rerender } = render(
+      <MarketDepthPanel
+        contract="0x1"
+        tokenId="7"
+        locale="en-US"
+        embedded
+        focusedOrderHash={hash}
+      />
+    );
+    await waitFor(() =>
+      expect(document.activeElement).toHaveAttribute("data-market-order", hash)
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const toggle = screen.getByRole("button", {
+      name: "Listings at 1.25 ETH",
+    });
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    rerender(
+      <MarketDepthPanel
+        contract="0x1"
+        tokenId="7"
+        locale="en-US"
+        embedded
+        focusedOrderHash={hash}
+        refreshKey={1}
+      />
+    );
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it.each(["levels", "orders"])(
+    "reveals the exact linked order beyond the first ten %s",
+    async (mode) => {
+      const hash = `0x${"b".repeat(64)}`;
+      const base = depth();
+      const orders = Array.from({ length: 12 }, (_, index) => ({
+        ...base.orders[0]!,
+        order_key: `order-${index}`,
+        order_id: index === 11 ? hash : `order-${index}`,
+        unit_price: mode === "levels" ? String(index + 1) : "1.25",
+      }));
+      const asks =
+        mode === "levels"
+          ? orders.map((order, index) => ({
+              unit_price: order.unit_price,
+              quantity: "2",
+              cumulative_quantity: String((index + 1) * 2),
+              order_count: 1,
+            }))
+          : [
+              {
+                unit_price: "1.25",
+                quantity: "24",
+                cumulative_quantity: "24",
+                order_count: 12,
+              },
+            ];
+      fetchMock.mockResolvedValue({
+        ...base,
+        orders,
+        order_count: 12,
+        criteria_order_count: 0,
+        books: [{ ...base.books[0]!, asks, ask_order_count: 12 }],
+      });
+      render(
+        <MarketDepthPanel
+          contract="0x1"
+          tokenId="7"
+          locale="en-US"
+          embedded
+          focusedOrderHash={hash}
+        />
+      );
+      await waitFor(() =>
+        expect(document.activeElement).toHaveAttribute(
+          "data-market-order",
+          hash
+        )
+      );
+      expect(document.activeElement).toBeVisible();
+    }
+  );
+
+  it("keeps an absent requested listing neutral without inventing a book entry", async () => {
+    const hash = `0x${"c".repeat(64)}`;
+    fetchMock.mockResolvedValue(depth());
+    render(
+      <MarketDepthPanel
+        contract="0x1"
+        tokenId="7"
+        locale="en-US"
+        embedded
+        focusedOrderHash={hash}
+      />
+    );
+    expect(
+      await screen.findByText(/This listing is not in the current order book/)
+    ).toBeVisible();
+    expect(
+      screen.getByRole("link", { name: "View in Orders" })
+    ).toHaveAttribute("href", "/collect/orders");
+    expect(document.querySelector(`[data-market-order="${hash}"]`)).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("keeps the price summary visible and tables closed until requested, preserving expanded rows on collapse", async () => {
@@ -565,7 +693,7 @@ describe("MarketDepthPanel", () => {
     );
   });
 
-  it("preserves callback action state while refresh shows loading", async () => {
+  it("preserves callback action state and the previous book while refreshing", async () => {
     let resolveRefresh: ((value: ReturnType<typeof depth>) => void) | undefined;
     const pendingRefresh = new Promise<ReturnType<typeof depth>>((resolve) => {
       resolveRefresh = resolve;
@@ -594,7 +722,10 @@ describe("MarketDepthPanel", () => {
     expect(screen.getByTestId("market-depth-action-count")).toHaveTextContent(
       "1"
     );
-    expect(screen.getByText("Loading listings and offers")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Loading listings and offers")
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Lowest listing · ETH")).toBeInTheDocument();
 
     resolveRefresh?.(depth());
     await screen.findByText("Lowest listing · ETH");

@@ -31,6 +31,8 @@ import type { CollectSelectedListing } from "./collect-selection.helpers";
 import { marketBatchStage } from "./market-batch.adapters";
 import type { CollectTradeStage } from "./collect.types";
 import { useCollectPlanMetadata } from "./CollectPlanMetadataProvider";
+import CollectTransactionReceipt from "./CollectTransactionReceipt";
+import { isCollectReceiptOperation } from "./collect-receipt.helpers";
 
 function focusReviewHeading(element: HTMLHeadingElement | null) {
   element?.focus();
@@ -104,6 +106,7 @@ interface CollectBatchQuoteReviewProps {
   readonly canEdit?: boolean;
   readonly disabledReason?: string | null | undefined;
   readonly message?: string | null | undefined;
+  readonly knownTransactionHash?: string | undefined;
   readonly reviewChangeNotice?: MarketReviewChangeNotice | undefined;
   /** Names must come from the operation's current, confirmed profile wallets. */
   readonly walletNames?: Readonly<Record<string, string>> | undefined;
@@ -151,6 +154,7 @@ function BatchQuoteReview({
   canEdit = true,
   disabledReason,
   message,
+  knownTransactionHash,
   reviewChangeNotice,
   walletNames,
   onConfirm,
@@ -210,6 +214,33 @@ function BatchQuoteReview({
   const destinations = operation.items.flatMap((item) => item.allocations);
   const assetFor = (item: ApiMarketBatchItem) =>
     itemFor(item)?.asset ?? metadata.assets.get(item.asset_key);
+  if (isCollectReceiptOperation(operation, knownTransactionHash)) {
+    return (
+      <CollectTransactionReceipt
+        operation={operation}
+        knownTransactionHash={knownTransactionHash}
+        spacious
+        onClose={onClose}
+        walletNames={walletNames}
+        artworks={operation.items.map((item) => {
+          const asset = assetFor(item);
+          return {
+            assetKey: item.asset_key,
+            title: asset?.name ?? "",
+            media: asset ? (
+              <CollectAssetMedia src={asset.image_url} name={asset.name} />
+            ) : undefined,
+            quantity: item.quantity,
+            orderHash: item.order.order_hash,
+            recipients: item.allocations.map((allocation) => ({
+              address: allocation.recipient,
+              quantity: allocation.quantity,
+            })),
+          };
+        })}
+      />
+    );
+  }
   const recipientCounts = new Map<string, number>();
   for (const allocation of destinations) {
     const address = allocation.recipient.toLowerCase();
